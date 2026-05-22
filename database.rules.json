@@ -1,0 +1,20 @@
+{
+  "rules": {
+    "sessions": {
+      ".read": true,
+      ".write": true,
+      "$session": {
+        ".read": true,
+        ".write": true
+      }
+    },
+    "app_update": {
+      ".read": true,
+      ".write": false
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

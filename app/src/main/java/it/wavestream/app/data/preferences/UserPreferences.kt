@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -16,6 +18,9 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 // SharedPreferences key per l'accent color (caricamento sincrono all'avvio)
 private const val SYNC_PREFS_NAME = "wavestream_sync_prefs"
 private const val SYNC_ACCENT_COLOR_KEY = "accent_color"
+private const val ENCRYPTED_PREFS_NAME = "wavestream_encrypted_prefs"
+private const val ENCRYPTED_TMDB_KEY = "tmdb_api_key"
+private const val ENCRYPTED_OMDB_KEY = "omdb_api_key"
 
 /**
  * User preferences manager using DataStore
@@ -27,6 +32,16 @@ class UserPreferences @Inject constructor(
     
     // SharedPreferences sincrone per dati critici all'avvio (accent color)
     private val syncPrefs = context.getSharedPreferences(SYNC_PREFS_NAME, Context.MODE_PRIVATE)
+
+    private val encryptedPrefs by lazy {
+        EncryptedSharedPreferences.create(
+            context,
+            ENCRYPTED_PREFS_NAME,
+            MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
     
     companion object {
         // TMDB
@@ -97,17 +112,17 @@ class UserPreferences @Inject constructor(
     
     private val dataStore = context.dataStore
     
-    // TMDB API Key
+    // TMDB API Key (cifrata)
     suspend fun setTmdbApiKey(apiKey: String) {
-        dataStore.edit { it[TMDB_API_KEY] = apiKey }
+        encryptedPrefs.edit().putString(ENCRYPTED_TMDB_KEY, apiKey).apply()
     }
-    
+
     suspend fun getTmdbApiKey(): String? {
-        return dataStore.data.first()[TMDB_API_KEY]
+        return encryptedPrefs.getString(ENCRYPTED_TMDB_KEY, null)
     }
-    
+
     fun getTmdbApiKeyFlow(): Flow<String?> {
-        return dataStore.data.map { it[TMDB_API_KEY] }
+        return kotlinx.coroutines.flow.flowOf(encryptedPrefs.getString(ENCRYPTED_TMDB_KEY, null))
     }
     
     // Current Profile
@@ -353,13 +368,13 @@ class UserPreferences @Inject constructor(
         return dataStore.data.first()[SETUP_COMPLETE] ?: false
     }
     
-    // OMDb API Key (for IMDB ratings)
+    // OMDb API Key (for IMDB ratings) (cifrata)
     suspend fun setOmdbApiKey(apiKey: String) {
-        dataStore.edit { it[OMDB_API_KEY] = apiKey }
+        encryptedPrefs.edit().putString(ENCRYPTED_OMDB_KEY, apiKey).apply()
     }
-    
+
     suspend fun getOmdbApiKey(): String? {
-        return dataStore.data.first()[OMDB_API_KEY]
+        return encryptedPrefs.getString(ENCRYPTED_OMDB_KEY, null)
     }
     
     // Clear all preferences
@@ -522,13 +537,5 @@ class UserPreferences @Inject constructor(
         }
     }
     
-    // One-time migration: Team Channel Cache cleared
-    suspend fun isTeamChannelCacheCleared(): Boolean {
-        return dataStore.data.first()[TEAM_CHANNEL_CACHE_CLEARED] ?: false
-    }
-    
-    suspend fun setTeamChannelCacheCleared() {
-        dataStore.edit { it[TEAM_CHANNEL_CACHE_CLEARED] = true }
-    }
 }
 

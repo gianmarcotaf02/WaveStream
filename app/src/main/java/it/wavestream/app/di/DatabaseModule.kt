@@ -81,22 +81,6 @@ object DatabaseModule {
     }
     
     /**
-     * Migration from version 9 to 10:
-     * - Add team_channel_map table (for Serie A team-channel mapping)
-     */
-    private val MIGRATION_9_10 = object : Migration(9, 10) {
-        override fun migrate(db: SupportSQLiteDatabase) {
-            // Create team_channel_map table (for Serie A team-channel mapping)
-            db.execSQL("""
-                CREATE TABLE IF NOT EXISTS team_channel_map (
-                    teamName TEXT NOT NULL PRIMARY KEY,
-                    channelIds TEXT NOT NULL
-                )
-            """)
-        }
-    }
-    
-    /**
      * Migration from version 10 to 11:
      * - Add trendingCategory column to movies table
      * - Add trendingCategory column to series table
@@ -138,20 +122,6 @@ object DatabaseModule {
             db.execSQL("CREATE INDEX IF NOT EXISTS index_downloaded_content_contentType_contentId ON downloaded_content(contentType, contentId)")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_downloaded_content_seriesId ON downloaded_content(seriesId)")
             db.execSQL("CREATE INDEX IF NOT EXISTS index_downloaded_content_cacheKey ON downloaded_content(cacheKey)")
-        }
-    }
-    
-    /**
-     * Migration from version 12 to 13:
-     * - Add cachedAt column to team_channel_map table
-     * - Clear existing cache entries (they lack timestamps)
-     */
-    private val MIGRATION_12_13 = object : Migration(12, 13) {
-        override fun migrate(db: SupportSQLiteDatabase) {
-            // Add cachedAt column with default value of 0 (will be treated as expired)
-            db.execSQL("ALTER TABLE team_channel_map ADD COLUMN cachedAt INTEGER NOT NULL DEFAULT 0")
-            // Clear existing cache so it's rebuilt with correct timestamps
-            db.execSQL("DELETE FROM team_channel_map")
         }
     }
     
@@ -216,6 +186,16 @@ object DatabaseModule {
         }
     }
 
+    /**
+     * Migration from version 17 to 18:
+     * - Remove team_channel_map table (Serie A section removed)
+     */
+    private val MIGRATION_17_18 = object : Migration(17, 18) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP TABLE IF EXISTS team_channel_map")
+        }
+    }
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -226,7 +206,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -272,9 +252,6 @@ object DatabaseModule {
     
     @Provides
     fun provideFavoriteCategoryDao(db: AppDatabase): FavoriteCategoryDao = db.favoriteCategoryDao()
-    
-    @Provides
-    fun provideTeamChannelMapDao(db: AppDatabase): TeamChannelMapDao = db.teamChannelMapDao()
     
     @Provides
     fun provideDownloadedContentDao(db: AppDatabase): DownloadedContentDao = db.downloadedContentDao()

@@ -48,7 +48,6 @@ class LoadingActivity : ComponentActivity() {
     @Inject lateinit var tmdbService: TMDBService
     @Inject lateinit var imdbRatingsRepository: ImdbRatingsRepository
     @Inject lateinit var watchProgressDao: it.wavestream.app.data.database.dao.WatchProgressDao
-    @Inject lateinit var teamChannelMapDao: it.wavestream.app.data.database.dao.TeamChannelMapDao
 
     
     private var profileId: Long = 1L
@@ -134,11 +133,6 @@ class LoadingActivity : ComponentActivity() {
                 val totalSteps = playlists.size
                 
                 onStateUpdate(LoadingState(status = getString(R.string.loading), detail = "Inizializzazione...", progress = 5, showProgress = true))
-                
-                if (!userPreferences.isTeamChannelCacheCleared()) {
-                    withContext(Dispatchers.IO) { teamChannelMapDao.clearAll() }
-                    userPreferences.setTeamChannelCacheCleared()
-                }
                 
                 playlists.forEachIndexed { index, playlist ->
                     val timeSinceUpdate = now - playlist.lastUpdated

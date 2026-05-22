@@ -105,7 +105,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 /**
  * Main Tab enum for navigation
  */
-enum class MainTab { MOVIES, SERIES, LIVE, SERIE_A, FAVORITES, LISTS, HISTORY }
+enum class MainTab { MOVIES, SERIES, LIVE, FAVORITES, LISTS, HISTORY }
 
 /**
  * Main Activity for Android TV
@@ -317,11 +317,6 @@ private fun MainActivityScreen(
             return
         }
         
-        if (tab == MainTab.SERIE_A) {
-            startActivityWithTransition(Intent(context, it.wavestream.app.ui.seriea.SerieAActivity::class.java))
-            return
-        }
-        
         if (tab == selectedTab) return
         selectedTab = tab
         onTabChanged(tab)
@@ -333,7 +328,7 @@ private fun MainActivityScreen(
             MainTab.FAVORITES -> HomeContentType.FAVORITES
             MainTab.LISTS -> HomeContentType.LISTS
             MainTab.HISTORY -> HomeContentType.HISTORY
-            MainTab.LIVE, MainTab.SERIE_A -> HomeContentType.MOVIES  // Fallback (shouldn't reach here)
+            MainTab.LIVE -> HomeContentType.MOVIES  // Fallback (shouldn't reach here)
         }
         homeViewModel.loadContent(contentType)
     }
@@ -662,16 +657,6 @@ private fun MainTopBar(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     MainTab.entries.forEachIndexed { index, tab ->
-                        // Add separator before SERIE_A (after LIVE)
-                        if (tab == MainTab.SERIE_A) {
-                            Text(
-                                text = "|",
-                                color = WaveStreamColors.TextTertiary,
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(horizontal = 4.dp)
-                            )
-                        }
-                        
                         if (tab == MainTab.HISTORY) {
                             // History icon button
                             HistoryTabButton(
@@ -696,22 +681,11 @@ private fun MainTopBar(
                                 onDownPress = onContentFocusRequest,
                                 onWidthMeasured = { width -> tabWidths[index] = width }
                             )
-                        } else if (tab == MainTab.SERIE_A) {
-                             // Serie A Logo Button
-                             ImageTabButton(
-                                 painter = androidx.compose.ui.res.painterResource(it.wavestream.app.R.drawable.serie_a),
-                                 contentDescription = "Serie A",
-                                 isSelected = tab == selectedTab,
-                                 onClick = { onTabSelected(tab) },
-                                 onDownPress = onContentFocusRequest,
-                                 onWidthMeasured = { width -> tabWidths[index] = width }
-                             )
                         } else {
                             TabButton(
                                 text = when (tab) {
                                     MainTab.MOVIES -> "Film"
                                     MainTab.SERIES -> "Serie TV"
-                                    MainTab.LIVE -> "Live"
                                     MainTab.LIVE -> "Live"
                                     else -> ""
                                 },
@@ -1081,73 +1055,6 @@ private fun getCurrentTimeString(): String {
     val formatter = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
     return formatter.format(java.util.Date())
 }
-
-@Composable
-private fun ImageTabButton(
-    painter: androidx.compose.ui.graphics.painter.Painter,
-    contentDescription: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    onDownPress: () -> Unit = {},
-    onWidthMeasured: (Float) -> Unit = {}
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val density = LocalDensity.current
-    
-    // Calculate width for indicator
-    LaunchedEffect(density) {
-        onWidthMeasured(50f)
-    }
-
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
-        animationSpec = AppAnimations.SpringCardFocus,
-        label = "imgTabScale"
-    )
-
-    // Border color when focused
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "imgTabBorder"
-    )
-
-    Box(
-        modifier = Modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .height(36.dp) 
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-            .focusable(interactionSource = interactionSource)
-            .onKeyEvent { keyEvent ->
-                if (keyEvent.type == KeyEventType.KeyDown &&
-                    keyEvent.key == Key.DirectionDown) {
-                    onDownPress()
-                    true
-                } else {
-                    false
-                }
-            }
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-            .padding(horizontal = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        androidx.compose.foundation.Image(
-            painter = painter,
-            contentDescription = contentDescription,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.height(24.dp)
-        )
-    }
-}
-
 /**
  * Favorites tab button - Heart icon only (Prime Video style)
  */

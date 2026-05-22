@@ -102,7 +102,7 @@ class SetupActivity : ComponentActivity() {
     private var currentSessionCode: String? = null
     
     // URL base per la pagina web di setup
-    private val webSetupBaseUrl = "https://sandtv-581c1.web.app/setup/"
+    private val webSetupBaseUrl = "https://wavestream-d3972.web.app/setup/"
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

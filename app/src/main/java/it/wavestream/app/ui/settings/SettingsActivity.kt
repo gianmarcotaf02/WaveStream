@@ -158,7 +158,7 @@ class SettingsActivity : ComponentActivity() {
                     "subtitles" -> SubtitlesSettings(openSubtitlesRepository, userPreferences, contentFocusRequester)
                     "epg" -> EpgSettings(userPreferences, epgRepository, playlistDao, contentFocusRequester)
                     "appearance" -> AppearanceSettings(userPreferences)
-                    "storage" -> StorageSettings()
+                    "storage" -> StorageSettings(profileDao, playlistDao, userPreferences)
                     "updates" -> UpdateSettings(appUpdateManager, contentFocusRequester)
                     "about" -> AboutSettings()
                     else -> {
@@ -1801,9 +1801,75 @@ private fun AppearanceSettings(userPreferences: UserPreferences) {
 }
 
 @Composable
-private fun StorageSettings() {
+private fun StorageSettings(
+    profileDao: ProfileDao,
+    playlistDao: PlaylistDao,
+    userPreferences: UserPreferences
+) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var showClearConfirm by remember { mutableStateOf(false) }
+
     SettingsSection(title = "Archiviazione") {
-        SettingsInfo(text = "Le impostazioni di archiviazione saranno disponibili qui.")
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(
+                text = "Cache e dati dell'app",
+                style = MaterialTheme.typography.bodyMedium,
+                color = WaveStreamColors.TextTertiary
+            )
+            if (showClearConfirm) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = WaveStreamColors.Accent.copy(alpha = 0.15f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Cancellare tutti i dati?",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WaveStreamColors.TextPrimary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Verranno eliminati: profili, playlist, cronologia, preferiti e impostazioni. L'app si riavvierà.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = WaveStreamColors.TextSecondary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Button(
+                                onClick = { showClearConfirm = false },
+                                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
+                            ) { Text("Annulla") }
+                            Button(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        context.deleteDatabase("wavestream_database")
+                                        context.getSharedPreferences("wavestream_sync_prefs", Context.MODE_PRIVATE).edit().clear().apply()
+                                        context.getDataDir().resolve("datastore").deleteRecursively()
+                                        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                                        if (intent != null) {
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                            context.startActivity(intent)
+                                        }
+                                        Runtime.getRuntime().exit(0)
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Error)
+                            ) { Text("Cancella tutto") }
+                        }
+                    }
+                }
+            } else {
+                Button(
+                    onClick = { showClearConfirm = true },
+                    colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Error)
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Cancella tutti i dati")
+                }
+            }
+        }
     }
 }
 
@@ -2134,6 +2200,7 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
 
 @Composable
 private fun AboutSettings() {
+    val context = LocalContext.current
     SettingsSection(title = "Informazioni") {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
@@ -2152,6 +2219,46 @@ private fun AboutSettings() {
                 text = "App per Android TV per streaming IPTV con supporto EPG, film e serie TV.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = WaveStreamColors.TextTertiary
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Informazioni Legali",
+                style = MaterialTheme.typography.titleMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Privacy Policy",
+                style = MaterialTheme.typography.bodyMedium,
+                color = WaveStreamColors.Accent,
+                modifier = Modifier
+                    .focusable()
+                    .clickable {
+                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://wavestream-d3972.web.app/privacy"))
+                        context.startActivity(intent)
+                    }
+            )
+            Text(
+                text = "Termini e Condizioni",
+                style = MaterialTheme.typography.bodyMedium,
+                color = WaveStreamColors.Accent,
+                modifier = Modifier
+                    .focusable()
+                    .clickable {
+                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://wavestream-d3972.web.app/terms"))
+                        context.startActivity(intent)
+                    }
+            )
+            Text(
+                text = "Licenze Open Source",
+                style = MaterialTheme.typography.bodyMedium,
+                color = WaveStreamColors.Accent,
+                modifier = Modifier
+                    .focusable()
+                    .clickable {
+                        val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://wavestream-d3972.web.app/licenses"))
+                        context.startActivity(intent)
+                    }
             )
         }
     }

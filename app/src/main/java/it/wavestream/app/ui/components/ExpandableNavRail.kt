@@ -227,17 +227,6 @@ fun ExpandableNavRail(
                 Spacer(modifier = Modifier.height(1.dp))
                 
                 NavRailItem(
-                    icon = Icons.Default.Movie,
-                    label = "Serie A",
-                    isSelected = selectedTab == MainTab.SERIE_A,
-                    isExpanded = isExpanded,
-                    onClick = { onTabSelected(MainTab.SERIE_A) },
-                    iconPainter = painterResource(id = R.drawable.serie_a)
-                )
-                
-                Spacer(modifier = Modifier.height(1.dp))
-                
-                NavRailItem(
                     icon = if (selectedTab == MainTab.FAVORITES) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     label = "Preferiti",
                     isSelected = selectedTab == MainTab.FAVORITES,

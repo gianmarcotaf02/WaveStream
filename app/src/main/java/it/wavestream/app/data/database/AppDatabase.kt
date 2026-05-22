@@ -26,10 +26,9 @@ import it.wavestream.app.data.database.entity.*
         CustomGroup::class,
         GroupItem::class,
         RecentlyWatchedChannel::class,
-        TeamChannelMap::class,
         DownloadedContent::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -50,7 +49,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun customGroupDao(): CustomGroupDao
     abstract fun recentlyWatchedDao(): RecentlyWatchedDao
     abstract fun favoriteCategoryDao(): FavoriteCategoryDao
-    abstract fun teamChannelMapDao(): TeamChannelMapDao
     abstract fun downloadedContentDao(): DownloadedContentDao
     
     companion object {
