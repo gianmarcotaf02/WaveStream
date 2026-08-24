@@ -2484,3 +2484,199 @@ private fun SettingsSwitch(
 }
 
 
+
+// ============ VPN in-app (WireGuard) ============
+
+@Composable
+private fun VpnSettings(
+    userPreferences: UserPreferences,
+    vpnManager: VpnManager,
+    contentFocusRequester: FocusRequester? = null
+) {
+    val scope = rememberCoroutineScope()
+    val vpnState by vpnManager.state.collectAsState()
+    val vpnError by vpnManager.error.collectAsState()
+    var savedConfig by remember { mutableStateOf("") }
+    var showConfigDialog by remember { mutableStateOf(false) }
+    var isBusy by remember { mutableStateOf(false) }
+    var feedback by remember { mutableStateOf<String?>(null) }
+
+    // Consent flow: la prima volta Android mostra il dialogo di autorizzazione VPN
+    val consentLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            scope.launch {
+                isBusy = true
+                feedback = null
+                val r = vpnManager.start(savedConfig)
+                if (r.isFailure) feedback = vpnError
+                isBusy = false
+            }
+        } else {
+            feedback = "Consenso VPN non concesso."
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        savedConfig = userPreferences.getVpnConfig()
+    }
+
+    SettingsSection(title = "VPN in-app") {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            // ---- Stato VPN ----
+            val isRunning = vpnState == Tunnel.State.UP
+            val statusColor = when (vpnState) {
+                Tunnel.State.UP -> WaveStreamColors.Success
+                Tunnel.State.DOWN -> WaveStreamColors.TextTertiary
+                else -> WaveStreamColors.Accent
+            }
+            val statusText = when (vpnState) {
+                Tunnel.State.UP -> "VPN attiva: solo il traffico di WaveStream è protetto"
+                Tunnel.State.DOWN -> "VPN disattivata"
+                else -> "Connessione in corso..."
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .clip(CircleShape)
+                        .background(statusColor)
+                )
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (isRunning) WaveStreamColors.Success else WaveStreamColors.TextPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            HorizontalDivider(
+                color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
+                thickness = 0.5.dp
+            )
+
+            // ---- Configurazione ----
+            val hasConfig = savedConfig.isNotBlank()
+            Text(
+                text = if (hasConfig)
+                    "Configurazione WireGuard presente (${savedConfig.lines().size} righe)"
+                else
+                    "Nessuna configurazione WireGuard salvata",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (hasConfig) WaveStreamColors.TextPrimary else WaveStreamColors.TextTertiary
+            )
+
+            Button(
+                onClick = { showConfigDialog = true },
+                enabled = !isBusy,
+                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
+            ) {
+                Icon(Icons.Default.Paste, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(if (hasConfig) "Modifica configurazione" else "Incolla configurazione WireGuard")
+            }
+
+            if (hasConfig) {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            isBusy = true
+                            feedback = null
+                            if (!vpnManager.isRunning()) {
+                                val consent = vpnManager.getConsentIntent()
+                                if (consent != null) {
+                                    // il consenso va chiesto fuori dal coroutine scope
+                                    consentLauncher.launch(consent)
+                                } else {
+                                    val r = vpnManager.start(savedConfig)
+                                    if (r.isFailure) feedback = vpnError
+                                }
+                            } else {
+                                vpnManager.stop()
+                            }
+                            isBusy = false
+                        }
+                    },
+                    enabled = !isBusy,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isRunning) WaveStreamColors.Error else WaveStreamColors.Accent
+                    )
+                ) {
+                    Icon(Icons.Default.PowerSettingsNew, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(if (isRunning) "Disattiva VPN" else "Attiva VPN")
+                }
+            }
+
+            feedback?.let {
+                Text(text = it, style = MaterialTheme.typography.bodySmall, color = WaveStreamColors.Error)
+            }
+            vpnError?.let {
+                Text(text = it, style = MaterialTheme.typography.bodySmall, color = WaveStreamColors.Error)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            SettingsInfo(
+                text = "La VPN è attiva solo dentro WaveStream: nessun'altra app è coinvolta. " +
+                    "Funziona a livello di sistema, quindi copre anche lo streaming video."
+            )
+            Text(
+                text = "Come ottenere la configurazione: Proton VPN → account.protonvpn.com → " +
+                    "Downloads → WireGuard configuration. Incolla qui il contenuto del file .conf. " +
+                    "Qualsiasi altro provider WireGuard funziona allo stesso modo.",
+                style = MaterialTheme.typography.bodySmall,
+                color = WaveStreamColors.TextTertiary
+            )
+            Text(
+                text = "Nota: WireGuard usa il protocollo UDP. Se la tua rete lo blocca o lo limita, " +
+                    "la connessione potrebbe non riuscire (in quel caso usa l'app Proton ufficiale " +
+                    "con il protocollo Stealth).",
+                style = MaterialTheme.typography.bodySmall,
+                color = WaveStreamColors.TextTertiary
+            )
+        }
+    }
+
+    if (showConfigDialog) {
+        VpnConfigDialog(
+            initialConfig = savedConfig,
+            onDismiss = { showConfigDialog = false },
+            onSave = { newConfig ->
+                scope.launch {
+                    feedback = null
+                    try {
+                        vpnManager.validateConfig(newConfig)
+                        userPreferences.setVpnConfig(newConfig)
+                        savedConfig = newConfig
+                        showConfigDialog = false
+                        feedback = "Configurazione salvata."
+                    } catch (e: Exception) {
+                        feedback = "Config non valida: ${e.message ?: "errore"}"
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun VpnConfigDialog(
+    initialConfig: String,
+    onDismiss: () -> Unit,
+    onSave: (String) -> Unit
+) {
+    var configText by remember { mutableStateOf(initialConfig) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = WaveStreamColors.BackgroundElevated,
+        title = {
+            Text("Configurazione WireGuard", color = WaveStreamColors.TextPrimary)
+        },
+        text = {
+            Column(verticalA
