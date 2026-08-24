@@ -130,10 +130,15 @@ class LiveActivity : ComponentActivity() {
         var favoriteCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
         var channelCounts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
         
-        // D-pad/system back: go back to the category grid first, then exit
-        BackHandler(enabled = selectedCategory != null) {
+        // D-pad/system back: go back to the category grid first, then exit.
+        // Also releases the heavy per-category data (channels + EPG map) so the
+        // grid renders without memory pressure / GC pauses.
+        val backToGrid = {
+            channels = emptyList()
+            channelPrograms = emptyMap()
             selectedCategory = null
         }
+        BackHandler(enabled = selectedCategory != null) { backToGrid() }
         
         // Load favorites
         LaunchedEffect(Unit) {
@@ -310,7 +315,7 @@ class LiveActivity : ComponentActivity() {
             },
             onBackClick = {
                 if (selectedCategory != null) {
-                    selectedCategory = null  // Go back to category grid
+                    backToGrid()  // Go back to category grid (releases per-category data)
                 } else {
                     finish()
                 }
