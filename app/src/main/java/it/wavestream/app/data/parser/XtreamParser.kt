@@ -327,15 +327,28 @@ class XtreamParser @Inject constructor() {
      * Attempts to repair a truncated JSON array by finding the last complete object
      * and closing the array. Returns null if repair fails.
      */
+    /**
+     * Repair a truncated JSON array by progressively trimming back to the previous
+     * object boundary until a valid array can be built. The naive lastIndexOf('}')
+     * approach breaks when the last '}' is inside a string value (e.g. a title
+     * containing a brace), which made big truncated Xtream responses parse to 0 items.
+     */
     private fun repairTruncatedJsonArray(json: String): String? {
         if (!json.trimStart().startsWith("[")) return null
-        val trimmed = json.trimEnd()
-        // Find last complete object: last '}' that's followed by ',' or end of array
-        val lastCloseBrace = trimmed.lastIndexOf('}')
-        if (lastCloseBrace < 0) return null
-        val repaired = trimmed.substring(0, lastCloseBrace + 1) + "]"
-        Log.d(TAG, "repairTruncatedJsonArray: trimmed at char $lastCloseBrace, repaired to ${repaired.length} chars")
-        return repaired
+        var end = json.length
+        while (end > 1) {
+            val candidate = json.substring(0, end) + "]"
+            try {
+                JSONArray(candidate)
+                Log.d(TAG, "repairTruncatedJsonArray: repaired at char $end -> ${candidate.length} chars")
+                return candidate
+            } catch (_: Exception) {
+                val prevBrace = json.lastIndexOf('}', end - 1)
+                if (prevBrace < 0) return null
+                end = prevBrace + 1
+            }
+        }
+        return null
     }
 }
 
