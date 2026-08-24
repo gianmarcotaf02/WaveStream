@@ -3167,13 +3167,32 @@ private fun VpnFilePickerDialog(
     val scope = rememberCoroutineScope()
     var files by remember { mutableStateOf<List<FoundConfig>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    var permissionNeeded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        files = withContext(Dispatchers.IO) { VpnConfigFinder.findConfigFiles(context) }
-        if (files?.isEmpty() == true) {
-            error = "Nessun file .conf trovato nella memoria della TV."
+    fun search() {
+        files = null
+        error = null
+        permissionNeeded = false
+        scope.launch {
+            val result = withContext(Dispatchers.IO) { VpnConfigFinder.findConfigFiles(context) }
+            files = result
+            if (result.isEmpty()) {
+                permissionNeeded = !VpnConfigFinder.hasAllFilesAccess(context)
+                if (!permissionNeeded) {
+                    error = "Nessun file .conf trovato nella memoria della TV."
+                }
+            }
         }
     }
+
+    // Dopo essere tornati dalle impostazioni di sistema, ripete la ricerca
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        search()
+    }
+
+    LaunchedEffect(Unit) { search() }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -3197,12 +3216,46 @@ private fun VpnFilePickerDialog(
                     files?.isEmpty() == true -> {
                         Text(
                             text = "Nessun file .conf trovato. Se hai appena copiato il file " +
-                                "(es. con adb push o un'app di trasferimento), chiudi e riapri per " +
-                                "riprovare la scansione. Verifica che il file sia nella cartella " +
-                                "Download, oppure usa \"Importa da file (USB)\" o \"Importa dal telefono (QR)\".",
+                                "(es. con adb push o un'app di trasferimento), usa \"Riprova\". " +
+                                "Verifica che il file sia nella cartella Download, oppure usa " +
+                                "\"Importa da file (USB)\" o \"Importa dal telefono (QR)\".",
                             style = MaterialTheme.typography.bodyMedium,
                             color = WaveStreamColors.TextSecondary
                         )
+                        if (permissionNeeded) {
+                            Text(
+                                text = "Per leggere la memoria della TV serve il permesso \"Accesso a " +
+                                    "tutti i file\". Aprilo dalle impostazioni di sistema.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = WaveStreamColors.Accent
+                            )
+                            Button(
+                                onClick = {
+                                    try {
+                                        val intent = Intent(
+                                            Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                                            Uri.parse("package:${context.packageName}")
+                                        )
+                                        permissionLauncher.launch(intent)
+                                    } catch (e: Exception) {
+                                        error = "Impossibile aprire le impostazioni: ${e.message}"
+                                    }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
+                            ) {
+                                Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Concedi accesso ai file")
+                            }
+                        }
+                        Button(
+                            onClick = { search() },
+                            colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Riprova")
+                        }
                     }
                     else -> {
                         LazyColumn(
