@@ -418,6 +418,13 @@ fun LiveScreen(
 ) {
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     
+    // Hoisted category-grid state: LiveCategoryGrid leaves composition while a
+    // category is open, so without hoisting it would be recreated from scratch on
+    // every back navigation (scroll reset + double composition + delayed focus
+    // jump). LiveScreen itself never leaves composition, so this survives.
+    val categoryGridState = androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
+    val categoryFocusRequester = remember { FocusRequester() }
+    
     // FocusRequesters for header buttons - allow navigation from content back to header
     val searchButtonFocusRequester = remember { FocusRequester() }
     val toggleButtonFocusRequester = remember { FocusRequester() }
@@ -438,6 +445,8 @@ fun LiveScreen(
             favoriteCategories = favoriteCategories,
             channelCounts = channelCounts,
             restoreCategory = restoreCategory,
+            gridState = categoryGridState,
+            categoryFocusRequester = categoryFocusRequester,
             onCategorySelect = onCategorySelect,
             onBackClick = onBackClick,
             onMultiscreenClick = onMultiscreenClick
@@ -957,24 +966,23 @@ private fun LiveCategoryGrid(
     favoriteCategories: Set<String> = emptySet(),
     channelCounts: Map<String, Int> = emptyMap(),
     restoreCategory: String? = null,
+    gridState: androidx.tv.foundation.lazy.grid.TvLazyGridState,
+    categoryFocusRequester: FocusRequester,
     onCategorySelect: (String) -> Unit,
     onBackClick: () -> Unit,
     onMultiscreenClick: () -> Unit = {}
 ) {
-    val gridState = androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
     val backFocusRequester = remember { FocusRequester() }
-    val categoryFocusRequester = remember { FocusRequester() }
     val restoreIndex = if (restoreCategory != null) categories.indexOf(restoreCategory) else -1
     val focusIndex = if (restoreIndex >= 0) restoreIndex else 0
     
-    // Restore focus to the category we just left (or focus the first on initial open)
-    LaunchedEffect(categories, restoreCategory) {
+    // The grid state is retained across back-navigation (hoisted in LiveScreen),
+    // so the scroll position is already where we left it: no scrollToItem jump.
+    // Focus is restored instantly (with retry while the target card composes)
+    // instead of the old delay(150) + slow retry that caused a visible lag/jump.
+    LaunchedEffect(categories, restoreCategory, focusIndex) {
         if (categories.isEmpty()) return@LaunchedEffect
-        if (restoreIndex >= 0) {
-            gridState.scrollToItem(restoreIndex)
-        }
-        delay(150)
-        requestFocusWithRetry(categoryFocusRequester)
+        requestFocusWithRetry(categoryFocusRequester, attempts = 8, retryDelayMs = 50)
     }
     val backInteractionSource = remember { MutableInteractionSource() }
     val isBackFocused by backInteractionSource.collectIsFocusedAsState()
