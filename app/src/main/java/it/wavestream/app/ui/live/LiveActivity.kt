@@ -3,6 +3,7 @@ package it.wavestream.app.ui.live
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -117,6 +118,7 @@ class LiveActivity : ComponentActivity() {
     private fun LiveScreenContent() {
         var categories by remember { mutableStateOf<List<String>>(emptyList()) }
         var selectedCategory by remember { mutableStateOf<String?>(null) }
+        var lastSelectedCategory by remember { mutableStateOf<String?>(null) }
         var channels by remember { mutableStateOf<List<Channel>>(emptyList()) }
         var channelPrograms by remember { mutableStateOf<Map<Long, List<EpgProgram>>>(emptyMap()) }
         var isGridMode by remember { mutableStateOf(true) }
@@ -125,6 +127,11 @@ class LiveActivity : ComponentActivity() {
         var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
         var favoriteCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
         var channelCounts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
+        
+        // D-pad/system back: go back to the category grid first, then exit
+        BackHandler(enabled = selectedCategory != null) {
+            selectedCategory = null
+        }
         
         // Load favorites
         LaunchedEffect(Unit) {
@@ -262,6 +269,7 @@ class LiveActivity : ComponentActivity() {
         LiveScreen(
             categories = categories,
             selectedCategory = selectedCategory,
+            restoreCategory = lastSelectedCategory,
             channels = channels,
             channelPrograms = channelPrograms,
             currentPrograms = currentPrograms,
@@ -269,7 +277,10 @@ class LiveActivity : ComponentActivity() {
             isLoading = isLoading,
             isEpgLoading = isEpgLoading,
             currentTime = currentTime,
-            onCategorySelect = { selectedCategory = it },
+            onCategorySelect = {
+                selectedCategory = it
+                lastSelectedCategory = it
+            },
             onChannelClick = { playChannel(it) },
             onToggleMode = { isGridMode = !isGridMode },
             onSearchClick = {
@@ -314,6 +325,25 @@ private const val PIXELS_PER_MINUTE = 2
 private const val TIMELINE_HOURS = 6
 
 /**
+ * Requests focus on the given FocusRequester, retrying while the target node is not yet
+ * attached to composition (e.g. lazy items that still have to be composed after a scroll).
+ */
+private suspend fun requestFocusWithRetry(
+    focusRequester: FocusRequester,
+    attempts: Int = 6,
+    retryDelayMs: Long = 100
+) {
+    repeat(attempts) {
+        try {
+            focusRequester.requestFocus()
+            return
+        } catch (e: IllegalStateException) {
+            delay(retryDelayMs)
+        }
+    }
+}
+
+/**
  * Derived state helper: computes current programs only when they actually change.
  * This prevents unnecessary recompositions when currentTime ticks but the current program is still the same.
  */
@@ -341,6 +371,7 @@ private fun deriveCurrentPrograms(
 fun LiveScreen(
     categories: List<String>,
     selectedCategory: String?,
+    restoreCategory: String? = null,
     channels: List<Channel>,
     channelPrograms: Map<Long, List<EpgProgram>>,
     currentPrograms: Map<Long, EpgProgram?>,
@@ -364,12 +395,22 @@ fun LiveScreen(
     val searchButtonFocusRequester = remember { FocusRequester() }
     val toggleButtonFocusRequester = remember { FocusRequester() }
     
+    // Request focus on the first channel (top-left) when a category is opened
+    val firstChannelFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(selectedCategory, isLoading, channels) {
+        if (!isLoading && channels.isNotEmpty()) {
+            delay(150)
+            requestFocusWithRetry(firstChannelFocusRequester)
+        }
+    }
+    
     // When no category is selected, show full-screen grid of category cards
     if (selectedCategory == null) {
         LiveCategoryGrid(
             categories = categories,
             favoriteCategories = favoriteCategories,
             channelCounts = channelCounts,
+            restoreCategory = restoreCategory,
             onCategorySelect = onCategorySelect,
             onBackClick = onBackClick,
             onMultiscreenClick = onMultiscreenClick
@@ -434,7 +475,12 @@ fun LiveScreen(
                                 channel = channel,
                                 currentProgram = currentPrograms[channel.id],
                                 currentTime = currentTime,
-                                onClick = { onChannelClick(channel) }
+                                onClick = { onChannelClick(channel) },
+                                modifier = if (channels.isNotEmpty() && channel.id == channels.first().id) {
+                                    Modifier.focusRequester(firstChannelFocusRequester)
+                                } else {
+                                    Modifier
+                                }
                             )
                         }
                     }
@@ -465,7 +511,12 @@ fun LiveScreen(
                                         programs = channelPrograms[channel.id] ?: emptyList(),
                                         currentTime = currentTime,
                                         timeFormat = timeFormat,
-                                        onClick = { onChannelClick(channel) }
+                                        onClick = { onChannelClick(channel) },
+                                        modifier = if (channels.isNotEmpty() && channel.id == channels.first().id) {
+                                            Modifier.focusRequester(firstChannelFocusRequester)
+                                        } else {
+                                            Modifier
+                                        }
                                     )
                                 }
                             }
@@ -584,7 +635,8 @@ private fun EpgChannelRow(
     programs: List<EpgProgram>,
     currentTime: Long,
     timeFormat: SimpleDateFormat,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -600,7 +652,7 @@ private fun EpgChannelRow(
     )
     
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(72.dp)
             .padding(horizontal = 4.dp, vertical = 2.dp)
@@ -875,12 +927,26 @@ private fun LiveCategoryGrid(
     categories: List<String>,
     favoriteCategories: Set<String> = emptySet(),
     channelCounts: Map<String, Int> = emptyMap(),
+    restoreCategory: String? = null,
     onCategorySelect: (String) -> Unit,
     onBackClick: () -> Unit,
     onMultiscreenClick: () -> Unit = {}
 ) {
-    val gridState = androidx.tv.foundation.lazy.list.rememberTvLazyListState()
+    val gridState = androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
     val backFocusRequester = remember { FocusRequester() }
+    val categoryFocusRequester = remember { FocusRequester() }
+    val restoreIndex = if (restoreCategory != null) categories.indexOf(restoreCategory) else -1
+    val focusIndex = if (restoreIndex >= 0) restoreIndex else 0
+    
+    // Restore focus to the category we just left (or focus the first on initial open)
+    LaunchedEffect(categories, restoreCategory) {
+        if (categories.isEmpty()) return@LaunchedEffect
+        if (restoreIndex >= 0) {
+            gridState.scrollToItem(restoreIndex)
+        }
+        delay(150)
+        requestFocusWithRetry(categoryFocusRequester)
+    }
     val backInteractionSource = remember { MutableInteractionSource() }
     val isBackFocused by backInteractionSource.collectIsFocusedAsState()
     val backBorderColor by animateColorAsState(
@@ -935,6 +1001,7 @@ private fun LiveCategoryGrid(
         // Grid of category cards
         androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid(
             columns = androidx.tv.foundation.lazy.grid.TvGridCells.Adaptive(minSize = 160.dp),
+            state = gridState,
             contentPadding = PaddingValues(24.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -950,7 +1017,12 @@ private fun LiveCategoryGrid(
                     category = category,
                     channelCount = count,
                     isFavorite = isFav,
-                    onClick = { onCategorySelect(category) }
+                    onClick = { onCategorySelect(category) },
+                    modifier = if (index == focusIndex) {
+                        Modifier.focusRequester(categoryFocusRequester)
+                    } else {
+                        Modifier
+                    }
                 )
             }
         }
@@ -962,7 +1034,8 @@ private fun LiveCategoryCard(
     category: String,
     channelCount: Int,
     isFavorite: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -991,7 +1064,7 @@ private fun LiveCategoryCard(
 
     Card(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
             .onFocusChanged { isFocused = it.isFocused }
@@ -1235,7 +1308,8 @@ private fun LiveChannelCard(
     channel: Channel,
     currentProgram: EpgProgram?,
     currentTime: Long,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1268,7 +1342,7 @@ private fun LiveChannelCard(
     }
     
     Column(
-        modifier = Modifier
+        modifier = modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
