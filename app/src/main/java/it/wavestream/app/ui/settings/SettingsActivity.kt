@@ -2484,7 +2484,6 @@ private fun SettingsSwitch(
 }
 
 
-
 // ============ VPN in-app (WireGuard) ============
 
 @Composable
@@ -2679,4 +2678,43 @@ private fun VpnConfigDialog(
             Text("Configurazione WireGuard", color = WaveStreamColors.TextPrimary)
         },
         text = {
-            Column(verticalA
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = configText,
+                    onValueChange = { configText = it },
+                    label = { Text("Contenuto del file .conf") },
+                    minLines = 10,
+                    maxLines = 18,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = WaveStreamColors.Accent,
+                        unfocusedBorderColor = WaveStreamColors.TextTertiary,
+                        focusedTextColor = WaveStreamColors.TextPrimary,
+                        unfocusedTextColor = WaveStreamColors.TextPrimary
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = "Formato wg-quick, es.:\n[Interface]\nPrivateKey = ...\nAddress = 10.2.0.2/32\nDNS = 10.2.0.1\n\n[Peer]\nPublicKey = ...\nAllowedIPs = 0.0.0.0/0\nEndpoint = it1-wg.letsvpn.net:51820",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WaveStreamColors.TextTertiary
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSave(configText) },
+                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
+            ) {
+                Text("Salva")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = WaveStreamColors.TextSecondary)
+            ) {
+                Text("Annulla")
+            }
+        }
+    )
+}
