@@ -388,6 +388,45 @@ class DetailsActivity : ComponentActivity() {
         // Check favorite status
         val isFavorite = favoriteDao.getFavorite(profileId, ContentType.MOVIE, contentId) != null
         
+        // ===== FAST PATH: show the DB state immediately, no network =====
+        // The skeleton disappears right away; Xtream VOD + TMDB enrichment below
+        // run afterwards and update the UI in place when they complete.
+        val fastProgress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
+        onStateUpdate(
+            DetailsState(
+                title = movie.name,
+                year = movie.year?.toString() ?: "",
+                overview = movie.plot ?: "",
+                genres = movie.genre ?: "",
+                duration = movie.tmdbRuntime?.let { "$it min" },
+                director = movie.director,
+                cast = movie.cast,
+                castPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(movie.tmdbCastJson),
+                directorPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(movie.tmdbCrewJson),
+                posterUrl = movie.posterUrl,
+                backdropUrl = movie.backdropUrl,
+                contentType = ContentType.MOVIE,
+                isFavorite = isFavorite,
+                isLoading = false,
+                tmdbRating = movie.tmdbVoteAverage,
+                imdbRating = movie.omdbImdbRating,
+                rottenTomatoesScore = movie.omdbRottenTomatoesScore,
+                metacriticScore = movie.omdbMetacriticScore,
+                audienceScore = movie.omdbAudienceScore,
+                trailerKey = movie.tmdbTrailerKey,
+                resumeMinutes = fastProgress?.let {
+                    val remaining = (it.duration - it.position) / 60000
+                    remaining.toInt().coerceAtLeast(1)
+                },
+                resumeProgress = fastProgress?.let {
+                    if (it.duration > 0) {
+                        (it.position.toFloat() / it.duration.toFloat()).coerceIn(0f, 1f)
+                    } else null
+                },
+                isDownloaded = downloadManager.isContentDownloaded(ContentType.MOVIE, contentId)
+            )
+        )
+        
         // Use persistent data from DB first (Xtream data we now save)
         var overview = movie.xtreamPlot ?: ""
         var cast = movie.xtreamCast
@@ -574,6 +613,34 @@ class DetailsActivity : ComponentActivity() {
         var series = seriesDao.getSeriesById(contentId) ?: return
         
         Log.d(TAG, "Loading series: ${series.name}, tmdbId=${series.tmdbId}")
+        
+        // ===== FAST PATH: show the DB state immediately, no network =====
+        // The skeleton disappears right away; TMDB enrichment + episode loading
+        // below run afterwards and update the UI in place when they complete.
+        val dbIsFavorite = favoriteDao.getFavorite(profileId, ContentType.SERIES, contentId) != null
+        onStateUpdate(
+            DetailsState(
+                title = series.name,
+                year = series.year?.toString() ?: "",
+                overview = series.plot ?: "",
+                genres = series.genre ?: "",
+                cast = series.cast,
+                castPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(series.tmdbCastJson),
+                directorPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(series.tmdbCrewJson),
+                director = series.director,
+                posterUrl = series.posterUrl,
+                backdropUrl = series.backdropUrl,
+                contentType = ContentType.SERIES,
+                isFavorite = dbIsFavorite,
+                isLoading = false,
+                tmdbRating = series.tmdbVoteAverage,
+                imdbRating = series.omdbImdbRating,
+                rottenTomatoesScore = series.omdbRottenTomatoesScore,
+                metacriticScore = series.omdbMetacriticScore,
+                audienceScore = series.omdbAudienceScore,
+                trailerKey = series.tmdbTrailerKey
+            )
+        )
         
         // Enrich with TMDB data if needed
         series = tmdbService.enrichSeriesDetails(series)
