@@ -69,13 +69,15 @@ import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import it.wavestream.app.data.database.entity.FavoriteCategory
 import it.wavestream.app.data.database.dao.FavoriteCategoryDao
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
+import java.util.concurrent.ConcurrentHashMap
 import androidx.lifecycle.lifecycleScope
 import java.text.SimpleDateFormat
 import java.util.*
@@ -226,7 +228,7 @@ class LiveActivity : ComponentActivity() {
             selectedCategory?.let { cat ->
                 isLoading = true
                 
-                // Load channels based on category type
+                // Load channels based on category type (single fast query)
                 val loadedChannels = if (cat == RECENT_CATEGORY) {
                     val cutoff = System.currentTimeMillis() - RECENT_WINDOW_MS
                     val recentIds = recentlyWatchedDao.getRecentChannelIds(cutoff)
@@ -236,21 +238,41 @@ class LiveActivity : ComponentActivity() {
                 }
                 
                 channels = loadedChannels
-                
-                // Load EPG for channels in parallel
-                val programs = loadedChannels.map { channel ->
-                    val channelIds = listOfNotNull(
-                        channel.xtreamEpgChannelId,
-                        channel.name,
-                        channel.xtreamStreamId?.toString()
-                    )
-                    async(Dispatchers.Default) {
-                        channel.id to epgRepository.getProgramsForChannelWithFallback(channelIds)
-                    }
-                }.awaitAll().toMap()
-                
-                channelPrograms = programs
+                channelPrograms = emptyMap()
+                // Show the grid/timeline immediately — EPG fills in progressively below
                 isLoading = false
+                
+                // Load EPG with bounded concurrency (8 at a time) and batched state updates,
+                // instead of one coroutine per channel + awaitAll(): avoids a lag spike when
+                // entering categories with hundreds/thousands of channels.
+                if (loadedChannels.isNotEmpty()) {
+                    val semaphore = Semaphore(8)
+                    val results = ConcurrentHashMap<Long, List<EpgProgram>>(loadedChannels.size)
+                    
+                    loadedChannels.map { channel ->
+                        async(Dispatchers.Default) {
+                            semaphore.withPermit {
+                                val channelIds = listOfNotNull(
+                                    channel.xtreamEpgChannelId,
+                                    channel.name,
+                                    channel.xtreamStreamId?.toString()
+                                )
+                                try {
+                                    results[channel.id] = epgRepository.getProgramsForChannelWithFallback(channelIds)
+                                } catch (e: Exception) {
+                                    results[channel.id] = emptyList()
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Flush completed results into state every 250ms (and once at the end)
+                    while (results.size < loadedChannels.size) {
+                        if (results.isNotEmpty()) channelPrograms = results.toMap()
+                        delay(250)
+                    }
+                    if (results.isNotEmpty()) channelPrograms = results.toMap()
+                }
             }
         }
         
@@ -705,7 +727,9 @@ private fun EpgChannelRow(
         // Programs timeline (horizontal lazy row - only composes visible items)
         LazyRow(
             modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            // Pre-compose one page of program blocks ahead when scrolling the timeline
+            beyondViewportPageCount = 1
         ) {
             if (programs.isEmpty()) {
                 item {
