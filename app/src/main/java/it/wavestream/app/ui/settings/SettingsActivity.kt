@@ -69,6 +69,7 @@ import it.wavestream.app.ui.profile.getAvatarIcon
 import it.wavestream.app.vpn.VpnManager
 import it.wavestream.app.vpn.VpnImportServer
 import it.wavestream.app.vpn.VpnConfigFinder
+import it.wavestream.app.vpn.VpnStrategy
 import it.wavestream.app.vpn.FoundConfig
 import com.wireguard.android.backend.Tunnel
 import android.net.Uri
@@ -2504,14 +2505,38 @@ private fun VpnSettings(
     val scope = rememberCoroutineScope()
     val vpnState by vpnManager.state.collectAsState()
     val vpnError by vpnManager.error.collectAsState()
-    var savedConfig by remember { mutableStateOf("") }
+    val currentConfig by vpnManager.currentConfig.collectAsState()
+
+    var configs by remember { mutableStateOf<List<String>>(emptyList()) }
+    var strategy by remember { mutableStateOf("random") }
+    var autoRotate by remember { mutableStateOf(false) }
+    var rotateInterval by remember { mutableStateOf("60") }
     var showConfigDialog by remember { mutableStateOf(false) }
     var showQrImport by remember { mutableStateOf(false) }
     var showFilePicker by remember { mutableStateOf(false) }
+    var pendingStart by remember { mutableStateOf<String?>(null) }
     var isBusy by remember { mutableStateOf(false) }
     var feedback by remember { mutableStateOf<String?>(null) }
 
-    // Import da file (USB) tramite Storage Access Framework
+    fun strategyEnum(): VpnStrategy = when (strategy) {
+        "round_robin" -> VpnStrategy.ROUND_ROBIN
+        "fastest" -> VpnStrategy.FASTEST
+        else -> VpnStrategy.RANDOM
+    }
+
+    fun refreshConfigs() {
+        scope.launch { configs = userPreferences.getVpnConfigs() }
+    }
+
+    suspend fun doStart(chosen: String, pool: List<String>, selStrategy: VpnStrategy) {
+        val r = vpnManager.start(chosen)
+        if (r.isSuccess && autoRotate) {
+            vpnManager.startAutoRotation(pool, selStrategy, rotateInterval.toLongOrNull() ?: 60L)
+        }
+        if (r.isFailure) feedback = vpnError
+    }
+
+    // Import da file (USB) tramite Storage Access Framework → aggiunge al pool
     val usbFilePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
@@ -2525,9 +2550,9 @@ private fun VpnSettings(
                         feedback = "File vuoto."
                     } else {
                         vpnManager.validateConfig(text)
-                        userPreferences.setVpnConfig(text)
-                        savedConfig = text
-                        feedback = "Configurazione importata dal file."
+                        userPreferences.addVpnConfig(text)
+                        refreshConfigs()
+                        feedback = "Configurazione aggiunta al pool."
                     }
                 } catch (e: Exception) {
                     feedback = "File non valido: ${e.message ?: "errore"}"
@@ -2544,8 +2569,10 @@ private fun VpnSettings(
             scope.launch {
                 isBusy = true
                 feedback = null
-                val r = vpnManager.start(savedConfig)
-                if (r.isFailure) feedback = vpnError
+                val pool = userPreferences.getVpnConfigs()
+                val selStrategy = strategyEnum()
+                val chosen = pendingStart ?: vpnManager.selectConfig(pool, selStrategy)
+                if (chosen != null) doStart(chosen, pool, selStrategy)
                 isBusy = false
             }
         } else {
@@ -2554,7 +2581,10 @@ private fun VpnSettings(
     }
 
     LaunchedEffect(Unit) {
-        savedConfig = userPreferences.getVpnConfig()
+        configs = userPreferences.getVpnConfigs()
+        strategy = userPreferences.getVpnStrategy()
+        autoRotate = userPreferences.getVpnAutoRotate()
+        rotateInterval = userPreferences.getVpnRotateInterval()
     }
 
     SettingsSection(title = "VPN in-app") {
@@ -2588,23 +2618,55 @@ private fun VpnSettings(
                     fontWeight = FontWeight.SemiBold
                 )
             }
+            if (isRunning && currentConfig != null) {
+                Text(
+                    text = "Server attivo: ${vpnManager.endpointOf(currentConfig!!) ?: "?"}" +
+                        if (autoRotate) " (rotazione ogni $rotateInterval min)" else "",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WaveStreamColors.TextTertiary
+                )
+            }
 
             HorizontalDivider(
                 color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
                 thickness = 0.5.dp
             )
 
-            // ---- Configurazione ----
-            val hasConfig = savedConfig.isNotBlank()
+            // ---- Pool di configurazioni ----
             Text(
-                text = if (hasConfig)
-                    "Configurazione WireGuard presente (${savedConfig.lines().size} righe)"
-                else
-                    "Nessuna configurazione WireGuard salvata",
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (hasConfig) WaveStreamColors.TextPrimary else WaveStreamColors.TextTertiary
+                text = "Configurazioni server (${configs.size})",
+                style = MaterialTheme.typography.titleMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
             )
+            if (configs.isEmpty()) {
+                Text(
+                    text = "Nessuna configurazione. Ogni configurazione = un server: " +
+                        "generane una per ogni server free di Proton (es. Paesi Bassi, Giappone, USA) " +
+                        "da account.protonvpn.com → Downloads → WireGuard configuration.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = WaveStreamColors.TextTertiary
+                )
+            } else {
+                configs.forEach { cfg ->
+                    VpnConfigPoolRow(
+                        label = vpnManager.endpointOf(cfg) ?: "Configurazione ${configs.indexOf(cfg) + 1}",
+                        isActive = cfg == currentConfig,
+                        onDelete = {
+                            scope.launch {
+                                if (cfg == currentConfig) {
+                                    feedback = "Disattiva la VPN prima di rimuovere il server attivo."
+                                } else {
+                                    userPreferences.removeVpnConfig(cfg)
+                                    refreshConfigs()
+                                }
+                            }
+                        }
+                    )
+                }
+            }
 
+            // ---- Aggiungi configurazioni ----
             Button(
                 onClick = { showConfigDialog = true },
                 enabled = !isBusy,
@@ -2612,7 +2674,7 @@ private fun VpnSettings(
             ) {
                 Icon(Icons.Default.ContentPaste, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(if (hasConfig) "Modifica configurazione" else "Incolla configurazione WireGuard")
+                Text("Aggiungi configurazione (incolla)")
             }
 
             Button(
@@ -2622,7 +2684,7 @@ private fun VpnSettings(
             ) {
                 Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Importa dal telefono (QR)")
+                Text("Aggiungi dal telefono (QR)")
             }
 
             Button(
@@ -2645,24 +2707,81 @@ private fun VpnSettings(
                 Text("Importa da file (USB)")
             }
 
-            if (hasConfig) {
+            HorizontalDivider(
+                color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
+                thickness = 0.5.dp
+            )
+
+            // ---- Strategia di scelta server ----
+            SettingsDropdown(
+                label = "Scelta server",
+                value = strategy,
+                options = listOf(
+                    "random" to "A caso",
+                    "round_robin" to "A turno (round-robin)",
+                    "fastest" to "Più veloce (test latenza)"
+                ),
+                onValueChange = {
+                    strategy = it
+                    scope.launch { userPreferences.setVpnStrategy(it) }
+                }
+            )
+
+            SettingsSwitch(
+                label = "Cambia server automaticamente",
+                checked = autoRotate,
+                onCheckedChange = {
+                    autoRotate = it
+                    scope.launch { userPreferences.setVpnAutoRotate(it) }
+                }
+            )
+
+            if (autoRotate) {
+                SettingsDropdown(
+                    label = "Intervallo di rotazione",
+                    value = rotateInterval,
+                    options = listOf(
+                        "30" to "Ogni 30 minuti",
+                        "60" to "Ogni ora",
+                        "180" to "Ogni 3 ore",
+                        "360" to "Ogni 6 ore",
+                        "720" to "Ogni 12 ore"
+                    ),
+                    onValueChange = {
+                        rotateInterval = it
+                        scope.launch { userPreferences.setVpnRotateInterval(it) }
+                    }
+                )
+            }
+
+            // ---- Attiva / Disattiva ----
+            if (configs.isNotEmpty()) {
                 Button(
                     onClick = {
                         scope.launch {
+                            if (vpnManager.isRunning()) {
+                                vpnManager.stopAutoRotation()
+                                vpnManager.stop()
+                                return@launch
+                            }
                             isBusy = true
                             feedback = null
-                            if (!vpnManager.isRunning()) {
-                                val consent = vpnManager.getConsentIntent()
-                                if (consent != null) {
-                                    // il consenso va chiesto fuori dal coroutine scope
-                                    consentLauncher.launch(consent)
-                                } else {
-                                    val r = vpnManager.start(savedConfig)
-                                    if (r.isFailure) feedback = vpnError
-                                }
-                            } else {
-                                vpnManager.stop()
+                            val pool = userPreferences.getVpnConfigs()
+                            val selStrategy = strategyEnum()
+                            val chosen = vpnManager.selectConfig(pool, selStrategy)
+                            if (chosen == null) {
+                                feedback = "Nessuna configurazione disponibile."
+                                isBusy = false
+                                return@launch
                             }
+                            val consent = vpnManager.getConsentIntent()
+                            if (consent != null) {
+                                pendingStart = chosen
+                                isBusy = false
+                                consentLauncher.launch(consent)
+                                return@launch
+                            }
+                            doStart(chosen, pool, selStrategy)
                             isBusy = false
                         }
                     },
@@ -2691,9 +2810,9 @@ private fun VpnSettings(
                     "Funziona a livello di sistema, quindi copre anche lo streaming video."
             )
             Text(
-                text = "Come ottenere la configurazione: Proton VPN → account.protonvpn.com → " +
-                    "Downloads → WireGuard configuration. Incolla qui il contenuto del file .conf. " +
-                    "Qualsiasi altro provider WireGuard funziona allo stesso modo.",
+                text = "Il \"carico\" reale dei server free non è esposto da Proton: la strategia " +
+                    "\"Più veloce\" misura la latenza di rete verso ogni server, mentre \"A caso\" e " +
+                    "\"A turno\" distribuiscono le connessioni tra i server del pool.",
                 style = MaterialTheme.typography.bodySmall,
                 color = WaveStreamColors.TextTertiary
             )
@@ -2709,17 +2828,17 @@ private fun VpnSettings(
 
     if (showConfigDialog) {
         VpnConfigDialog(
-            initialConfig = savedConfig,
+            initialConfig = "",
             onDismiss = { showConfigDialog = false },
             onSave = { newConfig ->
                 scope.launch {
                     feedback = null
                     try {
                         vpnManager.validateConfig(newConfig)
-                        userPreferences.setVpnConfig(newConfig)
-                        savedConfig = newConfig
+                        userPreferences.addVpnConfig(newConfig)
+                        refreshConfigs()
                         showConfigDialog = false
-                        feedback = "Configurazione salvata."
+                        feedback = "Configurazione aggiunta al pool."
                     } catch (e: Exception) {
                         feedback = "Config non valida: ${e.message ?: "errore"}"
                     }
@@ -2734,9 +2853,12 @@ private fun VpnSettings(
             userPreferences = userPreferences,
             onDismiss = { showQrImport = false },
             onImported = { newConfig ->
-                savedConfig = newConfig
-                feedback = "Configurazione importata dal telefono."
-                showQrImport = false
+                scope.launch {
+                    userPreferences.addVpnConfig(newConfig)
+                    refreshConfigs()
+                    feedback = "Configurazione importata dal telefono."
+                    showQrImport = false
+                }
             }
         )
     }
@@ -2750,8 +2872,8 @@ private fun VpnSettings(
                     feedback = null
                     try {
                         vpnManager.validateConfig(text)
-                        userPreferences.setVpnConfig(text)
-                        savedConfig = text
+                        userPreferences.addVpnConfig(text)
+                        refreshConfigs()
                         feedback = "Configurazione importata dal file."
                         showFilePicker = false
                     } catch (e: Exception) {
@@ -2760,6 +2882,58 @@ private fun VpnSettings(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun VpnConfigPoolRow(
+    label: String,
+    isActive: Boolean,
+    onDelete: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(
+                if (isActive) WaveStreamColors.Accent.copy(alpha = 0.12f)
+                else WaveStreamColors.SurfaceDark
+            )
+            .border(
+                1.dp,
+                if (isActive) WaveStreamColors.Accent else Color.Transparent,
+                RoundedCornerShape(10.dp)
+            )
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Public,
+            contentDescription = null,
+            tint = if (isActive) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
+            modifier = Modifier.size(22.dp)
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = if (isActive) "Server attivo" else "Nel pool",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isActive) WaveStreamColors.Accent else WaveStreamColors.TextTertiary
+            )
+        }
+        IconButton(onClick = onDelete) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Rimuovi",
+                tint = Color.Red
+            )
+        }
     }
 }
 
@@ -2859,7 +3033,6 @@ private fun VpnQrImportDialog(
         if (serverState == VpnImportServer.State.RECEIVED) {
             val cfg = receivedConfig
             if (cfg != null) {
-                userPreferences.setVpnConfig(cfg)
                 server.stopServer()
                 onImported(cfg)
             }
