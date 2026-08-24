@@ -614,6 +614,9 @@ class DetailsActivity : ComponentActivity() {
         
         Log.d(TAG, "Loading series: ${series.name}, tmdbId=${series.tmdbId}")
         
+        contentTitle = series.name
+        currentSeriesId = series.id
+        
         // ===== FAST PATH: show the DB state immediately, no network =====
         // The skeleton disappears right away; TMDB enrichment + episode loading
         // below run afterwards and update the UI in place when they complete.
@@ -646,9 +649,6 @@ class DetailsActivity : ComponentActivity() {
         series = tmdbService.enrichSeriesDetails(series)
         
         Log.d(TAG, "After enrich series: tmdbId=${series.tmdbId}, overview=${series.tmdbOverview?.take(50)}, cast=${series.tmdbCast}")
-        
-        contentTitle = series.name
-        currentSeriesId = series.id
         
         // Check favorite status
         val isFavorite = favoriteDao.getFavorite(profileId, ContentType.SERIES, contentId) != null
