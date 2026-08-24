@@ -3195,9 +3195,10 @@ private fun VpnFilePickerDialog(
                     }
                     files?.isEmpty() == true -> {
                         Text(
-                            text = "Nessun file .conf trovato. Verifica che l'app di trasferimento " +
-                                "salvi i file nella cartella Download, oppure usa \"Importa da file (USB)\" " +
-                                "o \"Importa dal telefono (QR)\".",
+                            text = "Nessun file .conf trovato. Se hai appena copiato il file " +
+                                "(es. con adb push o un'app di trasferimento), chiudi e riapri per " +
+                                "riprovare la scansione. Verifica che il file sia nella cartella " +
+                                "Download, oppure usa \"Importa da file (USB)\" o \"Importa dal telefono (QR)\".",
                             style = MaterialTheme.typography.bodyMedium,
                             color = WaveStreamColors.TextSecondary
                         )
