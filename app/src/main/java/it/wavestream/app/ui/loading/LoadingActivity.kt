@@ -454,7 +454,11 @@ class LoadingActivity : ComponentActivity() {
                             async(Dispatchers.IO) {
                                 try {
                                     val enrichedMovie = tmdbService.enrichMovieDetails(movie)
-                                    if (enrichedMovie.omdbImdbRating == null) {
+                                    // Refresh whenever any rating field is empty (not only imdb)
+                                    if (enrichedMovie.omdbImdbRating == null ||
+                                        enrichedMovie.omdbRottenTomatoesScore == null ||
+                                        enrichedMovie.omdbMetacriticScore == null
+                                    ) {
                                         val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
                                             imdbId = enrichedMovie.tmdbImdbId,
                                             originalTitle = movie.name,
@@ -553,7 +557,11 @@ class LoadingActivity : ComponentActivity() {
                             async(Dispatchers.IO) {
                                 try {
                                     val enrichedSeries = tmdbService.enrichSeriesDetails(series)
-                                    if (enrichedSeries.omdbImdbRating == null) {
+                                    // Refresh whenever any rating field is empty (not only imdb)
+                                    if (enrichedSeries.omdbImdbRating == null ||
+                                        enrichedSeries.omdbRottenTomatoesScore == null ||
+                                        enrichedSeries.omdbMetacriticScore == null
+                                    ) {
                                         val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
                                             imdbId = enrichedSeries.tmdbImdbId,
                                             originalTitle = series.name,

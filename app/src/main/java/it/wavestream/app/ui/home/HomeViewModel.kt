@@ -1008,7 +1008,7 @@ class HomeViewModel @Inject constructor(
                             coroutineScope {
                                 candidateMovies.map { movie ->
                                     async {
-                                        val enrichedMovie = if (movie.omdbImdbRating == null || movie.tmdbTrailerKey == null) {
+                                        val enrichedMovie = if (movie.omdbImdbRating == null || movie.omdbRottenTomatoesScore == null || movie.omdbMetacriticScore == null || movie.tmdbTrailerKey == null) {
                                             try {
                                                 val withTmdb = if (movie.tmdbId == null || movie.tmdbOverview == null || movie.tmdbTrailerKey == null) {
                                                     try { tmdbService.enrichMovieDetails(movie) } catch (e: Exception) { movie }
@@ -1058,7 +1058,7 @@ class HomeViewModel @Inject constructor(
                             coroutineScope {
                                 candidateSeries.map { series ->
                                     async {
-                                        val enrichedSeries = if (series.omdbImdbRating == null || series.tmdbTrailerKey == null) {
+                                        val enrichedSeries = if (series.omdbImdbRating == null || series.omdbRottenTomatoesScore == null || series.omdbMetacriticScore == null || series.tmdbTrailerKey == null) {
                                             try {
                                                 val withTmdb = if (series.tmdbId == null || series.tmdbOverview == null || series.tmdbTrailerKey == null) {
                                                     try { tmdbService.enrichSeriesDetails(series) } catch (e: Exception) { series }
@@ -1173,7 +1173,7 @@ class HomeViewModel @Inject constructor(
         return when {
             rec.localMovie != null && (filterType == ContentType.MOVIE || filterType != ContentType.SERIES) -> {
                 var movie = rec.localMovie!!
-                if (movie.omdbImdbRating == null || movie.tmdbTrailerKey == null) {
+                if (movie.omdbImdbRating == null || movie.omdbRottenTomatoesScore == null || movie.omdbMetacriticScore == null || movie.tmdbTrailerKey == null) {
                     try {
                         if (movie.tmdbId == null || movie.tmdbOverview == null || movie.tmdbTrailerKey == null) {
                             try { movie = tmdbService.enrichMovieDetails(movie) } catch (_: Exception) {}
@@ -1203,7 +1203,7 @@ class HomeViewModel @Inject constructor(
             }
             rec.localSeries != null && (filterType == ContentType.SERIES || filterType != ContentType.MOVIE) -> {
                 var series = rec.localSeries!!
-                if (series.omdbImdbRating == null || series.tmdbTrailerKey == null) {
+                if (series.omdbImdbRating == null || series.omdbRottenTomatoesScore == null || series.omdbMetacriticScore == null || series.tmdbTrailerKey == null) {
                     try {
                         if (series.tmdbId == null || series.tmdbOverview == null || series.tmdbTrailerKey == null) {
                             try { series = tmdbService.enrichSeriesDetails(series) } catch (_: Exception) {}
