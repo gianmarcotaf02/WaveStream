@@ -886,8 +886,10 @@ class TMDBService @Inject constructor(
             return@withContext movie
         }
         
-        // Skip if already enriched recently AND has TMDB data AND has original title (for OMDB fallback) AND has trailer key
-        val hasRealData = movie.tmdbId != null && movie.tmdbOverview != null && movie.tmdbOriginalTitle != null && movie.tmdbTrailerKey != null
+        // Skip if already enriched recently AND has TMDB data AND has original title (for OMDB fallback).
+        // Note: tmdbTrailerKey is intentionally NOT required here: many titles simply have no
+        // trailer, and requiring it forced a full TMDB search pipeline on every detail open.
+        val hasRealData = movie.tmdbId != null && movie.tmdbOverview != null && movie.tmdbOriginalTitle != null
         if (hasRealData && movie.tmdbLastFetchAt != null && 
             System.currentTimeMillis() - movie.tmdbLastFetchAt < 7 * 24 * 60 * 60 * 1000) {  // 7 days cache
             Log.d(TAG, "SKIP: Movie '${movie.name}' already enriched, returning cached (rating=${movie.tmdbVoteAverage})")
@@ -1293,8 +1295,8 @@ class TMDBService @Inject constructor(
      * Uses multiple search strategies for better matching
      */
     suspend fun enrichSeriesDetails(series: Series): Series = withContext(Dispatchers.IO) {
-        // Cache hit: recently searched AND has full data
-        val hasRealData = series.tmdbId != null && series.tmdbOverview != null && series.tmdbTrailerKey != null
+        // Cache hit: recently searched AND has full data (trailer not required, see movie path)
+        val hasRealData = series.tmdbId != null && series.tmdbOverview != null
         if (hasRealData && series.tmdbLastFetchAt != null && 
             System.currentTimeMillis() - series.tmdbLastFetchAt < 24 * 60 * 60 * 1000) {
             Log.d(TAG, "Series '${series.name}' already enriched with data, skipping")
