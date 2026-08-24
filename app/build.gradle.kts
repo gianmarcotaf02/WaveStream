@@ -135,6 +135,9 @@ dependencies {
     // Security
     implementation(libs.security.crypto)
 
+    // WireGuard (in-app VPN)
+    implementation(libs.wireguard.tunnel)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
