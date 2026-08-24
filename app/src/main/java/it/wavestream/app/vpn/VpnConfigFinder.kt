@@ -5,7 +5,9 @@ import android.content.Context
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
+import android.util.Log
 import java.io.File
 
 /**
@@ -33,6 +35,8 @@ data class FoundConfig(
  */
 object VpnConfigFinder {
 
+    private const val TAG = "VpnConfigFinder"
+
     private val KNOWN_DIRS = listOf(
         "/storage/emulated/0/Download",
         "/storage/emulated/0/Downloads",
@@ -45,12 +49,22 @@ object VpnConfigFinder {
         "/storage/emulated/0/SendFilestoTV"
     )
 
+    /** Vero se l'app può leggere la memoria condivisa in modo diretto (API 30+). */
+    fun hasAllFilesAccess(context: Context): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Environment.isExternalStorageManager()
+        } else {
+            true
+        }
+
     fun findConfigFiles(context: Context): List<FoundConfig> {
+        Log.d(TAG, "findConfigFiles: sdk=${Build.VERSION.SDK_INT} allFilesAccess=${hasAllFilesAccess(context)}")
         val results = LinkedHashMap<String, FoundConfig>()
 
         // 0) Scansione diretta delle cartelle note (istantanea; funziona dove l'accesso
         //    al percorso è consentito: storage legacy, cartelle app, API <= 28)
         scanKnownDirectories(results)
+        Log.d(TAG, "direct scan -> ${results.size} file")
 
         // 1) Forza l'indicizzazione MediaStore dei file appena copiati (es. adb push,
         //    Send Files to TV, download): senza questo i file nuovi non compaiono subito.
@@ -77,14 +91,22 @@ object VpnConfigFinder {
         } catch (_: Throwable) {
         }
 
+        Log.d(TAG, "total found -> ${results.size} file")
         return results.values.toList()
     }
 
     private fun scanKnownDirectories(results: MutableMap<String, FoundConfig>) {
         for (dirPath in KNOWN_DIRS) {
             val dir = File(dirPath)
-            if (!dir.exists() || !dir.isDirectory) continue
-            val files = dir.listFiles() ?: continue
+            if (!dir.exists() || !dir.isDirectory) {
+                Log.d(TAG, "dir non presente: $dirPath")
+                continue
+            }
+            val files = dir.listFiles()
+            if (files == null) {
+                Log.d(TAG, "listFiles null (accesso negato?): $dirPath")
+                continue
+            }
             for (f in files) {
                 if (f.isFile && f.name.lowercase().endsWith(".conf")) {
                     results[f.absolutePath] = FoundConfig(
@@ -103,6 +125,7 @@ object VpnConfigFinder {
         uri: Uri,
         results: MutableMap<String, FoundConfig>
     ) {
+        var count = 0
         val projection = arrayOf(
             MediaStore.Files.FileColumns._ID,
             MediaStore.Files.FileColumns.DISPLAY_NAME,
@@ -115,6 +138,7 @@ object VpnConfigFinder {
             val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME)
             val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DATA)
             while (cursor.moveToNext()) {
+                count++
                 val id = cursor.getLong(idCol)
                 val name = cursor.getString(nameCol) ?: continue
                 val path = cursor.getString(dataCol)
@@ -129,6 +153,7 @@ object VpnConfigFinder {
                 )
             }
         }
+        Log.d(TAG, "MediaStore $uri -> $count righe")
     }
 
     /** Legge il contenuto del file selezionato (prova percorso diretto, poi MediaStore). */
