@@ -28,6 +28,23 @@ class ImdbRatingsRepository @Inject constructor(
         private const val TAG = "ImdbRatings"
         private const val CACHE_DURATION_MS = 24 * 60 * 60 * 1000L // 24 hours
         private const val DEFAULT_API_KEY = "85ba6cc1" // Default OMDB API key
+        
+        // Release/quality/language tags found in playlist titles.
+        // Matched ONLY as whole words (see cleanTitleForOmdb) so real title
+        // words like "Cats" (TS), "Italian" (ITA), "English" (ENG), "Submarine" (SUB)
+        // are never corrupted. Longest-first ordering matters for multi-word tags.
+        private val RELEASE_TAGS = listOf(
+            "4K", "UHD", "2160p", "FHD", "1080p", "1080i",
+            "HD", "720p", "SD", "480p",
+            "HDR10+", "HDR10", "HDR", "Dolby Vision", "DV",
+            "HEVC", "H265", "H264", "x265", "x264",
+            "WEB-DL REMUX", "WEB-DL", "WEBDL", "WEBRip", "WEBRIP", "REMUX", "HDTV", "PDTV",
+            "BluRay", "BLU-RAY", "BLURAY", "BDRip", "BRRip",
+            "DVDRip", "DVDR", "CAM", "TS", "HDTS", "REPACK", "PROPER",
+            "ITA", "ENG", "MULTI", "SUB", "SUBBED", "AC3", "EAC3", "DTS", "AAC", "ATMOS",
+            "EXTENDED CUT", "UNRATED CUT", "EXTENDED", "UNRATED",
+            "DIRECTOR'S CUT", "DIRECTORS CUT", "REMASTERED"
+        )
     }
     
     private val api: OmdbService
@@ -389,6 +406,9 @@ class ImdbRatingsRepository @Inject constructor(
         // 5) Trailing bare year (not parenthesized): "Dune Part Two 2024" -> "Dune Part Two"
         //    The leading separator requirement keeps real titles like "1984" or "1917" intact.
         cleaned = cleaned.replace(Regex("""[\s.]+(?:19|20)\d{2}[\s.]*$"""), " ")
+        
+        // 5b) Trailing scene-release group: "x264-AMIABLE", "Webrip-GROUP" -> removed
+        cleaned = cleaned.replace(Regex("""\s*-\s*[A-Za-z0-9.]{2,15}$"""), " ")
         
         // 6) Collapse whitespace and drop trailing separators
         cleaned = cleaned.replace(Regex("""\s*[-|:]+\s*$"""), "")

@@ -1017,7 +1017,8 @@ class HomeViewModel @Inject constructor(
                                                     imdbRatingsRepository.getRatingsByImdbId(imdbId)
                                                 } ?: imdbRatingsRepository.getRatingsByTitle(
                                                     withTmdb.tmdbOriginalTitle ?: withTmdb.title,
-                                                    withTmdb.year
+                                                    withTmdb.year,
+                                                    "movie"
                                                 )
                                                 if (ratings != null) {
                                                     val withRatings = withTmdb.copy(
@@ -1181,7 +1182,8 @@ class HomeViewModel @Inject constructor(
                             imdbRatingsRepository.getRatingsByImdbId(imdbId)
                         } ?: imdbRatingsRepository.getRatingsByTitle(
                             movie.tmdbOriginalTitle ?: movie.title,
-                            movie.year
+                            movie.year,
+                            "movie"
                         )
                         if (ratings != null) {
                             movie = movie.copy(
