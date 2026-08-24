@@ -49,6 +49,25 @@ class VpnManager @Inject constructor(
         const val TUNNEL_NAME = "WaveStream VPN"
         private const val ALLOWED_KEY = "IncludedApplications"
         private const val EXCLUDED_KEY = "ExcludedApplications"
+
+        /**
+         * Divide testo che contiene più config wg-quick (ognuna inizia con [Interface]).
+         * Utile per incollare più server in un'unica volta.
+         */
+        fun splitConfigs(text: String): List<String> {
+            if (text.isBlank()) return emptyList()
+            val parts = mutableListOf<String>()
+            val current = StringBuilder()
+            for (line in text.lines()) {
+                if (line.trim().equals("[Interface]", ignoreCase = true) && current.isNotBlank()) {
+                    parts.add(current.toString().trim())
+                    current.setLength(0)
+                }
+                current.append(line).append('\n')
+            }
+            if (current.isNotBlank()) parts.add(current.toString().trim())
+            return parts
+        }
     }
 
     private val backend = GoBackend(context)

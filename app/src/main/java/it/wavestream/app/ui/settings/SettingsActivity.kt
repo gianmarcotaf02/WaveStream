@@ -2833,14 +2833,31 @@ private fun VpnSettings(
             onSave = { newConfig ->
                 scope.launch {
                     feedback = null
-                    try {
-                        vpnManager.validateConfig(newConfig)
-                        userPreferences.addVpnConfig(newConfig)
+                    val parts = VpnManager.splitConfigs(newConfig)
+                    if (parts.isEmpty()) {
+                        feedback = "Nessuna configurazione valida nel testo."
+                        return@launch
+                    }
+                    var added = 0
+                    var firstError: String? = null
+                    for (part in parts) {
+                        try {
+                            vpnManager.validateConfig(part)
+                            userPreferences.addVpnConfig(part)
+                            added++
+                        } catch (e: Exception) {
+                            if (firstError == null) firstError = e.message
+                        }
+                    }
+                    if (added > 0) {
                         refreshConfigs()
                         showConfigDialog = false
-                        feedback = "Configurazione aggiunta al pool."
-                    } catch (e: Exception) {
-                        feedback = "Config non valida: ${e.message ?: "errore"}"
+                        feedback = if (added == parts.size)
+                            "$added configurazioni aggiunte al pool."
+                        else
+                            "$added di ${parts.size} configurazioni aggiunte."
+                    } else {
+                        feedback = "Config non valida: ${firstError ?: "errore"}"
                     }
                 }
             }
@@ -2870,14 +2887,28 @@ private fun VpnSettings(
             onSelected = { text ->
                 scope.launch {
                     feedback = null
-                    try {
-                        vpnManager.validateConfig(text)
-                        userPreferences.addVpnConfig(text)
+                    val parts = VpnManager.splitConfigs(text)
+                    if (parts.isEmpty()) {
+                        feedback = "File vuoto o non valido."
+                        return@launch
+                    }
+                    var added = 0
+                    var firstError: String? = null
+                    for (part in parts) {
+                        try {
+                            vpnManager.validateConfig(part)
+                            userPreferences.addVpnConfig(part)
+                            added++
+                        } catch (e: Exception) {
+                            if (firstError == null) firstError = e.message
+                        }
+                    }
+                    if (added > 0) {
                         refreshConfigs()
-                        feedback = "Configurazione importata dal file."
+                        feedback = "$added configurazioni importate dal file."
                         showFilePicker = false
-                    } catch (e: Exception) {
-                        feedback = "File non valido: ${e.message ?: "errore"}"
+                    } else {
+                        feedback = "File non valido: ${firstError ?: "errore"}"
                     }
                 }
             }
@@ -2971,6 +3002,12 @@ private fun VpnConfigDialog(
                     text = "Formato wg-quick, es.:\n[Interface]\nPrivateKey = ...\nAddress = 10.2.0.2/32\nDNS = 10.2.0.1\n\n[Peer]\nPublicKey = ...\nAllowedIPs = 0.0.0.0/0\nEndpoint = it1-wg.letsvpn.net:51820",
                     style = MaterialTheme.typography.bodySmall,
                     color = WaveStreamColors.TextTertiary
+                )
+                Text(
+                    text = "Puoi incollare PIÙ configurazioni (più server) una dopo l'altra: " +
+                        "verranno riconosciute automaticamente e aggiunte tutte al pool.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WaveStreamColors.Accent
                 )
             }
         },
