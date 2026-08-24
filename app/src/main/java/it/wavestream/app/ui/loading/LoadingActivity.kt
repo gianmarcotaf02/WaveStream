@@ -204,6 +204,14 @@ class LoadingActivity : ComponentActivity() {
                             Log.e("LoadingActivity", "Background refresh error", e)
                         }
                     }
+                    
+                    // Preload all 3 tabs into ContentCache (idempotent — skips cached tabs).
+                    // Needed in BOTH paths: after a playlist refresh the session cache is
+                    // invalidated, so without this the home would rebuild lazily (slow TMDB
+                    // enrichment inline) and show the skeleton for a long time.
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
                 } else {
                     // Force refresh: sync playlist in foreground
                     val autoUpdateEnabled = userPreferences.getPlaylistAutoUpdate()
