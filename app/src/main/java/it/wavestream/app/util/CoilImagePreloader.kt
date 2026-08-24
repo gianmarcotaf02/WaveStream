@@ -1,6 +1,7 @@
 package it.wavestream.app.util
 
 import android.content.Context
+import coil.Coil
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.size.Size
@@ -15,34 +16,35 @@ import coil.size.Precision
  *
  * Enqueues non-blocking preload requests so images are already
  * in Coil's memory/disk cache when the UI needs them.
- * Throttled to 3 concurrent requests to avoid flooding the network.
  */
 @Singleton
 class CoilImagePreloader @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    // IMPORTANT: use the SAME app-wide ImageLoader (WaveStreamImageLoaderFactory,
+    // registered via Coil.setImageLoader in WaveStreamApplication). A separate
+    // ImageLoader(context) instance would populate a different cache than the UI
+    // reads from, making preloading useless.
     private val imageLoader: ImageLoader by lazy {
-        ImageLoader(context) // Uses the app-level factory via ImageLoaderFactory
+        Coil.imageLoader(context)
     }
 
     /**
      * Preload a list of image URLs into Coil's cache.
-     * Throttled to 3 concurrent requests to avoid network flooding.
+     * enqueue() returns immediately — OkHttp (max 5 concurrent requests per host)
+     * already throttles the network, so no manual batching is needed here.
      */
     fun preloadImages(urls: List<String?>, targetSize: Size = Size.ORIGINAL) {
         val filtered = urls.filterNotNull().filter { it.isNotBlank() }
-        // Chunk into batches of 3 — sequential batches give network time to respond
-        filtered.chunked(3).forEach { batch ->
-            batch.forEach { url ->
-                val request = ImageRequest.Builder(context)
-                    .data(url)
-                    .size(targetSize)
-                    .precision(Precision.INEXACT)
-                    .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
-                    .diskCachePolicy(coil.request.CachePolicy.ENABLED)
-                    .build()
-                imageLoader.enqueue(request)
-            }
+        filtered.forEach { url ->
+            val request = ImageRequest.Builder(context)
+                .data(url)
+                .size(targetSize)
+                .precision(Precision.INEXACT)
+                .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                .build()
+            imageLoader.enqueue(request)
         }
     }
 
