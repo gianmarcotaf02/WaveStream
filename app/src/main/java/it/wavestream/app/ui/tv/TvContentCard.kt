@@ -27,6 +27,7 @@ import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import it.wavestream.app.R
 import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.theme.WaveStreamColors
@@ -54,8 +55,10 @@ fun TvContentCard(
     var isFocused by remember { mutableStateOf(false) }
 
     // Painter created once and reused for both placeholder and error states
-    // (avoid re-creating two painters on every recomposition of each card)
-    val placeholderPainter = remember { coil.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster) }
+    // (avoid re-creating two painters on every recomposition of each card).
+    // rememberAsyncImagePainter is already @Composable-memoized internally,
+    // so it must NOT be wrapped in remember {} (illegal composable call).
+    val placeholderPainter = rememberAsyncImagePainter(R.drawable.placeholder_poster)
 
     // Single focus progress 0..1 — all visual properties are derived from this one animation
     // instead of running 4 separate animateFloatAsState / animateDpAsState, which on TVs with

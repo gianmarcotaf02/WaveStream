@@ -729,7 +729,8 @@ private fun EpgChannelRow(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             // Pre-compose one page of program blocks ahead when scrolling the timeline
-            beyondViewportPageCount = 1
+            // (beyondBoundsItemCount is the LazyRow param; beyondViewportPageCount is Pager-only)
+            beyondBoundsItemCount = 1
         ) {
             if (programs.isEmpty()) {
                 item {
