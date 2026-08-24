@@ -136,6 +136,18 @@ class PlaylistRepository @Inject constructor(
                 val content = downloadContent(playlist.url)
                 val result = m3uParser.parseContent(content, playlistId)
                 
+                // SAFETY GUARD: don't wipe content if the M3U parses to nothing
+                // (dead URL, changed format, ...) while the DB still has content.
+                if (result.channels.isEmpty() && result.movies.isEmpty() && result.series.isEmpty()) {
+                    val hasExisting = movieDao.getAllMoviesList().any { it.playlistId == playlistId } ||
+                        seriesDao.getAllSeriesList().any { it.playlistId == playlistId } ||
+                        channelDao.getAllChannelsList().any { it.playlistId == playlistId }
+                    if (hasExisting) {
+                        Log.e(TAG, "refreshPlaylist M3U ABORTED: empty parse while DB has content — refusing to wipe")
+                        throw Exception("M3U vuota o non valida: refresh annullato per non perdere i contenuti")
+                    }
+                }
+                
                 movieDao.deleteByPlaylist(playlistId)
                 seriesDao.deleteByPlaylist(playlistId)
                 channelDao.deleteByPlaylist(playlistId)
@@ -532,6 +544,19 @@ class PlaylistRepository @Inject constructor(
                 Log.d(TAG, "refreshXtreamContent DIAGNOSTIC: first 3 series: ${seriesList.take(3).map { "${it.name} (id=${it.id}, cat=${it.categoryId})" }}")
             }
 
+            // SAFETY GUARD: if the API returned empty lists everywhere while the DB
+            // still has content for this playlist, abort instead of wiping everything
+            // (e.g. expired credentials, empty response, server error).
+            if (liveStreams.isEmpty() && vodStreams.isEmpty() && seriesList.isEmpty()) {
+                val hasExistingContent = channelDao.getAllChannelsList().any { it.playlistId == playlistId } ||
+                    movieDao.getAllMoviesList().any { it.playlistId == playlistId } ||
+                    seriesDao.getAllSeriesList().any { it.playlistId == playlistId }
+                if (hasExistingContent) {
+                    Log.e(TAG, "refreshXtreamContent ABORTED: API empty (channels=${liveStreams.size}, vod=${vodStreams.size}, series=${seriesList.size}) but DB has content — refusing to wipe")
+                    throw Exception("API Xtream ha risposto vuota: refresh annullato per non perdere i contenuti")
+                }
+            }
+            
             categoryDao.deleteByPlaylistAndType(playlistId, CategoryType.LIVE_TV)
             channelDao.deleteByPlaylist(playlistId)
             val liveCategoryMap = liveCategories.associate { it.id to it.name }
