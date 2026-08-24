@@ -389,7 +389,23 @@ class DetailsActivity : ComponentActivity() {
     }
     
     private suspend fun loadMovie(onStateUpdate: (DetailsState) -> Unit) {
-        val movie = movieDao.getMovieById(contentId) ?: return
+        Log.d(TAG, "loadMovie: contentId=$contentId, contentType=$contentType")
+        val movie = movieDao.getMovieById(contentId)
+        if (movie == null) {
+            // Content not found in DB (stale id, wrong content_type, cleared DB, ...):
+            // NEVER leave the skeleton up — show the intent-provided title instead.
+            Log.w(TAG, "loadMovie: movie NOT FOUND for contentId=$contentId, showing intent state")
+            onStateUpdate(
+                DetailsState(
+                    title = intentTitle,
+                    posterUrl = intentPosterUrl,
+                    backdropUrl = intentBackdropUrl,
+                    contentType = ContentType.MOVIE,
+                    isLoading = false
+                )
+            )
+            return
+        }
         
         Log.d(TAG, "Loading movie: ${movie.name}, xtreamStreamId=${movie.xtreamStreamId}")
         
@@ -623,7 +639,22 @@ class DetailsActivity : ComponentActivity() {
     }
     
     private suspend fun loadSeries(onStateUpdate: (DetailsState) -> Unit) {
-        var series = seriesDao.getSeriesById(contentId) ?: return
+        Log.d(TAG, "loadSeries: contentId=$contentId, contentType=$contentType")
+        var series = seriesDao.getSeriesById(contentId)
+        if (series == null) {
+            // Content not found in DB: NEVER leave the skeleton up — show intent state.
+            Log.w(TAG, "loadSeries: series NOT FOUND for contentId=$contentId, showing intent state")
+            onStateUpdate(
+                DetailsState(
+                    title = intentTitle,
+                    posterUrl = intentPosterUrl,
+                    backdropUrl = intentBackdropUrl,
+                    contentType = ContentType.SERIES,
+                    isLoading = false
+                )
+            )
+            return
+        }
         
         Log.d(TAG, "Loading series: ${series.name}, tmdbId=${series.tmdbId}")
         
