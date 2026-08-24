@@ -73,7 +73,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -201,17 +200,11 @@ private fun TvHomeScreenContent(
     modifier: Modifier = Modifier
 ) {
     val columnListState = rememberTvLazyListState()
-    @Suppress("UNUSED_VARIABLE") // kept for future focus management
-    val focusManager = LocalFocusManager.current
     
-    // No change neededsters for each carousel row
+    // Focus requesters for each carousel row
     val rowFocusRequesters = remember(state.carouselRows.size) {
         List(state.carouselRows.size) { FocusRequester() }
     }
-    
-    // First row focus requester for TOP -> content navigation
-    @Suppress("UNUSED_VARIABLE") // kept for future TOP -> content navigation
-    val firstRowFocusRequester = remember { FocusRequester() }
     
     Box(
         modifier = modifier
@@ -226,8 +219,7 @@ private fun TvHomeScreenContent(
             val items = state.carouselRows.first().items
             val categoryTitle = state.selectedCategory ?: state.carouselRows.first().title
             
-            // Track grid state for proper UP navigation
-            val gridState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+            // Back button focus for UP navigation
             val backButtonFocusRequester = remember { FocusRequester() }
             
             Column(
