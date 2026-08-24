@@ -403,12 +403,13 @@ class ImdbRatingsRepository @Inject constructor(
         // 4) Dot-separated playlist titles: The.Irishman.2019.1080p -> The Irishman 2019 1080p
         cleaned = cleaned.replace(Regex("""(?<=[A-Za-z0-9])\.(?=[A-Za-z0-9])"""), " ")
         
-        // 5) Trailing bare year (not parenthesized): "Dune Part Two 2024" -> "Dune Part Two"
+        // 5) Trailing scene-release group: "x264-AMIABLE", "Webrip-GROUP" -> removed
+        //    (done before the year strip so the year becomes truly trailing)
+        cleaned = cleaned.replace(Regex("""\s*-\s*[A-Za-z0-9.]{2,15}$"""), " ")
+        
+        // 5b) Trailing bare year (not parenthesized): "Dune Part Two 2024" -> "Dune Part Two"
         //    The leading separator requirement keeps real titles like "1984" or "1917" intact.
         cleaned = cleaned.replace(Regex("""[\s.]+(?:19|20)\d{2}[\s.]*$"""), " ")
-        
-        // 5b) Trailing scene-release group: "x264-AMIABLE", "Webrip-GROUP" -> removed
-        cleaned = cleaned.replace(Regex("""\s*-\s*[A-Za-z0-9.]{2,15}$"""), " ")
         
         // 6) Collapse whitespace and drop trailing separators
         cleaned = cleaned.replace(Regex("""\s*[-|:]+\s*$"""), "")
