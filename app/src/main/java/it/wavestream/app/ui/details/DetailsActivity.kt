@@ -492,14 +492,19 @@ class DetailsActivity : ComponentActivity() {
         
         onStateUpdate(state)
         
-        // Check if OMDB ratings need refresh (null or older than 7 days)
-        // Lazy Loading per OMDB: only activate if data is absent in levels 1, 2, 3 (no rating available)
-        val hasAnyPrimaryRating = enrichedMovie.rating != null
-        val needsOmdbRefresh = !hasAnyPrimaryRating && (enrichedMovie.omdbLastFetchAt == null || 
-            System.currentTimeMillis() - enrichedMovie.omdbLastFetchAt > 7 * 24 * 60 * 60 * 1000)
+        // Refresh OMDB whenever any rating field is empty: an empty imdb/RT/metacritic
+        // means the last attempt produced no data, so we retry instead of trusting the
+        // cache. The 7-day cache applies only to content that already HAS ratings.
+        val hasAnyOmdbRating = enrichedMovie.omdbImdbRating != null ||
+            enrichedMovie.omdbRottenTomatoesScore != null ||
+            enrichedMovie.omdbMetacriticScore != null
+        val needsOmdbRefresh = !hasAnyOmdbRating ||
+            (enrichedMovie.omdbLastFetchAt?.let { lastFetch ->
+                System.currentTimeMillis() - lastFetch > 7 * 24 * 60 * 60 * 1000
+            } ?: false)
         
         if (needsOmdbRefresh) {
-            Log.d("ImdbRatings", "OMDB refresh needed! hasAnyPrimaryRating=$hasAnyPrimaryRating, lastFetch=${enrichedMovie.omdbLastFetchAt}")
+            Log.d("ImdbRatings", "OMDB refresh needed! hasAnyOmdbRating=$hasAnyOmdbRating, lastFetch=${enrichedMovie.omdbLastFetchAt}")
             Log.d("ImdbRatings", "IMDB ID: ${enrichedMovie.tmdbImdbId}, English title: tmdbTitle=${enrichedMovie.tmdbTitle}, tmdbOriginalTitle=${enrichedMovie.tmdbOriginalTitle}")
             loadImdbRatings(
                 title = movie.name, 
@@ -736,12 +741,14 @@ class DetailsActivity : ComponentActivity() {
         
         onStateUpdate(state)
         
-        // Check if OMDB ratings need refresh (null or older than 24 hours)
-        // Lazy Loading per OMDB: only activate if data is absent in levels 1, 2, 3 (no rating available)
-        val hasAnyPrimaryRating = series.rating != null
-        val lastFetch = series.omdbLastFetchAt
-        val needsOmdbRefresh = !hasAnyPrimaryRating && (lastFetch == null || 
-            System.currentTimeMillis() - lastFetch > 24 * 60 * 60 * 1000)
+        // Refresh OMDB whenever any rating field is empty (same rule as movies above).
+        val hasAnyOmdbRating = series.omdbImdbRating != null ||
+            series.omdbRottenTomatoesScore != null ||
+            series.omdbMetacriticScore != null
+        val needsOmdbRefresh = !hasAnyOmdbRating ||
+            (series.omdbLastFetchAt?.let { lastFetch ->
+                System.currentTimeMillis() - lastFetch > 7 * 24 * 60 * 60 * 1000
+            } ?: false)
         
         if (needsOmdbRefresh) {
             loadImdbRatings(
