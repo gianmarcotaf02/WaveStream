@@ -2610,7 +2610,7 @@ private fun VpnSettings(
                 enabled = !isBusy,
                 colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
             ) {
-                Icon(Icons.Default.Paste, contentDescription = null, modifier = Modifier.size(20.dp))
+                Icon(Icons.Default.ContentPaste, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(if (hasConfig) "Modifica configurazione" else "Incolla configurazione WireGuard")
             }

@@ -567,6 +567,10 @@ class UserPreferences @Inject constructor(
         dataStore.edit { it[TERMS_ACCEPTED] = accepted }
     }
 
+    suspend fun isTermsAccepted(): Boolean {
+        return dataStore.data.first()[TERMS_ACCEPTED] ?: false
+    }
+
     // In-app VPN (WireGuard)
     suspend fun setVpnConfig(config: String) {
         dataStore.edit { it[VPN_CONFIG] = config }

@@ -75,7 +75,7 @@ class VpnImportServer(
         val config = try {
             val files = HashMap<String, String>()
             session.parseBody(files)
-            session.parms["config"] ?: files[POST_DATA]
+            session.parms["config"] ?: files["postData"]
         } catch (e: Exception) {
             null
         }
