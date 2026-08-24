@@ -3,6 +3,7 @@ package it.wavestream.app.vpn
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
 import java.io.File
 
@@ -46,16 +47,18 @@ object VpnConfigFinder {
     fun findConfigFiles(context: Context): List<FoundConfig> {
         val results = LinkedHashMap<String, FoundConfig>()
 
-        // 1) MediaStore.Downloads
-        try {
-            queryMediaStore(context, MediaStore.Downloads.EXTERNAL_CONTENT_URI, results)
-        } catch (_: Exception) {
+        // 1) MediaStore.Downloads (solo API 29+; su API < 29 la classe non esiste)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            try {
+                queryMediaStore(context, MediaStore.Downloads.EXTERNAL_CONTENT_URI, results)
+            } catch (_: Throwable) {
+            }
         }
 
         // 2) MediaStore.Files (fallback)
         try {
             queryMediaStore(context, MediaStore.Files.getContentUri("external"), results)
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
         }
 
         // 3) Scansione diretta
@@ -123,7 +126,7 @@ object VpnConfigFinder {
             } else {
                 null
             }
-        } catch (_: Exception) {
+        } catch (_: Throwable) {
             null
         }
     }
