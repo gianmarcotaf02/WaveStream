@@ -90,6 +90,10 @@ class WaveStreamApplication : Application() {
                 SyncWorker.updateSchedules(this@WaveStreamApplication, userPreferences)
             } catch (_: Exception) { }
         }
+
+        // Periodic WAL checkpoint: guarantees playlist/watch data survives sudden
+        // TV power-off, not only onTrimMemory/onLowMemory callbacks
+        checkpointManager.startPeriodicCheckpoint()
     }
 
     override fun onTrimMemory(level: Int) {
