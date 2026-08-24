@@ -727,10 +727,9 @@ private fun EpgChannelRow(
         // Programs timeline (horizontal lazy row - only composes visible items)
         LazyRow(
             modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            // Pre-compose one page of program blocks ahead when scrolling the timeline
-            // (beyondBoundsItemCount is the LazyRow param; beyondViewportPageCount is Pager-only)
-            beyondBoundsItemCount = 1
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+            // Nota: beyondViewportPageCount/beyondBoundsItemCount non esistono su
+            // LazyRow in foundation 1.6.1 (beyondBoundsItemCount è arrivato in 1.7+)
         ) {
             if (programs.isEmpty()) {
                 item {
