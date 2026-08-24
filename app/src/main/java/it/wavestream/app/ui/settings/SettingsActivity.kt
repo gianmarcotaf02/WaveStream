@@ -1,9 +1,12 @@
 package it.wavestream.app.ui.settings
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -62,6 +65,8 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import it.wavestream.app.ui.theme.AccentColor
 import it.wavestream.app.ui.profile.getAvatarResource
 import it.wavestream.app.ui.profile.getAvatarIcon
+import it.wavestream.app.vpn.VpnManager
+import com.wireguard.android.backend.Tunnel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -87,6 +92,7 @@ class SettingsActivity : ComponentActivity() {
     @Inject lateinit var epgRepository: it.wavestream.app.data.repository.EpgRepository
     @Inject lateinit var appUpdateManager: it.wavestream.app.update.AppUpdateManager
     @Inject lateinit var openSubtitlesRepository: it.wavestream.app.data.repository.OpenSubtitlesRepository
+    @Inject lateinit var vpnManager: VpnManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,6 +132,7 @@ class SettingsActivity : ComponentActivity() {
             SettingsMenuItem("epg", "Guida TV (EPG)", "Aggiornamento guida programmi", Icons.Default.Tv),
             SettingsMenuItem("appearance", "Aspetto", "Tema e visualizzazione", Icons.Default.Palette),
             SettingsMenuItem("storage", "Archiviazione", "Cache e dati", Icons.Default.Storage),
+            SettingsMenuItem("vpn", "VPN in-app", "WireGuard · solo WaveStream", Icons.Default.Shield),
             SettingsMenuItem("updates", "Aggiornamenti", "Controlla nuove versioni", Icons.Default.SystemUpdate),
             SettingsMenuItem("about", "Informazioni", "Info sull'app", Icons.Default.Info),
             SettingsMenuItem("logout", "Disconnetti", "Esci dall'account", Icons.AutoMirrored.Filled.ExitToApp, isDestructive = true)
@@ -168,6 +175,7 @@ class SettingsActivity : ComponentActivity() {
                     "epg" -> EpgSettings(userPreferences, epgRepository, playlistDao, contentFocusRequester)
                     "appearance" -> AppearanceSettings(userPreferences)
                     "storage" -> StorageSettings(profileDao, playlistDao, userPreferences)
+                    "vpn" -> VpnSettings(userPreferences, vpnManager, contentFocusRequester)
                     "updates" -> UpdateSettings(appUpdateManager, contentFocusRequester)
                     "about" -> AboutSettings()
                     else -> {
