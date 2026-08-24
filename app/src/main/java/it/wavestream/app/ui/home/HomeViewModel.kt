@@ -538,37 +538,36 @@ class HomeViewModel @Inject constructor(
                 }
             }
             
-            val contentDeferred = async(Dispatchers.IO) {
+            // Stage 1: fast rows only (DB/cache — no TMDB network). Shown immediately
+            // so the skeleton disappears; recommendations / genre carousels (TMDB)
+            // and heroes fill in afterwards in the background.
+            val fastContentDeferred = async(Dispatchers.IO) {
                 try {
                     val contentRows = mutableListOf<CarouselRow>()
                     when (contentType) {
-                        HomeContentType.HOME -> loadHomeContent(contentRows)
-                        HomeContentType.MOVIES -> loadMoviesContent(contentRows)
-                        HomeContentType.SERIES -> loadSeriesContent(contentRows)
+                        HomeContentType.HOME -> loadHomeContent(contentRows, fastOnly = true)
+                        HomeContentType.MOVIES -> loadMoviesContent(contentRows, fastOnly = true)
+                        HomeContentType.SERIES -> loadSeriesContent(contentRows, fastOnly = true)
+                        // Secondary tabs have no slow parts worth deferring
                         HomeContentType.FAVORITES -> loadFavoritesContent(contentRows)
                         HomeContentType.LISTS -> loadListsContent(contentRows)
                         HomeContentType.HISTORY -> loadHistoryContent(contentRows)
                     }
                     contentRows
                 } catch (e: Exception) {
-                    Log.e("HomeViewModel", "Error loading rows for $contentType", e)
+                    Log.e("HomeViewModel", "Error loading fast rows for $contentType", e)
                     emptyList<CarouselRow>()
                 }
             }
             
-            // Wait for both results
-            val heroResult = heroDeferred.await()
-            val loadedRows = contentDeferred.await()
-            rows.addAll(loadedRows)
+            val fastRows = fastContentDeferred.await()
+            rows.addAll(fastRows)
             
-            // Cache the loaded data for HOME, MOVIES and SERIES
+            // Cache the fast rows immediately: even if the slow parts never finish,
+            // a restart (or the LoadingActivity preload) shows content instantly.
             if (contentType == HomeContentType.HOME || contentType == HomeContentType.MOVIES || contentType == HomeContentType.SERIES) {
                 cachedCarouselRows[contentType] = rows.toList()
-                cachedCarouselRowsTime[contentType] = System.currentTimeMillis() // stamp when built
-                if (heroResult != null) {
-                    cachedHeroItems[contentType] = heroResult
-                }
-                Log.d("HomeViewModel", "Cached content for $contentType: ${rows.size} rows, ${heroResult?.heroes?.size ?: 0} heroes")
+                cachedCarouselRowsTime[contentType] = System.currentTimeMillis()
             }
             
             // Only update UI if we're still on the same tab
@@ -576,7 +575,7 @@ class HomeViewModel @Inject constructor(
                 Log.w("HomeViewModel", "loadContent: $contentType SKIPPED — tab changed to $currentContentType")
                 return@launch
             }
-            Log.d("HomeViewModel", "loadContent: $contentType UPDATING UI — ${rows.size} rows: ${rows.map { it.title }}")
+            Log.d("HomeViewModel", "loadContent: $contentType SHOWING FAST ROWS — ${rows.size} rows")
             _uiState.update { 
                 it.copy(
                     isLoading = false,
@@ -588,14 +587,62 @@ class HomeViewModel @Inject constructor(
                     isFavoritesTab = contentType == HomeContentType.FAVORITES,
                     isHistoryTab = contentType == HomeContentType.HISTORY,
                     isHomeTab = contentType == HomeContentType.HOME,
-                    // Hero state
-                    heroItems = heroResult?.heroes ?: emptyList(),
+                    heroItems = emptyList(),
                     currentHeroIndex = 0,
-                    isContinueWatchingHero = heroResult?.isContinueWatching ?: false
+                    isContinueWatchingHero = false
                 )
             }
-            // Warm Coil caches with visible posters + hero backdrops (non-blocking)
-            preloadContentImages(rows, heroResult?.heroes ?: emptyList())
+            preloadContentImages(rows, emptyList())
+            
+            // Stage 2: full rows (adds recommendations / genre carousels / category rows).
+            // Only the cached tabs need the second pass — secondary tabs already got everything.
+            if (contentType == HomeContentType.HOME || contentType == HomeContentType.MOVIES || contentType == HomeContentType.SERIES) {
+                val fullContentDeferred = async(Dispatchers.IO) {
+                    try {
+                        val contentRows = mutableListOf<CarouselRow>()
+                        when (contentType) {
+                            HomeContentType.HOME -> loadHomeContent(contentRows)
+                            HomeContentType.MOVIES -> loadMoviesContent(contentRows)
+                            HomeContentType.SERIES -> loadSeriesContent(contentRows)
+                            else -> contentRows
+                        }
+                        contentRows
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error loading full rows for $contentType", e)
+                        emptyList<CarouselRow>()
+                    }
+                }
+                val fullRows = fullContentDeferred.await()
+                rows.clear()
+                rows.addAll(fullRows)
+                
+                // Refresh the cache with the complete rows
+                cachedCarouselRows[contentType] = rows.toList()
+                cachedCarouselRowsTime[contentType] = System.currentTimeMillis()
+                
+                if (currentContentType == contentType) {
+                    Log.d("HomeViewModel", "loadContent: $contentType FULL ROWS — ${rows.size} rows")
+                    _uiState.update { it.copy(carouselRows = rows) }
+                    preloadContentImages(rows, emptyList())
+                }
+            }
+            
+            // Stage 3: heroes (may include slow TMDB/OMDB enrichment) — update in place
+            val heroResult = heroDeferred.await()
+            if (heroResult != null && (contentType == HomeContentType.HOME || contentType == HomeContentType.MOVIES || contentType == HomeContentType.SERIES)) {
+                cachedHeroItems[contentType] = heroResult
+            }
+            if (currentContentType == contentType) {
+                Log.d("HomeViewModel", "loadContent: $contentType HEROES READY — ${heroResult?.heroes?.size ?: 0}")
+                _uiState.update {
+                    it.copy(
+                        heroItems = heroResult?.heroes ?: emptyList(),
+                        currentHeroIndex = 0,
+                        isContinueWatchingHero = heroResult?.isContinueWatching ?: false
+                    )
+                }
+                preloadContentImages(rows, heroResult?.heroes ?: emptyList())
+            }
         } catch (e: Exception) {
             Log.e("HomeViewModel", "CRITICAL ERROR in loadContent: ${e.message}", e)
              _uiState.update { it.copy(isLoading = false) }
@@ -659,7 +706,30 @@ class HomeViewModel @Inject constructor(
                     }
                 }
 
-                val contentDeferred = async(Dispatchers.IO) {
+                // Stage 1: fast rows (DB/cache only) — cached FIRST so that even if the
+                // slow TMDB parts (recommendations, genre carousels) time out, the home
+                // loads rows instantly on a cache hit.
+                val fastDeferred = async(Dispatchers.IO) {
+                    try {
+                        val contentRows = mutableListOf<CarouselRow>()
+                        when (contentType) {
+                            HomeContentType.HOME -> loadHomeContent(contentRows, fastOnly = true)
+                            HomeContentType.MOVIES -> loadMoviesContent(contentRows, fastOnly = true)
+                            HomeContentType.SERIES -> loadSeriesContent(contentRows, fastOnly = true)
+                            else -> {}
+                        }
+                        contentRows
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error preloading fast rows for $contentType", e)
+                        emptyList<CarouselRow>()
+                    }
+                }
+                val fastRows = fastDeferred.await()
+                cachedCarouselRows[contentType] = fastRows
+                cachedCarouselRowsTime[contentType] = System.currentTimeMillis()
+
+                // Stage 2: full rows (adds recommendations / genre carousels / category rows)
+                val fullDeferred = async(Dispatchers.IO) {
                     try {
                         val contentRows = mutableListOf<CarouselRow>()
                         when (contentType) {
@@ -670,23 +740,22 @@ class HomeViewModel @Inject constructor(
                         }
                         contentRows
                     } catch (e: Exception) {
-                        Log.e("HomeViewModel", "Error preloading rows for $contentType", e)
-                        emptyList<CarouselRow>()
+                        Log.e("HomeViewModel", "Error preloading full rows for $contentType", e)
+                        fastRows
                     }
                 }
-
+                val fullRows = fullDeferred.await()
                 val heroResult = heroDeferred.await()
-                val loadedRows = contentDeferred.await()
 
-                cachedCarouselRows[contentType] = loadedRows.toList()
+                cachedCarouselRows[contentType] = fullRows
                 cachedCarouselRowsTime[contentType] = System.currentTimeMillis()
                 if (heroResult != null) {
                     cachedHeroItems[contentType] = heroResult
                 }
 
-                Log.d("HomeViewModel", "preloadTabIntoCache: $contentType cached — ${loadedRows.size} rows, ${heroResult?.heroes?.size ?: 0} heroes")
+                Log.d("HomeViewModel", "preloadTabIntoCache: $contentType cached — ${fullRows.size} rows, ${heroResult?.heroes?.size ?: 0} heroes")
                 // Warm Coil caches so the first frame of the tab renders without placeholder pops
-                preloadContentImages(loadedRows, heroResult?.heroes ?: emptyList())
+                preloadContentImages(fullRows, heroResult?.heroes ?: emptyList())
             }
         } catch (e: Exception) {
             Log.e("HomeViewModel", "CRITICAL ERROR preloading $contentType: ${e.message}", e)
