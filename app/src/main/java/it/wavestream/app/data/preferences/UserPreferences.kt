@@ -600,12 +600,16 @@ class UserPreferences @Inject constructor(
         }
     }
 
-    /** Pool di config; migra dalla vecchia singola config se il pool è vuoto. */
+    /** Pool di config; migra una sola volta dalla vecchia singola config. */
     suspend fun getVpnConfigs(): List<String> {
         val set = dataStore.data.first()[VPN_CONFIGS]
         if (!set.isNullOrEmpty()) return set.toList()
         val legacy = dataStore.data.first()[VPN_CONFIG]
-        return if (legacy.isNullOrBlank()) emptyList() else listOf(legacy)
+        if (legacy.isNullOrBlank()) return emptyList()
+        // migrazione una tantum: la legacy finisce nel pool così, se poi il pool
+        // viene svuotato dalle eliminazioni, non ricompare più.
+        dataStore.edit { it[VPN_CONFIGS] = setOf(legacy) }
+        return listOf(legacy)
     }
 
     suspend fun setVpnStrategy(strategy: String) {

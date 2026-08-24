@@ -2659,7 +2659,8 @@ private fun VpnSettings(
                                     feedback = "Disattiva la VPN prima di rimuovere il server attivo."
                                 } else {
                                     userPreferences.removeVpnConfig(cfg)
-                                    refreshConfigs()
+                                    configs = userPreferences.getVpnConfigs()
+                                    feedback = "Configurazione rimossa dal pool."
                                 }
                             }
                         }
@@ -2936,7 +2937,7 @@ private fun VpnConfigPoolRow(
                 if (isActive) WaveStreamColors.Accent else Color.Transparent,
                 RoundedCornerShape(10.dp)
             )
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -2959,12 +2960,47 @@ private fun VpnConfigPoolRow(
                 color = if (isActive) WaveStreamColors.Accent else WaveStreamColors.TextTertiary
             )
         }
-        IconButton(onClick = onDelete) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Rimuovi",
-                tint = Color.Red
-            )
+
+        // Pulsante Rimuovi con focus visibile (navigabile col telecomando)
+        val interactionSource = remember { MutableInteractionSource() }
+        val isFocused by interactionSource.collectIsFocusedAsState()
+        val btnBorder by animateColorAsState(
+            targetValue = if (isFocused) Color(0xFFEF4444) else Color.Transparent,
+            animationSpec = tween(150),
+            label = "removeBtnBorder"
+        )
+        val btnBg by animateColorAsState(
+            targetValue = if (isFocused) Color(0xFFEF4444).copy(alpha = 0.15f) else Color.Transparent,
+            animationSpec = tween(150),
+            label = "removeBtnBg"
+        )
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .border(2.dp, btnBorder, RoundedCornerShape(8.dp))
+                .background(btnBg)
+                .focusable(interactionSource = interactionSource)
+                .clickable(interactionSource = interactionSource, indication = null, onClick = onDelete)
+                .padding(horizontal = 14.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = Color(0xFFEF4444),
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = "Rimuovi",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFFEF4444),
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }
