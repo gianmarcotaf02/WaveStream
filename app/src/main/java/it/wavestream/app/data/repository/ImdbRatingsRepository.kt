@@ -287,7 +287,9 @@ class ImdbRatingsRepository @Inject constructor(
     }
     
     /**
-     * Search using OMDB search endpoint, then get full details of first result
+     * Search using OMDB search endpoint, then get full details of the best match.
+     * First tries with year + type (most precise), then falls back to a fuzzy
+     * search without year (OMDB's search is loose and can still find the title).
      */
     private suspend fun searchAndGetRatings(
         query: String,
@@ -297,13 +299,44 @@ class ImdbRatingsRepository @Inject constructor(
         val apiKey = userPreferences.getOmdbApiKey() ?: DEFAULT_API_KEY
         if (apiKey.isEmpty()) return null
         
+        // Pass 1: with year + type. E.g. "Cats" + 2019 -> the right movie comes first.
+        searchAndPick(apiKey, query, year, type)?.let { return it }
+        // Pass 2: fuzzy search without year, when the title is still not found.
+        return searchAndPick(apiKey, query, null, type)
+    }
+    
+    /**
+     * Runs one OMDB search and resolves the best candidate to full ratings.
+     * Prefers exact year match, then near year match, then the first result.
+     */
+    private suspend fun searchAndPick(
+        apiKey: String,
+        query: String,
+        year: Int?,
+        type: String?
+    ): RatingInfo? {
         try {
             val searchResponse = api.search(apiKey, query, year, type)
             if (searchResponse.isSuccessful && searchResponse.body()?.Response == "True") {
-                val firstResult = searchResponse.body()?.Search?.firstOrNull()
-                if (firstResult?.imdbID != null) {
-                    Log.d(TAG, "Search found: ${firstResult.Title} (${firstResult.Year}) - ${firstResult.imdbID}")
-                    return getRatingsByImdbId(firstResult.imdbID)
+                val results = searchResponse.body()?.Search.orEmpty()
+                    .filter { type == null || it.Type == null || it.Type.equals(type, ignoreCase = true) }
+                
+                val best = when {
+                    results.isEmpty() -> null
+                    year != null -> {
+                        results.firstOrNull { it.Year?.toIntOrNull() == year }
+                            ?: results.firstOrNull {
+                                val rYear = it.Year?.toIntOrNull() ?: return@firstOrNull false
+                                kotlin.math.abs(rYear - year) <= 1
+                            }
+                            ?: results.first()
+                    }
+                    else -> results.first()
+                }
+                
+                if (best?.imdbID != null) {
+                    Log.d(TAG, "Search found: ${best.Title} (${best.Year}) - ${best.imdbID}")
+                    return getRatingsByImdbId(best.imdbID)
                 }
             }
         } catch (e: Exception) {
@@ -313,37 +346,56 @@ class ImdbRatingsRepository @Inject constructor(
     }
     
     /**
-     * Clean title for OMDB search - removes quality tags, years in brackets, etc.
+     * Clean title for OMDB search - removes years and release/quality tags
+     * WITHOUT corrupting real words inside titles.
+     *
+     * Tags are matched only as whole words (surrounded by non-alphanumerics), so:
+     *  "Cats (2019)"            -> "Cats"        (tag "TS" never touches "Cat-s")
+     *  "The Italian Job (2003)" -> "The Italian Job" (tag "ITA" never touches "Ital-ian")
+     *  "The English Patient"    -> "The English Patient" (tag "ENG" safe)
+     *  "Submarine (2010)"       -> "Submarine"   (tag "SUB" safe)
+     *  "Dune Part Two 2024 1080p WEB-DL H264 AC3" -> "Dune Part Two"
+     *  "The.Irishman.2019.1080p.WEB-DL"           -> "The Irishman"
      */
     private fun cleanTitleForOmdb(title: String): String {
-        var cleaned = title
+        var cleaned = title.trim()
         
-        // Remove year in parentheses/brackets
-        cleaned = cleaned.replace(Regex("""\s*\(\d{4}\)\s*"""), " ")
-        cleaned = cleaned.replace(Regex("""\s*\[\d{4}\]\s*"""), " ")
+        // Tag list, longest first so multi-word tags win over single-word ones.
+        val tagPattern = RELEASE_TAGS
+            .sortedByDescending { it.length }
+            .joinToString("|") { tag ->
+                tag.split(" ").joinToString("""\s*[.\s]\s*""") { Regex.escape(it) }
+            }
         
-        // Remove quality tags
-        val qualityTags = listOf(
-            "4K", "UHD", "2160p", "FHD", "1080p", "1080i",
-            "HD", "720p", "SD", "480p",
-            "HDR", "HDR10", "HDR10+", "Dolby Vision", "DV",
-            "HEVC", "H265", "H264", "x264", "x265",
-            "WEB-DL", "WEBDL", "WEBRip", "WEBRIP",
-            "BluRay", "BLU-RAY", "BLURAY", "BDRip", "BRRip",
-            "DVDRip", "DVDR", "CAM", "TS", "HDTS",
-            "ITA", "ENG", "MULTI", "SUB", "SUBBED", "AC3", "DTS",
-            "EXTENDED", "UNRATED", "DIRECTORS CUT", "REMASTERED"
+        // 1) Parenthesized/bracketed years: (2019) [2019] {2019}
+        cleaned = cleaned.replace(Regex("""[\[\(\(\{]\s*(?:19|20)\d{2}\s*[\]\)\}]"""), " ")
+        
+        // 2) Bracketed groups made ONLY of release info: [1080p] [WEB-DL.ITA] {HDR10+}
+        cleaned = cleaned.replace(
+            Regex("""[\[\(\(\{]\s*(?:$tagPattern(?:\s*[.\s'+-]\s*)?)+[\]\)\}]""", RegexOption.IGNORE_CASE),
+            " "
         )
         
-        for (tag in qualityTags) {
-            cleaned = cleaned.replace(Regex("""[\[\(]?\s*$tag\s*[\]\)]?""", RegexOption.IGNORE_CASE), " ")
-        }
+        // 3) Standalone release tags as whole words. Lookarounds guarantee the tag
+        //    is not embedded in a real word ("Cats" -> "Ca" would break OMDB lookups).
+        cleaned = cleaned.replace(
+            Regex("""(?<![A-Za-z0-9])(?:$tagPattern)(?![A-Za-z0-9])""", RegexOption.IGNORE_CASE),
+            " "
+        )
         
-        // Remove trailing separators and extra spaces
+        // 4) Dot-separated playlist titles: The.Irishman.2019.1080p -> The Irishman 2019 1080p
+        cleaned = cleaned.replace(Regex("""(?<=[A-Za-z0-9])\.(?=[A-Za-z0-9])"""), " ")
+        
+        // 5) Trailing bare year (not parenthesized): "Dune Part Two 2024" -> "Dune Part Two"
+        //    The leading separator requirement keeps real titles like "1984" or "1917" intact.
+        cleaned = cleaned.replace(Regex("""[\s.]+(?:19|20)\d{2}[\s.]*$"""), " ")
+        
+        // 6) Collapse whitespace and drop trailing separators
         cleaned = cleaned.replace(Regex("""\s*[-|:]+\s*$"""), "")
         cleaned = cleaned.trim().replace(Regex("""\s{2,}"""), " ")
         
-        return cleaned
+        // Safety net: never return an empty/mangled title (e.g. movie literally named "Cam").
+        return if (cleaned.length > 1) cleaned else title.trim()
     }
 
     
