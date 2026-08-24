@@ -1787,15 +1787,17 @@ class HomeViewModel @Inject constructor(
     /**
      * Load content for HOME tab (all content mixed, with genre carousels)
      */
-    private suspend fun loadHomeContent(rows: MutableList<CarouselRow>) {
+    private suspend fun loadHomeContent(rows: MutableList<CarouselRow>, fastOnly: Boolean = false) {
         // Load in parallel for speed — use coroutineScope instead of viewModelScope
         // so tasks survive ViewModel destruction during preload from LoadingActivity
         coroutineScope {
         val popularMoviesDeferred = async(Dispatchers.IO) { loadPopularMovies() }
         val popularSeriesDeferred = async(Dispatchers.IO) { loadPopularSeries() }
         val continueWatchingDeferred = async(Dispatchers.IO) { loadContinueWatching() }
-        val recommendationsDeferred = async(Dispatchers.IO) { loadRecommendations() }
-        val genreCarouselsDeferred = async(Dispatchers.IO) {
+        // Slow parts (TMDB network): skipped in the fast pass so the home shows the
+        // DB/cached rows immediately and the skeleton disappears; they fill in later.
+        val recommendationsDeferred = if (fastOnly) null else async(Dispatchers.IO) { loadRecommendations() }
+        val genreCarouselsDeferred = if (fastOnly) null else async(Dispatchers.IO) {
             recommendationEngine.generateGenreCarousels(currentProfileId)
         }
         
@@ -1810,7 +1812,7 @@ class HomeViewModel @Inject constructor(
         }
         
         // 2. Recommendations for you
-        recommendationsDeferred.await()?.let { recs ->
+        recommendationsDeferred?.await()?.let { recs ->
             if (recs.isNotEmpty()) {
                 rows.add(CarouselRow(
                     title = "Raccomandati per te",
@@ -1840,7 +1842,7 @@ class HomeViewModel @Inject constructor(
         }
         
         // 5. Genre-based carousels (from TMDB discover)
-        val genreCarousels = genreCarouselsDeferred.await()
+        val genreCarousels = genreCarouselsDeferred?.await() ?: emptyMap()
         for ((genreId, items) in genreCarousels) {
             if (items.isNotEmpty()) {
                 rows.add(CarouselRow(
@@ -1928,7 +1930,7 @@ class HomeViewModel @Inject constructor(
      * 6 carousels: Continua a guardare, Visti di recente, Film popolari,
      * Aggiunti di recente, Raccomandati, Categorie
      */
-    private suspend fun loadMoviesContent(rows: MutableList<CarouselRow>) {
+    private suspend fun loadMoviesContent(rows: MutableList<CarouselRow>, fastOnly: Boolean = false) {
         // 1. Continue watching movies
         loadContinueWatchingForTab(ContentType.MOVIE)?.let {
             if (it.isNotEmpty()) rows.add(CarouselRow(title = "Continua a guardare", items = it))
@@ -1959,19 +1961,21 @@ class HomeViewModel @Inject constructor(
             }
         }
         
-        // 5. Recommendations (movie-only)
-        loadRecommendations()?.let { recs ->
-            val movieRecs = recs.filter { it.contentType == ContentType.MOVIE.name }
-            if (movieRecs.isNotEmpty()) {
-                rows.add(CarouselRow(
-                    title = "Raccomandati per te",
-                    items = movieRecs
-                ))
+        // 5. Recommendations (movie-only) — skipped in the fast pass (TMDB network)
+        if (!fastOnly) {
+            loadRecommendations()?.let { recs ->
+                val movieRecs = recs.filter { it.contentType == ContentType.MOVIE.name }
+                if (movieRecs.isNotEmpty()) {
+                    rows.add(CarouselRow(
+                        title = "Raccomandati per te",
+                        items = movieRecs
+                    ))
+                }
             }
+            
+            // 6. Random category carousels (5-6 categories) — skipped in the fast pass
+            loadFilteredCategoryRows(rows, includeMovies = true, includeSeries = false)
         }
-        
-        // 6. Random category carousels (5-6 categories)
-        loadFilteredCategoryRows(rows, includeMovies = true, includeSeries = false)
     }
     
     /**
@@ -2073,7 +2077,7 @@ class HomeViewModel @Inject constructor(
      * 8 carousels: Continua a guardare, Prossimo episodio, Visti di recente,
      * Nuovi episodi, Serie popolari, Aggiunte di recente, Raccomandati, Categorie
      */
-    private suspend fun loadSeriesContent(rows: MutableList<CarouselRow>) {
+    private suspend fun loadSeriesContent(rows: MutableList<CarouselRow>, fastOnly: Boolean = false) {
         Log.d("HomeViewModel", "loadSeriesContent: START")
         
         val allSeries = withContext(Dispatchers.IO) { seriesDao.getAllSeriesList() }
@@ -2122,19 +2126,21 @@ class HomeViewModel @Inject constructor(
             }
         }
         
-        // 7. Recommendations (series-only)
-        loadRecommendations()?.let { recs ->
-            val seriesRecs = recs.filter { it.contentType == ContentType.SERIES.name }
-            if (seriesRecs.isNotEmpty()) {
-                rows.add(CarouselRow(
-                    title = "Raccomandati per te",
-                    items = seriesRecs
-                ))
+        // 7. Recommendations (series-only) — skipped in the fast pass (TMDB network)
+        if (!fastOnly) {
+            loadRecommendations()?.let { recs ->
+                val seriesRecs = recs.filter { it.contentType == ContentType.SERIES.name }
+                if (seriesRecs.isNotEmpty()) {
+                    rows.add(CarouselRow(
+                        title = "Raccomandati per te",
+                        items = seriesRecs
+                    ))
+                }
             }
+            
+            // 8. Random category carousels (5-6 categories) — skipped in the fast pass
+            loadFilteredCategoryRows(rows, includeMovies = false, includeSeries = true)
         }
-        
-        // 8. Random category carousels (5-6 categories)
-        loadFilteredCategoryRows(rows, includeMovies = false, includeSeries = true)
         
         Log.d("HomeViewModel", "loadSeriesContent: END, rows=${rows.size}")
     }
