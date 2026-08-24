@@ -20,7 +20,8 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index("profileId"),
-        Index(value = ["profileId", "contentType", "contentId"], unique = true)
+        Index(value = ["profileId", "contentType", "contentId"], unique = true),
+        Index(value = ["profileId", "addedAt"])
     ]
 )
 data class Favorite(

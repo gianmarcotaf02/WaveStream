@@ -49,17 +49,24 @@ import it.wavestream.app.data.database.dao.ProfileDao
 import it.wavestream.app.data.database.entity.Playlist
 import it.wavestream.app.data.database.entity.Profile
 import it.wavestream.app.data.preferences.UserPreferences
+import it.wavestream.app.data.repository.PlaylistRepository
+import it.wavestream.app.ui.loading.LoadingActivity
+import it.wavestream.app.ui.MainActivity
+import it.wavestream.app.ui.theme.WaveStreamColors
+import it.wavestream.app.ui.theme.WaveStreamTheme
+import it.wavestream.app.worker.EpgUpdateWorker
+import it.wavestream.app.worker.SyncWorker
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import it.wavestream.app.ui.loading.LoadingActivity
-import it.wavestream.app.ui.profile.getAvatarResource
-import it.wavestream.app.ui.setup.SetupActivity
-import it.wavestream.app.ui.theme.WaveStreamColors
-import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.ui.theme.AccentColor
+import it.wavestream.app.ui.profile.getAvatarResource
+import it.wavestream.app.ui.profile.getAvatarIcon
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 data class SettingsMenuItem(
@@ -110,7 +117,8 @@ class SettingsActivity : ComponentActivity() {
         }
         
         val menuItems = listOf(
-            SettingsMenuItem("profile", "Account e Profilo", "Dettagli account e modifica profilo", Icons.Default.Person),
+            SettingsMenuItem("profile", "Profilo", "Modifica nome e avatar", Icons.Default.Person),
+            SettingsMenuItem("account", "Account", "Dettagli account Xtream", Icons.Default.Lock),
             SettingsMenuItem("playlist", "Playlist", "Aggiornamento e sincronizzazione", Icons.AutoMirrored.Filled.List),
             SettingsMenuItem("preferences", "Preferenze", "Impostazioni generali", Icons.Default.Settings),
             SettingsMenuItem("player", "Player", "Impostazioni riproduzione", Icons.Default.PlayArrow),
@@ -151,7 +159,8 @@ class SettingsActivity : ComponentActivity() {
                     .padding(40.dp)
             ) {
                 when (selectedMenuId) {
-                    "profile" -> ProfileSettings(profileDao, playlistDao, userPreferences, contentFocusRequester)
+                    "profile" -> ProfileSettings(profileDao, userPreferences, contentFocusRequester)
+                    "account" -> AccountSettings(playlistDao, contentFocusRequester)
                     "playlist" -> PlaylistSettings(playlistDao, playlistRepository, userPreferences, contentFocusRequester)
                     "preferences" -> PreferencesSettings(userPreferences, contentFocusRequester)
                     "player" -> PlayerSettings(userPreferences, contentFocusRequester)
@@ -443,7 +452,6 @@ private fun SettingsMenuItemRow(
 @Composable
 private fun ProfileSettings(
     profileDao: ProfileDao,
-    playlistDao: PlaylistDao,
     userPreferences: UserPreferences,
     contentFocusRequester: FocusRequester? = null
 ) {
@@ -452,12 +460,6 @@ private fun ProfileSettings(
     var editedName by remember { mutableStateOf("") }
     var selectedAvatarIndex by remember { mutableStateOf(0) }
     var showAvatarPicker by remember { mutableStateOf(false) }
-    
-    // Xtream account state
-    var xtreamPlaylist by remember { mutableStateOf<Playlist?>(null) }
-    var authResponse by remember { mutableStateOf<it.wavestream.app.data.api.XtreamAuthResponse?>(null) }
-    var authError by remember { mutableStateOf<String?>(null) }
-    var isLoadingAuth by remember { mutableStateOf(false) }
     
     // Load current profile
     LaunchedEffect(Unit) {
@@ -471,36 +473,7 @@ private fun ProfileSettings(
         }
     }
     
-    // Load xtream playlist
-    LaunchedEffect(currentProfile) {
-        val profile = currentProfile ?: return@LaunchedEffect
-        val playlists = playlistDao.getEnabledPlaylistsList()
-        val playlist = playlists.find { it.type == "xtream" }
-        xtreamPlaylist = playlist
-        if (playlist?.username != null && playlist.password != null) {
-            isLoadingAuth = true
-            authError = null
-            try {
-                val baseUrl = playlist.url.trimEnd('/') + "/"
-                val moshi = com.squareup.moshi.Moshi.Builder().build()
-                val api = Retrofit.Builder()
-                    .baseUrl(baseUrl)
-                    .client(OkHttpClient.Builder().build())
-                    .addConverterFactory(MoshiConverterFactory.create(moshi))
-                    .build()
-                    .create(XtreamApiService::class.java)
-                authResponse = api.authenticate(playlist.username, playlist.password)
-            } catch (e: Exception) {
-                authError = e.message ?: "Errore di connessione"
-            }
-            isLoadingAuth = false
-        }
-    }
-    
-    val playlist = xtreamPlaylist
-    
-    SettingsSection(title = "Account e Profilo") {
-        // Profile section
+    SettingsSection(title = "Profilo") {
         currentProfile?.let { profile ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -508,17 +481,27 @@ private fun ProfileSettings(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 // Avatar with edit button
+                val avatarInteractionSource = remember { MutableInteractionSource() }
+                val isAvatarFocused by avatarInteractionSource.collectIsFocusedAsState()
+                val avatarBorderColor by animateColorAsState(
+                    targetValue = if (isAvatarFocused) WaveStreamColors.Accent else Color.Transparent,
+                    animationSpec = tween(200),
+                    label = "avatarBorder"
+                )
                 Box(
                     modifier = Modifier
                         .size(120.dp)
+                        .border(3.dp, avatarBorderColor, RoundedCornerShape(16.dp))
                         .clip(RoundedCornerShape(16.dp))
                         .background(WaveStreamColors.CardBackground)
+                        .focusable(interactionSource = avatarInteractionSource)
                         .clickable { showAvatarPicker = true }
                 ) {
-                    Image(
-                        painter = painterResource(getAvatarResource(selectedAvatarIndex)),
+                    Icon(
+                        imageVector = getAvatarIcon(selectedAvatarIndex),
                         contentDescription = "Avatar",
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        tint = Color.Unspecified
                     )
                     Box(
                         modifier = Modifier
@@ -542,35 +525,49 @@ private fun ProfileSettings(
                 )
                 
                 if (showAvatarPicker) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
                             .background(WaveStreamColors.BackgroundSecondary)
-                            .padding(16.dp)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        (0..1).forEach { index ->
-                            val isSelected = selectedAvatarIndex == index
-                            Box(
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .border(
-                                        2.dp,
-                                        if (isSelected) WaveStreamColors.Accent else Color.Transparent,
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .clickable {
-                                        selectedAvatarIndex = index
-                                        showAvatarPicker = false
-                                    }
+                        for (row in 0 until 3) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Image(
-                                    painter = painterResource(getAvatarResource(index)),
-                                    contentDescription = "Avatar $index",
-                                    modifier = Modifier.fillMaxSize()
-                                )
+                                for (col in 0 until 4) {
+                                    val index = row * 4 + col
+                                    val isSelected = selectedAvatarIndex == index
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .aspectRatio(1f)
+                                            .clip(CircleShape)
+                                            .background(
+                                                if (isSelected) WaveStreamColors.Accent else WaveStreamColors.BackgroundTertiary
+                                            )
+                                            .border(
+                                                if (isSelected) 3.dp else 2.dp,
+                                                if (isSelected) Color.White else Color.Transparent,
+                                                CircleShape
+                                            )
+                                            .clickable {
+                                                selectedAvatarIndex = index
+                                                showAvatarPicker = false
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = getAvatarIcon(index),
+                                            contentDescription = "Avatar $index",
+                                            tint = if (isSelected) Color.White else WaveStreamColors.TextSecondary,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -616,112 +613,157 @@ private fun ProfileSettings(
                 ) {
                     Text("Salva modifiche")
                 }
-                
-                // Xtream Account details
-                if (playlist?.type == "xtream") {
-                    HorizontalDivider(
-                        color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
-                        thickness = 0.5.dp
+            }
+        } ?: run {
+            SettingsInfo(text = "Nessun profilo selezionato")
+        }
+    }
+}
+
+@Composable
+private fun AccountSettings(
+    playlistDao: PlaylistDao,
+    contentFocusRequester: FocusRequester? = null
+) {
+    var xtreamPlaylist by remember { mutableStateOf<Playlist?>(null) }
+    var authResponse by remember { mutableStateOf<it.wavestream.app.data.api.XtreamAuthResponse?>(null) }
+    var authError by remember { mutableStateOf<String?>(null) }
+    var isLoadingAuth by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            val playlists = playlistDao.getEnabledPlaylistsList()
+            val playlist = playlists.find { it.type == "xtream" }
+            xtreamPlaylist = playlist
+            if (playlist?.username != null && playlist.password != null) {
+                isLoadingAuth = true
+                authError = null
+                try {
+                    val baseUrl = playlist.url.trimEnd('/') + "/"
+                    val client = OkHttpClient.Builder()
+                        .connectTimeout(10, TimeUnit.SECONDS)
+                        .readTimeout(10, TimeUnit.SECONDS)
+                        .build()
+                    val moshi = com.squareup.moshi.Moshi.Builder().build()
+                    val api = Retrofit.Builder()
+                        .baseUrl(baseUrl)
+                        .client(client)
+                        .addConverterFactory(MoshiConverterFactory.create(moshi))
+                        .build()
+                        .create(XtreamApiService::class.java)
+                    val response = api.authenticate(playlist.username, playlist.password)
+                    withContext(Dispatchers.Main) { authResponse = response }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) { authError = e.message ?: "Errore di connessione" }
+                }
+                withContext(Dispatchers.Main) { isLoadingAuth = false }
+            }
+        }
+    }
+
+    SettingsSection(title = "Account") {
+        val playlist = xtreamPlaylist
+        if (playlist?.type == "xtream") {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Dettagli account Xtream",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = WaveStreamColors.TextPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+
+                AccountDetailRow(label = "Server", value = playlist.url)
+                AccountDetailRow(label = "Username", value = playlist.username ?: "")
+                AccountDetailRow(label = "Tipo playlist", value = "Xtream Codes")
+
+                if (playlist.channelCount > 0 || playlist.movieCount > 0 || playlist.seriesCount > 0) {
+                    AccountDetailRow(
+                        label = "Contenuti",
+                        value = buildString {
+                            if (playlist.channelCount > 0) append("${playlist.channelCount} canali, ")
+                            if (playlist.movieCount > 0) append("${playlist.movieCount} film, ")
+                            if (playlist.seriesCount > 0) append("${playlist.seriesCount} serie")
+                            if (endsWith(", ")) setLength(length - 2)
+                        }
                     )
-                    
-                    Text(
-                        text = "Dettagli account Xtream",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = WaveStreamColors.TextPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    AccountDetailRow(label = "Server", value = playlist.url)
-                    AccountDetailRow(label = "Username", value = playlist.username ?: "")
-                    AccountDetailRow(label = "Tipo playlist", value = "Xtream Codes")
-                    
-                    if (playlist.channelCount > 0 || playlist.movieCount > 0 || playlist.seriesCount > 0) {
-                        AccountDetailRow(
-                            label = "Contenuti",
-                            value = buildString {
-                                if (playlist.channelCount > 0) append("${playlist.channelCount} canali, ")
-                                if (playlist.movieCount > 0) append("${playlist.movieCount} film, ")
-                                if (playlist.seriesCount > 0) append("${playlist.seriesCount} serie")
-                                if (endsWith(", ")) setLength(length - 2)
-                            }
+                }
+
+                HorizontalDivider(
+                    color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
+                    thickness = 0.5.dp
+                )
+
+                val userInfo = authResponse?.userInfo
+                if (isLoadingAuth) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = WaveStreamColors.Accent
+                        )
+                        Text(
+                            text = "Verifica account in corso...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = WaveStreamColors.TextTertiary
                         )
                     }
-                    
-                    HorizontalDivider(
-                        color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
-                        thickness = 0.5.dp
+                } else if (authError != null) {
+                    AccountDetailRow(
+                        label = "Stato",
+                        value = "Impossibile verificare",
+                        valueColor = WaveStreamColors.Error
                     )
-                    
-                    // Auth status
-                    val userInfo = authResponse?.userInfo
-                    if (isLoadingAuth) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                                color = WaveStreamColors.Accent
-                            )
-                            Text(
-                                text = "Verifica account in corso...",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = WaveStreamColors.TextTertiary
-                            )
-                        }
-                    } else if (authError != null) {
-                        AccountDetailRow(
-                            label = "Stato",
-                            value = "Impossibile verificare",
-                            valueColor = WaveStreamColors.Error
-                        )
-                        AccountDetailRow(
-                            label = "Errore",
-                            value = authError ?: "",
-                            valueColor = WaveStreamColors.Error
-                        )
-                    } else if (userInfo != null) {
-                        val isActive = userInfo.auth == 1 && userInfo.status == "Active"
-                        AccountDetailRow(
-                            label = "Stato",
-                            value = if (isActive) "Attivo" else (userInfo.status ?: "Sconosciuto"),
-                            valueColor = if (isActive) WaveStreamColors.Success else WaveStreamColors.Error
-                        )
-                        
-                        userInfo.expDate?.let { exp ->
-                            val expDate = try {
-                                val millis = exp.toLong() * 1000
-                                val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
-                                sdf.format(java.util.Date(millis))
-                            } catch (e: Exception) { exp }
-                            AccountDetailRow(label = "Scadenza", value = expDate)
-                        }
-                        
-                        userInfo.createdAt?.let { created ->
-                            val createdDate = try {
-                                val millis = created.toLong() * 1000
-                                val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
-                                sdf.format(java.util.Date(millis))
-                            } catch (e: Exception) { created }
-                            AccountDetailRow(label = "Registrato il", value = createdDate)
-                        }
-                        
-                        userInfo.activeCons?.let { cons ->
-                            val max = userInfo.maxConnections ?: cons
-                            AccountDetailRow(label = "Connessioni", value = "$cons / $max")
-                        }
-                        
-                        userInfo.isTrial?.let { trial ->
-                            if (trial == "1") {
-                                AccountDetailRow(label = "Tipo", value = "Prova gratuita")
-                            }
+                    AccountDetailRow(
+                        label = "Errore",
+                        value = authError ?: "",
+                        valueColor = WaveStreamColors.Error
+                    )
+                } else if (userInfo != null) {
+                    val isActive = userInfo.auth == 1 && userInfo.status == "Active"
+                    AccountDetailRow(
+                        label = "Stato",
+                        value = if (isActive) "Attivo" else (userInfo.status ?: "Sconosciuto"),
+                        valueColor = if (isActive) WaveStreamColors.Success else WaveStreamColors.Error
+                    )
+
+                    userInfo.expDate?.let { exp ->
+                        val expDate = try {
+                            val millis = exp.toLong() * 1000
+                            val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                            sdf.format(java.util.Date(millis))
+                        } catch (e: Exception) { exp }
+                        AccountDetailRow(label = "Scadenza", value = expDate)
+                    }
+
+                    userInfo.createdAt?.let { created ->
+                        val createdDate = try {
+                            val millis = created.toLong() * 1000
+                            val sdf = java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault())
+                            sdf.format(java.util.Date(millis))
+                        } catch (e: Exception) { created }
+                        AccountDetailRow(label = "Registrato il", value = createdDate)
+                    }
+
+                    userInfo.activeCons?.let { cons ->
+                        val max = userInfo.maxConnections ?: cons
+                        AccountDetailRow(label = "Connessioni", value = "$cons / $max")
+                    }
+
+                    userInfo.isTrial?.let { trial ->
+                        if (trial == "1") {
+                            AccountDetailRow(label = "Tipo", value = "Prova gratuita")
                         }
                     }
                 }
             }
-        } ?: run {
-            SettingsInfo(text = "Nessun profilo selezionato")
+        } else {
+            SettingsInfo(text = "Nessun account Xtream configurato")
         }
     }
 }
@@ -794,7 +836,10 @@ private fun PlaylistSettings(
                 ),
                 onValueChange = {
                     updateMode = it
-                    coroutineScope.launch { userPreferences.setPlaylistUpdateMode(it) }
+                    coroutineScope.launch {
+                        userPreferences.setPlaylistUpdateMode(it)
+                        SyncWorker.updateSchedules(context, userPreferences)
+                    }
                 }
             )
             
@@ -813,7 +858,10 @@ private fun PlaylistSettings(
                     ),
                     onValueChange = {
                         updateInterval = it
-                        coroutineScope.launch { userPreferences.setPlaylistUpdateInterval(it) }
+                        coroutineScope.launch {
+                            userPreferences.setPlaylistUpdateInterval(it)
+                            SyncWorker.updateSchedules(context, userPreferences)
+                        }
                     }
                 )
             }
@@ -1518,6 +1566,7 @@ private fun EpgSettings(
     contentFocusRequester: FocusRequester? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     
     var updateMode by remember { mutableStateOf("manual") }
     var updateInterval by remember { mutableStateOf("12h") }
@@ -1532,6 +1581,7 @@ private fun EpgSettings(
     LaunchedEffect(Unit) {
         updateMode = userPreferences.getEpgUpdateMode()
         updateInterval = userPreferences.getEpgUpdateInterval()
+        timezone = userPreferences.getEpgTimezone()
     }
     
     SettingsSection(title = "Guida TV (EPG)") {
@@ -1546,7 +1596,14 @@ private fun EpgSettings(
                 ),
                 onValueChange = {
                     updateMode = it
-                    coroutineScope.launch { userPreferences.setEpgUpdateMode(it) }
+                    coroutineScope.launch {
+                        userPreferences.setEpgUpdateMode(it)
+                        if (it == "auto") {
+                            EpgUpdateWorker.schedule(context, updateInterval)
+                        } else {
+                            EpgUpdateWorker.cancel(context)
+                        }
+                    }
                 }
             )
             
@@ -1566,7 +1623,10 @@ private fun EpgSettings(
                     ),
                     onValueChange = {
                         updateInterval = it
-                        coroutineScope.launch { userPreferences.setEpgUpdateInterval(it) }
+                        coroutineScope.launch {
+                            userPreferences.setEpgUpdateInterval(it)
+                            EpgUpdateWorker.schedule(context, it)
+                        }
                     }
                 )
             }
@@ -1585,7 +1645,10 @@ private fun EpgSettings(
                     "America/New_York" to "New York (EST/EDT)",
                     "America/Los_Angeles" to "Los Angeles (PST/PDT)"
                 ),
-                onValueChange = { timezone = it }
+                onValueChange = {
+                    timezone = it
+                    coroutineScope.launch { userPreferences.setEpgTimezone(it) }
+                }
             )
             
             Spacer(modifier = Modifier.height(16.dp))
@@ -1674,14 +1737,15 @@ private fun EpgSettings(
                                                 epgRepository.loadEpgFromXtream(
                                                     baseUrl = playlist.url,
                                                     username = playlist.username,
-                                                    password = playlist.password
+                                                    password = playlist.password,
+                                                    force = true
                                                 )
                                             }
                                             successCount++
                                         } else if (!playlist.epgUrl.isNullOrEmpty()) {
                                             refreshStatus = "Caricamento EPG da URL..."
                                             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                                                epgRepository.loadEpgFromUrl(playlist.epgUrl)
+                                                epgRepository.loadEpgFromUrl(playlist.epgUrl, force = true)
                                             }
                                             successCount++
                                         }
@@ -1844,7 +1908,7 @@ private fun StorageSettings(
                                 onClick = {
                                     coroutineScope.launch {
                                         context.deleteDatabase("wavestream_database")
-                                        context.getSharedPreferences("wavestream_sync_prefs", Context.MODE_PRIVATE).edit().clear().apply()
+                                        context.getSharedPreferences("wavestream_sync_prefs", 0).edit().clear().apply()
                                         context.getDataDir().resolve("datastore").deleteRecursively()
                                         val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
                                         if (intent != null) {

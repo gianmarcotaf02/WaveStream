@@ -61,6 +61,8 @@ data class Episode(
     // Convenience properties for UI
     val season: Int get() = seasonNumber
     val episode: Int get() = episodeNumber
-    val posterUrl: String? get() = tmdbStillPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+    val posterUrl: String?
+        get() = thumbnailUrl
+            ?: tmdbStillPath?.let { "https://image.tmdb.org/t/p/w500$it" }
     val title: String get() = tmdbName ?: name
 }

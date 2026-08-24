@@ -43,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,10 +53,13 @@ import it.wavestream.app.R
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.CustomGroup
 import it.wavestream.app.data.database.entity.Episode
+import it.wavestream.app.data.entity.PersonInfo
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.util.TitleCleaner
+import androidx.compose.ui.input.key.*
+
 
 /**
  * Episode progress info for display
@@ -78,6 +82,8 @@ data class DetailsState(
     val duration: String? = null,
     val director: String? = null,
     val cast: String? = null,
+    val castPeople: List<it.wavestream.app.data.entity.PersonInfo> = emptyList(),
+    val directorPeople: List<it.wavestream.app.data.entity.PersonInfo> = emptyList(),
     val posterUrl: String? = null,
     val backdropUrl: String? = null,
     val contentType: ContentType = ContentType.MOVIE,
@@ -136,6 +142,7 @@ fun DetailsScreen(
     onFavoriteClick: () -> Unit,
     onSeasonSelected: (Int) -> Unit,
     onEpisodeClick: (Episode) -> Unit,
+    onEpisodeLongClick: (Episode) -> Unit = {},
     onTrailerClick: () -> Unit = {},
     // Custom lists callbacks
     onAddToList: (Long) -> Unit = {},
@@ -143,6 +150,7 @@ fun DetailsScreen(
     onCreateList: (String) -> Unit = {},
     onRenameList: (Long, String) -> Unit = { _, _ -> },
     onMarkAsWatchedClick: () -> Unit = {},
+    onPersonClick: (personId: Int, personName: String) -> Unit = { _, _ -> },
     // Download callbacks
     onDownloadClick: () -> Unit = {},
     onDeleteDownloadClick: () -> Unit = {},
@@ -286,25 +294,25 @@ fun DetailsScreen(
         androidx.tv.foundation.lazy.list.TvLazyColumn(
             state = listState,
             contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 24.dp),
+            pivotOffsets = androidx.tv.foundation.PivotOffsets(parentFraction = 0.6f),
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth(0.75f)  // Use left 75% of screen for content (increased to fit all buttons)
                 .padding(start = 32.dp, end = 16.dp)
         ) {
-            // Top content block: top bar, poster, info, buttons, overview, cast
+            // Top content block: poster, info, buttons, overview, cast
             item {
-            // Top bar - always visible
-            DetailsTopBar(
-                onBackClick = onBackClick
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Main content - displayed immediately (no AnimatedVisibility)
+            // Main content - back button + poster + info in one row
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                // Back button - aligned to top of info column (same height as title)
+                DetailsTopBar(
+                    onBackClick = onBackClick,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+                
                 // Poster
                 if (!state.posterUrl.isNullOrEmpty()) {
                     AsyncImage(
@@ -337,7 +345,9 @@ fun DetailsScreen(
                         text = state.title,
                         style = MaterialTheme.typography.displaySmall,
                         color = WaveStreamColors.TextPrimary,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis
                     )
                     
                     Spacer(modifier = Modifier.height(8.dp))
@@ -569,8 +579,29 @@ fun DetailsScreen(
                         }
                     }
                     
-                    // 2. Cast
-                    state.cast?.let {
+                    // 2. Cast — clickable with profile photos
+                    if (state.castPeople.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Cast",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WaveStreamColors.TextSecondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.castPeople.size) { index ->
+                                val person = state.castPeople[index]
+                                CastPersonCard(
+                                    person = person,
+                                    onClick = { onPersonClick(person.id, person.name) }
+                                )
+                            }
+                        }
+                    } else state.cast?.let {
+                        // Fallback: plain text if no structured cast data
                         Spacer(modifier = Modifier.height(12.dp))
                         Row(
                             verticalAlignment = Alignment.Top,
@@ -592,8 +623,29 @@ fun DetailsScreen(
                         }
                     }
                     
-                    // 3. Director (Regia)
-                    state.director?.let {
+                    // 3. Director (Regia) — clickable with profile photos
+                    if (state.directorPeople.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Regia",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WaveStreamColors.TextSecondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.directorPeople.size) { index ->
+                                val person = state.directorPeople[index]
+                                CastPersonCard(
+                                    person = person,
+                                    onClick = { onPersonClick(person.id, person.name) }
+                                )
+                            }
+                        }
+                    } else state.director?.let {
+                        // Fallback: plain text if no structured crew data
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -643,6 +695,7 @@ fun DetailsScreen(
                         downloadState = downloadState,
                         seriesName = state.title,
                         onClick = { onEpisodeClick(episode) },
+                        onLongClick = { onEpisodeLongClick(episode) },
                         onDownloadClick = { onDownloadEpisode(episode) },
                         modifier = Modifier.then(
                             if (index == (state.scrollToEpisodeIndex ?: 0)) Modifier.focusRequester(targetEpisodeFocusRequester) else Modifier
@@ -700,6 +753,92 @@ private fun DetailsTopBar(
                 contentDescription = "Back",
                 tint = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
                 modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Cast person card — clickable circular photo with name + role
+ */
+@Composable
+private fun CastPersonCard(
+    person: PersonInfo,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.08f else 1f,
+        label = "castScale"
+    )
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .width(72.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(4.dp)
+    ) {
+        // Profile photo
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(WaveStreamColors.BackgroundTertiary)
+        ) {
+            person.profileUrl?.let { url ->
+                AsyncImage(
+                    model = url,
+                    contentDescription = person.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            // Fallback: show initial letter
+            if (person.profileUrl == null) {
+                Text(
+                    text = person.name.firstOrNull()?.uppercase() ?: "?",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = WaveStreamColors.TextSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // Name
+        Text(
+            text = person.name,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // Role (character)
+        person.roleLabel?.let { role ->
+            Text(
+                text = role,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                color = WaveStreamColors.TextTertiary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -890,7 +1029,8 @@ private fun PlayButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .widthIn(min = 100.dp, max = 160.dp)  // Narrower: no icon buttons squishing
+            .width(IntrinsicSize.Min)
+            .widthIn(min = 120.dp)
             .height(52.dp)
             .border(3.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
@@ -906,7 +1046,7 @@ private fun PlayButton(
     ) {
         // Button content
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
+            modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 2.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -920,7 +1060,8 @@ private fun PlayButton(
                 text = text,
                 style = MaterialTheme.typography.labelLarge,
                 color = contentColor,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
             )
         }
         
@@ -933,15 +1074,13 @@ private fun PlayButton(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
-                    .height(6.dp)  // Slightly thicker for visibility
-                    .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
-                    .background(Color.Black.copy(alpha = 0.4f))  // Darker track
+                    .height(4.dp)
+                    .background(Color.Black.copy(alpha = 0.15f))  // Consistent track
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
                         .fillMaxWidth(effectiveProgress)
-                        .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = if (effectiveProgress > 0.95f) 12.dp else 0.dp))
                         .background(WaveStreamColors.Accent)
                 )
             }
@@ -1443,6 +1582,7 @@ private fun SeasonTab(
  * Thumbnail on left, episode info on right
  * With progress bar at bottom when in-progress
  */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun EpisodeCard(
     episode: Episode,
@@ -1450,11 +1590,15 @@ private fun EpisodeCard(
     downloadState: EpisodeDownloadState? = null,
     seriesName: String? = null,
     onClick: () -> Unit,
+    onLongClick: () -> Unit = {},
     onDownloadClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+    
+    var pressStartTime by remember { mutableStateOf(0L) }
+    val longPressThreshold = 500L
     
     // Download state
     val isDownloaded = downloadState?.isDownloaded == true
@@ -1503,10 +1647,34 @@ private fun EpisodeCard(
                 .border(2.dp, borderColor, RoundedCornerShape(8.dp))
                 .background(backgroundColor)
                 .focusable(interactionSource = interactionSource)
-                .clickable(
+                .onPreviewKeyEvent { keyEvent ->
+                    when {
+                        keyEvent.key == Key.DirectionCenter ||
+                        keyEvent.key == Key.Enter -> {
+                            if (keyEvent.type == KeyEventType.KeyDown) {
+                                if (pressStartTime == 0L) {
+                                    pressStartTime = System.currentTimeMillis()
+                                }
+                                true
+                            } else if (keyEvent.type == KeyEventType.KeyUp) {
+                                val pressDuration = System.currentTimeMillis() - pressStartTime
+                                pressStartTime = 0L
+                                if (pressDuration >= longPressThreshold) {
+                                    onLongClick()
+                                } else {
+                                    onClick()
+                                }
+                                true
+                            } else false
+                        }
+                        else -> false
+                    }
+                }
+                .combinedClickable(
                     interactionSource = interactionSource,
                     indication = null,
-                    onClick = onClick
+                    onClick = onClick,
+                    onLongClick = onLongClick
                 )
                 .padding(8.dp),
             verticalAlignment = Alignment.Top
@@ -1670,8 +1838,10 @@ private fun EpisodeCard(
                 
                 Spacer(modifier = Modifier.height(8.dp))
                 
-                // Description if available
-                episode.tmdbOverview?.takeIf { it.isNotBlank() }?.let { overview ->
+                // Description if available (TMDB enriched, fallback to Xtream plot)
+                val episodeOverview = episode.tmdbOverview?.takeIf { it.isNotBlank() }
+                    ?: episode.plot?.takeIf { it.isNotBlank() }
+                episodeOverview?.let { overview ->
                     Text(
                         text = overview,
                         style = MaterialTheme.typography.bodySmall,

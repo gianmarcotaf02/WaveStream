@@ -20,7 +20,9 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index(value = ["profileId"]),
-        Index(value = ["profileId", "contentType", "contentId"], unique = true)
+        Index(value = ["profileId", "contentType", "contentId"], unique = true),
+        Index(value = ["profileId", "lastWatchedAt"]),
+        Index("seriesId")
     ]
 )
 data class WatchProgress(

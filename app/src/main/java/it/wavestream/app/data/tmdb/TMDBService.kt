@@ -1,15 +1,20 @@
 package it.wavestream.app.data.tmdb
 
 import android.util.Log
+import it.wavestream.app.data.database.dao.EpisodeDao
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.SeriesDao
+import it.wavestream.app.data.database.entity.Episode
 import it.wavestream.app.data.database.entity.Movie
 import it.wavestream.app.data.database.entity.Series
 import it.wavestream.app.data.preferences.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.json.JSONObject
-import java.net.URL
+import java.io.IOException
+import java.net.URLEncoder
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +25,9 @@ import javax.inject.Singleton
 class TMDBService @Inject constructor(
     private val movieDao: MovieDao,
     private val seriesDao: SeriesDao,
-    private val userPreferences: UserPreferences
+    private val episodeDao: EpisodeDao,
+    private val userPreferences: UserPreferences,
+    private val httpClient: OkHttpClient
 ) {
     companion object {
         private const val TAG = "TMDBService"
@@ -28,6 +35,27 @@ class TMDBService @Inject constructor(
         private const val API_KEY = "5f275659e4e6975d78d510255857dbf8"
         private const val LANGUAGE = "it-IT"
         private const val CACHE_DURATION_HOURS = 168L  // 7 days = 168 hours
+        private const val MAX_RETRIES = 2
+    }
+
+    private fun fetchUrl(url: String): String {
+        val request = Request.Builder().url(url).build()
+        var lastException: IOException? = null
+        for (attempt in 0..MAX_RETRIES) {
+            try {
+                val response = httpClient.newCall(request).execute()
+                if (!response.isSuccessful) {
+                    throw IOException("HTTP ${response.code}")
+                }
+                return response.body?.string() ?: throw IOException("Empty body")
+            } catch (e: IOException) {
+                lastException = e
+                if (attempt < MAX_RETRIES) {
+                    Log.w(TAG, "Attempt ${attempt + 1} failed for $url, retrying...")
+                }
+            }
+        }
+        throw lastException ?: IOException("Unknown network error")
     }
     
     // TMDB Genre IDs
@@ -80,7 +108,8 @@ class TMDBService @Inject constructor(
         val overview: String?,
         val voteAverage: Float,
         val releaseDate: String?,
-        val genreIds: List<Int>
+        val genreIds: List<Int>,
+        val mediaType: String = "movie" // "movie" or "tv"
     )
     
     data class CarouselRow(
@@ -561,7 +590,7 @@ class TMDBService @Inject constructor(
      * Fetch data from TMDB API
      */
     private fun fetchFromTMDB(url: String, isTV: Boolean = false): List<TMDBItem> {
-        val response = URL(url).readText()
+        val response = fetchUrl(url)
         val json = JSONObject(response)
         val results = json.getJSONArray("results")
         
@@ -584,7 +613,8 @@ class TMDBService @Inject constructor(
                 overview = item.optString("overview", "").takeIf { it.isNotEmpty() },
                 voteAverage = item.optDouble("vote_average", 0.0).toFloat(),
                 releaseDate = item.optString(if (isTV) "first_air_date" else "release_date", "").takeIf { it.isNotEmpty() },
-                genreIds = genreIds
+                genreIds = genreIds,
+                mediaType = if (isTV) "tv" else "movie"
             )
         }
     }
@@ -849,6 +879,13 @@ class TMDBService @Inject constructor(
             return@withContext movie
         }
         
+        // Negative cache: recently searched but NOT found, don't re-search
+        if (movie.tmdbId == null && movie.tmdbLastFetchAt != null &&
+            System.currentTimeMillis() - movie.tmdbLastFetchAt < 24 * 60 * 60 * 1000) {
+            Log.d(TAG, "Movie '${movie.name}' recently searched but not found on TMDB, skipping")
+            return@withContext movie
+        }
+        
         // Skip if already enriched recently AND has TMDB data AND has original title (for OMDB fallback) AND has trailer key
         val hasRealData = movie.tmdbId != null && movie.tmdbOverview != null && movie.tmdbOriginalTitle != null && movie.tmdbTrailerKey != null
         if (hasRealData && movie.tmdbLastFetchAt != null && 
@@ -934,6 +971,8 @@ class TMDBService @Inject constructor(
             
             if (tmdbId == null) {
                 Log.d(TAG, "No TMDB results for: '${movie.name}' after all strategies")
+                // Mark as searched so we don't retry for 24h
+                movieDao.update(movie.copy(tmdbLastFetchAt = System.currentTimeMillis()))
                 return@withContext movie
             }
             
@@ -950,6 +989,9 @@ class TMDBService @Inject constructor(
             
         } catch (e: Exception) {
             Log.e(TAG, "Error enriching movie: ${movie.name}", e)
+            try {
+                movieDao.update(movie.copy(tmdbLastFetchAt = System.currentTimeMillis()))
+            } catch (_: Exception) {}
             movie
         }
     }
@@ -961,12 +1003,12 @@ class TMDBService @Inject constructor(
         try {
             val yearParam = year?.let { "&year=$it" } ?: ""
             val searchUrl = "$BASE_URL/search/movie?api_key=$API_KEY&language=$language&query=${
-                java.net.URLEncoder.encode(title, "UTF-8")
+                URLEncoder.encode(title, "UTF-8")
             }$yearParam"
             
             Log.d(TAG, "TMDB search: '$title' year=$year lang=$language")
             
-            val searchResponse = URL(searchUrl).readText()
+            val searchResponse = fetchUrl(searchUrl)
             val searchJson = JSONObject(searchResponse)
             val results = searchJson.optJSONArray("results")
             
@@ -983,13 +1025,76 @@ class TMDBService @Inject constructor(
         return null
     }
     
+    // ── Public search methods for Taste Setup ──
+
+    suspend fun searchMulti(query: String): List<TMDBItem> = withContext(Dispatchers.IO) {
+        try {
+            val url = "$BASE_URL/search/multi?api_key=$API_KEY&language=$LANGUAGE&query=${java.net.URLEncoder.encode(query, "UTF-8")}"
+            fetchFromTMDB(url)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error searching multi: $query", e)
+            emptyList()
+        }
+    }
+
+    suspend fun searchMovie(query: String): List<TMDBItem> = withContext(Dispatchers.IO) {
+        try {
+            val url = "$BASE_URL/search/movie?api_key=$API_KEY&language=$LANGUAGE&query=${java.net.URLEncoder.encode(query, "UTF-8")}"
+            fetchFromTMDB(url)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error searching movie: $query", e)
+            emptyList()
+        }
+    }
+
+    suspend fun searchSeries(query: String): List<TMDBItem> = withContext(Dispatchers.IO) {
+        try {
+            val url = "$BASE_URL/search/tv?api_key=$API_KEY&language=$LANGUAGE&query=${java.net.URLEncoder.encode(query, "UTF-8")}"
+            fetchFromTMDB(url, isTV = true)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error searching series: $query", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getRecommendations(tmdbId: Int, mediaType: String, page: Int = 1): List<TMDBItem> = withContext(Dispatchers.IO) {
+        try {
+            val url = "$BASE_URL/$mediaType/$tmdbId/recommendations?api_key=$API_KEY&language=$LANGUAGE&page=$page"
+            fetchFromTMDB(url, isTV = mediaType == "tv")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting recommendations for $mediaType/$tmdbId", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getSimilar(tmdbId: Int, mediaType: String, page: Int = 1): List<TMDBItem> = withContext(Dispatchers.IO) {
+        try {
+            val url = "$BASE_URL/$mediaType/$tmdbId/similar?api_key=$API_KEY&language=$LANGUAGE&page=$page"
+            fetchFromTMDB(url, isTV = mediaType == "tv")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting similar for $mediaType/$tmdbId", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getDiscoverByGenre(genreIds: List<Int>, mediaType: String, page: Int = 1): List<TMDBItem> = withContext(Dispatchers.IO) {
+        try {
+            val genresParam = genreIds.joinToString(",")
+            val url = "$BASE_URL/discover/$mediaType?api_key=$API_KEY&language=$LANGUAGE&with_genres=$genresParam&sort_by=popularity.desc&page=$page"
+            fetchFromTMDB(url, isTV = mediaType == "tv")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error discovering by genres: $genreIds", e)
+            emptyList()
+        }
+    }
+
     /**
      * Fetch full movie details from TMDB
      */
     private fun fetchMovieDetails(movie: Movie, tmdbId: Int): Movie {
         val detailsUrl = "$BASE_URL/movie/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,external_ids,videos&include_video_language=it,en,null"
         Log.d(TAG, "Fetching: $detailsUrl")
-        val detailsResponse = URL(detailsUrl).readText()
+        val detailsResponse = fetchUrl(detailsUrl)
         val details = JSONObject(detailsResponse)
         
         // Extract detailed info
@@ -1019,6 +1124,21 @@ class TMDBService @Inject constructor(
                 castArray.getJSONObject(it).optString("name", "").takeIf { name -> name.isNotEmpty() }
             }.joinToString(", ")
         } else null
+
+        val castJson = if (castArray != null) {
+            org.json.JSONArray().apply {
+                (0 until minOf(15, castArray.length())).forEach { i ->
+                    val c = castArray.getJSONObject(i)
+                    val obj = org.json.JSONObject()
+                    obj.put("id", c.optInt("id"))
+                    obj.put("name", c.optString("name", ""))
+                    obj.put("character", c.optString("character", ""))
+                    obj.put("profile_path", c.optString("profile_path", "").takeIf { it.isNotEmpty() } ?: "")
+                    obj.put("order", c.optInt("order", i))
+                    if (obj.optString("name").isNotEmpty()) put(obj)
+                }
+            }.toString()
+        } else null
         
         // Extract director
         val crewArray = credits?.optJSONArray("crew")
@@ -1032,6 +1152,24 @@ class TMDBService @Inject constructor(
                 }
             }
         }
+
+        val crewJson = if (crewArray != null) {
+            org.json.JSONArray().apply {
+                for (i in 0 until crewArray.length()) {
+                    val c = crewArray.getJSONObject(i)
+                    val job = c.optString("job", "")
+                    if (job == "Director" || job == "Producer" || job == "Writer") {
+                        val obj = org.json.JSONObject()
+                        obj.put("id", c.optInt("id"))
+                        obj.put("name", c.optString("name", ""))
+                        obj.put("job", job)
+                        obj.put("department", c.optString("department", ""))
+                        obj.put("profile_path", c.optString("profile_path", "").takeIf { it.isNotEmpty() } ?: "")
+                        put(obj)
+                    }
+                }
+            }.toString()
+        } else null
         
         val externalIds = details.optJSONObject("external_ids")
         val imdbId = externalIds?.optString("imdb_id", "")?.takeIf { it.isNotBlank() }
@@ -1078,6 +1216,8 @@ class TMDBService @Inject constructor(
             tmdbRuntime = runtime,
             tmdbCast = cast,
             tmdbDirector = director,
+            tmdbCastJson = castJson,
+            tmdbCrewJson = crewJson,
             tmdbGenres = genres,
             tmdbBackdropPath = backdropPath,
             tmdbPosterPath = posterPath ?: movie.tmdbPosterPath,
@@ -1153,12 +1293,11 @@ class TMDBService @Inject constructor(
      * Uses multiple search strategies for better matching
      */
     suspend fun enrichSeriesDetails(series: Series): Series = withContext(Dispatchers.IO) {
-        // Skip if already enriched recently AND has TMDB data AND has trailer key
+        // Cache hit: recently searched AND has full data
         val hasRealData = series.tmdbId != null && series.tmdbOverview != null && series.tmdbTrailerKey != null
         if (hasRealData && series.tmdbLastFetchAt != null && 
             System.currentTimeMillis() - series.tmdbLastFetchAt < 24 * 60 * 60 * 1000) {
             Log.d(TAG, "Series '${series.name}' already enriched with data, skipping")
-            // Return fresh data from DB to ensure all fields are populated
             val freshFromDb = seriesDao.getSeriesById(series.id)
             if (freshFromDb != null && freshFromDb.tmdbVoteAverage != null) {
                 Log.d(TAG, "Returning fresh DB series data with rating=${freshFromDb.tmdbVoteAverage}")
@@ -1166,25 +1305,38 @@ class TMDBService @Inject constructor(
             }
             return@withContext series
         }
-        
+
+        // Negative cache: recently searched but NOT found, don't re-search
+        if (series.tmdbId == null && series.tmdbLastFetchAt != null &&
+            System.currentTimeMillis() - series.tmdbLastFetchAt < 24 * 60 * 60 * 1000) {
+            Log.d(TAG, "Series '${series.name}' recently searched but not found on TMDB, skipping")
+            return@withContext series
+        }
+
         try {
-            // Clean title for TMDB search
+            var tmdbId: Int? = series.tmdbId
+
+            // If TMDB ID already known from playlist, fetch details directly
+            if (tmdbId != null) {
+                Log.d(TAG, "Series '${series.name}' has TMDB ID from playlist: $tmdbId, fetching details directly")
+                val enrichedSeries = fetchSeriesDetails(series, tmdbId)
+                seriesDao.update(enrichedSeries)
+                Log.d(TAG, "Enriched series: ${series.name} with TMDB data (id=$tmdbId)")
+                return@withContext enrichedSeries
+            }
+
+            // Otherwise search by title with fallback strategies
             val cleanedTitle = cleanTitleForSearch(series.name)
-            
-            // Try to extract year from first air date or name
             val yearFromName = Regex("""\\((\\d{4})\\)""").find(series.name)?.groupValues?.get(1)?.toIntOrNull()
             val year = series.year ?: yearFromName
-            
-            // Try multiple search strategies
-            var tmdbId: Int? = searchSeriesOnTMDB(cleanedTitle, year, "it-IT")
-            
-            // Strategy 2: If no results, try without year
+
+            tmdbId = searchSeriesOnTMDB(cleanedTitle, year, "it-IT")
+
             if (tmdbId == null && year != null) {
                 Log.d(TAG, "TMDB TV: No results with year, trying without year...")
                 tmdbId = searchSeriesOnTMDB(cleanedTitle, null, "it-IT")
             }
-            
-            // Strategy 3: Try with English language
+
             if (tmdbId == null) {
                 Log.d(TAG, "TMDB TV: No Italian results, trying English language...")
                 tmdbId = searchSeriesOnTMDB(cleanedTitle, year, "en-US")
@@ -1192,8 +1344,7 @@ class TMDBService @Inject constructor(
                     tmdbId = searchSeriesOnTMDB(cleanedTitle, null, "en-US")
                 }
             }
-            
-            // Strategy 4: Try common Italian-to-English title translations
+
             if (tmdbId == null) {
                 val englishTitle = tryTranslateCommonItalianTitles(cleanedTitle)
                 if (englishTitle != null && englishTitle != cleanedTitle) {
@@ -1204,8 +1355,7 @@ class TMDBService @Inject constructor(
                     }
                 }
             }
-            
-            // Strategy 5: Try removing articles and common prefixes
+
             if (tmdbId == null) {
                 val simplifiedTitle = removeArticlesAndPrefixes(cleanedTitle)
                 if (simplifiedTitle != cleanedTitle) {
@@ -1216,15 +1366,14 @@ class TMDBService @Inject constructor(
                     }
                 }
             }
-            
-            // Strategy 6: Try individual words (for cases like "John Rambo" -> "Rambo")
+
             if (tmdbId == null) {
                 val words = cleanedTitle.split(" ").filter { it.length > 3 }
                 if (words.size >= 2) {
                     val lastWord = words.last()
                     Log.d(TAG, "TMDB TV: Trying last word: '$lastWord'")
                     tmdbId = searchSeriesOnTMDB(lastWord, year, "en-US")
-                    
+
                     if (tmdbId == null && words.first() != lastWord) {
                         val firstWord = words.first()
                         Log.d(TAG, "TMDB TV: Trying first word: '$firstWord'")
@@ -1232,21 +1381,19 @@ class TMDBService @Inject constructor(
                     }
                 }
             }
-            
+
             if (tmdbId == null) {
                 Log.d(TAG, "No TMDB results for series: '${series.name}' after all strategies")
+                // Mark as searched so we don't retry for 24h
+                seriesDao.update(series.copy(tmdbLastFetchAt = System.currentTimeMillis()))
                 return@withContext series
             }
-            
-            // Fetch full series details (in Italian)
+
             val enrichedSeries = fetchSeriesDetails(series, tmdbId)
-            
-            // Save to database
             seriesDao.update(enrichedSeries)
-            
             Log.d(TAG, "Enriched series: ${series.name} with TMDB data (id=$tmdbId)")
             enrichedSeries
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "Error enriching series: ${series.name}", e)
             series
@@ -1260,12 +1407,12 @@ class TMDBService @Inject constructor(
         try {
             val yearParam = year?.let { "&first_air_date_year=$it" } ?: ""
             val searchUrl = "$BASE_URL/search/tv?api_key=$API_KEY&language=$language&query=${
-                java.net.URLEncoder.encode(title, "UTF-8")
+                URLEncoder.encode(title, "UTF-8")
             }$yearParam"
             
             Log.d(TAG, "TMDB TV search: '$title' year=$year lang=$language")
             
-            val searchResponse = URL(searchUrl).readText()
+            val searchResponse = fetchUrl(searchUrl)
             val searchJson = JSONObject(searchResponse)
             val results = searchJson.optJSONArray("results")
             
@@ -1286,8 +1433,8 @@ class TMDBService @Inject constructor(
      * Fetch full TV series details from TMDB
      */
     private fun fetchSeriesDetails(series: Series, tmdbId: Int): Series {
-        val detailsUrl = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,videos&include_video_language=it,en,null"
-        val detailsResponse = URL(detailsUrl).readText()
+        val detailsUrl = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,videos,external_ids&include_video_language=it,en,null"
+        val detailsResponse = fetchUrl(detailsUrl)
         val details = JSONObject(detailsResponse)
         
         // Extract detailed info
@@ -1336,14 +1483,56 @@ class TMDBService @Inject constructor(
                 castArray.getJSONObject(it).optString("name", "").takeIf { name -> name.isNotEmpty() }
             }.joinToString(", ")
         } else null
+
+        val castJson = if (castArray != null) {
+            org.json.JSONArray().apply {
+                (0 until minOf(15, castArray.length())).forEach { i ->
+                    val c = castArray.getJSONObject(i)
+                    val obj = org.json.JSONObject()
+                    obj.put("id", c.optInt("id"))
+                    obj.put("name", c.optString("name", ""))
+                    obj.put("character", c.optString("character", ""))
+                    obj.put("profile_path", c.optString("profile_path", "").takeIf { it.isNotEmpty() } ?: "")
+                    obj.put("order", c.optInt("order", i))
+                    if (obj.optString("name").isNotEmpty()) put(obj)
+                }
+            }.toString()
+        } else null
+
+        val crewArray = credits?.optJSONArray("crew")
+        val crewJson = if (crewArray != null) {
+            org.json.JSONArray().apply {
+                for (i in 0 until crewArray.length()) {
+                    val c = crewArray.getJSONObject(i)
+                    val job = c.optString("job", "")
+                    if (job == "Director" || job == "Producer" || job == "Writer") {
+                        val obj = org.json.JSONObject()
+                        obj.put("id", c.optInt("id"))
+                        obj.put("name", c.optString("name", ""))
+                        obj.put("job", job)
+                        obj.put("department", c.optString("department", ""))
+                        obj.put("profile_path", c.optString("profile_path", "").takeIf { it.isNotEmpty() } ?: "")
+                        put(obj)
+                    }
+                }
+            }.toString()
+        } else null
         
+        // Extract external IDs (IMDB ID)
+        val externalIds = details.optJSONObject("external_ids")
+        val imdbId = externalIds?.optString("imdb_id", "")?.takeIf { it.isNotBlank() }
+        Log.d(TAG, "TV External IDs: imdb_id=$imdbId")
+
         // Update series entity
         return series.copy(
             tmdbId = tmdbId,
+            tmdbImdbId = imdbId,
             tmdbTrailerKey = trailerKey,
             tmdbOverview = overview,
             tmdbFirstAirDate = firstAirDate,
             tmdbCast = cast,
+            tmdbCastJson = castJson,
+            tmdbCrewJson = crewJson,
             tmdbGenres = genres,
             tmdbBackdropPath = backdropPath,
             tmdbPosterPath = posterPath ?: series.tmdbPosterPath,
@@ -1354,7 +1543,58 @@ class TMDBService @Inject constructor(
             tmdbLastFetchAt = System.currentTimeMillis()
         )
     }
-    
+
+    /**
+     * Enrich series episodes with TMDB data (title, plot, still image) as fallback.
+     * This is called after Xtream episode metadata has been parsed first.
+     * TMDB fills in any missing fields (waterfall: Xtream parsed data first, then TMDB).
+     */
+    suspend fun enrichEpisodesFromTMDB(series: Series): Unit = withContext(Dispatchers.IO) {
+        val tmdbId = series.tmdbId ?: return@withContext
+
+        try {
+            val existingSeasons = episodeDao.getSeasonNumbers(series.id)
+            for (season in existingSeasons) {
+                fetchAndUpdateSeasonEpisodes(series, tmdbId, season)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error enriching episodes for series: ${series.name}", e)
+        }
+    }
+
+    private suspend fun fetchAndUpdateSeasonEpisodes(series: Series, tmdbId: Int, seasonNumber: Int) {
+        val seasonUrl = "$BASE_URL/tv/$tmdbId/season/$seasonNumber?api_key=$API_KEY&language=$LANGUAGE"
+        val seasonResponse = fetchUrl(seasonUrl)
+        val seasonJson = JSONObject(seasonResponse)
+        val episodesArray = seasonJson.optJSONArray("episodes") ?: return
+
+        for (i in 0 until episodesArray.length()) {
+            val tmdbEp = episodesArray.getJSONObject(i)
+            val epNumber = tmdbEp.optInt("episode_number", 0)
+            if (epNumber <= 0) continue
+
+            val localEp = episodeDao.getEpisode(series.id, seasonNumber, epNumber) ?: continue
+
+            val tmdbName = tmdbEp.optString("name", "").takeIf { it.isNotBlank() }
+            val tmdbOverview = tmdbEp.optString("overview", "").takeIf { it.isNotBlank() }
+            val tmdbStillPath = tmdbEp.optString("still_path", "").takeIf { it.isNotBlank() }
+            val tmdbAirDate = tmdbEp.optString("air_date", "").takeIf { it.isNotBlank() }
+            val tmdbVoteAverage = tmdbEp.optDouble("vote_average", 0.0).toFloat().takeIf { it > 0f }
+            val tmdbRuntime = tmdbEp.optInt("runtime", 0).takeIf { it > 0 }
+            val tmdbEpisodeId = tmdbEp.optInt("id", 0).takeIf { it > 0 }
+
+            episodeDao.update(localEp.copy(
+                tmdbEpisodeId = tmdbEpisodeId,
+                tmdbName = tmdbName ?: localEp.tmdbName,
+                tmdbOverview = tmdbOverview ?: localEp.tmdbOverview,
+                tmdbStillPath = tmdbStillPath ?: localEp.tmdbStillPath,
+                tmdbAirDate = tmdbAirDate ?: localEp.tmdbAirDate,
+                tmdbVoteAverage = tmdbVoteAverage ?: localEp.tmdbVoteAverage,
+                tmdbRuntime = tmdbRuntime ?: localEp.tmdbRuntime
+            ))
+        }
+    }
+
     /**
      * Helper to extract year from date string (YYYY-MM-DD)
      */

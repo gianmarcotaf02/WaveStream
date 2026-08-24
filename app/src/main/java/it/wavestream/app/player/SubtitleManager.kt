@@ -80,7 +80,8 @@ class SubtitleManager @Inject constructor(
         imdbId: String? = null,
         type: String? = null,
         season: Int? = null,
-        episode: Int? = null
+        episode: Int? = null,
+        languages: String = "it,en"
     ): List<SubtitleTrack> {
         if (!openSubtitlesRepo.isAuthenticated()) {
             return emptyList()
@@ -92,7 +93,8 @@ class SubtitleManager @Inject constructor(
             imdbId = imdbId,
             type = type,
             season = season,
-            episode = episode
+            episode = episode,
+            language = languages
         )
         
         return when (result) {
@@ -142,7 +144,6 @@ class SubtitleManager @Inject constructor(
     /**
      * Apply subtitle to ExoPlayer
      */
-    @Suppress("UNUSED_PARAMETER") // player kept for future use
     fun applySubtitle(player: ExoPlayer, subtitlePath: String, mediaItem: MediaItem): MediaItem {
         val subtitleUri = Uri.fromFile(File(subtitlePath))
         val mimeType = when {
@@ -159,18 +160,25 @@ class SubtitleManager @Inject constructor(
             .setSelectionFlags(C.SELECTION_FLAG_DEFAULT)
             .build()
         
-        return mediaItem.buildUpon()
+        val newMediaItem = mediaItem.buildUpon()
             .setSubtitleConfigurations(listOf(subtitleConfig))
             .build()
+        
+        player.replaceMediaItem(player.currentMediaItemIndex, newMediaItem)
+        return newMediaItem
     }
     
     /**
      * Clear active subtitle
      */
-    @Suppress("UNUSED_PARAMETER") // player kept for future use
     fun clearSubtitle(player: ExoPlayer) {
         activeSubtitlePath = null
-        // Player will need to be reset to remove subtitles
+        // Remove subtitle config from current item
+        val current = player.currentMediaItem
+        if (current != null) {
+            player.replaceMediaItem(player.currentMediaItemIndex,
+                current.buildUpon().setSubtitleConfigurations(emptyList()).build())
+        }
     }
     
     fun isAuthenticated(): Boolean = openSubtitlesRepo.isAuthenticated()

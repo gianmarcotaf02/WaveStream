@@ -131,24 +131,11 @@ class SearchActivity : ComponentActivity() {
         val keyboardController = LocalSoftwareKeyboardController.current
         val view = androidx.compose.ui.platform.LocalView.current
         
-        // Force keyboard open on Android TV
         LaunchedEffect(Unit) {
-            // Wait for full composition before requesting focus
-            delay(300)
+            delay(500)
             try {
                 focusRequester.requestFocus()
-                // Wait for focus to settle, then show keyboard
-                delay(200)
                 keyboardController?.show()
-                
-                // Additionally force open keyboard using InputMethodManager for TV devices
-                delay(200)
-                val imm = view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                // Try multiple methods to show keyboard on TV
-                imm?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
-                delay(100)
-                // Fallback: toggle soft input which works better on some TV devices
-                imm?.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
             } catch (e: Exception) {
                 // Ignore focus/keyboard errors on TV devices
             }
@@ -258,9 +245,16 @@ class SearchActivity : ComponentActivity() {
                 "swedish", "sweden", "svezia",
                 "norwegian", "norway", "norvegia",
                 "danish", "denmark", "danimarca",
-                "finnish", "finland", "finlandia"
+                "finnish", "finland", "finlandia",
+                "english", "england", "inghilterra", "british", "uk channel", "gb", "gb-"
             )
             if (blockedLangKeywords.any { nameLower.contains(it) || catLower.contains(it) }) return true
+
+            // 4. UPPERCASE country code patterns (catches "UK|Name" or "NAME | UK")
+            val upperCodes = listOf("UK|", "UK ", "UK-", "UK:", "DE|", "DE ", "DE-", "DE:", "FR|", "FR ", "FR-", "FR:")
+            val nameUpper = name.trim().uppercase()
+            val catUpper = category?.uppercase()?.trim() ?: ""
+            if (upperCodes.any { nameUpper.startsWith(it) || catUpper.startsWith(it) || nameUpper.contains("| $it") || catUpper.contains("| $it") }) return true
 
             // 4. Pattern "| XX" o "| XX |" nel nome (es. "Film | DE", "Serie | FR |")
             val pipePattern = Regex("\\|\\s*(${blockedCountryCodes.joinToString("|")})\\s*(\\||$)")

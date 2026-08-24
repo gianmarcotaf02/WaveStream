@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.google.firebase.database.FirebaseDatabase
@@ -37,7 +38,9 @@ class AppUpdateManager @Inject constructor(
         private const val APK_FILENAME = "wavestream_update.apk"
     }
     
-    private val database = FirebaseDatabase.getInstance()
+    private val database by lazy {
+        FirebaseDatabase.getInstance("https://wavestream-d3972-default-rtdb.europe-west1.firebasedatabase.app")
+    }
     
     private val _downloadState = MutableStateFlow<DownloadState>(DownloadState.Idle)
     val downloadState: StateFlow<DownloadState> = _downloadState
@@ -228,6 +231,14 @@ class AppUpdateManager @Inject constructor(
      * This will show the standard Android package installer
      */
     fun installUpdate() {
+        if (downloadedApkFile == null) {
+            val updatesDir = File(context.getExternalFilesDir(null), "updates")
+            val apkFile = File(updatesDir, APK_FILENAME)
+            if (apkFile.exists()) {
+                downloadedApkFile = apkFile
+            }
+        }
+        
         val apkFile = downloadedApkFile ?: return
         
         if (!apkFile.exists()) {
@@ -236,6 +247,17 @@ class AppUpdateManager @Inject constructor(
         }
         
         try {
+            // Check for install unknown apps permission on Android O (API 26) and above
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.packageManager.canRequestPackageInstalls()) {
+                Log.d(TAG, "Requesting install packages permission (Unknown Sources settings page)")
+                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context.startActivity(intent)
+                return
+            }
+
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 val apkUri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     FileProvider.getUriForFile(

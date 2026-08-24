@@ -26,9 +26,11 @@ import it.wavestream.app.data.database.entity.*
         CustomGroup::class,
         GroupItem::class,
         RecentlyWatchedChannel::class,
-        DownloadedContent::class
+        DownloadedContent::class,
+        UserTaste::class,
+        HomeSessionCacheEntity::class
     ],
-    version = 18,
+    version = 25,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -50,6 +52,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun recentlyWatchedDao(): RecentlyWatchedDao
     abstract fun favoriteCategoryDao(): FavoriteCategoryDao
     abstract fun downloadedContentDao(): DownloadedContentDao
+    abstract fun userTasteDao(): UserTasteDao
+    abstract fun homeSessionCacheDao(): HomeSessionCacheDao
     
     companion object {
         const val DATABASE_NAME = "wavestream_database"

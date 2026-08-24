@@ -15,8 +15,10 @@ class WaveStreamImageLoaderFactory @Inject constructor(
 ) : ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
-        val memoryPercent = 0.25
-        val diskCacheSize = 150L * 1024 * 1024
+        // 30% memory — TV has more RAM than phone, and hero backdrops are large
+        val memoryPercent = 0.30
+        // 300MB disk cache — enough for ~1000 HD poster images
+        val diskCacheSize = 300L * 1024 * 1024
 
         return ImageLoader.Builder(context)
             .memoryCache {

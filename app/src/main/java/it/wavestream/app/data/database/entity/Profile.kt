@@ -38,6 +38,8 @@ data class Profile(
     val isDefault: Boolean = false,      // This profile starts automatically
     val isLastUsed: Boolean = false,     // Track last used for "use last profile" setting
     
+    val selectedGenres: String? = null,  // Comma-separated TMDB genre IDs
+
     val createdAt: Long = System.currentTimeMillis(),
     val lastUsedAt: Long = System.currentTimeMillis()
 )

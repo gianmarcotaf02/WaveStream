@@ -196,6 +196,141 @@ object DatabaseModule {
         }
     }
 
+    /**
+     * Migration from version 18 to 19:
+     * - Add user_taste table for storing user's movie/series preferences
+     * - Add selectedGenres column to profiles table
+     */
+    private val MIGRATION_18_19 = object : Migration(18, 19) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS user_taste (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    profileId INTEGER NOT NULL,
+                    contentType TEXT NOT NULL,
+                    tmdbId INTEGER NOT NULL,
+                    title TEXT NOT NULL,
+                    posterPath TEXT,
+                    year INTEGER,
+                    status TEXT NOT NULL,
+                    addedAt INTEGER NOT NULL,
+                    FOREIGN KEY (profileId) REFERENCES profiles(id) ON DELETE CASCADE
+                )
+            """)
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_user_taste_profileId ON user_taste(profileId)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_user_taste_profileId_contentType_status ON user_taste(profileId, contentType, status)")
+            db.execSQL("ALTER TABLE profiles ADD COLUMN selectedGenres TEXT DEFAULT NULL")
+        }
+    }
+
+    /**
+     * Migration from version 19 to 20:
+     * - Add tmdbImdbId column to series table
+     */
+    private val MIGRATION_19_20 = object : Migration(19, 20) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE series ADD COLUMN tmdbImdbId TEXT DEFAULT NULL")
+        }
+    }
+
+    /**
+     * Migration from version 20 to 21:
+     * - Add tmdbCastJson and tmdbCrewJson columns to movies table
+     * - Add tmdbCastJson and tmdbCrewJson columns to series table
+     */
+    private val MIGRATION_20_21 = object : Migration(20, 21) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE movies ADD COLUMN tmdbCastJson TEXT DEFAULT NULL")
+            db.execSQL("ALTER TABLE movies ADD COLUMN tmdbCrewJson TEXT DEFAULT NULL")
+            db.execSQL("ALTER TABLE series ADD COLUMN tmdbCastJson TEXT DEFAULT NULL")
+            db.execSQL("ALTER TABLE series ADD COLUMN tmdbCrewJson TEXT DEFAULT NULL")
+        }
+    }
+
+    /**
+     * Migration from version 21 to 22:
+     * - Add performance indices to movies, series, and watch_progress tables
+     * - These indices dramatically speed up queries used by HomeViewModel
+     *   (getByTrendingCategory, isHidden filtering, continue watching, etc.)
+     */
+    private val MIGRATION_21_22 = object : Migration(21, 22) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            // Movies: add performance indices
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_trendingCategory ON movies(trendingCategory)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_isHidden ON movies(isHidden)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_addedAt ON movies(addedAt)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_playlistOrder ON movies(playlistOrder)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_playlistId_category_isHidden ON movies(playlistId, category, isHidden)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_trendingCategory_isHidden ON movies(trendingCategory, isHidden)")
+
+            // Series: add performance indices
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_series_trendingCategory ON series(trendingCategory)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_series_isHidden ON series(isHidden)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_series_addedAt ON series(addedAt)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_series_playlistOrder ON series(playlistOrder)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_series_playlistId_category_isHidden ON series(playlistId, category, isHidden)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_series_trendingCategory_isHidden ON series(trendingCategory, isHidden)")
+
+            // Watch progress: add indices for continue watching and episode lookups
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_watch_progress_profileId_lastWatchedAt ON watch_progress(profileId, lastWatchedAt)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_watch_progress_seriesId ON watch_progress(seriesId)")
+
+            // Favorites: add composite index for ordered queries
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_favorites_profileId_addedAt ON favorites(profileId, addedAt)")
+        }
+    }
+
+    /**
+     * Migration from version 22 to 23:
+     * - Add composite index (category, isHidden, name) to movies table
+     * - Add composite index (category, isHidden, name) to series table
+     * These indices fully cover the WHERE category = ? AND isHidden = 0 ORDER BY name
+     * queries used by FilmActivity and SeriesActivity, eliminating the filesort
+     * that caused slow initial loading on every app start.
+     */
+    private val MIGRATION_22_23 = object : Migration(22, 23) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_category_isHidden_name ON movies(category, isHidden, name)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_series_category_isHidden_name ON series(category, isHidden, name)")
+        }
+    }
+
+    /**
+     * Migration from version 23 to 24:
+     * - Add composite index (isHidden, name) to movies table
+     * - Add composite index (isHidden, name) to series table
+     * These indices cover the getAllMoviesList / getAllSeriesList queries:
+     * WHERE isHidden = 0 ORDER BY name
+     * Without this index SQLite filters via isHidden but then has to do a full
+     * filesort on the entire result set for ORDER BY name. With thousands of
+     * series entries this is the root cause of SeriesActivity being slow even
+     * after the previous optimizations.
+     */
+    private val MIGRATION_23_24 = object : Migration(23, 24) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_isHidden_name ON movies(isHidden, name)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_series_isHidden_name ON series(isHidden, name)")
+        }
+    }
+
+    /**
+     * Migration from version 24 to 25:
+     * - Add home_session_cache table for persistent tab content caching
+     * Replaces in-memory ConcurrentHashMap in ContentCache
+     */
+    private val MIGRATION_24_25 = object : Migration(24, 25) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS home_session_cache (
+                    key TEXT NOT NULL PRIMARY KEY,
+                    valueJson TEXT NOT NULL,
+                    updatedAt INTEGER NOT NULL
+                )
+            """)
+        }
+    }
+
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -206,7 +341,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -255,6 +390,12 @@ object DatabaseModule {
     
     @Provides
     fun provideDownloadedContentDao(db: AppDatabase): DownloadedContentDao = db.downloadedContentDao()
+    
+    @Provides
+    fun provideUserTasteDao(db: AppDatabase): UserTasteDao = db.userTasteDao()
+    
+    @Provides
+    fun provideHomeSessionCacheDao(db: AppDatabase): HomeSessionCacheDao = db.homeSessionCacheDao()
     
     @Provides
     @Singleton

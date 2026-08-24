@@ -15,8 +15,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -249,7 +252,7 @@ fun ProfileCard(
                         .background(
                             brush = Brush.radialGradient(
                                 colors = listOf(
-                                    WaveStreamColors.Accent.copy(alpha = cardGlowAlpha),
+                                    WaveStreamColors.Accent.copy(alpha = cardGlowAlpha.coerceIn(0f, 1f)),
                                     Color.Transparent
                                 )
                             )
@@ -257,11 +260,11 @@ fun ProfileCard(
                 )
             }
             
-            Image(
-                painter = painterResource(getAvatarResource(profile.avatarIndex)),
+            Icon(
+                imageVector = getAvatarIcon(profile.avatarIndex),
                 contentDescription = profile.name,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                tint = Color.Unspecified
             )
         }
         
@@ -329,15 +332,32 @@ private fun AddProfileButton(
 }
 
 /**
- * Get avatar drawable resource based on index
- * 0 = Male avatar, 1 = Female avatar
+ * Get avatar drawable resource based on index (legacy, for indices 0-1 only)
  */
 fun getAvatarResource(index: Int): Int {
-    return when (index) {
-        0 -> R.drawable.avatar_male
-        1 -> R.drawable.avatar_female
-        else -> R.drawable.avatar_male  // Default to male
-    }
+    return R.drawable.avatar_male  // Fallback, rarely used now
+}
+
+/**
+ * Get avatar Material Icon based on index (0-11)
+ * Maps directly to SetupActivity's avatarIcons list
+ */
+fun getAvatarIcon(index: Int): androidx.compose.ui.graphics.vector.ImageVector {
+    val icons = listOf(
+        Icons.Default.Person,
+        Icons.Default.Star,
+        Icons.Default.Favorite,
+        Icons.Default.QueueMusic,
+        Icons.Default.Palette,
+        Icons.Default.Image,
+        Icons.Default.PhoneAndroid,
+        Icons.Default.Tv,
+        Icons.Default.Bolt,
+        Icons.Default.Shield,
+        Icons.Default.AutoFixHigh,
+        Icons.Default.Flight
+    )
+    return icons.getOrElse(index) { icons[0] }
 }
 
 // ============ Dialogs ============
@@ -354,7 +374,8 @@ fun AddProfileDialog(
     if (!isVisible) return
     
     var profileName by remember { mutableStateOf("") }
-    var selectedAvatarIndex by remember { mutableIntStateOf(0) }  // 0 = male, 1 = female
+    var selectedAvatarIndex by remember { mutableIntStateOf(0) }
+    val confirmFocusRequester = remember { FocusRequester() }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -375,26 +396,27 @@ fun AddProfileDialog(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                Row(
+                // Avatar grid (4 columns, 3 rows = 12 icons)
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Male avatar
-                    AvatarOption(
-                        avatarRes = R.drawable.avatar_male,
-                        isSelected = selectedAvatarIndex == 0,
-                        onClick = { selectedAvatarIndex = 0 }
-                    )
-                    
-                    Spacer(modifier = Modifier.width(24.dp))
-                    
-                    // Female avatar
-                    AvatarOption(
-                        avatarRes = R.drawable.avatar_female,
-                        isSelected = selectedAvatarIndex == 1,
-                        onClick = { selectedAvatarIndex = 1 }
-                    )
+                    for (row in 0 until 3) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            for (col in 0 until 4) {
+                                val index = row * 4 + col
+                                AvatarIconOption(
+                                    avatarIndex = index,
+                                    isSelected = selectedAvatarIndex == index,
+                                    onClick = { selectedAvatarIndex = index },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -405,6 +427,10 @@ fun AddProfileDialog(
                     onValueChange = { profileName = it },
                     label = { Text(stringResource(R.string.profile_name_hint)) },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = { confirmFocusRequester.requestFocus() }
+                    ),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = WaveStreamColors.Accent,
                         unfocusedBorderColor = WaveStreamColors.TextTertiary,
@@ -426,6 +452,7 @@ fun AddProfileDialog(
                         profileName = ""
                     }
                 },
+                modifier = Modifier.focusRequester(confirmFocusRequester),
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = WaveStreamColors.Accent
                 )
@@ -466,7 +493,7 @@ private fun AvatarOption(
     val borderColor by animateColorAsState(
         targetValue = when {
             isSelected -> WaveStreamColors.Accent
-            isFocused -> WaveStreamColors.TextSecondary
+            isFocused -> WaveStreamColors.Accent
             else -> Color.Transparent
         },
         label = "avatarBorder"
@@ -498,6 +525,54 @@ private fun AvatarOption(
     }
 }
 
+@Composable
+private fun AvatarIconOption(
+    avatarIndex: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected || isFocused) 1.1f else 1f,
+        label = "avatarIconScale"
+    )
+    
+    Box(
+        modifier = modifier
+            .aspectRatio(1f)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(CircleShape)
+            .background(
+                if (isSelected) WaveStreamColors.Accent else WaveStreamColors.BackgroundTertiary
+            )
+            .border(
+                if (isSelected) 3.dp else 2.dp,
+                if (isSelected) Color.White else Color.Transparent,
+                CircleShape
+            )
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = getAvatarIcon(avatarIndex),
+            contentDescription = "Avatar ${avatarIndex + 1}",
+            tint = if (isSelected) Color.White else WaveStreamColors.TextSecondary,
+            modifier = Modifier.size(28.dp)
+        )
+    }
+}
+
 /**
  * Edit Profile Dialog with avatar selection
  */
@@ -512,6 +587,7 @@ fun EditProfileDialog(
     
     var profileName by remember(profile) { mutableStateOf(profile.name) }
     var selectedAvatarIndex by remember(profile) { mutableIntStateOf(profile.avatarIndex) }
+    val editConfirmFocusRequester = remember { FocusRequester() }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -532,26 +608,27 @@ fun EditProfileDialog(
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
-                Row(
+                // Avatar grid (4 columns, 3 rows = 12 icons)
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Male avatar
-                    AvatarOption(
-                        avatarRes = R.drawable.avatar_male,
-                        isSelected = selectedAvatarIndex == 0,
-                        onClick = { selectedAvatarIndex = 0 }
-                    )
-                    
-                    Spacer(modifier = Modifier.width(24.dp))
-                    
-                    // Female avatar
-                    AvatarOption(
-                        avatarRes = R.drawable.avatar_female,
-                        isSelected = selectedAvatarIndex == 1,
-                        onClick = { selectedAvatarIndex = 1 }
-                    )
+                    for (row in 0 until 3) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            for (col in 0 until 4) {
+                                val index = row * 4 + col
+                                AvatarIconOption(
+                                    avatarIndex = index,
+                                    isSelected = selectedAvatarIndex == index,
+                                    onClick = { selectedAvatarIndex = index },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(20.dp))
@@ -562,6 +639,10 @@ fun EditProfileDialog(
                     onValueChange = { profileName = it },
                     label = { Text(stringResource(R.string.profile_name_hint)) },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = { editConfirmFocusRequester.requestFocus() }
+                    ),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = WaveStreamColors.Accent,
                         unfocusedBorderColor = WaveStreamColors.TextTertiary,
@@ -585,6 +666,7 @@ fun EditProfileDialog(
                         ))
                     }
                 },
+                modifier = Modifier.focusRequester(editConfirmFocusRequester),
                 colors = ButtonDefaults.textButtonColors(
                     contentColor = WaveStreamColors.Accent
                 )

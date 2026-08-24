@@ -56,7 +56,7 @@ fun MovieCard(
     ContentPosterCard(
         title = displayTitle,
         posterUrl = movie.posterUrl ?: movie.logoUrl,
-        rating = movie.tmdbVoteAverage,
+        rating = movie.rating,
         year = movie.year,
         onClick = onClick,
         modifier = modifier,
@@ -99,7 +99,7 @@ fun SeriesCard(
     ContentPosterCard(
         title = displayTitle,
         posterUrl = series.posterUrl ?: series.logoUrl,
-        rating = series.tmdbVoteAverage,
+        rating = series.rating,
         year = series.year,
         onClick = onClick,
         modifier = modifier,

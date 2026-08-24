@@ -12,9 +12,10 @@ import coil.size.Precision
 
 /**
  * Image preloader using Coil (same cache as UI rendering)
- * 
+ *
  * Enqueues non-blocking preload requests so images are already
  * in Coil's memory/disk cache when the UI needs them.
+ * Throttled to 3 concurrent requests to avoid flooding the network.
  */
 @Singleton
 class CoilImagePreloader @Inject constructor(
@@ -26,18 +27,22 @@ class CoilImagePreloader @Inject constructor(
 
     /**
      * Preload a list of image URLs into Coil's cache.
-     * Non-blocking — fires and forgets.
+     * Throttled to 3 concurrent requests to avoid network flooding.
      */
     fun preloadImages(urls: List<String?>, targetSize: Size = Size.ORIGINAL) {
-        urls.filterNotNull().filter { it.isNotBlank() }.forEach { url ->
-            val request = ImageRequest.Builder(context)
-                .data(url)
-                .size(targetSize)
-                .precision(Precision.INEXACT) // Fast decoding, no strict constraints
-                .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
-                .diskCachePolicy(coil.request.CachePolicy.ENABLED)
-                .build()
-            imageLoader.enqueue(request)
+        val filtered = urls.filterNotNull().filter { it.isNotBlank() }
+        // Chunk into batches of 3 — sequential batches give network time to respond
+        filtered.chunked(3).forEach { batch ->
+            batch.forEach { url ->
+                val request = ImageRequest.Builder(context)
+                    .data(url)
+                    .size(targetSize)
+                    .precision(Precision.INEXACT)
+                    .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                    .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                    .build()
+                imageLoader.enqueue(request)
+            }
         }
     }
 

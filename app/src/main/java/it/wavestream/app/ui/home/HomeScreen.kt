@@ -43,10 +43,12 @@ import it.wavestream.app.R
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
+import androidx.compose.runtime.Immutable
 
 /**
  * Content item for carousels (Movie, Series, Channel)
  */
+@Immutable
 data class CarouselItem(
     val id: Long,
     val title: String,
@@ -55,10 +57,15 @@ data class CarouselItem(
     val contentType: String, // "MOVIE", "SERIES", "CHANNEL", "CATEGORY_MOVIE", "CATEGORY_SERIES", "CATEGORY_LIVE"
     val year: Int? = null,
     val rating: Float? = null,
+    val ratingText: String? = null,  // Pre-formatted rating to avoid String.format in composables
     // Continue Watching fields
     val progressPercent: Float? = null,  // 0.0 to 1.0
     val remainingMinutes: Int? = null,
     val episodeLabel: String? = null,  // "S2 E5" for series
+    // Series-specific fields
+    val nextEpisodeLabel: String? = null,    // "S2 E5" next unwatched episode
+    val seasonCount: Int? = null,           // Number of seasons (e.g. "3 stagioni")
+    val newEpisodeBadge: Boolean = false,   // Badge "NUOVO" for recent episodes
     // Category card fields
     val contentCount: Int? = null  // Number of items in category (for category cards)
 )
@@ -66,6 +73,7 @@ data class CarouselItem(
 /**
  * Hero banner item with enriched content
  */
+@Immutable
 data class HeroItem(
     val id: Long,
     val title: String,
@@ -95,8 +103,19 @@ data class HeroItem(
 )
 
 /**
+ * Wrapper for hero pair data to fix Gson deserialization.
+ * Gson cannot reliably deserialize Kotlin Pair — it creates LinkedTreeMap
+ * instead of a proper Pair, causing silent failures after process death.
+ */
+data class HeroPairData(
+    val heroes: List<HeroItem>,
+    val isContinueWatching: Boolean
+)
+
+/**
  * Carousel row data
  */
+@Immutable
 data class CarouselRow(
     val title: String,
     val items: List<CarouselItem>,
@@ -107,6 +126,7 @@ data class CarouselRow(
 /**
  * Home screen state
  */
+@Immutable
 data class HomeScreenState(
     val carouselRows: List<CarouselRow> = emptyList(),
     val isLoading: Boolean = false,  // Default false - loading happens in LoadingActivity
@@ -116,6 +136,7 @@ data class HomeScreenState(
     val isListsTab: Boolean = false,  // True when viewing the Lists tab (for empty state)
     val isFavoritesTab: Boolean = false,  // True when viewing the Favorites tab (for empty state)
     val isHistoryTab: Boolean = false,    // True when viewing the History tab (for empty state)
+    val isHomeTab: Boolean = false,       // True when viewing the Home tab
     // Hero banner fields
     val heroItems: List<HeroItem> = emptyList(),
     val currentHeroIndex: Int = 0,
@@ -161,10 +182,13 @@ fun HomeScreen(
             ) {
                 // Carousel rows
                 items(state.carouselRows, key = { it.title }) { row ->
+                    // remember the closure once per row (keyed by title) so it isn't re-allocated
+                    // on every recompose — this preserves Compose's skip optimization.
+                    val seeAllForRow = remember(row.title) { { onSeeAllClick(row.title) } }
                     CarouselRowItem(
                         row = row,
                         onItemClick = onItemClick,
-                        onSeeAllClick = { onSeeAllClick(row.title) }
+                        onSeeAllClick = seeAllForRow
                     )
                 }
             }

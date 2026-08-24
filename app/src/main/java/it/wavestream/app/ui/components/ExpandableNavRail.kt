@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -56,31 +57,38 @@ fun ExpandableNavRail(
     onExploreCategoriesClick: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val railWidth by animateDpAsState(
-        targetValue = if (isExpanded) 200.dp else 64.dp,
-        animationSpec = spring(dampingRatio = 0.7f, stiffness = 400f),
-        label = "railWidth"
-    )
-    
-    val backgroundAlpha by animateFloatAsState(
-        targetValue = if (isExpanded) 0.95f else 0.9f,
-        animationSpec = tween(200),
-        label = "railBgAlpha"
-    )
-    
-    val textAlpha by animateFloatAsState(
+    // Single expansion progress 0..1 — railWidth, backgroundAlpha, textAlpha derived from it.
+    // Replaces 3 separate animate*AsState calls that ran in parallel.
+    val expansionProgress by animateFloatAsState(
         targetValue = if (isExpanded) 1f else 0f,
-        animationSpec = tween(150),
-        label = "railTextAlpha"
+        animationSpec = spring(dampingRatio = 0.7f, stiffness = 400f),
+        label = "railExpansion"
     )
-    
+
+    val railWidth = (64.dp + 136.dp * expansionProgress)
+    val backgroundAlpha = 0.9f + 0.05f * expansionProgress
+    val textAlpha = expansionProgress
+
     val railFocusRequester = remember { FocusRequester() }
-    val firstItemFocusRequester = remember { FocusRequester() }
-    val lastItemFocusRequester = remember { FocusRequester() }
-    
-    LaunchedEffect(isExpanded) {
+    val homeFocusRequester = remember { FocusRequester() }
+    val moviesFocusRequester = remember { FocusRequester() }
+    val seriesFocusRequester = remember { FocusRequester() }
+    val favoritesFocusRequester = remember { FocusRequester() }
+    val listsFocusRequester = remember { FocusRequester() }
+    val historyFocusRequester = remember { FocusRequester() }
+
+    // Merged two duplicate LaunchedEffect into one
+    LaunchedEffect(isExpanded, selectedTab) {
         if (isExpanded) {
-            firstItemFocusRequester.requestFocus()
+            when (selectedTab) {
+                MainTab.HOME -> homeFocusRequester.requestFocus()
+                MainTab.MOVIES -> moviesFocusRequester.requestFocus()
+                MainTab.SERIES -> seriesFocusRequester.requestFocus()
+                MainTab.LIVE -> homeFocusRequester.requestFocus()
+                MainTab.FAVORITES -> favoritesFocusRequester.requestFocus()
+                MainTab.LISTS -> listsFocusRequester.requestFocus()
+                MainTab.HISTORY -> historyFocusRequester.requestFocus()
+            }
         }
     }
     
@@ -88,22 +96,21 @@ fun ExpandableNavRail(
         modifier = modifier
             .width(railWidth)
             .fillMaxHeight()
+            .padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
+            )
+            .clip(RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp))
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color.Black.copy(alpha = backgroundAlpha),
-                        Color.Black.copy(alpha = backgroundAlpha * 0.95f)
+                        WaveStreamColors.Accent.copy(alpha = 0.06f * backgroundAlpha),
+                        WaveStreamColors.BackgroundDark.copy(alpha = backgroundAlpha),
+                        WaveStreamColors.BackgroundDark.copy(alpha = backgroundAlpha * 0.97f)
                     )
                 )
             )
-            .drawBehind {
-                drawLine(
-                    color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
-                    start = Offset(size.width, 0f),
-                    end = Offset(size.width, size.height),
-                    strokeWidth = 1.dp.toPx()
-                )
-            }
             .focusRequester(railFocusRequester)
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && 
@@ -179,6 +186,18 @@ fun ExpandableNavRail(
                 modifier = Modifier.weight(1f, fill = false)
             ) {
                 NavRailItem(
+                    icon = Icons.Default.Home,
+                    label = "Home",
+                    isSelected = selectedTab == MainTab.HOME,
+                    isExpanded = isExpanded,
+                    onClick = { 
+                        onTabSelected(MainTab.HOME)
+                        if (isExpanded) onCollapseRequest()
+                    },
+                    modifier = Modifier.focusRequester(homeFocusRequester)
+                )
+                
+                NavRailItem(
                     icon = Icons.Default.Movie,
                     label = "Film",
                     isSelected = selectedTab == MainTab.MOVIES,
@@ -187,7 +206,7 @@ fun ExpandableNavRail(
                         onTabSelected(MainTab.MOVIES)
                         if (isExpanded) onCollapseRequest()
                     },
-                    modifier = Modifier.focusRequester(firstItemFocusRequester)
+                    modifier = Modifier.focusRequester(moviesFocusRequester)
                 )
                 
                 if (isExpanded && selectedTab == MainTab.MOVIES) {
@@ -204,7 +223,8 @@ fun ExpandableNavRail(
                     label = "Serie TV",
                     isSelected = selectedTab == MainTab.SERIES,
                     isExpanded = isExpanded,
-                    onClick = { onTabSelected(MainTab.SERIES) }
+                    onClick = { onTabSelected(MainTab.SERIES) },
+                    modifier = Modifier.focusRequester(seriesFocusRequester)
                 )
                 
                 if (isExpanded && selectedTab == MainTab.SERIES) {
@@ -231,7 +251,8 @@ fun ExpandableNavRail(
                     label = "Preferiti",
                     isSelected = selectedTab == MainTab.FAVORITES,
                     isExpanded = isExpanded,
-                    onClick = { onTabSelected(MainTab.FAVORITES) }
+                    onClick = { onTabSelected(MainTab.FAVORITES) },
+                    modifier = Modifier.focusRequester(favoritesFocusRequester)
                 )
                 
                 Spacer(modifier = Modifier.height(1.dp))
@@ -241,7 +262,8 @@ fun ExpandableNavRail(
                     label = "Liste",
                     isSelected = selectedTab == MainTab.LISTS,
                     isExpanded = isExpanded,
-                    onClick = { onTabSelected(MainTab.LISTS) }
+                    onClick = { onTabSelected(MainTab.LISTS) },
+                    modifier = Modifier.focusRequester(listsFocusRequester)
                 )
                 
                 Spacer(modifier = Modifier.height(1.dp))
@@ -252,7 +274,7 @@ fun ExpandableNavRail(
                     isSelected = selectedTab == MainTab.HISTORY,
                     isExpanded = isExpanded,
                     onClick = { onTabSelected(MainTab.HISTORY) },
-                    modifier = Modifier.focusRequester(lastItemFocusRequester)
+                    modifier = Modifier.focusRequester(historyFocusRequester)
                 )
             }
             
@@ -322,7 +344,7 @@ private fun ExploreCategoriesItem(
             color = textColor
         )
         Text(
-            text = "Esplora tutte le categorie",
+            text = "Categorie",
             style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
             color = textColor,
             fontWeight = FontWeight.Normal,

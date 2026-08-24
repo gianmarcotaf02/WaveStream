@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
+import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.dao.CategoryWithCount
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.WatchProgressDao
@@ -52,7 +53,6 @@ import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -62,9 +62,14 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class FilmActivity : ComponentActivity() {
-    
+
+    companion object {
+        private const val PAGE_SIZE = 150
+    }
+
     @Inject lateinit var movieDao: MovieDao
     @Inject lateinit var watchProgressDao: WatchProgressDao
+    @Inject lateinit var contentCache: ContentCache
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,67 +90,101 @@ class FilmActivity : ComponentActivity() {
         var selectedCategory by remember { mutableStateOf<String?>(null) }
         var movies by remember { mutableStateOf<List<Movie>>(emptyList()) }
         var isLoading by remember { mutableStateOf(true) }
+        var isLoadingMore by remember { mutableStateOf(false) }
+        var hasMoreMovies by remember { mutableStateOf(false) }
+        var totalMoviesCount by remember { mutableIntStateOf(0) }
         var showingAllMovies by remember { mutableStateOf(initialCategory == null) }
-        
-        // Continue watching state
         var continueWatchingItems by remember { mutableStateOf<List<ContinueWatchingItem>>(emptyList()) }
-        
-        // Load categories and continue watching on first composition
-        LaunchedEffect(Unit) {
-            // Load continue watching movies
-            val progressList = watchProgressDao.getContinueWatchingMovies(1L)
-            continueWatchingItems = progressList.mapNotNull { progress ->
-                val movie = movieDao.getMovieById(progress.contentId) ?: return@mapNotNull null
-                val remaining = ((progress.duration - progress.position) / 60000).toInt()
-                ContinueWatchingItem(
-                    watchProgressId = progress.id,
-                    contentType = ContentType.MOVIE,
-                    contentId = progress.contentId,
-                    title = movie.tmdbTitle ?: movie.name,
-                    posterUrl = movie.posterUrl,
-                    backdropUrl = movie.backdropUrl,
-                    position = progress.position,
-                    duration = progress.duration,
-                    progressPercent = progress.progressPercent,
-                    remainingMinutes = remaining.coerceAtLeast(1),
-                    lastWatchedAt = progress.lastWatchedAt
-                )
+
+        // Load more: appends next page to current list
+        fun loadMoreMovies() {
+            if (isLoadingMore) return
+            lifecycleScope.launch {
+                isLoadingMore = true
+                val offset = movies.size
+                val more = if (showingAllMovies) {
+                    movieDao.getAllMoviesListPaged(PAGE_SIZE, offset)
+                } else {
+                    movieDao.getMoviesByCategoryListPaged(selectedCategory!!, PAGE_SIZE, offset)
+                }
+                movies = movies + more
+                hasMoreMovies = movies.size < totalMoviesCount
+                isLoadingMore = false
             }
-            
+        }
+
+        // Initial load
+        LaunchedEffect(Unit) {
+            // Continue watching — batch query (N+1 fix)
+            val progressList = watchProgressDao.getContinueWatchingMovies(1L)
+            if (progressList.isNotEmpty()) {
+                val ids = progressList.map { it.contentId }
+                val moviesById = movieDao.getMoviesByIds(ids).associateBy { it.id }
+                continueWatchingItems = progressList.mapNotNull { progress ->
+                    val movie = moviesById[progress.contentId] ?: return@mapNotNull null
+                    val remaining = ((progress.duration - progress.position) / 60000).toInt()
+                    ContinueWatchingItem(
+                        watchProgressId = progress.id,
+                        contentType = ContentType.MOVIE,
+                        contentId = progress.contentId,
+                        title = movie.tmdbTitle ?: movie.name,
+                        posterUrl = movie.posterUrl,
+                        backdropUrl = movie.backdropUrl,
+                        position = progress.position,
+                        duration = progress.duration,
+                        progressPercent = progress.progressPercent,
+                        remainingMinutes = remaining.coerceAtLeast(1),
+                        lastWatchedAt = progress.lastWatchedAt
+                    )
+                }
+            }
+
             val cats = movieDao.getCategoriesWithCount()
             categories = cats
-            
+
             if (initialCategory == null) {
-                // "Vedi tutti" - show all movies without category filter
                 showingAllMovies = true
-                movies = movieDao.getAllMovies().first()
                 selectedCategory = null
+                val total = movieDao.getAllMoviesCount()
+                totalMoviesCount = total
+                val first = movieDao.getAllMoviesListPaged(PAGE_SIZE, 0)
+                movies = first
+                hasMoreMovies = first.size < total
             } else {
-                // Specific category selected
                 showingAllMovies = false
                 selectedCategory = initialCategory
-                movies = movieDao.getMoviesByCategoryList(initialCategory)
+                val total = movieDao.getMoviesCountByCategory(initialCategory)
+                totalMoviesCount = total
+                val first = movieDao.getMoviesByCategoryListPaged(initialCategory, PAGE_SIZE, 0)
+                movies = first
+                hasMoreMovies = first.size < total
             }
             isLoading = false
         }
-        
-        // Load movies when category changes
+
+        // Load movies when category changes (user taps sidebar)
         LaunchedEffect(selectedCategory) {
             if (selectedCategory != null) {
                 isLoading = true
                 showingAllMovies = false
-                movies = movieDao.getMoviesByCategoryList(selectedCategory!!)
+                val total = movieDao.getMoviesCountByCategory(selectedCategory!!)
+                totalMoviesCount = total
+                val first = movieDao.getMoviesByCategoryListPaged(selectedCategory!!, PAGE_SIZE, 0)
+                movies = first
+                hasMoreMovies = first.size < total
                 isLoading = false
             }
         }
-        
+
         FilmScreen(
             categories = categories,
             selectedCategory = selectedCategory,
             movies = movies,
             isLoading = isLoading,
+            isLoadingMore = isLoadingMore,
+            hasMoreMovies = hasMoreMovies,
             showingAllMovies = showingAllMovies,
-            totalMoviesCount = movies.size,
+            totalMoviesCount = totalMoviesCount,
             continueWatchingItems = continueWatchingItems,
             onCategorySelect = { cat ->
                 showingAllMovies = false
@@ -156,12 +195,17 @@ class FilmActivity : ComponentActivity() {
                     isLoading = true
                     showingAllMovies = true
                     selectedCategory = null
-                    movies = movieDao.getAllMovies().first()
+                    val total = movieDao.getAllMoviesCount()
+                    totalMoviesCount = total
+                    val first = movieDao.getAllMoviesListPaged(PAGE_SIZE, 0)
+                    movies = first
+                    hasMoreMovies = first.size < total
                     isLoading = false
                 }
             },
+            onLoadMore = { loadMoreMovies() },
             onMovieClick = { openMovieDetails(it) },
-            onContinueWatchingClick = { item -> 
+            onContinueWatchingClick = { item ->
                 val intent = Intent(this@FilmActivity, DetailsActivity::class.java).apply {
                     putExtra("content_id", item.contentId)
                     putExtra("content_type", "MOVIE")
@@ -196,12 +240,15 @@ fun FilmScreen(
     selectedCategory: String?,
     movies: List<Movie>,
     isLoading: Boolean,
+    isLoadingMore: Boolean = false,
+    hasMoreMovies: Boolean = false,
     showingAllMovies: Boolean,
     totalMoviesCount: Int,
     continueWatchingItems: List<ContinueWatchingItem> = emptyList(),
     onCategorySelect: (String) -> Unit,
     onViewAllClick: () -> Unit,
     onMovieClick: (Movie) -> Unit,
+    onLoadMore: () -> Unit = {},
     onContinueWatchingClick: (ContinueWatchingItem) -> Unit = {},
     onBackClick: () -> Unit
 ) {
@@ -302,6 +349,40 @@ fun FilmScreen(
                                 movie = movie,
                                 onClick = { onMovieClick(movie) }
                             )
+                        }
+                        // Load more button — shown when more data is available
+                        if (hasMoreMovies || isLoadingMore) {
+                            item(key = "load_more_movies", span = { androidx.tv.foundation.lazy.grid.TvGridItemSpan(maxLineSpan) }) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isLoadingMore) {
+                                        CircularProgressIndicator(
+                                            color = WaveStreamColors.Accent,
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    } else {
+                                        val interactionSource = remember { MutableInteractionSource() }
+                                        val isFocused by interactionSource.collectIsFocusedAsState()
+                                        val remaining = totalMoviesCount - movies.size
+                                        Text(
+                                            text = "▼  Carica altri $remaining film",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
+                                            fontWeight = if (isFocused) FontWeight.Bold else FontWeight.Normal,
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.1f) else Color.Transparent)
+                                                .clickable { onLoadMore() }
+                                                .focusable(interactionSource = interactionSource)
+                                                .padding(horizontal = 24.dp, vertical = 12.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -523,7 +604,7 @@ private fun MovieGridCard(
             )
             
             // Rating badge
-            movie.tmdbVoteAverage?.takeIf { it > 0 }?.let { rating ->
+            movie.rating?.takeIf { it > 0 }?.let { rating ->
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)

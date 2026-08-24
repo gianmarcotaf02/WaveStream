@@ -1,6 +1,7 @@
 package it.wavestream.app.data.repository
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
@@ -9,14 +10,13 @@ import it.wavestream.app.data.api.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
-import java.net.URL
 import java.util.concurrent.TimeUnit
-import java.util.zip.GZIPInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,6 +44,7 @@ class OpenSubtitlesRepository @Inject constructor(
     }
     
     private val api: OpenSubtitlesService
+    private val httpClient: OkHttpClient
     private val encryptedPrefs by lazy { createEncryptedPrefs() }
     
     // Rate limiting
@@ -55,10 +56,9 @@ class OpenSubtitlesRepository @Inject constructor(
             level = HttpLoggingInterceptor.Level.BODY
         }
         
-        val client = OkHttpClient.Builder()
+        httpClient = OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder()
-                    .addHeader("Api-Key", OpenSubtitlesService.API_KEY)
                     .addHeader("Content-Type", "application/json")
                     .addHeader("User-Agent", "WaveStream v1.0")
                     .build()
@@ -71,21 +71,54 @@ class OpenSubtitlesRepository @Inject constructor(
         
         api = Retrofit.Builder()
             .baseUrl(OpenSubtitlesService.BASE_URL)
-            .client(client)
+            .client(httpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OpenSubtitlesService::class.java)
     }
     
-    private fun createEncryptedPrefs() = EncryptedSharedPreferences.create(
-        context,
-        PREFS_NAME,
-        MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build(),
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    private fun createEncryptedPrefs(): SharedPreferences {
+        return try {
+            EncryptedSharedPreferences.create(
+                context,
+                PREFS_NAME,
+                MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build(),
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "Encrypted prefs unavailable, falling back to plain storage", e)
+            context.getSharedPreferences(PREFS_NAME + "_plain", Context.MODE_PRIVATE)
+        }
+    }
+
+    private fun secureGetString(key: String, default: String? = null): String? = try {
+        encryptedPrefs.getString(key, default)
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to read $key", e); default
+    }
+
+    private fun secureGetInt(key: String, default: Int = 0): Int = try {
+        encryptedPrefs.getInt(key, default)
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to read $key", e); default
+    }
+
+    private fun secureGetLong(key: String, default: Long = 0L): Long = try {
+        encryptedPrefs.getLong(key, default)
+    } catch (e: Exception) {
+        Log.w(TAG, "Failed to read $key", e); default
+    }
+
+    private fun securePut(block: SharedPreferences.Editor.() -> Unit) {
+        try {
+            encryptedPrefs.edit().apply { block(); apply() }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to write preferences", e)
+        }
+    }
     
     // ========== Authentication ==========
     
@@ -105,15 +138,15 @@ class OpenSubtitlesRepository @Inject constructor(
                 val token = body.token!!
                 
                 // Save credentials including password for auto-refresh
-                encryptedPrefs.edit()
-                    .putString(KEY_TOKEN, token)
-                    .putString(KEY_USERNAME, username)
-                    .putString(KEY_PASSWORD, password)  // Saved securely for auto-refresh
-                    .putInt(KEY_USER_ID, body.user?.user_id ?: 0)
-                    .putBoolean(KEY_VIP, body.user?.vip ?: false)
-                    .putInt(KEY_REMAINING, body.user?.allowed_downloads ?: 0)
-                    .putLong(KEY_TOKEN_EXPIRY, System.currentTimeMillis() + 24 * 60 * 60 * 1000) // 24h
-                    .apply()
+                securePut {
+                    putString(KEY_TOKEN, token)
+                    putString(KEY_USERNAME, username)
+                    putString(KEY_PASSWORD, password)
+                    putInt(KEY_USER_ID, body.user?.user_id ?: 0)
+                    putBoolean(KEY_VIP, body.user?.vip ?: false)
+                    putInt(KEY_REMAINING, body.user?.allowed_downloads ?: 0)
+                    putLong(KEY_TOKEN_EXPIRY, System.currentTimeMillis() + 24 * 60 * 60 * 1000)
+                }
                 
                 AuthResult.Success(
                     username = username,
@@ -143,10 +176,9 @@ class OpenSubtitlesRepository @Inject constructor(
     }
     
     fun isAuthenticated(): Boolean {
-        val token = encryptedPrefs.getString(KEY_TOKEN, null)
-        val expiry = encryptedPrefs.getLong(KEY_TOKEN_EXPIRY, 0)
-        // Consider authenticated if we have credentials (can auto-refresh token)
-        val hasCredentials = encryptedPrefs.getString(KEY_PASSWORD, null) != null
+        val token = secureGetString(KEY_TOKEN)
+        val expiry = secureGetLong(KEY_TOKEN_EXPIRY)
+        val hasCredentials = secureGetString(KEY_PASSWORD) != null
         return token != null && (System.currentTimeMillis() < expiry || hasCredentials)
     }
     
@@ -155,17 +187,15 @@ class OpenSubtitlesRepository @Inject constructor(
      * Call this before making API requests
      */
     private suspend fun ensureValidToken(): Boolean {
-        val token = encryptedPrefs.getString(KEY_TOKEN, null)
-        val expiry = encryptedPrefs.getLong(KEY_TOKEN_EXPIRY, 0)
+        val token = secureGetString(KEY_TOKEN)
+        val expiry = secureGetLong(KEY_TOKEN_EXPIRY)
         
-        // Token still valid
         if (token != null && System.currentTimeMillis() < expiry) {
             return true
         }
         
-        // Try to refresh using saved credentials
-        val username = encryptedPrefs.getString(KEY_USERNAME, null)
-        val password = encryptedPrefs.getString(KEY_PASSWORD, null)
+        val username = secureGetString(KEY_USERNAME)
+        val password = secureGetString(KEY_PASSWORD)
         
         if (username != null && password != null) {
             Log.d(TAG, "Token expired, auto-refreshing...")
@@ -190,13 +220,13 @@ class OpenSubtitlesRepository @Inject constructor(
                 val token = body.token!!
                 
                 // Update token and expiry
-                encryptedPrefs.edit()
-                    .putString(KEY_TOKEN, token)
-                    .putInt(KEY_USER_ID, body.user?.user_id ?: 0)
-                    .putBoolean(KEY_VIP, body.user?.vip ?: false)
-                    .putInt(KEY_REMAINING, body.user?.allowed_downloads ?: 0)
-                    .putLong(KEY_TOKEN_EXPIRY, System.currentTimeMillis() + 24 * 60 * 60 * 1000)
-                    .apply()
+                securePut {
+                    putString(KEY_TOKEN, token)
+                    putInt(KEY_USER_ID, body.user?.user_id ?: 0)
+                    putBoolean(KEY_VIP, body.user?.vip ?: false)
+                    putInt(KEY_REMAINING, body.user?.allowed_downloads ?: 0)
+                    putLong(KEY_TOKEN_EXPIRY, System.currentTimeMillis() + 24 * 60 * 60 * 1000)
+                }
                 
                 Log.d(TAG, "Token refreshed successfully")
                 AuthResult.Success(
@@ -212,14 +242,14 @@ class OpenSubtitlesRepository @Inject constructor(
         }
     }
     
-    fun getUsername(): String? = encryptedPrefs.getString(KEY_USERNAME, null)
+    fun getUsername(): String? = secureGetString(KEY_USERNAME)
     
-    fun getRemainingDownloads(): Int = encryptedPrefs.getInt(KEY_REMAINING, 0)
+    fun getRemainingDownloads(): Int = secureGetInt(KEY_REMAINING)
     
-    private fun getToken(): String? = encryptedPrefs.getString(KEY_TOKEN, null)
+    private fun getToken(): String? = secureGetString(KEY_TOKEN)
     
     private fun clearCredentials() {
-        encryptedPrefs.edit().clear().apply()
+        securePut { clear() }
     }
     
     // ========== Subtitle Search ==========
@@ -336,8 +366,8 @@ class OpenSubtitlesRepository @Inject constructor(
                 val body = response.body()!!
                 
                 // Update remaining downloads
-                body.remaining?.let {
-                    encryptedPrefs.edit().putInt(KEY_REMAINING, it).apply()
+                body.remaining?.let { remaining ->
+                    securePut { putInt(KEY_REMAINING, remaining) }
                 }
                 
                 // Check if limit reached
@@ -352,20 +382,25 @@ class OpenSubtitlesRepository @Inject constructor(
                 val cacheDir = File(context.cacheDir, CACHE_DIR)
                 cacheDir.mkdirs()
                 
-                // Clean cache if too large
                 cleanCacheIfNeeded(cacheDir)
                 
                 val outputFile = File(cacheDir, fileName)
                 
-                URL(downloadUrl).openStream().use { input ->
-                    FileOutputStream(outputFile).use { output ->
-                        // Check if gzipped
-                        if (downloadUrl.endsWith(".gz")) {
-                            GZIPInputStream(input).copyTo(output)
-                        } else {
+                // Use OkHttp to download — handles gzip transparently via Content-Encoding
+                val downloadRequest = Request.Builder()
+                    .url(downloadUrl)
+                    .addHeader("User-Agent", "WaveStream v1.0")
+                    .build()
+                
+                httpClient.newCall(downloadRequest).execute().use { downloadResponse ->
+                    if (!downloadResponse.isSuccessful) {
+                        return@withContext DownloadResult.Error("Download fallito: HTTP ${downloadResponse.code}")
+                    }
+                    downloadResponse.body?.byteStream()?.use { input ->
+                        FileOutputStream(outputFile).use { output ->
                             input.copyTo(output)
                         }
-                    }
+                    } ?: return@withContext DownloadResult.Error("Body download vuoto")
                 }
                 
                 DownloadResult.Success(outputFile.absolutePath)

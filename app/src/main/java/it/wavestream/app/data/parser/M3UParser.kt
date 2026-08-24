@@ -131,7 +131,7 @@ class M3UParser @Inject constructor(
         playlistOrder: Int = 0
     ) {
         // Parse the name intelligently
-        val parsed = contentNameParser.parse(info.name, info.groupTitle)
+        val parsed = contentNameParser.parse(info.name, info.groupTitle, info.tvgType, info.duration)
         
         when (parsed.contentType) {
             ContentNameParser.ContentType.LIVE_TV -> {
@@ -164,8 +164,7 @@ class M3UParser @Inject constructor(
                 categoryMap.getOrPut("series") { mutableSetOf() }.add(category)
             }
             
-            ContentNameParser.ContentType.MOVIE, ContentNameParser.ContentType.UNKNOWN -> {
-                // Default to movie for VOD content
+            ContentNameParser.ContentType.MOVIE -> {
                 val category = contentNameParser.normalizeMovieCategory(info.groupTitle)
                 movies.add(ParsedMovie(
                     originalName = info.name,
@@ -181,6 +180,39 @@ class M3UParser @Inject constructor(
                     playlistOrder = playlistOrder
                 ))
                 categoryMap.getOrPut("movies") { mutableSetOf() }.add(category)
+            }
+            
+            ContentNameParser.ContentType.UNKNOWN -> {
+                if (info.duration <= 0) {
+                    // Live stream with unrecognized category — treat as channel
+                    val category = contentNameParser.normalizeCategory(info.groupTitle)
+                    channels.add(ParsedChannel(
+                        name = info.name,
+                        streamUrl = streamUrl,
+                        logoUrl = info.logo,
+                        category = category,
+                        epgId = info.tvgId,
+                        quality = parsed.quality
+                    ))
+                    categoryMap.getOrPut("channels") { mutableSetOf() }.add(category)
+                } else {
+                    // VOD content with unrecognized category — default to movie
+                    val category = contentNameParser.normalizeMovieCategory(info.groupTitle)
+                    movies.add(ParsedMovie(
+                        originalName = info.name,
+                        cleanName = parsed.cleanTitle,
+                        streamUrl = streamUrl,
+                        logoUrl = info.logo,
+                        category = category,
+                        year = info.year ?: parsed.year,
+                        quality = parsed.quality,
+                        language = parsed.language,
+                        isExtended = parsed.isExtended,
+                        isHdr = parsed.isHdr,
+                        playlistOrder = playlistOrder
+                    ))
+                    categoryMap.getOrPut("movies") { mutableSetOf() }.add(category)
+                }
             }
         }
     }
@@ -220,6 +252,7 @@ class M3UParser @Inject constructor(
         tvgName = extractAttribute(attributesPart, "tvg-name")
         logo = extractAttribute(attributesPart, "tvg-logo")
         groupTitle = extractAttribute(attributesPart, "group-title")
+        val tvgType = extractAttribute(attributesPart, "tvg-type")
         
         // Extract Year from attributes (year, generic release, copyright, etc)
         val yearStr = extractAttribute(attributesPart, "year") ?: 
@@ -246,7 +279,8 @@ class M3UParser @Inject constructor(
             tvgName = tvgName,
             logo = logo,
             groupTitle = groupTitle,
-            year = yearAttributes
+            year = yearAttributes,
+            tvgType = tvgType
         )
     }
     
@@ -273,6 +307,7 @@ class M3UParser @Inject constructor(
         val tvgName: String?,
         val logo: String?,
         val groupTitle: String?,
-        val year: Int? = null
+        val year: Int? = null,
+        val tvgType: String? = null
     )
 }

@@ -105,9 +105,14 @@ class UserPreferences @Inject constructor(
         private val EPG_UPDATE_MODE = stringPreferencesKey("epg_update_mode") // "manual" or "automatic"
         private val EPG_UPDATE_INTERVAL = stringPreferencesKey("epg_update_interval") // startup, 3h, 6h, 12h, 24h, 3d, weekly
         private val EPG_LAST_UPDATE = longPreferencesKey("epg_last_update")
+        private val EPG_TIMEZONE = stringPreferencesKey("epg_timezone") // auto, UTC, Europe/Rome, etc.
         
         // One-time migrations
         private val TEAM_CHANNEL_CACHE_CLEARED = booleanPreferencesKey("team_channel_cache_cleared_v3")
+
+        // Onboarding
+        private val WELCOME_SHOWN = booleanPreferencesKey("welcome_shown")
+        private val TERMS_ACCEPTED = booleanPreferencesKey("terms_accepted")
     }
     
     private val dataStore = context.dataStore
@@ -498,6 +503,15 @@ class UserPreferences @Inject constructor(
         return dataStore.data.map { it[EPG_LAST_UPDATE] ?: 0L }
     }
     
+    // EPG Timezone
+    suspend fun setEpgTimezone(timezone: String) {
+        dataStore.edit { it[EPG_TIMEZONE] = timezone }
+    }
+    
+    suspend fun getEpgTimezone(): String {
+        return dataStore.data.first()[EPG_TIMEZONE] ?: "auto"
+    }
+    
     // Playlist Update Mode (manual or auto)
     suspend fun setPlaylistUpdateMode(mode: String) {
         dataStore.edit { 
@@ -535,6 +549,23 @@ class UserPreferences @Inject constructor(
             168 -> "weekly"
             else -> "24h"
         }
+    }
+
+    // Onboarding flags
+    suspend fun setWelcomeShown(shown: Boolean) {
+        dataStore.edit { it[WELCOME_SHOWN] = shown }
+    }
+
+    suspend fun isWelcomeShown(): Boolean {
+        return dataStore.data.first()[WELCOME_SHOWN] ?: false
+    }
+
+    suspend fun setTermsAccepted(accepted: Boolean) {
+        dataStore.edit { it[TERMS_ACCEPTED] = accepted }
+    }
+
+    suspend fun isTermsAccepted(): Boolean {
+        return dataStore.data.first()[TERMS_ACCEPTED] ?: false
     }
     
 }

@@ -7,6 +7,7 @@ import it.wavestream.app.data.preferences.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import okhttp3.Protocol
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -46,8 +47,9 @@ class ImdbRatingsRepository @Inject constructor(
         
         val client = OkHttpClient.Builder()
             .addInterceptor(logging)
-            .connectTimeout(15, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
+            .protocols(listOf(Protocol.HTTP_1_1))
+            .connectTimeout(20, TimeUnit.SECONDS)
+            .readTimeout(20, TimeUnit.SECONDS)
             .build()
         
         api = Retrofit.Builder()
@@ -73,7 +75,7 @@ class ImdbRatingsRepository @Inject constructor(
         val boxOffice: String?
     ) {
         val hasRatings: Boolean
-            get() = imdbRating != null || rottenTomatoesScore != null || metacriticScore != null
+            get() = imdbRating != null || rottenTomatoesScore != null || audienceScore != null || metacriticScore != null
         
         fun getFormattedImdbRating(): String? {
             return imdbRating?.let { String.format("%.1f", it) }

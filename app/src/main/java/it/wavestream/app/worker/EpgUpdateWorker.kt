@@ -10,6 +10,8 @@ import it.wavestream.app.data.database.dao.PlaylistDao
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.data.repository.EpgRepository
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -105,36 +107,39 @@ class EpgUpdateWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         Log.d(TAG, "Starting EPG update work")
-        
+
         return try {
             val playlists = playlistDao.getAllPlaylists().first()
-            
-            for (playlist in playlists) {
-                try {
-                    if (playlist.type == "xtream" && 
-                        !playlist.username.isNullOrEmpty() && 
-                        !playlist.password.isNullOrEmpty()) {
-                        // Xtream EPG
-                        epgRepository.loadEpgFromXtream(
-                            baseUrl = playlist.url,
-                            username = playlist.username,
-                            password = playlist.password
-                        )
-                    } else if (!playlist.epgUrl.isNullOrEmpty()) {
-                        // XMLTV EPG
-                        epgRepository.loadEpgFromUrl(playlist.epgUrl)
+
+            // Load EPG in parallel — each playlist can be fetched concurrently
+            coroutineScope {
+                playlists.forEach { playlist ->
+                    launch {
+                        try {
+                            if (playlist.type == "xtream" &&
+                                !playlist.username.isNullOrEmpty() &&
+                                !playlist.password.isNullOrEmpty()) {
+                                epgRepository.loadEpgFromXtream(
+                                    baseUrl = playlist.url,
+                                    username = playlist.username,
+                                    password = playlist.password
+                                )
+                            } else if (!playlist.epgUrl.isNullOrEmpty()) {
+                                epgRepository.loadEpgFromUrl(playlist.epgUrl)
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Failed to load EPG for ${playlist.name}", e)
+                        }
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to load EPG for ${playlist.name}", e)
                 }
             }
-            
+
             // Update last update timestamp
             userPreferences.setEpgLastUpdate(System.currentTimeMillis())
-            
+
             Log.d(TAG, "EPG update completed successfully")
             Result.success()
-            
+
         } catch (e: Exception) {
             Log.e(TAG, "EPG update failed", e)
             Result.retry()

@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
+import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.dao.EpisodeDao
 import it.wavestream.app.data.database.dao.SeriesCategoryWithCount
 import it.wavestream.app.data.database.dao.SeriesDao
@@ -53,7 +54,6 @@ import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -63,10 +63,15 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class SeriesActivity : ComponentActivity() {
-    
+
+    companion object {
+        private const val PAGE_SIZE = 150
+    }
+
     @Inject lateinit var seriesDao: SeriesDao
     @Inject lateinit var episodeDao: EpisodeDao
     @Inject lateinit var watchProgressDao: WatchProgressDao
+    @Inject lateinit var contentCache: ContentCache
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,72 +92,106 @@ class SeriesActivity : ComponentActivity() {
         var selectedCategory by remember { mutableStateOf<String?>(null) }
         var seriesList by remember { mutableStateOf<List<Series>>(emptyList()) }
         var isLoading by remember { mutableStateOf(true) }
+        var isLoadingMore by remember { mutableStateOf(false) }
+        var hasMoreSeries by remember { mutableStateOf(false) }
+        var totalSeriesCount by remember { mutableIntStateOf(0) }
         var showingAllSeries by remember { mutableStateOf(initialCategory == null) }
-        
-        // Continue watching state
         var continueWatchingItems by remember { mutableStateOf<List<ContinueWatchingItem>>(emptyList()) }
-        
-        // Load categories and continue watching on first composition
-        LaunchedEffect(Unit) {
-            // Load continue watching episodes/series
-            val progressList = watchProgressDao.getContinueWatchingSeries(1L)
-            continueWatchingItems = progressList.mapNotNull { progress ->
-                // For episodes, get the series info
-                val seriesInfo = progress.seriesId?.let { seriesDao.getSeriesById(it) }
-                    ?: return@mapNotNull null
-                val remaining = ((progress.duration - progress.position) / 60000).toInt()
-                ContinueWatchingItem(
-                    watchProgressId = progress.id,
-                    contentType = progress.contentType,
-                    contentId = progress.contentId,
-                    title = seriesInfo.tmdbName ?: seriesInfo.name,
-                    posterUrl = seriesInfo.posterUrl,
-                    backdropUrl = seriesInfo.backdropUrl,
-                    position = progress.position,
-                    duration = progress.duration,
-                    progressPercent = progress.progressPercent,
-                    remainingMinutes = remaining.coerceAtLeast(1),
-                    seriesId = progress.seriesId,
-                    seasonNumber = progress.season,
-                    episodeNumber = progress.episode,
-                    lastWatchedAt = progress.lastWatchedAt
-                )
+
+        // Load more: appends next page to current list
+        fun loadMoreSeries() {
+            if (isLoadingMore) return
+            lifecycleScope.launch {
+                isLoadingMore = true
+                val offset = seriesList.size
+                val more = if (showingAllSeries) {
+                    seriesDao.getAllSeriesListPaged(PAGE_SIZE, offset)
+                } else {
+                    seriesDao.getSeriesByCategoryListPaged(selectedCategory!!, PAGE_SIZE, offset)
+                }
+                seriesList = seriesList + more
+                hasMoreSeries = seriesList.size < totalSeriesCount
+                isLoadingMore = false
             }
-            
+        }
+
+        // Initial load
+        LaunchedEffect(Unit) {
+            // Load continue watching — batch query (fixes N+1)
+            val progressList = watchProgressDao.getContinueWatchingSeries(1L)
+            if (progressList.isNotEmpty()) {
+                val seriesIds = progressList.mapNotNull { it.seriesId }
+                val seriesById = if (seriesIds.isNotEmpty()) {
+                    seriesDao.getSeriesByIds(seriesIds).associateBy { it.id }
+                } else emptyMap()
+                continueWatchingItems = progressList.mapNotNull { progress ->
+                    val seriesInfo = progress.seriesId?.let { seriesById[it] } ?: return@mapNotNull null
+                    val remaining = ((progress.duration - progress.position) / 60000).toInt()
+                    ContinueWatchingItem(
+                        watchProgressId = progress.id,
+                        contentType = progress.contentType,
+                        contentId = progress.contentId,
+                        title = seriesInfo.tmdbName ?: seriesInfo.name,
+                        posterUrl = seriesInfo.posterUrl,
+                        backdropUrl = seriesInfo.backdropUrl,
+                        position = progress.position,
+                        duration = progress.duration,
+                        progressPercent = progress.progressPercent,
+                        remainingMinutes = remaining.coerceAtLeast(1),
+                        seriesId = progress.seriesId,
+                        seasonNumber = progress.season,
+                        episodeNumber = progress.episode,
+                        lastWatchedAt = progress.lastWatchedAt
+                    )
+                }
+            }
+
             val cats = seriesDao.getCategoriesWithCount()
             categories = cats
-            
+
             if (initialCategory == null) {
-                // "Vedi tutte" - show all series without category filter
                 showingAllSeries = true
-                seriesList = seriesDao.getAllSeries().first()
                 selectedCategory = null
+                val total = seriesDao.getAllSeriesCount()
+                totalSeriesCount = total
+                val first = seriesDao.getAllSeriesListPaged(PAGE_SIZE, 0)
+                seriesList = first
+                hasMoreSeries = first.size < total
             } else {
-                // Specific category selected
                 showingAllSeries = false
                 selectedCategory = initialCategory
-                seriesList = seriesDao.getSeriesByCategoryList(initialCategory)
+                val total = seriesDao.getSeriesCountByCategory(initialCategory)
+                totalSeriesCount = total
+                val first = seriesDao.getSeriesByCategoryListPaged(initialCategory, PAGE_SIZE, 0)
+                seriesList = first
+                hasMoreSeries = first.size < total
             }
             isLoading = false
         }
-        
-        // Load series when category changes
+
+        // Load series when category changes (user taps sidebar)
         LaunchedEffect(selectedCategory) {
             if (selectedCategory != null) {
                 isLoading = true
                 showingAllSeries = false
-                seriesList = seriesDao.getSeriesByCategoryList(selectedCategory!!)
+                val total = seriesDao.getSeriesCountByCategory(selectedCategory!!)
+                totalSeriesCount = total
+                val first = seriesDao.getSeriesByCategoryListPaged(selectedCategory!!, PAGE_SIZE, 0)
+                seriesList = first
+                hasMoreSeries = first.size < total
                 isLoading = false
             }
         }
-        
+
         SeriesScreen(
             categories = categories,
             selectedCategory = selectedCategory,
             seriesList = seriesList,
             isLoading = isLoading,
+            isLoadingMore = isLoadingMore,
+            hasMoreSeries = hasMoreSeries,
             showingAllSeries = showingAllSeries,
-            totalSeriesCount = seriesList.size,
+            totalSeriesCount = totalSeriesCount,
             continueWatchingItems = continueWatchingItems,
             onCategorySelect = { cat ->
                 showingAllSeries = false
@@ -163,13 +202,17 @@ class SeriesActivity : ComponentActivity() {
                     isLoading = true
                     showingAllSeries = true
                     selectedCategory = null
-                    seriesList = seriesDao.getAllSeries().first()
+                    val total = seriesDao.getAllSeriesCount()
+                    totalSeriesCount = total
+                    val first = seriesDao.getAllSeriesListPaged(PAGE_SIZE, 0)
+                    seriesList = first
+                    hasMoreSeries = first.size < total
                     isLoading = false
                 }
             },
+            onLoadMore = { loadMoreSeries() },
             onSeriesClick = { openSeriesDetails(it) },
             onContinueWatchingClick = { item ->
-                // Navigate to series details using seriesId
                 item.seriesId?.let { sid ->
                     val intent = Intent(this@SeriesActivity, DetailsActivity::class.java).apply {
                         putExtra("content_id", sid)
@@ -177,7 +220,6 @@ class SeriesActivity : ComponentActivity() {
                         putExtra("title", item.title)
                         putExtra("poster_url", item.posterUrl)
                         putExtra("backdrop_url", item.backdropUrl)
-                        // Pass resume season and episode for auto-selection
                         item.seasonNumber?.let { putExtra("resume_season", it) }
                         item.episodeNumber?.let { putExtra("resume_episode", it) }
                     }
@@ -209,12 +251,15 @@ fun SeriesScreen(
     selectedCategory: String?,
     seriesList: List<Series>,
     isLoading: Boolean,
+    isLoadingMore: Boolean = false,
+    hasMoreSeries: Boolean = false,
     showingAllSeries: Boolean,
     totalSeriesCount: Int,
     continueWatchingItems: List<ContinueWatchingItem> = emptyList(),
     onCategorySelect: (String) -> Unit,
     onViewAllClick: () -> Unit,
     onSeriesClick: (Series) -> Unit,
+    onLoadMore: () -> Unit = {},
     onContinueWatchingClick: (ContinueWatchingItem) -> Unit = {},
     onBackClick: () -> Unit
 ) {
@@ -315,6 +360,40 @@ fun SeriesScreen(
                                 series = series,
                                 onClick = { onSeriesClick(series) }
                             )
+                        }
+                        // Load more button — shown when more data is available
+                        if (hasMoreSeries || isLoadingMore) {
+                            item(key = "load_more_series", span = { androidx.tv.foundation.lazy.grid.TvGridItemSpan(maxLineSpan) }) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 24.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isLoadingMore) {
+                                        CircularProgressIndicator(
+                                            color = WaveStreamColors.Accent,
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    } else {
+                                        val interactionSource = remember { MutableInteractionSource() }
+                                        val isFocused by interactionSource.collectIsFocusedAsState()
+                                        val remaining = totalSeriesCount - seriesList.size
+                                        Text(
+                                            text = "▼  Carica altre $remaining serie",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
+                                            fontWeight = if (isFocused) FontWeight.Bold else FontWeight.Normal,
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.1f) else Color.Transparent)
+                                                .clickable { onLoadMore() }
+                                                .focusable(interactionSource = interactionSource)
+                                                .padding(horizontal = 24.dp, vertical = 12.dp)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -536,7 +615,7 @@ private fun SeriesGridCard(
             )
             
             // Rating badge
-            series.tmdbVoteAverage?.takeIf { it > 0 }?.let { rating ->
+            series.rating?.takeIf { it > 0 }?.let { rating ->
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)

@@ -66,6 +66,7 @@ class DetailsActivity : ComponentActivity() {
     private var streamUrl: String? = null
     private var contentTitle: String = ""
     private var currentSeriesId: Long = 0
+    private var profileId: Long = 1L
     
     // Intent extras for instant rendering
     private var intentTitle: String = ""
@@ -208,6 +209,19 @@ class DetailsActivity : ComponentActivity() {
                 streamUrl = episode.streamUrl
                 playContent(state, episode)
             },
+            onEpisodeLongClick = { episode ->
+                lifecycleScope.launch {
+                    watchProgressDao.deleteProgress(profileId, ContentType.EPISODE, episode.id)
+                    android.widget.Toast.makeText(
+                        this@DetailsActivity,
+                        "Progresso azzerato per l'episodio",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    loadContent { newState ->
+                        state = newState
+                    }
+                }
+            },
             onTrailerClick = {
                 state.trailerKey?.let { key -> playTrailer(key) }
             },
@@ -235,7 +249,7 @@ class DetailsActivity : ComponentActivity() {
             onMarkAsWatchedClick = {
                 // Remove from Continue Watching
                 lifecycleScope.launch {
-                    watchProgressDao.deleteProgress(1L, contentType, contentId)
+                    watchProgressDao.deleteProgress(profileId, contentType, contentId)
                     android.widget.Toast.makeText(
                         this@DetailsActivity, 
                         "Rimosso da Continua a guardare", 
@@ -341,12 +355,20 @@ class DetailsActivity : ComponentActivity() {
                         android.widget.Toast.LENGTH_SHORT
                     ).show()
                 }
+            },
+            onPersonClick = { personId, personName ->
+                val intent = android.content.Intent(this, it.wavestream.app.ui.person.PersonActivity::class.java).apply {
+                    putExtra("person_id", personId)
+                    putExtra("person_name", personName)
+                }
+                startActivity(intent)
             }
         )
     }
     
     private fun loadContent(onStateUpdate: (DetailsState) -> Unit) {
         lifecycleScope.launch {
+            profileId = userPreferences.getCurrentProfileId() ?: 1L
             when (contentType) {
                 ContentType.MOVIE -> loadMovie(onStateUpdate)
                 ContentType.SERIES, ContentType.EPISODE -> loadSeries(onStateUpdate)
@@ -364,7 +386,7 @@ class DetailsActivity : ComponentActivity() {
         streamUrl = movie.streamUrl
         
         // Check favorite status
-        val isFavorite = favoriteDao.getFavorite(1, ContentType.MOVIE, contentId) != null
+        val isFavorite = favoriteDao.getFavorite(profileId, ContentType.MOVIE, contentId) != null
         
         // Use persistent data from DB first (Xtream data we now save)
         var overview = movie.xtreamPlot ?: ""
@@ -430,12 +452,14 @@ class DetailsActivity : ComponentActivity() {
             duration = duration,
             director = enrichedMovie.director,
             cast = enrichedMovie.cast,
+            castPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(enrichedMovie.tmdbCastJson),
+            directorPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(enrichedMovie.tmdbCrewJson),
             posterUrl = enrichedMovie.posterUrl,
             backdropUrl = enrichedMovie.backdropUrl,
             contentType = ContentType.MOVIE,
             isFavorite = isFavorite,
             isLoading = false,
-            tmdbRating = enrichedMovie.rating,
+            tmdbRating = enrichedMovie.tmdbVoteAverage,
             imdbRating = enrichedMovie.omdbImdbRating,
             rottenTomatoesScore = enrichedMovie.omdbRottenTomatoesScore,
             metacriticScore = enrichedMovie.omdbMetacriticScore,
@@ -444,7 +468,7 @@ class DetailsActivity : ComponentActivity() {
         )
         
         // Load watch progress for resume button
-        val watchProgress = watchProgressDao.getProgress(1L, ContentType.MOVIE, contentId)
+        val watchProgress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
         val resumeMinutes = watchProgress?.let { 
             val remaining = (it.duration - it.position) / 60000
             remaining.toInt().coerceAtLeast(1)
@@ -555,7 +579,7 @@ class DetailsActivity : ComponentActivity() {
         currentSeriesId = series.id
         
         // Check favorite status
-        val isFavorite = favoriteDao.getFavorite(1, ContentType.SERIES, contentId) != null
+        val isFavorite = favoriteDao.getFavorite(profileId, ContentType.SERIES, contentId) != null
         
         // Load episodes on-demand
         val loadSuccess = playlistRepository.loadSeriesEpisodes(series.id)
@@ -576,13 +600,13 @@ class DetailsActivity : ComponentActivity() {
         var resumeProgress: Float? = null
         
         allEpisodes.forEach { ep ->
-            val progress = watchProgressDao.getProgress(1L, ContentType.EPISODE, ep.id)
+            val progress = watchProgressDao.getProgress(profileId, ContentType.EPISODE, ep.id)
             if (progress != null && progress.duration > 0) {
                 val progressPercent = (progress.position.toFloat() / progress.duration.toFloat()).coerceIn(0f, 1f)
                 val remainingMs = progress.duration - progress.position
                 val remainingMin = (remainingMs / 60000).toInt().coerceAtLeast(1)
-                // Consider completed if isCompleted flag OR remaining <= 7 minutes (credits threshold)
-                val effectivelyCompleted = progress.isCompleted || remainingMs <= 7 * 60 * 1000
+                // Consider completed if isCompleted flag OR remaining <= 6 minutes (credits threshold)
+                val effectivelyCompleted = progress.isCompleted || remainingMs <= 6 * 60 * 1000
                 
                 episodeProgressMap[ep.id] = EpisodeProgress(
                     episodeId = ep.id,
@@ -603,33 +627,44 @@ class DetailsActivity : ComponentActivity() {
         // Sort all episodes by season and episode number
         val sortedEpisodes = allEpisodes.sortedWith(compareBy({ it.seasonNumber }, { it.episodeNumber }))
         
-        // Find the first episode that is NOT completed (the "next" to watch)
-        val firstUnwatchedEp = sortedEpisodes.firstOrNull { ep ->
-            val epProgress = episodeProgressMap[ep.id]
-            epProgress == null || !epProgress.isCompleted  // not watched or not completed
-        }
-        
-        // Check if the first unwatched has progress (in progress = resume)
-        val firstUnwatchedProgress = firstUnwatchedEp?.let { episodeProgressMap[it.id] }
-        
-        if (firstUnwatchedProgress != null && firstUnwatchedProgress.progress > 0.01f) {
-            // Episode is in progress - show resume
-            resumeMinutes = firstUnwatchedProgress.remainingMinutes
-            resumeProgress = firstUnwatchedProgress.progress
-            lastWatchedEpisode = firstUnwatchedEp
-        } else if (firstUnwatchedEp != null) {
-            // There are completed episodes before this one -> show "next episode"
-            val hasWatchedAny = sortedEpisodes.any { ep ->
-                val epProgress = episodeProgressMap[ep.id]
-                epProgress != null && epProgress.isCompleted
+        if (lastWatchedEpisode != null && lastWatchedProgress != null) {
+            val progressPercent = (lastWatchedProgress!!.position.toFloat() / lastWatchedProgress!!.duration.toFloat()).coerceIn(0f, 1f)
+            val remainingMs = lastWatchedProgress!!.duration - lastWatchedProgress!!.position
+            val remainingMin = (remainingMs / 60000).toInt().coerceAtLeast(1)
+            val effectivelyCompleted = lastWatchedProgress!!.isCompleted || remainingMs <= 6 * 60 * 1000
+            
+            if (!effectivelyCompleted && progressPercent > 0.01f) {
+                // Episode is in progress - show resume
+                resumeMinutes = remainingMin
+                resumeProgress = progressPercent
+                // Keep lastWatchedEpisode pointing to this episode
+            } else {
+                // Episode is completed - suggest the next episode in sequence
+                val lastIndex = sortedEpisodes.indexOfFirst { it.id == lastWatchedEpisode!!.id }
+                if (lastIndex != -1 && lastIndex + 1 < sortedEpisodes.size) {
+                    val nextEp = sortedEpisodes[lastIndex + 1]
+                    nextEpisodeInfo = "Riproduci S${nextEp.seasonNumber} E${nextEp.episodeNumber}"
+                    nextEpisodeId = nextEp.id
+                    lastWatchedEpisode = nextEp // Point to next episode's season/details
+                } else {
+                    // Last episode completed - check if there are any other unwatched episodes (e.g. skipped ones)
+                    val firstUnwatchedEp = sortedEpisodes.firstOrNull { ep ->
+                        val epProgress = episodeProgressMap[ep.id]
+                        epProgress == null || !epProgress.isCompleted
+                    }
+                    if (firstUnwatchedEp != null) {
+                        nextEpisodeInfo = "Riproduci S${firstUnwatchedEp.seasonNumber} E${firstUnwatchedEp.episodeNumber}"
+                        nextEpisodeId = firstUnwatchedEp.id
+                        lastWatchedEpisode = firstUnwatchedEp
+                    }
+                }
             }
-            if (hasWatchedAny) {
-                nextEpisodeInfo = "Riproduci S${firstUnwatchedEp.seasonNumber} E${firstUnwatchedEp.episodeNumber}"
-                nextEpisodeId = firstUnwatchedEp.id
-                // Set lastWatchedEpisode to point to the next episode's season
-                lastWatchedEpisode = firstUnwatchedEp
+        } else {
+            // No watch progress at all - default to first episode
+            val firstEp = sortedEpisodes.firstOrNull()
+            if (firstEp != null) {
+                lastWatchedEpisode = firstEp
             }
-            // If no episodes watched at all, fall through to default "play first episode"
         }
         
         // Default to the season of the next/resume episode, or first season if no watch history
@@ -669,13 +704,15 @@ class DetailsActivity : ComponentActivity() {
             overview = series.plot ?: "",
             genres = series.genre ?: "",
             cast = series.cast,
+            castPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(series.tmdbCastJson),
+            directorPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(series.tmdbCrewJson),
             director = series.director,
             posterUrl = series.posterUrl,
             backdropUrl = series.backdropUrl,
             contentType = ContentType.SERIES,
             isFavorite = isFavorite,
             isLoading = false,
-            tmdbRating = series.rating,
+            tmdbRating = series.tmdbVoteAverage,
             seasons = seasons,
             selectedSeason = selectedSeason,
             episodes = episodes,
@@ -707,7 +744,12 @@ class DetailsActivity : ComponentActivity() {
             System.currentTimeMillis() - lastFetch > 24 * 60 * 60 * 1000)
         
         if (needsOmdbRefresh) {
-            loadImdbRatings(series.name, series.year) { ratings: ImdbRatingsRepository.RatingInfo? ->
+            loadImdbRatings(
+                title = series.name,
+                year = series.year,
+                englishTitle = series.tmdbOriginalName ?: series.tmdbName,
+                imdbId = series.tmdbImdbId
+            ) { ratings: ImdbRatingsRepository.RatingInfo? ->
                 // Update UI
                 state = state.copy(
                     imdbRating = ratings?.getFormattedImdbRating() ?: state.imdbRating,
@@ -767,7 +809,7 @@ class DetailsActivity : ComponentActivity() {
         streamUrl = channel.streamUrl
         
         // Check favorite status
-        val isFavorite = favoriteDao.getFavorite(1, ContentType.CHANNEL, contentId) != null
+        val isFavorite = favoriteDao.getFavorite(profileId, ContentType.CHANNEL, contentId) != null
         
         onStateUpdate(
             DetailsState(
@@ -890,10 +932,10 @@ class DetailsActivity : ComponentActivity() {
     private fun toggleFavorite(currentlyFavorite: Boolean, onComplete: (Boolean) -> Unit) {
         lifecycleScope.launch {
             if (currentlyFavorite) {
-                favoriteDao.removeFavorite(1, contentType, contentId)
+                favoriteDao.removeFavorite(profileId, contentType, contentId)
             } else {
                 val favorite = Favorite(
-                    profileId = 1,
+                    profileId = profileId,
                     contentType = contentType,
                     contentId = contentId,
                     title = contentTitle
@@ -908,7 +950,6 @@ class DetailsActivity : ComponentActivity() {
     
     private fun loadCustomLists(@Suppress("UNUSED_PARAMETER") state: DetailsState, onUpdate: (List<CustomGroup>, Set<Long>) -> Unit) {
         lifecycleScope.launch {
-            val profileId = 1L // TODO: Get from current profile
             val lists = customGroupDao.getGroupsForProfileList(profileId)
             
             // Find which lists contain this content
@@ -944,7 +985,6 @@ class DetailsActivity : ComponentActivity() {
             val itemToRemove = items.find { it.contentType == contentType && it.contentId == contentId }
             itemToRemove?.let { customGroupDao.deleteItem(it) }
             
-            val profileId = 1L
             val lists = customGroupDao.getGroupsForProfileList(profileId)
             val containingListIds = mutableSetOf<Long>()
             lists.forEach { list ->
@@ -959,7 +999,6 @@ class DetailsActivity : ComponentActivity() {
     
     private fun createList(name: String, state: DetailsState, onComplete: (List<CustomGroup>, Set<Long>) -> Unit) {
         lifecycleScope.launch {
-            val profileId = 1L
             val group = CustomGroup(
                 profileId = profileId,
                 name = name
@@ -987,7 +1026,6 @@ class DetailsActivity : ComponentActivity() {
             group?.let {
                 customGroupDao.updateGroup(it.copy(name = newName, updatedAt = System.currentTimeMillis()))
             }
-            val profileId = 1L
             val lists = customGroupDao.getGroupsForProfileList(profileId)
             onComplete(lists)
         }

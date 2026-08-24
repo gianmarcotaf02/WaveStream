@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -55,6 +58,7 @@ fun AddProfileDialog(
     var selectedPlaylistIndex by remember { mutableIntStateOf(0) }
     
     val focusRequester = remember { FocusRequester() }
+    val createButtonFocusRequester = remember { FocusRequester() }
     
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -108,6 +112,10 @@ fun AddProfileDialog(
                     ),
                     cursorBrush = SolidColor(WaveStreamColors.Accent),
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = { createButtonFocusRequester.requestFocus() }
+                    ),
                     decorationBox = { innerTextField ->
                         Box(
                             contentAlignment = Alignment.CenterStart,
@@ -211,6 +219,7 @@ fun AddProfileDialog(
                         }
                     },
                     enabled = profileName.isNotBlank(),
+                    modifier = Modifier.focusRequester(createButtonFocusRequester),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = WaveStreamColors.Accent,
                         contentColor = Color.White

@@ -1,6 +1,5 @@
 # Add project specific ProGuard rules here.
--keepattributes Signature
--keepattributes *Annotation*
+-keepattributes Signature,InnerClasses,EnclosingMethod,Annotation
 
 # Keep Moshi classes
 -keep class com.squareup.moshi.** { *; }
@@ -31,6 +30,21 @@
 -dontwarn androidx.compose.**
 -keep class androidx.compose.** { *; }
 -keep class kotlin.Metadata { *; }
+
+# =================== MATERIAL ICONS EXTENDED ===================
+# Material Icons Extended uses Kotlin lazy delegates compiled into *Kt static methods.
+# R8 aggressively optimizes these, breaking icon initialization at runtime.
+-keep class androidx.compose.material.icons.** { *; }
+-keepclassmembers class androidx.compose.material.icons.** { *; }
+# Keep all Kotlin file-level facades (*Kt classes) for icons
+-keep class androidx.compose.material.icons.filled.**Kt { *; }
+-keep class androidx.compose.material.icons.outlined.**Kt { *; }
+-keep class androidx.compose.material.icons.rounded.**Kt { *; }
+-keep class androidx.compose.material.icons.sharp.**Kt { *; }
+-keep class androidx.compose.material.icons.twotone.**Kt { *; }
+-keep class androidx.compose.material.icons.automirrored.**Kt { *; }
+-keep class androidx.compose.material.icons.automirrored.filled.**Kt { *; }
+-keep class androidx.compose.material.icons.automirrored.outlined.**Kt { *; }
 
 # Hilt
 -keep class dagger.hilt.** { *; }
@@ -96,6 +110,7 @@
 -keep class * implements com.google.gson.TypeAdapterFactory
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
+-keep class * extends com.google.gson.reflect.TypeToken
 -keepclassmembers,allowobfuscation class * {
   @com.google.gson.annotations.SerializedName <fields>;
 }
@@ -109,11 +124,29 @@
 # Firebase Realtime Database
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
+-keepclassmembers class com.google.firebase.** { *; }
+-keepclassmembers class com.google.android.gms.** { *; }
 -dontwarn com.google.firebase.**
 -dontwarn com.google.android.gms.**
 
+# Explicitly keep all Firebase Database internal classes (connection, WebSocket, etc.)
+-keep class com.google.firebase.database.** { *; }
+-keepclassmembers class com.google.firebase.database.** { *; }
+
+# Legacy Firebase connection / WebSocket packages (Tubesock, etc.)
+-keep class com.firebase.** { *; }
+-dontwarn com.firebase.**
+
+# Jackson parser classes used by Firebase internally
+-keep class com.fasterxml.jackson.** { *; }
+-dontwarn com.fasterxml.jackson.**
+
 # =================== ZXING QR CODE ===================
 -keep class com.google.zxing.** { *; }
+-keep interface com.google.zxing.** { *; }
+-keep enum com.google.zxing.** { *; }
+-keepclassmembers class com.google.zxing.** { *; }
+-keepclassmembers enum com.google.zxing.** { *; }
 -dontwarn com.google.zxing.**
 
 # =================== WaveStream UI Classes ===================
@@ -186,6 +219,10 @@
 # Keep Compose runtime classes
 -keep class androidx.compose.runtime.** { *; }
 -keep class androidx.tv.** { *; }
+
+# Keep Material Icons (Extended) — R8 strips individual icon classes as "unused"
+-keep class androidx.compose.material.icons.** { *; }
+-keepclassmembers class androidx.compose.material.icons.** { *; }
 
 # =================== HISTORY TAB FIX ===================
 # Keep HomeViewModel internal methods used by History tab
@@ -312,5 +349,26 @@
 -keepclassmembers class * {
     public ** component*();
     public ** copy(...);
+}
+
+# =================== HERO RATINGS / SCRAPING ===================
+# Keep Rotten Tomatoes scraper and its inner data classes
+-keep class it.wavestream.app.data.repository.RottenTomatoesScraper { *; }
+-keep class it.wavestream.app.data.repository.RottenTomatoesScraper$* { *; }
+
+# Keep IMDB ratings repository and its inner data classes
+-keep class it.wavestream.app.data.repository.ImdbRatingsRepository { *; }
+-keep class it.wavestream.app.data.repository.ImdbRatingsRepository$* { *; }
+
+# Keep all repositories (for Hilt injection + reflection)
+-keep class it.wavestream.app.data.repository.** { *; }
+
+# Keep ContentCache and HeroPairData (Gson serialization)
+-keep class it.wavestream.app.data.cache.ContentCache { *; }
+-keep class it.wavestream.app.ui.home.HeroPairData { *; }
+-keepclassmembers class it.wavestream.app.ui.home.HeroPairData {
+    <init>(...);
+    <fields>;
+    *;
 }
 

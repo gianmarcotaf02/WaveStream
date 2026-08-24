@@ -16,6 +16,7 @@
     </style>
     
     <style name="Theme.WaveStream.FullScreen">
+        <item name="android:windowBackground">@color/background_dark</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowTranslucentStatus">true</item>

@@ -44,8 +44,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.tv.foundation.lazy.grid.items
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
@@ -144,16 +147,27 @@ fun MultiscreenContent(
         // Reduced buffer for multi-stream to save memory
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                10_000,    // Min buffer (10s)
+                5_000,     // Min buffer (5s)
                 30_000,    // Max buffer (30s) - reduced for multi-stream
                 2_500,     // Buffer for playback
-                5_000      // Buffer after seek
+                3_000      // Buffer after seek
             )
             .setPrioritizeTimeOverSizeThresholds(true)
             .build()
         
+        // Optimized HTTP DataSource with keep-alive
+        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setConnectTimeoutMs(5_000)
+            .setReadTimeoutMs(10_000)
+            .setUserAgent("WaveStream/1.0")
+            .setAllowCrossProtocolRedirects(true)
+        
+        val dataSourceFactory = DefaultDataSource.Factory(context, httpDataSourceFactory)
+        val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
+        
         return ExoPlayer.Builder(context)
             .setLoadControl(loadControl)
+            .setMediaSourceFactory(mediaSourceFactory)
             .build()
     }
     

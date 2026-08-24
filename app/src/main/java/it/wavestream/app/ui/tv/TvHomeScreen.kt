@@ -100,6 +100,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
+ * Sealed class representing the focus state of the hero banner.
+ * Replaces the previous triple-state (isHeroFocused, wasHeroFocused, focusWentDown)
+ * to avoid mutable state thrash and recomposition loops.
+ */
+private sealed class HeroFocusState {
+    data object None : HeroFocusState()
+    data object Focused : HeroFocusState()
+    data object LeftToContent : HeroFocusState()
+    data object LeftToTopBar : HeroFocusState()
+}
+
+/**
  * Full TV Home Screen using Jetpack Compose for TV
  * Replaces MainFragment (Leanback BrowseSupportFragment)
  * 
@@ -549,23 +561,16 @@ private fun TvHomeScreenContent(
             val heroPlayButtonFocusRequester = remember { FocusRequester() }
             
             val hasHero = state.heroItems.isNotEmpty() && !state.isListsTab && !state.isHistoryTab
-            
-            // Track if hero buttons have focus to prevent scroll drift
-            var isHeroFocused by remember { mutableStateOf(false) }
-            var wasHeroFocused by remember { mutableStateOf(false) }
-            // Track if focus left via DOWN (to carousel) vs UP (to TopBar)
-            var focusWentDown by remember { mutableStateOf(false) }
-            
+
+            // Single sealed class for hero focus state - avoids triple mutableStateOf thrash
+            var heroFocusState by remember { mutableStateOf<HeroFocusState>(HeroFocusState.None) }
+
             // When focus leaves Hero via DOWN, scroll carousel into view
             // Don't scroll if focus went UP to TopBar
-            LaunchedEffect(isHeroFocused) {
-                if (wasHeroFocused && !isHeroFocused && state.carouselRows.isNotEmpty() && focusWentDown) {
-                    // Focus left Hero going DOWN - scroll to show first carousel
+            LaunchedEffect(heroFocusState) {
+                if (heroFocusState == HeroFocusState.LeftToContent && state.carouselRows.isNotEmpty()) {
                     columnListState.animateScrollToItem(1)
                 }
-                wasHeroFocused = isHeroFocused
-                // Reset direction tracking
-                if (!isHeroFocused) focusWentDown = false
             }
             
             TvLazyColumn(
@@ -578,7 +583,7 @@ private fun TvHomeScreenContent(
                 pivotOffsets = PivotOffsets(parentFraction = 0.20f),
                 // Disable user scroll while Hero is focused to keep it stable
                 // TvLazyColumn will still auto-scroll when focus changes (DOWN to carousel)
-                userScrollEnabled = !isHeroFocused,
+                userScrollEnabled = heroFocusState != HeroFocusState.Focused,
                 modifier = Modifier.fillMaxSize()
             ) {
                 // Hero Banner as first item
@@ -591,15 +596,25 @@ private fun TvHomeScreenContent(
                             Box(
                                 modifier = Modifier
                                     .onFocusChanged { focusState ->
-                                        isHeroFocused = focusState.hasFocus
+                                        heroFocusState = if (focusState.hasFocus) {
+                                            HeroFocusState.Focused
+                                        } else {
+                                            // Will be set to LeftToContent or LeftToTopBar by key handler below
+                                            heroFocusState
+                                        }
                                     }
                                     .onPreviewKeyEvent { keyEvent ->
                                         if (keyEvent.type == KeyEventType.KeyDown) {
                                             when (keyEvent.key) {
                                                 Key.DirectionDown -> {
                                                     // DOWN: Mark that focus is going down, allow scroll
-                                                    focusWentDown = true
+                                                    heroFocusState = HeroFocusState.LeftToContent
                                                     false // Don't consume, let focus move down
+                                                }
+                                                Key.DirectionUp -> {
+                                                    // UP: Focus is going back to TopBar
+                                                    heroFocusState = HeroFocusState.LeftToTopBar
+                                                    false
                                                 }
                                                 else -> false
                                             }
@@ -695,21 +710,25 @@ private fun TvHomeScreenContent(
                                         }
                                     }
                                 ) {
+                                    val seeAllForRow = remember(row.title) { { onSeeAllClick(row.title) } }
+                                    val rowFocusRequester = rowFocusRequesters.getOrNull(index) ?: remember { FocusRequester() }
                                     TvCarouselRow(
                                         row = row,
                                         onItemClick = onItemClick,
-                                        onSeeAllClick = { onSeeAllClick(row.title) },
-                                        focusRequester = rowFocusRequesters.getOrNull(index) ?: remember { FocusRequester() },
+                                        onSeeAllClick = seeAllForRow,
+                                        focusRequester = rowFocusRequester,
                                         onLeftOnFirstItem = onRailFocusRequest
                                     )
                                 }
                             } else {
                                 // Other carousels: normal navigation
+                                val seeAllForRow = remember(row.title) { { onSeeAllClick(row.title) } }
+                                val rowFocusRequester = rowFocusRequesters.getOrNull(index) ?: remember { FocusRequester() }
                                 TvCarouselRow(
                                     row = row,
                                     onItemClick = onItemClick,
-                                    onSeeAllClick = { onSeeAllClick(row.title) },
-                                    focusRequester = rowFocusRequesters.getOrNull(index) ?: remember { FocusRequester() },
+                                    onSeeAllClick = seeAllForRow,
+                                    focusRequester = rowFocusRequester,
                                     onLeftOnFirstItem = onRailFocusRequest
                                 )
                             }
@@ -864,54 +883,48 @@ fun HeroBanner(
             },
             label = "heroSlide"
         ) { hero ->
+            // Static gradient brushes - created once and reused for every recompose/frame
+            val topGradient = remember {
+                Brush.verticalGradient(colors = listOf(Color.Black, Color.Black.copy(alpha = 0.5f), Color.Transparent))
+            }
+            val bottomGradient = remember {
+                Brush.verticalGradient(colors = listOf(Color.Transparent, Color.Black), startY = 300f, endY = Float.POSITIVE_INFINITY)
+            }
+            val leftGradient = remember {
+                Brush.horizontalGradient(colorStops = arrayOf(
+                    0f to Color.Black,
+                    0.35f to Color.Black, // Keep solid black over text area for readability
+                    0.45f to Color.Black.copy(alpha = 0.85f),
+                    0.65f to Color.Black.copy(alpha = 0.30f),
+                    0.80f to Color.Transparent
+                ))
+            }
+            val rightGradient = remember {
+                Brush.horizontalGradient(colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f)))
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
-                // Backdrop image - reduced size to show more on screen
+                // Backdrop image - full width to avoid sharp vertical boundaries
                 AsyncImage(
                     model = hero.backdropUrl ?: hero.posterUrl,
                     contentDescription = hero.title,
                     contentScale = ContentScale.Crop,  // Maintain aspect ratio
-                    alignment = Alignment.Center,  // Center the image
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(0.60f)  // 60% width instead of full
-                        .align(Alignment.CenterEnd)  // Align to right side
-                        .drawWithCache {
-                            val topGradient = Brush.verticalGradient(
-                                colors = listOf(Color.Black, Color.Black.copy(alpha = 0.7f), Color.Transparent),
-                                endY = 100.dp.toPx()
-                            )
-                            val bottomGradient = Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black),
-                                startY = this.size.height - 100.dp.toPx()
-                            )
-                            val leftGradient = Brush.horizontalGradient(
-                                colorStops = arrayOf(
-                                    0f to Color.Black,
-                                    0.30f to Color.Black.copy(alpha = 0.98f),
-                                    0.45f to Color.Black.copy(alpha = 0.85f),
-                                    0.60f to Color.Black.copy(alpha = 0.5f),
-                                    0.80f to Color.Transparent
-                                )
-                            )
-                            val rightGradient = Brush.horizontalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.6f)),
-                                startX = this.size.width - 100.dp.toPx()
-                            )
-                            onDrawWithContent {
-                                drawContent()
-                                drawRect(topGradient)
-                                drawRect(bottomGradient)
-                                drawRect(leftGradient)
-                                drawRect(rightGradient)
-                            }
-                        }
+                    alignment = Alignment.CenterEnd,  // Align right side of image content
+                    alpha = 0.90f,
+                    modifier = Modifier.fillMaxSize()
                 )
+
+                // Static gradient overlays - reused across recompositions
+                Box(modifier = Modifier.fillMaxSize().background(topGradient))
+                Box(modifier = Modifier.fillMaxSize().background(bottomGradient))
+                Box(modifier = Modifier.fillMaxSize().background(leftGradient))
+                Box(modifier = Modifier.fillMaxSize().background(rightGradient))
                 
                 // Content - inside animation block for full slide effect
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = 80.dp, end = 24.dp, top = 40.dp, bottom = 20.dp)
+                        .padding(start = 80.dp, end = 24.dp, top = 20.dp, bottom = 8.dp)
                         .fillMaxHeight()
                         .fillMaxWidth(), // Force full width for buttons
                     verticalArrangement = Arrangement.Bottom  // Put content at bottom
@@ -926,6 +939,22 @@ fun HeroBanner(
                             ) {
                                 Text(
                                     text = "Nuovo episodio S${hero.newEpisodeSeason} E${hero.newEpisodeNumber}",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        // Prossimo episodio badge (for series with resume point)
+                        if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(WaveStreamColors.Accent.copy(alpha = 0.9f))
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "Prossimo episodio S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold
@@ -1066,7 +1095,7 @@ fun HeroBanner(
                         
                         // Genres
                         hero.genres?.let { genres ->
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = genres,
                                 style = MaterialTheme.typography.bodySmall,
@@ -1078,7 +1107,7 @@ fun HeroBanner(
                         
                         // Overview with "Leggi di più" - Limited width for readability
                         hero.overview?.let { overview ->
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
                             Column(
                                 modifier = Modifier.fillMaxWidth(0.6f)  // Limit overview width relative to new parent width
                             ) {
@@ -1107,7 +1136,7 @@ fun HeroBanner(
                         
                         // Cast - Limited width for readability
                         hero.cast?.let { cast ->
-                            Spacer(modifier = Modifier.height(10.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = "Cast: $cast",
                                 style = MaterialTheme.typography.bodySmall.copy(
@@ -1120,7 +1149,7 @@ fun HeroBanner(
                             )
                         }
                         
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         
                         // Action buttons - exactly like DetailsScreen
                         Row(
@@ -1139,27 +1168,47 @@ fun HeroBanner(
                                 label = "playScale"
                             )
                             
-                            // Different style for resume vs play
-                            val hasProgress = hero.resumeMinutes != null
+                            // Determine hero state for button styling
+                            val isInProgress = hero.resumeMinutes != null
+                            val isNextEpisode = hero.resumeMinutes == null && hero.resumeEpisodeSeason != null
+                            val isCWItem = isInProgress || isNextEpisode
+                            val hasProgress = isInProgress
                             val playBg by animateColorAsState(
                                 targetValue = when {
-                                    hasProgress && isPlayFocused -> Color.White
-                                    hasProgress -> Color.White.copy(alpha = 0.95f)
+                                    isCWItem && isPlayFocused -> Color.White
+                                    isCWItem -> Color.White.copy(alpha = 0.95f)
                                     isPlayFocused -> WaveStreamColors.AccentLight
                                     else -> WaveStreamColors.Accent
                                 },
                                 label = "playBg"
                             )
-                            val playContent = if (hasProgress) Color.Black else WaveStreamColors.TextPrimary
+                            val playContent = if (isCWItem) Color.Black else WaveStreamColors.TextPrimary
                             
                             val playBorderColor by animateColorAsState(
                                 targetValue = if (isPlayFocused) WaveStreamColors.Accent else Color.Transparent,
                                 label = "playBorder"
                             )
 
+                            val buttonText = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber) {
+                                if (isInProgress) {
+                                    val episodeInfo = if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
+                                        "S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber} - "
+                                    } else ""
+                                    "${episodeInfo}Riprendi"
+                                } else if (isNextEpisode) {
+                                    val episodeInfo = if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
+                                        "S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber} - "
+                                    } else ""
+                                    "${episodeInfo}Guarda il successivo"
+                                } else if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null) {
+                                    "Nuovo episodio S${hero.newEpisodeSeason} E${hero.newEpisodeNumber}"
+                                } else {
+                                    "Riproduci"
+                                }
+                            }
+
                             // Play button with focusProperties to redirect UP to TopBar
-                            Button(
-                                onClick = onPlayClick,
+                            Box(
                                 modifier = Modifier
                                     .graphicsLayer {
                                         scaleX = playScale
@@ -1167,83 +1216,69 @@ fun HeroBanner(
                                     }
                                     .then(if (playButtonFocusRequester != null) Modifier.focusRequester(playButtonFocusRequester) else Modifier)
                                     .height(52.dp)
+                                    .wrapContentWidth()
+                                    .widthIn(min = 140.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(playBg)
                                     .border(3.dp, playBorderColor, RoundedCornerShape(12.dp))
-                                    .clip(RoundedCornerShape(12.dp)) // Clip content (including progress bar) to match button shape
-                                    .then(
-                                        if (hasProgress && hero.progressPercent != null) {
-                                            val progress = hero.progressPercent.coerceIn(0.05f, 1f)
-                                            Modifier.drawWithContent {
-                                                drawContent()
-                                                val trackHeight = 4.dp.toPx() // Thinner
-                                                val trackY = size.height - trackHeight
-                                                
-                                                // Draw track (black background)
-                                                drawRect(
-                                                    color = Color.Black.copy(alpha = 0.4f),
-                                                    topLeft = Offset(0f, trackY),
-                                                    size = Size(size.width, trackHeight)
-                                                )
-                                                
-                                                // Draw progress
-                                                drawRect(
-                                                    color = WaveStreamColors.Accent, // Use accent color instead of hardcoded purple
-                                                    topLeft = Offset(0f, trackY),
-                                                    size = Size(size.width * progress, trackHeight)
-                                                )
-                                            }
-                                        } else Modifier
+                                    .focusable(interactionSource = playInteractionSource)
+                                    .clickable(
+                                        interactionSource = playInteractionSource,
+                                        indication = null,
+                                        onClick = onPlayClick
                                     ),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = playBg,
-                                    contentColor = playContent
-                                ),
-                                shape = RoundedCornerShape(12.dp),
-                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 8.dp),
-                                interactionSource = playInteractionSource
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                // Text with episode info like DetailsScreen
-                                val buttonText = if (hasProgress && hero.resumeMinutes != null) {
-                                    val episodeInfo = if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
-                                        "S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber} - "
-                                    } else ""
-                                    "${episodeInfo}Riprendi"
-                                } else if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null) {
-                                    "Nuovo episodio S${hero.newEpisodeSeason} E${hero.newEpisodeNumber}"
-                                } else if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
-                                    "Riproduci S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber}"
-                                } else {
-                                    "Riproduci"
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(horizontal = 24.dp)
+                                        .padding(bottom = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        tint = playContent,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = buttonText,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = playContent,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
                                 }
-                                Text(
-                                    text = buttonText,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                                
+                                // Progress bar integrated flush at the bottom edge of the button
+                                if (hasProgress && hero.progressPercent != null) {
+                                    val progress = hero.progressPercent.coerceIn(0.05f, 1f)
+                                    Box(
+                                        modifier = Modifier.matchParentSize()
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.BottomStart)
+                                                .fillMaxWidth()
+                                                .height(4.dp)
+                                                .background(Color.Black.copy(alpha = 0.15f))
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .fillMaxWidth(progress)
+                                                    .background(WaveStreamColors.Accent)
+                                            )
+                                        }
+                                    }
+                                }
                             }
                             
-                            Spacer(modifier = Modifier.width(4.dp)) // Gap after Play button
-                            
-                            // Text: "xx min rimasti di yy min" - Same level as buttons
-                            if (hasProgress && hero.resumeMinutes != null && hero.totalDurationMinutes != null) {
-                            // Format minutes → "2h 7min" when >= 60, otherwise "X min"
-                            fun formatMins(m: Int): String = if (m >= 60) {
-                                val h = m / 60; val rem = m % 60
-                                if (rem > 0) "${h}h ${rem}min" else "${h}h"
-                            } else "$m min"
-                            Text(
-                                text = "${formatMins(hero.resumeMinutes!!)} rimasti di ${formatMins(hero.totalDurationMinutes!!)}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = WaveStreamColors.TextSecondary,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Spacer(modifier = Modifier.width(8.dp)) // Gap before icon buttons
-                            }
+                            Spacer(modifier = Modifier.width(12.dp)) // Gap after Play button before other buttons
                             
                             // Trailer button (only if key exists)
                             if (hero.trailerKey != null) {
@@ -1283,8 +1318,8 @@ fun HeroBanner(
                                 onFocusChange = { if (it) isPaused = true }
                             )
                             
-                            // Mark as watched button (only for continue watching)
-                            if (isContinueWatching) {
+                            // Mark as watched button (only for in-progress items)
+                            if (isInProgress) {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 HeroIconButton(
                                     icon = painterResource(id = R.drawable.ic_eye),
@@ -1293,6 +1328,23 @@ fun HeroBanner(
                                     onFocusChange = { if (it) isPaused = true }
                                 )
                             }
+                        }
+
+                        // Text: "xx min rimasti di yy min" - Below the buttons row
+                        if (hero.resumeMinutes != null && hero.totalDurationMinutes != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            // Format minutes → "2h 7min" when >= 60, otherwise "X min"
+                            fun formatMins(m: Int): String = if (m >= 60) {
+                                val h = m / 60; val rem = m % 60
+                                if (rem > 0) "${h}h ${rem}min" else "${h}h"
+                            } else "$m min"
+                            Text(
+                                text = "${formatMins(hero.resumeMinutes!!)} rimasti di ${formatMins(hero.totalDurationMinutes!!)}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = WaveStreamColors.TextSecondary,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
                         }
                     // Removed inner Column closing brace
                 }  // Close outer Column
@@ -1357,7 +1409,7 @@ fun HeroBanner(
         }
         
         // Pagination indicator (OUTSIDE animation - stay stable)
-        if (isContinueWatching && totalCount > 1) {
+        if (totalCount > 1) {
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -1506,12 +1558,21 @@ private fun HeroIconButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
+
     LaunchedEffect(isFocused) {
         onFocusChange(isFocused)
     }
-    
-    // Bounce animation when becoming active (same as FavoriteButton)
+
+    // Single focus progress 0..1 — derives scale and all colors.
+    // Replaces the previous 4 animate*AsState calls (scale, bg, border, tint)
+    // which together caused significant recomposition overhead.
+    val focusProgress by animateFloatAsState(
+        targetValue = if (isFocused) 1f else 0f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "heroIconButtonProgress"
+    )
+
+    // Bounce on isActive toggle only (independent from focus)
     var bounceScale by remember { mutableFloatStateOf(1f) }
     LaunchedEffect(isActive) {
         if (isActive) {
@@ -1520,7 +1581,6 @@ private fun HeroIconButton(
             bounceScale = 1f
         }
     }
-    
     val animatedBounce by animateFloatAsState(
         targetValue = bounceScale,
         animationSpec = spring(
@@ -1529,49 +1589,33 @@ private fun HeroIconButton(
         ),
         label = "iconBounce"
     )
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.IconButtonFocusScale else 1f,
-        animationSpec = AppAnimations.SpringCardFocus,
-        label = "heroIconButtonScale"
-    )
-    
-    // Pink color from FavoriteButton: 0xFFE91E63
+
     val activeColor = Color(0xFFE91E63)
-    
-    // Background - matches FavoriteButton exactly
-    val backgroundColor by animateColorAsState(
-        targetValue = when {
-            isActive -> activeColor.copy(alpha = 0.15f)  // Pink tint when active
-            isFocused -> WaveStreamColors.Accent
-            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f)
-        },
-        label = "heroBtnBg"
-    )
-    
-    // Border - matches FavoriteButton exactly  
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            isActive -> activeColor  // Pink border when active
-            isFocused -> WaveStreamColors.Accent  // Accent when focused
-            else -> WaveStreamColors.TextSecondary.copy(alpha = 0.7f)  // Visible default
-        },
-        label = "heroBtnBorder"
-    )
-    
-    // Icon tint - matches FavoriteButton exactly
-    val iconTint by animateColorAsState(
-        targetValue = if (isActive) activeColor else WaveStreamColors.TextPrimary,
-        label = "heroBtnTint"
-    )
-    
+    val unfocusedBg = WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f)
+    val unfocusedBorder = WaveStreamColors.TextSecondary.copy(alpha = 0.7f)
+
+    // Derive background, border, tint from focusProgress + isActive (no per-property animation)
+    val scale = 1f + (AppAnimations.IconButtonFocusScale - 1f) * focusProgress
+    val backgroundColor = when {
+        isActive -> activeColor.copy(alpha = 0.15f + 0.85f * focusProgress)
+            .let { if (isFocused) WaveStreamColors.Accent else it }
+        isFocused -> WaveStreamColors.Accent
+        else -> unfocusedBg
+    }
+    val borderColor = when {
+        isActive -> activeColor
+        isFocused -> WaveStreamColors.Accent
+        else -> unfocusedBorder
+    }
+    val iconTint = if (isActive) activeColor else WaveStreamColors.TextPrimary
+
     Box(
         modifier = Modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .size(48.dp)
+            .requiredSize(48.dp)
             .clip(CircleShape)
             .background(backgroundColor)
             .border(1.dp, borderColor, CircleShape)
@@ -1626,50 +1670,42 @@ private fun HeroIconButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
+
     LaunchedEffect(isFocused) {
         onFocusChange(isFocused)
     }
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.IconButtonFocusScale else 1f,
+
+    // Single focus progress 0..1 — derives scale, bg, border, tint
+    val focusProgress by animateFloatAsState(
+        targetValue = if (isFocused) 1f else 0f,
         animationSpec = AppAnimations.SpringCardFocus,
-        label = "heroIconButtonScale"
+        label = "heroIconButtonProgress"
     )
-    
-    // Background
-    val backgroundColor by animateColorAsState(
-        targetValue = when {
-            isActive -> Color(0xFFE91E63).copy(alpha = 0.15f)
-            isFocused -> WaveStreamColors.Accent
-            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f)
-        },
-        label = "heroBtnBg"
-    )
-    
-    // Border
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            isActive -> Color(0xFFE91E63)
-            isFocused -> WaveStreamColors.Accent
-            else -> WaveStreamColors.TextSecondary.copy(alpha = 0.7f)
-        },
-        label = "heroBtnBorder"
-    )
-    
-    // Icon tint
-    val iconTint by animateColorAsState(
-        targetValue = if (isActive) Color(0xFFE91E63) else WaveStreamColors.TextPrimary,
-        label = "heroBtnTint"
-    )
-    
+
+    val activeColor = Color(0xFFE91E63)
+    val unfocusedBg = WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f)
+    val unfocusedBorder = WaveStreamColors.TextSecondary.copy(alpha = 0.7f)
+
+    val scale = 1f + (AppAnimations.IconButtonFocusScale - 1f) * focusProgress
+    val backgroundColor = when {
+        isActive -> activeColor.copy(alpha = 0.15f)
+        isFocused -> WaveStreamColors.Accent
+        else -> unfocusedBg
+    }
+    val borderColor = when {
+        isActive -> activeColor
+        isFocused -> WaveStreamColors.Accent
+        else -> unfocusedBorder
+    }
+    val iconTint = if (isActive) activeColor else WaveStreamColors.TextPrimary
+
     Box(
         modifier = Modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .size(48.dp)
+            .requiredSize(48.dp)
             .clip(CircleShape)
             .background(backgroundColor)
             .border(1.dp, borderColor, CircleShape)
@@ -1713,37 +1749,32 @@ private fun HeroTrailerButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    LaunchedEffect(isFocused) {
-        onFocusChange(isFocused)
-    }
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
+
+    LaunchedEffect(isFocused) { onFocusChange(isFocused) }
+
+    val focusProgress by animateFloatAsState(
+        targetValue = if (isFocused) 1f else 0f,
         animationSpec = AppAnimations.SpringCardFocus,
-        label = "heroTrailerScale"
+        label = "heroTrailerProgress"
     )
-    
+
+    val scale = 1f + 0.1f * focusProgress
+
+    // animateColorAsState instead of lerp — lerp between Oklab/sRGB color spaces crashes
     val backgroundColor by animateColorAsState(
         targetValue = if (isFocused) Color.White else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.6f),
+        animationSpec = tween(150),
         label = "heroTrailerBg"
     )
-    
+
     Box(
         modifier = Modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .size(48.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .requiredSize(48.dp)
             .clip(CircleShape)
             .border(1.dp, WaveStreamColors.TextSecondary.copy(alpha = 0.5f), CircleShape)
             .background(backgroundColor)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .focusable(interactionSource = interactionSource),
         contentAlignment = Alignment.Center
     ) {
@@ -1770,45 +1801,44 @@ private fun HeroNavArrow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.IconButtonFocusScale else 1f,
+
+    // Single focus progress derives scale, bg, border
+    val focusProgress by animateFloatAsState(
+        targetValue = if (isFocused) 1f else 0f,
         animationSpec = AppAnimations.SpringCardFocus,
-        label = "arrowScale"
+        label = "arrowProgress"
     )
-    
+
+    val scale = 1f + (AppAnimations.IconButtonFocusScale - 1f) * focusProgress
+
+    // animateColorAsState instead of lerp — lerp between Oklab/sRGB color spaces crashes
     val backgroundColor by animateColorAsState(
         targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.6f),
+        animationSpec = tween(150),
         label = "arrowBg"
     )
-    
+
     val borderColor by animateColorAsState(
         targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        animationSpec = tween(150),
         label = "arrowBorder"
     )
-    
+
     Box(
         modifier = modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .size(48.dp)
             .clip(CircleShape)
             .border(3.dp, borderColor, CircleShape)
             .background(backgroundColor)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .focusable(interactionSource = interactionSource)
             .onPreviewKeyEvent { keyEvent ->
-                if (keyEvent.type == KeyEventType.KeyDown && 
+                if (keyEvent.type == KeyEventType.KeyDown &&
                     keyEvent.key == Key.DirectionLeft && isLeft) {
                     onLeftPress?.invoke()
                     true
-                } else if (keyEvent.type == KeyEventType.KeyDown && 
+                } else if (keyEvent.type == KeyEventType.KeyDown &&
                            keyEvent.key == Key.DirectionUp) {
                     onUpPress?.invoke()
                     true

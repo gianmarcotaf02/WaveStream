@@ -14,6 +14,8 @@ import it.wavestream.app.data.database.entity.TMDBMediaType
 import it.wavestream.app.data.preferences.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -253,6 +255,7 @@ class TMDBRepository @Inject constructor(
         tmdbBackdropPath = details.backdropPath,
         tmdbTitle = details.title,
         tmdbOriginalTitle = details.originalTitle,
+        tmdbImdbId = details.externalIds?.imdbId,
         tmdbOverview = details.overview,
         tmdbReleaseDate = details.releaseDate,
         tmdbVoteAverage = details.voteAverage,
@@ -262,6 +265,28 @@ class TMDBRepository @Inject constructor(
         tmdbRuntime = details.runtime,
         tmdbCast = details.credits?.cast?.take(10)?.joinToString(",") { it.name },
         tmdbDirector = details.credits?.crew?.find { it.job == "Director" }?.name,
+        tmdbCastJson = details.credits?.cast?.take(15)?.let { cast -> JSONArray().apply {
+            cast.forEach { c ->
+                val obj = JSONObject()
+                obj.put("id", c.id)
+                obj.put("name", c.name)
+                obj.put("character", c.character ?: "")
+                obj.put("profile_path", c.profilePath ?: "")
+                obj.put("order", c.order ?: 0)
+                put(obj)
+            }
+        }.toString() },
+        tmdbCrewJson = details.credits?.crew?.filter { it.job in listOf("Director", "Producer", "Writer") }?.let { crew -> JSONArray().apply {
+            crew.forEach { c ->
+                val obj = JSONObject()
+                obj.put("id", c.id)
+                obj.put("name", c.name)
+                obj.put("job", c.job ?: "")
+                obj.put("department", c.department ?: "")
+                obj.put("profile_path", c.profilePath ?: "")
+                put(obj)
+            }
+        }.toString() },
         tmdbLastFetchAt = System.currentTimeMillis()
     )
     
@@ -280,7 +305,30 @@ class TMDBRepository @Inject constructor(
         tmdbNumberOfSeasons = details.numberOfSeasons,
         tmdbNumberOfEpisodes = details.numberOfEpisodes,
         tmdbCast = details.credits?.cast?.take(10)?.joinToString(",") { it.name },
+        tmdbCastJson = details.credits?.cast?.take(15)?.let { cast -> JSONArray().apply {
+            cast.forEach { c ->
+                val obj = JSONObject()
+                obj.put("id", c.id)
+                obj.put("name", c.name)
+                obj.put("character", c.character ?: "")
+                obj.put("profile_path", c.profilePath ?: "")
+                obj.put("order", c.order ?: 0)
+                put(obj)
+            }
+        }.toString() },
+        tmdbCrewJson = details.credits?.crew?.filter { it.job in listOf("Director", "Producer", "Writer") }?.let { crew -> JSONArray().apply {
+            crew.forEach { c ->
+                val obj = JSONObject()
+                obj.put("id", c.id)
+                obj.put("name", c.name)
+                obj.put("job", c.job ?: "")
+                obj.put("department", c.department ?: "")
+                obj.put("profile_path", c.profilePath ?: "")
+                put(obj)
+            }
+        }.toString() },
         tmdbStatus = details.status,
+        tmdbImdbId = details.externalIds?.imdbId,
         tmdbLastFetchAt = System.currentTimeMillis()
     )
 }

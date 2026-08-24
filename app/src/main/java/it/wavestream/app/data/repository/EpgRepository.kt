@@ -15,6 +15,8 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import java.io.BufferedReader
+import java.io.Reader
 import java.io.StringReader
 import java.text.SimpleDateFormat
 import java.util.*
@@ -37,7 +39,18 @@ class EpgRepository @Inject constructor(
         private const val MAX_PROGRAMS_PER_CHANNEL = 24 // ~today + tomorrow
     }
     
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .addNetworkInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .header("Connection", "close")
+                .build()
+            chain.proceed(request)
+        }
+        .build()
     private val epgCache = mutableMapOf<String, List<EpgProgram>>()
     private var lastUpdate: Long = 0
     private val cacheValidityMs = 6 * 60 * 60 * 1000L // 6 hours
@@ -81,14 +94,24 @@ class EpgRepository @Inject constructor(
             val response = httpClient.newCall(request).execute()
             
             if (response.isSuccessful) {
-                val content = response.body?.string() ?: ""
-                if (content.isNotEmpty() && content.contains("<tv")) {
-                    Log.d(TAG, "Got XMLTV response, parsing...")
-                    parseXmlTv(content)
-                    Log.d(TAG, "EPG loaded from XMLTV: ${epgCache.size} channels cached")
-                    lastUpdate = System.currentTimeMillis()
-                    // saveCacheToDisk() // Disabled - causes OOM
-                    return@withContext
+                response.body?.use { body ->
+                    val reader = BufferedReader(body.charStream())
+                    reader.mark(2048)
+                    val buffer = CharArray(2048)
+                    val read = reader.read(buffer)
+                    val preview = if (read > 0) String(buffer, 0, read) else ""
+                    reader.reset()
+                    
+                    if (preview.contains("<tv")) {
+                        Log.d(TAG, "Got XMLTV response, parsing stream...")
+                        parseXmlTv(reader)
+                        Log.d(TAG, "EPG loaded from XMLTV: ${epgCache.size} channels cached")
+                        lastUpdate = System.currentTimeMillis()
+                        // saveCacheToDisk() // Disabled - causes OOM
+                        return@withContext
+                    } else {
+                        Log.w(TAG, "Response does not seem to be XMLTV format (preview: ${preview.take(100)})")
+                    }
                 }
             }
             
@@ -240,8 +263,10 @@ class EpgRepository @Inject constructor(
                 throw Exception("HTTP ${response.code}")
             }
             
-            val content = response.body?.string() ?: ""
-            parseXmlTv(content)
+            response.body?.use { body ->
+                val reader = BufferedReader(body.charStream())
+                parseXmlTv(reader)
+            }
             
             lastUpdate = System.currentTimeMillis()
             // saveCacheToDisk() // Disabled - causes OOM
@@ -310,11 +335,15 @@ class EpgRepository @Inject constructor(
     /**
      * Parse XMLTV format
      */
-    private fun parseXmlTv(content: String) {
+    /**
+     * Parse XMLTV format from a Reader stream
+     */
+    private fun parseXmlTv(reader: Reader) {
+        val tempCache = mutableMapOf<String, MutableList<EpgProgram>>()
         try {
             val factory = XmlPullParserFactory.newInstance()
             val parser = factory.newPullParser()
-            parser.setInput(StringReader(content))
+            parser.setInput(reader)
             
             var eventType = parser.eventType
             var currentChannelId: String? = null
@@ -360,7 +389,6 @@ class EpgRepository @Inject constructor(
                                 if (currentChannelId != null && currentTitle != null && 
                                     currentStart != null && currentEnd != null) {
                                     
-                                    // Filter: only keep programs within next 24 hours
                                     val now = System.currentTimeMillis()
                                     val cutoff24h = now + (24 * 60 * 60 * 1000L)
                                     
@@ -373,10 +401,7 @@ class EpgRepository @Inject constructor(
                                             end = currentEnd,
                                             category = currentCategory
                                         )
-                                        
-                                        val existing = epgCache[currentChannelId]?.toMutableList() ?: mutableListOf()
-                                        existing.add(program)
-                                        epgCache[currentChannelId] = existing.sortedBy { it.start }
+                                        tempCache.getOrPut(currentChannelId) { mutableListOf() }.add(program)
                                     }
                                 }
                                 
@@ -393,9 +418,19 @@ class EpgRepository @Inject constructor(
                 }
                 eventType = parser.next()
             }
-            
         } catch (e: Exception) {
-            Log.e(TAG, "Error parsing XMLTV", e)
+            Log.e(TAG, "Error parsing XMLTV (partial parsing may have succeeded)", e)
+        } finally {
+            var savedChannelsCount = 0
+            for ((channelId, programs) in tempCache) {
+                if (programs.isNotEmpty()) {
+                    val existing = epgCache[channelId]?.toMutableList() ?: mutableListOf()
+                    existing.addAll(programs)
+                    epgCache[channelId] = existing.sortedBy { it.start }
+                    savedChannelsCount++
+                }
+            }
+            Log.d(TAG, "Streaming parser finished. Cached programs for $savedChannelsCount channels.")
         }
     }
     

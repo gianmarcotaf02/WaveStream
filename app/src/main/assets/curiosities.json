@@ -1,0 +1,602 @@
+[
+  {
+    "id": 1,
+    "categoria": "Film",
+    "titolo": "Inside Out 2 (2024)",
+    "curiosita": "Per l'animazione dell'Ansia, i registi hanno consultato veri psicologi infantili. Il design originale prevedeva oltre 15 nuove emozioni, tra cui 'Vergogna' (poi scartata perché troppo cupa per il tono del film)."
+  },
+  {
+    "id": 2,
+    "categoria": "Film",
+    "titolo": "Dune: Parte Due (2024)",
+    "curiosita": "La lingua dei Fremen, il Chakobsa, è stata espansa dal linguista David J. Peterson fino a diventare un idioma parlabile con oltre 300 parole uniche, basate su dialetti arabi e caucasi."
+  },
+  {
+    "id": 3,
+    "categoria": "Serie TV",
+    "titolo": "Squid Game (Stagione 2 - 2024/2025)",
+    "curiosita": "Il regista Hwang Dong-hyuk ha ammesso di aver dovuto riscrivere intere parti della seconda stagione dopo che alcune teorie dei fan su Reddit avevano indovinato quasi perfettamente la trama originale."
+  },
+  {
+    "id": 4,
+    "categoria": "Film",
+    "titolo": "Oppenheimer (2023)",
+    "curiosita": "La pellicola IMAX in bianco e nero usata per alcune sezioni del film non esisteva. La Kodak l'ha prodotta da zero appositamente su richiesta di Christopher Nolan e del direttore della fotografia Hoyte van Hoytema."
+  },
+  {
+    "id": 5,
+    "categoria": "Film",
+    "titolo": "Barbie (2023)",
+    "curiosita": "La costruzione delle scenografie a grandezza naturale della Barbieland ha causato una vera e propria carenza globale di vernice fluorescente rosa della marca Rosco, esaurendo le scorte dell'azienda."
+  },
+  {
+    "id": 6,
+    "categoria": "Film",
+    "titolo": "Everything Everywhere All at Once (2022)",
+    "curiosita": "Gli incredibili effetti visivi del film, vincitore di 7 premi Oscar, sono stati realizzati da un team di soli 5 artisti autodidatti (inclusi i due registi) che hanno imparato a usare i software guardando tutorial gratuiti su YouTube."
+  },
+  {
+    "id": 7,
+    "categoria": "Serie TV",
+    "titolo": "The Last of Us (2023)",
+    "curiosita": "I terrificanti suoni emessi dai 'Clicker' non sono digitali. Sono stati creati interamente dai doppiatori Misty Lee e Phillip Kovats usando una tecnica di clicking vocale profondo e aspirato."
+  },
+  {
+    "id": 8,
+    "categoria": "Film",
+    "titolo": "Avatar: La via dell'acqua (2022)",
+    "curiosita": "Kate Winslet ha stabilito il record mondiale di apnea cinematografica trattenendo il respiro sott'acqua per ben 7 minuti e 14 secondi, superando il precedente record di Tom Cruise in Mission: Impossible."
+  },
+  {
+    "id": 9,
+    "categoria": "Film",
+    "titolo": "Spider-Man: Across the Spider-Verse (2023)",
+    "curiosita": "La scena ambientata nel mondo LEGO è stata interamente animata da Preston Mutanga, un ragazzo canadese di soli 14 anni, notato dai produttori su YouTube dopo che aveva ricreato il trailer del film con i mattoncini."
+  },
+  {
+    "id": 10,
+    "categoria": "Serie TV",
+    "titolo": "Mercoledì (2022)",
+    "curiosita": "Jenna Ortega ha imparato a suonare il violoncello, a tirare di scherma e ha coreografato autonomamente la celebre scena del ballo (diventata virale) mentre era affetta da un principio di COVID-19 non ancora diagnosticato."
+  },
+  {
+    "id": 11,
+    "categoria": "Film",
+    "titolo": "Top Gun: Maverick (2022)",
+    "curiosita": "Gli attori hanno dovuto firmare una liberatoria speciale per girare a bordo dei veri caccia F/A-18. Ognuno di loro era responsabile della gestione della telecamera IMAX montata nella cabina di pilotaggio e dell'accensione delle luci interne durante il volo."
+  },
+  {
+    "id": 12,
+    "categoria": "Film",
+    "titolo": "Killers of the Flower Moon (2023)",
+    "curiosita": "Martin Scorsese ha preteso che tutti i ruoli della tribù Osage fossero interpretati da veri discendenti della tribù. Molti dialoghi sono stati modificati sul set per rispecchiare le reali tradizioni orali tramandate dagli anziani nativi."
+  },
+  {
+    "id": 13,
+    "categoria": "Serie TV",
+    "titolo": "Stranger Things (Stagione 4 - 2022)",
+    "curiosita": "La protesi di Vecna, interpretato da Jamie Campbell Bower, pesava quasi 18 chili e richiedeva oltre 7 ore di applicazione giornaliera. Il lattice era così sensibile che l'attore non poteva sedersi per tutta la durata delle riprese."
+  },
+  {
+    "id": 14,
+    "categoria": "Film",
+    "titolo": "Furiosa: A Mad Max Saga (2024)",
+    "curiosita": "Per la sequenza d'azione 'Stairway to Nowhere', della durata di 15 minuti, sono stati necessari 78 giorni di riprese consecutivi e l'impiego giornaliero di quasi 200 stuntman nel deserto australiano."
+  },
+  {
+    "id": 15,
+    "categoria": "Film",
+    "titolo": "The Matrix (1999)",
+    "curiosita": "L'iconico codice verde verticale che scorre sullo schermo all'inizio del film non è una sequenza di algoritmi complessi, ma una serie di ricette di sushi scansionate da un libro di cucina giapponese della moglie dello scenografo."
+  },
+  {
+    "id": 16,
+    "categoria": "Film",
+    "titolo": "Il Cavaliere Oscuro (2008)",
+    "curiosita": "Il tic di Heath Ledger di leccarsi continuamente le labbra nei panni del Joker non era inizialmente sul copione. L'attore lo faceva perché le protesi di silicone tendevano a staccarsi continuamente mentre parlava."
+  },
+  {
+    "id": 17,
+    "categoria": "Film",
+    "titolo": "Die Hard (1988)",
+    "curiosita": "Nella scena in cui Hans Gruber (Alan Rickman) cade dal palazzo, l'espressione di terrore del personaggio è reale: lo stuntman lo ha lasciato cadere sul materasso al conteggio di 'due' anziché di 'tre', prendendolo alla sprovvista."
+  },
+  {
+    "id": 18,
+    "categoria": "Film",
+    "titolo": "Il Signore degli Anelli: Il ritorno del re (2003)",
+    "curiosita": "Andy Serkis (Gollum) ha dovuto bere litri di una miscela speciale di miele, limone e zenzero (soprannominata 'Succo di Gollum') per evitare di distruggere le sue corde vocali durante le sessioni di doppiaggio."
+  },
+  {
+    "id": 19,
+    "categoria": "Film",
+    "titolo": "Pulp Fiction (1994)",
+    "curiosita": "La famosa Chevrolet Chevelle Malibu del 1964 guidata da Vincent Vega (John Travolta) apparteneva al regista Quentin Tarantino. Durante le riprese del film l'auto venne rubata e fu ritrovata dalla polizia solo vent'anni dopo, nel 2013."
+  },
+  {
+    "id": 20,
+    "categoria": "Film",
+    "titolo": "Il padrino (1972)",
+    "curiosita": "Il gatto randagio tenuto in grembo da Marlon Brando nella scena iniziale non era previsto. Il regista Francis Ford Coppola lo trovò nel giardino degli studios e lo diede a Brando poco prima del ciak; le fusa del gatto coprirono quasi interamente i dialoghi registrati."
+  },
+  {
+    "id": 21,
+    "categoria": "Film",
+    "titolo": "Jurassic Park (1993)",
+    "curiosita": "I versi emessi dai Velociraptor quando comunicano tra loro nella cucina sono in realtà registrazioni audio di tartarughe giganti catturate durante l'accoppiamento."
+  },
+  {
+    "id": 22,
+    "categoria": "Film",
+    "titolo": "Psycho (1960)",
+    "curiosita": "È stato il primo film nella storia del cinema americano a mostrare esplicitamente lo scarico di un water in funzione, una scena che all'epoca scatenò l'ira della censura per motivi di 'decoro'."
+  },
+  {
+    "id": 23,
+    "categoria": "Serie TV",
+    "titolo": "Succession (2018-2023)",
+    "curiosita": "La produzione ha assunto veri consulenti patrimoniali 'miliardari' per insegnare agli attori dettagli microscopici, come il fatto che i veri super-ricchi non indossano quasi mai il cappotto per strada perché si spostano solo da un interno all'altro tramite autista."
+  },
+  {
+    "id": 24,
+    "categoria": "Film",
+    "titolo": "Shining (1980)",
+    "curiosita": "Per la famosa scena in cui Jack Torrance abbatte la porta del bagno con un'ascia, la produzione dovette usare porte vere in legno massiccio, poiché Jack Nicholson era stato un vigile del fuoco volontario e distruggeva le porte finte troppo velocemente."
+  },
+  {
+    "id": 25,
+    "categoria": "Film",
+    "titolo": "Candyman (1992)",
+    "curiosita": "L'attore Tony Todd si è fatto inserire vere api vive all'interno della bocca per girare la celebre e terrificante scena culminante. Aveva stipulato un contratto che gli garantiva un bonus di 1.000 dollari per ogni singola puntura ricevuta."
+  },
+  {
+    "id": 26,
+    "categoria": "Film",
+    "titolo": "Fight Club (1999)",
+    "curiosita": "Il regista David Fincher ha nascosto una tazza di caffè di Starbucks in ogni singola inquadratura e scena del film, come satira visiva contro il consumismo sfrenato degli anni '90."
+  },
+  {
+    "id": 27,
+    "categoria": "Serie TV",
+    "titolo": "Breaking Bad (2008-2013)",
+    "curiosita": "La metanfetamina blu usata nella serie era in realtà semplice zucchero candito aromatizzato alla menta (rock candy). L'attore Aaron Paul ha ammesso che lui e Bryan Cranston ne mangiavano a tonnellate tra un ciak e l'altro."
+  },
+  {
+    "id": 28,
+    "categoria": "Film",
+    "titolo": "Terminator 2 - Il giorno del giudizio (1991)",
+    "curiosita": "I gemelli digitali e i camuffamenti del T-1000 non sono stati fatti tutti in CGI. James Cameron ha risparmiato sul budget ingaggiando veri gemelli omozigoti, tra cui il fratello gemello della guardia dell'ospedale psichiatrico e la sorella gemella di Linda Hamilton."
+  },
+  {
+    "id": 29,
+    "categoria": "Film",
+    "titolo": "Titanic (1997)",
+    "curiosita": "Il disegno di Rose senza veli non è stato fatto da Leonardo DiCaprio, ma dal regista James Cameron. Poiché Cameron è mancino e DiCaprio è destrimano, l'inquadratura delle mani che disegnano è stata specchiata digitalmente in post-produzione."
+  },
+  {
+    "id": 30,
+    "categoria": "Film",
+    "titolo": "L'esorcista (1973)",
+    "curiosita": "Il fumo che esce dalla bocca degli attori nella stanza della possessione è reale. La camera da letto fu costruita dentro una gigantesca cella frigorifera commerciale, e la temperatura sul set scendeva spesso sotto lo zero, congelando letteralmente il sudore della troupe."
+  },
+  {
+    "id": 31,
+    "categoria": "Film",
+    "titolo": "Django Unchained (2012)",
+    "curiosita": "Quando Leonardo DiCaprio sbatte violentemente la mano sul tavolo e si taglia con un bicchiere di vetro, la ferita è reale. L'attore ha ignorato il dolore e ha continuato a recitare la scena coperto di sangue, sequenza poi mantenuta nel montaggio finale."
+  },
+  {
+    "id": 32,
+    "categoria": "Film",
+    "titolo": "Monsters & Co. (2001)",
+    "curiosita": "La bambina che dà la voce a Boo (Mary Gibbs) era troppo piccola per stare ferma davanti a un microfono in sala di registrazione. I tecnici dovettero rincorrerla per i corridoi della Pixar con i microfoni mentre giocava, montando poi i suoi versi spontanei."
+  },
+  {
+    "id": 33,
+    "categoria": "Serie TV",
+    "titolo": "Better Call Saul (2015-2022)",
+    "curiosita": "Per l'iconica scena in cui la borsa di Saul cade nel deserto, la troupe ha provato oltre 50 angolazioni diverse. La telecamera è stata persino sepolta nella sabbia dentro una scatola di plexiglass trasparente per catturare il punto di vista del terreno."
+  },
+  {
+    "id": 34,
+    "categoria": "Film",
+    "titolo": "La La Land (2016)",
+    "curiosita": "Ryan Gosling ha rifiutato l'uso di una controfigura o di manipolazioni digitali per le mani sulla tastiera. Ha studiato pianoforte jazz per due ore al giorno, sei giorni alla settimana, per tre mesi consecutivi prima delle riprese."
+  },
+  {
+    "id": 35,
+    "categoria": "Film",
+    "titolo": "Interstellar (2014)",
+    "curiosita": "Per le scene della fattoria di Cooper, Christopher Nolan ha fatto coltivare da zero oltre 500 acri di vero mais. Dopo la fine delle riprese, lo studio ha venduto il raccolto, generando un profitto commerciale inaspettato."
+  },
+  {
+    "id": 36,
+    "categoria": "Film",
+    "titolo": "La città incantata (2001)",
+    "curiosita": "La famosa scena in cui Chihiro pulisce lo Spirito del Cattivo Odore è ispirata a un'esperienza reale di Hayao Miyazaki, che da giovane partecipò alla pulizia di un fiume locale tirando fuori dal fango una bicicletta arrugginita."
+  },
+  {
+    "id": 37,
+    "categoria": "Film",
+    "titolo": "The Truman Show (1998)",
+    "curiosita": "La città di Seahaven non è un set cinematografico finto. È una reale comunità pianificata chiamata Seaside, situata in Florida, costruita secondo i principi del New Urbanism per sembrare artificialmente perfetta."
+  },
+  {
+    "id": 38,
+    "categoria": "Serie TV",
+    "titolo": "Il Trono di Spade (2011-2019)",
+    "curiosita": "La carne di cuore di stallone che Daenerys Targaryen deve mangiare nella prima stagione era composta interamente da tre chili di una sostanza gelatinosa a base di orsetti gommosi giganti fusi e marmellata."
+  },
+  {
+    "id": 39,
+    "categoria": "Film",
+    "titolo": "Il silenzio degli innocenti (1991)",
+    "curiosita": "Anthony Hopkins ha vinto l'Oscar come miglior attore protagonista apparendo sullo schermo per un totale di soli 16 minuti complessivi in tutto il film. Durante le sue scene, l'attore ha evitato quasi totalmente di sbattere le palpebre per rendere il personaggio più inquietante."
+  },
+  {
+    "id": 40,
+    "categoria": "Film",
+    "titolo": "Alien (1979)",
+    "curiosita": "Nella famosissima scena dello 'Chestburster' (la nascita dell'alieno dal petto), la reazione di terrore degli attori è autentica. Il regista Ridley Scott non aveva detto loro che sarebbe sprizzato del vero sangue animale sintetico pressurizzato sul set."
+  },
+  {
+    "id": 41,
+    "categoria": "Film",
+    "titolo": "The Wolf of Wall Street (2013)",
+    "curiosita": "La polvere bianca sniffata dagli attori durante il film non era amido, ma vitamina B polverizzata. Jonah Hill ha dovuto essere ricoverato in ospedale alla fine delle riprese per una forte bronchite causata dall'inalazione di enormi quantità della sostanza."
+  },
+  {
+    "id": 42,
+    "categoria": "Film",
+    "titolo": "A Quiet Place (2018)",
+    "curiosita": "La produzione ha acquistato un vero campo di grano e ha speso oltre 100.000 dollari per creare sentieri di sabbia soffice calpestabile, riducendo al minimo il rumore ambientale reale per favorire il design sonoro isolato del film."
+  },
+  {
+    "id": 43,
+    "categoria": "Serie TV",
+    "titolo": "The Crown (2016-2023)",
+    "curiosita": "Il dipartimento costumi della serie contava oltre 100 persone stabilmente impiegate. Per riprodurre l'abito da sposa della Principessa Diana nella quarta stagione, sono servite quattro sarte e 600 ore di lavoro continuo."
+  },
+  {
+    "id": 44,
+    "categoria": "Film",
+    "titolo": "Spider-Man: No Way Home (2021)",
+    "curiosita": "Per evitare che i leak rivelassero la presenza di Tobey Maguire e Andrew Garfield, i due attori entravano sul set camuffati con lunghi mantelli neri da set fantasy e venivano accreditati nei fogli d'ordine giornalieri con i nomi in codice 'George' e 'Arthur'."
+  },
+  {
+    "id": 45,
+    "categoria": "Film",
+    "titolo": "L'uomo d'acciaio (2013)",
+    "curiosita": "Henry Cavill ha rifiutato categoricamente l'uso di CGI o di trucchi grafici per alterare i suoi muscoli o aggiungere addominali finti sul costume, sottoponendosi a un regime militare di allenamento da 5000 calorie al giorno."
+  },
+  {
+    "id": 46,
+    "categoria": "Film",
+    "titolo": "Whiplash (2014)",
+    "curiosita": "Durante le riprese delle sessioni di batteria più intense, Miles Teller ha suonato fino a farsi sanguinare realmente le mani. Le macchie di sangue visibili sulle bacchette e sui piatti nel montaggio finale sono autentiche."
+  },
+  {
+    "id": 47,
+    "categoria": "Film",
+    "titolo": "Parasite (2019)",
+    "curiosita": "La lussuosa villa modernista della famiglia Park non esiste. È stata interamente costruita da zero dallo scenografo Lee Ha-jun come un set modulare a cielo aperto, studiando l'orientamento del sole per ottimizzare l'illuminazione naturale."
+  },
+  {
+    "id": 48,
+    "categoria": "Serie TV",
+    "titolo": "Chernobyl (2019)",
+    "curiosita": "Molti dei dialoghi e delle procedure della centrale nucleare sono stati tradotti direttamente dai nastri audio originali dei liquidatori e dei pompieri sovietici registrati nel 1986, garantendo un realismo documentaristico assoluto."
+  },
+  {
+    "id": 49,
+    "categoria": "Film",
+    "titolo": " WALL-E (2008)",
+    "curiosita": "Per creare il suono del vento desolato sulla Terra abbandonata, il leggendario sound designer Ben Burtt ha registrato lo sfregamento di un sacchetto di plastica per la spesa trascinato su un tappeto da corsa elettrico."
+  },
+  {
+    "id": 50,
+    "categoria": "Film",
+    "titolo": "Blade Runner 2049 (2017)",
+    "curiosita": "Il regista Denis Villeneuve ha ridotto al minimo l'uso del green screen. Gli attori recitavano all'interno di enormi set fisici in scala reale; persino le luci al neon colorate dei giganteschi ologrammi erano proiettori fisici presenti sul set."
+  },
+  {
+    "id": 51,
+    "categoria": "Film",
+    "titolo": "Meteora / Twisters (2024)",
+    "curiosita": "Per ricreare la forza distruttiva dei tornado senza fare affidamento esclusivo sul digitale, la produzione ha utilizzato i motori di un aereo Boeing 747 posizionato su un rimorchio per generare venti reali a oltre 200 km/h sul set."
+  },
+  {
+    "id": 52,
+    "categoria": "Serie TV",
+    "titolo": "The Bear (2022-2024)",
+    "curiosita": "L'episodio 'Review' (Stagione 1, Episodio 7), della durata di 18 minuti, è un unico piano sequenza continuo reale, girato senza stacchi digitali nascosti. Gli attori hanno provato la coreografia della cucina per una settimana intera prima di girare."
+  },
+  {
+    "id": 53,
+    "categoria": "Film",
+    "titolo": "Napoleon (2023)",
+    "curiosita": "Il regista Ridley Scott ha utilizzato fino a 11 telecamere contemporaneamente per riprendere le enormi scene di battaglia, consentendo agli attori di improvvisare i movimenti senza dover ripetere la scena da diverse angolazioni."
+  },
+  {
+    "id": 54,
+    "categoria": "Film",
+    "titolo": "John Wick: Capitolo 4 (2023)",
+    "curiosita": "La celebre scena di combattimento sulla scalinata della Basilica del Sacro Cuore a Parigi ha richiesto sette notti intere di riprese. Keanu Reeves ha eseguito personalmente quasi la totalità delle cadute sui gradini."
+  },
+  {
+    "id": 55,
+    "categoria": "Film",
+    "titolo": "Godzilla Minus One (2023)",
+    "curiosita": "Il film ha vinto l'Oscar per i Migliori Effetti Visivi pur avendo un budget stimato inferiore ai 15 milioni di dollari. Il regista Takashi Yamazaki ha curato personalmente la modellazione 3D lavorando fianco a fianco con un team di soli 35 artisti."
+  },
+  {
+    "id": 56,
+    "categoria": "Film",
+    "titolo": "Gladiator II (2024)",
+    "curiosita": "Per la ricostruzione del Colosseo a Malta, la produzione ha edificato una replica fisica alta quasi 20 metri e larga un terzo dell'originale, utilizzando materiali eco-sostenibili e riciclabili al termine delle riprese."
+  },
+  {
+    "id": 57,
+    "categoria": "Serie TV",
+    "titolo": "Andor (2022)",
+    "curiosita": "A differenza delle altre serie di Star Wars che usano lo schermo LED 'The Volume' (StageCraft), Andor è stata girata quasi interamente in location reali nel Regno Unito e su giganteschi set fisici all'aperto lunghi centinaia di metri."
+  },
+  {
+    "id": 58,
+    "categoria": "Film",
+    "titolo": "The Batman (2022)",
+    "curiosita": "Per definire l'estetica sporca e sgranata di Gotham, il direttore della fotografia Greig Fraser ha registrato il film in digitale, lo ha stampato su vera pellicola cinematografica da 35mm e poi lo ha nuovamente scansionato in digitale."
+  },
+  {
+    "id": 59,
+    "categoria": "Film",
+    "titolo": "M3GAN (2022)",
+    "curiosita": "L'inquietante bambola robotica non è quasi mai mossa in CGI o animatronica nelle scene di movimento rapido. È stata interpretata da una giovanissima ballerina e stunt-girl neozelandese, Amie Donald, che indossava una maschera di silicone."
+  },
+  {
+    "id": 60,
+    "categoria": "Film",
+    "titolo": "Babylon (2022)",
+    "curiosita": "La scena iniziale della festa selvaggia ha richiesto più di 250 comparse coreografate al millimetro. Margot Robbie ha rivelato che la maggior parte delle reazioni visive assurde catturate sullo sfondo erano totalmente improvvisate."
+  },
+  {
+    "id": 61,
+    "categoria": "Serie TV",
+    "titolo": "One Piece (Netflix - 2023)",
+    "curiosita": "Il creatore del manga originale, Eiichiro Oda, aveva il diritto di veto assoluto nel contratto. La produzione non poteva pubblicare o girare alcuna scena senza la sua approvazione scritta preventiva su ogni dettaglio dei personaggi."
+  },
+  {
+    "id": 62,
+    "categoria": "Film",
+    "titolo": "Poor Things (2023)",
+    "curiosita": "I cieli bizzarri e surreali visibili nel film di Yorgos Lanthimos sono stati realizzati proiettando dipinti classici in movimento su enormi schermi LED ad altissima risoluzione posizionati attorno al set teatrale."
+  },
+  {
+    "id": 63,
+    "categoria": "Film",
+    "titolo": "The Whale (2022)",
+    "curiosita": "La pesante tuta protesica indossata da Brendan Fraser pesava oltre 130 chili. Per evitare colpi di calore dovuti al peso e al lattice, la tuta conteneva un sistema interno di tubi in cui scorreva acqua ghiacciata da installazione medica."
+  },
+  {
+    "id": 64,
+    "categoria": "Film",
+    "titolo": "Nope (2022)",
+    "curiosita": "Il regista Jordan Peele e il direttore della fotografia Hoyte van Hoytema hanno sviluppato una nuova tecnologia di ripresa notturna per filmare il deserto di giorno usando telecamere a infrarossi accoppiate a pellicola 65mm, simulando il buio profondo reale."
+  },
+  {
+    "id": 65,
+    "categoria": "Serie TV",
+    "titolo": "The Boys (Stagione 4 - 2024)",
+    "curiosita": "Il dipartimento degli effetti speciali ha dovuto raddoppiare il budget per il sangue finto biodegradabile. Nelle prime quattro stagioni sono stati consumati oltre 15.000 litri di fluido rosso a base di sciroppo di mais."
+  },
+  {
+    "id": 66,
+    "categoria": "Film",
+    "titolo": "Civil War (2024)",
+    "curiosita": "Per rendere realistici gli spari dei fucili e dei carri armati, il regista Alex Garland ha utilizzato armi a salve modificate che emettevano un livello di decibel quasi pari a quelle reali, obbligando la troupe a indossare cuffie protettive da cantiere."
+  },
+  {
+    "id": 67,
+    "categoria": "Film",
+    "titolo": "Challengers (2024)",
+    "curiosita": "Zendaya, Josh O'Connor e Mike Faist si sono allenati nel tennis professionistico per tre mesi sotto la guida dell'ex campione Brad Gilbert. Sul set, tuttavia, le palline da tennis sono state aggiunte digitalmente per evitare imprecisioni nei colpi."
+  },
+  {
+    "id": 68,
+    "categoria": "Film",
+    "titolo": "Super Mario Bros. - Il film (2023)",
+    "curiosita": "La canzone 'Peaches' cantata da Jack Black (Bowser) non era prevista nella sceneggiatura originale. È stata scritta, registrata e filmata in meno di 48 ore dopo che l'attore ha proposto un intermezzo musicale comico improvvisato."
+  },
+  {
+    "id": 69,
+    "categoria": "Serie TV",
+    "titolo": "House of the Dragon (2022-2024)",
+    "curiosita": "Ogni drago nella serie possiede uno stile di volo unico basato su animali reali. Caraxes si muove come una vipera d'acqua, Syrax imita il volo stabile delle aquile reali e Vhagar si sposta pesantemente come un albatros anziano."
+  },
+  {
+    "id": 70,
+    "categoria": "Film",
+    "titolo": "The Menu (2022)",
+    "curiosita": "Tutti i piatti gourmet visibili nel film sono stati ideati e preparati sul set da Dominique Crenn, l'unica chef donna negli Stati Uniti a detenere tre stelle Michelin, per garantire l'autenticità visiva dell'alta cucina."
+  },
+  {
+    "id": 71,
+    "categoria": "Film",
+    "titolo": "Alien: Romulus (2024)",
+    "curiosita": "Il regista Fede Álvarez ha assunto lo stesso team tecnico di effetti speciali che lavorò a 'Aliens - Scontro finale' nel 1986, costruendo animatronic fisici giganti per gli Xenomorfi invece di affidarsi alla grafica computerizzata."
+  },
+  {
+    "id": 72,
+    "categoria": "Film",
+    "titolo": "Wonka (2023)",
+    "curiosita": "La produzione ha assunto una cioccolatiera professionista a tempo pieno sul set. Tutti i cioccolatini e i dolci giganti che si vedono mangiare nel film erano commestibili e realizzati con vero cioccolato artigianale di alta qualità."
+  },
+  {
+    "id": 73,
+    "categoria": "Serie TV",
+    "titolo": "Fallout (2024)",
+    "curiosita": "L'armatura atomica T-60 utilizzata nella serie è un costume fisico perfettamente funzionante, pesante oltre 40 chili. L'attore all'interno poteva camminare ed eseguire movimenti autonomamente grazie a un esoscheletro bilanciato."
+  },
+  {
+    "id": 74,
+    "categoria": "Film",
+    "titolo": "Deadpool & Wolverine (2024)",
+    "curiosita": "La coreografia della danza iniziale sulle note di 'Bye Bye Bye' degli NSYNC non è stata eseguita da Ryan Reynolds, ma dal ballerino professionista Nick Pauley, accreditato ufficialmente nei titoli di coda come 'Dancepool'."
+  },
+  {
+    "id": 75,
+    "categoria": "Film",
+    "titolo": "Maestro (2023)",
+    "curiosita": "Bradley Cooper ha trascorso sei anni a studiare direzione d'orchestra per poter dirigere realmente la London Symphony Orchestra nella cattedrale di Ely per una scena di soli sei minuti, registrata interamente dal vivo senza correzioni."
+  },
+  {
+    "id": 76,
+    "categoria": "Film",
+    "titolo": "Perfect Days (2023)",
+    "curiosita": "Il film di Wim Wenders è stato girato in soli 17 giorni a Tokyo. L'attore Kōji Yakusho ha passato intere giornate con i veri addetti alle pulizie dei bagni pubblici della città per imparare le loro esatte e meticolose routine di pulizia."
+  },
+  {
+    "id": 77,
+    "categoria": "Serie TV",
+    "titolo": "Severance (Scissione - 2022-2025)",
+    "curiosita": "L'inquietante corridoio bianco della Lumon Industries è stato costruito fisicamente in un unico enorme set continuo. Gli attori dovevano camminare realmente per minuti interi per girare le scene di transizione, accentuando il senso di disorientamento spaziale."
+  },
+  {
+    "id": 78,
+    "categoria": "Film",
+    "titolo": "The Fabelmans (2022)",
+    "curiosita": "La cinepresa da 8mm usata dal giovane Sammy nel film è l'esatta telecamera originale che Steven Spielberg utilizzò da bambino per girare i suoi primissimi cortometraggi amatoriali in casa."
+  },
+  {
+    "id": 79,
+    "categoria": "Film",
+    "titolo": "Prey (2022)",
+    "curiosita": "È stato il primo film nella storia del cinema a debuttare con un doppiaggio completo nella lingua dei nativi americani Comanche, realizzato dagli stessi attori del cast per preservare l'accuratezza storica e culturale."
+  },
+  {
+    "id": 80,
+    "categoria": "Film",
+    "titolo": "Glass Onion - Knives Out (2022)",
+    "curiosita": "La gigantesca struttura a cipolla di vetro posizionata sul tetto della villa greca è stata costruita digitalmente, ma i riflessi di luce deformati all'interno della stanza principale sono stati creati posizionando veri specchi sagomati attorno alle lenti delle telecamere."
+  },
+  {
+    "id": 81,
+    "categoria": "Serie TV",
+    "titolo": "The White Lotus (Stagione 3 - 2025)",
+    "curiosita": "Le riprese in Thailandia sono state monitorate da un comitato speciale del Ministero del Turismo locale per garantire che la satira sociale della serie non violasse le rigidissime leggi nazionali sul reato di lesa maestà."
+  },
+  {
+    "id": 82,
+    "categoria": "Film",
+    "titolo": "Ferrari (2023)",
+    "curiosita": "Il regista Michael Mann ha rifiutato l'uso di suoni pre-registrati per le auto d'epoca. La produzione ha rintracciato veri collezionisti privati di Maserati e Ferrari degli anni '50, registrando il rombo autentico dei motori originali su pista."
+  },
+  {
+    "id": 83,
+    "categoria": "Film",
+    "titolo": "Society of the Snow (La società della neve - 2023)",
+    "curiosita": "Per ricreare le condizioni estreme delle Ande, gli attori sono stati sottoposti a una dieta ferrea controllata da nutrizionisti per perdere peso in modo realistico durante le riprese, effettuate in ordine strettamente cronologico."
+  },
+  {
+    "id": 84,
+    "categoria": "Film",
+    "titolo": "The Zone of Interest (La zona d'interesse - 2023)",
+    "curiosita": "Il regista Jonathan Glazer ha nascosto fino a 10 telecamere fisse all'interno della casa del comandante Rudolf Höss. Gli attori recitavano senza sapere esattamente quale telecamera li stesse riprendendo, eliminando ogni traccia di recitazione teatrale."
+  },
+  {
+    "id": 85,
+    "categoria": "Serie TV",
+    "titolo": "The Mandalorian (2019-2023)",
+    "curiosita": "Il burattino fisico di Grogu (Baby Yoda) è costato alla produzione circa 2 milioni di dollari. È controllato simultaneamente da due tecnici specializzati: uno muove gli occhi e la bocca, l'altro gestisce le orecchie e il corpo."
+  },
+  {
+    "id": 86,
+    "categoria": "Film",
+    "titolo": "Povere Creature! (2023)",
+    "curiosita": "Willem Dafoe si svegliava ogni giorno alle 3 del mattino per sottoporsi a quattro ore di trucco facciale per le cicatrici del dottor Godwin Baxter. L'attore passava il tempo leggendo ad alta voce per abituarsi a parlare con la protesi rigida sulla guancia."
+  },
+  {
+    "id": 87,
+    "categoria": "Film",
+    "titolo": "Saltburn (2023)",
+    "curiosita": "La splendida tenuta di Saltburn è una reale residenza storica inglese (Drayton House) risalente al 1300. Il proprietario ha accettato di affittarla alla produzione a una sola condizione: nessun membro della troupe poteva rivelare la posizione esatta della casa sui social."
+  },
+  {
+    "id": 88,
+    "categoria": "Film",
+    "titolo": "Bones and All (2022)",
+    "curiosita": "Il regista italiano Luca Guadagnino ha girato il film interamente nell'Ohio rurale. La carne umana finta consumata dai protagonisti Timothée Chalamet e Taylor Russell era composta da una miscela edibile di prosciutto crudo frullato, gelatina e sciroppo di ciliegie."
+  },
+  {
+    "id": 89,
+    "categoria": "Serie TV",
+    "titolo": "The Lord of the Rings: The Rings of Power (2022-2024)",
+    "curiosita": "Con un budget stimato di oltre 460 milioni di dollari per la sola prima stagione, è la serie TV più costosa mai prodotta nella storia. La sola costruzione del porto di Númenor ha occupato un intero backlot degli studios in Nuova Zelanda."
+  },
+  {
+    "id": 90,
+    "categoria": "Film",
+    "titolo": "Anatomia di una caduta (2023)",
+    "curiosita": "Il cane Messi, che interpreta Snoop nel film, ha dovuto affrontare due mesi di addestramento intensivo specifico solo per imparare a simulare perfettamente uno stato di avvelenamento letargico con gli occhi aperti e la lingua fuori."
+  },
+  {
+    "id": 91,
+    "categoria": "Film",
+    "titolo": "Priscilla (2023)",
+    "curiosita": "Sofia Coppola ha girato l'intero film in soli 30 giorni. A causa dei vincoli di budget, l'attrice Cailee Spaeny ha dovuto cambiare acconciatura e trucco fino a cinque volte al giorno per rappresentare l'invecchiamento del personaggio dai 14 ai 27 anni."
+  },
+  {
+    "id": 92,
+    "categoria": "Film",
+    "titolo": "Dream Scenario (2023)",
+    "curiosita": "Nicolas Cage ha dichiarato che questo è uno dei pochissimi film della sua carriera in cui la calvizie e l'aspetto dimesso del suo personaggio sono stati ottenuti senza protesi pesanti, ma solo rasando i suoi capelli reali e modificando la sua postura vertebrale."
+  },
+  {
+    "id": 93,
+    "categoria": "Serie TV",
+    "titolo": "One Day (2024)",
+    "curiosita": "Per mantenere l'autenticità visiva dei diversi anni in cui è ambientata la serie, la produzione ha utilizzato lenti fotografiche vintage risalenti agli esatti anni della timeline della puntata (lenti anni '80 per i primi episodi, lenti anni '90 per quelli centrali)."
+  },
+  {
+    "id": 94,
+    "categoria": "Film",
+    "titolo": "Gladiator (2000)",
+    "curiosita": "Oliver Reed, che interpretava Proximo, morì tre settimane prima della fine delle riprese. Per completare le sue scene mancanti, la produzione spese 3,2 milioni di dollari dell'epoca per creare un doppio digitale del volto del defunto attore, segnando uno dei primi usi intensivi del deepfake prototipale nel cinema moderno."
+  },
+  {
+    "id": 95,
+    "categoria": "Film",
+    "titolo": "The Creator (2023)",
+    "curiosita": "Il regista Gareth Edwards ha risparmiato sui costi di budget girando con una telecamera commerciale ultraleggera (Sony FX3) acquistabile nei normali negozi di elettronica. Questo ha permesso alla troupe di viaggiare in location remote senza l'ingombro dei pesanti macchinari hollywoodiani."
+  },
+  {
+    "id": 96,
+    "categoria": "Film",
+    "titolo": "Elio / Pixar (2025)",
+    "curiosita": "I grafici della Pixar hanno sviluppato un software di rendering inedito per calcolare la rifrazione della luce attraverso formazioni gassose intergalattiche complesse, riducendo i tempi di elaborazione dei server del 40% rispetto alle tecnologie usate in 'Lightyear'."
+  },
+  {
+    "id": 97,
+    "categoria": "Serie TV",
+    "titolo": "The Penguin (2024)",
+    "curiosita": "Il trucco prostetico di Colin Farrell per trasformarsi in Oz Cobb era composto da 10 pezzi distinti di silicone. L'applicazione quotidiana richiedeva 3 ore, rendendo la pelle dell'attore così irriconoscibile che persino i suoi figli sul set non riuscivano a identificarlo visivamente."
+  },
+  {
+    "id": 98,
+    "categoria": "Film",
+    "titolo": "Superman: Legacy (2025)",
+    "curiosita": "Il regista James Gunn ha insistito affinché il costume di Superman non usasse le moderne trame geometriche in rilievo tipiche dei film sui supereroi degli ultimi dieci anni, optando per un tessuto classico a base di filati naturali intrecciati per dare un aspetto più accogliente e vintage."
+  },
+  {
+    "id": 99,
+    "categoria": "Film",
+    "titolo": "Nosferatu (2024/2025)",
+    "curiosita": "Bill Skarsgård ha passato mesi a lavorare con un cantante d'opera lirica per abbassare il tono naturale della sua voce di un'ottava intera, riuscendo a emettere suoni gutturali sgradevoli senza l'ausilio di filtri o alterazioni digitali in post-produzione."
+  },
+  {
+    "id": 100,
+    "categoria": "Film",
+    "titolo": "Mission: Impossible - The Final Reckoning (2025/2026)",
+    "curiosita": "Per una delle sequenze d'azione principali ambientate a bordo di un sottomarino, Tom Cruise ha preteso la costruzione di una gigantesca piastra idraulica in grado di inclinare l'intero set di 45 gradi in una vasca d'acqua reale, rifiutando l'effetto digitale della simulazione del movimento ondoso."
+  }
+]

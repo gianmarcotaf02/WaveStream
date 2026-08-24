@@ -14,7 +14,15 @@ import it.wavestream.app.data.database.dao.DownloadedContentDao
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.EpisodeDao
 import it.wavestream.app.data.database.dao.SeriesDao
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import javax.inject.Qualifier
 import javax.inject.Singleton
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ApplicationScope
 
 /**
  * Hilt module for app-level dependencies
@@ -22,6 +30,13 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+    
+    @Provides
+    @Singleton
+    @ApplicationScope
+    fun provideApplicationScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    }
     
     @Provides
     @Singleton

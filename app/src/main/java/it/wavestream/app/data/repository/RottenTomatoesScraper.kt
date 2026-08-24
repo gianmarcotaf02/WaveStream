@@ -168,13 +168,27 @@ class RottenTomatoesScraper {
     }
 
     private fun extractScore(html: String, slotName: String): Int? {
-        // RT uses hyphenated slot names like "audience-score" not "audienceScore"
         val hyphenatedName = when (slotName) {
             "audienceScore" -> "audience-score"
             "criticsScore" -> "critics-score"
             else -> slotName
         }
-        
+
+        // Pattern 0: JSON-LD embedded data (current RT format)
+        val jsonLdPattern = """"@type"\s*:\s*"Movie".*"aggregateRating"\s*:\s*\{.*"ratingValue"\s*:\s*(\d+)""".toRegex()
+        val criticJsonLdPattern = """"@type"\s*:\s*"Movie".*"reviewRating"\s*:\s*\{.*"ratingValue"\s*:\s*(\d+)""".toRegex()
+        if (slotName == "audienceScore") {
+            jsonLdPattern.find(html)?.groupValues?.get(1)?.toIntOrNull()?.let {
+                Log.d(TAG, "✓ Found audienceScore via JSON-LD: $it%")
+                return it
+            }
+        } else {
+            criticJsonLdPattern.find(html)?.groupValues?.get(1)?.toIntOrNull()?.let {
+                Log.d(TAG, "✓ Found criticsScore via JSON-LD reviewRating: $it%")
+                return it
+            }
+        }
+
         // Pattern 1: slot="audience-score"...>83%< (with hyphen)
         val slotHyphenPattern = """slot="$hyphenatedName"[\s\S]*?>(\d+)%?<""".toRegex()
         val slotHyphenMatch = slotHyphenPattern.find(html)
@@ -191,8 +205,7 @@ class RottenTomatoesScraper {
             return it
         }
         
-        // Pattern 3: JSON data
-        // "audienceScore": { "score": 90 }
+        // Pattern 3: JSON data - "audienceScore": { "score": 90 }
         val jsonPattern = """"$slotName":\s*\{\s*"score":\s*(\d+)""".toRegex()
         val jsonMatch = jsonPattern.find(html)
         jsonMatch?.groupValues?.get(1)?.toIntOrNull()?.let {
@@ -200,9 +213,8 @@ class RottenTomatoesScraper {
             return it
         }
         
-        // Pattern 4: TV series specific - look for data-audiencescore attribute
+        // Pattern 4: TV series specific - data-audiencescore attribute
         if (slotName == "audienceScore") {
-            // Try: data-audiencescore="83"
             val dataAttrPattern = """data-audiencescore="(\d+)"""".toRegex(RegexOption.IGNORE_CASE)
             val dataAttrMatch = dataAttrPattern.find(html)
             dataAttrMatch?.groupValues?.get(1)?.toIntOrNull()?.let {
@@ -210,7 +222,7 @@ class RottenTomatoesScraper {
                 return it
             }
             
-            // Try: rt-text with audience-score slot directly
+            // rt-text with audience-score slot
             val rtTextPattern = """<rt-text[^>]*slot="audience-score"[^>]*>(\d{1,3})%?</rt-text>""".toRegex(RegexOption.IGNORE_CASE)
             val rtTextMatch = rtTextPattern.find(html)
             rtTextMatch?.groupValues?.get(1)?.toIntOrNull()?.let {
@@ -218,7 +230,7 @@ class RottenTomatoesScraper {
                 return it
             }
             
-            // Try: audience-score percentage display
+            // audience-score percentage display
             val audiencePercentPattern = """(?:audience|popcornmeter|avgpopcornmeter)[\s\S]{0,100}?>(\d{1,3})%<""".toRegex(RegexOption.IGNORE_CASE)
             val audiencePercentMatch = audiencePercentPattern.find(html)
             audiencePercentMatch?.groupValues?.get(1)?.toIntOrNull()?.let {
@@ -228,7 +240,7 @@ class RottenTomatoesScraper {
                 }
             }
             
-            // Fallback: Generic pattern
+            // Generic fallback
             val fallbackPattern = """audienceScore[\s\S]{0,200}?>(\d{1,3})%?<""".toRegex(RegexOption.IGNORE_CASE)
             val fallbackMatch = fallbackPattern.find(html)
             fallbackMatch?.groupValues?.get(1)?.toIntOrNull()?.let {
@@ -254,7 +266,10 @@ class RottenTomatoesScraper {
             .replace(Regex("^(the|a|an)\\s+"), "")
             // Remove year in parentheses
             .replace(Regex("\\s*\\(\\d{4}\\)"), "")
-            // Remove special characters except alphanumeric and spaces
+            // Normalize accented characters to ASCII equivalents (é -> e, ü -> u, etc.)
+            .let { java.text.Normalizer.normalize(it, java.text.Normalizer.Form.NFD) }
+            .replace(Regex("[\\u0300-\\u036f]"), "")
+            // Remove remaining special characters except alphanumeric and spaces
             .replace(Regex("[^a-z0-9\\s]"), "")
             // Replace spaces with underscores
             .replace(Regex("\\s+"), "_")

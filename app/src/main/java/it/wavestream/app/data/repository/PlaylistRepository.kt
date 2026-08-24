@@ -11,6 +11,14 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.BufferedInputStream
+import java.io.EOFException
+import java.io.IOException
+import java.net.InetSocketAddress
+import java.net.ProtocolException
+import java.net.Socket
+import java.net.URL
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,7 +41,18 @@ class PlaylistRepository @Inject constructor(
         private const val TAG = "PlaylistRepo"
     }
     
-    private val httpClient = OkHttpClient()
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .addNetworkInterceptor { chain ->
+            val request = chain.request().newBuilder()
+                .header("Accept-Encoding", "identity")
+                .header("Connection", "close")
+                .build()
+            chain.proceed(request)
+        }
+        .build()
     
     /**
      * Add M3U playlist by URL
@@ -104,19 +123,27 @@ class PlaylistRepository @Inject constructor(
     suspend fun refreshPlaylist(playlistId: Long) = withContext(Dispatchers.IO) {
         val playlist = playlistDao.getPlaylistById(playlistId) ?: return@withContext
         
-        channelDao.deleteByPlaylist(playlistId)
-        categoryDao.deleteByPlaylist(playlistId)
-        
         when (playlist.type) {
             "m3u" -> {
                 val content = downloadContent(playlist.url)
                 val result = m3uParser.parseContent(content, playlistId)
-                saveCategories(playlistId, result)
-                saveChannels(playlistId, result.channels)
+                
                 movieDao.deleteByPlaylist(playlistId)
                 seriesDao.deleteByPlaylist(playlistId)
+                channelDao.deleteByPlaylist(playlistId)
+                categoryDao.deleteByPlaylist(playlistId)
+                
+                saveCategories(playlistId, result)
+                saveChannels(playlistId, result.channels)
                 saveMovies(playlistId, result.movies)
                 saveSeries(playlistId, result.series)
+                
+                playlistDao.updateCounts(
+                    playlistId,
+                    result.channels.size,
+                    result.movies.size,
+                    result.series.size
+                )
             }
             "xtream" -> {
                 refreshXtreamContent(
@@ -199,8 +226,8 @@ class PlaylistRepository @Inject constructor(
                         episodeNumber = episodeNum,
                         xtreamEpisodeId = episodeId,
                         containerExtension = extension,
-                        tmdbStillPath = ep.info?.image,
-                        tmdbOverview = ep.info?.plot,
+                        thumbnailUrl = ep.info?.image,
+                        plot = ep.info?.plot,
                         duration = ep.info?.durationSecs?.toLong()
                     ))
                 }
@@ -227,11 +254,129 @@ class PlaylistRepository @Inject constructor(
         }
     }
     
-    private suspend fun downloadContent(url: String): String {
+    private suspend fun downloadContent(url: String): String = withContext(Dispatchers.IO) {
+        val action = url.substringAfter("action=").substringBefore("&")
         val request = Request.Builder().url(url).build()
-        return httpClient.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("HTTP ${response.code}")
-            response.body?.string() ?: ""
+        try {
+            httpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw IOException("HTTP ${response.code}")
+                val body = response.body?.string() ?: ""
+                Log.d(TAG, "downloadContent OK via OkHttp: $action -> ${body.length} chars")
+                body
+            }
+        } catch (e: EOFException) {
+            Log.w(TAG, "OkHttp EOFException for $action, trying raw socket fallback")
+            val result = downloadViaRawSocket(url)
+            Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
+            result
+        } catch (e: ProtocolException) {
+            Log.w(TAG, "OkHttp ProtocolException for $action, trying raw socket fallback")
+            val result = downloadViaRawSocket(url)
+            Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
+            result
+        } catch (e: IOException) {
+            Log.w(TAG, "OkHttp failed for $action: ${e.message}, retrying...")
+            try {
+                httpClient.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) throw IOException("HTTP ${response.code}")
+                    val body = response.body?.string() ?: ""
+                    Log.d(TAG, "downloadContent OK via retry: $action -> ${body.length} chars")
+                    body
+                }
+            } catch (e2: EOFException) {
+                Log.w(TAG, "Retry also EOFException for $action, trying raw socket fallback")
+                val result = downloadViaRawSocket(url)
+                Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
+                result
+            } catch (e2: ProtocolException) {
+                Log.w(TAG, "Retry also ProtocolException for $action, trying raw socket fallback")
+                val result = downloadViaRawSocket(url)
+                Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
+                result
+            } catch (e2: IOException) {
+                Log.w(TAG, "Retry also failed for $action: ${e2.message}, trying raw socket fallback")
+                val result = downloadViaRawSocket(url)
+                Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
+                result
+            }
+        }
+    }
+
+    private fun downloadViaRawSocket(urlString: String): String {
+        val url = URL(urlString)
+        val host = url.host
+        val port = if (url.port > 0) url.port else 80
+        val path = url.file
+        val action = urlString.substringAfter("action=").substringBefore("&")
+
+        Socket().use { socket ->
+            socket.connect(InetSocketAddress(host, port), 30000)
+            socket.soTimeout = 60000
+
+            val output = socket.getOutputStream()
+            val requestBytes = buildString {
+                append("GET $path HTTP/1.0\r\n")
+                append("Host: $host${if (url.port > 0) ":${url.port}" else ""}\r\n")
+                append("User-Agent: okhttp/4.12.0\r\n")
+                append("Accept: application/json, */*\r\n")
+                append("Accept-Encoding: identity\r\n")
+                append("\r\n")
+            }.toByteArray(Charsets.UTF_8)
+            output.write(requestBytes)
+            output.flush()
+
+            val input = BufferedInputStream(socket.getInputStream())
+            val responseBytes = input.readAllBytes()
+            val responseStr = String(responseBytes, Charsets.UTF_8)
+
+            val headerEnd = responseStr.indexOf("\r\n\r\n")
+            if (headerEnd == -1) {
+                Log.e(TAG, "downloadViaRawSocket: Invalid HTTP response for $action (${responseBytes.size} bytes)")
+                throw IOException("Invalid HTTP response from raw socket")
+            }
+
+            val statusLine = responseStr.substringBefore("\r\n")
+            if (!statusLine.contains(" 200 ")) {
+                Log.e(TAG, "downloadViaRawSocket: HTTP status not OK for $action: $statusLine")
+                throw IOException("HTTP status not OK: $statusLine")
+            }
+
+            val headers = responseStr.substring(0, headerEnd)
+            var body = responseStr.substring(headerEnd + 4)
+
+            if (headers.contains("Transfer-Encoding: chunked", ignoreCase = true)) {
+                body = dechunkBody(body)
+            }
+
+            Log.d(TAG, "downloadViaRawSocket: OK for $action -> ${body.length} chars")
+            return body
+        }
+    }
+
+    private fun dechunkBody(body: String): String {
+        var remaining = body
+        val result = StringBuilder()
+        while (remaining.isNotEmpty()) {
+            val crlf = remaining.indexOf("\r\n")
+            if (crlf == -1) return body
+            val chunkSize = remaining.substring(0, crlf).toIntOrNull(16) ?: return body
+            if (chunkSize == 0) return result.toString()
+            val chunkStart = crlf + 2
+            if (chunkStart + chunkSize > remaining.length) return body
+            result.append(remaining.substring(chunkStart, chunkStart + chunkSize))
+            remaining = remaining.substring(chunkStart + chunkSize + 2)
+        }
+        return result.toString()
+    }
+
+    private suspend fun safeDownload(url: String): String {
+        return try {
+            val result = downloadContent(url)
+            Log.d(TAG, "safeDownload OK: ${url.substringAfter("action=")} -> ${result.length} chars, starts='${result.take(80)}'")
+            result
+        } catch (e: Exception) {
+            Log.e(TAG, "safeDownload FAILED: ${url.substringAfter("action=")} -> ${e.javaClass.simpleName}: ${e.message?.take(200)}")
+            "[]"
         }
     }
     
@@ -243,12 +388,12 @@ class PlaylistRepository @Inject constructor(
     ) = withContext(Dispatchers.IO) {
         val apiBase = "$baseUrl/player_api.php?username=$username&password=$password"
         try {
-            val liveCatsDeferred = async { downloadContent("$apiBase&action=get_live_categories") }
-            val liveStreamsDeferred = async { downloadContent("$apiBase&action=get_live_streams") }
-            val vodCatsDeferred = async { downloadContent("$apiBase&action=get_vod_categories") }
-            val vodStreamsDeferred = async { downloadContent("$apiBase&action=get_vod_streams") }
-            val seriesCatsDeferred = async { downloadContent("$apiBase&action=get_series_categories") }
-            val seriesListDeferred = async { downloadContent("$apiBase&action=get_series") }
+            val liveCatsDeferred = async { safeDownload("$apiBase&action=get_live_categories") }
+            val liveStreamsDeferred = async { safeDownload("$apiBase&action=get_live_streams") }
+            val vodCatsDeferred = async { safeDownload("$apiBase&action=get_vod_categories") }
+            val vodStreamsDeferred = async { safeDownload("$apiBase&action=get_vod_streams") }
+            val seriesCatsDeferred = async { safeDownload("$apiBase&action=get_series_categories") }
+            val seriesListDeferred = async { safeDownload("$apiBase&action=get_series") }
             
             val liveCatsJson = liveCatsDeferred.await()
             val liveStreamsJson = liveStreamsDeferred.await()
@@ -263,7 +408,15 @@ class PlaylistRepository @Inject constructor(
             val vodStreams = xtreamParser.parseVodStreams(vodStreamsJson)
             val seriesCategories = xtreamParser.parseSeriesCategories(seriesCatsJson)
             val seriesList = xtreamParser.parseSeries(seriesListJson)
-            
+            Log.d(TAG, "loadXtreamContent DIAGNOSTIC: seriesCatsJson=${seriesCatsJson.length} chars, seriesListJson=${seriesListJson.length} chars")
+            Log.d(TAG, "loadXtreamContent DIAGNOSTIC: parsed seriesCategories=${seriesCategories.size}, parsed seriesList=${seriesList.size}")
+            if (seriesList.isNotEmpty()) {
+                Log.d(TAG, "loadXtreamContent DIAGNOSTIC: first 3 series: ${seriesList.take(3).map { "${it.name} (id=${it.id}, cat=${it.categoryId})" }}")
+            }
+            if (seriesCategories.isNotEmpty()) {
+                Log.d(TAG, "loadXtreamContent DIAGNOSTIC: first 3 series categories: ${seriesCategories.take(3).map { "${it.name} (id=${it.id})" }}")
+            }
+
             val liveCategoryMap = liveCategories.associate { it.id to it.name }
             categoryDao.insertAll(liveCategories.map { Category(playlistId = playlistId, name = it.name, type = CategoryType.LIVE_TV, externalId = it.id) })
             channelDao.insertAll(liveStreams.map { stream ->
@@ -302,6 +455,7 @@ class PlaylistRepository @Inject constructor(
             val seriesCategoryMap = seriesCategories.associate { it.id to contentNameParser.normalizeSeriesCategory(it.name) }
             categoryDao.insertAll(seriesCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeSeriesCategory(it.name), type = CategoryType.SERIES, externalId = it.id) })
             val filteredSeries = seriesList.filter { !it.name.equals("Test Serie", true) && !it.name.equals("Test Series", true) }
+            Log.d(TAG, "loadXtreamContent DIAGNOSTIC: filteredSeries=${filteredSeries.size} (removed ${seriesList.size - filteredSeries.size} test items)")
             seriesDao.insertAll(filteredSeries.mapIndexed { index, ser ->
                 Series(
                     playlistId = playlistId,
@@ -316,11 +470,13 @@ class PlaylistRepository @Inject constructor(
                     xtreamCast = ser.cast,
                     xtreamDirector = ser.director,
                     xtreamGenre = ser.genre,
-                    playlistOrder = (ser.added ?: index.toLong()).toInt()
+                    playlistOrder = (ser.added ?: index.toLong()).toInt(),
+                    tmdbId = ser.tmdbId
                 )
             })
             
             playlistDao.updateCounts(playlistId, liveStreams.size, vodStreams.size, filteredSeries.size)
+            Log.d(TAG, "loadXtreamContent FINAL: live=${liveStreams.size}, vod=${vodStreams.size}, series=${filteredSeries.size} inserted into DB")
         } catch (e: Exception) {
             Log.e(TAG, "Error loading Xtream content", e)
             throw Exception("Errore nel caricamento dei contenuti Xtream: ${e.message}")
@@ -335,12 +491,12 @@ class PlaylistRepository @Inject constructor(
     ) = withContext(Dispatchers.IO) {
         val apiBase = "$baseUrl/player_api.php?username=$username&password=$password"
         try {
-            val liveCatsDeferred = async { downloadContent("$apiBase&action=get_live_categories") }
-            val liveStreamsDeferred = async { downloadContent("$apiBase&action=get_live_streams") }
-            val vodCatsDeferred = async { downloadContent("$apiBase&action=get_vod_categories") }
-            val vodStreamsDeferred = async { downloadContent("$apiBase&action=get_vod_streams") }
-            val seriesCatsDeferred = async { downloadContent("$apiBase&action=get_series_categories") }
-            val seriesListDeferred = async { downloadContent("$apiBase&action=get_series") }
+            val liveCatsDeferred = async { safeDownload("$apiBase&action=get_live_categories") }
+            val liveStreamsDeferred = async { safeDownload("$apiBase&action=get_live_streams") }
+            val vodCatsDeferred = async { safeDownload("$apiBase&action=get_vod_categories") }
+            val vodStreamsDeferred = async { safeDownload("$apiBase&action=get_vod_streams") }
+            val seriesCatsDeferred = async { safeDownload("$apiBase&action=get_series_categories") }
+            val seriesListDeferred = async { safeDownload("$apiBase&action=get_series") }
             
             val liveCatsJson = liveCatsDeferred.await()
             val liveStreamsJson = liveStreamsDeferred.await()
@@ -355,12 +511,17 @@ class PlaylistRepository @Inject constructor(
             val vodStreams = xtreamParser.parseVodStreams(vodStreamsJson)
             val seriesCategories = xtreamParser.parseSeriesCategories(seriesCatsJson)
             val seriesList = xtreamParser.parseSeries(seriesListJson)
+            Log.d(TAG, "refreshXtreamContent DIAGNOSTIC: seriesCatsJson=${seriesCatsJson.length} chars, seriesListJson=${seriesListJson.length} chars")
+            Log.d(TAG, "refreshXtreamContent DIAGNOSTIC: parsed seriesCategories=${seriesCategories.size}, parsed seriesList=${seriesList.size}")
+            if (seriesList.isNotEmpty()) {
+                Log.d(TAG, "refreshXtreamContent DIAGNOSTIC: first 3 series: ${seriesList.take(3).map { "${it.name} (id=${it.id}, cat=${it.categoryId})" }}")
+            }
 
             categoryDao.deleteByPlaylistAndType(playlistId, CategoryType.LIVE_TV)
-            val liveCategoryMap = liveCategories.associate { it.id to it.name }
-            categoryDao.insertAll(liveCategories.map { Category(playlistId = playlistId, name = it.name, type = CategoryType.LIVE_TV, externalId = it.id) })
             channelDao.deleteByPlaylist(playlistId)
-            channelDao.insertAll(liveStreams.map { stream ->
+            val liveCategoryMap = liveCategories.associate { it.id to it.name }
+            val liveCategoryEntities = liveCategories.map { Category(playlistId = playlistId, name = it.name, type = CategoryType.LIVE_TV, externalId = it.id) }
+            val channelEntities = liveStreams.map { stream ->
                 Channel(
                     playlistId = playlistId,
                     name = stream.name,
@@ -372,13 +533,16 @@ class PlaylistRepository @Inject constructor(
                     xtreamEpgChannelId = stream.epgId,
                     hasCatchup = stream.hasArchive > 0
                 )
-            })
+            }
+            categoryDao.insertAll(liveCategoryEntities)
+            channelDao.insertAll(channelEntities)
 
             val currentMovies = movieDao.getAllMoviesList().filter { it.playlistId == playlistId }
             val currentMovieMap = currentMovies.associateBy { it.xtreamStreamId }
             categoryDao.deleteByPlaylistAndType(playlistId, CategoryType.MOVIE)
             val vodCategoryMap = vodCategories.associate { it.id to contentNameParser.normalizeMovieCategory(it.name) }
-            categoryDao.insertAll(vodCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeMovieCategory(it.name), type = CategoryType.MOVIE, externalId = it.id) })
+            val movieCategoryEntities = vodCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeMovieCategory(it.name), type = CategoryType.MOVIE, externalId = it.id) }
+            categoryDao.insertAll(movieCategoryEntities)
             
             val moviesToInsert = mutableListOf<Movie>()
             val moviesToUpdate = mutableListOf<Movie>()
@@ -420,7 +584,8 @@ class PlaylistRepository @Inject constructor(
             val currentSeriesMap = currentSeries.associateBy { it.xtreamSeriesId }
             categoryDao.deleteByPlaylistAndType(playlistId, CategoryType.SERIES)
             val seriesCategoryMap = seriesCategories.associate { it.id to contentNameParser.normalizeSeriesCategory(it.name) }
-            categoryDao.insertAll(seriesCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeSeriesCategory(it.name), type = CategoryType.SERIES, externalId = it.id) })
+            val seriesCategoryEntities = seriesCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeSeriesCategory(it.name), type = CategoryType.SERIES, externalId = it.id) }
+            categoryDao.insertAll(seriesCategoryEntities)
             
             val seriesToInsert = mutableListOf<Series>()
             val seriesToUpdate = mutableListOf<Series>()
@@ -428,6 +593,7 @@ class PlaylistRepository @Inject constructor(
             val seenSeriesIds = mutableSetOf<Int>()
 
             val filteredNewSeries = seriesList.filter { !it.name.equals("Test Serie", true) && !it.name.equals("Test Series", true) }
+            Log.d(TAG, "refreshXtreamContent DIAGNOSTIC: currentSeries=${currentSeries.size}, filteredNewSeries=${filteredNewSeries.size}")
             filteredNewSeries.forEachIndexed { index, ser ->
                 val xtreamId = ser.id
                 if (xtreamId != null) {
@@ -442,12 +608,13 @@ class PlaylistRepository @Inject constructor(
                                 name = ser.name, logoUrl = ser.poster, xtreamBackdropUrl = ser.backdrop,
                                 category = categoryName, categoryId = ser.categoryId, xtreamRating = ser.rating, 
                                 xtreamPlot = ser.plot, xtreamCast = ser.cast, xtreamDirector = ser.director, xtreamGenre = ser.genre,
-                                playlistOrder = playlistOrder
+                                playlistOrder = playlistOrder, tmdbId = ser.tmdbId ?: existing.tmdbId
                             ))
                         } else {
                             seriesToUpdate.add(existing.copy(
                                 xtreamRating = ser.rating, xtreamPlot = ser.plot, xtreamCast = ser.cast, 
-                                xtreamDirector = ser.director, xtreamGenre = ser.genre, playlistOrder = playlistOrder
+                                xtreamDirector = ser.director, xtreamGenre = ser.genre, playlistOrder = playlistOrder,
+                                tmdbId = ser.tmdbId ?: existing.tmdbId
                             ))
                         }
                     } else {
@@ -455,7 +622,8 @@ class PlaylistRepository @Inject constructor(
                             playlistId = playlistId, name = ser.name, logoUrl = ser.poster, xtreamBackdropUrl = ser.backdrop,
                             category = categoryName, categoryId = ser.categoryId, xtreamSeriesId = ser.id, 
                             xtreamRating = ser.rating, xtreamPlot = ser.plot, xtreamCast = ser.cast, 
-                            xtreamDirector = ser.director, xtreamGenre = ser.genre, playlistOrder = playlistOrder
+                            xtreamDirector = ser.director, xtreamGenre = ser.genre, playlistOrder = playlistOrder,
+                            tmdbId = ser.tmdbId
                         ))
                     }
                 }
@@ -465,6 +633,7 @@ class PlaylistRepository @Inject constructor(
             seriesDao.deleteList(seriesToDelete)
             seriesDao.updateList(seriesToUpdate)
             seriesDao.insertAll(seriesToInsert)
+            Log.d(TAG, "refreshXtreamContent FINAL: series insert=${seriesToInsert.size}, update=${seriesToUpdate.size}, delete=${seriesToDelete.size}, total now=${currentSeries.size - seriesToDelete.size + seriesToInsert.size}")
 
             playlistDao.updateCounts(playlistId, liveStreams.size, currentMovies.size - moviesToDelete.size + moviesToInsert.size, currentSeries.size - seriesToDelete.size + seriesToInsert.size)
         } catch (e: Exception) {

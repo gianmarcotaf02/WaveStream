@@ -72,16 +72,13 @@ fun SplashScreen(
     
     // Text visibility
     val textVisible = animationPhase >= 1
-    val mottoVisible = animationPhase >= 2
     
     // Animation sequence controller
     LaunchedEffect(Unit) {
         delay(800) // Show centered logo briefly
         animationPhase = 1 // Start logo slide + text reveal
         delay(1000) // Wait for spring animation to settle
-        animationPhase = 2 // Show motto
-        delay(1200) // Show complete animation
-        animationPhase = 3
+        animationPhase = 2
         onComplete()
     }
     
@@ -161,27 +158,7 @@ fun SplashScreen(
                 }
             }
             
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Motto - fades in
-            AnimatedVisibility(
-                visible = mottoVisible,
-                enter = fadeIn(
-                    animationSpec = tween(
-                        durationMillis = 600,
-                        delayMillis = 100
-                    )
-                )
-            ) {
-                Text(
-                    text = "Perchè il pezzotto è cosa bella!",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Normal,
-                    fontStyle = FontStyle.Italic,
-                    color = WaveStreamColors.TextSecondary,
-                    letterSpacing = 1.sp
-                )
-            }
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

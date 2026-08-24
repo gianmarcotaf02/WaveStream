@@ -79,7 +79,7 @@ interface TMDBApiService {
         @Path("tv_id") tvId: Int,
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "it-IT",
-        @Query("append_to_response") appendToResponse: String = "credits"
+        @Query("append_to_response") appendToResponse: String = "credits,external_ids"
     ): TMDBTVDetails
     
     /**
@@ -92,6 +92,17 @@ interface TMDBApiService {
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "it-IT"
     ): TMDBSeasonDetails
+
+    /**
+     * Get person details
+     */
+    @GET("person/{person_id}")
+    suspend fun getPersonDetails(
+        @Path("person_id") personId: Int,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "it-IT",
+        @Query("append_to_response") appendToResponse: String = "combined_credits"
+    ): TMDBPersonDetails
 }
 
 // Response models
@@ -215,7 +226,8 @@ data class TMDBTVDetails(
     @Json(name = "number_of_episodes") val numberOfEpisodes: Int?,
     val genres: List<TMDBGenre>?,
     val status: String?,
-    val credits: TMDBCredits?
+    val credits: TMDBCredits?,
+    @Json(name = "external_ids") val externalIds: TMDBExternalIds?
 )
 
 @JsonClass(generateAdapter = true)
@@ -270,4 +282,45 @@ data class TMDBCrew(
     val job: String?,
     val department: String?,
     @Json(name = "profile_path") val profilePath: String?
+)
+
+@JsonClass(generateAdapter = true)
+data class TMDBPersonDetails(
+    val id: Int,
+    val name: String?,
+    val biography: String?,
+    val birthday: String?,
+    @Json(name = "place_of_birth") val placeOfBirth: String?,
+    @Json(name = "profile_path") val profilePath: String?,
+    @Json(name = "known_for_department") val knownForDepartment: String?,
+    @Json(name = "combined_credits") val combinedCredits: TMDBPersonCredits?
+)
+
+@JsonClass(generateAdapter = true)
+data class TMDBPersonCredits(
+    val cast: List<TMDBPersonCast>?,
+    val crew: List<TMDBPersonCrew>?
+)
+
+@JsonClass(generateAdapter = true)
+data class TMDBPersonCast(
+    val id: Int,
+    val title: String?,
+    val name: String?,
+    val character: String?,
+    @Json(name = "poster_path") val posterPath: String?,
+    @Json(name = "media_type") val mediaType: String?,
+    @Json(name = "release_date") val releaseDate: String?,
+    @Json(name = "first_air_date") val firstAirDate: String?
+)
+
+@JsonClass(generateAdapter = true)
+data class TMDBPersonCrew(
+    val id: Int,
+    val title: String?,
+    val name: String?,
+    val job: String?,
+    val department: String?,
+    @Json(name = "poster_path") val posterPath: String?,
+    @Json(name = "media_type") val mediaType: String?
 )

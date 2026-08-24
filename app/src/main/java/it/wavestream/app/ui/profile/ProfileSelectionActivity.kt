@@ -189,6 +189,26 @@ class ProfileSelectionActivity : ComponentActivity() {
                 }
             }
             
+            // If only one profile (default "Principale") and onboarding not done,
+            // skip profile selection screen and go directly to onboarding
+            if (profiles.size == 1) {
+                val welcomeShown = userPreferences.isWelcomeShown()
+                val termsAccepted = userPreferences.isTermsAccepted()
+                
+                if (!welcomeShown || !termsAccepted) {
+                    // Save as last used before navigating
+                    userPreferences.setCurrentProfileId(profiles.first().id)
+                    withContext(Dispatchers.Main) {
+                        if (!welcomeShown) {
+                            goToWelcome()
+                        } else {
+                            goToTerms()
+                        }
+                    }
+                    return@launch
+                }
+            }
+            
             // Show profile selection
             withContext(Dispatchers.Main) {
                 onProfilesLoaded(profiles, lastProfileId)
@@ -202,16 +222,46 @@ class ProfileSelectionActivity : ComponentActivity() {
             android.util.Log.d("WaveStreamDebug", "Saving profile ID ${profile.id} in background...")
             userPreferences.setCurrentProfileId(profile.id)
         }
-        
-        // Immediate navigation
-        goToMain(profile)
+
+        // Check onboarding state in background, then navigate
+        lifecycleScope.launch(Dispatchers.IO) {
+            val welcomeShown = userPreferences.isWelcomeShown()
+            val termsAccepted = userPreferences.isTermsAccepted()
+
+            withContext(Dispatchers.Main) {
+                if (!welcomeShown) {
+                    goToWelcome()
+                } else if (!termsAccepted) {
+                    goToTerms()
+                } else {
+                    goToMain(profile)
+                }
+            }
+        }
+    }
+
+    private fun goToWelcome() {
+        val intent = Intent(this, it.wavestream.app.ui.welcome.WelcomeActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+        finish()
+        overridePendingTransition(0, 0)
+    }
+
+    private fun goToTerms() {
+        val intent = Intent(this, it.wavestream.app.ui.terms.TermsActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
+        finish()
+        overridePendingTransition(0, 0)
     }
     
     private fun goToMain(profile: Profile) {
         android.util.Log.d("WaveStreamDebug", "Navigating to LoadingActivity immediately. Setup check delegated.")
         
         // Always go to LoadingActivity first - it handles redirection to Setup if needed
-        // This avoids blocking the UI thread waiting for DataStore reads
         val intent = Intent(this, it.wavestream.app.ui.loading.LoadingActivity::class.java).apply {
             putExtra("profile_id", profile.id)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

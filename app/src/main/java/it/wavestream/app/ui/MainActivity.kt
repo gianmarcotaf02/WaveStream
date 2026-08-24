@@ -76,6 +76,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.Key
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import it.wavestream.app.data.database.entity.ContentType
@@ -105,7 +106,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 /**
  * Main Tab enum for navigation
  */
-enum class MainTab { MOVIES, SERIES, LIVE, FAVORITES, LISTS, HISTORY }
+enum class MainTab { HOME, MOVIES, SERIES, LIVE, FAVORITES, LISTS, HISTORY }
 
 /**
  * Main Activity for Android TV
@@ -114,7 +115,7 @@ enum class MainTab { MOVIES, SERIES, LIVE, FAVORITES, LISTS, HISTORY }
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
     
-    private var currentTab = MainTab.MOVIES
+    private var currentTab = MainTab.HOME
     private var lastBackPressTime = 0L
     private var backKeyDownTime = 0L
     
@@ -135,9 +136,9 @@ class MainActivity : FragmentActivity() {
         // Restore state
         if (savedInstanceState != null) {
             try {
-                currentTab = MainTab.valueOf(savedInstanceState.getString("current_tab", "MOVIES"))
+                currentTab = MainTab.valueOf(savedInstanceState.getString("current_tab", "HOME"))
             } catch (e: Exception) {
-                currentTab = MainTab.MOVIES
+                currentTab = MainTab.HOME
             }
         }
         
@@ -230,16 +231,11 @@ private fun MainActivityScreen(
 ) {
     val context = LocalContext.current
     val rootView = LocalView.current
-    
-    android.util.Log.d("WaveStreamDebug", "MainActivityScreen: Starting...")
-    
+
     // ViewModel for home content
     val homeViewModel: HomeViewModel = hiltViewModel()
-    android.util.Log.d("WaveStreamDebug", "MainActivityScreen: ViewModel created")
-    
-    
-    val homeState by homeViewModel.uiState.collectAsState()
-    android.util.Log.d("WaveStreamDebug", "MainActivityScreen: State collected, isLoading=${homeState.isLoading}")
+
+    val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
     
 
     
@@ -283,13 +279,20 @@ private fun MainActivityScreen(
     }
     
     // Refresh content on resume (e.g., after returning from player)
-    // Refresh content on resume (e.g., after returning from player)
     val lifecycleOwner = LocalLifecycleOwner.current
+    var isFirstResume by remember { mutableStateOf(true) }
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-                // Force refresh to show updated "Continue Watching" immediately
-                homeViewModel.forceRefresh()
+            when (event) {
+                androidx.lifecycle.Lifecycle.Event.ON_RESUME -> {
+                    if (isFirstResume) {
+                        isFirstResume = false
+                    } else {
+                        // Force refresh to show updated "Continue Watching" and Hero buttons immediately
+                        homeViewModel.forceRefresh()
+                    }
+                }
+                else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -323,6 +326,7 @@ private fun MainActivityScreen(
         
         // Load content for the selected tab
         val contentType = when (tab) {
+            MainTab.HOME -> HomeContentType.HOME
             MainTab.MOVIES -> HomeContentType.MOVIES
             MainTab.SERIES -> HomeContentType.SERIES
             MainTab.FAVORITES -> HomeContentType.FAVORITES
@@ -402,7 +406,15 @@ private fun MainActivityScreen(
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        WaveStreamColors.Accent.copy(alpha = 0.03f),
+                        Color.Black,
+                        Color.Black
+                    )
+                )
+            )
     ) {
         // Navigation Rail (expandable)
         ExpandableNavRail(
@@ -433,7 +445,9 @@ private fun MainActivityScreen(
         // Main content area
         Column(modifier = Modifier.fillMaxSize()) {
             // Mini Top Bar (clock + actions only)
+            val profileName by homeViewModel.profileName.collectAsStateWithLifecycle()
             MiniTopBar(
+                profileName = profileName,
                 onProfileClick = { 
                     startActivityWithTransition(Intent(context, it.wavestream.app.ui.profile.ProfileSelectionActivity::class.java))
                 },
@@ -480,14 +494,9 @@ private fun MainActivityScreen(
                 },
                 label = "tabTransition"
             ) { targetTab ->
-                val isContentLoading = homeState.isLoading && homeState.carouselRows.isEmpty()
-                
-                if (isContentLoading) {
-                    TabLoadingSkeleton()
-                } else {
-                    TvHomeScreen(
-                        state = homeState,
-                        onItemClick = { handleItemClick(it) },
+                TvHomeScreen(
+                    state = homeState,
+                    onItemClick = { handleItemClick(it) },
                         onSeeAllClick = { handleSeeAllClick(it) },
                         onPlayClick = { handleItemClick(it) },
                         onTopBarFocusRequest = {
@@ -544,7 +553,6 @@ private fun MainActivityScreen(
                             .fillMaxSize()
                             .focusRequester(contentFocusRequester)
                     )
-                }
             }
         }
         
@@ -614,13 +622,16 @@ private fun MainTopBar(
             )
             
             // Tabs container with sliding indicator
-            val tabWidths = remember { mutableStateMapOf<Int, Float>() }
+            // Use a stable MutableState<IntArray> instead of mutableStateMapOf to avoid recompose loops:
+            // onGloballyPositioned -> map update -> recompose -> onGloballyPositioned
+            val tabWidthsState = remember { mutableStateOf(IntArray(MainTab.entries.size) { 80 }) }
+            val tabWidths = tabWidthsState.value
             val selectedTabIndex = MainTab.entries.indexOf(selectedTab)
-            
+
             // Calculate indicator offset with spring animation
             val indicatorOffset by animateDpAsState(
-                targetValue = (0 until selectedTabIndex).sumOf { 
-                    (tabWidths[it] ?: 80f).toInt() + 16 // tab width + spacing
+                targetValue = (0 until selectedTabIndex).sumOf {
+                    tabWidths[it] + 16 // tab width + spacing
                 }.dp,
                 animationSpec = spring(
                     dampingRatio = 0.6f,
@@ -628,9 +639,9 @@ private fun MainTopBar(
                 ),
                 label = "indicatorOffset"
             )
-            
+
             val indicatorWidth by animateDpAsState(
-                targetValue = (tabWidths[selectedTabIndex] ?: 80f).dp,
+                targetValue = tabWidths[selectedTabIndex].dp,
                 animationSpec = spring(
                     dampingRatio = 0.6f,
                     stiffness = 300f
@@ -663,7 +674,13 @@ private fun MainTopBar(
                                 isSelected = tab == selectedTab,
                                 onClick = { onTabSelected(tab) },
                                 onDownPress = onContentFocusRequest,
-                                onWidthMeasured = { width -> tabWidths[index] = width }
+                                onWidthMeasured = { width ->
+                                    val current = tabWidthsState.value
+                                    val w = width.toInt()
+                                    if (current[index] != w) {
+                                        tabWidthsState.value = current.copyOf().also { it[index] = w }
+                                    }
+                                }
                             )
                         } else if (tab == MainTab.FAVORITES) {
                             // Heart icon button for favorites
@@ -671,7 +688,13 @@ private fun MainTopBar(
                                 isSelected = tab == selectedTab,
                                 onClick = { onTabSelected(tab) },
                                 onDownPress = onContentFocusRequest,
-                                onWidthMeasured = { width -> tabWidths[index] = width }
+                                onWidthMeasured = { width ->
+                                    val current = tabWidthsState.value
+                                    val w = width.toInt()
+                                    if (current[index] != w) {
+                                        tabWidthsState.value = current.copyOf().also { it[index] = w }
+                                    }
+                                }
                             )
                         } else if (tab == MainTab.LISTS) {
                             // List icon button for custom lists
@@ -679,7 +702,13 @@ private fun MainTopBar(
                                 isSelected = tab == selectedTab,
                                 onClick = { onTabSelected(tab) },
                                 onDownPress = onContentFocusRequest,
-                                onWidthMeasured = { width -> tabWidths[index] = width }
+                                onWidthMeasured = { width ->
+                                    val current = tabWidthsState.value
+                                    val w = width.toInt()
+                                    if (current[index] != w) {
+                                        tabWidthsState.value = current.copyOf().also { it[index] = w }
+                                    }
+                                }
                             )
                         } else {
                             TabButton(
@@ -693,7 +722,13 @@ private fun MainTopBar(
                                 onClick = { onTabSelected(tab) },
                                 focusRequester = if (tab == MainTab.MOVIES) filmTabFocusRequester else null,
                                 onDownPress = onContentFocusRequest,
-                                onWidthMeasured = { width -> tabWidths[index] = width }
+                                onWidthMeasured = { width ->
+                                    val current = tabWidthsState.value
+                                    val w = width.toInt()
+                                    if (current[index] != w) {
+                                        tabWidthsState.value = current.copyOf().also { it[index] = w }
+                                    }
+                                }
                             )
                         }
                     }
@@ -772,6 +807,7 @@ private fun MainTopBar(
  */
 @Composable
 private fun MiniTopBar(
+    profileName: String = "",
     onProfileClick: () -> Unit,
     onSearchClick: () -> Unit,
     onRandomClick: () -> Unit = {},
@@ -784,43 +820,69 @@ private fun MiniTopBar(
         modifier = modifier
             .background(Color.Black.copy(alpha = 0.8f))
             .padding(horizontal = 24.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.End,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Digital Clock
-        DigitalClock()
+        // Left: greeting + profile name
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (profileName.isNotEmpty()) {
+                Text(
+                    text = "Ciao, $profileName",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = WaveStreamColors.TextPrimary,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(20.dp)
+                        .background(Color.White.copy(alpha = 0.2f))
+                )
+            }
+        }
         
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        // Random content button
-        TopBarIconButton(
-            painter = androidx.compose.ui.res.painterResource(it.wavestream.app.R.drawable.dadi),
-            contentDescription = "Contenuto casuale",
-            onClick = onRandomClick,
-            onDownPress = onContentFocusRequest
-        )
-        
-        TopBarIconButton(
-            icon = Icons.Default.Download,
-            contentDescription = "Download",
-            onClick = onDownloadsClick,
-            onDownPress = onContentFocusRequest
-        )
-        
-        TopBarIconButton(
-            icon = Icons.Default.Search,
-            contentDescription = "Cerca",
-            onClick = onSearchClick,
-            onDownPress = onContentFocusRequest,
-            focusRequester = searchButtonFocusRequester
-        )
-        
-        TopBarIconButton(
-            icon = Icons.Default.Person,
-            contentDescription = "Profilo",
-            onClick = onProfileClick,
-            onDownPress = onContentFocusRequest
-        )
+        // Right: clock + actions
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            DigitalClock()
+            
+            Spacer(modifier = Modifier.width(8.dp))
+            
+            // Random content button
+            TopBarIconButton(
+                painter = androidx.compose.ui.res.painterResource(it.wavestream.app.R.drawable.dadi),
+                contentDescription = "Contenuto casuale",
+                onClick = onRandomClick,
+                onDownPress = onContentFocusRequest
+            )
+            
+            TopBarIconButton(
+                icon = Icons.Default.Download,
+                contentDescription = "Download",
+                onClick = onDownloadsClick,
+                onDownPress = onContentFocusRequest
+            )
+            
+            TopBarIconButton(
+                icon = Icons.Default.Search,
+                contentDescription = "Cerca",
+                onClick = onSearchClick,
+                onDownPress = onContentFocusRequest,
+                focusRequester = searchButtonFocusRequester
+            )
+            
+            TopBarIconButton(
+                icon = Icons.Default.Person,
+                contentDescription = "Profilo",
+                onClick = onProfileClick,
+                onDownPress = onContentFocusRequest
+            )
+        }
     }
 }
 
@@ -1025,7 +1087,9 @@ private fun TopBarIconButton(
 
 /**
  * Digital clock that shows the current time
- * Updates every second
+ * Updates every second.
+ * Isolated as its own composable so the surrounding Row doesn't recompose every second
+ * — only this Text is invalidated.
  */
 @Composable
 fun DigitalClock(
@@ -1033,15 +1097,13 @@ fun DigitalClock(
     textColor: Color = Color.White,
     textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.titleMedium
 ) {
-    var currentTime by remember { mutableStateOf(getCurrentTimeString()) }
-    
-    LaunchedEffect(Unit) {
+    val currentTime by produceState(initialValue = getCurrentTimeString()) {
         while (true) {
-            currentTime = getCurrentTimeString()
-            kotlinx.coroutines.delay(1000L) // Update every second
+            value = getCurrentTimeString()
+            kotlinx.coroutines.delay(1000L)
         }
     }
-    
+
     Text(
         text = currentTime,
         color = textColor,

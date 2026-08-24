@@ -27,6 +27,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
  * Content type for tab-specific loading
  */
 enum class HomeContentType {
+    HOME,      // Home tab - all content mixed
     MOVIES,    // Film tab - only movies
     SERIES,    // Serie TV tab - only series
     FAVORITES, // Preferiti tab - favorites
@@ -55,17 +56,22 @@ class HomeViewModel @Inject constructor(
     private val tmdbService: TMDBService,
     private val imdbRatingsRepository: ImdbRatingsRepository,
     private val playlistDao: PlaylistDao,
-    private val episodeDao: EpisodeDao
+    private val episodeDao: EpisodeDao,
+    private val profileDao: ProfileDao,
+    private val recommendationEngine: it.wavestream.app.data.tmdb.RecommendationEngine
 ) : ViewModel() {
 
     companion object {
-        private const val HERO_CACHE_DURATION = 30 * 60 * 1000L // 30 minutes
-        private const val POPULAR_CACHE_DURATION = 15 * 60 * 1000L // 15 minutes
-        private const val CAROUSEL_CACHE_DURATION = 30 * 60 * 1000L // 30 minutes - carousel order stays stable
+        private const val HERO_CACHE_DURATION = 10 * 24 * 60 * 60 * 1000L // 10 days
+        private const val POPULAR_CACHE_DURATION = 10 * 24 * 60 * 60 * 1000L // 10 days
+        private const val CAROUSEL_CACHE_DURATION = 10 * 24 * 60 * 60 * 1000L // 10 days - carousel order stays stable
     }
 
     private val _uiState = MutableStateFlow(HomeScreenState())
     val uiState: StateFlow<HomeScreenState> = _uiState.asStateFlow()
+    
+    private val _profileName = MutableStateFlow("")
+    val profileName: StateFlow<String> = _profileName.asStateFlow()
     
     // Available categories for sidebar
     private val _movieCategories = MutableStateFlow<List<String>>(emptyList())
@@ -74,13 +80,85 @@ class HomeViewModel @Inject constructor(
     private val _seriesCategories = MutableStateFlow<List<String>>(emptyList())
     val seriesCategories: StateFlow<List<String>> = _seriesCategories.asStateFlow()
     
-    private var currentProfileId: Long = 1L
-    private var currentContentType: HomeContentType = HomeContentType.MOVIES
+    // Trending refresh state — LoadingActivity can observe this to show overlay
+    private val _isRefreshingTrending = MutableStateFlow(false)
+    val isRefreshingTrending: StateFlow<Boolean> = _isRefreshingTrending.asStateFlow()
     
-    // Cache for tab content to avoid reloading when switching tabs
-    private val cachedCarouselRows = mutableMapOf<HomeContentType, List<CarouselRow>>()
-    private val cachedCarouselRowsTime = mutableMapOf<HomeContentType, Long>() // timestamp of cache build
-    private val cachedHeroItems = mutableMapOf<HomeContentType, Pair<List<HeroItem>, Boolean>>()
+    private var currentProfileId: Long = 1L
+    private var currentContentType: HomeContentType = HomeContentType.HOME
+    
+    // Active loading jobs per tab — cancels previous job when switching tabs to avoid race conditions
+    private val loadingJobs = mutableMapOf<HomeContentType, Job>()
+    
+    // Cache for tab content to avoid reloading when switching tabs - delegated to ContentCache for persistence across VM recreation
+    private val cachedCarouselRows = object : MutableMap<HomeContentType, List<CarouselRow>> {
+        override val size: Int get() = 0
+        override fun containsKey(key: HomeContentType): Boolean = get(key) != null
+        override fun containsValue(value: List<CarouselRow>): Boolean = false
+        override fun get(key: HomeContentType): List<CarouselRow>? = contentCache.getCarouselRows("rows_${key.name}")
+        override fun isEmpty(): Boolean = size == 0
+        override val entries: MutableSet<MutableMap.MutableEntry<HomeContentType, List<CarouselRow>>> get() = mutableSetOf()
+        override val keys: MutableSet<HomeContentType> get() = mutableSetOf()
+        override val values: MutableCollection<List<CarouselRow>> get() = mutableListOf()
+        override fun clear() = contentCache.clearHomeSessionData()
+        override fun put(key: HomeContentType, value: List<CarouselRow>): List<CarouselRow>? {
+            contentCache.putCarouselRows("rows_${key.name}", value)
+            return null
+        }
+        override fun putAll(from: Map<out HomeContentType, List<CarouselRow>>) {
+            from.forEach { (k, v) -> put(k, v) }
+        }
+        override fun remove(key: HomeContentType): List<CarouselRow>? {
+            contentCache.removeHomeSessionData("rows_${key.name}")
+            return null
+        }
+    }
+
+    private val cachedCarouselRowsTime = object : MutableMap<HomeContentType, Long> {
+        override val size: Int get() = 0
+        override fun containsKey(key: HomeContentType): Boolean = get(key) != null
+        override fun containsValue(value: Long): Boolean = false
+        override fun get(key: HomeContentType): Long? = contentCache.getTimestamp("rows_time_${key.name}")
+        override fun isEmpty(): Boolean = size == 0
+        override val entries: MutableSet<MutableMap.MutableEntry<HomeContentType, Long>> get() = mutableSetOf()
+        override val keys: MutableSet<HomeContentType> get() = mutableSetOf()
+        override val values: MutableCollection<Long> get() = mutableListOf()
+        override fun clear() {}
+        override fun put(key: HomeContentType, value: Long): Long? {
+            contentCache.putTimestamp("rows_time_${key.name}", value)
+            return null
+        }
+        override fun putAll(from: Map<out HomeContentType, Long>) {
+            from.forEach { (k, v) -> put(k, v) }
+        }
+        override fun remove(key: HomeContentType): Long? {
+            contentCache.removeHomeSessionData("rows_time_${key.name}")
+            return null
+        }
+    }
+
+    private val cachedHeroItems = object : MutableMap<HomeContentType, HeroPairData> {
+        override val size: Int get() = 0
+        override fun containsKey(key: HomeContentType): Boolean = get(key) != null
+        override fun containsValue(value: HeroPairData): Boolean = false
+        override fun get(key: HomeContentType): HeroPairData? = contentCache.getHeroPair("hero_${key.name}")
+        override fun isEmpty(): Boolean = size == 0
+        override val entries: MutableSet<MutableMap.MutableEntry<HomeContentType, HeroPairData>> get() = mutableSetOf()
+        override val keys: MutableSet<HomeContentType> get() = mutableSetOf()
+        override val values: MutableCollection<HeroPairData> get() = mutableListOf()
+        override fun clear() {}
+        override fun put(key: HomeContentType, value: HeroPairData): HeroPairData? {
+            contentCache.putHeroPair("hero_${key.name}", value)
+            return null
+        }
+        override fun putAll(from: Map<out HomeContentType, HeroPairData>) {
+            from.forEach { (k, v) -> put(k, v) }
+        }
+        override fun remove(key: HomeContentType): HeroPairData? {
+            contentCache.removeHomeSessionData("hero_${key.name}")
+            return null
+        }
+    }
     
     // In-memory session cache for "Recently Added" content
     private var cachedRecentlyAddedMovies: List<Movie>? = null
@@ -98,34 +176,24 @@ class HomeViewModel @Inject constructor(
     private var savedPreGridState: HomeScreenState? = null
 
     init {
-        // DISABLED: Cleanup was deleting progress before movies loaded
-        // cleanupOrphanedProgress()
-        loadContent(HomeContentType.MOVIES)
-        loadAllCategories()
-        loadFavoriteCategories()
-        
-        // Pre-load Series heroes in background so they're ready when switching tabs
-        preloadSeriesHeroes()
-    }
-    
-    /**
-     * Pre-load series heroes in background during startup
-     * This ensures heroes are ready when user switches to Serie TV tab
-     */
-    private fun preloadSeriesHeroes() {
+        // Load HOME tab content (the critical first-frame path)
+        loadContent(HomeContentType.HOME)
+
+        // Defer non-critical background work to avoid CPU contention during first frame.
+        viewModelScope.launch {
+            kotlinx.coroutines.delay(2000)
+            loadAllCategories()
+            loadFavoriteCategories()
+        }
+
+        // Load profile name for HOME tab greeting (off Main thread)
         viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val heroResult = loadHeroItems(ContentType.SERIES)
-                if (heroResult != null) {
-                    cachedHeroItems[HomeContentType.SERIES] = heroResult
-                    Log.d("HomeViewModel", "Pre-loaded ${heroResult.first.size} series heroes")
-                }
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Error pre-loading series heroes", e)
-            }
+            currentProfileId = userPreferences.getCurrentProfileId() ?: 1L
+            val profile = profileDao.getProfileById(currentProfileId)
+            _profileName.value = profile?.name ?: ""
         }
     }
-    
+
     /**
      * Remove WatchProgress entries that reference movies/series that no longer exist
      * This happens when playlists are reimported and content gets new IDs
@@ -167,20 +235,48 @@ class HomeViewModel @Inject constructor(
      * A full reload only happens if the carousel cache has expired.
      */
     fun forceRefresh() {
-        Log.d("HomeViewModel", "Soft refresh for $currentContentType")
+        val contentType = currentContentType
+        Log.d("HomeViewModel", "Soft refresh for $contentType")
         
-        val cachedRows = cachedCarouselRows[currentContentType]
-        val cacheTime = cachedCarouselRowsTime[currentContentType] ?: 0L
+        // Check if trending is > 7 days old → re-populate in background
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val lastUpdate = userPreferences.getTmdbPopularLastUpdate()
+                val sevenDaysMs = 7 * 24 * 60 * 60 * 1000L
+                if (System.currentTimeMillis() - lastUpdate > sevenDaysMs) {
+                    Log.d("HomeViewModel", "Trending > 7 days old, re-populating in background")
+                    _isRefreshingTrending.value = true
+                    try {
+                        tmdbService.populateTrendingMovies()
+                        tmdbService.populateTrendingSeries()
+                        userPreferences.setTmdbPopularLastUpdate(System.currentTimeMillis())
+                        Log.d("HomeViewModel", "Background trending refresh complete")
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Background trending refresh failed", e)
+                    } finally {
+                        _isRefreshingTrending.value = false
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error checking trending age", e)
+            }
+        }
+        
+        val cachedRows = cachedCarouselRows[contentType]
+        val cacheTime = cachedCarouselRowsTime[contentType] ?: 0L
         val isCacheStillValid = cachedRows != null &&
             (System.currentTimeMillis() - cacheTime) < CAROUSEL_CACHE_DURATION &&
-            (currentContentType == HomeContentType.MOVIES || currentContentType == HomeContentType.SERIES)
+            (contentType == HomeContentType.HOME || contentType == HomeContentType.MOVIES || contentType == HomeContentType.SERIES)
         
         if (isCacheStillValid && cachedRows != null) {
             // Only refresh the "Continua a guardare" row in-place
             viewModelScope.launch(Dispatchers.IO) {
                 try {
+                    // Check if tab changed while we were queued — abort if so
+                    if (currentContentType != contentType) return@launch
+                    
                     val continueWatchingData = loadContinueWatching() ?: emptyList()
-                    val cwItems = when (currentContentType) {
+                    val cwItems = when (contentType) {
                         HomeContentType.MOVIES -> continueWatchingData.filter { it.contentType == ContentType.MOVIE }
                         HomeContentType.SERIES -> continueWatchingData.filter { it.contentType == ContentType.SERIES }
                         else -> continueWatchingData
@@ -207,23 +303,48 @@ class HomeViewModel @Inject constructor(
                     }
                     
                     // Update cache with the patched rows
-                    cachedCarouselRows[currentContentType] = updatedRows
+                    cachedCarouselRows[contentType] = updatedRows
+                    cachedCarouselRowsTime[contentType] = System.currentTimeMillis()
                     
-                    withContext(Dispatchers.Main) {
-                        _uiState.update { it.copy(carouselRows = updatedRows) }
+                    // ALSO refresh watch progress for current heroes!
+                    var currentHeroes = _uiState.value.heroItems
+                    if (currentHeroes.isEmpty()) {
+                        currentHeroes = cachedHeroItems[contentType]?.heroes ?: emptyList()
                     }
-                    Log.d("HomeViewModel", "Soft refresh done: CW row updated, carousels stable")
+                    val freshHeroes = refreshHeroItemsWatchProgress(currentHeroes)
+                    val hasAnyCW = freshHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
+                    
+                    // Update cachedHeroItems with the fresh progress so the cache stays synced
+                    val cachedHero = cachedHeroItems[contentType]
+                    if (cachedHero != null) {
+                        cachedHeroItems[contentType] = cachedHero.copy(heroes = freshHeroes, isContinueWatching = hasAnyCW)
+                    }
+                    
+                    // Only update UI if tab hasn't changed
+                    if (currentContentType == contentType) {
+                        withContext(Dispatchers.Main) {
+                            _uiState.update { 
+                                it.copy(
+                                    carouselRows = updatedRows,
+                                    heroItems = freshHeroes,
+                                    isContinueWatchingHero = hasAnyCW
+                                ) 
+                            }
+                        }
+                    }
+                    Log.d("HomeViewModel", "Soft refresh done: CW row updated, carousels stable, hero progress refreshed")
                 } catch (e: Exception) {
                     Log.e("HomeViewModel", "Error in soft refresh", e)
                 }
             }
         } else {
-            // Cache expired (> 30 min) or not yet built → full reload
+            // Cache expired (> 7 days) or not yet built → full reload
+            if (currentContentType != contentType) return  // Tab changed, abort stale refresh
             Log.d("HomeViewModel", "Carousel cache expired, doing full reload")
-            cachedCarouselRows.remove(currentContentType)
-            cachedCarouselRowsTime.remove(currentContentType)
-            cachedHeroItems.remove(currentContentType)
-            loadContent(currentContentType)
+            cachedCarouselRows.remove(contentType)
+            cachedCarouselRowsTime.remove(contentType)
+            cachedHeroItems.remove(contentType)
+            loadContent(contentType)
         }
     }
     
@@ -302,20 +423,41 @@ class HomeViewModel @Inject constructor(
     /**
      * Load content based on content type (tab)
      * Uses cache for MOVIES and SERIES to avoid reloading when switching tabs
+     * Cancels any in-flight loading job for the same tab to avoid race conditions
      */
     fun loadContent(contentType: HomeContentType = currentContentType) {
+        Log.d("HomeViewModel", "loadContent: contentType=$contentType, previous=$currentContentType")
         currentContentType = contentType
-        viewModelScope.launch {
+        // Cancel ALL in-flight loading jobs to prevent stale data overwriting current tab
+        loadingJobs.values.forEach { it.cancel() }
+        loadingJobs.clear()
+        loadingJobs[contentType] = viewModelScope.launch {
             try {
-                currentProfileId = userPreferences.getCurrentProfileId() ?: 1L
-            
-            // Check if we have cached data for this content type (only for MOVIES and SERIES)
+                // Move DB reads off Main thread to avoid ANR
+                withContext(Dispatchers.IO) {
+                    currentProfileId = userPreferences.getCurrentProfileId() ?: 1L
+                    val profile = profileDao.getProfileById(currentProfileId)
+                    _profileName.value = profile?.name ?: ""
+                }
+
+            // Check if we have cached data for this content type
             val cachedRows = cachedCarouselRows[contentType]
             val cachedHero = cachedHeroItems[contentType]
+            Log.d("HomeViewModel", "loadContent: $contentType cache check — rows=${cachedRows != null} (${cachedRows?.size ?: 0}), heroes=${cachedHero != null}")
             
-            if (cachedRows != null && (contentType == HomeContentType.MOVIES || contentType == HomeContentType.SERIES)) {
-                // Use cached data - instant switch without loading
-                Log.d("HomeViewModel", "Using cached content for $contentType, heroItems=${cachedHero?.first?.size ?: 0}")
+            if (cachedRows != null && (contentType == HomeContentType.HOME || contentType == HomeContentType.MOVIES || contentType == HomeContentType.SERIES)) {
+                // Use cached rows immediately — show content fast
+                if (currentContentType != contentType) return@launch
+                
+                // Refresh watch progress for cached heroes on load
+                val freshHeroes = cachedHero?.heroes?.let { refreshHeroItemsWatchProgress(it) } ?: emptyList()
+                val hasAnyCW = freshHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
+                
+                // Update cachedHeroItems with the fresh progress so the cache stays synced
+                if (cachedHero != null) {
+                    cachedHeroItems[contentType] = cachedHero.copy(heroes = freshHeroes, isContinueWatching = hasAnyCW)
+                }
+                
                 _uiState.update { 
                     it.copy(
                         isLoading = false,
@@ -325,16 +467,57 @@ class HomeViewModel @Inject constructor(
                         selectedCategory = null,
                         isListsTab = false,
                         isFavoritesTab = false,
-                        isHistoryTab = false,  // Reset history tab flag
-                        heroItems = cachedHero?.first ?: emptyList(),
+                        isHistoryTab = false,
+                        isHomeTab = contentType == HomeContentType.HOME,
+                        heroItems = freshHeroes,
                         currentHeroIndex = 0,
-                        isContinueWatchingHero = cachedHero?.second ?: false
+                        isContinueWatchingHero = hasAnyCW
                     )
+                }
+                // If heroes not cached yet, load them in background
+                if (cachedHero == null || cachedHero.heroes.isEmpty()) {
+                    launch(Dispatchers.IO) {
+                        try {
+                            val heroResult = when (contentType) {
+                                HomeContentType.HOME -> loadHomeHeroItems()
+                                HomeContentType.MOVIES -> loadHeroItems(ContentType.MOVIE)
+                                HomeContentType.SERIES -> loadHeroItems(ContentType.SERIES)
+                                else -> null
+                            }
+                            if (heroResult != null) {
+                                cachedHeroItems[contentType] = heroResult
+                                if (currentContentType == contentType) {
+                                    withContext(Dispatchers.Main) {
+                                        _uiState.update {
+                                            it.copy(
+                                                heroItems = heroResult.heroes,
+                                                currentHeroIndex = 0,
+                                                isContinueWatchingHero = heroResult.isContinueWatching
+                                            )
+                                        }
+                                    }
+                                }
+                                Log.d("HomeViewModel", "Background hero load done for $contentType: ${heroResult.heroes.size} heroes")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("HomeViewModel", "Error background hero load for $contentType", e)
+                        }
+                    }
                 }
                 return@launch
             }
             
-            // No cache - load fresh content (fast from SQLite, no spinner needed)
+            // No cache — show skeleton immediately
+            if (currentContentType != contentType) return@launch
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    carouselRows = emptyList(),
+                    heroItems = emptyList(),
+                    isGridMode = false,
+                    isHomeTab = contentType == HomeContentType.HOME
+                )
+            }
             
             val rows = mutableListOf<CarouselRow>()
             
@@ -342,6 +525,7 @@ class HomeViewModel @Inject constructor(
             val heroDeferred = async(Dispatchers.IO) {
                 try {
                      when (contentType) {
+                        HomeContentType.HOME -> loadHomeHeroItems()
                         HomeContentType.MOVIES -> loadHeroItems(ContentType.MOVIE)
                         HomeContentType.SERIES -> loadHeroItems(ContentType.SERIES)
                         else -> null
@@ -356,6 +540,7 @@ class HomeViewModel @Inject constructor(
                 try {
                     val contentRows = mutableListOf<CarouselRow>()
                     when (contentType) {
+                        HomeContentType.HOME -> loadHomeContent(contentRows)
                         HomeContentType.MOVIES -> loadMoviesContent(contentRows)
                         HomeContentType.SERIES -> loadSeriesContent(contentRows)
                         HomeContentType.FAVORITES -> loadFavoritesContent(contentRows)
@@ -374,16 +559,22 @@ class HomeViewModel @Inject constructor(
             val loadedRows = contentDeferred.await()
             rows.addAll(loadedRows)
             
-            // Cache the loaded data for MOVIES and SERIES
-            if (contentType == HomeContentType.MOVIES || contentType == HomeContentType.SERIES) {
+            // Cache the loaded data for HOME, MOVIES and SERIES
+            if (contentType == HomeContentType.HOME || contentType == HomeContentType.MOVIES || contentType == HomeContentType.SERIES) {
                 cachedCarouselRows[contentType] = rows.toList()
                 cachedCarouselRowsTime[contentType] = System.currentTimeMillis() // stamp when built
                 if (heroResult != null) {
                     cachedHeroItems[contentType] = heroResult
                 }
-                Log.d("HomeViewModel", "Cached content for $contentType: ${rows.size} rows, ${heroResult?.first?.size ?: 0} heroes")
+                Log.d("HomeViewModel", "Cached content for $contentType: ${rows.size} rows, ${heroResult?.heroes?.size ?: 0} heroes")
             }
             
+            // Only update UI if we're still on the same tab
+            if (currentContentType != contentType) {
+                Log.w("HomeViewModel", "loadContent: $contentType SKIPPED — tab changed to $currentContentType")
+                return@launch
+            }
+            Log.d("HomeViewModel", "loadContent: $contentType UPDATING UI — ${rows.size} rows: ${rows.map { it.title }}")
             _uiState.update { 
                 it.copy(
                     isLoading = false,
@@ -392,20 +583,127 @@ class HomeViewModel @Inject constructor(
                     isGridMode = false,  // Reset grid mode when loading tabs
                     selectedCategory = null,
                     isListsTab = contentType == HomeContentType.LISTS,
-
                     isFavoritesTab = contentType == HomeContentType.FAVORITES,
                     isHistoryTab = contentType == HomeContentType.HISTORY,
+                    isHomeTab = contentType == HomeContentType.HOME,
                     // Hero state
-                    heroItems = heroResult?.first ?: emptyList(),
+                    heroItems = heroResult?.heroes ?: emptyList(),
                     currentHeroIndex = 0,
-                    isContinueWatchingHero = heroResult?.second ?: false
+                    isContinueWatchingHero = heroResult?.isContinueWatching ?: false
                 )
             }
         } catch (e: Exception) {
-            Log.e("HomeViewModel", "CRITICAL ERROR in loadContent", e)
+            Log.e("HomeViewModel", "CRITICAL ERROR in loadContent: ${e.message}", e)
              _uiState.update { it.copy(isLoading = false) }
         }
     }
+    }
+
+    /**
+     * Check if a tab has finished loading (has cached content or is not loading).
+     * Used by LoadingActivity to know when all tabs are ready.
+     */
+    fun isReadyForTab(type: HomeContentType): Boolean {
+        return when (type) {
+            HomeContentType.HOME -> {
+                val rows = cachedCarouselRows[HomeContentType.HOME]
+                val heroes = cachedHeroItems[HomeContentType.HOME]
+                rows != null && rows.isNotEmpty() && heroes != null && heroes.heroes.isNotEmpty()
+            }
+            HomeContentType.MOVIES -> {
+                val rows = cachedCarouselRows[HomeContentType.MOVIES]
+                val heroes = cachedHeroItems[HomeContentType.MOVIES]
+                rows != null && rows.isNotEmpty() && heroes != null && heroes.heroes.isNotEmpty()
+            }
+            HomeContentType.SERIES -> {
+                val rows = cachedCarouselRows[HomeContentType.SERIES]
+                val heroes = cachedHeroItems[HomeContentType.SERIES]
+                rows != null && rows.isNotEmpty() && heroes != null && heroes.heroes.isNotEmpty()
+            }
+            else -> false
+        }
+    }
+    
+    /**
+     * Preload a tab's carousel rows AND heroes into ContentCache without touching _uiState.
+     * Used during LoadingActivity to warm all tab caches so tab switches
+     * in MainActivity are instant (cache hit, no skeleton loading).
+     */
+    suspend fun preloadTabIntoCache(contentType: HomeContentType) {
+        try {
+            val existingRows = cachedCarouselRows[contentType]
+            val existingHeroes = cachedHeroItems[contentType]
+            if (existingRows != null && existingRows.isNotEmpty() && existingHeroes != null && existingHeroes.heroes.isNotEmpty()) {
+                Log.d("HomeViewModel", "preloadTabIntoCache: $contentType already cached, skipping")
+                return
+            }
+
+            Log.d("HomeViewModel", "preloadTabIntoCache: Loading $contentType into cache")
+
+            coroutineScope {
+                val heroDeferred = async(Dispatchers.IO) {
+                    try {
+                        when (contentType) {
+                            HomeContentType.HOME -> loadHomeHeroItems()
+                            HomeContentType.MOVIES -> loadHeroItems(ContentType.MOVIE)
+                            HomeContentType.SERIES -> loadHeroItems(ContentType.SERIES)
+                            else -> null
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error preloading heroes for $contentType", e)
+                        null
+                    }
+                }
+
+                val contentDeferred = async(Dispatchers.IO) {
+                    try {
+                        val contentRows = mutableListOf<CarouselRow>()
+                        when (contentType) {
+                            HomeContentType.HOME -> loadHomeContent(contentRows)
+                            HomeContentType.MOVIES -> loadMoviesContent(contentRows)
+                            HomeContentType.SERIES -> loadSeriesContent(contentRows)
+                            else -> {}
+                        }
+                        contentRows
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error preloading rows for $contentType", e)
+                        emptyList<CarouselRow>()
+                    }
+                }
+
+                val heroResult = heroDeferred.await()
+                val loadedRows = contentDeferred.await()
+
+                cachedCarouselRows[contentType] = loadedRows.toList()
+                cachedCarouselRowsTime[contentType] = System.currentTimeMillis()
+                if (heroResult != null) {
+                    cachedHeroItems[contentType] = heroResult
+                }
+
+                Log.d("HomeViewModel", "preloadTabIntoCache: $contentType cached — ${loadedRows.size} rows, ${heroResult?.heroes?.size ?: 0} heroes")
+            }
+        } catch (e: Exception) {
+            Log.e("HomeViewModel", "CRITICAL ERROR preloading $contentType: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Check if the current visible tab is still loading.
+     */
+    fun isCurrentTabLoading(): Boolean = _uiState.value.isLoading
+    
+    /**
+     * Suspend function that waits for a tab to be ready, with timeout.
+     * Returns true if ready, false if timed out.
+     */
+    suspend fun waitForTabReady(type: HomeContentType, timeoutMs: Long = 30_000): Boolean {
+        val start = System.currentTimeMillis()
+        while (System.currentTimeMillis() - start < timeoutMs) {
+            if (isReadyForTab(type)) return true
+            kotlinx.coroutines.delay(200)
+        }
+        Log.w("HomeViewModel", "waitForTabReady timed out for $type after ${timeoutMs}ms")
+        return false
     }
 
     
@@ -529,70 +827,94 @@ class HomeViewModel @Inject constructor(
      * Load hero items - prioritize continue watching, fallback to popular carousels
      * Returns Pair(heroItems, isContinueWatching)
      */
-    private suspend fun loadHeroItems(@Suppress("UNUSED_PARAMETER") filterType: ContentType): Pair<List<HeroItem>, Boolean>? {
+    private suspend fun loadHeroItems(@Suppress("UNUSED_PARAMETER") filterType: ContentType): HeroPairData? {
         return withContext(Dispatchers.IO) {
             try {
                 Log.d("HomeViewModel", "loadHeroItems: Loading heroes for filterType=$filterType")
-                
-                // First try: Continue Watching (has priority)
+
+                val mergedHeroes = mutableListOf<HeroItem>()
+                val seenIds = mutableSetOf<Pair<Long, String>>() // (id, contentType) to deduplicate
+
+                fun addHero(item: HeroItem?) {
+                    if (item != null && seenIds.add(item.id to item.contentType)) {
+                        mergedHeroes.add(item)
+                    }
+                }
+
+                // === Priority 1: Continue Watching ===
                 val allContinueWatching = watchProgressDao.getContinueWatching(currentProfileId, 10)
                 Log.d("HomeViewModel", "loadHeroItems: profileId=$currentProfileId, allContinueWatching=${allContinueWatching.size}")
-                
+
                 val continueWatching = allContinueWatching.filter { progress ->
                     when (filterType) {
                         ContentType.MOVIE -> progress.contentType == ContentType.MOVIE
                         ContentType.SERIES -> progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE)
                         else -> false
                     }
+                }.filter { progress ->
+                    // Filter out series where the user finished the last episode of the last season
+                    if (progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) &&
+                        progress.season != null && progress.episode != null) {
+                        val seriesId = progress.seriesId ?: progress.contentId
+                        val seasonNumbers = episodeDao.getSeasonNumbers(seriesId)
+                        val maxSeason = seasonNumbers.maxOrNull()
+                        if (maxSeason != null && progress.season == maxSeason) {
+                            val lastEp = episodeDao.getLastEpisodeOfSeason(seriesId, maxSeason)
+                            if (lastEp != null && progress.episode == lastEp.episodeNumber) {
+                                // Last episode of last season — auto-mark as completed
+                                if (!progress.isCompleted) {
+                                    watchProgressDao.upsert(progress.copy(isCompleted = true))
+                                }
+                                false  // Remove from continue watching heroes
+                            } else true
+                        } else true
+                    } else true
                 }
                 Log.d("HomeViewModel", "loadHeroItems: filtered continueWatching=${continueWatching.size}")
-                
-                if (continueWatching.isNotEmpty()) {
-                    // Build hero items from continue watching
-                    val heroItems = continueWatching.take(5).mapNotNull { progress ->
-                        buildHeroItem(progress, filterType)
-                    }
-                    if (heroItems.isNotEmpty()) {
-                        Log.d("HomeViewModel", "loadHeroItems: built heroItems from continue watching=${heroItems.size}")
-                        return@withContext Pair(heroItems, true)
-                    } else {
-                        Log.w("HomeViewModel", "loadHeroItems: Continue watching exists but all items failed to build, falling back to popular carousel")
-                    }
+
+                // Build CW heroes in parallel for faster OMDB/TMDB fetches
+                val cwHeroes = coroutineScope {
+                    continueWatching.take(5).map { progress ->
+                        async { buildHeroItem(progress, filterType) }
+                    }.awaitAll().filterNotNull()
                 }
-                
-                // Second try (Series only): Recently completed episode → suggest next episode
+                cwHeroes.forEach { addHero(it) }
+                Log.d("HomeViewModel", "loadHeroItems: CW heroes added=${cwHeroes.size}")
+
+                // === Priority 2: Next episode after completion (SERIES only) ===
                 if (filterType == ContentType.SERIES) {
                     val recentAll = watchProgressDao.getRecentlyWatched(currentProfileId, 10)
                     val recentCompleted = recentAll.filter {
                         it.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) && it.isCompleted
                     }
                     Log.d("HomeViewModel", "loadHeroItems: recentCompleted series=${recentCompleted.size}")
-                    
+
                     for (progress in recentCompleted) {
+                        if (mergedHeroes.size >= 10) break
                         val seriesId = progress.seriesId ?: continue
                         val season = progress.season ?: continue
                         val episode = progress.episode ?: continue
-                        
-                        // Check if all episodes of this series have been watched
+
+                        if (seenIds.any { it.first == seriesId && it.second == ContentType.SERIES.name }) continue
+
                         val totalEpisodes = episodeDao.getCountBySeries(seriesId)
                         val allSeriesProgress = watchProgressDao.getRecentlyWatched(currentProfileId, 200)
                             .filter { it.seriesId == seriesId && it.isCompleted }
                             .distinctBy { Pair(it.season, it.episode) }
                         if (allSeriesProgress.size >= totalEpisodes && totalEpisodes > 0) {
-                            Log.d("HomeViewModel", "loadHeroItems: Series $seriesId fully watched (${allSeriesProgress.size}/$totalEpisodes completed), skipping")
+                            Log.d("HomeViewModel", "loadHeroItems: Series $seriesId fully watched, skipping")
                             continue
                         }
-                        
+
                         val nextEpisode = episodeDao.getNextEpisode(seriesId, season, episode) ?: continue
                         Log.d("HomeViewModel", "loadHeroItems: found next episode S${nextEpisode.seasonNumber}E${nextEpisode.episodeNumber} for seriesId=$seriesId")
-                        
+
                         var series = seriesDao.getSeriesById(seriesId) ?: continue
-                        
-                        // Enrich series if needed
+
                         if (series.tmdbTrailerKey == null) {
                             try { series = tmdbService.enrichSeriesDetails(series) } catch (_: Exception) {}
                         }
-                        
+
                         val heroItem = buildHeroItemFromSeries(
                             series,
                             resumeMinutes = null,
@@ -600,161 +922,142 @@ class HomeViewModel @Inject constructor(
                             resumeEpisodeSeason = nextEpisode.seasonNumber,
                             resumeEpisodeNumber = nextEpisode.episodeNumber
                         )
-                        return@withContext Pair(listOf(heroItem), true)
+                        addHero(heroItem)
+                        Log.d("HomeViewModel", "loadHeroItems: next-episode hero added for seriesId=$seriesId")
                     }
                 }
-                
-                // Fallback: Use popular carousels content (same source as "Film Popolari" / "Serie Popolari")
-                Log.d("HomeViewModel", "loadHeroItems: No continue watching, using popular carousel for filterType=$filterType")
-                
-                // Check cache first
-                val now = System.currentTimeMillis()
-                val cachedHeroes = when (filterType) {
-                    ContentType.MOVIE -> if (now - contentCache.lastMovieHeroFetchTime < HERO_CACHE_DURATION) contentCache.cachedMovieHeroes else null
-                    ContentType.SERIES -> if (now - contentCache.lastSeriesHeroFetchTime < HERO_CACHE_DURATION) contentCache.cachedSeriesHeroes else null
-                    else -> null
-                }
-                
-                if (cachedHeroes != null && cachedHeroes.isNotEmpty()) {
-                    Log.d("HomeViewModel", "loadHeroItems: Returning cached heroes for $filterType (${cachedHeroes.size} items)")
-                    return@withContext Pair(cachedHeroes, false)
-                }
 
-                val heroItems = when (filterType) {
-                    ContentType.MOVIE -> {
-                        // Get from POPULAR movies carousel (same source as the carousel)
-                        val popularMovies = loadPopularMovies()
-                            ?.filter { movie ->
-                                !ContentFilters.shouldExcludeMovieFromHero(movie.name, movie.category) &&
-                                (movie.backdropUrl != null || movie.posterUrl != null)
-                            } ?: emptyList()
-                        
-                        val candidateMovies = if (popularMovies.isNotEmpty()) {
-                            Log.d("HomeViewModel", "loadHeroItems: Found ${popularMovies.size} popular movies for hero selection")
-                            // Take 5 random from popular carousel
-                            popularMovies.shuffled().take(5)
-                        } else {
-                            // Fallback to random if no popular available yet
-                            Log.d("HomeViewModel", "loadHeroItems: No popular movies found, falling back to fully-enriched")
-                            movieDao.getFullyEnrichedMovies(10).shuffled().take(5)
-                        }
+                // === Priority 3: Taste-based recommendations ===
+                if (mergedHeroes.size < 10) {
+                    try {
+                        val recommendations = recommendationEngine.generateRecommendations(currentProfileId)
+                        Log.d("HomeViewModel", "loadHeroItems: recommendations from engine=${recommendations.size}")
 
-                        val finalHeroes = candidateMovies.map { movie -> 
-                            // Ensure movie is enriched (has ratings and trailer) before building hero
-                            val enrichedMovie = if (movie.omdbImdbRating == null || movie.tmdbTrailerKey == null) {
-                                try {
-                                    // 1. Ensure TMDB details (might be missing if only popular match or no trailer)
-                                    val withTmdb = if (movie.tmdbId == null || movie.tmdbOverview == null || movie.tmdbTrailerKey == null) {
-                                        try {
-                                            tmdbService.enrichMovieDetails(movie)
-                                        } catch (e: Exception) {
-                                            movie
-                                        }
-                                    } else movie
-                                    
-                                    // 2. Fetch OMDB ratings
-                                    val ratings = withTmdb.tmdbImdbId?.let { imdbId ->
-                                        imdbRatingsRepository.getRatingsByImdbId(imdbId)
-                                    } ?: imdbRatingsRepository.getRatingsByTitle(
-                                        withTmdb.tmdbOriginalTitle ?: withTmdb.title,
-                                        withTmdb.year
-                                    )
-                                    
-                                    if (ratings != null) {
-                                        val withRatings = withTmdb.copy(
-                                            omdbImdbRating = ratings.getFormattedImdbRating(),
-                                            omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
-                                            omdbMetacriticScore = ratings.metacriticScore,
-                                            omdbAudienceScore = ratings.audienceScore,
-                                            omdbLastFetchAt = System.currentTimeMillis()
-                                        )
-                                        movieDao.update(withRatings)
-                                        withRatings
-                                    } else withTmdb
-                                } catch (e: Exception) {
-                                    Log.e("HomeViewModel", "Error enrichment movie for hero: ${movie.name}", e)
-                                    movie
-                                }
-                            } else movie
-                            
-                            buildHeroItemFromMovie(enrichedMovie) 
+                        for (rec in recommendations) {
+                            if (mergedHeroes.size >= 10) break
+                            val heroItem = buildHeroItemFromRecommendation(rec, filterType)
+                            addHero(heroItem)
                         }
-                        
-                        if (finalHeroes.isNotEmpty()) {
-                            contentCache.cachedMovieHeroes = finalHeroes
-                            contentCache.lastMovieHeroFetchTime = System.currentTimeMillis()
-                        }
-                        finalHeroes
+                        Log.d("HomeViewModel", "loadHeroItems: recommendation heroes added, total now=${mergedHeroes.size}")
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "loadHeroItems: Error loading recommendation heroes", e)
                     }
-                    ContentType.SERIES -> {
-                        // Get from POPULAR series carousel (same source as the carousel)
-                        val popularSeries = loadPopularSeries()
-                            ?.filter { series ->
-                                !ContentFilters.shouldExcludeSeriesFromHero(series.name, series.category) &&
-                                (series.backdropUrl != null || series.posterUrl != null)
-                            } ?: emptyList()
-                            
-                        val candidateSeries = if (popularSeries.isNotEmpty()) {
-                            Log.d("HomeViewModel", "loadHeroItems: Found ${popularSeries.size} popular series for hero selection")
-                            // Take 5 random from popular carousel
-                            popularSeries.shuffled().take(5)
-                        } else {
-                            // Fallback to random if no popular available yet
-                            Log.d("HomeViewModel", "loadHeroItems: No popular series found, falling back to fully-enriched")
-                            seriesDao.getFullyEnrichedSeries(10).shuffled().take(5)
-                        }
-
-                        val finalHeroes = candidateSeries.map { series -> 
-                             // Ensure series is enriched (has ratings and trailer) before building hero
-                            val enrichedSeries = if (series.omdbImdbRating == null || series.tmdbTrailerKey == null) {
-                                try {
-                                    // 1. Ensure TMDB details
-                                    val withTmdb = if (series.tmdbId == null || series.tmdbOverview == null || series.tmdbTrailerKey == null) {
-                                        try {
-                                            tmdbService.enrichSeriesDetails(series)
-                                        } catch (e: Exception) {
-                                            series
-                                        }
-                                    } else series
-                                    
-                                    // 2. Fetch OMDB ratings
-                                    val ratings = imdbRatingsRepository.getRatingsByTitle(
-                                        withTmdb.tmdbOriginalName ?: withTmdb.title,
-                                        withTmdb.year,
-                                        "series"
-                                    )
-                                    
-                                    if (ratings != null) {
-                                        val withRatings = withTmdb.copy(
-                                            omdbImdbRating = ratings.getFormattedImdbRating(),
-                                            omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
-                                            omdbMetacriticScore = ratings.metacriticScore,
-                                            omdbAudienceScore = ratings.audienceScore,
-                                            omdbLastFetchAt = System.currentTimeMillis()
-                                        )
-                                        seriesDao.update(withRatings)
-                                        withRatings
-                                    } else withTmdb
-                                } catch (e: Exception) {
-                                    Log.e("HomeViewModel", "Error enrichment series for hero: ${series.name}", e)
-                                    series
-                                }
-                            } else series
-
-                            buildHeroItemFromSeries(enrichedSeries) 
-                        }
-                        
-                        if (finalHeroes.isNotEmpty()) {
-                            contentCache.cachedSeriesHeroes = finalHeroes
-                            contentCache.lastSeriesHeroFetchTime = System.currentTimeMillis()
-                        }
-                        finalHeroes
-                    }
-                    else -> emptyList()
                 }
-                Log.d("HomeViewModel", "loadHeroItems: filtered heroItems=${heroItems.size}")
-                
-                Pair(heroItems, false)
+
+                // === Priority 4: Popular/trending fallback ===
+                if (mergedHeroes.size < 5) {
+                    Log.d("HomeViewModel", "loadHeroItems: Merged only ${mergedHeroes.size} heroes, loading popular fallback for filterType=$filterType")
+
+                    val popularHeroes = when (filterType) {
+                        ContentType.MOVIE -> {
+                            val popularMovies = loadPopularMovies()
+                                ?.filter { movie ->
+                                    !ContentFilters.shouldExcludeMovieFromHero(movie.name, movie.category) &&
+                                    (movie.backdropUrl != null || movie.posterUrl != null)
+                                } ?: emptyList()
+
+                            val candidateMovies = if (popularMovies.isNotEmpty()) {
+                                popularMovies.shuffled().take(5)
+                            } else {
+                                movieDao.getFullyEnrichedMovies(10).shuffled().take(5)
+                            }
+
+                            // Build popular movie heroes in parallel
+                            coroutineScope {
+                                candidateMovies.map { movie ->
+                                    async {
+                                        val enrichedMovie = if (movie.omdbImdbRating == null || movie.tmdbTrailerKey == null) {
+                                            try {
+                                                val withTmdb = if (movie.tmdbId == null || movie.tmdbOverview == null || movie.tmdbTrailerKey == null) {
+                                                    try { tmdbService.enrichMovieDetails(movie) } catch (e: Exception) { movie }
+                                                } else movie
+                                                val ratings = withTmdb.tmdbImdbId?.let { imdbId ->
+                                                    imdbRatingsRepository.getRatingsByImdbId(imdbId)
+                                                } ?: imdbRatingsRepository.getRatingsByTitle(
+                                                    withTmdb.tmdbOriginalTitle ?: withTmdb.title,
+                                                    withTmdb.year
+                                                )
+                                                if (ratings != null) {
+                                                    val withRatings = withTmdb.copy(
+                                                        omdbImdbRating = ratings.getFormattedImdbRating(),
+                                                        omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
+                                                        omdbMetacriticScore = ratings.metacriticScore,
+                                                        omdbAudienceScore = ratings.audienceScore,
+                                                        omdbLastFetchAt = System.currentTimeMillis()
+                                                    )
+                                                    movieDao.update(withRatings)
+                                                    withRatings
+                                                } else withTmdb
+                                            } catch (e: Exception) {
+                                                Log.e("HomeViewModel", "Error enrichment movie for hero: ${movie.name}", e)
+                                                movie
+                                            }
+                                        } else movie
+                                        buildHeroItemFromMovie(enrichedMovie)
+                                    }
+                                }.awaitAll()
+                            }
+                        }
+                        ContentType.SERIES -> {
+                            val popularSeries = loadPopularSeries()
+                                ?.filter { series ->
+                                    !ContentFilters.shouldExcludeSeriesFromHero(series.name, series.category) &&
+                                    (series.backdropUrl != null || series.posterUrl != null)
+                                } ?: emptyList()
+
+                            val candidateSeries = if (popularSeries.isNotEmpty()) {
+                                popularSeries.shuffled().take(5)
+                            } else {
+                                seriesDao.getFullyEnrichedSeries(10).shuffled().take(5)
+                            }
+
+                            // Build popular series heroes in parallel
+                            coroutineScope {
+                                candidateSeries.map { series ->
+                                    async {
+                                        val enrichedSeries = if (series.omdbImdbRating == null || series.tmdbTrailerKey == null) {
+                                            try {
+                                                val withTmdb = if (series.tmdbId == null || series.tmdbOverview == null || series.tmdbTrailerKey == null) {
+                                                    try { tmdbService.enrichSeriesDetails(series) } catch (e: Exception) { series }
+                                                } else series
+                                                val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
+                                                    imdbId = withTmdb.tmdbImdbId,
+                                                    originalTitle = withTmdb.title,
+                                                    englishTitle = withTmdb.tmdbOriginalName ?: withTmdb.tmdbName,
+                                                    year = withTmdb.year,
+                                                    type = "series"
+                                                )
+                                                if (ratings != null) {
+                                                    val withRatings = withTmdb.copy(
+                                                        omdbImdbRating = ratings.getFormattedImdbRating(),
+                                                        omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
+                                                        omdbMetacriticScore = ratings.metacriticScore,
+                                                        omdbAudienceScore = ratings.audienceScore,
+                                                        omdbLastFetchAt = System.currentTimeMillis()
+                                                    )
+                                                    seriesDao.update(withRatings)
+                                                    withRatings
+                                                } else withTmdb
+                                            } catch (e: Exception) {
+                                                Log.e("HomeViewModel", "Error enrichment series for hero: ${series.name}", e)
+                                                series
+                                            }
+                                        } else series
+                                        buildHeroItemFromSeries(enrichedSeries)
+                                    }
+                                }.awaitAll()
+                            }
+                        }
+                        else -> emptyList()
+                    }
+
+                    popularHeroes.forEach { addHero(it) }
+                    Log.d("HomeViewModel", "loadHeroItems: popular heroes added, total now=${mergedHeroes.size}")
+                }
+
+                val hasAnyCW = mergedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
+                Log.d("HomeViewModel", "loadHeroItems: final mergedHeroes=${mergedHeroes.size}, hasAnyCW=$hasAnyCW")
+                HeroPairData(mergedHeroes.toList(), hasAnyCW)
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading hero items: ${e.message}", e)
                 null
@@ -817,6 +1120,78 @@ class HomeViewModel @Inject constructor(
     }
     
     /**
+     * Build HeroItem from a RecommendedItem (from RecommendationEngine)
+     * Filters by content type and enriches with ratings/trailer
+     */
+    private suspend fun buildHeroItemFromRecommendation(
+        rec: it.wavestream.app.data.tmdb.RecommendedItem,
+        filterType: ContentType
+    ): HeroItem? {
+        return when {
+            rec.localMovie != null && (filterType == ContentType.MOVIE || filterType != ContentType.SERIES) -> {
+                var movie = rec.localMovie!!
+                if (movie.omdbImdbRating == null || movie.tmdbTrailerKey == null) {
+                    try {
+                        if (movie.tmdbId == null || movie.tmdbOverview == null || movie.tmdbTrailerKey == null) {
+                            try { movie = tmdbService.enrichMovieDetails(movie) } catch (_: Exception) {}
+                        }
+                        val ratings = movie.tmdbImdbId?.let { imdbId ->
+                            imdbRatingsRepository.getRatingsByImdbId(imdbId)
+                        } ?: imdbRatingsRepository.getRatingsByTitle(
+                            movie.tmdbOriginalTitle ?: movie.title,
+                            movie.year
+                        )
+                        if (ratings != null) {
+                            movie = movie.copy(
+                                omdbImdbRating = ratings.getFormattedImdbRating(),
+                                omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
+                                omdbMetacriticScore = ratings.metacriticScore,
+                                omdbAudienceScore = ratings.audienceScore,
+                                omdbLastFetchAt = System.currentTimeMillis()
+                            )
+                            viewModelScope.launch(Dispatchers.IO) { movieDao.update(movie) }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error enriching rec movie: ${movie.name}", e)
+                    }
+                }
+                buildHeroItemFromMovie(movie)
+            }
+            rec.localSeries != null && (filterType == ContentType.SERIES || filterType != ContentType.MOVIE) -> {
+                var series = rec.localSeries!!
+                if (series.omdbImdbRating == null || series.tmdbTrailerKey == null) {
+                    try {
+                        if (series.tmdbId == null || series.tmdbOverview == null || series.tmdbTrailerKey == null) {
+                            try { series = tmdbService.enrichSeriesDetails(series) } catch (_: Exception) {}
+                        }
+                        val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
+                            imdbId = series.tmdbImdbId,
+                            originalTitle = series.title,
+                            englishTitle = series.tmdbOriginalName ?: series.tmdbName,
+                            year = series.year,
+                            type = "series"
+                        )
+                        if (ratings != null) {
+                            series = series.copy(
+                                omdbImdbRating = ratings.getFormattedImdbRating(),
+                                omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
+                                omdbMetacriticScore = ratings.metacriticScore,
+                                omdbAudienceScore = ratings.audienceScore,
+                                omdbLastFetchAt = System.currentTimeMillis()
+                            )
+                            viewModelScope.launch(Dispatchers.IO) { seriesDao.update(series) }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error enriching rec series: ${series.name}", e)
+                    }
+                }
+                buildHeroItemFromSeries(series)
+            }
+            else -> null
+        }
+    }
+    
+    /**
      * Build HeroItem from Movie entity
      * Loads plot from Xtream API if not available from TMDB
      */
@@ -825,6 +1200,16 @@ class HomeViewModel @Inject constructor(
         resumeMinutes: Int? = null,
         progressPercent: Float? = null
     ): HeroItem {
+        var actualResumeMinutes = resumeMinutes
+        var actualProgressPercent = progressPercent
+
+        if (actualResumeMinutes == null) {
+            val progress = watchProgressDao.getProgress(currentProfileId, ContentType.MOVIE, movie.id)
+            if (progress != null && !progress.isCompleted) {
+                actualResumeMinutes = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(1)
+                actualProgressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
+            }
+        }
         // Format duration
         val durationStr = movie.tmdbRuntime?.let { mins ->
             if (mins >= 60) "${mins / 60}h ${mins % 60}m" else "${mins}m"
@@ -862,6 +1247,16 @@ class HomeViewModel @Inject constructor(
                         if (genres.isNullOrEmpty()) genres = info.genre
                     }
                     Log.d("HomeViewModel", "Loaded plot from Xtream for ${movie.name}: ${overview?.take(50)}")
+                    
+                    // Persist Xtream data to entity so it survives process death
+                    if (overview != null || cast != null || genres != null) {
+                        val updatedMovie = movie.copy(
+                            xtreamPlot = overview?.takeIf { it.isNotEmpty() } ?: movie.xtreamPlot,
+                            xtreamCast = cast?.takeIf { it.isNotEmpty() } ?: movie.xtreamCast,
+                            xtreamGenre = genres?.takeIf { it.isNotEmpty() } ?: movie.xtreamGenre
+                        )
+                        viewModelScope.launch(Dispatchers.IO) { movieDao.update(updatedMovie) }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading Xtream VOD info for ${movie.name}", e)
@@ -880,13 +1275,26 @@ class HomeViewModel @Inject constructor(
         if (needsOmdbRefresh) {
             try {
                 Log.d("HomeViewModel", "Fetching missing OMDB ratings for hero movie: ${movie.name}")
-                val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
+                var ratings = imdbRatingsRepository.getRatingsWithFallbacks(
                     imdbId = movie.tmdbImdbId,
                     originalTitle = movie.name,
                     englishTitle = movie.tmdbOriginalTitle ?: movie.tmdbTitle,
                     year = movie.year,
                     type = "movie"
                 )
+
+                // Retry once after short delay if first attempt failed
+                if (ratings == null) {
+                    Log.d("HomeViewModel", "OMDB first attempt failed for ${movie.name}, retrying in 1.5s...")
+                    kotlinx.coroutines.delay(1500)
+                    ratings = imdbRatingsRepository.getRatingsWithFallbacks(
+                        imdbId = movie.tmdbImdbId,
+                        originalTitle = movie.name,
+                        englishTitle = movie.tmdbOriginalTitle ?: movie.tmdbTitle,
+                        year = movie.year,
+                        type = "movie"
+                    )
+                }
 
                 if (ratings != null) {
                     currentMovie = movie.copy(
@@ -965,8 +1373,8 @@ class HomeViewModel @Inject constructor(
             audienceScore = currentMovie.omdbAudienceScore,
             metacriticScore = currentMovie.omdbMetacriticScore,
             tmdbRating = currentMovie.tmdbVoteAverage,
-            resumeMinutes = resumeMinutes,
-            progressPercent = progressPercent,
+            resumeMinutes = actualResumeMinutes,
+            progressPercent = actualProgressPercent,
             year = currentMovie.year,
             duration = durationStr,
             genres = genres,
@@ -993,6 +1401,20 @@ class HomeViewModel @Inject constructor(
         resumeEpisodeSeason: Int? = null,
         resumeEpisodeNumber: Int? = null
     ): HeroItem {
+        var actualResumeMinutes = resumeMinutes
+        var actualProgressPercent = progressPercent
+        var actualResumeEpisodeSeason = resumeEpisodeSeason
+        var actualResumeEpisodeNumber = resumeEpisodeNumber
+
+        if (actualResumeMinutes == null) {
+            val progress = watchProgressDao.getSeriesProgress(currentProfileId, series.id)
+            if (progress != null && !progress.isCompleted) {
+                actualResumeMinutes = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(1)
+                actualProgressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
+                actualResumeEpisodeSeason = progress.season
+                actualResumeEpisodeNumber = progress.episode
+            }
+        }
         // Try to get overview from TMDB first, if null try Xtream API
         var overview = series.tmdbOverview
         var cast = series.tmdbCast
@@ -1025,6 +1447,16 @@ class HomeViewModel @Inject constructor(
                         if (genres.isNullOrEmpty()) genres = info.genre
                     }
                     Log.d("HomeViewModel", "Loaded plot from Xtream for ${series.name}: ${overview?.take(50)}")
+                    
+                    // Persist Xtream data to entity so it survives process death
+                    if (overview != null || cast != null || genres != null) {
+                        val updatedSeries = series.copy(
+                            xtreamPlot = overview?.takeIf { it.isNotEmpty() } ?: series.xtreamPlot,
+                            xtreamCast = cast?.takeIf { it.isNotEmpty() } ?: series.xtreamCast,
+                            xtreamGenre = genres?.takeIf { it.isNotEmpty() } ?: series.xtreamGenre
+                        )
+                        viewModelScope.launch(Dispatchers.IO) { seriesDao.update(updatedSeries) }
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading Xtream series info for ${series.name}", e)
@@ -1043,13 +1475,26 @@ class HomeViewModel @Inject constructor(
         if (needsOmdbRefresh) {
             try {
                 Log.d("HomeViewModel", "Fetching missing OMDB ratings for hero series: ${series.name}")
-                val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
-                    imdbId = null, // Can try to pass external IDs if available, but name lookup works too
+                var ratings = imdbRatingsRepository.getRatingsWithFallbacks(
+                    imdbId = series.tmdbImdbId,
                     originalTitle = series.name,
-                    englishTitle = null, 
+                    englishTitle = series.tmdbOriginalName ?: series.tmdbName,
                     year = series.year,
                     type = "series"
                 )
+
+                // Retry once after short delay if first attempt failed
+                if (ratings == null) {
+                    Log.d("HomeViewModel", "OMDB first attempt failed for ${series.name}, retrying in 1.5s...")
+                    kotlinx.coroutines.delay(1500)
+                    ratings = imdbRatingsRepository.getRatingsWithFallbacks(
+                        imdbId = series.tmdbImdbId,
+                        originalTitle = series.name,
+                        englishTitle = series.tmdbOriginalName ?: series.tmdbName,
+                        year = series.year,
+                        type = "series"
+                    )
+                }
 
                 if (ratings != null) {
                     currentSeries = series.copy(
@@ -1062,8 +1507,9 @@ class HomeViewModel @Inject constructor(
                     
                     // If OMDB didn't provide audience score OR critics score, try RT scraper
                     if (currentSeries.omdbAudienceScore == null || currentSeries.omdbRottenTomatoesScore == null) {
+                        val searchTitle = series.tmdbOriginalName ?: series.tmdbName ?: series.name
                         val rtScores = imdbRatingsRepository.fetchRtScores(
-                            title = series.name,
+                            title = searchTitle,
                             year = currentSeries.year,
                             isMovie = false
                         )
@@ -1087,8 +1533,9 @@ class HomeViewModel @Inject constructor(
             // Logic added: If ratings are fresh but RT scores are missing, try to fetch them specifically
              try {
                 Log.d("HomeViewModel", "Hero series has ratings but missing RT scores: ${series.name}")
+                val searchTitle = series.tmdbOriginalName ?: series.tmdbName ?: series.name
                 val rtScores = imdbRatingsRepository.fetchRtScores(
-                    title = series.name,
+                    title = searchTitle,
                     year = currentSeries.year,
                     isMovie = false
                 )
@@ -1144,8 +1591,8 @@ class HomeViewModel @Inject constructor(
             audienceScore = currentSeries.omdbAudienceScore,
             metacriticScore = currentSeries.omdbMetacriticScore,
             tmdbRating = currentSeries.tmdbVoteAverage,
-            resumeMinutes = resumeMinutes,
-            progressPercent = progressPercent,
+            resumeMinutes = actualResumeMinutes,
+            progressPercent = actualProgressPercent,
             year = currentSeries.year,
             duration = null,  // Series don't have single duration
             genres = genres,
@@ -1157,24 +1604,158 @@ class HomeViewModel @Inject constructor(
                 false
             },
             trailerKey = currentSeries.tmdbTrailerKey,
-            resumeEpisodeSeason = resumeEpisodeSeason,
-            resumeEpisodeNumber = resumeEpisodeNumber,
+            resumeEpisodeSeason = actualResumeEpisodeSeason,
+            resumeEpisodeNumber = actualResumeEpisodeNumber,
             newEpisodeSeason = newEpisodeSeason,
             newEpisodeNumber = newEpisodeNumber
         )
     }
 
+    /**
+     * Dynamically updates the watch progress fields of a list of HeroItems using the database.
+     * This is useful to correct stale progress data when items are loaded from cache or when returning to home.
+     */
+    private suspend fun refreshHeroItemsWatchProgress(heroes: List<HeroItem>): List<HeroItem> {
+        return withContext(Dispatchers.IO) {
+            heroes.map { hero ->
+                if (hero.contentType == ContentType.MOVIE.name) {
+                    val progress = watchProgressDao.getProgress(currentProfileId, ContentType.MOVIE, hero.id)
+                    if (progress != null && !progress.isCompleted) {
+                        val remainingMinutes = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(1)
+                        val progressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
+                        hero.copy(
+                            resumeMinutes = remainingMinutes,
+                            progressPercent = progressPercent
+                        )
+                    } else {
+                        hero.copy(
+                            resumeMinutes = null,
+                            progressPercent = null
+                        )
+                    }
+                } else if (hero.contentType == ContentType.SERIES.name) {
+                    val progress = watchProgressDao.getSeriesProgress(currentProfileId, hero.id)
+                    if (progress != null && !progress.isCompleted) {
+                        val remainingMinutes = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(1)
+                        val progressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
+                        hero.copy(
+                            resumeMinutes = remainingMinutes,
+                            progressPercent = progressPercent,
+                            resumeEpisodeSeason = progress.season,
+                            resumeEpisodeNumber = progress.episode
+                        )
+                    } else {
+                        hero.copy(
+                            resumeMinutes = null,
+                            progressPercent = null,
+                            resumeEpisodeSeason = null,
+                            resumeEpisodeNumber = null
+                        )
+                    }
+                } else {
+                    hero
+                }
+            }
+        }
+    }
     
     /**
-     * Load content for HOME tab (all content)
+     * Load hero items for HOME tab (mix of movies and series from continue watching or popular)
      */
-    private suspend fun loadAllContent(rows: MutableList<CarouselRow>) {
-        // Load in parallel for speed
-        val popularMoviesDeferred = viewModelScope.async { loadPopularMovies() }
-        val popularSeriesDeferred = viewModelScope.async { loadPopularSeries() }
-        val continueWatchingDeferred = viewModelScope.async { loadContinueWatching() }
+    private suspend fun loadHomeHeroItems(): HeroPairData? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val mergedHeroes = mutableListOf<HeroItem>()
+                val seenIds = mutableSetOf<Pair<Long, String>>()
+
+                fun addHero(item: HeroItem?) {
+                    if (item != null && seenIds.add(item.id to item.contentType)) {
+                        mergedHeroes.add(item)
+                    }
+                }
+
+                // Priority 1: Continue Watching (both movies and series)
+                val allContinueWatching = watchProgressDao.getContinueWatching(currentProfileId, 10)
+                // Build CW heroes in parallel for faster OMDB/TMDB fetches
+                val cwHeroes = coroutineScope {
+                    allContinueWatching.take(5).map { progress ->
+                        async { buildHeroItem(progress, progress.contentType) }
+                    }.awaitAll().filterNotNull()
+                }
+                cwHeroes.forEach { addHero(it) }
+                Log.d("HomeViewModel", "loadHomeHeroItems: CW heroes added=${cwHeroes.size}")
+
+                // Priority 2: Taste-based recommendations
+                if (mergedHeroes.size < 10) {
+                    try {
+                        val recommendations = recommendationEngine.generateRecommendations(currentProfileId)
+                        Log.d("HomeViewModel", "loadHomeHeroItems: recommendations from engine=${recommendations.size}")
+
+                        for (rec in recommendations) {
+                            if (mergedHeroes.size >= 10) break
+                            val heroItem = buildHeroItemFromRecommendation(rec, rec.localMovie?.let { ContentType.MOVIE } ?: ContentType.SERIES)
+                            addHero(heroItem)
+                        }
+                        Log.d("HomeViewModel", "loadHomeHeroItems: rec heroes added, total now=${mergedHeroes.size}")
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "loadHomeHeroItems: Error loading recommendation heroes", e)
+                    }
+                }
+
+                // Priority 3: Popular movies + series fallback
+                if (mergedHeroes.size < 5) {
+                    val popularMovies = loadPopularMovies()?.filter { movie ->
+                        !ContentFilters.shouldExcludeMovieFromHero(movie.name, movie.category) &&
+                        (movie.backdropUrl != null || movie.posterUrl != null)
+                    } ?: emptyList()
+
+                    val popularSeries = loadPopularSeries()?.filter { series ->
+                        !ContentFilters.shouldExcludeSeriesFromHero(series.name, series.category) &&
+                        (series.backdropUrl != null || series.posterUrl != null)
+                    } ?: emptyList()
+
+                    val candidates = (popularMovies.shuffled().take(3) + popularSeries.shuffled().take(3)).shuffled()
+                    // Build popular heroes in parallel
+                    coroutineScope {
+                        candidates.map { content ->
+                            async {
+                                when (content) {
+                                    is Movie -> buildHeroItemFromMovie(content)
+                                    is Series -> buildHeroItemFromSeries(content)
+                                    else -> null
+                                }
+                            }
+                        }.awaitAll().filterNotNull()
+                    }.forEach { addHero(it) }
+                    Log.d("HomeViewModel", "loadHomeHeroItems: popular heroes added, total now=${mergedHeroes.size}")
+                }
+
+                val hasAnyCW = mergedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
+                Log.d("HomeViewModel", "loadHomeHeroItems: final mergedHeroes=${mergedHeroes.size}, hasAnyCW=$hasAnyCW")
+                if (mergedHeroes.isNotEmpty()) HeroPairData(mergedHeroes.toList(), hasAnyCW) else null
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loading home heroes", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * Load content for HOME tab (all content mixed, with genre carousels)
+     */
+    private suspend fun loadHomeContent(rows: MutableList<CarouselRow>) {
+        // Load in parallel for speed — use coroutineScope instead of viewModelScope
+        // so tasks survive ViewModel destruction during preload from LoadingActivity
+        coroutineScope {
+        val popularMoviesDeferred = async(Dispatchers.IO) { loadPopularMovies() }
+        val popularSeriesDeferred = async(Dispatchers.IO) { loadPopularSeries() }
+        val continueWatchingDeferred = async(Dispatchers.IO) { loadContinueWatching() }
+        val recommendationsDeferred = async(Dispatchers.IO) { loadRecommendations() }
+        val genreCarouselsDeferred = async(Dispatchers.IO) {
+            recommendationEngine.generateGenreCarousels(currentProfileId)
+        }
         
-        // Add continue watching first
+        // 1. Continue watching first
         continueWatchingDeferred.await()?.let { watchStates ->
             if (watchStates.isNotEmpty()) {
                 rows.add(CarouselRow(
@@ -1184,56 +1765,137 @@ class HomeViewModel @Inject constructor(
             }
         }
         
-        // Add popular movies
+        // 2. Recommendations for you
+        recommendationsDeferred.await()?.let { recs ->
+            if (recs.isNotEmpty()) {
+                rows.add(CarouselRow(
+                    title = "Raccomandati per te",
+                    items = recs
+                ))
+            }
+        }
+        
+        // 3. Film per te
         popularMoviesDeferred.await()?.let { movies ->
             if (movies.isNotEmpty()) {
                 rows.add(CarouselRow(
-                    title = context.getString(R.string.popular_movies),
+                    title = "Film per te",
                     items = movies.map { it.toCarouselItem() }
                 ))
             }
         }
         
-        // Add popular series
+        // 4. Serie TV per te
         popularSeriesDeferred.await()?.let { series ->
             if (series.isNotEmpty()) {
                 rows.add(CarouselRow(
-                    title = context.getString(R.string.popular_series),
+                    title = "Serie TV per te",
                     items = series.map { it.toCarouselItem() }
                 ))
             }
         }
         
-        // Load category rows (filtered)
-        loadFilteredCategoryRows(rows, includeMovies = true, includeSeries = true)
+        // 5. Genre-based carousels (from TMDB discover)
+        val genreCarousels = genreCarouselsDeferred.await()
+        for ((genreId, items) in genreCarousels) {
+            if (items.isNotEmpty()) {
+                rows.add(CarouselRow(
+                    title = getGenreName(genreId),
+                    items = items.mapNotNull { rec -> recommendedToCarouselItem(rec) }
+                ))
+            }
+        }
+        } // coroutineScope
+    }
+    
+    /**
+     * Convert RecommendedItem to CarouselItem
+     */
+    private fun recommendedToCarouselItem(rec: it.wavestream.app.data.tmdb.RecommendedItem): CarouselItem? {
+        val posterUrl = when {
+            rec.localMovie?.posterUrl != null -> rec.localMovie.posterUrl
+            rec.localSeries?.posterUrl != null -> rec.localSeries.posterUrl
+            rec.posterPath != null -> "https://image.tmdb.org/t/p/w342${rec.posterPath}"
+            else -> null
+        }
+        val backdropUrl = rec.backdropPath?.let { "https://image.tmdb.org/t/p/w780$it" }
+        return when {
+            rec.localMovie != null -> CarouselItem(
+                id = rec.localMovie.id,
+                title = rec.title,
+                posterUrl = posterUrl,
+                backdropUrl = backdropUrl,
+                contentType = ContentType.MOVIE.name,
+                year = rec.year,
+                rating = rec.voteAverage,
+                ratingText = rec.voteAverage?.let { "%.1f".format(it) }
+            )
+            rec.localSeries != null -> CarouselItem(
+                id = rec.localSeries.id,
+                title = rec.title,
+                posterUrl = posterUrl,
+                backdropUrl = backdropUrl,
+                contentType = ContentType.SERIES.name,
+                year = rec.year,
+                rating = rec.voteAverage,
+                ratingText = rec.voteAverage?.let { "%.1f".format(it) }
+            )
+            else -> null
+        }
+    }
+    
+    /**
+     * Map TMDB genre ID to Italian name
+     */
+    private fun getGenreName(genreId: Int): String {
+        return when (genreId) {
+            28 -> "Azione"
+            12 -> "Avventura"
+            16 -> "Animazione"
+            35 -> "Commedia"
+            80 -> "Crime"
+            99 -> "Documentario"
+            18 -> "Dramma"
+            10751 -> "Famiglia"
+            14 -> "Fantasy"
+            36 -> "Storia"
+            27 -> "Horror"
+            10402 -> "Musica"
+            9648 -> "Mistero"
+            10749 -> "Romantico"
+            878 -> "Fantascienza"
+            53 -> "Thriller"
+            10752 -> "Guerra"
+            37 -> "Western"
+            10759 -> "Azione & Avventura"
+            10762 -> "Bambini"
+            10763 -> "Notizie"
+            10764 -> "Reality"
+            10765 -> "Sci-Fi & Fantasy"
+            10766 -> "Soap"
+            10767 -> "Talk"
+            10768 -> "Guerra & Politica"
+            else -> "Genere"
+        }
     }
     
     /**
      * Load content for MOVIES tab only
+     * 6 carousels: Continua a guardare, Visti di recente, Film popolari,
+     * Aggiunti di recente, Raccomandati, Categorie
      */
     private suspend fun loadMoviesContent(rows: MutableList<CarouselRow>) {
-        // Continue watching movies only
-        val watchStates = loadContinueWatching()
-        watchStates?.filter { it.contentType == ContentType.MOVIE }?.let { movieWatches ->
-            if (movieWatches.isNotEmpty()) {
-                rows.add(CarouselRow(
-                    title = "Continua a guardare",
-                    items = movieWatches.mapNotNull { it.toCarouselItem() }
-                ))
-            }
+        // 1. Continue watching movies
+        loadContinueWatchingForTab(ContentType.MOVIE)?.let {
+            if (it.isNotEmpty()) rows.add(CarouselRow(title = "Continua a guardare", items = it))
         }
         
-        // Recently watched movies (full watch history, including completed)
-        loadRecentlyWatched(ContentType.MOVIE)?.let { recentMovies ->
-            if (recentMovies.isNotEmpty()) {
-                rows.add(CarouselRow(
-                    title = "Visti di recente",
-                    items = recentMovies
-                ))
-            }
+        // 2. Recently watched movies (completed)
+        loadRecentlyWatched(ContentType.MOVIE)?.let {
+            if (it.isNotEmpty()) rows.add(CarouselRow(title = "Visti di recente", items = it))
         }
         
-        // Popular movies
+        // 3. Popular movies (trending → fallback getPopularMovies)
         loadPopularMovies()?.let { movies ->
             if (movies.isNotEmpty()) {
                 rows.add(CarouselRow(
@@ -1243,7 +1905,7 @@ class HomeViewModel @Inject constructor(
             }
         }
         
-        // Recently added movies (filtered categories)
+        // 4. Recently added movies
         loadRecentlyAddedMovies()?.let { movies ->
             if (movies.isNotEmpty()) {
                 rows.add(CarouselRow(
@@ -1253,11 +1915,20 @@ class HomeViewModel @Inject constructor(
             }
         }
         
-        // Movie category rows
+        // 5. Recommendations (movie-only)
+        loadRecommendations()?.let { recs ->
+            val movieRecs = recs.filter { it.contentType == ContentType.MOVIE.name }
+            if (movieRecs.isNotEmpty()) {
+                rows.add(CarouselRow(
+                    title = "Raccomandati per te",
+                    items = movieRecs
+                ))
+            }
+        }
+        
+        // 6. Random category carousels (5-6 categories)
         loadFilteredCategoryRows(rows, includeMovies = true, includeSeries = false)
     }
-    
-
     
     /**
      * Load content for HISTORY tab
@@ -1355,30 +2026,39 @@ class HomeViewModel @Inject constructor(
 
     /**
      * Load content for SERIES tab only
+     * 8 carousels: Continua a guardare, Prossimo episodio, Visti di recente,
+     * Nuovi episodi, Serie popolari, Aggiunte di recente, Raccomandati, Categorie
      */
     private suspend fun loadSeriesContent(rows: MutableList<CarouselRow>) {
-        // Continue watching series only
-        val watchStates = loadContinueWatching()
-        watchStates?.filter { it.contentType == ContentType.SERIES }?.let { seriesWatches ->
-            if (seriesWatches.isNotEmpty()) {
-                rows.add(CarouselRow(
-                    title = "Continua a guardare",
-                    items = seriesWatches.mapNotNull { it.toCarouselItem() }
-                ))
-            }
+        Log.d("HomeViewModel", "loadSeriesContent: START")
+        
+        val allSeries = withContext(Dispatchers.IO) { seriesDao.getAllSeriesList() }
+        Log.d("HomeViewModel", "loadSeriesContent: total series in DB = ${allSeries.size}")
+        if (allSeries.isNotEmpty()) {
+            Log.d("HomeViewModel", "loadSeriesContent: sample series = ${allSeries.take(3).map { "${it.name} (logoUrl=${it.logoUrl != null}, tmdbPosterPath=${it.tmdbPosterPath != null})" }}")
         }
         
-        // Recently watched series (full watch history, including completed)
-        loadRecentlyWatched(ContentType.SERIES)?.let { recentSeries ->
-            if (recentSeries.isNotEmpty()) {
-                rows.add(CarouselRow(
-                    title = "Visti di recente",
-                    items = recentSeries
-                ))
-            }
+        // 1. Continue watching series (dedupe per seriesId, max 10)
+        loadContinueWatchingForTab(ContentType.SERIES)?.let {
+            if (it.isNotEmpty()) rows.add(CarouselRow(title = "Continua a guardare", items = it))
         }
         
-        // Popular series
+        // 2. Next unwatched episode per series (max 8)
+        loadNextEpisodesForTab(limit = 8)?.let {
+            if (it.isNotEmpty()) rows.add(CarouselRow(title = "Prossimo episodio", items = it))
+        }
+        
+        // 3. Recently watched series (completed)
+        loadRecentlyWatched(ContentType.SERIES)?.let {
+            if (it.isNotEmpty()) rows.add(CarouselRow(title = "Visti di recente", items = it))
+        }
+        
+        // 4. New episodes this week (latestEpisodeAddedAt < 7 days)
+        loadNewEpisodesThisWeek(limit = 10)?.let {
+            if (it.isNotEmpty()) rows.add(CarouselRow(title = "Nuovi episodi", items = it))
+        }
+        
+        // 5. Popular series (trending → fallback getPopularSeries)
         loadPopularSeries()?.let { series ->
             if (series.isNotEmpty()) {
                 rows.add(CarouselRow(
@@ -1388,7 +2068,7 @@ class HomeViewModel @Inject constructor(
             }
         }
         
-        // Recently added series (filtered categories)
+        // 6. Recently added series
         loadRecentlyAddedSeries()?.let { series ->
             if (series.isNotEmpty()) {
                 rows.add(CarouselRow(
@@ -1398,8 +2078,21 @@ class HomeViewModel @Inject constructor(
             }
         }
         
-        // Series category rows
+        // 7. Recommendations (series-only)
+        loadRecommendations()?.let { recs ->
+            val seriesRecs = recs.filter { it.contentType == ContentType.SERIES.name }
+            if (seriesRecs.isNotEmpty()) {
+                rows.add(CarouselRow(
+                    title = "Raccomandati per te",
+                    items = seriesRecs
+                ))
+            }
+        }
+        
+        // 8. Random category carousels (5-6 categories)
         loadFilteredCategoryRows(rows, includeMovies = false, includeSeries = true)
+        
+        Log.d("HomeViewModel", "loadSeriesContent: END, rows=${rows.size}")
     }
     
     /**
@@ -1694,9 +2387,15 @@ class HomeViewModel @Inject constructor(
      * Load popular movies from "Film Popolari" trending category
      * Category is populated weekly by LoadingActivity
      * Results are cached for 15 minutes to avoid reshuffling on every resume
+     *
+     * Fallback chain: trending category → TMDB refresh → getPopularMovies(20)
+     */
+    /**
+     * Load popular movies from "Film Popolari" trending category
+     * Category is populated weekly by LoadingActivity
+     * Results are cached for 15 minutes to avoid reshuffling on every resume
      */
     private suspend fun loadPopularMovies(): List<Movie>? {
-        // Return cached data if still fresh
         val cached = contentCache.popularMoviesCache
         if (cached != null && (System.currentTimeMillis() - contentCache.popularMoviesCacheTime) < POPULAR_CACHE_DURATION) {
             Log.d("HomeViewModel", "Using cached popular movies (${cached.size} items)")
@@ -1705,30 +2404,26 @@ class HomeViewModel @Inject constructor(
         
         return withContext(Dispatchers.IO) {
             try {
-                // Load from trending category (populated weekly by LoadingActivity)
-                val movies = movieDao.getByTrendingCategory("Film Popolari")
+                var movies = movieDao.getByTrendingCategory("Film Popolari")
                 
                 if (movies.isEmpty()) {
                     Log.w("HomeViewModel", "No trending movies found, triggering TMDB refresh...")
                     try {
                         tmdbService.populateTrendingMovies()
-                        val refreshedMovies = movieDao.getByTrendingCategory("Film Popolari")
-                        if (refreshedMovies.isNotEmpty()) {
-                            val result = refreshedMovies.shuffled().take(10)
-                            contentCache.popularMoviesCache = result
-                            contentCache.popularMoviesCacheTime = System.currentTimeMillis()
-                            return@withContext result
-                        }
+                        movies = movieDao.getByTrendingCategory("Film Popolari")
                     } catch (e: Exception) {
                         Log.e("HomeViewModel", "Error re-populating trending movies", e)
                     }
-                    return@withContext emptyList()
                 }
                 
-                val result = movies.shuffled().take(10)
-                Log.d("HomeViewModel", "Loaded ${result.size} trending movies from category (fresh)")
+                if (movies.isEmpty()) {
+                    Log.d("HomeViewModel", "Trending movies still 0, fallback: random from DB")
+                    movies = movieDao.getRandomMoviesAny(10)
+                }
                 
-                // Cache the shuffled result
+                if (movies.isEmpty()) return@withContext null
+                
+                val result = movies.shuffled().take(10)
                 contentCache.popularMoviesCache = result
                 contentCache.popularMoviesCacheTime = System.currentTimeMillis()
                 result
@@ -1745,7 +2440,6 @@ class HomeViewModel @Inject constructor(
      * Results are cached for 15 minutes to avoid reshuffling on every resume
      */
     private suspend fun loadPopularSeries(): List<Series>? {
-        // Return cached data if still fresh
         val cached = contentCache.popularSeriesCache
         if (cached != null && (System.currentTimeMillis() - contentCache.popularSeriesCacheTime) < POPULAR_CACHE_DURATION) {
             Log.d("HomeViewModel", "Using cached popular series (${cached.size} items)")
@@ -1754,30 +2448,26 @@ class HomeViewModel @Inject constructor(
         
         return withContext(Dispatchers.IO) {
             try {
-                // Load from trending category (populated weekly by LoadingActivity)
-                val series = seriesDao.getByTrendingCategory("Serie Popolari")
+                var series = seriesDao.getByTrendingCategory("Serie Popolari")
                 
                 if (series.isEmpty()) {
                     Log.w("HomeViewModel", "No trending series found, triggering TMDB refresh...")
                     try {
                         tmdbService.populateTrendingSeries()
-                        val refreshedSeries = seriesDao.getByTrendingCategory("Serie Popolari")
-                        if (refreshedSeries.isNotEmpty()) {
-                            val result = refreshedSeries.shuffled().take(10)
-                            contentCache.popularSeriesCache = result
-                            contentCache.popularSeriesCacheTime = System.currentTimeMillis()
-                            return@withContext result
-                        }
+                        series = seriesDao.getByTrendingCategory("Serie Popolari")
                     } catch (e: Exception) {
                         Log.e("HomeViewModel", "Error re-populating trending series", e)
                     }
-                    return@withContext emptyList()
                 }
                 
-                val result = series.shuffled().take(10)
-                Log.d("HomeViewModel", "Loaded ${result.size} trending series from category (fresh)")
+                if (series.isEmpty()) {
+                    Log.d("HomeViewModel", "Trending series still 0, fallback: random from DB")
+                    series = seriesDao.getRandomSeriesAny(10)
+                }
                 
-                // Cache the shuffled result
+                if (series.isEmpty()) return@withContext null
+                
+                val result = series.shuffled().take(10)
                 contentCache.popularSeriesCache = result
                 contentCache.popularSeriesCacheTime = System.currentTimeMillis()
                 result
@@ -1844,9 +2534,255 @@ class HomeViewModel @Inject constructor(
                         "MOVIE_${data.contentId}"  // Movies by content ID
                     }
                 }
+                // Filter out series where the user finished the last episode of the last season
+                .filter { data ->
+                    if (data.contentType == ContentType.SERIES && data.seriesId != null && data.seasonNumber != null && data.episodeNumber != null) {
+                        val seasonNumbers = episodeDao.getSeasonNumbers(data.seriesId)
+                        val maxSeason = seasonNumbers.maxOrNull()
+                        if (maxSeason != null && data.seasonNumber == maxSeason) {
+                            val lastEp = episodeDao.getLastEpisodeOfSeason(data.seriesId, maxSeason)
+                            if (lastEp != null && data.episodeNumber == lastEp.episodeNumber) {
+                                // Last episode of last season — treat as completed
+                                // Auto-mark as completed in background
+                                val progress = watchProgressDao.getProgress(currentProfileId, ContentType.EPISODE, data.contentId)
+                                if (progress != null && !progress.isCompleted) {
+                                    watchProgressDao.upsert(progress.copy(isCompleted = true))
+                                }
+                                false  // Remove from continue watching
+                            } else true
+                        } else true
+                    } else true
+                }
                 .take(10)  // Limit to 10 items after deduplication
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading continue watching: ${e.message}")
+                null
+            }
+        }
+    }
+
+    /**
+     * Load continue watching items filtered by content type (MOVIE or SERIES)
+     * Deduplicates series by seriesId, movies by contentId
+     */
+    private suspend fun loadContinueWatchingForTab(filterType: ContentType, limit: Int = 10): List<CarouselItem>? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val progressList = watchProgressDao.getContinueWatching(currentProfileId, 30)
+                progressList
+                    .filter { progress ->
+                        when (filterType) {
+                            ContentType.MOVIE -> progress.contentType == ContentType.MOVIE
+                            ContentType.SERIES -> progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE)
+                            else -> false
+                        }
+                    }
+                    // Filter out series where the user finished the last episode of the last season
+                    .filter { progress ->
+                        if (progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) &&
+                            progress.season != null && progress.episode != null) {
+                            val seriesId = progress.seriesId ?: progress.contentId
+                            val seasonNumbers = episodeDao.getSeasonNumbers(seriesId)
+                            val maxSeason = seasonNumbers.maxOrNull()
+                            if (maxSeason != null && progress.season == maxSeason) {
+                                val lastEp = episodeDao.getLastEpisodeOfSeason(seriesId, maxSeason)
+                                if (lastEp != null && progress.episode == lastEp.episodeNumber) {
+                                    // Last episode of last season — auto-mark as completed
+                                    if (!progress.isCompleted) {
+                                        watchProgressDao.upsert(progress.copy(isCompleted = true))
+                                    }
+                                    false  // Remove from continue watching
+                                } else true
+                            } else true
+                        } else true
+                    }
+                    .take(limit)
+                    .mapNotNull { progress ->
+                        when (progress.contentType) {
+                            ContentType.MOVIE -> {
+                                val movie = movieDao.getMovieById(progress.contentId) ?: return@mapNotNull null
+                                val progressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
+                                val remaining = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(0)
+                                CarouselItem(
+                                    id = movie.id,
+                                    title = movie.title,
+                                    posterUrl = movie.posterUrl,
+                                    backdropUrl = movie.backdropUrl,
+                                    contentType = ContentType.MOVIE.name,
+                                    progressPercent = progressPercent.coerceIn(0f, 1f),
+                                    remainingMinutes = remaining,
+                                    rating = movie.rating
+                                )
+                            }
+                            ContentType.SERIES, ContentType.EPISODE -> {
+                                val seriesId = progress.seriesId ?: progress.contentId
+                                val series = seriesDao.getSeriesById(seriesId) ?: return@mapNotNull null
+                                val progressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
+                                val remaining = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(0)
+                                val episodeLabel = if (progress.season != null && progress.episode != null) {
+                                    "S${progress.season} E${progress.episode}"
+                                } else null
+                                CarouselItem(
+                                    id = series.id,
+                                    title = series.title,
+                                    posterUrl = series.posterUrl,
+                                    backdropUrl = series.backdropUrl,
+                                    contentType = ContentType.SERIES.name,
+                                    progressPercent = progressPercent.coerceIn(0f, 1f),
+                                    remainingMinutes = remaining,
+                                    episodeLabel = episodeLabel,
+                                    rating = series.rating
+                                )
+                            }
+                            else -> null
+                        }
+                    }
+                    .distinctBy { it.id }
+                    .ifEmpty { null }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loading continue watching for tab: ${e.message}")
+                null
+            }
+        }
+    }
+
+    /**
+     * Load next unwatched episodes for series (SERIES tab only)
+     * For each series with at least one completed episode, find the next unwatched episode
+     */
+    private suspend fun loadNextEpisodesForTab(limit: Int = 8): List<CarouselItem>? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val recentCompleted = watchProgressDao.getRecentlyWatched(currentProfileId, 200)
+                    .filter { it.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) && it.isCompleted }
+                    .distinctBy { it.seriesId }
+
+                val items = mutableListOf<CarouselItem>()
+                for (progress in recentCompleted) {
+                    if (items.size >= limit) break
+                    val seriesId = progress.seriesId ?: continue
+                    val season = progress.season ?: continue
+                    val episode = progress.episode ?: continue
+
+                    // Check if all episodes are watched
+                    val totalEpisodes = episodeDao.getCountBySeries(seriesId)
+                    val allSeriesProgress = watchProgressDao.getRecentlyWatched(currentProfileId, 200)
+                        .filter { it.seriesId == seriesId && it.isCompleted }
+                        .distinctBy { Pair(it.season, it.episode) }
+                    if (allSeriesProgress.size >= totalEpisodes && totalEpisodes > 0) continue
+
+                    val nextEpisode = episodeDao.getNextEpisode(seriesId, season, episode) ?: continue
+                    val series = seriesDao.getSeriesById(seriesId) ?: continue
+
+                    // Skip if already in items
+                    if (items.any { it.id == series.id }) continue
+
+                    val label = "S${nextEpisode.seasonNumber} E${nextEpisode.episodeNumber}"
+                    items.add(CarouselItem(
+                        id = series.id,
+                        title = series.title,
+                        posterUrl = series.posterUrl,
+                        backdropUrl = series.backdropUrl,
+                        contentType = ContentType.SERIES.name,
+                        nextEpisodeLabel = label,
+                        seasonCount = series.tmdbNumberOfSeasons ?: series.seasonCount.takeIf { it > 0 },
+                        rating = series.rating
+                    ))
+                }
+                items.ifEmpty { null }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loading next episodes", e)
+                null
+            }
+        }
+    }
+
+    /**
+     * Load series with new episodes added this week (SERIES tab only)
+     */
+    private suspend fun loadNewEpisodesThisWeek(limit: Int = 10): List<CarouselItem>? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val oneWeekAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+                val series = seriesDao.getRecentlyAddedSeries(50)
+                    .filter { s ->
+                        val isRecent = s.latestEpisodeAddedAt != null && s.latestEpisodeAddedAt > oneWeekAgo
+                        isRecent && !ContentFilters.isHiddenSeriesName(s.name)
+                    }
+                    .take(limit)
+
+                series.map { s ->
+                    val epLabel = if (s.latestEpisodeSeason != null && s.latestEpisodeNumber != null) {
+                        "S${s.latestEpisodeSeason} E${s.latestEpisodeNumber}"
+                    } else null
+
+                    CarouselItem(
+                        id = s.id,
+                        title = s.title,
+                        posterUrl = s.posterUrl,
+                        backdropUrl = s.backdropUrl,
+                        contentType = ContentType.SERIES.name,
+                        nextEpisodeLabel = epLabel,
+                        newEpisodeBadge = true,
+                        seasonCount = s.tmdbNumberOfSeasons ?: s.seasonCount.takeIf { it > 0 },
+                        rating = s.rating
+                    )
+                }.ifEmpty { null }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loading new episodes this week", e)
+                null
+            }
+        }
+    }
+
+    /**
+     * Load recommendations based on user's taste profile
+     */
+    private var cachedRecommendations: List<CarouselItem>? = null
+
+    private suspend fun loadRecommendations(): List<CarouselItem>? {
+        cachedRecommendations?.let { return it }
+
+        return withContext(Dispatchers.IO) {
+            try {
+                val recommended = recommendationEngine.generateRecommendations(currentProfileId)
+                if (recommended.isEmpty()) return@withContext null
+
+                val items = recommended.mapNotNull { rec ->
+                    val posterUrl = when {
+                        rec.localMovie?.posterUrl != null -> rec.localMovie.posterUrl
+                        rec.localSeries?.posterUrl != null -> rec.localSeries.posterUrl
+                        rec.posterPath != null -> "https://image.tmdb.org/t/p/w342${rec.posterPath}"
+                        else -> null
+                    }
+                    val backdropUrl = rec.backdropPath?.let { "https://image.tmdb.org/t/p/w780$it" }
+                    when {
+                        rec.localMovie != null -> CarouselItem(
+                            id = rec.localMovie.id,
+                            title = rec.title,
+                            posterUrl = posterUrl,
+                            backdropUrl = backdropUrl,
+                            contentType = ContentType.MOVIE.name,
+                            year = rec.year,
+                            rating = rec.voteAverage
+                        )
+                        rec.localSeries != null -> CarouselItem(
+                            id = rec.localSeries.id,
+                            title = rec.title,
+                            posterUrl = posterUrl,
+                            backdropUrl = backdropUrl,
+                            contentType = ContentType.SERIES.name,
+                            year = rec.year,
+                            rating = rec.voteAverage
+                        )
+                        else -> null
+                    }
+                }
+                if (items.isEmpty()) return@withContext null
+                cachedRecommendations = items
+                items
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loading recommendations", e)
                 null
             }
         }
@@ -1862,8 +2798,8 @@ class HomeViewModel @Inject constructor(
                 val watchHistory = watchProgressDao.getRecentlyWatched(currentProfileId, 50)
                 Log.d("HomeViewModel", "Recently watched items found: ${watchHistory.size}")
                 
-                // 8 minutes in milliseconds (threshold for "completed" excluding credits)
-                val completedThresholdMs = 8 * 60 * 1000L
+                // 6 minutes in milliseconds (threshold for "completed" excluding credits)
+                val completedThresholdMs = 6 * 60 * 1000L
 
                 watchHistory
                     .filter { progress ->
@@ -2067,11 +3003,14 @@ class HomeViewModel @Inject constructor(
                     // Only shuffle once at first load
                     if (contentCache.cachedShuffledSeriesCategories == null) {
                         val allSeriesCategories = seriesDao.getCategoriesList()
+                        Log.d("CarouselDebug", "All series categories: ${allSeriesCategories.size} -> ${allSeriesCategories.take(10)}")
                         val filteredCategories = ContentFilters.filterSeriesCategories(allSeriesCategories)
+                        Log.d("CarouselDebug", "Filtered series categories: ${filteredCategories.size} -> ${filteredCategories.take(10)}")
                         contentCache.cachedShuffledSeriesCategories = filteredCategories.shuffled()
                     }
                     
                     val categoriesToShow = contentCache.cachedShuffledSeriesCategories!!.take(8)
+                    Log.d("CarouselDebug", "Series categories to show: ${categoriesToShow.size} -> $categoriesToShow")
                     
                     for (category in categoriesToShow) {
                         val series = contentCache.getSeriesByCategory(category)
@@ -2079,6 +3018,7 @@ class HomeViewModel @Inject constructor(
                                 contentCache.putSeriesByCategory(category, it)
                             }
                         
+                        Log.d("CarouselDebug", "Series category '$category': ${series.size} series")
                         if (series.isNotEmpty()) {
                             rows.add(CarouselRow(
                                 title = ContentFilters.cleanCategoryTitle(category),
@@ -2439,7 +3379,8 @@ fun loadCategoryContentAutoDetect(category: String) {
         backdropUrl = backdropUrl,
         contentType = "MOVIE",
         year = year ?: tmdbReleaseDate?.take(4)?.toIntOrNull(),
-        rating = rating
+        rating = rating,
+        ratingText = rating?.let { "%.1f".format(it) }
     )
     
     private fun Series.toCarouselItem() = CarouselItem(
@@ -2449,7 +3390,8 @@ fun loadCategoryContentAutoDetect(category: String) {
         backdropUrl = backdropUrl,
         contentType = "SERIES",
         year = year,
-        rating = rating
+        rating = rating,
+        ratingText = rating?.let { "%.1f".format(it) }
     )
     
     private fun Channel.toCarouselItem() = CarouselItem(
@@ -2479,19 +3421,23 @@ fun loadCategoryContentAutoDetect(category: String) {
         )
     }
 
-    private fun HeroItem.toCarouselItem() = CarouselItem(
-        id = id,
-        title = title,
-        posterUrl = posterUrl,
-        backdropUrl = backdropUrl,
-        contentType = contentType,
-        year = year,
-        rating = tmdbRating ?: imdbRating?.toFloatOrNull(),
-        // Continue Watching fields
-        progressPercent = progressPercent,
-        remainingMinutes = resumeMinutes,
-        episodeLabel = null
-    )
+    private fun HeroItem.toCarouselItem(): CarouselItem {
+        val heroRating = tmdbRating ?: imdbRating?.toFloatOrNull()
+        return CarouselItem(
+            id = id,
+            title = title,
+            posterUrl = posterUrl,
+            backdropUrl = backdropUrl,
+            contentType = contentType,
+            year = year,
+            rating = heroRating,
+            ratingText = heroRating?.let { "%.1f".format(it) },
+            // Continue Watching fields
+            progressPercent = progressPercent,
+            remainingMinutes = resumeMinutes,
+            episodeLabel = null
+        )
+    }
 
     fun toggleHeroFavorite(hero: HeroItem) {
         viewModelScope.launch {
@@ -2519,10 +3465,10 @@ fun loadCategoryContentAutoDetect(category: String) {
             // Also update the cache so switching tabs preserves the favorite state
             val heroContentType = if (hero.contentType == "MOVIE") HomeContentType.MOVIES else HomeContentType.SERIES
             cachedHeroItems[heroContentType]?.let { cached ->
-                val updatedCachedHeroes = cached.first.map { 
+                val updatedCachedHeroes = cached.heroes.map { 
                     if (it.id == hero.id) it.copy(isFavorite = isNowFavorite) else it 
                 }
-                cachedHeroItems[heroContentType] = Pair(updatedCachedHeroes, cached.second)
+                cachedHeroItems[heroContentType] = HeroPairData(updatedCachedHeroes, cached.isContinueWatching)
             }
         }
     }

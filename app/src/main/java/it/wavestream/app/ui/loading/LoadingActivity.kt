@@ -5,6 +5,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import it.wavestream.app.ui.theme.WaveStreamColors
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import android.util.Log
@@ -12,6 +18,7 @@ import it.wavestream.app.R
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.PlaylistDao
 import it.wavestream.app.data.database.dao.SeriesDao
+import it.wavestream.app.data.database.dao.ProfileDao
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.data.repository.EpgRepository
 import it.wavestream.app.data.repository.ImdbRatingsRepository
@@ -30,6 +37,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
+import it.wavestream.app.di.ApplicationScope
+import kotlinx.coroutines.CoroutineScope
+import androidx.activity.viewModels
+import it.wavestream.app.ui.home.HomeViewModel
+import it.wavestream.app.ui.home.HomeContentType
+import it.wavestream.app.data.cache.ContentCache
 
 /**
  * Loading Activity - Shows sync progress after setup
@@ -48,6 +61,11 @@ class LoadingActivity : ComponentActivity() {
     @Inject lateinit var tmdbService: TMDBService
     @Inject lateinit var imdbRatingsRepository: ImdbRatingsRepository
     @Inject lateinit var watchProgressDao: it.wavestream.app.data.database.dao.WatchProgressDao
+    @Inject lateinit var profileDao: ProfileDao
+    @Inject @ApplicationScope lateinit var applicationScope: CoroutineScope
+    @Inject lateinit var contentCache: ContentCache
+    
+    private val homeViewModel: HomeViewModel by viewModels()
 
     
     private var profileId: Long = 1L
@@ -57,6 +75,30 @@ class LoadingActivity : ComponentActivity() {
         
         profileId = intent.getLongExtra("profile_id", 1L)
         val forceRefresh = intent.getBooleanExtra("force_refresh", false)
+        
+        // Clear cache only if stale (>24h) or force refresh — reuse fresh data when possible
+        val homeRowsTime = contentCache.getHomeSessionDataTimestamp("rows_HOME")
+        val cacheAge = if (homeRowsTime != null) System.currentTimeMillis() - homeRowsTime else Long.MAX_VALUE
+        val staleThreshold = 10 * 24 * 60 * 60 * 1000L // 10 days - match CAROUSEL_CACHE_DURATION
+        if (forceRefresh || cacheAge > staleThreshold) {
+            contentCache.clearHomeSessionData()
+            Log.d("LoadingActivity", "Cache cleared (forceRefresh=$forceRefresh, age=${cacheAge / 3600_000}h)")
+        } else {
+            Log.d("LoadingActivity", "Cache fresh (age=${cacheAge / 60_000}m), reusing")
+        }
+        
+        // Trigger lazy initialization to start preloading HomeViewModel content in background
+        val triggerVm = homeViewModel
+        Log.d("LoadingActivity", "Preloading HomeViewModel triggered: $triggerVm")
+        
+        if (!forceRefresh) {
+            // Preload all 3 tabs into ContentCache using applicationScope.
+            // These coroutines survive Activity transitions (unlike ViewModel-scoped ones).
+            // ContentCache is a @Singleton, so data persists to MainActivity's ViewModel.
+            applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
+            applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
+            applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
+        }
         
         setContent {
             WaveStreamTheme {
@@ -78,6 +120,22 @@ class LoadingActivity : ComponentActivity() {
             ) 
         }
         
+        var profileLoaded by remember { mutableStateOf(false) }
+        var profileName by remember { mutableStateOf("") }
+        var avatarIndex by remember { mutableIntStateOf(0) }
+        var avatarColor by remember { mutableStateOf("#8B5CF6") }
+        
+        LaunchedEffect(profileId) {
+            withContext(Dispatchers.IO) {
+                profileDao.getProfileById(profileId)?.let { profile ->
+                    profileName = profile.name
+                    avatarIndex = profile.avatarIndex
+                    avatarColor = profile.avatarColor
+                }
+                profileLoaded = true
+            }
+        }
+        
         // Start loading on first composition
         LaunchedEffect(Unit) {
             startLoading(forceRefresh) { state ->
@@ -85,12 +143,23 @@ class LoadingActivity : ComponentActivity() {
             }
         }
         
-        LoadingScreen(
-            statusText = loadingState.status,
-            detailText = loadingState.detail,
-            progress = loadingState.progress,
-            showProgressBar = loadingState.showProgress
-        )
+        if (!profileLoaded) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(WaveStreamColors.BackgroundDark)
+            )
+        } else {
+            LoadingScreen(
+                profileName = profileName,
+                avatarIndex = avatarIndex,
+                avatarColorHex = avatarColor,
+                statusText = loadingState.status,
+                detailText = loadingState.detail,
+                progress = loadingState.progress,
+                showProgressBar = loadingState.showProgress
+            )
+        }
     }
     
     private fun startLoading(
@@ -106,66 +175,131 @@ class LoadingActivity : ComponentActivity() {
                     return@launch
                 }
                 
-                // Go to Main immediately when using cache
+                // Phase 1: Playlist sync (background for cached, foreground for fresh)
                 if (!forceRefresh) {
-                    Log.d("LoadingActivity", "Using cache, proceeding to Main immediately")
+                    Log.d("LoadingActivity", "Using cache, background playlist refresh")
                     
-                    // Start EPG loading in background (fire-and-forget, don't block startup)
-                    lifecycleScope.launch {
+                    // Background playlist refresh (non-blocking)
+                    applicationScope.launch(Dispatchers.IO) {
                         try {
+                            val autoUpdateEnabled = userPreferences.getPlaylistAutoUpdate()
+                            val updateIntervalHours = userPreferences.getPlaylistUpdateIntervalHours()
+                            val intervalMs = updateIntervalHours * 60 * 60 * 1000L
+                            val now = System.currentTimeMillis()
+                            
+                            playlists.forEach { playlist ->
+                                val timeSinceUpdate = now - playlist.lastUpdated
+                                if (autoUpdateEnabled && timeSinceUpdate > intervalMs) {
+                                    Log.d("LoadingActivity", "Background refresh needed for: ${playlist.name}")
+                                    try {
+                                        playlistRepository.refreshPlaylist(playlist.id)
+                                    } catch (e: Exception) {
+                                        Log.e("LoadingActivity", "Background refresh failed: ${playlist.name}", e)
+                                    }
+                                }
+                            }
+                            
                             loadEpgIfNeeded(playlists, forceRefresh = false) { _ -> }
                         } catch (e: Exception) {
-                            Log.e("LoadingActivity", "Background EPG load failed", e)
+                            Log.e("LoadingActivity", "Background refresh error", e)
+                        }
+                    }
+                } else {
+                    // Force refresh: sync playlist in foreground
+                    val autoUpdateEnabled = userPreferences.getPlaylistAutoUpdate()
+                    val updateIntervalHours = userPreferences.getPlaylistUpdateIntervalHours()
+                    val intervalMs = updateIntervalHours * 60 * 60 * 1000L
+                    val now = System.currentTimeMillis()
+                    val totalSteps = playlists.size
+                    
+                    onStateUpdate(LoadingState(status = getString(R.string.loading), detail = "Inizializzazione...", progress = 5, showProgress = true))
+                    
+                    playlists.forEachIndexed { index, playlist ->
+                        val timeSinceUpdate = now - playlist.lastUpdated
+                        val needsUpdate = forceRefresh || (autoUpdateEnabled && timeSinceUpdate > intervalMs)
+                        val phaseProgress = 5 + ((index + 1) * 25 / totalSteps)
+                        
+                        if (needsUpdate) {
+                            onStateUpdate(LoadingState(status = getString(R.string.loading_syncing), detail = playlist.name, progress = phaseProgress, showProgress = true))
+                            try {
+                                playlistRepository.refreshPlaylist(playlist.id)
+                            } catch (e: Exception) {
+                                Log.e("LoadingActivity", "Failed to sync ${playlist.name}", e)
+                            }
+                        } else {
+                            onStateUpdate(LoadingState(status = getString(R.string.loading_using_cache), detail = "${playlist.name}", progress = phaseProgress, showProgress = true))
                         }
                     }
                     
-                    goToMain()
-                    return@launch
-                }
-                
-                // The rest of the sync logic continues here...
-                val autoUpdateEnabled = userPreferences.getPlaylistAutoUpdate()
-                val updateIntervalHours = userPreferences.getPlaylistUpdateIntervalHours()
-                val intervalMs = updateIntervalHours * 60 * 60 * 1000L
-                val now = System.currentTimeMillis()
-                
-                var progress = 0
-                val totalSteps = playlists.size
-                
-                onStateUpdate(LoadingState(status = getString(R.string.loading), detail = "Inizializzazione...", progress = 5, showProgress = true))
-                
-                playlists.forEachIndexed { index, playlist ->
-                    val timeSinceUpdate = now - playlist.lastUpdated
-                    val needsUpdate = forceRefresh || (autoUpdateEnabled && timeSinceUpdate > intervalMs)
-                    val phaseProgress = 5 + ((index + 1) * 25 / totalSteps)
+                    loadEpgIfNeeded(playlists, forceRefresh, onStateUpdate)
+                    refreshTrendingCategoriesIfNeeded(onStateUpdate)
+                    enrichHeroContent(onStateUpdate)
                     
-                    if (needsUpdate) {
-                        onStateUpdate(LoadingState(status = getString(R.string.loading_syncing), detail = playlist.name, progress = phaseProgress, showProgress = true))
-                        try {
-                            playlistRepository.refreshPlaylist(playlist.id)
-                        } catch (e: Exception) {
-                            Log.e("LoadingActivity", "Failed to sync ${playlist.name}", e)
-                        }
-                    } else {
-                        onStateUpdate(LoadingState(status = getString(R.string.loading_using_cache), detail = "${playlist.name}", progress = phaseProgress, showProgress = true))
-                    }
+                    // Clear the session cache to ensure clean preloading on fresh data
+                    contentCache.clearHomeSessionData()
+                    
+                    // Preload all 3 tabs into ContentCache using applicationScope.
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
                 }
                 
-                loadEpgIfNeeded(playlists, forceRefresh, onStateUpdate)
-                refreshTrendingCategoriesIfNeeded(onStateUpdate)
-                enrichHeroContent(onStateUpdate)
+                // Phase 2: Wait for HomeViewModel tabs to be ready
+                onStateUpdate(LoadingState(
+                    status = "Caricamento contenuti...",
+                    detail = "Preparazione Home, Film e Serie TV",
+                    progress = 85,
+                    showProgress = true
+                ))
                 
-                if (forceRefresh) {
-                    onStateUpdate(LoadingState(status = getString(R.string.loading_complete), detail = "Tutto pronto!", progress = 100, showProgress = true, isComplete = true))
-                    delay(600)
-                    goToMain()
+                val tabsReady = waitForAllTabsReady(timeoutMs = 120_000)
+                if (!tabsReady) {
+                    Log.w("LoadingActivity", "Some tabs did not load in time, proceeding anyway")
                 }
+                
+                // Phase 3: Navigate to main screen
+                onStateUpdate(LoadingState(
+                    status = getString(R.string.loading_complete),
+                    detail = "Tutto pronto!",
+                    progress = 100,
+                    showProgress = true,
+                    isComplete = true
+                ))
+                delay(500) // brief pause to show "Tutto pronto!"
+                goToMain()
                 
             } catch (e: Exception) {
                 Log.e("LoadingActivity", "Error in startLoading", e)
                 goToMain()
             }
         }
+    }
+    
+    /**
+     * Wait for all 3 main tabs (HOME, MOVIES, SERIES) to have content ready.
+     * The HomeViewModel init {} triggers loadContent(HOME) which starts loading.
+     * We poll isReadyForTab() until all are ready or timeout.
+     */
+    private suspend fun waitForAllTabsReady(timeoutMs: Long = 120_000): Boolean {
+        val tabs = listOf(HomeContentType.HOME, HomeContentType.MOVIES, HomeContentType.SERIES)
+        val start = System.currentTimeMillis()
+        
+        while (System.currentTimeMillis() - start < timeoutMs) {
+            val readyCount = tabs.count { homeViewModel.isReadyForTab(it) }
+            val elapsed = System.currentTimeMillis() - start
+            if (readyCount == tabs.size) {
+                Log.d("LoadingActivity", "All 3 tabs ready in ${elapsed}ms")
+                return true
+            }
+            if (elapsed % 3000 < 300) {
+                Log.d("LoadingActivity", "waitForAllTabsReady: $readyCount/3 tabs ready after ${elapsed}ms")
+            }
+            kotlinx.coroutines.delay(300)
+        }
+        
+        val readyCount = tabs.count { homeViewModel.isReadyForTab(it) }
+        Log.w("LoadingActivity", "waitForAllTabsReady timed out: $readyCount/3 tabs ready after ${timeoutMs}ms")
+        return false
     }
     
     private fun goToMain() {
@@ -282,258 +416,212 @@ class LoadingActivity : ComponentActivity() {
     }
     
     /**
-     * Enrich hero content - prioritizes continue watching, falls back to random
-     * This runs during loading so heroes are ready when user reaches home screen
+     * Enrich ALL trending content with full TMDB metadata + OMDB/RT ratings.
+     * Skips items already enriched within 7 days.
+     * Concurrency limited to 5 parallel API calls to avoid rate limits.
+     * This ensures trending content has complete metadata for heroes + carousels.
      */
     private suspend fun enrichHeroContent(onStateUpdate: (LoadingState) -> Unit) {
         try {
             withContext(Dispatchers.IO) {
-                // === MOVIES ===
-                val movieContinueWatching = watchProgressDao.getContinueWatchingMovies(profileId, 5)
-                val hasContinueWatchingMovies = movieContinueWatching.isNotEmpty()
+                val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
                 
+                // === MOVIES: enrich ALL trending ===
+                val allTrendingMovies = movieDao.getByTrendingCategory("Film Popolari")
+                val moviesToEnrich = allTrendingMovies.filter { movie ->
+                    movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo
+                }.sortedByDescending { it.tmdbPopularity ?: 0f }.take(100)
+                
+                val moviesCached = allTrendingMovies.size - moviesToEnrich.size
                 android.util.Log.d("LoadingActivity", 
-                    "Continue watching movies: ${movieContinueWatching.size}, profileId=$profileId")
+                    "Movies: ${allTrendingMovies.size} trending, $moviesCached already enriched, ${moviesToEnrich.size} to enrich")
                 
-                if (hasContinueWatchingMovies) {
-                    // Continue watching items are already enriched from previous views - no API calls needed
-                    android.util.Log.d("LoadingActivity", 
-                        "Skipping movie enrichment - using cached continue watching data")
-                    
+                if (moviesToEnrich.isNotEmpty()) {
                     withContext(Dispatchers.Main) {
-                        onStateUpdate(
-                            LoadingState(
-                                status = "Contenuti già pronti!",
-                                detail = "Film in continua a guardare",
-                                progress = 75,
-                                showProgress = true
-                            )
-                        )
-                    }
-                } else {
-                    // No continue watching - random 5 from "Film Popolari" trending category
-                    val trendingMovies = movieDao.getByTrendingCategory("Film Popolari")
-                    val popularMovies = if (trendingMovies.isNotEmpty()) {
-                        // Random 5 from trending category
-                        trendingMovies
-                            .filter { movie ->
-                                !ContentFilters.shouldExcludeMovieFromHero(movie.name, movie.category) &&
-                                (movie.logoUrl != null || movie.tmdbPosterPath != null)
-                            }
-                            .shuffled()
-                            .take(5)
-                    } else {
-                        // Fallback to random if trending not populated yet
-                        movieDao.getRandomMovies(30)
-                            .filter { movie ->
-                                !ContentFilters.shouldExcludeMovieFromHero(movie.name, movie.category) &&
-                                (movie.logoUrl != null || movie.tmdbPosterPath != null)
-                            }
-                            .take(5)
+                        onStateUpdate(LoadingState(
+                            status = "Preparazione film...",
+                            detail = "0/${moviesToEnrich.size} già pronti ($moviesCached da cache)",
+                            progress = 55,
+                            showProgress = true
+                        ))
                     }
                     
-                    android.util.Log.d("LoadingActivity", "Enriching ${popularMovies.size} trending/popular movies for hero")
-                    
-                    popularMovies.forEachIndexed { index, movie ->
-                        val movieProgress = 55 + ((index + 1) * 20 / popularMovies.size.coerceAtLeast(1))
-                        
-                        withContext(Dispatchers.Main) {
-                            onStateUpdate(
-                                 LoadingState(
-                                     status = "Preparazione film...",
-                                     detail = movie.name,
-                                     progress = movieProgress,
-                                     showProgress = true
-                                 )
-                            )
-                        }
-                        
-                        try {
-                            val enrichedMovie = tmdbService.enrichMovieDetails(movie)
-                            
-                            if (enrichedMovie.omdbImdbRating == null) {
-                                val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
-                                    imdbId = enrichedMovie.tmdbImdbId,
-                                    originalTitle = movie.name,
-                                    englishTitle = enrichedMovie.tmdbOriginalTitle ?: enrichedMovie.tmdbTitle,
-                                    year = enrichedMovie.year,
-                                    type = "movie"
-                                )
-                                
-                                if (ratings != null) {
-                                    var withRatings = enrichedMovie.copy(
-                                        omdbImdbRating = ratings.getFormattedImdbRating(),
-                                        omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
-                                        omdbMetacriticScore = ratings.metacriticScore,
-                                        omdbAudienceScore = ratings.audienceScore,
-                                        omdbLastFetchAt = System.currentTimeMillis()
-                                    )
-                                    
-                                    // If OMDB didn't provide audience score, try RT scraper
-                                    if (withRatings.omdbAudienceScore == null) {
-                                        android.util.Log.d("LoadingActivity", "OMDB missing audienceScore for hero ${movie.name}, fetching from RT...")
-                                        val searchTitle = withRatings.tmdbOriginalTitle ?: withRatings.tmdbTitle ?: movie.name
+                    // Enrich in batches of 5 (concurrency limit)
+                    val batchSize = 5
+                    for (batchStart in moviesToEnrich.indices step batchSize) {
+                        val batch = moviesToEnrich.drop(batchStart).take(batchSize)
+                        val deferredMovies = batch.map { movie ->
+                            async(Dispatchers.IO) {
+                                try {
+                                    val enrichedMovie = tmdbService.enrichMovieDetails(movie)
+                                    if (enrichedMovie.omdbImdbRating == null) {
+                                        val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
+                                            imdbId = enrichedMovie.tmdbImdbId,
+                                            originalTitle = movie.name,
+                                            englishTitle = enrichedMovie.tmdbOriginalTitle ?: enrichedMovie.tmdbTitle,
+                                            year = enrichedMovie.year,
+                                            type = "movie"
+                                        )
+                                        if (ratings != null) {
+                                            var withRatings = enrichedMovie.copy(
+                                                omdbImdbRating = ratings.getFormattedImdbRating(),
+                                                omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
+                                                omdbMetacriticScore = ratings.metacriticScore,
+                                                omdbAudienceScore = ratings.audienceScore,
+                                                omdbLastFetchAt = System.currentTimeMillis()
+                                            )
+                                            if (withRatings.omdbAudienceScore == null) {
+                                                val searchTitle = withRatings.tmdbOriginalTitle ?: withRatings.tmdbTitle ?: movie.name
+                                                val rtScores = imdbRatingsRepository.fetchRtScores(
+                                                    title = searchTitle, year = withRatings.year, isMovie = true
+                                                )
+                                                if (rtScores != null) {
+                                                    withRatings = withRatings.copy(
+                                                        omdbAudienceScore = withRatings.omdbAudienceScore ?: rtScores.audienceScore,
+                                                        omdbRottenTomatoesScore = withRatings.omdbRottenTomatoesScore ?: rtScores.criticsScore
+                                                    )
+                                                }
+                                            }
+                                            movieDao.update(withRatings)
+                                        }
+                                    } else if (enrichedMovie.omdbAudienceScore == null || enrichedMovie.omdbRottenTomatoesScore == null) {
+                                        val searchTitle = enrichedMovie.tmdbOriginalTitle ?: enrichedMovie.tmdbTitle ?: movie.name
                                         val rtScores = imdbRatingsRepository.fetchRtScores(
-                                            title = searchTitle,
-                                            year = withRatings.year,
-                                            isMovie = true
+                                            title = searchTitle, year = enrichedMovie.year, isMovie = true
                                         )
                                         if (rtScores != null) {
-                                            android.util.Log.d("LoadingActivity", "RT scores fetched for hero: Audience=${rtScores.audienceScore}%, Critics=${rtScores.criticsScore}%")
-                                            withRatings = withRatings.copy(
-                                                omdbAudienceScore = withRatings.omdbAudienceScore ?: rtScores.audienceScore,
-                                                omdbRottenTomatoesScore = withRatings.omdbRottenTomatoesScore ?: rtScores.criticsScore
-                                            )
+                                            movieDao.update(enrichedMovie.copy(
+                                                omdbAudienceScore = enrichedMovie.omdbAudienceScore ?: rtScores.audienceScore,
+                                                omdbRottenTomatoesScore = enrichedMovie.omdbRottenTomatoesScore ?: rtScores.criticsScore
+                                            ))
                                         }
                                     }
-                                    
-                                    movieDao.update(withRatings)
+                                } catch (e: Exception) {
+                                    android.util.Log.e("LoadingActivity", "Error enriching movie: ${movie.name}", e)
                                 }
-                            } else if (enrichedMovie.omdbAudienceScore == null || enrichedMovie.omdbRottenTomatoesScore == null) {
-                                // Already enriched but missing RT scores - try to fetch them
-                                android.util.Log.d("LoadingActivity", "Hero missing RT scores: ${movie.name}")
-                                val searchTitle = enrichedMovie.tmdbOriginalTitle ?: enrichedMovie.tmdbTitle ?: movie.name
-                                val rtScores = imdbRatingsRepository.fetchRtScores(
-                                    title = searchTitle,
-                                    year = enrichedMovie.year,
-                                    isMovie = true
-                                )
-                                if (rtScores != null) {
-                                    android.util.Log.d("LoadingActivity", "RT scores updated for hero: Audience=${rtScores.audienceScore}%, Critics=${rtScores.criticsScore}%")
-                                    movieDao.update(enrichedMovie.copy(
-                                        omdbAudienceScore = enrichedMovie.omdbAudienceScore ?: rtScores.audienceScore,
-                                        omdbRottenTomatoesScore = enrichedMovie.omdbRottenTomatoesScore ?: rtScores.criticsScore
-                                    ))
-                                }
+                                Unit
                             }
-                        } catch (e: Exception) {
-                            android.util.Log.e("LoadingActivity", "Error enriching movie: ${movie.name}", e)
                         }
+                        deferredMovies.awaitAll()
+                        val progress = 55 + ((batchStart + batch.size) * 20 / moviesToEnrich.size.coerceAtLeast(1))
+                        withContext(Dispatchers.Main) {
+                            onStateUpdate(LoadingState(
+                                status = "Preparazione film...",
+                                detail = "${(batchStart + batch.size)}/${moviesToEnrich.size}",
+                                progress = progress,
+                                showProgress = true
+                            ))
+                        }
+                        android.util.Log.d("LoadingActivity", "Movies enriched: ${batchStart + batch.size}/${moviesToEnrich.size}")
+                    }
+                } else {
+                    android.util.Log.d("LoadingActivity", "All movies already enriched, skipping")
+                    withContext(Dispatchers.Main) {
+                        onStateUpdate(LoadingState(
+                            status = "Contenuti già pronti!",
+                            detail = "${moviesCached} film dalla cache",
+                            progress = 75,
+                            showProgress = true
+                        ))
                     }
                 }
 
-                // === SERIES ===
-                val seriesContinueWatching = watchProgressDao.getContinueWatchingSeries(profileId, 5)
-                val hasContinueWatchingSeries = seriesContinueWatching.isNotEmpty()
+                // === SERIES: enrich ALL trending ===
+                val allTrendingSeries = seriesDao.getByTrendingCategory("Serie Popolari")
+                val seriesToEnrich = allTrendingSeries.filter { series ->
+                    series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo
+                }.sortedByDescending { it.tmdbPopularity ?: 0f }.take(100)
                 
+                val seriesCached = allTrendingSeries.size - seriesToEnrich.size
                 android.util.Log.d("LoadingActivity", 
-                    "Continue watching series: ${seriesContinueWatching.size}")
+                    "Series: ${allTrendingSeries.size} trending, $seriesCached already enriched, ${seriesToEnrich.size} to enrich")
                 
-                if (hasContinueWatchingSeries) {
-                    // Continue watching items are already enriched - no API calls needed
-                    android.util.Log.d("LoadingActivity", 
-                        "Skipping series enrichment - using cached continue watching data")
-                    
+                if (seriesToEnrich.isNotEmpty()) {
                     withContext(Dispatchers.Main) {
-                        onStateUpdate(
-                            LoadingState(
-                                status = "Contenuti già pronti!",
-                                detail = "Serie TV in continua a guardare",
-                                progress = 95,
-                                showProgress = true
-                            )
-                        )
-                    }
-                } else {
-                    // No continue watching - random 5 from "Serie Popolari" trending category
-                    val trendingSeries = seriesDao.getByTrendingCategory("Serie Popolari")
-                    val popularSeries = if (trendingSeries.isNotEmpty()) {
-                        // Random 5 from trending category
-                        trendingSeries
-                            .filter { series ->
-                                !ContentFilters.shouldExcludeSeriesFromHero(series.name, series.category) &&
-                                (series.logoUrl != null || series.tmdbPosterPath != null)
-                            }
-                            .shuffled()
-                            .take(5)
-                    } else {
-                        // Fallback to random if trending not populated yet
-                        seriesDao.getRandomSeries(30)
-                            .filter { series ->
-                                !ContentFilters.shouldExcludeSeriesFromHero(series.name, series.category) &&
-                                (series.logoUrl != null || series.tmdbPosterPath != null)
-                            }
-                            .take(5)
+                        onStateUpdate(LoadingState(
+                            status = "Preparazione serie TV...",
+                            detail = "0/${seriesToEnrich.size} già pronti ($seriesCached da cache)",
+                            progress = 76,
+                            showProgress = true
+                        ))
                     }
                     
-                    android.util.Log.d("LoadingActivity", "Enriching ${popularSeries.size} trending/popular series for hero")
-                    
-                    popularSeries.forEachIndexed { index, series ->
-                        val seriesProgress = 75 + ((index + 1) * 20 / popularSeries.size.coerceAtLeast(1))
-                        
-                        withContext(Dispatchers.Main) {
-                            onStateUpdate(
-                                LoadingState(
-                                    status = "Preparazione serie TV...",
-                                    detail = series.name,
-                                    progress = seriesProgress,
-                                    showProgress = true
-                                )
-                            )
-                        }
-                        
-                        try {
-                            val enrichedSeries = tmdbService.enrichSeriesDetails(series)
-                            
-                            if (enrichedSeries.omdbImdbRating == null) {
-                                val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
-                                    imdbId = null,
-                                    originalTitle = series.name,
-                                    englishTitle = enrichedSeries.tmdbOriginalName ?: enrichedSeries.tmdbName,
-                                    year = enrichedSeries.year,
-                                    type = "series"
-                                )
-                                
-                                if (ratings != null) {
-                                    var withRatings = enrichedSeries.copy(
-                                        omdbImdbRating = ratings.getFormattedImdbRating(),
-                                        omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
-                                        omdbMetacriticScore = ratings.metacriticScore,
-                                        omdbAudienceScore = ratings.audienceScore,
-                                        omdbLastFetchAt = System.currentTimeMillis()
-                                    )
-                                    
-                                    // If OMDB didn't provide audience score OR critics score, try RT scraper
-                                    if (withRatings.omdbAudienceScore == null || withRatings.omdbRottenTomatoesScore == null) {
-                                        android.util.Log.d("LoadingActivity", "OMDB missing RT scores for series hero ${series.name}, fetching from RT...")
-                                        val searchTitle = withRatings.tmdbOriginalName ?: withRatings.tmdbName ?: series.name
+                    val batchSize = 5
+                    for (batchStart in seriesToEnrich.indices step batchSize) {
+                        val batch = seriesToEnrich.drop(batchStart).take(batchSize)
+                        val deferredSeries = batch.map { series ->
+                            async(Dispatchers.IO) {
+                                try {
+                                    val enrichedSeries = tmdbService.enrichSeriesDetails(series)
+                                    if (enrichedSeries.omdbImdbRating == null) {
+                                        val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
+                                            imdbId = enrichedSeries.tmdbImdbId,
+                                            originalTitle = series.name,
+                                            englishTitle = enrichedSeries.tmdbOriginalName ?: enrichedSeries.tmdbName,
+                                            year = enrichedSeries.year,
+                                            type = "series"
+                                        )
+                                        if (ratings != null) {
+                                            var withRatings = enrichedSeries.copy(
+                                                omdbImdbRating = ratings.getFormattedImdbRating(),
+                                                omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
+                                                omdbMetacriticScore = ratings.metacriticScore,
+                                                omdbAudienceScore = ratings.audienceScore,
+                                                omdbLastFetchAt = System.currentTimeMillis()
+                                            )
+                                            if (withRatings.omdbAudienceScore == null || withRatings.omdbRottenTomatoesScore == null) {
+                                                val searchTitle = withRatings.tmdbOriginalName ?: withRatings.tmdbName ?: series.name
+                                                val rtScores = imdbRatingsRepository.fetchRtScores(
+                                                    title = searchTitle, year = withRatings.year, isMovie = false
+                                                )
+                                                if (rtScores != null) {
+                                                    withRatings = withRatings.copy(
+                                                        omdbAudienceScore = withRatings.omdbAudienceScore ?: rtScores.audienceScore,
+                                                        omdbRottenTomatoesScore = withRatings.omdbRottenTomatoesScore ?: rtScores.criticsScore
+                                                    )
+                                                }
+                                            }
+                                            seriesDao.update(withRatings)
+                                        }
+                                    } else if (enrichedSeries.omdbAudienceScore == null || enrichedSeries.omdbRottenTomatoesScore == null) {
+                                        val searchTitle = enrichedSeries.tmdbOriginalName ?: enrichedSeries.tmdbName ?: series.name
                                         val rtScores = imdbRatingsRepository.fetchRtScores(
-                                            title = searchTitle,
-                                            year = withRatings.year,
-                                            isMovie = false
+                                            title = searchTitle, year = enrichedSeries.year, isMovie = false
                                         )
                                         if (rtScores != null) {
-                                            android.util.Log.d("LoadingActivity", "RT scores fetched for series hero: Audience=${rtScores.audienceScore}%, Critics=${rtScores.criticsScore}%")
-                                            withRatings = withRatings.copy(
-                                                omdbAudienceScore = withRatings.omdbAudienceScore ?: rtScores.audienceScore,
-                                                omdbRottenTomatoesScore = withRatings.omdbRottenTomatoesScore ?: rtScores.criticsScore
-                                            )
+                                            seriesDao.update(enrichedSeries.copy(
+                                                omdbAudienceScore = enrichedSeries.omdbAudienceScore ?: rtScores.audienceScore,
+                                                omdbRottenTomatoesScore = enrichedSeries.omdbRottenTomatoesScore ?: rtScores.criticsScore
+                                            ))
                                         }
                                     }
-                                    
-                                    seriesDao.update(withRatings)
+                                } catch (e: Exception) {
+                                    android.util.Log.e("LoadingActivity", "Error enriching series: ${series.name}", e)
                                 }
-                            } else if (enrichedSeries.omdbAudienceScore == null || enrichedSeries.omdbRottenTomatoesScore == null) {
-                                // Already enriched but missing RT scores - try to fetch them
-                                android.util.Log.d("LoadingActivity", "Series hero missing RT scores: ${series.name}")
-                                val searchTitle = enrichedSeries.tmdbOriginalName ?: enrichedSeries.tmdbName ?: series.name
-                                val rtScores = imdbRatingsRepository.fetchRtScores(
-                                    title = searchTitle,
-                                    year = enrichedSeries.year,
-                                    isMovie = false
-                                )
-                                if (rtScores != null) {
-                                    android.util.Log.d("LoadingActivity", "RT scores updated for series hero: Audience=${rtScores.audienceScore}%, Critics=${rtScores.criticsScore}%")
-                                    seriesDao.update(enrichedSeries.copy(
-                                        omdbAudienceScore = enrichedSeries.omdbAudienceScore ?: rtScores.audienceScore,
-                                        omdbRottenTomatoesScore = enrichedSeries.omdbRottenTomatoesScore ?: rtScores.criticsScore
-                                    ))
-                                }
+                                Unit
                             }
-
-                        } catch (e: Exception) {
-                            android.util.Log.e("LoadingActivity", "Error enriching series: ${series.name}", e)
                         }
+                        deferredSeries.awaitAll()
+                        val progress = 76 + ((batchStart + batch.size) * 20 / seriesToEnrich.size.coerceAtLeast(1))
+                        withContext(Dispatchers.Main) {
+                            onStateUpdate(LoadingState(
+                                status = "Preparazione serie TV...",
+                                detail = "${(batchStart + batch.size)}/${seriesToEnrich.size}",
+                                progress = progress,
+                                showProgress = true
+                            ))
+                        }
+                        android.util.Log.d("LoadingActivity", "Series enriched: ${batchStart + batch.size}/${seriesToEnrich.size}")
+                    }
+                } else {
+                    android.util.Log.d("LoadingActivity", "All series already enriched, skipping")
+                    withContext(Dispatchers.Main) {
+                        onStateUpdate(LoadingState(
+                            status = "Contenuti già pronti!",
+                            detail = "${seriesCached} serie dalla cache",
+                            progress = 96,
+                            showProgress = true
+                        ))
                     }
                 }
             }
@@ -558,9 +646,19 @@ class LoadingActivity : ComponentActivity() {
             val forceRefresh = false
             val needsUpdate = forceRefresh || (System.currentTimeMillis() - lastUpdate) > oneWeekMs
             
-            if (!needsUpdate) {
+            // Force re-populate if trending is empty but catalog is large enough
+            val existingMovieTrending = movieDao.getByTrendingCategory("Film Popolari").size
+            val existingSeriesTrending = seriesDao.getByTrendingCategory("Serie Popolari").size
+            val shouldForceBecauseEmpty = (existingMovieTrending == 0 && movieDao.getAllMoviesCount() > 50) ||
+                                          (existingSeriesTrending == 0 && seriesDao.getAllSeriesCount() > 50)
+            
+            if (!needsUpdate && !shouldForceBecauseEmpty) {
                 android.util.Log.d("LoadingActivity", "Trending categories cache still valid, skipping refresh")
                 return
+            }
+            
+            if (shouldForceBecauseEmpty) {
+                android.util.Log.d("LoadingActivity", "Trending vuoto ma catalogo grande (movies=$existingMovieTrending, series=$existingSeriesTrending), forzo re-populate")
             }
             
             android.util.Log.d("LoadingActivity", "Trending categories: Refreshing...")

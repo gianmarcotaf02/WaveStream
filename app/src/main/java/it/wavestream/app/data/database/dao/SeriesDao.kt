@@ -12,6 +12,10 @@ interface SeriesDao {
     
     @Query("SELECT * FROM series WHERE isHidden = 0 ORDER BY name")
     suspend fun getAllSeriesList(): List<Series>
+
+    @Query("SELECT * FROM series WHERE isHidden = 0 ORDER BY name LIMIT :limit OFFSET :offset")
+    suspend fun getAllSeriesListPaged(limit: Int, offset: Int): List<Series>
+
     
     @Query("SELECT COUNT(*) FROM series WHERE isHidden = 0")
     suspend fun getAllSeriesCount(): Int
@@ -24,6 +28,10 @@ interface SeriesDao {
     
     @Query("SELECT * FROM series WHERE category = :category AND isHidden = 0 ORDER BY name")
     suspend fun getSeriesByCategoryList(category: String): List<Series>
+
+    @Query("SELECT * FROM series WHERE category = :category AND isHidden = 0 ORDER BY name LIMIT :limit OFFSET :offset")
+    suspend fun getSeriesByCategoryListPaged(category: String, limit: Int, offset: Int): List<Series>
+
     
     @Query("SELECT DISTINCT category FROM series WHERE category IS NOT NULL AND isHidden = 0 ORDER BY category")
     fun getCategories(): Flow<List<String>>
@@ -33,6 +41,14 @@ interface SeriesDao {
     
     @Query("SELECT * FROM series WHERE id = :id")
     suspend fun getSeriesById(id: Long): Series?
+
+    // Batch query — replaces N+1 getSeriesById calls
+    @Query("SELECT * FROM series WHERE id IN (:ids)")
+    suspend fun getSeriesByIds(ids: List<Long>): List<Series>
+
+    // Batch count query — replaces N+1 getSeriesCountByCategory calls in loadFavoritesContent
+    @Query("SELECT category as name, COUNT(*) as count FROM series WHERE category IN (:categories) AND isHidden = 0 GROUP BY category")
+    suspend fun getCountByCategories(categories: List<String>): List<SeriesCategoryWithCount>
     
     @Query("SELECT * FROM series WHERE tmdbId = :tmdbId LIMIT 1")
     suspend fun getSeriesByTmdbId(tmdbId: Int): Series?
@@ -69,6 +85,10 @@ interface SeriesDao {
     // Random series for hero banner (prioritize ones with images)
     @Query("SELECT * FROM series WHERE isHidden = 0 AND (logoUrl IS NOT NULL OR tmdbPosterPath IS NOT NULL) ORDER BY RANDOM() LIMIT :limit")
     suspend fun getRandomSeries(limit: Int = 5): List<Series>
+    
+    // Random series — NO image requirement (guaranteed content for carousels)
+    @Query("SELECT * FROM series WHERE isHidden = 0 ORDER BY RANDOM() LIMIT :limit")
+    suspend fun getRandomSeriesAny(limit: Int = 20): List<Series>
     
     // Get fully enriched series for FAST hero loading (has overview AND OMDB rating = already enriched by LoadingActivity)
     @Query("""
@@ -123,6 +143,7 @@ interface SeriesDao {
                     tmdbId = existing.tmdbId ?: series.tmdbId,
                     tmdbPosterPath = existing.tmdbPosterPath ?: series.tmdbPosterPath,
                     tmdbBackdropPath = existing.tmdbBackdropPath ?: series.tmdbBackdropPath,
+                    tmdbImdbId = existing.tmdbImdbId ?: series.tmdbImdbId,
                     tmdbName = existing.tmdbName ?: series.tmdbName,
                     tmdbOriginalName = existing.tmdbOriginalName ?: series.tmdbOriginalName,
                     tmdbOverview = existing.tmdbOverview ?: series.tmdbOverview,
@@ -130,6 +151,8 @@ interface SeriesDao {
                     tmdbVoteAverage = existing.tmdbVoteAverage ?: series.tmdbVoteAverage,
                     tmdbPopularity = existing.tmdbPopularity ?: series.tmdbPopularity,
                     tmdbCast = existing.tmdbCast ?: series.tmdbCast,
+                    tmdbCastJson = existing.tmdbCastJson ?: series.tmdbCastJson,
+                    tmdbCrewJson = existing.tmdbCrewJson ?: series.tmdbCrewJson,
                     omdbImdbRating = existing.omdbImdbRating ?: series.omdbImdbRating,
                     omdbRottenTomatoesScore = existing.omdbRottenTomatoesScore ?: series.omdbRottenTomatoesScore,
                     omdbMetacriticScore = existing.omdbMetacriticScore ?: series.omdbMetacriticScore,
@@ -167,6 +190,14 @@ interface SeriesDao {
         ORDER BY category
     """)
     suspend fun getCategoriesWithCount(): List<SeriesCategoryWithCount>
+
+    @Query("""
+        SELECT * FROM series 
+        WHERE (tmdbCast LIKE '%' || :name || '%' OR name LIKE '%' || :name || '%') 
+        AND isHidden = 0 
+        ORDER BY tmdbPopularity DESC
+    """)
+    suspend fun getByPerson(name: String): List<Series>
 }
 
 data class SeriesCategoryWithCount(

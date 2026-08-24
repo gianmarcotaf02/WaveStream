@@ -5,6 +5,7 @@ import it.wavestream.app.data.database.entity.CategoryType
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.FavoriteType
 import it.wavestream.app.data.database.entity.StreamQuality
+import it.wavestream.app.data.database.entity.TasteStatus
 
 /**
  * Type converters for Room database
@@ -42,6 +43,14 @@ class Converters {
     @TypeConverter
     fun toContentType(value: String): ContentType = 
         ContentType.valueOf(value)
+    
+    // TasteStatus
+    @TypeConverter
+    fun fromTasteStatus(value: TasteStatus): String = value.name
+    
+    @TypeConverter
+    fun toTasteStatus(value: String): TasteStatus = 
+        TasteStatus.valueOf(value)
     
     // List<String>
     @TypeConverter

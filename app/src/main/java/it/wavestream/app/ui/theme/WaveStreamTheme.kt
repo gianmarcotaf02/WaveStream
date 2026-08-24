@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -231,34 +232,38 @@ val WaveStreamTypography = Typography(
 fun WaveStreamTheme(
     content: @Composable () -> Unit
 ) {
-    val colorScheme = darkColorScheme(
-        primary = WaveStreamColors.Accent,
-        onPrimary = WaveStreamColors.TextPrimary,
-        primaryContainer = WaveStreamColors.AccentDark,
-        onPrimaryContainer = WaveStreamColors.TextPrimary,
+    // Cache the color scheme so it isn't recreated on every recompose.
+    // darkColorScheme() allocates a new ColorScheme each time — remember prevents that.
+    val colorScheme = remember(WaveStreamColors.Accent) {
+        darkColorScheme(
+            primary = WaveStreamColors.Accent,
+            onPrimary = WaveStreamColors.TextPrimary,
+            primaryContainer = WaveStreamColors.AccentDark,
+            onPrimaryContainer = WaveStreamColors.TextPrimary,
 
-        secondary = WaveStreamColors.AccentGold,
-        onSecondary = WaveStreamColors.TextPrimary,
-        secondaryContainer = WaveStreamColors.AccentGoldLight,
-        onSecondaryContainer = WaveStreamColors.BackgroundDark,
+            secondary = WaveStreamColors.AccentGold,
+            onSecondary = WaveStreamColors.TextPrimary,
+            secondaryContainer = WaveStreamColors.AccentGoldLight,
+            onSecondaryContainer = WaveStreamColors.BackgroundDark,
 
-        tertiary = WaveStreamColors.AccentLight,
-        onTertiary = WaveStreamColors.TextPrimary,
+            tertiary = WaveStreamColors.AccentLight,
+            onTertiary = WaveStreamColors.TextPrimary,
 
-        background = WaveStreamColors.BackgroundDark,
-        onBackground = WaveStreamColors.TextPrimary,
+            background = WaveStreamColors.BackgroundDark,
+            onBackground = WaveStreamColors.TextPrimary,
 
-        surface = WaveStreamColors.BackgroundPrimary,
-        onSurface = WaveStreamColors.TextPrimary,
-        surfaceVariant = WaveStreamColors.BackgroundSecondary,
-        onSurfaceVariant = WaveStreamColors.TextSecondary,
+            surface = WaveStreamColors.BackgroundPrimary,
+            onSurface = WaveStreamColors.TextPrimary,
+            surfaceVariant = WaveStreamColors.BackgroundSecondary,
+            onSurfaceVariant = WaveStreamColors.TextSecondary,
 
-        error = WaveStreamColors.Error,
-        onError = WaveStreamColors.TextPrimary,
+            error = WaveStreamColors.Error,
+            onError = WaveStreamColors.TextPrimary,
 
-        outline = WaveStreamColors.TextTertiary,
-        outlineVariant = WaveStreamColors.TextHint
-    )
+            outline = WaveStreamColors.TextTertiary,
+            outlineVariant = WaveStreamColors.TextHint
+        )
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,

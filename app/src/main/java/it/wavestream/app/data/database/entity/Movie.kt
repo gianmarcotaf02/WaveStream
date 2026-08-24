@@ -23,7 +23,17 @@ import androidx.room.PrimaryKey
         Index("playlistId"),
         Index("category"),
         Index("name"),
-        Index("tmdbId")
+        Index("tmdbId"),
+        Index("trendingCategory"),
+        Index("isHidden"),
+        Index("addedAt"),
+        Index("playlistOrder"),
+        Index(value = ["playlistId", "category", "isHidden"]),
+        Index(value = ["trendingCategory", "isHidden"]),
+        // Composite index for FilmActivity: WHERE category = ? AND isHidden = 0 ORDER BY name
+        Index(value = ["category", "isHidden", "name"]),
+        // Composite index for getAllMoviesList: WHERE isHidden = 0 ORDER BY name (covers filter + sort)
+        Index(value = ["isHidden", "name"])
     ]
 )
 data class Movie(
@@ -65,6 +75,8 @@ data class Movie(
     val tmdbRuntime: Int? = null, // in minutes
     val tmdbCast: String? = null, // JSON array of cast names
     val tmdbDirector: String? = null,
+    val tmdbCastJson: String? = null,    // JSON array of {id, name, character, profile_path, order}
+    val tmdbCrewJson: String? = null,    // JSON array of {id, name, job, department, profile_path}
     val tmdbImdbId: String? = null, // IMDB ID from TMDB external_ids
     val tmdbTrailerKey: String? = null, // YouTube video key
     
@@ -97,7 +109,7 @@ data class Movie(
     val genre: String? get() = xtreamGenre ?: tmdbGenres
     val cast: String? get() = xtreamCast ?: tmdbCast
     val director: String? get() = xtreamDirector ?: tmdbDirector
-    val imdbId: String? get() = null
+    val imdbId: String? get() = tmdbImdbId
     val title: String get() = tmdbTitle?.takeIf { it.isNotEmpty() } ?: name
 }
 

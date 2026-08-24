@@ -52,39 +52,21 @@ fun TvContentCard(
     customHeight: androidx.compose.ui.unit.Dp? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.CardFocusScale else 1f,
-        animationSpec = AppAnimations.SpringCardFocus,
-        label = "cardScale"
-    )
-    
 
-    // Focus glow effect - animated shadow elevation
-    val glowElevation by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.FocusGlowElevation else AppAnimations.UnfocusedGlowElevation,
-        animationSpec = AppAnimations.SpringGlow,
-        label = "cardGlow"
+    // Single focus progress 0..1 — all visual properties are derived from this one animation
+    // instead of running 4 separate animateFloatAsState / animateDpAsState, which on TVs with
+    // many cards on screen caused significant recomposition overhead.
+    val focusProgress by animateFloatAsState(
+        targetValue = if (isFocused) 1f else 0f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "cardFocusProgress"
     )
-    
-    // Title slide-up animation on focus
-    val titleOffsetY by animateDpAsState(
-        targetValue = if (isFocused) (-2).dp else 0.dp,
-        label = "titleOffset"
-    )
-    
-    // Title alpha transition
-    val titleAlpha by animateFloatAsState(
-        targetValue = if (isFocused) 1f else 0.7f,
-        animationSpec = AppAnimations.SpringSmooth,
-        label = "titleAlpha"
-    )
-    
+
     // Use smaller dimensions for channels (square-ish), larger for movies/series (poster)
     val isChannel = item.contentType == "CHANNEL"
     val cardWidth = customWidth ?: if (isChannel) 90.dp else 130.dp
     val cardHeight = customHeight ?: if (isChannel) 70.dp else 195.dp
-    
+
     Column(
         modifier = modifier
             .width(cardWidth)
@@ -96,8 +78,9 @@ fun TvContentCard(
                 .height(cardHeight)
                 .onFocusChanged { isFocused = it.isFocused }
                 .graphicsLayer {
-                    // Focus glow via shadow
-                    shadowElevation = glowElevation
+                    // Focus glow via shadow - derived from focusProgress
+                    shadowElevation = AppAnimations.UnfocusedGlowElevation +
+                        (AppAnimations.FocusGlowElevation - AppAnimations.UnfocusedGlowElevation) * focusProgress
                     shape = RoundedCornerShape(8.dp)
                     ambientShadowColor = WaveStreamColors.Accent
                     spotShadowColor = WaveStreamColors.Accent
@@ -126,7 +109,7 @@ fun TvContentCard(
             )
         ) {
             Box(modifier = Modifier.fillMaxSize()) {
-                
+
                 // Poster/Logo image - use Fit for channels, Crop for movies/series
                 if (item.posterUrl.isNullOrEmpty()) {
                     // Fallback when no poster is available (common for VOD categories without TMDB enrichment)
@@ -158,10 +141,11 @@ fun TvContentCard(
                             .then(if (isChannel) Modifier.padding(8.dp) else Modifier)
                     )
                 }
-                
-                // Rating badge (if available and NOT continue watching)
+
+                // Rating badge (if available and NOT continue watching) - using pre-formatted ratingText
                 if (item.progressPercent == null) {
-                    item.rating?.takeIf { it > 0 }?.let { rating ->
+                    val ratingText = item.ratingText
+                    if (!ratingText.isNullOrEmpty()) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -171,7 +155,7 @@ fun TvContentCard(
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
-                                text = String.format("%.1f", rating),
+                                text = ratingText,
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
@@ -179,7 +163,7 @@ fun TvContentCard(
                         }
                     }
                 }
-                
+
                 // Episode label for series (top left)
                 item.episodeLabel?.let { label ->
                     Box(
@@ -198,7 +182,7 @@ fun TvContentCard(
                         )
                     }
                 }
-                
+
                 // Progress bar overlay (for Continue Watching)
                 item.progressPercent?.let { progress ->
                     Column(
@@ -227,7 +211,7 @@ fun TvContentCard(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                         }
-                        
+
                         // Progress bar
                         Box(
                             modifier = Modifier
@@ -248,10 +232,10 @@ fun TvContentCard(
                 }
             }
         }
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
-        // Title below card - animated slide-up + fade on focus
+
+        // Title below card - derived translationY and alpha from focusProgress
         Text(
             text = item.title,
             style = MaterialTheme.typography.bodySmall.copy(
@@ -263,8 +247,8 @@ fun TvContentCard(
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .graphicsLayer {
-                    translationY = titleOffsetY.toPx()
-                    alpha = titleAlpha
+                    translationY = -2f * focusProgress
+                    alpha = 0.7f + 0.3f * focusProgress
                 }
         )
     }
@@ -281,21 +265,14 @@ fun TvWideCard(
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
-    
-    // Focus glow effect
-    val glowElevation by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.FocusGlowElevation else AppAnimations.UnfocusedGlowElevation,
-        animationSpec = AppAnimations.SpringGlow,
-        label = "wideCardGlow"
-    )
-    
-    // Title alpha transition
-    val titleAlpha by animateFloatAsState(
-        targetValue = if (isFocused) 1f else 0.8f,
+
+    // Single focus progress 0..1 — both glow and title alpha are derived from this
+    val focusProgress by animateFloatAsState(
+        targetValue = if (isFocused) 1f else 0f,
         animationSpec = AppAnimations.SpringSmooth,
-        label = "wideTitleAlpha"
+        label = "wideCardFocusProgress"
     )
-    
+
     Card(
         onClick = onClick,
         modifier = modifier
@@ -303,7 +280,9 @@ fun TvWideCard(
             .height(157.dp)
             .onFocusChanged { isFocused = it.isFocused }
             .graphicsLayer {
-                shadowElevation = glowElevation
+                // Focus glow via shadow - derived from focusProgress
+                shadowElevation = AppAnimations.UnfocusedGlowElevation +
+                    (AppAnimations.FocusGlowElevation - AppAnimations.UnfocusedGlowElevation) * focusProgress
                 shape = RoundedCornerShape(8.dp)
                 ambientShadowColor = WaveStreamColors.Accent
                 spotShadowColor = WaveStreamColors.Accent
@@ -337,7 +316,7 @@ fun TvWideCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
-            
+
             // Gradient overlay at bottom
             Box(
                 modifier = Modifier
@@ -353,7 +332,7 @@ fun TvWideCard(
                         )
                     )
             )
-            
+
             // Title
             Text(
                 text = item.title,
@@ -366,10 +345,10 @@ fun TvWideCard(
                     .align(Alignment.BottomStart)
                     .padding(12.dp)
                     .graphicsLayer {
-                        alpha = titleAlpha
+                        alpha = 0.8f + 0.2f * focusProgress
                     }
             )
-            
+
             // Progress bar (for continue watching)
             item.progressPercent?.let { progress ->
                 Box(

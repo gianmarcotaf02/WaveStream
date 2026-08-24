@@ -22,7 +22,19 @@ class XtreamParser @Inject constructor() {
      */
     fun parseLiveCategories(json: String): List<XtreamCategory> {
         return try {
-            val array = JSONArray(json)
+            val array = try {
+                JSONArray(json)
+            } catch (e: Exception) {
+                Log.w(TAG, "parseLiveCategories: JSON truncated (${json.length} chars), attempting repair...")
+                val repaired = repairTruncatedJsonArray(json)
+                if (repaired != null) {
+                    Log.d(TAG, "parseLiveCategories: repaired JSON -> ${repaired.length} chars")
+                    JSONArray(repaired)
+                } else {
+                    throw e
+                }
+            }
+            Log.d(TAG, "parseLiveCategories: JSON array length=${array.length()}")
             (0 until array.length()).map { i ->
                 val obj = array.getJSONObject(i)
                 XtreamCategory(
@@ -32,7 +44,7 @@ class XtreamParser @Inject constructor() {
                 )
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error parsing live categories", e)
+            Log.e(TAG, "Error parsing live categories: ${e.javaClass.simpleName}: ${e.message?.take(200)}")
             emptyList()
         }
     }
@@ -42,7 +54,19 @@ class XtreamParser @Inject constructor() {
      */
     fun parseLiveStreams(json: String): List<XtreamStream> {
         return try {
-            val array = JSONArray(json)
+            val array = try {
+                JSONArray(json)
+            } catch (e: Exception) {
+                Log.w(TAG, "parseLiveStreams: JSON truncated (${json.length} chars), attempting repair...")
+                val repaired = repairTruncatedJsonArray(json)
+                if (repaired != null) {
+                    Log.d(TAG, "parseLiveStreams: repaired JSON -> ${repaired.length} chars")
+                    JSONArray(repaired)
+                } else {
+                    throw e
+                }
+            }
+            Log.d(TAG, "parseLiveStreams: JSON array length=${array.length()}, jsonSize=${json.length}")
             (0 until array.length()).map { i ->
                 val obj = array.getJSONObject(i)
                 XtreamStream(
@@ -55,7 +79,7 @@ class XtreamParser @Inject constructor() {
                 )
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error parsing live streams", e)
+            Log.e(TAG, "Error parsing live streams: ${e.javaClass.simpleName}: ${e.message?.take(200)}")
             emptyList()
         }
     }
@@ -70,7 +94,19 @@ class XtreamParser @Inject constructor() {
      */
     fun parseVodStreams(json: String): List<XtreamVod> {
         return try {
-            val array = JSONArray(json)
+            val array = try {
+                JSONArray(json)
+            } catch (e: Exception) {
+                Log.w(TAG, "parseVodStreams: JSON truncated (${json.length} chars), attempting repair...")
+                val repaired = repairTruncatedJsonArray(json)
+                if (repaired != null) {
+                    Log.d(TAG, "parseVodStreams: repaired JSON -> ${repaired.length} chars")
+                    JSONArray(repaired)
+                } else {
+                    throw e
+                }
+            }
+            Log.d(TAG, "parseVodStreams: JSON array length=${array.length()}, jsonSize=${json.length}")
             (0 until array.length()).mapNotNull { i ->
                 val obj = array.getJSONObject(i)
                 val name = obj.optString("name", "")
@@ -109,7 +145,7 @@ class XtreamParser @Inject constructor() {
                 )
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error parsing VOD streams", e)
+            Log.e(TAG, "Error parsing VOD streams: ${e.javaClass.simpleName}: ${e.message?.take(200)}")
             emptyList()
         }
     }
@@ -117,15 +153,34 @@ class XtreamParser @Inject constructor() {
     /**
      * Parse series categories JSON
      */
-    fun parseSeriesCategories(json: String): List<XtreamCategory> = parseLiveCategories(json)
+    fun parseSeriesCategories(json: String): List<XtreamCategory> {
+        val result = parseLiveCategories(json)
+        Log.d(TAG, "parseSeriesCategories: result=${result.size} categories")
+        if (result.isNotEmpty()) {
+            Log.d(TAG, "parseSeriesCategories: first 3: ${result.take(3).map { "${it.name} (id=${it.id})" }}")
+        }
+        return result
+    }
     
     /**
      * Parse series list JSON
      */
     fun parseSeries(json: String): List<XtreamSeries> {
         return try {
-            val array = JSONArray(json)
-            (0 until array.length()).mapNotNull { i ->
+            val array = try {
+                JSONArray(json)
+            } catch (e: Exception) {
+                Log.w(TAG, "parseSeries: JSON truncated (${json.length} chars), attempting repair...")
+                val repaired = repairTruncatedJsonArray(json)
+                if (repaired != null) {
+                    Log.d(TAG, "parseSeries: repaired JSON -> ${repaired.length} chars")
+                    JSONArray(repaired)
+                } else {
+                    throw e
+                }
+            }
+            Log.d(TAG, "parseSeries: JSON array length=${array.length()}")
+            val result = (0 until array.length()).mapNotNull { i ->
                 val obj = array.getJSONObject(i)
                 val name = obj.optString("name", "")
                 
@@ -155,11 +210,17 @@ class XtreamParser @Inject constructor() {
                     cast = obj.optString("cast", "").takeIf { it.isNotEmpty() },
                     director = obj.optString("director", "").takeIf { it.isNotEmpty() },
                     genre = obj.optString("genre", "").takeIf { it.isNotEmpty() },
-                    added = addedTimestamp
+                    added = addedTimestamp,
+                    tmdbId = obj.optInt("tmdb_id", 0).takeIf { it != 0 }
                 )
             }
+            Log.d(TAG, "parseSeries: result=${result.size} series (filtered ${array.length() - result.size} delimiters)")
+            if (array.length() > 0 && result.isEmpty()) {
+                Log.w(TAG, "parseSeries: WARNING - array had ${array.length()} items but ALL were filtered! First item: ${array.getJSONObject(0).optString("name", "?")} series_id=${array.getJSONObject(0).optInt("series_id", -1)}")
+            }
+            result
         } catch (e: Exception) {
-            Log.e(TAG, "Error parsing series", e)
+            Log.e(TAG, "Error parsing series: ${e.javaClass.simpleName}: ${e.message?.take(200)}")
             emptyList()
         }
     }
@@ -191,19 +252,31 @@ class XtreamParser @Inject constructor() {
                 val seasonArray = episodesObj.getJSONArray(season)
                 episodes[season] = (0 until seasonArray.length()).map { i ->
                     val ep = seasonArray.getJSONObject(i)
+                    val epInfoObj = ep.optJSONObject("info")
+                    val epInfo = epInfoObj?.let {
+                        XtreamEpisodeInfo(
+                            image = it.optString("movie_image", "").takeIf { s -> s.isNotEmpty() }
+                                ?: it.optString("image", "").takeIf { s -> s.isNotEmpty() },
+                            plot = it.optString("plot", "").takeIf { s -> s.isNotEmpty() },
+                            durationSecs = it.optInt("duration_secs", 0).takeIf { d -> d > 0 }
+                                ?: it.optInt("duration", 0).takeIf { d -> d > 0 },
+                            releaseDate = it.optString("releasedate", "").takeIf { s -> s.isNotEmpty() }
+                                ?: it.optString("release_date", "").takeIf { s -> s.isNotEmpty() }
+                        )
+                    }
                     XtreamEpisode(
                         id = ep.optString("id", ""),
                         episodeNum = ep.optInt("episode_num", 0),
                         title = ep.optString("title", "").takeIf { s -> s.isNotEmpty() },
                         extension = ep.optString("container_extension", "").takeIf { s -> s.isNotEmpty() },
-                        info = null
+                        info = epInfo
                     )
                 }
             }
             
             XtreamSeriesInfo(info, episodes.takeIf { it.isNotEmpty() })
         } catch (e: Exception) {
-            Log.e(TAG, "Error parsing series info", e)
+            Log.e(TAG, "Error parsing series info: ${e.javaClass.simpleName}: ${e.message?.take(200)}")
             null
         }
     }
@@ -231,7 +304,7 @@ class XtreamParser @Inject constructor() {
                 youtubeTrailer = infoObj.optString("youtube_trailer", "").takeIf { it.isNotEmpty() }
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Error parsing VOD info", e)
+            Log.e(TAG, "Error parsing VOD info: ${e.javaClass.simpleName}: ${e.message?.take(200)}")
             null
         }
     }
@@ -245,7 +318,24 @@ class XtreamParser @Inject constructor() {
         // Matches at least 3 occurrences of special characters (-, =, *, ~, |, <, >) with optional spaces
         // at the very beginning of the name.
         val delimiterPattern = Regex("^([_\\\\=*~|><-]\\s*){3,}.*")
-        return delimiterPattern.matches(trimmed)
+        val isDelimiter = delimiterPattern.matches(trimmed)
+        if (isDelimiter) Log.d(TAG, "isCategoryDelimiter: filtered '$trimmed'")
+        return isDelimiter
+    }
+
+    /**
+     * Attempts to repair a truncated JSON array by finding the last complete object
+     * and closing the array. Returns null if repair fails.
+     */
+    private fun repairTruncatedJsonArray(json: String): String? {
+        if (!json.trimStart().startsWith("[")) return null
+        val trimmed = json.trimEnd()
+        // Find last complete object: last '}' that's followed by ',' or end of array
+        val lastCloseBrace = trimmed.lastIndexOf('}')
+        if (lastCloseBrace < 0) return null
+        val repaired = trimmed.substring(0, lastCloseBrace + 1) + "]"
+        Log.d(TAG, "repairTruncatedJsonArray: trimmed at char $lastCloseBrace, repaired to ${repaired.length} chars")
+        return repaired
     }
 }
 
@@ -289,7 +379,8 @@ data class XtreamSeries(
     val cast: String? = null,
     val director: String? = null,
     val genre: String? = null,
-    val added: Long? = null  // Unix timestamp when content was added by provider
+    val added: Long? = null,  // Unix timestamp when content was added by provider
+    val tmdbId: Int? = null   // TMDB ID if provided by Xtream API
 )
 
 data class XtreamSeriesInfo(

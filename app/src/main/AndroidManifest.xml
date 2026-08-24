@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- TV Features -->
     <uses-feature
@@ -56,6 +57,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WaveStream"
         android:usesCleartextTraffic="false"
+        android:largeHeap="true"
         tools:targetApi="31">
 
         <!-- Main Activity (content browsing) - Jetpack Compose -->
@@ -77,23 +79,18 @@
             </intent-filter>
         </activity>
 
+        <!-- Taste Setup Activity -->
+        <activity
+            android:name=".ui.taste.TasteSetupActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.WaveStream.FullScreen" />
+
         <!-- Player Activity with PiP -->
-        <activity
-            android:name=".ui.seriea.SerieAActivity"
-            android:exported="false"
-            android:theme="@style/Theme.WaveStream" />
-        <activity
-            android:name=".ui.seriea.MatchDetailsActivity"
-            android:exported="false"
-            android:theme="@style/Theme.WaveStream" />
-        <activity
-            android:name=".ui.seriea.TeamDetailsActivity"
-            android:exported="false"
-            android:theme="@style/Theme.WaveStream" />
         <activity
             android:name=".ui.player.PlayerActivity"
             android:exported="false"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode|density|fontScale"
             android:screenOrientation="landscape"
             android:launchMode="singleTop"
             android:supportsPictureInPicture="true"
@@ -174,6 +171,20 @@
             android:screenOrientation="landscape"
             android:theme="@style/Theme.WaveStream.FullScreen" />
 
+        <!-- Welcome Activity (tutorial slides) -->
+        <activity
+            android:name=".ui.welcome.WelcomeActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.WaveStream.FullScreen" />
+
+        <!-- Terms Activity (T&C + Privacy) -->
+        <activity
+            android:name=".ui.terms.TermsActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.WaveStream.FullScreen" />
+
         <!-- Loading Activity -->
         <activity
             android:name=".ui.loading.LoadingActivity"
@@ -184,6 +195,13 @@
         <!-- Downloads Activity -->
         <activity
             android:name=".ui.downloads.DownloadsActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.WaveStream.FullScreen" />
+
+        <!-- Person Activity -->
+        <activity
+            android:name=".ui.person.PersonActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.WaveStream.FullScreen" />

@@ -12,6 +12,10 @@ interface MovieDao {
     
     @Query("SELECT * FROM movies WHERE isHidden = 0 ORDER BY name")
     suspend fun getAllMoviesList(): List<Movie>
+
+    @Query("SELECT * FROM movies WHERE isHidden = 0 ORDER BY name LIMIT :limit OFFSET :offset")
+    suspend fun getAllMoviesListPaged(limit: Int, offset: Int): List<Movie>
+
     
     @Query("SELECT COUNT(*) FROM movies WHERE isHidden = 0")
     suspend fun getAllMoviesCount(): Int
@@ -24,6 +28,13 @@ interface MovieDao {
     
     @Query("SELECT * FROM movies WHERE category = :category AND isHidden = 0 ORDER BY name")
     suspend fun getMoviesByCategoryList(category: String): List<Movie>
+
+    @Query("SELECT * FROM movies WHERE category = :category AND isHidden = 0 ORDER BY name LIMIT :limit OFFSET :offset")
+    suspend fun getMoviesByCategoryListPaged(category: String, limit: Int, offset: Int): List<Movie>
+
+    @Query("SELECT COUNT(*) FROM movies WHERE category = :category AND isHidden = 0")
+    suspend fun getMoviesCountByCategory(category: String): Int
+
     
     @Query("SELECT DISTINCT category FROM movies WHERE category IS NOT NULL AND isHidden = 0 ORDER BY category")
     fun getCategories(): Flow<List<String>>
@@ -33,6 +44,14 @@ interface MovieDao {
     
     @Query("SELECT * FROM movies WHERE id = :id")
     suspend fun getMovieById(id: Long): Movie?
+
+    // Batch query — replaces N+1 getMovieById calls in HomeViewModel loadHeroItems / loadContinueWatching
+    @Query("SELECT * FROM movies WHERE id IN (:ids)")
+    suspend fun getMoviesByIds(ids: List<Long>): List<Movie>
+
+    // Batch count query — replaces N+1 getCountByCategory calls in loadFavoritesContent
+    @Query("SELECT category as name, COUNT(*) as count FROM movies WHERE category IN (:categories) AND isHidden = 0 GROUP BY category")
+    suspend fun getCountByCategories(categories: List<String>): List<CategoryWithCount>
     
     @Query("SELECT * FROM movies WHERE tmdbId = :tmdbId LIMIT 1")
     suspend fun getMovieByTmdbId(tmdbId: Int): Movie?
@@ -72,6 +91,10 @@ interface MovieDao {
     // Random movies for hero banner (prioritize ones with images)
     @Query("SELECT * FROM movies WHERE isHidden = 0 AND (logoUrl IS NOT NULL OR tmdbPosterPath IS NOT NULL) ORDER BY RANDOM() LIMIT :limit")
     suspend fun getRandomMovies(limit: Int = 5): List<Movie>
+    
+    // Random movies — NO image requirement (guaranteed content for carousels)
+    @Query("SELECT * FROM movies WHERE isHidden = 0 ORDER BY RANDOM() LIMIT :limit")
+    suspend fun getRandomMoviesAny(limit: Int = 20): List<Movie>
     
     // Get fully enriched movies for FAST hero loading (has overview AND OMDB rating = already enriched by LoadingActivity)
     @Query("""
@@ -135,6 +158,8 @@ interface MovieDao {
                     tmdbPopularity = existing.tmdbPopularity ?: movie.tmdbPopularity,
                     tmdbCast = existing.tmdbCast ?: movie.tmdbCast,
                     tmdbDirector = existing.tmdbDirector ?: movie.tmdbDirector,
+                    tmdbCastJson = existing.tmdbCastJson ?: movie.tmdbCastJson,
+                    tmdbCrewJson = existing.tmdbCrewJson ?: movie.tmdbCrewJson,
                     omdbImdbRating = existing.omdbImdbRating ?: movie.omdbImdbRating,
                     omdbRottenTomatoesScore = existing.omdbRottenTomatoesScore ?: movie.omdbRottenTomatoesScore,
                     omdbMetacriticScore = existing.omdbMetacriticScore ?: movie.omdbMetacriticScore,
@@ -171,6 +196,14 @@ interface MovieDao {
         ORDER BY category
     """)
     suspend fun getCategoriesWithCount(): List<CategoryWithCount>
+
+    @Query("""
+        SELECT * FROM movies 
+        WHERE (tmdbCast LIKE '%' || :name || '%' OR tmdbDirector = :name) 
+        AND isHidden = 0 
+        ORDER BY tmdbPopularity DESC
+    """)
+    suspend fun getByPerson(name: String): List<Movie>
 }
 
 data class CategoryWithCount(

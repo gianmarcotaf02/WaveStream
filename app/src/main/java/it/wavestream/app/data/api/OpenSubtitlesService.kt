@@ -11,7 +11,6 @@ interface OpenSubtitlesService {
     
     companion object {
         const val BASE_URL = "https://api.opensubtitles.com/api/v1/"
-        const val API_KEY = "6eVFIj0IVFqCwzPFDLvfM6wpuB53UeHK"
     }
     
     // ========== Authentication ==========

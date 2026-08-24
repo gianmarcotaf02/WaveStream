@@ -18,10 +18,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import dagger.hilt.android.AndroidEntryPoint
+import it.wavestream.app.data.cache.NetworkMonitor
 import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.WatchProgress
@@ -47,6 +51,7 @@ import kotlinx.coroutines.Dispatchers
 @AndroidEntryPoint
 class PlayerActivity : ComponentActivity() {
     
+    @Inject lateinit var networkMonitor: NetworkMonitor
     @Inject lateinit var watchProgressDao: WatchProgressDao
     @Inject lateinit var playNextManager: PlayNextManager
     @Inject lateinit var subtitleManager: SubtitleManager
@@ -104,9 +109,14 @@ class PlayerActivity : ComponentActivity() {
     
     // Auto-retry for live channel buffering
     private var bufferingRetryCount = 0
-    private val MAX_BUFFERING_RETRIES = 5
-    private val FIRST_RETRY_DELAY_MS = 5000L  // First retry after 5 seconds
-    private val SUBSEQUENT_RETRY_DELAY_MS = 7000L  // Subsequent retries every 7 seconds
+    private val MAX_BUFFERING_RETRIES = 8
+    private val FIRST_RETRY_DELAY_MS = 3000L
+    private val MAX_RETRY_DELAY_MS = 30000L
+    
+    private fun calculateRetryDelay(attempt: Int): Long {
+        return (FIRST_RETRY_DELAY_MS + (attempt.toLong() * attempt * 500L))
+            .coerceAtMost(MAX_RETRY_DELAY_MS)
+    }
     
     // Auto-retry runnable for buffering - must use explicit function to avoid recursive type inference
     private val bufferingTimeoutRunnable: Runnable = object : Runnable {
@@ -129,7 +139,13 @@ class PlayerActivity : ComponentActivity() {
             }
             
             // Show retry feedback
-            android.widget.Toast.makeText(this, "Riconnessione... (tentativo $bufferingRetryCount/$MAX_BUFFERING_RETRIES)", android.widget.Toast.LENGTH_SHORT).show()
+            if (bufferingRetryCount > 1) {
+                android.widget.Toast.makeText(
+                    this,
+                    "Riconnessione... (tentativo $bufferingRetryCount/$MAX_BUFFERING_RETRIES)",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
             
             // Aggressive retry: completely recreate media item
             forceReloadStream()
@@ -143,23 +159,33 @@ class PlayerActivity : ComponentActivity() {
     private fun forceReloadStream() {
         if (!::player.isInitialized) return
         
-        android.util.Log.d("PlayerActivity", "Force reloading stream: $streamUrl")
-        
-        // Stop current playback
-        player.stop()
-        player.clearMediaItems()
-        
-        // Recreate media item from scratch
-        val mediaItem = androidx.media3.common.MediaItem.Builder()
-            .setUri(android.net.Uri.parse(streamUrl))
-            .build()
-        
-        player.setMediaItem(mediaItem)
-        player.prepare()
-        player.play()
-        
-        // Schedule next retry timeout
-        bufferingHandler.postDelayed(bufferingTimeoutRunnable, SUBSEQUENT_RETRY_DELAY_MS)
+        try {
+            android.util.Log.d("PlayerActivity", "Force reloading stream: $streamUrl")
+            
+            player.stop()
+            player.clearMediaItems()
+            
+            val mediaItem = androidx.media3.common.MediaItem.Builder()
+                .setUri(android.net.Uri.parse(streamUrl))
+                .build()
+            
+            player.setMediaItem(mediaItem)
+            player.prepare()
+            player.play()
+            
+            val nextDelay = calculateRetryDelay(bufferingRetryCount)
+            android.util.Log.d("PlayerActivity", "Next retry in ${nextDelay}ms (attempt $bufferingRetryCount)")
+            bufferingHandler.postDelayed(bufferingTimeoutRunnable, nextDelay)
+        } catch (e: Exception) {
+            android.util.Log.e("PlayerActivity", "Force reload failed: ${e.message}", e)
+            if (bufferingRetryCount >= MAX_BUFFERING_RETRIES) {
+                finish()
+            } else {
+                bufferingRetryCount++
+                val retryDelay = calculateRetryDelay(bufferingRetryCount)
+                bufferingHandler.postDelayed({ forceReloadStream() }, retryDelay)
+            }
+        }
     }
     
     // MediaSession for headphone/Bluetooth button controls
@@ -205,10 +231,30 @@ class PlayerActivity : ComponentActivity() {
         // Keep screen on during playback to prevent standby
         window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         
-        initPlayer()
-        setupMediaSession()  // Enable headphone/Bluetooth button controls
+        try {
+            initPlayer()
+            setupMediaSession()
+            
+            // START PLAYBACK IMMEDIATELY if URL is already available
+            if (streamUrl.isNotEmpty()) {
+                android.util.Log.d("PlayerActivity", "Stream URL available from intent - starting playback immediately")
+                startPlayback()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("PlayerActivity", "Player init failed: ${e.message}", e)
+            android.util.Log.e("PlayerActivity", "Stacktrace: ${android.util.Log.getStackTraceString(e)}")
+            android.widget.Toast.makeText(
+                this, 
+                "Errore player: ${e.message?.take(80) ?: "sconosciuto"}", 
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+            // Release resources if player was partially initialized
+            try { if (::player.isInitialized) player.release() } catch (_: Exception) {}
+            finish()
+            return
+        }
         
-        // If stream URL is missing, fetch from database, then start playback
+        // Load remaining data in background (preferences, DB fetches, next/prev episodes)
         lifecycleScope.launch {
             // Load seek preferences
             seekForwardSeconds = userPreferences.getSeekForwardSeconds()
@@ -219,16 +265,54 @@ class PlayerActivity : ComponentActivity() {
                 android.util.Log.d("PlayerActivity", "Stream URL empty, fetching from database...")
                 streamUrl = fetchStreamUrlFromDatabase() ?: ""
                 android.util.Log.d("PlayerActivity", "Fetched streamUrl: $streamUrl")
+                
+                if (streamUrl.isEmpty()) {
+                    android.util.Log.e("PlayerActivity", "Stream URL is empty!")
+                    android.widget.Toast.makeText(this@PlayerActivity, "Errore: URL streaming mancante", android.widget.Toast.LENGTH_LONG).show()
+                    finish()
+                    return@launch
+                }
+                
+                // Start playback now that we have the URL
+                startPlayback()
             }
             
-            if (streamUrl.isEmpty()) {
-                android.util.Log.e("PlayerActivity", "Stream URL is empty!")
-                android.widget.Toast.makeText(this@PlayerActivity, "Errore: URL streaming mancante", android.widget.Toast.LENGTH_LONG).show()
-                finish()
-                return@launch
+            // Check for downloaded content (only for VOD) and switch to cache if found
+            if (contentType != ContentType.CHANNEL) {
+                val isDownloaded = withContext(Dispatchers.IO) {
+                    downloadedContentDao.getByContent(contentType, contentId)?.isComplete == true
+                }
+                if (isDownloaded) {
+                    android.util.Log.d("PlayerActivity", "Switching to offline cache: $title")
+                    player.stop()
+                    player.clearMediaItems()
+                    val cacheFactory = downloadContentManager.cacheDataSourceFactory
+                    val cacheMediaSourceFactory = DefaultMediaSourceFactory(cacheFactory)
+                    val cacheMediaSource = cacheMediaSourceFactory.createMediaSource(
+                        MediaItem.fromUri(Uri.parse(streamUrl))
+                    )
+                    player.setMediaSource(cacheMediaSource)
+                    player.prepare()
+                    player.play()
+                }
             }
             
-            startPlayback()
+            // Apply volume normalization (async, doesn't block playback start)
+            val volumeLevel = userPreferences.getPlayerVolumeLevel()
+            player.volume = volumeLevel / 100f
+            android.util.Log.d("PlayerActivity", "Applied volume normalization: $volumeLevel%")
+            
+            // Restore watch progress for VOD
+            if (contentType != ContentType.CHANNEL) {
+                val progress = withContext(Dispatchers.IO) {
+                    watchProgressDao.getProgress(profileId, contentType, contentId)
+                }
+                progress?.let {
+                    if (it.position > 0 && it.position < it.duration - 30_000) {
+                        player.seekTo(it.position)
+                    }
+                }
+            }
             
             // Check auto-play preferences
             _autoPlayNextEnabled.value = userPreferences.getAutoPlayNext()
@@ -330,19 +414,39 @@ class PlayerActivity : ComponentActivity() {
     }
     
     private fun initPlayer() {
-        // Optimized buffer configuration for IPTV streams
+        val isLive = contentType == ContentType.CHANNEL
+
+        // Optimized buffer: reduce VOD buffer to 30s (from 90s) to save RAM on TV devices
+        // Live TV keeps minimal buffers for low latency
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                20_000,    // Min buffer (20s) - increased from 15s to reduce rebuffering
-                90_000,    // Max buffer (1.5 min) - increased from 60s for smoother playback
-                5_000,     // Buffer for playback to resume (5s) - increased from 2.5s
-                10_000     // Buffer after seek (10s) - increased from 5s to handle seek better
+                if (isLive) 5_000 else 15_000,      // minBuffer
+                if (isLive) 15_000 else 30_000,     // maxBuffer (was 90s, too much RAM on TV)
+                if (isLive) 2_500 else 2_500,       // bufferForPlayback (rebuffer → playback)
+                if (isLive) 5_000 else 5_000        // bufferForPlaybackAfterRebuffer
             )
             .setPrioritizeTimeOverSizeThresholds(true)
+            .setBackBuffer(10_000, true) // Keep last 10s for back-skip without re-downloading
             .build()
-        
-        player = ExoPlayer.Builder(this)
+
+        // Custom HTTP DataSource with optimized timeouts and keep-alive
+        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setConnectTimeoutMs(if (isLive) 10_000 else 15_000)
+            .setReadTimeoutMs(if (isLive) 15_000 else 20_000)
+            .setUserAgent("WaveStream/1.0")
+
+        val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
+        val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
+
+        // Explicit HW decoder configuration for better TV compatibility
+        val renderersFactory = DefaultRenderersFactory(this)
+            .setEnableDecoderFallback(true)
+            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
+
+        player = ExoPlayer.Builder(this, renderersFactory)
             .setLoadControl(loadControl)
+            .setMediaSourceFactory(mediaSourceFactory)
+            .setHandleAudioBecomingNoisy(true)
             .build()
         
         player.addListener(object : Player.Listener {
@@ -354,7 +458,7 @@ class PlayerActivity : ComponentActivity() {
                         // Start buffering timeout for Live TV
                         if (contentType == ContentType.CHANNEL) {
                             bufferingHandler.removeCallbacks(bufferingTimeoutRunnable)
-                            bufferingHandler.postDelayed(bufferingTimeoutRunnable, 5000) // 5 seconds
+                            bufferingHandler.postDelayed(bufferingTimeoutRunnable, 3000) // 3 seconds
                         }
                     }
                     Player.STATE_READY -> {
@@ -389,19 +493,22 @@ class PlayerActivity : ComponentActivity() {
                     
                     if (bufferingRetryCount < MAX_BUFFERING_RETRIES) {
                         android.util.Log.w("PlayerActivity", "Error recovery - retry attempt $bufferingRetryCount")
-                        android.widget.Toast.makeText(
-                            this@PlayerActivity,
-                            "Errore stream, riconnessione... (tentativo $bufferingRetryCount/$MAX_BUFFERING_RETRIES)",
-                            android.widget.Toast.LENGTH_SHORT
-                        ).show()
+                        if (bufferingRetryCount > 1) {
+                            android.widget.Toast.makeText(
+                                this@PlayerActivity,
+                                "Errore stream, riconnessione... (tentativo $bufferingRetryCount/$MAX_BUFFERING_RETRIES)",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        }
                         
-                        // Delay before retry to allow server to recover
-                        bufferingHandler.postDelayed({ forceReloadStream() }, 2000)
+                        // Exponential backoff for retry delay
+                        val retryDelay = calculateRetryDelay(bufferingRetryCount)
+                        bufferingHandler.postDelayed({ forceReloadStream() }, retryDelay)
                     } else {
                         android.util.Log.e("PlayerActivity", "All error recovery attempts failed")
                         android.widget.Toast.makeText(
                             this@PlayerActivity,
-                            "Impossibile riprodurre il canale",
+                            "Impossibile riprodurre il canale. Riprova più tardi.",
                             android.widget.Toast.LENGTH_LONG
                         ).show()
                         finish()
@@ -432,7 +539,7 @@ class PlayerActivity : ComponentActivity() {
                         this.contentType = ContentType.EPISODE
                         this.season = episode.seasonNumber
                         this.episode = episode.episodeNumber
-                        this.subtitle = "Stagione ${episode.seasonNumber} - Episodio ${episode.episodeNumber}"
+                        this.subtitle = "Stagione ${episode.seasonNumber} Episodio ${episode.episodeNumber}"
                         episode.streamUrl
                     } else {
                         null
@@ -446,7 +553,7 @@ class PlayerActivity : ComponentActivity() {
                         this.contentType = ContentType.EPISODE
                         this.season = firstEpisode.seasonNumber
                         this.episode = firstEpisode.episodeNumber
-                        this.subtitle = "Stagione ${firstEpisode.seasonNumber} - Episodio ${firstEpisode.episodeNumber}"
+                        this.subtitle = "Stagione ${firstEpisode.seasonNumber} Episodio ${firstEpisode.episodeNumber}"
                         firstEpisode.streamUrl
                     } else {
                         null
@@ -465,42 +572,18 @@ class PlayerActivity : ComponentActivity() {
     }
     
     @androidx.annotation.OptIn(UnstableApi::class)
-    private suspend fun startPlayback() {
-        // Check for downloaded content
-        val isDownloaded = withContext(Dispatchers.IO) {
-            downloadedContentDao.getByContent(contentType, contentId)?.isComplete == true
-        }
-
-        val mediaItem = MediaItem.fromUri(Uri.parse(streamUrl))
-        
-        if (isDownloaded) {
-            android.util.Log.d("PlayerActivity", "Playing from offline cache: $title")
-            val cacheFactory = downloadContentManager.cacheDataSourceFactory
-            val mediaSourceFactory = DefaultMediaSourceFactory(cacheFactory)
-            val mediaSource = mediaSourceFactory.createMediaSource(mediaItem)
-            player.setMediaSource(mediaSource)
-        } else {
+    private fun startPlayback() {
+        try {
+            val mediaItem = MediaItem.fromUri(Uri.parse(streamUrl))
             player.setMediaItem(mediaItem)
+            player.prepare()
+            player.play()
+        } catch (e: Exception) {
+            android.util.Log.e("PlayerActivity", "startPlayback failed: ${e.message}", e)
+            android.widget.Toast.makeText(this, "Errore nell'avvio dello stream", android.widget.Toast.LENGTH_SHORT).show()
+            finish()
         }
-        
-        player.prepare()
-        
-        // Restore position and apply volume normalization
-        // Apply volume normalization (default 70% to reduce loud IPTV streams)
-        val volumeLevel = userPreferences.getPlayerVolumeLevel()
-        player.volume = volumeLevel / 100f
-        android.util.Log.d("PlayerActivity", "Applied volume normalization: $volumeLevel%")
-        
-        val progress = watchProgressDao.getProgress(profileId, contentType, contentId)
-        progress?.let {
-            if (it.position > 0 && it.position < it.duration - 30_000) {
-                player.seekTo(it.position)
-            }
-        }
-        player.play()
     }
-    
-
     
     /**
      * Simple seek by milliseconds (for media keys)
@@ -840,7 +923,6 @@ class PlayerActivity : ComponentActivity() {
         
         lifecycleScope.launch {
             try {
-                // Check if authenticated first
                 if (!subtitleManager.isAuthenticated()) {
                     android.widget.Toast.makeText(
                         this@PlayerActivity,
@@ -850,7 +932,6 @@ class PlayerActivity : ComponentActivity() {
                     return@launch
                 }
                 
-                // Get IMDb ID from content if available
                 val imdbId = when (contentType) {
                     ContentType.MOVIE -> movieDao.getMovieById(contentId)?.imdbId
                     ContentType.SERIES, ContentType.EPISODE -> {
@@ -860,15 +941,22 @@ class PlayerActivity : ComponentActivity() {
                     else -> null
                 }
                 
-                android.util.Log.d("PlayerActivity", "Searching subtitles: title=$title, imdbId=$imdbId, season=$season, episode=$episode")
+                // Use user's preferred subtitle language
+                val subtitleLanguage = try {
+                    userPreferences.getSubtitleLanguage()
+                } catch (e: Exception) {
+                    "it"
+                }
                 
-                // Search for subtitles using SubtitleManager
+                android.util.Log.d("PlayerActivity", "Searching subtitles: title=$title, imdbId=$imdbId, lang=$subtitleLanguage, season=$season, episode=$episode")
+                
                 val subtitles = subtitleManager.searchRemoteSubtitles(
                     query = title,
                     imdbId = imdbId,
                     type = if (contentType == ContentType.MOVIE) "movie" else "episode",
                     season = season,
-                    episode = episode
+                    episode = episode,
+                    languages = subtitleLanguage
                 )
                 
                 if (subtitles.isEmpty()) {
@@ -915,7 +1003,6 @@ class PlayerActivity : ComponentActivity() {
             
             when (result) {
                 is SubtitleManager.DownloadState.Success -> {
-                    // Apply subtitle to player
                     val subtitlePath = result.filePath
                     val currentMediaItem = player.currentMediaItem
                     if (currentMediaItem != null) {
@@ -950,8 +1037,8 @@ class PlayerActivity : ComponentActivity() {
             val currentPos = player.currentPosition
             val totalDur = player.duration
             val remainingMs = totalDur - currentPos
-            // Completed if watched > 95% OR if remaining time <= 7 minutes (credits threshold)
-            val isCompleted = currentPos > (totalDur * 0.95) || remainingMs <= 7 * 60 * 1000
+            // Completed if watched > 95% OR if remaining time <= 6 minutes (credits threshold)
+            val isCompleted = currentPos > (totalDur * 0.95) || remainingMs <= 6 * 60 * 1000
             
             lifecycleScope.launch {
                 val progress = WatchProgress(
@@ -1071,7 +1158,7 @@ class PlayerActivity : ComponentActivity() {
         progressHandler.removeCallbacksAndMessages(null)
         nextEpisodeHandler.removeCallbacksAndMessages(null)
         bufferingHandler.removeCallbacksAndMessages(null)
-        player.release()
+        if (::player.isInitialized) player.release()
     }
     
     /**

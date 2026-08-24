@@ -102,12 +102,12 @@ class ContentNameParser @Inject constructor() {
     /**
      * Parse content name and extract metadata
      */
-    fun parse(name: String, category: String? = null): ParsedContent {
+    fun parse(name: String, category: String? = null, tvgType: String? = null, duration: Int = -1): ParsedContent {
         val originalName = name.trim()
         var workingName = originalName
         
         // Detect content type from category first
-        val contentType = detectContentType(category, originalName)
+        val contentType = detectContentType(category, originalName, tvgType, duration)
         
         // Extract year
         val year = extractYear(workingName)
@@ -172,10 +172,19 @@ class ContentNameParser @Inject constructor() {
     /**
      * Detect content type from category name
      */
-    fun detectContentType(category: String?, name: String): ContentType {
+    fun detectContentType(category: String?, name: String, tvgType: String? = null, duration: Int = -1): ContentType {
         val categoryLower = category?.lowercase() ?: ""
         @Suppress("UNUSED_VARIABLE")
         val nameLower = name.lowercase()
+        
+        // Check tvg-type attribute first (most reliable)
+        if (tvgType != null) {
+            when (tvgType.lowercase()) {
+                "live" -> return ContentType.LIVE_TV
+                "movie", "vod", "film" -> return ContentType.MOVIE
+                "series", "tvshow", "episode" -> return ContentType.SERIES
+            }
+        }
         
         // Check category first (most reliable)
         if (liveTvCategories.any { categoryLower.contains(it) }) {
@@ -196,6 +205,11 @@ class ContentNameParser @Inject constructor() {
         // Check for year in parentheses (common for movies)
         if ("""\(\d{4}\)""".toRegex().containsMatchIn(name)) {
             return ContentType.MOVIE
+        }
+        
+        // If duration <= 0 (live stream indicator, both -1 and 0 are common) and no VOD patterns matched, assume live TV
+        if (duration <= 0) {
+            return ContentType.LIVE_TV
         }
         
         return ContentType.UNKNOWN

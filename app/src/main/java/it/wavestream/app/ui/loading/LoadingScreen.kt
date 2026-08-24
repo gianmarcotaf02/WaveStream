@@ -1,9 +1,13 @@
 package it.wavestream.app.ui.loading
 
+import android.content.Context
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.*
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,12 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -30,9 +34,29 @@ import it.wavestream.app.R
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
+import it.wavestream.app.ui.profile.getAvatarResource
+import it.wavestream.app.ui.profile.getAvatarIcon
 import kotlinx.coroutines.delay
 
-// Fun phrases that rotate during loading
+data class TriviaItem(
+    val title: String,
+    val category: String,
+    val text: String
+)
+
+// Default fallback trivia phrases in Italian
+private val fallbackCuriosities = listOf(
+    "\"GTO - Great Teacher Onizuka\" rese popolare il genere scolastico con protagonista adulto: il manga di Tōru Fujisawa vendette oltre 50 milioni di copie.",
+    "\"Digimon Adventure\" nacque nel 1999 come rivale di Pokémon ma sviluppò trame più mature: i fan lo considerano superiore nella narrazione a lungo termine.",
+    "Il primo anime trasmesso in televisione è stato Astro Boy nel 1963, creato dal leggendario Osamu Tezuka.",
+    "L'anime film Akira (1988) è stato realizzato quasi interamente a mano, con oltre 160.000 fogli di celluloide disegnati singolarmente.",
+    "L'app IPTV Player WaveStream è progettata specificamente per Android TV con un'interfaccia ultra-veloce e fluida.",
+    "Puoi salvare i tuoi film e serie preferiti nei Preferiti o creare Liste personalizzate premendo a lungo su un contenuto.",
+    "Nel lettore video puoi premere la freccia GIÙ per cambiare traccia audio o sottotitoli in tempo reale.",
+    "WaveStream sincronizza automaticamente la guida TV (EPG) per permetterti di non perdere nessun programma in diretta."
+)
+
+// Fun phrases that rotate during loading if profileName is empty (e.g. initial setup)
 private val loadingPhrases = listOf(
     "Prepariamo il popcorn... 🍿",
     "Scopriamo cosa c'è in onda...",
@@ -47,8 +71,35 @@ private val loadingPhrases = listOf(
 )
 
 /**
+ * Loads curiosities array from assets/curiosities.json
+ */
+private fun loadCuriositiesFromAssets(context: Context): List<TriviaItem> {
+    return try {
+        val jsonString = context.assets.open("curiosities.json").bufferedReader().use { it.readText() }
+        val jsonArray = org.json.JSONArray(jsonString)
+        val list = mutableListOf<TriviaItem>()
+        for (i in 0 until jsonArray.length()) {
+            val item = jsonArray.get(i)
+            if (item is org.json.JSONObject) {
+                list.add(
+                    TriviaItem(
+                        title = item.optString("titolo", ""),
+                        category = item.optString("categoria", ""),
+                        text = item.optString("curiosita", "")
+                    )
+                )
+            }
+        }
+        list
+    } catch (e: Exception) {
+        android.util.Log.e("LoadingScreen", "Error loading curiosities from assets", e)
+        emptyList()
+    }
+}
+
+/**
  * Loading Screen - Modern design with fluid animations
- * Premium streaming app style with rotating phrases
+ * Premium streaming app style with rotating phrases or profile curiosities
  */
 @Composable
 fun LoadingScreen(
@@ -56,24 +107,58 @@ fun LoadingScreen(
     detailText: String,
     progress: Int,
     showProgressBar: Boolean = false,
+    profileName: String = "",
+    avatarIndex: Int = 0,
+    avatarColorHex: String = "#8B5CF6",
     modifier: Modifier = Modifier
 ) {
-    // Rotating phrase state
-    var currentPhraseIndex by remember { mutableIntStateOf(0) }
+    val context = LocalContext.current
     
-    // Cycle through phrases every 3 seconds
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(3000)
-            currentPhraseIndex = (currentPhraseIndex + 1) % loadingPhrases.size
+    // Load curiosities list
+    val curiosities = remember(context) {
+        loadCuriositiesFromAssets(context)
+    }
+    
+    val activeTriviaList = remember(curiosities) {
+        val baseList = if (curiosities.isNotEmpty()) {
+            curiosities
+        } else {
+            fallbackCuriosities.map { TriviaItem(title = "", category = "", text = it) }
+        }
+        baseList.shuffled().take(20)
+    }
+    
+    // Rotating trivia index state
+    var currentTriviaIndex by remember { mutableIntStateOf(0) }
+    
+    // Cycle through trivia every 5 seconds if profile name is present
+    if (profileName.isNotEmpty()) {
+        LaunchedEffect(activeTriviaList) {
+            if (activeTriviaList.isNotEmpty()) {
+                while (true) {
+                    delay(5000)
+                    currentTriviaIndex = (currentTriviaIndex + 1) % activeTriviaList.size
+                }
+            }
         }
     }
     
-    // Phrase fade animation
-    val phraseAlpha by animateFloatAsState(
+    // Rotating phrase state (for standard loading phase without profile selection)
+    var currentPhraseIndex by remember { mutableIntStateOf(0) }
+    if (profileName.isEmpty()) {
+        LaunchedEffect(Unit) {
+            while (true) {
+                delay(3000)
+                currentPhraseIndex = (currentPhraseIndex + 1) % loadingPhrases.size
+            }
+        }
+    }
+    
+    // Phrase/trivia fade animation
+    val textAlpha by animateFloatAsState(
         targetValue = 1f,
         animationSpec = tween(500),
-        label = "phraseAlpha"
+        label = "textAlpha"
     )
     
     Box(
@@ -84,36 +169,58 @@ fun LoadingScreen(
         // Animated background with moving gradient
         AnimatedGradientBackground()
         
-        // Content
+        // Center Content Area
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(64.dp),
+                .padding(bottom = if (profileName.isNotEmpty()) 200.dp else 120.dp), // make space for trivia card in the lower third
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Animated Logo with glow
-            AnimatedLogo()
+            if (profileName.isNotEmpty()) {
+                // Show custom profile avatar and rotating loading ring
+                ProfileAvatarLoader(
+                    name = profileName,
+                    avatarIndex = avatarIndex,
+                    avatarColorHex = avatarColorHex
+                )
+                
+                Spacer(modifier = Modifier.height(20.dp))
+                
+                Text(
+                    text = profileName,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp,
+                        letterSpacing = 0.5.sp
+                    ),
+                    color = WaveStreamColors.TextPrimary,
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                // Animated Logo with glow
+                AnimatedLogo()
+                
+                Spacer(modifier = Modifier.height(48.dp))
+                
+                // Bouncing dots loader
+                BouncingDotsLoader()
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                // Rotating fun phrase
+                Text(
+                    text = loadingPhrases[currentPhraseIndex],
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
+                    color = WaveStreamColors.TextPrimary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.alpha(textAlpha)
+                )
+            }
             
-            Spacer(modifier = Modifier.height(48.dp))
-            
-            // Bouncing dots loader
-            BouncingDotsLoader()
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            // Rotating fun phrase
-            Text(
-                text = loadingPhrases[currentPhraseIndex],
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Medium
-                ),
-                color = WaveStreamColors.TextPrimary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.alpha(phraseAlpha)
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
             // Status/detail text (actual progress info)
             if (statusText.isNotEmpty()) {
@@ -134,13 +241,316 @@ fun LoadingScreen(
                     textAlign = TextAlign.Center
                 )
             }
-            
-            // Progress bar (optional)
-            if (showProgressBar && progress > 0) {
-                Spacer(modifier = Modifier.height(40.dp))
+        }
+        
+
+        
+        // Bottom Trivia Card Area (only shown when profile details are available)
+        if (profileName.isNotEmpty()) {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "LO SAPEVI?",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    ),
+                    color = WaveStreamColors.TextTertiary.copy(alpha = 0.8f)
+                )
                 
-                GlassProgressBar(progress = progress)
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                AnimatedContent(
+                    targetState = activeTriviaList.getOrNull(currentTriviaIndex),
+                    transitionSpec = {
+                        (androidx.compose.animation.fadeIn(animationSpec = tween(600)) +
+                                androidx.compose.animation.slideInVertically(animationSpec = tween(600), initialOffsetY = { it / 3 })) togetherWith
+                                (androidx.compose.animation.fadeOut(animationSpec = tween(600)) +
+                                        androidx.compose.animation.slideOutVertically(animationSpec = tween(600), targetOffsetY = { -it / 3 }))
+                    },
+                    label = "triviaTransition"
+                ) { triviaItem ->
+                    if (triviaItem != null) {
+                        TriviaCard(item = triviaItem)
+                    }
+                }
             }
+        }
+    }
+}
+
+/**
+ * Premium glassmorphic trivia card with overlapping background card effect (double sheet)
+ */
+@Composable
+private fun TriviaCard(
+    item: TriviaItem,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .width(580.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        // Shadow/Offset card behind (background sheet)
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .offset(y = 6.dp, x = 3.dp)
+                .graphicsLayer {
+                    rotationZ = -2f
+                }
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color(0xFF161215).copy(alpha = 0.5f))
+                .border(
+                    width = 1.dp,
+                    color = Color.White.copy(alpha = 0.05f),
+                    shape = RoundedCornerShape(20.dp)
+                )
+        )
+        
+        // Main foreground card
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    rotationZ = -0.5f
+                }
+                .shadow(
+                    elevation = 12.dp,
+                    shape = RoundedCornerShape(20.dp),
+                    spotColor = Color.Black.copy(alpha = 0.6f)
+                )
+                .clip(RoundedCornerShape(20.dp))
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xFF261D22).copy(alpha = 0.85f),
+                            Color(0xFF1B161B).copy(alpha = 0.9f)
+                        )
+                    )
+                )
+                .border(
+                    width = 1.2.dp,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.12f),
+                            Color.White.copy(alpha = 0.02f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(20.dp)
+                )
+                .padding(horizontal = 32.dp, vertical = 20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (item.title.isNotEmpty()) {
+                    Text(
+                        text = if (item.category.isNotEmpty()) "${item.category.uppercase()} • ${item.title}" else item.title,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = WaveStreamColors.AccentLight,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                Text(
+                    text = item.text,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        lineHeight = 22.sp,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Normal
+                    ),
+                    color = Color.White.copy(alpha = 0.9f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Animated profile loader with rotating accent rings and breathing pulse avatar
+ */
+@Composable
+private fun ProfileAvatarLoader(
+    name: String,
+    avatarIndex: Int,
+    avatarColorHex: String,
+    modifier: Modifier = Modifier
+) {
+    val initial = name.firstOrNull()?.uppercase() ?: "?"
+    val parsedColor = remember(avatarColorHex) {
+        try {
+            Color(android.graphics.Color.parseColor(avatarColorHex))
+        } catch (e: Exception) {
+            Color(0xFF8B5CF6) // Default purple
+        }
+    }
+    
+    // Rotating loading ring animations
+    val infiniteTransition = rememberInfiniteTransition(label = "profileLoaderRing")
+    val rotationAngle by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ringRotation"
+    )
+    
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "avatarPulse"
+    )
+    
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        // Glowing background orb matching avatar color
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .background(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            parsedColor.copy(alpha = 0.2f),
+                            Color.Transparent
+                        )
+                    ),
+                    shape = CircleShape
+                )
+        )
+        
+        // Rotating Ring (Outer dashed/segmented ring)
+        androidx.compose.foundation.Canvas(
+            modifier = Modifier
+                .size(144.dp)
+                .graphicsLayer {
+                    rotationZ = rotationAngle
+                }
+        ) {
+            drawArc(
+                color = parsedColor,
+                startAngle = 0f,
+                sweepAngle = 90f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 4.dp.toPx(),
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            )
+            drawArc(
+                color = parsedColor.copy(alpha = 0.25f),
+                startAngle = 90f,
+                sweepAngle = 90f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 2.dp.toPx(),
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            )
+            drawArc(
+                color = parsedColor,
+                startAngle = 180f,
+                sweepAngle = 90f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 4.dp.toPx(),
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            )
+            drawArc(
+                color = parsedColor.copy(alpha = 0.25f),
+                startAngle = 270f,
+                sweepAngle = 90f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 2.dp.toPx(),
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            )
+        }
+        
+        // Inner pulsing rotating ring (counter-clockwise)
+        androidx.compose.foundation.Canvas(
+            modifier = Modifier
+                .size(130.dp)
+                .graphicsLayer {
+                    rotationZ = -rotationAngle * 1.5f
+                }
+        ) {
+            drawArc(
+                color = Color.White.copy(alpha = 0.4f),
+                startAngle = 45f,
+                sweepAngle = 45f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 2.dp.toPx(),
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            )
+            drawArc(
+                color = Color.White.copy(alpha = 0.4f),
+                startAngle = 225f,
+                sweepAngle = 45f,
+                useCenter = false,
+                style = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = 2.dp.toPx(),
+                    cap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
+            )
+        }
+        
+        // The Profile Avatar Circle
+        Box(
+            modifier = Modifier
+                .size(112.dp)
+                .graphicsLayer {
+                    scaleX = pulseScale
+                    scaleY = pulseScale
+                }
+                .shadow(
+                    elevation = 16.dp,
+                    shape = CircleShape,
+                    spotColor = parsedColor.copy(alpha = 0.5f)
+                )
+                .clip(CircleShape)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            parsedColor.copy(alpha = 0.85f),
+                            parsedColor
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = getAvatarIcon(avatarIndex),
+                contentDescription = name,
+                modifier = Modifier.fillMaxSize().padding(24.dp),
+                tint = Color.Unspecified
+            )
         }
     }
 }
@@ -366,76 +776,7 @@ private fun BouncingDot(delay: Int, size: androidx.compose.ui.unit.Dp) {
     )
 }
 
-/**
- * Glass-morphism style progress bar with glow
- */
-@Composable
-private fun GlassProgressBar(
-    progress: Int,
-    modifier: Modifier = Modifier
-) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress / 100f,
-        animationSpec = tween(durationMillis = 400, easing = EaseOutCubic),
-        label = "progressAnimation"
-    )
-    
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = modifier
-                .width(350.dp)
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(WaveStreamColors.BackgroundTertiary.copy(alpha = 0.5f))
-        ) {
-            // Glow effect behind progress
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(animatedProgress)
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                WaveStreamColors.Accent.copy(alpha = 0.3f),
-                                WaveStreamColors.Accent.copy(alpha = 0.5f)
-                            )
-                        ),
-                        shape = RoundedCornerShape(4.dp)
-                    )
-            )
-            
-            // Main progress bar
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(animatedProgress)
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                WaveStreamColors.Accent,
-                                WaveStreamColors.AccentLight
-                            )
-                        ),
-                        shape = RoundedCornerShape(4.dp)
-                    )
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(12.dp))
-        
-        // Percentage
-        Text(
-            text = "$progress%",
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 1.sp
-            ),
-            color = WaveStreamColors.Accent
-        )
-    }
-}
+
 
 // ============ Loading State Data Class ============
 

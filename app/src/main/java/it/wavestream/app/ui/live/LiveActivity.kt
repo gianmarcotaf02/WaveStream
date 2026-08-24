@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -23,6 +24,7 @@ import androidx.tv.foundation.lazy.list.itemsIndexed
 import androidx.tv.foundation.lazy.grid.items as tvGridItems
 import androidx.tv.foundation.lazy.list.items as tvListItems
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -39,6 +41,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -49,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.ChannelDao
+import it.wavestream.app.data.database.dao.CategoryWithCount
 import it.wavestream.app.data.database.dao.PlaylistDao
 import it.wavestream.app.data.database.dao.RecentlyWatchedDao
 import it.wavestream.app.data.database.entity.Channel
@@ -120,6 +124,7 @@ class LiveActivity : ComponentActivity() {
         var isEpgLoading by remember { mutableStateOf(false) }
         var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
         var favoriteCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
+        var channelCounts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
         
         // Load favorites
         LaunchedEffect(Unit) {
@@ -155,17 +160,18 @@ class LiveActivity : ComponentActivity() {
             cats.add(0, RECENT_CATEGORY)  // Always show, even if empty
             categories = cats
             
-            // Auto-select first category AND load its channels immediately
-            cats.firstOrNull()?.let { firstCat ->
-                selectedCategory = firstCat
-                channels = if (firstCat == RECENT_CATEGORY) {
-                    val recentIds = recentlyWatchedDao.getRecentChannelIds(cutoff)
-                    channelDao.getChannelsByIds(recentIds)
-                } else {
-                    channelDao.getChannelsByCategoryList(firstCat)
-                }
+            // Load channel counts per category for the grid cards (single query)
+            val countsMap = mutableMapOf<String, Int>()
+            val countsResult = channelDao.getCategoriesWithCount()
+            for (item in countsResult) {
+                countsMap[item.name] = item.count
             }
+            // "Visti di recente" count
+            countsMap[RECENT_CATEGORY] = recentlyWatchedDao.getRecentChannelIds(cutoff).size
+            channelCounts = countsMap
+            
             isLoading = false
+            // Don't auto-select — start with category grid view
         }
         
         // Load EPG data if needed (respecting cache)
@@ -269,12 +275,19 @@ class LiveActivity : ComponentActivity() {
             onSearchClick = {
                 startActivity(Intent(this@LiveActivity, SearchActivity::class.java))
             },
-            onBackClick = { finish() },
+            onBackClick = {
+                if (selectedCategory != null) {
+                    selectedCategory = null  // Go back to category grid
+                } else {
+                    finish()
+                }
+            },
             onMultiscreenClick = {
                 startActivity(Intent(this@LiveActivity, MultiscreenActivity::class.java))
             },
             favoriteCategories = favoriteCategories,
-            onToggleFavorite = onToggleFavorite
+            onToggleFavorite = onToggleFavorite,
+            channelCounts = channelCounts
         )
     }
     
@@ -342,7 +355,8 @@ fun LiveScreen(
     onBackClick: () -> Unit,
     onMultiscreenClick: () -> Unit = {},
     favoriteCategories: Set<String> = emptySet(),
-    onToggleFavorite: (String) -> Unit = {}
+    onToggleFavorite: (String) -> Unit = {},
+    channelCounts: Map<String, Int> = emptyMap()
 ) {
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     
@@ -350,136 +364,130 @@ fun LiveScreen(
     val searchButtonFocusRequester = remember { FocusRequester() }
     val toggleButtonFocusRequester = remember { FocusRequester() }
     
-    Row(
+    // When no category is selected, show full-screen grid of category cards
+    if (selectedCategory == null) {
+        LiveCategoryGrid(
+            categories = categories,
+            favoriteCategories = favoriteCategories,
+            channelCounts = channelCounts,
+            onCategorySelect = onCategorySelect,
+            onBackClick = onBackClick,
+            onMultiscreenClick = onMultiscreenClick
+        )
+        return
+    }
+
+    // Category selected — show channels directly (no sidebar)
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(WaveStreamColors.BackgroundDark)
     ) {
-        // Left sidebar - categories with back button
-        LiveCategorySidebar(
-            categories = categories,
+        // Header with back button, category name, search, toggle
+        LiveHeader(
             selectedCategory = selectedCategory,
-            favoriteCategories = favoriteCategories,
-            onCategorySelect = onCategorySelect,
-            onToggleFavorite = onToggleFavorite,
+            channelCount = channels.size,
+            isGridMode = isGridMode,
+            onToggleMode = onToggleMode,
+            onSearchClick = onSearchClick,
             onBackClick = onBackClick,
-            onMultiscreenClick = onMultiscreenClick,
-            modifier = Modifier
-                .width(250.dp)
-                .fillMaxHeight()
+            searchButtonFocusRequester = searchButtonFocusRequester,
+            toggleButtonFocusRequester = toggleButtonFocusRequester
         )
         
-        // Right content
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
+        // Content
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            // Header with back button and toggle
-            LiveHeader(
-                selectedCategory = selectedCategory,
-                channelCount = channels.size,
-                isGridMode = isGridMode,
-                onToggleMode = onToggleMode,
-                onSearchClick = onSearchClick,
-                onBackClick = onBackClick,
-                searchButtonFocusRequester = searchButtonFocusRequester,
-                toggleButtonFocusRequester = toggleButtonFocusRequester
-            )
-            
-            // Content
-            Box(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                when {
-                    isLoading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = WaveStreamColors.Accent
-                        )
-                    }
-                    channels.isEmpty() -> {
-                        Text(
-                            text = "Nessun canale in questa categoria",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = WaveStreamColors.TextSecondary,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    isGridMode -> {
-                        // Grid mode - channel cards using TvLazyVerticalGrid for proper D-pad navigation
-                        androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid(
-                            columns = androidx.tv.foundation.lazy.grid.TvGridCells.Adaptive(minSize = 140.dp),
-                            contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 24.dp)
-                                .focusProperties {
-                                    // Allow navigating up to header buttons
-                                    up = toggleButtonFocusRequester
-                                }
-                        ) {
-                            tvGridItems(channels, key = { it.id }) { channel ->
-                                LiveChannelCard(
-                                    channel = channel,
-                                    currentProgram = currentPrograms[channel.id],
-                                    onClick = { onChannelClick(channel) }
-                                )
+            when {
+                isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = WaveStreamColors.Accent
+                    )
+                }
+                channels.isEmpty() -> {
+                    Text(
+                        text = "Nessun canale in questa categoria",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = WaveStreamColors.TextSecondary,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                isGridMode -> {
+                    // Grid mode - channel cards using TvLazyVerticalGrid for proper D-pad navigation
+                    androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid(
+                        columns = androidx.tv.foundation.lazy.grid.TvGridCells.Adaptive(minSize = 160.dp),
+                        contentPadding = PaddingValues(top = 16.dp, bottom = 24.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp)
+                            .focusProperties {
+                                // Allow navigating up to header buttons
+                                up = toggleButtonFocusRequester
                             }
+                    ) {
+                        tvGridItems(channels, key = { it.id }) { channel ->
+                            LiveChannelCard(
+                                channel = channel,
+                                currentProgram = currentPrograms[channel.id],
+                                currentTime = currentTime,
+                                onClick = { onChannelClick(channel) }
+                            )
                         }
                     }
-                    else -> {
-                        // EPG Timeline mode with time header and red current time line
-                        Column(modifier = Modifier.fillMaxSize()) {
-                            // Time header
-                            EpgTimeHeader(
-                                currentTime = currentTime,
-                                timeFormat = timeFormat
-                            )
+                }
+                else -> {
+                    // EPG Timeline mode with time header and red current time line
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        // Time header
+                        EpgTimeHeader(
+                            currentTime = currentTime,
+                            timeFormat = timeFormat
+                        )
+                        
+                        // Channel rows with programs using TvLazyColumn for proper D-pad navigation
+                        Box(modifier = Modifier.weight(1f)) {
+                            androidx.tv.foundation.lazy.list.TvLazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .focusProperties {
+                                        // Allow navigating up to header buttons
+                                        up = toggleButtonFocusRequester
+                                    },
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                tvListItems(channels, key = { it.id }) { channel ->
+                                    EpgChannelRow(
+                                        channel = channel,
+                                        programs = channelPrograms[channel.id] ?: emptyList(),
+                                        currentTime = currentTime,
+                                        timeFormat = timeFormat,
+                                        onClick = { onChannelClick(channel) }
+                                    )
+                                }
+                            }
                             
-                            // Channel rows with programs using TvLazyColumn for proper D-pad navigation
-                            Box(modifier = Modifier.weight(1f)) {
-                                androidx.tv.foundation.lazy.list.TvLazyColumn(
+                            // Current time line (RED)
+                            CurrentTimeLine(currentTime = currentTime)
+                            
+                            // Loading overlay for EPG
+                            if (isEpgLoading) {
+                                Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .focusProperties {
-                                            // Allow navigating up to header buttons
-                                            up = toggleButtonFocusRequester
-                                        },
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                        .background(Color.Black.copy(alpha = 0.5f)),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    tvListItems(channels, key = { it.id }) { channel ->
-                                        EpgChannelRow(
-                                            channel = channel,
-                                            programs = channelPrograms[channel.id] ?: emptyList(),
-                                            currentTime = currentTime,
-                                            timeFormat = timeFormat,
-                                            onClick = { onChannelClick(channel) }
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        CircularProgressIndicator(color = WaveStreamColors.Accent)
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = "Caricamento EPG...",
+                                            color = WaveStreamColors.TextPrimary
                                         )
-                                    }
-                                }
-                                
-                                // Current time line (RED)
-                                CurrentTimeLine(currentTime = currentTime)
-                                
-                                // Loading overlay for EPG
-                                if (isEpgLoading) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .background(Color.Black.copy(alpha = 0.5f)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            CircularProgressIndicator(color = WaveStreamColors.Accent)
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            Text(
-                                                text = "Caricamento EPG...",
-                                                color = WaveStreamColors.TextPrimary
-                                            )
-                                        }
                                     }
                                 }
                             }
@@ -737,15 +745,16 @@ private fun LiveHeader(
     isGridMode: Boolean,
     onToggleMode: () -> Unit,
     onSearchClick: () -> Unit,
-    @Suppress("UNUSED_PARAMETER") // onBackClick kept for API consistency
     onBackClick: () -> Unit,
     searchButtonFocusRequester: FocusRequester,
     toggleButtonFocusRequester: FocusRequester
 ) {
     val searchInteractionSource = remember { MutableInteractionSource() }
     val toggleInteractionSource = remember { MutableInteractionSource() }
+    val backInteractionSource = remember { MutableInteractionSource() }
     val isSearchFocused by searchInteractionSource.collectIsFocusedAsState()
     val isToggleFocused by toggleInteractionSource.collectIsFocusedAsState()
+    val isBackFocused by backInteractionSource.collectIsFocusedAsState()
     
     val searchBorderColor by animateColorAsState(
         targetValue = if (isSearchFocused) WaveStreamColors.Accent else Color.Transparent,
@@ -755,16 +764,42 @@ private fun LiveHeader(
         targetValue = if (isToggleFocused) WaveStreamColors.Accent else Color.Transparent,
         label = "toggleBorder"
     )
+    val backBorderColor by animateColorAsState(
+        targetValue = if (isBackFocused) WaveStreamColors.Accent else Color.Transparent,
+        label = "backBorder"
+    )
     
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 24.dp, vertical = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Back button
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .border(2.dp, backBorderColor, CircleShape)
+                .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f))
+                .focusable(interactionSource = backInteractionSource)
+                .clickable(
+                    interactionSource = backInteractionSource,
+                    indication = null,
+                    onClick = onBackClick
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Indietro",
+                tint = if (isBackFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary
+            )
+        }
+        
         // Category info
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = selectedCategory ?: "Live TV",
                 style = MaterialTheme.typography.headlineMedium,
@@ -835,6 +870,188 @@ private fun LiveHeader(
 /**
  * Category sidebar with back button at top
  */
+@Composable
+private fun LiveCategoryGrid(
+    categories: List<String>,
+    favoriteCategories: Set<String> = emptySet(),
+    channelCounts: Map<String, Int> = emptyMap(),
+    onCategorySelect: (String) -> Unit,
+    onBackClick: () -> Unit,
+    onMultiscreenClick: () -> Unit = {}
+) {
+    val gridState = androidx.tv.foundation.lazy.list.rememberTvLazyListState()
+    val backFocusRequester = remember { FocusRequester() }
+    val backInteractionSource = remember { MutableInteractionSource() }
+    val isBackFocused by backInteractionSource.collectIsFocusedAsState()
+    val backBorderColor by animateColorAsState(
+        targetValue = if (isBackFocused) WaveStreamColors.Accent else Color.Transparent,
+        label = "backBorder"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(WaveStreamColors.BackgroundDark)
+    ) {
+        // Top bar with back + title
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(WaveStreamColors.BackgroundPrimary.copy(alpha = 0.9f))
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .focusRequester(backFocusRequester)
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(2.dp, backBorderColor, CircleShape)
+                    .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f))
+                    .focusable(interactionSource = backInteractionSource)
+                    .clickable(
+                        interactionSource = backInteractionSource,
+                        indication = null,
+                        onClick = onBackClick
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Indietro",
+                    tint = if (isBackFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary
+                )
+            }
+
+            Text(
+                text = "Live TV",
+                style = MaterialTheme.typography.headlineSmall,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        // Grid of category cards
+        androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid(
+            columns = androidx.tv.foundation.lazy.grid.TvGridCells.Adaptive(minSize = 160.dp),
+            contentPadding = PaddingValues(24.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .focusProperties { up = backFocusRequester }
+        ) {
+            tvGridItems(categories.indices.toList(), key = { categories[it] }) { index ->
+                val category = categories[index]
+                val isFav = favoriteCategories.contains(category)
+                val count = channelCounts[category] ?: 0
+                LiveCategoryCard(
+                    category = category,
+                    channelCount = count,
+                    isFavorite = isFav,
+                    onClick = { onCategorySelect(category) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LiveCategoryCard(
+    category: String,
+    channelCount: Int,
+    isFavorite: Boolean,
+    onClick: () -> Unit
+) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.05f else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "catCardScale"
+    )
+
+    // Color derived from category name for visual variety
+    val categoryColor = remember(category) {
+        val colors = listOf(
+            Color(0xFF1E88E5), // Blue
+            Color(0xFF43A047), // Green
+            Color(0xFFE53935), // Red
+            Color(0xFF8E24AA), // Purple
+            Color(0xFFFF8F00), // Orange
+            Color(0xFF00ACC1), // Cyan
+            Color(0xFFD81B60), // Pink
+            Color(0xFF5E35B1), // Deep Purple
+            Color(0xFF3949AB), // Indigo
+            Color(0xFF00897B), // Teal
+        )
+        colors[Math.abs(category.hashCode()) % colors.size]
+    }
+
+    Card(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(120.dp)
+            .onFocusChanged { isFocused = it.isFocused }
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = WaveStreamColors.BackgroundSecondary
+        ),
+        border = BorderStroke(
+            width = if (isFocused) 3.dp else 0.dp,
+            color = if (isFocused) WaveStreamColors.Accent else Color.Transparent
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(categoryColor.copy(alpha = if (isFocused) 0.25f else 0.1f))
+                .padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = WaveStreamColors.TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (isFavorite) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Preferito",
+                            tint = Color(0xFFE91E63),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+
+                Text(
+                    text = if (channelCount > 0) "$channelCount canali" else "Nessun canale",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WaveStreamColors.TextSecondary
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun LiveCategorySidebar(
     categories: List<String>,
@@ -1017,6 +1234,7 @@ private fun LiveCategoryItem(
 private fun LiveChannelCard(
     channel: Channel,
     currentProgram: EpgProgram?,
+    currentTime: Long,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -1032,13 +1250,30 @@ private fun LiveChannelCard(
         label = "channelBorder"
     )
     
+    // Calculate EPG progress for current program
+    val epgProgress = remember(currentProgram, currentTime) {
+        if (currentProgram != null && currentProgram.start > 0 && currentProgram.end > currentProgram.start) {
+            val elapsed = currentTime - currentProgram.start
+            val total = currentProgram.end - currentProgram.start
+            (elapsed.toFloat() / total.toFloat()).coerceIn(0f, 1f)
+        } else 0f
+    }
+    
+    // Format time range
+    val timeRange = remember(currentProgram) {
+        if (currentProgram != null) {
+            val fmt = SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+            "${fmt.format(java.util.Date(currentProgram.start))} - ${fmt.format(java.util.Date(currentProgram.end))}"
+        } else null
+    }
+    
     Column(
         modifier = Modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .width(140.dp)  // Reduced from 180.dp for more compact grid
+            .width(160.dp)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1050,7 +1285,7 @@ private fun LiveChannelCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)  // Reduced from 100.dp for more compact cards
+                .height(90.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .border(2.dp, borderColor, RoundedCornerShape(12.dp))
                 .background(WaveStreamColors.CardBackground),
@@ -1083,9 +1318,27 @@ private fun LiveChannelCard(
                     )
                 }
             }
+            
+            // EPG progress bar at bottom of logo
+            if (currentProgram != null && epgProgress > 0f) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .background(Color.Black.copy(alpha = 0.5f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(epgProgress)
+                            .background(WaveStreamColors.Accent)
+                    )
+                }
+            }
         }
         
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         
         // Channel name
         Text(
@@ -1097,7 +1350,7 @@ private fun LiveChannelCard(
             fontWeight = FontWeight.Medium
         )
         
-        // Current program
+        // EPG: current program title
         currentProgram?.let { program ->
             Text(
                 text = program.title,
@@ -1105,6 +1358,16 @@ private fun LiveChannelCard(
                 color = WaveStreamColors.TextTertiary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+        
+        // EPG: time range
+        timeRange?.let { range ->
+            Text(
+                text = range,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                color = WaveStreamColors.TextTertiary.copy(alpha = 0.7f),
+                maxLines = 1
             )
         }
     }

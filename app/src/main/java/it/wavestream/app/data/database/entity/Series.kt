@@ -22,7 +22,17 @@ import androidx.room.PrimaryKey
         Index("playlistId"),
         Index("category"),
         Index("name"),
-        Index("tmdbId")
+        Index("tmdbId"),
+        Index("trendingCategory"),
+        Index("isHidden"),
+        Index("addedAt"),
+        Index("playlistOrder"),
+        Index(value = ["playlistId", "category", "isHidden"]),
+        Index(value = ["trendingCategory", "isHidden"]),
+        // Composite index for SeriesActivity: WHERE category = ? AND isHidden = 0 ORDER BY name
+        Index(value = ["category", "isHidden", "name"]),
+        // Composite index for getAllSeriesList: WHERE isHidden = 0 ORDER BY name (covers filter + sort)
+        Index(value = ["isHidden", "name"])
     ]
 )
 data class Series(
@@ -48,6 +58,7 @@ data class Series(
     
     // TMDB enriched data
     val tmdbId: Int? = null,
+    val tmdbImdbId: String? = null, // IMDB ID from TMDB external_ids
     val tmdbPosterPath: String? = null,
     val tmdbBackdropPath: String? = null,
     val tmdbName: String? = null,
@@ -61,6 +72,8 @@ data class Series(
     val tmdbNumberOfSeasons: Int? = null,
     val tmdbNumberOfEpisodes: Int? = null,
     val tmdbCast: String? = null, // JSON array of cast names
+    val tmdbCastJson: String? = null,    // JSON array of {id, name, character, profile_path, order}
+    val tmdbCrewJson: String? = null,    // JSON array of {id, name, job, department, profile_path}
     val tmdbStatus: String? = null, // "Returning Series", "Ended", etc.
     val tmdbTrailerKey: String? = null, // YouTube video key
     
@@ -93,7 +106,7 @@ data class Series(
     val genre: String? get() = xtreamGenre ?: tmdbGenres
     val cast: String? get() = xtreamCast ?: tmdbCast
     val director: String? get() = xtreamDirector // No tmdbDirector for series
-    val imdbId: String? get() = null
+    val imdbId: String? get() = tmdbImdbId
     val title: String get() = tmdbName?.takeIf { it.isNotEmpty() } ?: name
 }
 

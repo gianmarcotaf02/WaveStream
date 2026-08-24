@@ -14,8 +14,8 @@ android {
         applicationId = "it.wavestream.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 5
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -62,6 +62,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.core.splashscreen)
+
+    // Baseline Profile — pre-compilation of hot paths for 30-50% faster startup
+    implementation("androidx.profileinstaller:profileinstaller:1.3.1")
 
     // Leanback / TV
     implementation(libs.androidx.leanback)
