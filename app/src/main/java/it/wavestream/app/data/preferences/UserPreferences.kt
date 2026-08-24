@@ -95,6 +95,10 @@ class UserPreferences @Inject constructor(
         
         // In-app VPN (WireGuard)
         private val VPN_CONFIG = stringPreferencesKey("vpn_wireguard_config")
+        private val VPN_CONFIGS = stringSetPreferencesKey("vpn_wireguard_configs_set")
+        private val VPN_STRATEGY = stringPreferencesKey("vpn_strategy")
+        private val VPN_AUTO_ROTATE = booleanPreferencesKey("vpn_auto_rotate")
+        private val VPN_ROTATE_INTERVAL = stringPreferencesKey("vpn_rotate_interval")
         
         // TMDB Cache Update
         private val TMDB_LAST_UPDATE = longPreferencesKey("tmdb_last_update")
@@ -575,12 +579,58 @@ class UserPreferences @Inject constructor(
     suspend fun setVpnConfig(config: String) {
         dataStore.edit { it[VPN_CONFIG] = config }
     }
-    
+
     suspend fun getVpnConfig(): String {
         return dataStore.data.first()[VPN_CONFIG] ?: ""
     }
-    
-    fun getVpnConfigFlow(): Flow<String> = dataStore.data.map { it[VPN_CONFIG] ?: "" }
+
+    /** Aggiunge una config al pool (ogni config = un server). */
+    suspend fun addVpnConfig(config: String) {
+        dataStore.edit {
+            val current = it[VPN_CONFIGS] ?: emptySet()
+            it[VPN_CONFIGS] = current + config
+        }
+    }
+
+    /** Rimuove una config dal pool. */
+    suspend fun removeVpnConfig(config: String) {
+        dataStore.edit {
+            val current = it[VPN_CONFIGS] ?: emptySet()
+            it[VPN_CONFIGS] = current - config
+        }
+    }
+
+    /** Pool di config; migra dalla vecchia singola config se il pool è vuoto. */
+    suspend fun getVpnConfigs(): List<String> {
+        val set = dataStore.data.first()[VPN_CONFIGS]
+        if (!set.isNullOrEmpty()) return set.toList()
+        val legacy = dataStore.data.first()[VPN_CONFIG]
+        return if (legacy.isNullOrBlank()) emptyList() else listOf(legacy)
+    }
+
+    suspend fun setVpnStrategy(strategy: String) {
+        dataStore.edit { it[VPN_STRATEGY] = strategy }
+    }
+
+    suspend fun getVpnStrategy(): String {
+        return dataStore.data.first()[VPN_STRATEGY] ?: "random"
+    }
+
+    suspend fun setVpnAutoRotate(enabled: Boolean) {
+        dataStore.edit { it[VPN_AUTO_ROTATE] = enabled }
+    }
+
+    suspend fun getVpnAutoRotate(): Boolean {
+        return dataStore.data.first()[VPN_AUTO_ROTATE] ?: false
+    }
+
+    suspend fun setVpnRotateInterval(minutes: String) {
+        dataStore.edit { it[VPN_ROTATE_INTERVAL] = minutes }
+    }
+
+    suspend fun getVpnRotateInterval(): String {
+        return dataStore.data.first()[VPN_ROTATE_INTERVAL] ?: "60"
+    }
     
 } // end of UserPreferences
 

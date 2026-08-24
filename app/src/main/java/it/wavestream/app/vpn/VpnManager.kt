@@ -3,18 +3,31 @@ package it.wavestream.app.vpn
 import android.content.Context
 import android.content.Intent
 import android.net.VpnService
+import android.os.SystemClock
 import com.wireguard.android.backend.BackendException
 import com.wireguard.android.backend.GoBackend
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/** Strategia di scelta del server tra le config del pool. */
+enum class VpnStrategy { RANDOM, ROUND_ROBIN, FASTEST }
 
 /**
  * Gestisce la VPN in-app basata su WireGuard.
@@ -43,6 +56,15 @@ class VpnManager @Inject constructor(
     private val _state = MutableStateFlow(Tunnel.State.DOWN)
     val state: StateFlow<Tunnel.State> = _state.asStateFlow()
 
+    private val _currentConfig = MutableStateFlow<String?>(null)
+    val currentConfig: StateFlow<String?> = _currentConfig.asStateFlow()
+
+    private val _autoRotate = MutableStateFlow(false)
+    val autoRotate: StateFlow<Boolean> = _autoRotate.asStateFlow()
+
+    private var roundRobinIndex = 0
+    private var autoRotationJob: Job? = null
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
@@ -50,7 +72,10 @@ class VpnManager @Inject constructor(
         override fun getName(): String = TUNNEL_NAME
         override fun onStateChange(newState: Tunnel.State) {
             _state.value = newState
-            if (newState == Tunnel.State.DOWN) _error.value = null
+            if (newState == Tunnel.State.DOWN) {
+                _error.value = null
+                _currentConfig.value = null
+            }
         }
     }
 
@@ -58,6 +83,97 @@ class VpnManager @Inject constructor(
 
     /** Restituisce l'Intent di consenso da lanciare in una Activity, oppure null se già autorizzato. */
     fun getConsentIntent(): Intent? = VpnService.prepare(context)
+
+    /** Endpoint del server della config (per mostrarlo nella UI). */
+    fun endpointOf(configText: String): String? =
+        parseEndpoint(configText)?.let { "${it.host}:${it.port}" }
+
+    /**
+     * Sceglie una config dal pool secondo la strategia.
+     * FASTEST misura DNS + handshake TCP verso ogni endpoint (euristico di "migliore" server).
+     */
+    suspend fun selectConfig(configs: List<String>, strategy: VpnStrategy): String? =
+        withContext(Dispatchers.IO) {
+            if (configs.isEmpty()) return@withContext null
+            when (strategy) {
+                VpnStrategy.RANDOM -> configs.random()
+                VpnStrategy.ROUND_ROBIN -> {
+                    val idx = roundRobinIndex % configs.size
+                    roundRobinIndex = (roundRobinIndex + 1) % configs.size
+                    configs[idx]
+                }
+                VpnStrategy.FASTEST -> {
+                    val measured = configs.map { it to measureLatency(it) }
+                    measured.sortedBy { it.second ?: Long.MAX_VALUE }.first().first
+                }
+            }
+        }
+
+    /**
+     * Euristico di latenza: tempo di risoluzione DNS + tentativo di connessione TCP
+     * verso l'endpoint WireGuard. Restituisce null se il server non è raggiungibile.
+     */
+    fun measureLatency(configText: String): Long? {
+        val endpoint = parseEndpoint(configText) ?: return null
+        return try {
+            val start = SystemClock.elapsedRealtime()
+            val address = InetAddress.getByName(endpoint.host)
+            val dnsTime = SystemClock.elapsedRealtime() - start
+            val tcpTime = try {
+                val s = SystemClock.elapsedRealtime()
+                Socket().use { it.connect(InetSocketAddress(address, endpoint.port), 1500) }
+                SystemClock.elapsedRealtime() - s
+            } catch (e: Exception) {
+                null
+            }
+            if (tcpTime != null) dnsTime + tcpTime else dnsTime
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    data class WireGuardEndpoint(val host: String, val port: Int)
+
+    /** Estrae host e porta dalla riga `Endpoint = host:port` della config. */
+    fun parseEndpoint(configText: String): WireGuardEndpoint? {
+        for (line in configText.lines()) {
+            val t = line.trim()
+            if (t.startsWith("Endpoint", ignoreCase = true)) {
+                val value = t.substringAfter('=').trim()
+                val parts = value.split(":")
+                if (parts.size >= 2) {
+                    val host = parts[0].trim()
+                    val port = parts[1].trim().toIntOrNull() ?: 51820
+                    return WireGuardEndpoint(host, port)
+                }
+            }
+        }
+        return null
+    }
+
+    /**
+     * Rotazione automatica: ogni [intervalMinutes] la VPN si riavvia su un altro server
+     * del pool secondo la strategia. Da chiamare DOPO una [start] riuscita.
+     */
+    fun startAutoRotation(configs: List<String>, strategy: VpnStrategy, intervalMinutes: Long) {
+        stopAutoRotation()
+        _autoRotate.value = true
+        autoRotationJob = CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+            while (isActive && _autoRotate.value) {
+                delay(intervalMinutes * 60_000L)
+                if (!isActive || !_autoRotate.value) break
+                stop()
+                val next = selectConfig(configs, strategy)
+                if (next != null) start(next)
+            }
+        }
+    }
+
+    fun stopAutoRotation() {
+        _autoRotate.value = false
+        autoRotationJob?.cancel()
+        autoRotationJob = null
+    }
 
     /**
      * Inietta `IncludedApplications = it.wavestream.app` nella sezione [Interface]
@@ -91,6 +207,7 @@ class VpnManager @Inject constructor(
         try {
             val config = Config.parse(ensureAppOnly(configText).reader().buffered())
             backend.setState(tunnel, Tunnel.State.UP, config)
+            _currentConfig.value = configText
             Result.success(Unit)
         } catch (e: BackendException) {
             val msg = when (e.reason) {
