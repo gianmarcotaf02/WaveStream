@@ -324,10 +324,6 @@ class XtreamParser @Inject constructor() {
     }
 
     /**
-     * Attempts to repair a truncated JSON array by finding the last complete object
-     * and closing the array. Returns null if repair fails.
-     */
-    /**
      * Repair a truncated JSON array by progressively trimming back to the previous
      * object boundary until a valid array can be built. The naive lastIndexOf('}')
      * approach breaks when the last '}' is inside a string value (e.g. a title
