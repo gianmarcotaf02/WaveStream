@@ -388,6 +388,28 @@ class DetailsActivity : ComponentActivity() {
         }
     }
     
+    /**
+     * Stale-id fallback: the home session cache can hold item ids that no longer
+     * exist in the DB (playlist re-imported/refreshed). Resolve by the intent
+     * title/poster so the user still opens the right content instead of an empty
+     * detail. Returns null when the content really is gone.
+     */
+    private suspend fun resolveMovieByTitleFallback(): Movie? {
+        if (intentTitle.isBlank()) return null
+        val matches = movieDao.searchMovies(intentTitle)
+        return matches.firstOrNull { it.name.equals(intentTitle, ignoreCase = true) }
+            ?: matches.firstOrNull { intentPosterUrl != null && it.logoUrl == intentPosterUrl }
+            ?: matches.firstOrNull()
+    }
+    
+    private suspend fun resolveSeriesByTitleFallback(): Series? {
+        if (intentTitle.isBlank()) return null
+        val matches = seriesDao.searchSeries(intentTitle)
+        return matches.firstOrNull { it.name.equals(intentTitle, ignoreCase = true) }
+            ?: matches.firstOrNull { intentPosterUrl != null && it.logoUrl == intentPosterUrl }
+            ?: matches.firstOrNull()
+    }
+    
     private suspend fun loadMovie(onStateUpdate: (DetailsState) -> Unit) {
         Log.d(TAG, "loadMovie: contentId=$contentId, contentType=$contentType")
         val movie = movieDao.getMovieById(contentId)
