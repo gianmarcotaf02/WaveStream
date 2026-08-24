@@ -474,6 +474,8 @@ class HomeViewModel @Inject constructor(
                         isContinueWatchingHero = hasAnyCW
                     )
                 }
+                // Warm Coil caches with visible posters + hero backdrops (non-blocking)
+                preloadContentImages(cachedRows, freshHeroes)
                 // If heroes not cached yet, load them in background
                 if (cachedHero == null || cachedHero.heroes.isEmpty()) {
                     launch(Dispatchers.IO) {
@@ -592,6 +594,8 @@ class HomeViewModel @Inject constructor(
                     isContinueWatchingHero = heroResult?.isContinueWatching ?: false
                 )
             }
+            // Warm Coil caches with visible posters + hero backdrops (non-blocking)
+            preloadContentImages(rows, heroResult?.heroes ?: emptyList())
         } catch (e: Exception) {
             Log.e("HomeViewModel", "CRITICAL ERROR in loadContent: ${e.message}", e)
              _uiState.update { it.copy(isLoading = false) }
@@ -681,9 +685,30 @@ class HomeViewModel @Inject constructor(
                 }
 
                 Log.d("HomeViewModel", "preloadTabIntoCache: $contentType cached — ${loadedRows.size} rows, ${heroResult?.heroes?.size ?: 0} heroes")
+                // Warm Coil caches so the first frame of the tab renders without placeholder pops
+                preloadContentImages(loadedRows, heroResult?.heroes ?: emptyList())
             }
         } catch (e: Exception) {
             Log.e("HomeViewModel", "CRITICAL ERROR preloading $contentType: ${e.message}", e)
+        }
+    }
+
+    /**
+     * Warm Coil's memory/disk cache for the visible content: hero backdrops
+     * (current + next, for seamless auto-rotation) and the first posters of each
+     * visible row. Non-blocking — only enqueues image requests.
+     */
+    private fun preloadContentImages(rows: List<CarouselRow>, heroes: List<HeroItem>) {
+        try {
+            val heroItems = heroes.ifEmpty { rows.flatMap { it.items }.take(5) }
+            // Current + next hero backdrop
+            heroItems.firstOrNull()?.let { imagePreloader.preloadBackdrop(it.backdropUrl ?: it.posterUrl) }
+            heroItems.getOrNull(1)?.let { imagePreloader.preloadBackdrop(it.backdropUrl ?: it.posterUrl) }
+            // Posters of the first items of each visible row
+            val posters = rows.take(8).flatMap { row -> row.items.take(12).map { it.posterUrl } }
+            imagePreloader.preloadCarouselPosters(posters)
+        } catch (e: Exception) {
+            // Preloading is best-effort — never let it break the UI
         }
     }
 
@@ -711,6 +736,8 @@ class HomeViewModel @Inject constructor(
      * Navigate to next hero
      */
     fun nextHero() {
+        // Preload the upcoming hero's backdrop so the 7s auto-rotation slides are seamless
+        preloadAdjacentHeroBackdrop(offset = 1)
         _uiState.update { state ->
             val newIndex = if (state.heroItems.isNotEmpty()) {
                 (state.currentHeroIndex + 1) % state.heroItems.size
@@ -723,12 +750,27 @@ class HomeViewModel @Inject constructor(
      * Navigate to previous hero
      */
     fun prevHero() {
+        // Preload the upcoming hero's backdrop before navigating to it
+        preloadAdjacentHeroBackdrop(offset = -1)
         _uiState.update { state ->
             val newIndex = if (state.heroItems.isNotEmpty()) {
                 if (state.currentHeroIndex == 0) state.heroItems.size - 1
                 else state.currentHeroIndex - 1
             } else 0
             state.copy(currentHeroIndex = newIndex)
+        }
+    }
+
+    /**
+     * Preload the hero backdrop at [offset] from the current one (for smooth rotation).
+     */
+    private fun preloadAdjacentHeroBackdrop(offset: Int) {
+        val heroes = _uiState.value.heroItems
+        if (heroes.isNotEmpty()) {
+            val index = (heroes.size + _uiState.value.currentHeroIndex + offset) % heroes.size
+            heroes.getOrNull(index)?.let { hero ->
+                imagePreloader.preloadBackdrop(hero.backdropUrl ?: hero.posterUrl)
+            }
         }
     }
     

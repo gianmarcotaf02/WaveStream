@@ -53,6 +53,10 @@ fun TvContentCard(
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
+    // Painter created once and reused for both placeholder and error states
+    // (avoid re-creating two painters on every recomposition of each card)
+    val placeholderPainter = remember { coil.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster) }
+
     // Single focus progress 0..1 — all visual properties are derived from this one animation
     // instead of running 4 separate animateFloatAsState / animateDpAsState, which on TVs with
     // many cards on screen caused significant recomposition overhead.
@@ -134,8 +138,8 @@ fun TvContentCard(
                         model = item.posterUrl,
                         contentDescription = item.title,
                         contentScale = if (isChannel) ContentScale.Fit else ContentScale.Crop,
-                        placeholder = coil.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
-                        error = coil.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
+                        placeholder = placeholderPainter,
+                        error = placeholderPainter,
                         modifier = Modifier
                             .fillMaxSize()
                             .then(if (isChannel) Modifier.padding(8.dp) else Modifier)
