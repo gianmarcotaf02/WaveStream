@@ -324,27 +324,40 @@ class XtreamParser @Inject constructor() {
     }
 
     /**
-     * Repair a truncated JSON array by progressively trimming back to the previous
-     * object boundary until a valid array can be built. The naive lastIndexOf('}')
-     * approach breaks when the last '}' is inside a string value (e.g. a title
-     * containing a brace), which made big truncated Xtream responses parse to 0 items.
+     * Repair a truncated JSON array (the Xtream server cuts large responses mid-string).
+     * Scans BACKWARD from the end, tracking whether we're inside a string (counting
+     * unescaped quotes), and cuts at the last '}' that is NOT inside a string — i.e.
+     * the last complete object. O(n), single validation pass.
      */
     private fun repairTruncatedJsonArray(json: String): String? {
         if (!json.trimStart().startsWith("[")) return null
-        var end = json.length
-        while (end > 1) {
-            val candidate = json.substring(0, end) + "]"
-            try {
-                JSONArray(candidate)
-                Log.d(TAG, "repairTruncatedJsonArray: repaired at char $end -> ${candidate.length} chars")
-                return candidate
-            } catch (_: Exception) {
-                val prevBrace = json.lastIndexOf('}', end - 1)
-                if (prevBrace < 0) return null
-                end = prevBrace + 1
+        var inString = false
+        var end = -1
+        var i = json.length - 1
+        while (i >= 0) {
+            val c = json[i]
+            if (c == '"') {
+                // A quote preceded by an odd number of backslashes is escaped (\") and
+                // does not open/close a string.
+                var backslashes = 0
+                var j = i - 1
+                while (j >= 0 && json[j] == '\\') { backslashes++; j-- }
+                if (backslashes % 2 == 0) inString = !inString
+            } else if (c == '}' && !inString) {
+                end = i + 1
+                break
             }
+            i--
         }
-        return null
+        if (end <= 1) return null
+        val candidate = json.substring(0, end) + "]"
+        return try {
+            JSONArray(candidate)
+            Log.d(TAG, "repairTruncatedJsonArray: repaired at char $end -> ${candidate.length} chars")
+            candidate
+        } catch (_: Exception) {
+            null
+        }
     }
 }
 

@@ -45,15 +45,11 @@ class PlaylistRepository @Inject constructor(
     
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
         .writeTimeout(30, TimeUnit.SECONDS)
-        .addNetworkInterceptor { chain ->
-            val request = chain.request().newBuilder()
-                .header("Accept-Encoding", "identity")
-                .header("Connection", "close")
-                .build()
-            chain.proceed(request)
-        }
+        // Nota: NIENTE header Accept-Encoding: identity. Lasciando che OkHttp richieda
+        // gzip, il server comprime le risposte (la lista VOD passa da ~27MB a ~2-3MB)
+        // e non tronca più la connessione a metà. OkHttp decomprime in trasparenza.
         .build()
     
     /**
@@ -338,7 +334,7 @@ class PlaylistRepository @Inject constructor(
 
         Socket().use { socket ->
             socket.connect(InetSocketAddress(host, port), 30000)
-            socket.soTimeout = 60000
+            socket.soTimeout = 120000
 
             val output = socket.getOutputStream()
             val requestBytes = buildString {
