@@ -369,10 +369,21 @@ class DetailsActivity : ComponentActivity() {
     private fun loadContent(onStateUpdate: (DetailsState) -> Unit) {
         lifecycleScope.launch {
             profileId = userPreferences.getCurrentProfileId() ?: 1L
-            when (contentType) {
-                ContentType.MOVIE -> loadMovie(onStateUpdate)
-                ContentType.SERIES, ContentType.EPISODE -> loadSeries(onStateUpdate)
-                ContentType.CHANNEL -> loadChannel(onStateUpdate)
+            try {
+                when (contentType) {
+                    ContentType.MOVIE -> loadMovie(onStateUpdate)
+                    ContentType.SERIES, ContentType.EPISODE -> loadSeries(onStateUpdate)
+                    ContentType.CHANNEL -> loadChannel(onStateUpdate)
+                }
+            } catch (e: Exception) {
+                // Safety net: never leave the skeleton up forever, whatever fails.
+                Log.e(TAG, "Error loading content, showing empty detail", e)
+                onStateUpdate(
+                    DetailsState(
+                        contentType = contentType,
+                        isLoading = false
+                    )
+                )
             }
         }
     }
@@ -387,6 +398,8 @@ class DetailsActivity : ComponentActivity() {
         
         // Check favorite status
         val isFavorite = favoriteDao.getFavorite(profileId, ContentType.MOVIE, contentId) != null
+        
+        Log.d(TAG, "FAST PATH movie: showing DB state immediately for '${movie.name}'")
         
         // ===== FAST PATH: show the DB state immediately, no network =====
         // The skeleton disappears right away; Xtream VOD + TMDB enrichment below
