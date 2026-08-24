@@ -2,6 +2,7 @@ package it.wavestream.app.vpn
 
 import android.content.ContentUris
 import android.content.Context
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
@@ -47,7 +48,22 @@ object VpnConfigFinder {
     fun findConfigFiles(context: Context): List<FoundConfig> {
         val results = LinkedHashMap<String, FoundConfig>()
 
-        // 1) MediaStore.Downloads (solo API 29+; su API < 29 la classe non esiste)
+        // 0) Scansione diretta delle cartelle note (istantanea; funziona dove l'accesso
+        //    al percorso è consentito: storage legacy, cartelle app, API <= 28)
+        scanKnownDirectories(results)
+
+        // 1) Forza l'indicizzazione MediaStore dei file appena copiati (es. adb push,
+        //    Send Files to TV, download): senza questo i file nuovi non compaiono subito.
+        try {
+            MediaScannerConnection.scanFile(context, KNOWN_DIRS.toTypedArray(), null, null)
+        } catch (_: Throwable) {
+        }
+        try {
+            Thread.sleep(1000)
+        } catch (_: InterruptedException) {
+        }
+
+        // 2) MediaStore.Downloads (solo API 29+; su API < 29 la classe non esiste)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             try {
                 queryMediaStore(context, MediaStore.Downloads.EXTERNAL_CONTENT_URI, results)
@@ -55,13 +71,16 @@ object VpnConfigFinder {
             }
         }
 
-        // 2) MediaStore.Files (fallback)
+        // 3) MediaStore.Files (fallback)
         try {
             queryMediaStore(context, MediaStore.Files.getContentUri("external"), results)
         } catch (_: Throwable) {
         }
 
-        // 3) Scansione diretta
+        return results.values.toList()
+    }
+
+    private fun scanKnownDirectories(results: MutableMap<String, FoundConfig>) {
         for (dirPath in KNOWN_DIRS) {
             val dir = File(dirPath)
             if (!dir.exists() || !dir.isDirectory) continue
@@ -77,8 +96,6 @@ object VpnConfigFinder {
                 }
             }
         }
-
-        return results.values.toList()
     }
 
     private fun queryMediaStore(
