@@ -1,6 +1,7 @@
 package it.wavestream.app.data.repository
 
 import android.util.Log
+import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.dao.*
 import it.wavestream.app.data.database.entity.*
 import it.wavestream.app.data.parser.ContentNameParser
@@ -35,7 +36,8 @@ class PlaylistRepository @Inject constructor(
     private val categoryDao: CategoryDao,
     private val m3uParser: M3UParser,
     private val xtreamParser: XtreamParser,
-    private val contentNameParser: ContentNameParser
+    private val contentNameParser: ContentNameParser,
+    private val contentCache: ContentCache
 ) {
     companion object {
         private const val TAG = "PlaylistRepo"
@@ -83,6 +85,9 @@ class PlaylistRepository @Inject constructor(
             parseResult.series.size
         )
         
+        // Content changed: the home session cache holds item ids that may now be stale.
+        contentCache.clearHomeSessionData()
+        
         playlistId
     }
     
@@ -113,6 +118,9 @@ class PlaylistRepository @Inject constructor(
         
         val playlistId = playlistDao.insert(playlist)
         loadXtreamContent(playlistId, baseUrl, username, password)
+        
+        // Content changed: invalidate the home session cache (ids may have shifted).
+        contentCache.clearHomeSessionData()
         
         playlistId
     }
@@ -156,6 +164,10 @@ class PlaylistRepository @Inject constructor(
         }
         
         playlistDao.updateLastUpdated(playlistId, System.currentTimeMillis())
+        
+        // Content may have changed (M3U re-inserts with new ids, Xtream removes gone items):
+        // the home session cache would keep showing stale ids for up to 10 days.
+        contentCache.clearHomeSessionData()
     }
     
     /**
@@ -171,6 +183,9 @@ class PlaylistRepository @Inject constructor(
         seriesDao.deleteByPlaylist(playlistId)
         categoryDao.deleteByPlaylist(playlistId)
         playlistDao.deleteById(playlistId)
+        
+        // Playlist gone: drop the cached home rows referencing its content.
+        contentCache.clearHomeSessionData()
     }
     
     /**

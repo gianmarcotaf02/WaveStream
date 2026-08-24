@@ -391,6 +391,7 @@ class DetailsActivity : ComponentActivity() {
     private suspend fun loadMovie(onStateUpdate: (DetailsState) -> Unit) {
         Log.d(TAG, "loadMovie: contentId=$contentId, contentType=$contentType")
         val movie = movieDao.getMovieById(contentId)
+            ?: resolveMovieByTitleFallback()
         if (movie == null) {
             // Content not found in DB (stale id, wrong content_type, cleared DB, ...):
             // NEVER leave the skeleton up — show the intent-provided title instead.
@@ -641,6 +642,7 @@ class DetailsActivity : ComponentActivity() {
     private suspend fun loadSeries(onStateUpdate: (DetailsState) -> Unit) {
         Log.d(TAG, "loadSeries: contentId=$contentId, contentType=$contentType")
         var series = seriesDao.getSeriesById(contentId)
+            ?: resolveSeriesByTitleFallback()
         if (series == null) {
             // Content not found in DB: NEVER leave the skeleton up — show intent state.
             Log.w(TAG, "loadSeries: series NOT FOUND for contentId=$contentId, showing intent state")
