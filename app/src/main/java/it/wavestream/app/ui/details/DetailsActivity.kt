@@ -630,6 +630,8 @@ class DetailsActivity : ComponentActivity() {
         contentTitle = series.name
         currentSeriesId = series.id
         
+        Log.d(TAG, "FAST PATH series: showing DB state immediately for '${series.name}'")
+        
         // ===== FAST PATH: show the DB state immediately, no network =====
         // The skeleton disappears right away; TMDB enrichment + episode loading
         // below run afterwards and update the UI in place when they complete.
