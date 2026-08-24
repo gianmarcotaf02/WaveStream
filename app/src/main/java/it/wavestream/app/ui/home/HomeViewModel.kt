@@ -700,10 +700,10 @@ class HomeViewModel @Inject constructor(
      */
     private fun preloadContentImages(rows: List<CarouselRow>, heroes: List<HeroItem>) {
         try {
-            val heroItems = heroes.ifEmpty { rows.flatMap { it.items }.take(5) }
-            // Current + next hero backdrop
-            heroItems.firstOrNull()?.let { imagePreloader.preloadBackdrop(it.backdropUrl ?: it.posterUrl) }
-            heroItems.getOrNull(1)?.let { imagePreloader.preloadBackdrop(it.backdropUrl ?: it.posterUrl) }
+            // Hero backdrops (current + next, for seamless auto-rotation)
+            heroes.take(2).forEach { hero ->
+                imagePreloader.preloadBackdrop(hero.backdropUrl ?: hero.posterUrl)
+            }
             // Posters of the first items of each visible row
             val posters = rows.take(8).flatMap { row -> row.items.take(12).map { it.posterUrl } }
             imagePreloader.preloadCarouselPosters(posters)
