@@ -67,6 +67,8 @@ import it.wavestream.app.ui.profile.getAvatarResource
 import it.wavestream.app.ui.profile.getAvatarIcon
 import it.wavestream.app.vpn.VpnManager
 import it.wavestream.app.vpn.VpnImportServer
+import it.wavestream.app.vpn.VpnConfigFinder
+import it.wavestream.app.vpn.FoundConfig
 import com.wireguard.android.backend.Tunnel
 import android.net.Uri
 import androidx.compose.ui.graphics.asImageBitmap
@@ -2504,6 +2506,7 @@ private fun VpnSettings(
     var savedConfig by remember { mutableStateOf("") }
     var showConfigDialog by remember { mutableStateOf(false) }
     var showQrImport by remember { mutableStateOf(false) }
+    var showFilePicker by remember { mutableStateOf(false) }
     var isBusy by remember { mutableStateOf(false) }
     var feedback by remember { mutableStateOf<String?>(null) }
 
@@ -2622,6 +2625,16 @@ private fun VpnSettings(
             }
 
             Button(
+                onClick = { showFilePicker = true },
+                enabled = !isBusy,
+                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
+            ) {
+                Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Cerca file .conf sulla TV")
+            }
+
+            Button(
                 onClick = { usbFilePicker.launch(arrayOf("*/*")) },
                 enabled = !isBusy,
                 colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
@@ -2723,6 +2736,27 @@ private fun VpnSettings(
                 savedConfig = newConfig
                 feedback = "Configurazione importata dal telefono."
                 showQrImport = false
+            }
+        )
+    }
+
+    if (showFilePicker) {
+        VpnFilePickerDialog(
+            context = context,
+            onDismiss = { showFilePicker = false },
+            onSelected = { text ->
+                scope.launch {
+                    feedback = null
+                    try {
+                        vpnManager.validateConfig(text)
+                        userPreferences.setVpnConfig(text)
+                        savedConfig = text
+                        feedback = "Configurazione importata dal file."
+                        showFilePicker = false
+                    } catch (e: Exception) {
+                        feedback = "File non valido: ${e.message ?: "errore"}"
+                    }
+                }
             }
         )
     }
