@@ -93,6 +93,9 @@ class UserPreferences @Inject constructor(
         // Startup Screen
         private val STARTUP_SCREEN = stringPreferencesKey("startup_screen") // "movies", "series", "live"
         
+        // In-app VPN (WireGuard)
+        private val VPN_CONFIG = stringPreferencesKey("vpn_wireguard_config")
+        
         // TMDB Cache Update
         private val TMDB_LAST_UPDATE = longPreferencesKey("tmdb_last_update")
         private val TMDB_POPULAR_LAST_UPDATE = longPreferencesKey("tmdb_popular_last_update")
@@ -564,9 +567,16 @@ class UserPreferences @Inject constructor(
         dataStore.edit { it[TERMS_ACCEPTED] = accepted }
     }
 
-    suspend fun isTermsAccepted(): Boolean {
-        return dataStore.data.first()[TERMS_ACCEPTED] ?: false
+    // In-app VPN (WireGuard)
+    suspend fun setVpnConfig(config: String) {
+        dataStore.edit { it[VPN_CONFIG] = config }
     }
     
-}
+    suspend fun getVpnConfig(): String {
+        return dataStore.data.first()[VPN_CONFIG] ?: ""
+    }
+    
+    fun getVpnConfigFlow(): Flow<String> = dataStore.data.map { it[VPN_CONFIG] ?: "" }
+    
+} // end of UserPreferences
 
