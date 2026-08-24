@@ -376,3 +376,6 @@
 # WireGuard tunnel library (Go userspace backend via JNI)
 -keep class com.wireguard.** { *; }
 -keepclasseswithmembernames class com.wireguard.android.backend.GoBackend { native <methods>; }
+
+# NanoHTTPD (local HTTP relay server for VPN config transfer)
+-keep class fi.iki.elonen.** { *; }

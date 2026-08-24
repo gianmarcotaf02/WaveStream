@@ -33,6 +33,7 @@ hiltNavigationCompose = "1.1.0"
 coilCompose = "2.5.0"
 tvCompose = "1.0.0-alpha10"
 wireguard = "1.0.20260102"
+nanohttpd = "2.3.1"
 
 [libraries]
 # AndroidX Core
@@ -107,6 +108,7 @@ compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-material-icons = { group = "androidx.compose.material", name = "material-icons-extended" }
 wireguard-tunnel = { group = "com.wireguard.android", name = "tunnel", version.ref = "wireguard" }
+nanohttpd = { group = "org.nanohttpd", name = "nanohttpd", version.ref = "nanohttpd" }
 compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
 compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 compose-tv-foundation = { group = "androidx.tv", name = "tv-foundation", version.ref = "tvCompose" }

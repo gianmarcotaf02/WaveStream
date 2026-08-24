@@ -138,6 +138,9 @@ dependencies {
     // WireGuard (in-app VPN)
     implementation(libs.wireguard.tunnel)
 
+    // NanoHTTPD (local HTTP relay for phone→TV VPN config transfer)
+    implementation(libs.nanohttpd)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
