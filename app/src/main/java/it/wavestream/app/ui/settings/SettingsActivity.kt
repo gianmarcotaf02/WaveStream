@@ -66,7 +66,12 @@ import it.wavestream.app.ui.theme.AccentColor
 import it.wavestream.app.ui.profile.getAvatarResource
 import it.wavestream.app.ui.profile.getAvatarIcon
 import it.wavestream.app.vpn.VpnManager
+import it.wavestream.app.vpn.VpnImportServer
 import com.wireguard.android.backend.Tunnel
+import android.net.Uri
+import androidx.compose.ui.graphics.asImageBitmap
+import it.wavestream.app.util.QRCodeGenerator
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -2492,13 +2497,40 @@ private fun VpnSettings(
     vpnManager: VpnManager,
     contentFocusRequester: FocusRequester? = null
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val vpnState by vpnManager.state.collectAsState()
     val vpnError by vpnManager.error.collectAsState()
     var savedConfig by remember { mutableStateOf("") }
     var showConfigDialog by remember { mutableStateOf(false) }
+    var showQrImport by remember { mutableStateOf(false) }
     var isBusy by remember { mutableStateOf(false) }
     var feedback by remember { mutableStateOf<String?>(null) }
+
+    // Import da file (USB) tramite Storage Access Framework
+    val usbFilePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                feedback = null
+                try {
+                    val text = context.contentResolver.openInputStream(uri)
+                        ?.bufferedReader()?.use { it.readText() }
+                    if (text.isNullOrBlank()) {
+                        feedback = "File vuoto."
+                    } else {
+                        vpnManager.validateConfig(text)
+                        userPreferences.setVpnConfig(text)
+                        savedConfig = text
+                        feedback = "Configurazione importata dal file."
+                    }
+                } catch (e: Exception) {
+                    feedback = "File non valido: ${e.message ?: "errore"}"
+                }
+            }
+        }
+    }
 
     // Consent flow: la prima volta Android mostra il dialogo di autorizzazione VPN
     val consentLauncher = rememberLauncherForActivityResult(
@@ -2577,6 +2609,26 @@ private fun VpnSettings(
                 Icon(Icons.Default.Paste, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(if (hasConfig) "Modifica configurazione" else "Incolla configurazione WireGuard")
+            }
+
+            Button(
+                onClick = { showQrImport = true },
+                enabled = !isBusy,
+                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
+            ) {
+                Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Importa dal telefono (QR)")
+            }
+
+            Button(
+                onClick = { usbFilePicker.launch(arrayOf("*/*")) },
+                enabled = !isBusy,
+                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
+            ) {
+                Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Importa da file (USB)")
             }
 
             if (hasConfig) {
@@ -2658,6 +2710,19 @@ private fun VpnSettings(
                         feedback = "Config non valida: ${e.message ?: "errore"}"
                     }
                 }
+            }
+        )
+    }
+
+    if (showQrImport) {
+        VpnQrImportDialog(
+            vpnManager = vpnManager,
+            userPreferences = userPreferences,
+            onDismiss = { showQrImport = false },
+            onImported = { newConfig ->
+                savedConfig = newConfig
+                feedback = "Configurazione importata dal telefono."
+                showQrImport = false
             }
         )
     }
