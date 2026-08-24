@@ -923,7 +923,22 @@ class DetailsActivity : ComponentActivity() {
     }
     
     private suspend fun loadChannel(onStateUpdate: (DetailsState) -> Unit) {
-        val channel = channelDao.getChannelById(contentId) ?: return
+        Log.d(TAG, "loadChannel: contentId=$contentId, contentType=$contentType")
+        val channel = channelDao.getChannelById(contentId)
+        if (channel == null) {
+            // Never leave the skeleton up on a stale id.
+            Log.w(TAG, "loadChannel: channel NOT FOUND for contentId=$contentId, showing intent state")
+            onStateUpdate(
+                DetailsState(
+                    title = intentTitle,
+                    posterUrl = intentPosterUrl,
+                    backdropUrl = intentBackdropUrl,
+                    contentType = ContentType.CHANNEL,
+                    isLoading = false
+                )
+            )
+            return
+        }
         
         contentTitle = channel.name
         streamUrl = channel.streamUrl
