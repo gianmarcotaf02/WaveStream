@@ -601,6 +601,12 @@ class PlaylistRepository @Inject constructor(
 
             val currentMovies = movieDao.getAllMoviesList().filter { it.playlistId == playlistId }
             val currentMovieMap = currentMovies.associateBy { it.xtreamStreamId }
+            // CATEGORY GUARD: if the VOD response is empty/corrupt but the DB still has
+            // movies for this playlist, preserve the existing ones instead of deleting them.
+            val preserveMovies = vodStreams.isEmpty() && currentMovies.isNotEmpty()
+            if (preserveMovies) {
+                Log.w(TAG, "refreshXtreamContent: VOD API empty but DB has ${currentMovies.size} movies — preserving existing movies")
+            }
             categoryDao.deleteByPlaylistAndType(playlistId, CategoryType.MOVIE)
             val vodCategoryMap = vodCategories.associate { it.id to contentNameParser.normalizeMovieCategory(it.name) }
             val movieCategoryEntities = vodCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeMovieCategory(it.name), type = CategoryType.MOVIE, externalId = it.id) }
@@ -637,13 +643,19 @@ class PlaylistRepository @Inject constructor(
                     }
                 }
             }
-            currentMovies.forEach { if (it.xtreamStreamId != null && !seenXtreamIds.contains(it.xtreamStreamId)) moviesToDelete.add(it) }
+            currentMovies.forEach { if (!preserveMovies && it.xtreamStreamId != null && !seenXtreamIds.contains(it.xtreamStreamId)) moviesToDelete.add(it) }
             movieDao.deleteList(moviesToDelete)
             movieDao.updateList(moviesToUpdate)
             movieDao.insertAll(moviesToInsert)
 
             val currentSeries = seriesDao.getAllSeriesList().filter { it.playlistId == playlistId }
             val currentSeriesMap = currentSeries.associateBy { it.xtreamSeriesId }
+            // CATEGORY GUARD: if the series response is empty/corrupt but the DB still has
+            // series for this playlist, preserve the existing ones instead of deleting them.
+            val preserveSeries = seriesList.isEmpty() && currentSeries.isNotEmpty()
+            if (preserveSeries) {
+                Log.w(TAG, "refreshXtreamContent: series API empty but DB has ${currentSeries.size} series — preserving existing series")
+            }
             categoryDao.deleteByPlaylistAndType(playlistId, CategoryType.SERIES)
             val seriesCategoryMap = seriesCategories.associate { it.id to contentNameParser.normalizeSeriesCategory(it.name) }
             val seriesCategoryEntities = seriesCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeSeriesCategory(it.name), type = CategoryType.SERIES, externalId = it.id) }
@@ -690,7 +702,7 @@ class PlaylistRepository @Inject constructor(
                     }
                 }
             }
-            currentSeries.forEach { if (it.xtreamSeriesId != null && !seenSeriesIds.contains(it.xtreamSeriesId)) seriesToDelete.add(it) }
+            currentSeries.forEach { if (!preserveSeries && it.xtreamSeriesId != null && !seenSeriesIds.contains(it.xtreamSeriesId)) seriesToDelete.add(it) }
             seriesToDelete.forEach { episodeDao.deleteBySeries(it.id) }
             seriesDao.deleteList(seriesToDelete)
             seriesDao.updateList(seriesToUpdate)
