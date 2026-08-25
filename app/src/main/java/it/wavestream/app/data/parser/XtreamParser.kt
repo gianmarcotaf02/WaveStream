@@ -325,35 +325,44 @@ class XtreamParser @Inject constructor() {
 
     /**
      * Repair a truncated JSON array (the Xtream server cuts large responses mid-string).
-     * Scans BACKWARD from the end, tracking whether we're inside a string (counting
-     * unescaped quotes), and cuts at the last '}' that is NOT inside a string — i.e.
-     * the last complete object. O(n), single validation pass.
+     * Scans FORWARD from the start, where the string state is always known and correct.
+     * This matters because the server can cut the response in the middle of a string:
+     * a backward scan loses track of escaped quotes and fails to find the last complete
+     * object. We track string state (honouring backslash escapes) and object nesting, and
+     * record the end of the last object that closes at depth 0 — i.e. the last complete
+     * item in the array. O(n), single validation pass.
      */
     private fun repairTruncatedJsonArray(json: String): String? {
         if (!json.trimStart().startsWith("[")) return null
         var inString = false
-        var end = -1
-        var i = json.length - 1
-        while (i >= 0) {
+        var depth = 0
+        var lastCompleteEnd = -1
+        var i = 0
+        val n = json.length
+        while (i < n) {
             val c = json[i]
-            if (c == '"') {
-                // A quote preceded by an odd number of backslashes is escaped (\") and
-                // does not open/close a string.
-                var backslashes = 0
-                var j = i - 1
-                while (j >= 0 && json[j] == '\\') { backslashes++; j-- }
-                if (backslashes % 2 == 0) inString = !inString
-            } else if (c == '}' && !inString) {
-                end = i + 1
-                break
+            if (inString) {
+                when {
+                    c == '\\' -> i++ // skip the escaped character
+                    c == '"' -> inString = false
+                }
+            } else {
+                when (c) {
+                    '"' -> inString = true
+                    '{' -> depth++
+                    '}' -> {
+                        depth--
+                        if (depth == 0) lastCompleteEnd = i + 1
+                    }
+                }
             }
-            i--
+            i++
         }
-        if (end <= 1) return null
-        val candidate = json.substring(0, end) + "]"
+        if (lastCompleteEnd <= 1) return null
+        val candidate = json.substring(0, lastCompleteEnd) + "]"
         return try {
             JSONArray(candidate)
-            Log.d(TAG, "repairTruncatedJsonArray: repaired at char $end -> ${candidate.length} chars")
+            Log.d(TAG, "repairTruncatedJsonArray: repaired at char $lastCompleteEnd -> ${candidate.length} chars")
             candidate
         } catch (_: Exception) {
             null
