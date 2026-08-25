@@ -337,7 +337,13 @@ class PlaylistRepository @Inject constructor(
         val action = urlString.substringAfter("action=").substringBefore("&")
 
         Socket().use { socket ->
-            socket.connect(InetSocketAddress(host, port), 30000)
+            try {
+                socket.connect(InetSocketAddress(host, port), 30000)
+            } catch (e: IOException) {
+                Log.e(TAG, "downloadViaRawSocket: connect FAILED for $action ($host:$port): ${e.javaClass.simpleName}: ${e.message}")
+                throw e
+            }
+            Log.d(TAG, "downloadViaRawSocket: connected to $host:$port for $action, sending request")
             socket.soTimeout = 120000
 
             val output = socket.getOutputStream()
@@ -353,8 +359,22 @@ class PlaylistRepository @Inject constructor(
             output.write(requestBytes)
             output.flush()
 
-            val input = BufferedInputStream(socket.getInputStream())
-            val responseBytes = input.readAllBytes()
+            val responseBytes = try {
+                val input = BufferedInputStream(socket.getInputStream())
+                input.readAllBytes()
+            } catch (e: SocketException) {
+                Log.e(TAG, "downloadViaRawSocket: read FAILED for $action ($host:$port): ${e.javaClass.simpleName}: ${e.message}")
+                throw e
+            } catch (e: IOException) {
+                Log.e(TAG, "downloadViaRawSocket: read FAILED for $action ($host:$port): ${e.javaClass.simpleName}: ${e.message}")
+                throw e
+            }
+
+            if (responseBytes.isEmpty()) {
+                Log.e(TAG, "downloadViaRawSocket: empty response for $action ($host:$port)")
+                throw IOException("Empty response from raw socket")
+            }
+
             val responseStr = String(responseBytes, Charsets.UTF_8)
 
             val headerEnd = responseStr.indexOf("\r\n\r\n")
@@ -364,6 +384,7 @@ class PlaylistRepository @Inject constructor(
             }
 
             val statusLine = responseStr.substringBefore("\r\n")
+            Log.d(TAG, "downloadViaRawSocket: status for $action: $statusLine")
             if (!statusLine.contains(" 200 ")) {
                 Log.e(TAG, "downloadViaRawSocket: HTTP status not OK for $action: $statusLine")
                 throw IOException("HTTP status not OK: $statusLine")
