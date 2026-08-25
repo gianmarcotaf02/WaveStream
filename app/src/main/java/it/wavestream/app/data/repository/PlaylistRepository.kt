@@ -10,6 +10,7 @@ import it.wavestream.app.data.parser.XtreamParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.BufferedInputStream
@@ -18,6 +19,7 @@ import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.ProtocolException
 import java.net.Socket
+import java.net.SocketException
 import java.net.URL
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -41,6 +43,7 @@ class PlaylistRepository @Inject constructor(
 ) {
     companion object {
         private const val TAG = "PlaylistRepo"
+        private const val RETRY_BACKOFF_MS = 800L
     }
     
     private val httpClient = OkHttpClient.Builder()
@@ -287,18 +290,22 @@ class PlaylistRepository @Inject constructor(
                 Log.d(TAG, "downloadContent OK via OkHttp: $action -> ${body.length} chars")
                 body
             }
+        } catch (e: SocketException) {
+            // "Connection reset" is a transport-level rejection (firewall, geo-block or a
+            // panel that resets HTTP/1.1 clients). An identical OkHttp retry virtually always
+            // fails the same way, so go straight to the raw socket fallback which uses a
+            // different transport (HTTP/1.0 + identity encoding) and may bypass the reset.
+            Log.w(TAG, "OkHttp SocketException for $action (${e.message}), trying raw socket fallback")
+            downloadViaRawSocket(url)
         } catch (e: EOFException) {
             Log.w(TAG, "OkHttp EOFException for $action, trying raw socket fallback")
-            val result = downloadViaRawSocket(url)
-            Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
-            result
+            downloadViaRawSocket(url)
         } catch (e: ProtocolException) {
             Log.w(TAG, "OkHttp ProtocolException for $action, trying raw socket fallback")
-            val result = downloadViaRawSocket(url)
-            Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
-            result
+            downloadViaRawSocket(url)
         } catch (e: IOException) {
             Log.w(TAG, "OkHttp failed for $action: ${e.message}, retrying...")
+            delay(RETRY_BACKOFF_MS)
             try {
                 httpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) throw IOException("HTTP ${response.code}")
@@ -306,21 +313,18 @@ class PlaylistRepository @Inject constructor(
                     Log.d(TAG, "downloadContent OK via retry: $action -> ${body.length} chars")
                     body
                 }
+            } catch (e2: SocketException) {
+                Log.w(TAG, "Retry also SocketException for $action (${e2.message}), trying raw socket fallback")
+                downloadViaRawSocket(url)
             } catch (e2: EOFException) {
                 Log.w(TAG, "Retry also EOFException for $action, trying raw socket fallback")
-                val result = downloadViaRawSocket(url)
-                Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
-                result
+                downloadViaRawSocket(url)
             } catch (e2: ProtocolException) {
                 Log.w(TAG, "Retry also ProtocolException for $action, trying raw socket fallback")
-                val result = downloadViaRawSocket(url)
-                Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
-                result
+                downloadViaRawSocket(url)
             } catch (e2: IOException) {
                 Log.w(TAG, "Retry also failed for $action: ${e2.message}, trying raw socket fallback")
-                val result = downloadViaRawSocket(url)
-                Log.d(TAG, "downloadContent OK via raw socket: $action -> ${result.length} chars")
-                result
+                downloadViaRawSocket(url)
             }
         }
     }
@@ -343,6 +347,7 @@ class PlaylistRepository @Inject constructor(
                 append("User-Agent: okhttp/4.12.0\r\n")
                 append("Accept: application/json, */*\r\n")
                 append("Accept-Encoding: identity\r\n")
+                append("Connection: close\r\n")
                 append("\r\n")
             }.toByteArray(Charsets.UTF_8)
             output.write(requestBytes)
