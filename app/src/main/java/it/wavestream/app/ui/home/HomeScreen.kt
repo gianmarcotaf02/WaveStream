@@ -45,7 +45,6 @@ import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.theme.GlassTokens
-import it.wavestream.app.ui.theme.accentStroke
 import androidx.compose.runtime.Immutable
 
 /**

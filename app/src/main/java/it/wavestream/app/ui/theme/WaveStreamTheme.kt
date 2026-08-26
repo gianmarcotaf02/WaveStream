@@ -113,6 +113,16 @@ object WaveStreamColors {
     val RailItemSelected = Accent.copy(alpha = 0.15f)
     val RailDivider = BackgroundTertiary
 
+    // ============== Glass / Liquid Glass (FASE 1) ==============
+    // Token vetro esposti anche dal tema per coerenza. La fonte primaria dei
+    // componenti è `GlassTokens` (ui/theme/Glass.kt); qui servono per i composable
+    // che leggono i colori direttamente dal tema.
+    val GlassSurfaceFill = Color(0x1FFFFFFF)
+    val GlassSurfaceFillStrong = Color(0x2EFFFFFF)
+    val GlassSurfaceFillDark = Color(0x40101418)
+    val GlassBorderSubtle = Color(0x26FFFFFF)
+    val GlassBorderAccent get() = Accent.copy(alpha = 0.55f)
+
     fun updateAccent(accentColor: AccentColor) {
         _accent.value = accentColor.primary
         _accentLight.value = accentColor.light

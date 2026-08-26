@@ -18,7 +18,6 @@ import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
-import it.wavestream.app.ui.theme.accentStroke
 
 /**
  * FASE 1 — Card in vetro riusabile e ottimizzata per D-pad.
@@ -52,7 +51,7 @@ fun GlassCard(
     GlassSurface(
         shape = shape,
         fill = fill,
-        stroke = if (isFocused) accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
+        stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
         strokeWidth = if (isFocused) 2.dp else 1.dp,
         modifier = modifier
             .graphicsLayer {
