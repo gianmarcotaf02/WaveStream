@@ -43,6 +43,9 @@ import it.wavestream.app.R
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
+import it.wavestream.app.ui.theme.accentStroke
 import androidx.compose.runtime.Immutable
 
 /**
@@ -327,7 +330,7 @@ private fun HeroSecondaryButton(
     )
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f),
+        targetValue = if (isFocused) GlassTokens.SurfaceFillStrong else GlassTokens.SurfaceFill,
         label = "heroSecBg"
     )
     
@@ -339,6 +342,11 @@ private fun HeroSecondaryButton(
                 scaleY = scale
             }
             .height(48.dp)
+            .border(
+                width = if (isFocused) 2.dp else 1.dp,
+                brush = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
+                shape = RoundedCornerShape(8.dp)
+            )
             .focusable(interactionSource = interactionSource),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor,
@@ -416,20 +424,41 @@ private fun SeeAllButton(onClick: () -> Unit) {
         targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
         label = "seeAllColor"
     )
+    val pillFill by animateColorAsState(
+        targetValue = if (isFocused) GlassTokens.SurfaceFillStrong else GlassTokens.SurfaceFill,
+        label = "seeAllFill"
+    )
+    val pillScale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringSmooth,
+        label = "seeAllScale"
+    )
     
-    Text(
-        text = "Vedi tutto →",
-        style = MaterialTheme.typography.labelLarge,
-        color = textColor,
+    // Pill vetro flottante (FASE 1 — Liquid Glass)
+    GlassSurface(
+        shape = RoundedCornerShape(50),
+        fill = pillFill,
+        stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
+        strokeWidth = if (isFocused) 2.dp else 1.dp,
         modifier = Modifier
+            .graphicsLayer {
+                scaleX = pillScale
+                scaleY = pillScale
+            }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             )
             .focusable(interactionSource = interactionSource)
-            .padding(8.dp)
-    )
+    ) {
+        Text(
+            text = "Vedi tutto →",
+            style = MaterialTheme.typography.labelLarge,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
+        )
+    }
 }
 
 /**

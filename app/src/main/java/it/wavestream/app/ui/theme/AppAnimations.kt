@@ -105,7 +105,24 @@ object AppAnimations {
     
     /** Glow alpha when focused */
     const val FocusGlowAlpha = 0.4f
-    
+
+    // ============== Glass / Floating tokens (FASE 1) ==============
+
+    /** Overlay fade in/out duration (ms) — pill, banner, drawer */
+    const val GlassFadeMs = 150
+
+    /** Drawer/slide-in duration (ms) */
+    const val GlassSlideMs = 240
+
+    /** Scale del pill vetro su focus */
+    const val GlassPillFocusScale = 1.06f
+
+    /** Spring per overlay vetro (liscio, senza overshoot eccessivo) */
+    val SpringGlass = spring<Float>(
+        dampingRatio = 0.8f,
+        stiffness = 500f
+    )
+
     // ============== Pre-built Enter/Exit Specs ==============
     
     /** Fade in animation */
