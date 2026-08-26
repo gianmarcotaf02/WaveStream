@@ -98,13 +98,24 @@ fun NavRailItem(
             .focusable(interactionSource = interactionSource),
         contentAlignment = if (isExpanded) Alignment.CenterStart else Alignment.Center
     ) {
+        // Indicatore di selezione: barra accent verticale a sinistra (solo espanso)
+        if (isExpanded && isSelected) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .width(3.dp)
+                    .fillMaxHeight(0.55f)
+                    .clip(RoundedCornerShape(topEnd = 3.dp, bottomEnd = 3.dp))
+                    .background(WaveStreamColors.Accent)
+            )
+        }
         if (isExpanded) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
+                    .padding(start = 18.dp, end = 14.dp)
             ) {
                 Box(
                     modifier = Modifier.size(20.dp),
