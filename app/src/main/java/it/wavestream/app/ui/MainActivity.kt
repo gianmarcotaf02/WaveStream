@@ -57,10 +57,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.BlurEffect
-import androidx.compose.ui.graphics.TileMode
-import androidx.compose.ui.zIndex
-import android.os.Build
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -245,7 +241,7 @@ private fun MainActivityScreen(
     
     // State
     var selectedTab by remember { mutableStateOf(initialTab) }
-    var railExpanded by remember { mutableStateOf(false) }
+    var railExpanded by remember { mutableStateOf(true) }
     var showCreateListDialog by remember { mutableStateOf(false) }
     
     // Handle back press to exit grid mode (See All view) - restore previous scroll position
@@ -407,14 +403,7 @@ private fun MainActivityScreen(
         })
     }
     
-    // Overlay layout: il rail è sopra il contenuto (vetro) e lo sfoca quando espanso
-    val contentBlurModifier = if (railExpanded && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        Modifier.graphicsLayer {
-            renderEffect = BlurEffect(20f, 20f, TileMode.Clamp)
-        }
-    } else Modifier
-
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxSize()
             .background(
@@ -450,14 +439,11 @@ private fun MainActivityScreen(
                     putExtra("contentType", contentType)
                 })
             },
-            modifier = Modifier.align(Alignment.CenterStart).zIndex(1f)
+            modifier = Modifier.fillMaxHeight()
         )
         
         // Main content area
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(start = 72.dp)
-            .then(contentBlurModifier)) {
+        Column(modifier = Modifier.fillMaxSize()) {
             // Mini Top Bar (clock + actions only)
             val profileName by homeViewModel.profileName.collectAsStateWithLifecycle()
             MiniTopBar(
