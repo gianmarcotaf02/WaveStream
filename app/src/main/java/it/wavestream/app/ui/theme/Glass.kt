@@ -9,9 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
@@ -83,12 +83,12 @@ object GlassTokens {
  */
 fun Modifier.glassSurfaceBlur(enabled: Boolean = true): Modifier {
     if (!enabled || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return this
-    val renderEffect = RenderEffect.createBlurEffect(
+    val blurEffect = BlurEffect(
         GlassTokens.BlurRadius,
         GlassTokens.BlurRadius,
         TileMode.Clamp
     )
-    return this.graphicsLayer { this.renderEffect = renderEffect }
+    return this.graphicsLayer { this.renderEffect = blurEffect }
 }
 
 /**
