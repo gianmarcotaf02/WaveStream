@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import it.wavestream.app.ui.MainTab
 import it.wavestream.app.R
 import it.wavestream.app.ui.theme.WaveStreamColors
+import it.wavestream.app.ui.theme.GlassTokens
 
 @Composable
 fun ExpandableNavRail(
@@ -111,6 +113,8 @@ fun ExpandableNavRail(
                     )
                 )
             )
+            // Bordo vetro luminoso — pannello flottante (FASE 2)
+            .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp))
             .focusRequester(railFocusRequester)
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && 
