@@ -340,24 +340,31 @@ object DatabaseModule {
      */
     private val MIGRATION_25_26 = object : Migration(25, 26) {
         override fun migrate(db: SupportSQLiteDatabase) {
-            db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_channel USING fts5(name, category, logoUrl UNINDEXED)")
-            db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_movie USING fts5(name, category, logoUrl UNINDEXED)")
-            db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_series USING fts5(name, category, logoUrl UNINDEXED)")
+            // FTS5 NON è disponibile su tutti i device: alcuni OEM/emulatori non
+            // compilano il modulo fts5 nel SQLite di sistema. In tal caso non
+            // creiamo l'indice e la ricerca userà il fallback LIKE. Non deve crashare.
+            try {
+                db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_channel USING fts5(name, category, logoUrl UNINDEXED)")
+                db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_movie USING fts5(name, category, logoUrl UNINDEXED)")
+                db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_series USING fts5(name, category, logoUrl UNINDEXED)")
 
-            // channels triggers
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_insert AFTER INSERT ON channels BEGIN INSERT INTO fts_channel(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_update AFTER UPDATE ON channels BEGIN INSERT INTO fts_channel(fts_channel, rowid) VALUES('delete', old.rowid); INSERT INTO fts_channel(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_delete AFTER DELETE ON channels BEGIN INSERT INTO fts_channel(fts_channel, rowid) VALUES('delete', old.rowid); END")
+                // channels triggers
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_insert AFTER INSERT ON channels BEGIN INSERT INTO fts_channel(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_update AFTER UPDATE ON channels BEGIN INSERT INTO fts_channel(fts_channel, rowid) VALUES('delete', old.rowid); INSERT INTO fts_channel(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_delete AFTER DELETE ON channels BEGIN INSERT INTO fts_channel(fts_channel, rowid) VALUES('delete', old.rowid); END")
 
-            // movies triggers
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_insert AFTER INSERT ON movies BEGIN INSERT INTO fts_movie(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_update AFTER UPDATE ON movies BEGIN INSERT INTO fts_movie(fts_movie, rowid) VALUES('delete', old.rowid); INSERT INTO fts_movie(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_delete AFTER DELETE ON movies BEGIN INSERT INTO fts_movie(fts_movie, rowid) VALUES('delete', old.rowid); END")
+                // movies triggers
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_insert AFTER INSERT ON movies BEGIN INSERT INTO fts_movie(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_update AFTER UPDATE ON movies BEGIN INSERT INTO fts_movie(fts_movie, rowid) VALUES('delete', old.rowid); INSERT INTO fts_movie(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_delete AFTER DELETE ON movies BEGIN INSERT INTO fts_movie(fts_movie, rowid) VALUES('delete', old.rowid); END")
 
-            // series triggers
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_insert AFTER INSERT ON series BEGIN INSERT INTO fts_series(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_update AFTER UPDATE ON series BEGIN INSERT INTO fts_series(fts_series, rowid) VALUES('delete', old.rowid); INSERT INTO fts_series(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
-            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_delete AFTER DELETE ON series BEGIN INSERT INTO fts_series(fts_series, rowid) VALUES('delete', old.rowid); END")
+                // series triggers
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_insert AFTER INSERT ON series BEGIN INSERT INTO fts_series(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_update AFTER UPDATE ON series BEGIN INSERT INTO fts_series(fts_series, rowid) VALUES('delete', old.rowid); INSERT INTO fts_series(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+                db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_delete AFTER DELETE ON series BEGIN INSERT INTO fts_series(fts_series, rowid) VALUES('delete', old.rowid); END")
+            } catch (_: Exception) {
+                // FTS5 non disponibile: ignora, la ricerca userà il fallback LIKE.
+            }
         }
     }
 
