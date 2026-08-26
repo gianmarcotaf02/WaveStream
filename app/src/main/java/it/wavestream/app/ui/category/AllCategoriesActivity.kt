@@ -53,6 +53,7 @@ import kotlin.math.abs
 /**
  * Data class for category with item count
  */
+@Immutable
 data class CategoryInfo(
     val name: String,
     val itemCount: Int

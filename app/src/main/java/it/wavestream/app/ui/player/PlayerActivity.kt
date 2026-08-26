@@ -1258,6 +1258,7 @@ class PlayerActivity : ComponentActivity() {
 /**
  * Audio track information
  */
+@Immutable
 data class AudioTrackInfo(
     val index: Int,
     val groupIndex: Int,

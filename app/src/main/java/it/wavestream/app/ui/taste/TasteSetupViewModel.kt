@@ -1,5 +1,6 @@
 package it.wavestream.app.ui.taste
 
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Immutable
 data class TasteSetupState(
     val currentStep: Int = 0,  // 0=genres, 1=watched
     val searchQuery: String = "",
@@ -27,6 +29,7 @@ data class TasteSetupState(
     val isComplete: Boolean = false
 )
 
+@Immutable
 data class GenreOption(
     val id: Int,
     val name: String

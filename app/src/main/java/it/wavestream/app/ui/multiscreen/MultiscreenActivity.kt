@@ -102,6 +102,7 @@ class MultiscreenActivity : ComponentActivity() {
 /**
  * Data class representing a screen slot in multiscreen view
  */
+@Immutable
 data class ScreenSlot(
     val index: Int,
     val channel: Channel? = null,

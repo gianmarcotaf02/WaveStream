@@ -38,6 +38,7 @@ import it.wavestream.app.ui.profile.getAvatarResource
 import it.wavestream.app.ui.profile.getAvatarIcon
 import kotlinx.coroutines.delay
 
+@Immutable
 data class TriviaItem(
     val title: String,
     val category: String,
@@ -783,6 +784,7 @@ private fun BouncingDot(delay: Int, size: androidx.compose.ui.unit.Dp) {
 /**
  * Loading state holder
  */
+@Immutable
 data class LoadingState(
     val status: String = "",
     val detail: String = "",

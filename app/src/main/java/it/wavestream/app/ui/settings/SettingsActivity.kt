@@ -84,6 +84,7 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+@Immutable
 data class SettingsMenuItem(
     val id: String,
     val title: String,

@@ -64,6 +64,7 @@ import androidx.compose.ui.input.key.*
 /**
  * Episode progress info for display
  */
+@Immutable
 data class EpisodeProgress(
     val episodeId: Long,
     val progress: Float,           // 0f to 1f
@@ -74,6 +75,7 @@ data class EpisodeProgress(
 /**
  * Details state holder
  */
+@Immutable
 data class DetailsState(
     val title: String = "",
     val year: String = "",
@@ -124,6 +126,7 @@ data class DetailsState(
 )
 
 // State for individual episode downloads
+@Immutable
 data class EpisodeDownloadState(
     val isDownloaded: Boolean = false,
     val isDownloading: Boolean = false,

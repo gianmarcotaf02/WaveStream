@@ -76,6 +76,7 @@ import javax.inject.Inject
 /**
  * Search result item
  */
+@Immutable
 data class SearchResultItem(
     val id: Long,
     val title: String,
