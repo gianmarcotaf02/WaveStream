@@ -63,12 +63,25 @@ class RottenTomatoesScraper {
         }
         
         try {
-            val slug = createSlug(title)
-            val url = "$BASE_URL/m/$slug"
-            Log.d(TAG, "Fetching movie: $url")
-            
-            val scores = fetchScores(url)
-            
+            // Build candidate URLs: RT slugs vary (some keep "the", recent titles append the year).
+            // Try them in order and return the first page that yields scores.
+            val baseSlug = createSlug(title)
+            val candidates = buildList {
+                add("$BASE_URL/m/$baseSlug")
+                createSlugKeepingArticle(title).takeIf { it != baseSlug }?.let { add("$BASE_URL/m/$it") }
+                if (year != null) {
+                    add("$BASE_URL/m/${createSlugWithYear(title, year)}")
+                    add("$BASE_URL/m/${baseSlug}_$year")
+                }
+            }.distinct()
+
+            var scores: RtScores? = null
+            for (url in candidates) {
+                Log.d(TAG, "Fetching movie: $url")
+                scores = fetchScores(url)
+                if (scores != null) break
+            }
+
             // Cache result
             scoresCache[cacheKey] = CachedScore(scores, System.currentTimeMillis())
             
@@ -103,12 +116,24 @@ class RottenTomatoesScraper {
         }
         
         try {
-            val slug = createSlug(title)
-            val url = "$BASE_URL/tv/$slug"
-            Log.d(TAG, "Fetching series: $url")
-            
-            val scores = fetchScores(url)
-            
+            // Build candidate URLs: RT slugs vary (some keep "the", recent titles append the year).
+            val baseSlug = createSlug(title)
+            val candidates = buildList {
+                add("$BASE_URL/tv/$baseSlug")
+                createSlugKeepingArticle(title).takeIf { it != baseSlug }?.let { add("$BASE_URL/tv/$it") }
+                if (year != null) {
+                    add("$BASE_URL/tv/${createSlugWithYear(title, year)}")
+                    add("$BASE_URL/tv/${baseSlug}_$year")
+                }
+            }.distinct()
+
+            var scores: RtScores? = null
+            for (url in candidates) {
+                Log.d(TAG, "Fetching series: $url")
+                scores = fetchScores(url)
+                if (scores != null) break
+            }
+
             // Cache result
             scoresCache[cacheKey] = CachedScore(scores, System.currentTimeMillis())
             
@@ -258,14 +283,34 @@ class RottenTomatoesScraper {
     }
 
     /**
-     * Create RT URL slug from title
-     * Example: "One Battle After Another" -> "one_battle_after_another"
+     * Create RT URL slug from title, dropping a leading article.
+     * Example: "The Odyssey" -> "odyssey"
      */
     private fun createSlug(title: String): String {
+        return cleanSlug(title).replace(Regex("^(the|a|an)_"), "")
+    }
+
+    /**
+     * Create RT URL slug keeping a leading article (RT sometimes keeps "the").
+     * Example: "The Odyssey" -> "the_odyssey"
+     */
+    private fun createSlugKeepingArticle(title: String): String {
+        return cleanSlug(title)
+    }
+
+    /**
+     * Create RT URL slug including the release year (recent titles use e.g. "the_odyssey_2026").
+     */
+    private fun createSlugWithYear(title: String, year: Int): String {
+        return "${createSlugKeepingArticle(title)}_$year"
+    }
+
+    /**
+     * Normalize a title into an RT-style underscore slug without article handling.
+     */
+    private fun cleanSlug(title: String): String {
         return title
             .lowercase()
-            // Remove common articles at the start
-            .replace(Regex("^(the|a|an)\\s+"), "")
             // Remove year in parentheses
             .replace(Regex("\\s*\\(\\d{4}\\)"), "")
             // Normalize accented characters to ASCII equivalents (é -> e, ü -> u, etc.)
