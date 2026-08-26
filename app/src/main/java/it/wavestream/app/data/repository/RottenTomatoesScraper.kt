@@ -205,8 +205,10 @@ class RottenTomatoesScraper {
             return it
         }
         
-        // Pattern 3: JSON data - "audienceScore": { "score": 90 }
-        val jsonPattern = """"$slotName":\s*\{\s*"score":\s*(\d+)""".toRegex()
+        // Pattern 3: JSON data - "audienceScore":{ ... "score":"95" ... }
+        // RT moved "score" further into the object (no longer the first key), so match
+        // any content up to the first closing brace that contains a "score" value.
+        val jsonPattern = """"$slotName":\s*\{[^}]*?"score":\s*"?(\d+)""".toRegex()
         val jsonMatch = jsonPattern.find(html)
         jsonMatch?.groupValues?.get(1)?.toIntOrNull()?.let {
             Log.d(TAG, "✓ Found $slotName via JSON pattern: $it%")
