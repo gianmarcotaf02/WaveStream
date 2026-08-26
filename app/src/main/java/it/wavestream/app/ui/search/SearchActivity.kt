@@ -61,6 +61,7 @@ import it.wavestream.app.R
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.SeriesDao
+import it.wavestream.app.data.repository.FtsSearchRepository
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.player.PlayerActivity
@@ -97,6 +98,7 @@ class SearchActivity : ComponentActivity() {
     @Inject lateinit var movieDao: MovieDao
     @Inject lateinit var seriesDao: SeriesDao
     @Inject lateinit var channelDao: ChannelDao
+    @Inject lateinit var ftsSearchRepository: FtsSearchRepository
     @Inject lateinit var favoriteDao: it.wavestream.app.data.database.dao.FavoriteDao
     @Inject lateinit var userPreferences: it.wavestream.app.data.preferences.UserPreferences
     
@@ -264,7 +266,7 @@ class SearchActivity : ComponentActivity() {
         }
         
         // Search movies
-        val movies = movieDao.searchMovies(query)
+        val movies = (ftsSearchRepository.searchMovies(query) ?: movieDao.searchMovies(query))
             .filter { !isBlockedContent(it.name, it.category) }
         results.addAll(movies.map { movie ->
             SearchResultItem(
@@ -279,7 +281,7 @@ class SearchActivity : ComponentActivity() {
         })
 
         // Search series
-        val series = seriesDao.searchSeries(query)
+        val series = (ftsSearchRepository.searchSeries(query) ?: seriesDao.searchSeries(query))
             .filter { !isBlockedContent(it.name, it.category) }
         results.addAll(series.map { s ->
             SearchResultItem(
@@ -294,7 +296,7 @@ class SearchActivity : ComponentActivity() {
         })
 
         // Search channels
-        val channels = channelDao.searchChannels(query)
+        val channels = (ftsSearchRepository.searchChannels(query) ?: channelDao.searchChannels(query))
             .filter { !isBlockedContent(it.name, it.categoryName) }
         results.addAll(channels.map { channel ->
             SearchResultItem(

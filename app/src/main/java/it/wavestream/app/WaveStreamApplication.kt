@@ -7,6 +7,7 @@ import dagger.hilt.android.HiltAndroidApp
 import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.DatabaseCheckpointManager
 import it.wavestream.app.data.database.dao.FtsSearchDao
+import it.wavestream.app.data.repository.FtsSearchRepository
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.theme.AccentColor
 import it.wavestream.app.ui.theme.WaveStreamColors
@@ -36,6 +37,9 @@ class WaveStreamApplication : Application() {
 
     @Inject
     lateinit var ftsSearchDao: FtsSearchDao
+
+    @Inject
+    lateinit var ftsSearchRepository: FtsSearchRepository
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -101,9 +105,10 @@ class WaveStreamApplication : Application() {
 
         // FASE 4 — Rebuild FTS5 search index in background (covers data present
         // before the 25→26 migration, since triggers only fire on new writes).
+        // Only runs if FTS5 is actually available (not compiled on all devices).
         applicationScope.launch {
             try {
-                rebuildFtsIndex()
+                if (ftsSearchRepository.isFts5Available()) rebuildFtsIndex()
             } catch (_: Exception) { }
         }
     }
