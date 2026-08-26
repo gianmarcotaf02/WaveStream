@@ -108,6 +108,10 @@ dependencies {
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
 
+    // Paging 3 (FASE 4.5)
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
+
     // Network / API
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.moshi)
