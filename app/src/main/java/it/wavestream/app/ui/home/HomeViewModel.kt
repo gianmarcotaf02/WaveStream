@@ -311,7 +311,7 @@ class HomeViewModel @Inject constructor(
                     if (currentHeroes.isEmpty()) {
                         currentHeroes = cachedHeroItems[contentType]?.heroes ?: emptyList()
                     }
-                    val freshHeroes = refreshHeroItemsWatchProgress(currentHeroes)
+                    val freshHeroes = refreshHeroItemsRatings(currentHeroes).let { refreshHeroItemsWatchProgress(it) }
                     val hasAnyCW = freshHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                     
                     // Update cachedHeroItems with the fresh progress so the cache stays synced
@@ -449,8 +449,11 @@ class HomeViewModel @Inject constructor(
                 // Use cached rows immediately — show content fast
                 if (currentContentType != contentType) return@launch
                 
-                // Refresh watch progress for cached heroes on load
-                val freshHeroes = cachedHero?.heroes?.let { refreshHeroItemsWatchProgress(it) } ?: emptyList()
+                // Refresh ratings + watch progress for cached heroes on load
+                val freshHeroes = cachedHero?.heroes
+                    ?.let { refreshHeroItemsRatings(it) }
+                    ?.let { refreshHeroItemsWatchProgress(it) }
+                    ?: emptyList()
                 val hasAnyCW = freshHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                 
                 // Update cachedHeroItems with the fresh progress so the cache stays synced
@@ -1766,6 +1769,51 @@ class HomeViewModel @Inject constructor(
                         )
                     }
                 } else {
+                    hero
+                }
+            }
+        }
+    }
+    
+    /**
+     * Refresh the rating fields of cached heroes from the DB. Cached heroes are
+     * often written before background TMDB/OMDB enrichment has finished, so their
+     * imdbRating/tmdbRating/etc. are null. On cache load we re-read the fresh values
+     * from the database and patch them in (no network calls here).
+     */
+    private suspend fun refreshHeroItemsRatings(heroes: List<HeroItem>): List<HeroItem> {
+        return withContext(Dispatchers.IO) {
+            heroes.map { hero ->
+                try {
+                    when (hero.contentType) {
+                        ContentType.MOVIE.name -> {
+                            val movie = movieDao.getMovieById(hero.id)
+                            movie?.let {
+                                hero.copy(
+                                    imdbRating = it.omdbImdbRating,
+                                    rottenTomatoesScore = it.omdbRottenTomatoesScore,
+                                    audienceScore = it.omdbAudienceScore,
+                                    metacriticScore = it.omdbMetacriticScore,
+                                    tmdbRating = it.tmdbVoteAverage
+                                )
+                            } ?: hero
+                        }
+                        ContentType.SERIES.name -> {
+                            val series = seriesDao.getSeriesById(hero.id)
+                            series?.let {
+                                hero.copy(
+                                    imdbRating = it.omdbImdbRating,
+                                    rottenTomatoesScore = it.omdbRottenTomatoesScore,
+                                    audienceScore = it.omdbAudienceScore,
+                                    metacriticScore = it.omdbMetacriticScore,
+                                    tmdbRating = it.tmdbVoteAverage
+                                )
+                            } ?: hero
+                        }
+                        else -> hero
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "Error refreshing ratings for hero ${hero.id}", e)
                     hero
                 }
             }
