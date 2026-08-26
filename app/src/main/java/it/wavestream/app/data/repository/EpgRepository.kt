@@ -4,7 +4,9 @@ import android.util.Log
 import it.wavestream.app.data.api.XtreamApiService
 import it.wavestream.app.data.api.XtreamEpgListing
 import it.wavestream.app.data.database.dao.ChannelDao
+import it.wavestream.app.data.database.dao.EPGDao
 import it.wavestream.app.data.database.dao.PlaylistDao
+import it.wavestream.app.data.database.entity.EPGProgram
 import it.wavestream.app.ui.epg.EpgProgram
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -31,7 +33,8 @@ import javax.inject.Singleton
 class EpgRepository @Inject constructor(
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context,
     private val playlistDao: PlaylistDao,
-    private val channelDao: ChannelDao
+    private val channelDao: ChannelDao,
+    private val epgDao: EPGDao
 ) {
     
     companion object {
@@ -107,7 +110,7 @@ class EpgRepository @Inject constructor(
                         parseXmlTv(reader)
                         Log.d(TAG, "EPG loaded from XMLTV: ${epgCache.size} channels cached")
                         lastUpdate = System.currentTimeMillis()
-                        // saveCacheToDisk() // Disabled - causes OOM
+                        persistEpgToRoom() // FASE 4: salva in Room (best-effort)
                         return@withContext
                     } else {
                         Log.w(TAG, "Response does not seem to be XMLTV format (preview: ${preview.take(100)})")
@@ -185,7 +188,7 @@ class EpgRepository @Inject constructor(
         
         
         lastUpdate = System.currentTimeMillis()
-        // saveCacheToDisk() // Disabled - causes OOM
+        persistEpgToRoom() // FASE 4: salva in Room (best-effort)
         Log.d(TAG, "EPG via get_short_epg: $loadedCount channels loaded")
     }
     
@@ -269,7 +272,7 @@ class EpgRepository @Inject constructor(
             }
             
             lastUpdate = System.currentTimeMillis()
-            // saveCacheToDisk() // Disabled - causes OOM
+            persistEpgToRoom() // FASE 4: salva in Room (best-effort)
             Log.d(TAG, "EPG loaded: ${epgCache.size} channels")
             
         } catch (e: Exception) {
@@ -281,6 +284,7 @@ class EpgRepository @Inject constructor(
      * Get programs for a channel
      */
     suspend fun getProgramsForChannel(channelId: String): List<EpgProgram> {
+        loadEpgFromRoomIfEmpty() // FASE 4: se la cache è vuota, prova da Room
         return epgCache[channelId] 
             ?: epgCache[channelId.lowercase()] 
             ?: epgCache[channelId.uppercase()]
@@ -330,6 +334,67 @@ class EpgRepository @Inject constructor(
         val programs = getProgramsForChannel(channelId)
         val now = System.currentTimeMillis()
         return programs.find { it.start > now }
+    }
+
+    /**
+     * FASE 4 — Salva la cache EPG in Room (best-effort).
+     * Mappa la chiave della cache (epgChannelId) al channelId DB tramite la lista
+     * dei canali; se un canale non è (più) presente, i suoi programmi vengono saltati.
+     */
+    private suspend fun persistEpgToRoom() {
+        try {
+            val channelIdMap = channelDao.getAllChannelsList()
+                .associate { (it.xtreamEpgChannelId ?: it.name) to it.id }
+            epgCache.forEach { (key, programs) ->
+                val dbChannelId = channelIdMap[key] ?: return@forEach
+                val entities = programs.map { p ->
+                    EPGProgram(
+                        channelId = dbChannelId,
+                        epgChannelId = key,
+                        title = p.title,
+                        description = p.description,
+                        startTime = p.start,
+                        endTime = p.end,
+                        category = p.category
+                    )
+                }
+                if (entities.isNotEmpty()) {
+                    epgDao.deleteByChannel(dbChannelId)
+                    epgDao.insertAll(entities)
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "EPG persist to Room failed", e)
+        }
+    }
+
+    /**
+     * FASE 4 — Carica da Room nella cache in memoria se è vuota (best-effort).
+     * Serve per ripristinare l'EPG dopo il riavvio senza rifare il fetch di rete.
+     */
+    private suspend fun loadEpgFromRoomIfEmpty() {
+        if (epgCache.isNotEmpty()) return
+        try {
+            val all = epgDao.getAllPrograms()
+            if (all.isNotEmpty()) {
+                epgCache.clear()
+                all.groupBy { it.epgChannelId }.forEach { (key, list) ->
+                    epgCache[key] = list.map { e ->
+                        EpgProgram(
+                            channelId = e.epgChannelId,
+                            title = e.title,
+                            description = e.description,
+                            start = e.startTime,
+                            end = e.endTime,
+                            category = e.category
+                        )
+                    }
+                }
+                lastUpdate = System.currentTimeMillis()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "EPG load from Room failed", e)
+        }
     }
     
     /**

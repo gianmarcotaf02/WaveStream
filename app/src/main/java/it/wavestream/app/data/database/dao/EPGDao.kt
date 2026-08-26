@@ -34,6 +34,9 @@ interface EPGDao {
     """)
     suspend fun getNextProgram(channelId: Long, currentTime: Long = System.currentTimeMillis()): EPGProgram?
     
+    @Query("SELECT * FROM epg_programs")
+    suspend fun getAllPrograms(): List<EPGProgram>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(program: EPGProgram): Long
     
