@@ -42,6 +42,8 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import kotlinx.coroutines.delay
 
 /**
@@ -898,25 +900,22 @@ private fun ModernPillButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.15f),
-        label = "bg"
-    )
-    
+
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.05f else 1f,
         label = "scale"
     )
-    
-    Box(
+
+    GlassSurface(
+        shape = RoundedCornerShape(20.dp),
+        fill = if (isFocused) GlassTokens.SurfaceFillStrong else GlassTokens.SurfaceFill,
+        stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
+        strokeWidth = if (isFocused) 2.dp else 1.dp,
         modifier = Modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(20.dp))
-            .background(backgroundColor)
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .focusable(interactionSource = interactionSource)
             .clickable(
@@ -924,8 +923,7 @@ private fun ModernPillButton(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        contentAlignment = Alignment.Center
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
             text = text,
@@ -1355,17 +1353,17 @@ private fun PlayerClockOverlay(modifier: Modifier = Modifier) {
         }
     }
     
-    Box(
+    GlassSurface(
+        shape = RoundedCornerShape(8.dp),
+        fill = GlassTokens.SurfaceFill,
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color.Black.copy(alpha = 0.3f))
-            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
             text = currentTime,
             color = Color.White.copy(alpha = 0.9f),
             style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
     }
 }
