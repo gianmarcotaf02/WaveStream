@@ -30,7 +30,7 @@ import it.wavestream.app.data.database.entity.*
         UserTaste::class,
         HomeSessionCacheEntity::class
     ],
-    version = 25,
+    version = 26,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -54,6 +54,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun downloadedContentDao(): DownloadedContentDao
     abstract fun userTasteDao(): UserTasteDao
     abstract fun homeSessionCacheDao(): HomeSessionCacheDao
+    abstract fun ftsSearchDao(): FtsSearchDao
     
     companion object {
         const val DATABASE_NAME = "wavestream_database"
