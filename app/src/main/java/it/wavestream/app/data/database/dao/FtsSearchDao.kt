@@ -40,7 +40,9 @@ interface FtsSearchDao {
     /**
      * Backfill dell'indice FTS dai dati correnti (da chiamare all'avvio o dopo
      * un upgrade). Svuota e ripopola le tre tabelle virtuali.
+     * Ritorna il numero di righe interessate (Room richiede un tipo non-void
+     * per @RawQuery).
      */
     @RawQuery
-    fun reindexAll(query: SupportSQLiteQuery)
+    fun reindexAll(query: SupportSQLiteQuery): Int
 }
