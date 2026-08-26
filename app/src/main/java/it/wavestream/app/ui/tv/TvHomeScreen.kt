@@ -87,7 +87,7 @@ import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.items as tvGridItems
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.compose.ui.focus.onFocusChanged
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import it.wavestream.app.R
 import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.CarouselRow

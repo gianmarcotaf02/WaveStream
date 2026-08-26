@@ -1,15 +1,15 @@
 package it.wavestream.app.util
 
 import android.content.Context
-import coil.Coil
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.size.Size
+import coil3.Coil
+import coil3.ImageLoader
+import coil3.request.ImageRequest
+import coil3.size.Size
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-import coil.size.Precision
+import coil3.size.Precision
 
 /**
  * Image preloader using Coil (same cache as UI rendering)
@@ -41,8 +41,8 @@ class CoilImagePreloader @Inject constructor(
                 .data(url)
                 .size(targetSize)
                 .precision(Precision.INEXACT)
-                .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
-                .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
+                .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .build()
             imageLoader.enqueue(request)
         }

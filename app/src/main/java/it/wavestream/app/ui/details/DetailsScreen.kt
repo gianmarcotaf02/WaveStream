@@ -48,7 +48,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import it.wavestream.app.R
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.CustomGroup
@@ -219,12 +219,12 @@ fun DetailsScreen(
         // Backdrop image - FULLSCREEN, shifted RIGHT
         if (!state.backdropUrl.isNullOrEmpty()) {
             AsyncImage(
-                model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
+                model = coil3.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
                     .data(state.backdropUrl)
                     .size(1280, 720)
                     .crossfade(true)
-                    .diskCachePolicy(coil.request.CachePolicy.ENABLED)
-                    .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
+                    .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
+                    .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
@@ -316,7 +316,7 @@ fun DetailsScreen(
                 // Poster
                 if (!state.posterUrl.isNullOrEmpty()) {
                     AsyncImage(
-                        model = coil.request.ImageRequest.Builder(
+                        model = coil3.request.ImageRequest.Builder(
                             androidx.compose.ui.platform.LocalContext.current
                         )
                             .data(state.posterUrl)

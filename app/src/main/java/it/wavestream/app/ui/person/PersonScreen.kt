@@ -31,9 +31,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import coil.request.CachePolicy
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.CachePolicy
 import it.wavestream.app.data.api.TMDBPersonDetails
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.Movie
