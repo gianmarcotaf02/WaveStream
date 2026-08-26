@@ -330,6 +330,37 @@ object DatabaseModule {
         }
     }
 
+    /**
+     * Migration from version 25 to 26 (FASE 4 — FTS5 search):
+     * - Creates FTS5 virtual index tables for channels/movies/series
+     * - Adds triggers to keep them in sync with the source tables
+     * The FTS tables are NOT declared as Room entities (extra tables) and are
+     * queried via @RawQuery (FtsSearchDao). Existing rows are re-indexed by
+     * calling FtsSearchDao.reindexAll on first use.
+     */
+    private val MIGRATION_25_26 = object : Migration(25, 26) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_channel USING fts5(name, category, logoUrl UNINDEXED)")
+            db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_movie USING fts5(name, category, logoUrl UNINDEXED)")
+            db.execSQL("CREATE VIRTUAL TABLE IF NOT EXISTS fts_series USING fts5(name, category, logoUrl UNINDEXED)")
+
+            // channels triggers
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_insert AFTER INSERT ON channels BEGIN INSERT INTO fts_channel(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_update AFTER UPDATE ON channels BEGIN INSERT INTO fts_channel(fts_channel, rowid) VALUES('delete', old.rowid); INSERT INTO fts_channel(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_channel_delete AFTER DELETE ON channels BEGIN INSERT INTO fts_channel(fts_channel, rowid) VALUES('delete', old.rowid); END")
+
+            // movies triggers
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_insert AFTER INSERT ON movies BEGIN INSERT INTO fts_movie(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_update AFTER UPDATE ON movies BEGIN INSERT INTO fts_movie(fts_movie, rowid) VALUES('delete', old.rowid); INSERT INTO fts_movie(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_movie_delete AFTER DELETE ON movies BEGIN INSERT INTO fts_movie(fts_movie, rowid) VALUES('delete', old.rowid); END")
+
+            // series triggers
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_insert AFTER INSERT ON series BEGIN INSERT INTO fts_series(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_update AFTER UPDATE ON series BEGIN INSERT INTO fts_series(fts_series, rowid) VALUES('delete', old.rowid); INSERT INTO fts_series(rowid, name, category, logoUrl) VALUES (new.id, new.name, COALESCE(new.category,''), COALESCE(new.logoUrl,'')); END")
+            db.execSQL("CREATE TRIGGER IF NOT EXISTS fts_series_delete AFTER DELETE ON series BEGIN INSERT INTO fts_series(fts_series, rowid) VALUES('delete', old.rowid); END")
+        }
+    }
+
 
     @Provides
     @Singleton
@@ -341,7 +372,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26)
             .fallbackToDestructiveMigration()
             .build()
     }

@@ -6,6 +6,7 @@ import android.os.StrictMode
 import dagger.hilt.android.HiltAndroidApp
 import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.DatabaseCheckpointManager
+import it.wavestream.app.data.database.dao.FtsSearchDao
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.theme.AccentColor
 import it.wavestream.app.ui.theme.WaveStreamColors
@@ -32,6 +33,9 @@ class WaveStreamApplication : Application() {
 
     @Inject
     lateinit var contentCache: ContentCache
+
+    @Inject
+    lateinit var ftsSearchDao: FtsSearchDao
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -94,6 +98,33 @@ class WaveStreamApplication : Application() {
         // Periodic WAL checkpoint: guarantees playlist/watch data survives sudden
         // TV power-off, not only onTrimMemory/onLowMemory callbacks
         checkpointManager.startPeriodicCheckpoint()
+
+        // FASE 4 — Rebuild FTS5 search index in background (covers data present
+        // before the 25→26 migration, since triggers only fire on new writes).
+        applicationScope.launch {
+            try {
+                rebuildFtsIndex()
+            } catch (_: Exception) { }
+        }
+    }
+
+    /**
+     * Ripopola l'indice FTS5 dalle tabelle sorgente.
+     * DELETE + INSERT completo: l'UPSERT (ON CONFLICT DO UPDATE) non è disponibile
+     * su SQLite < 3.24 (minSdk 26 → Android 8, SQLite 3.18). Eseguirsi in background.
+     */
+    private fun rebuildFtsIndex() {
+        val statements = listOf(
+            "DELETE FROM fts_channel",
+            "INSERT INTO fts_channel(rowid, name, category, logoUrl) SELECT id, name, COALESCE(category,''), COALESCE(logoUrl,'') FROM channels",
+            "DELETE FROM fts_movie",
+            "INSERT INTO fts_movie(rowid, name, category, logoUrl) SELECT id, name, COALESCE(category,''), COALESCE(logoUrl,'') FROM movies",
+            "DELETE FROM fts_series",
+            "INSERT INTO fts_series(rowid, name, category, logoUrl) SELECT id, name, COALESCE(category,''), COALESCE(logoUrl,'') FROM series"
+        )
+        statements.forEach { sql ->
+            ftsSearchDao.reindexAll(androidx.sqlite.db.SimpleSQLiteQuery(sql))
+        }
     }
 
     override fun onTrimMemory(level: Int) {
