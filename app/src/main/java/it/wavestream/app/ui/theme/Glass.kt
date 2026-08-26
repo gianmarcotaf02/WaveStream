@@ -1,7 +1,5 @@
 package it.wavestream.app.ui.theme
 
-import android.graphics.RenderEffect
-import android.graphics.Shader
 import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,7 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -86,7 +86,7 @@ fun Modifier.glassSurfaceBlur(enabled: Boolean = true): Modifier {
     val renderEffect = RenderEffect.createBlurEffect(
         GlassTokens.BlurRadius,
         GlassTokens.BlurRadius,
-        Shader.TileMode.CLAMP
+        TileMode.Clamp
     )
     return this.graphicsLayer { this.renderEffect = renderEffect }
 }
