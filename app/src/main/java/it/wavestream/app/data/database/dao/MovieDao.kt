@@ -61,6 +61,9 @@ interface MovieDao {
     
     @Query("SELECT * FROM movies WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")
     fun searchMoviesFlow(query: String): Flow<List<Movie>>
+
+    @Query("SELECT * FROM movies WHERE isHidden = 0 ORDER BY name")
+    fun pagingMovies(): androidx.paging.PagingSource<Int, Movie>
     
     @Query("SELECT * FROM movies WHERE category = :category AND isHidden = 0 ORDER BY name LIMIT :limit")
     fun getMoviesByCategory(category: String, limit: Int): Flow<List<Movie>>

@@ -58,6 +58,9 @@ interface SeriesDao {
     
     @Query("SELECT * FROM series WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")
     fun searchSeriesFlow(query: String): Flow<List<Series>>
+
+    @Query("SELECT * FROM series WHERE isHidden = 0 ORDER BY name")
+    fun pagingSeries(): androidx.paging.PagingSource<Int, Series>
     
     @Query("SELECT * FROM series WHERE category = :category AND isHidden = 0 ORDER BY name LIMIT :limit")
     fun getSeriesByCategory(category: String, limit: Int): Flow<List<Series>>

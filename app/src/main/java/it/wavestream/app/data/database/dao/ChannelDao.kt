@@ -40,6 +40,9 @@ interface ChannelDao {
     @Query("SELECT * FROM channels WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")
     fun searchChannelsFlow(query: String): Flow<List<Channel>>
 
+    @Query("SELECT * FROM channels WHERE isHidden = 0 ORDER BY name")
+    fun pagingChannels(): androidx.paging.PagingSource<Int, Channel>
+
     @Query("SELECT * FROM channels WHERE (name LIKE '%' || :query1 || '%' OR name LIKE '%' || :query2 || '%') AND isHidden = 0 ORDER BY name")
     suspend fun searchChannelsDual(query1: String, query2: String): List<Channel>
     
