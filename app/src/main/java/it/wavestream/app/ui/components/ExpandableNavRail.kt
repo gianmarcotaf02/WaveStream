@@ -69,7 +69,7 @@ fun ExpandableNavRail(
     )
 
     val railWidth = (64.dp + 136.dp * expansionProgress)
-    val backgroundAlpha = 0.9f + 0.05f * expansionProgress
+    val backgroundAlpha = 0.55f + 0.1f * expansionProgress
     val textAlpha = expansionProgress
 
     val railFocusRequester = remember { FocusRequester() }
