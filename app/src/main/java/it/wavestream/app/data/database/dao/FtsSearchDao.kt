@@ -20,25 +20,8 @@ import it.wavestream.app.data.database.entity.Series
  * (INSERT/UPDATE/DELETE su channels/movies/series). I dati già presenti al momento
  * dell'upgrade vanno riindicizzati chiamando [reindexAll].
  */
-data class FtsSearchHit(
-    val id: Long,
-    val title: String,
-    val category: String?,
-    val posterUrl: String?,
-    val type: String
-)
-
 @Dao
 interface FtsSearchDao {
-
-    @RawQuery
-    fun searchChannels(query: SupportSQLiteQuery): List<FtsSearchHit>
-
-    @RawQuery
-    fun searchMovies(query: SupportSQLiteQuery): List<FtsSearchHit>
-
-    @RawQuery
-    fun searchSeries(query: SupportSQLiteQuery): List<FtsSearchHit>
 
     /**
      * Backfill dell'indice FTS dai dati correnti (da chiamare all'avvio o dopo
