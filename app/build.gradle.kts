@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "it.wavestream.app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "it.wavestream.app"

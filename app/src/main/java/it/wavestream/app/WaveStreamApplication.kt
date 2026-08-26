@@ -12,7 +12,7 @@ import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.theme.AccentColor
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.worker.SyncWorker
-import coil3.Coil
+import coil.Coil
 import it.wavestream.app.util.WaveStreamImageLoaderFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
