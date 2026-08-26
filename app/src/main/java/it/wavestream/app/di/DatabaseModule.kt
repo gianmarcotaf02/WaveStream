@@ -427,6 +427,9 @@ object DatabaseModule {
     
     @Provides
     fun provideHomeSessionCacheDao(db: AppDatabase): HomeSessionCacheDao = db.homeSessionCacheDao()
+
+    @Provides
+    fun provideFtsSearchDao(db: AppDatabase): FtsSearchDao = db.ftsSearchDao()
     
     @Provides
     @Singleton
