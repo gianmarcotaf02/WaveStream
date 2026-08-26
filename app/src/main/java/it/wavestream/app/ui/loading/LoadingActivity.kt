@@ -212,6 +212,10 @@ class LoadingActivity : ComponentActivity() {
                     applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
                     applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
                     applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
+                    
+                    // Enrich hero/trending content with TMDB votes + OMDB ratings in background
+                    // so heroes and carousels have ratings ready without blocking startup.
+                    applicationScope.launch(Dispatchers.IO) { enrichHeroContent { _ -> } }
                 } else {
                     // Force refresh: sync playlist in foreground
                     val autoUpdateEnabled = userPreferences.getPlaylistAutoUpdate()
@@ -437,7 +441,7 @@ class LoadingActivity : ComponentActivity() {
                 // === MOVIES: enrich ALL trending ===
                 val allTrendingMovies = movieDao.getByTrendingCategory("Film Popolari")
                 val moviesToEnrich = allTrendingMovies.filter { movie ->
-                    movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo
+                    movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo || movie.tmdbVoteAverage == null
                 }.sortedByDescending { it.tmdbPopularity ?: 0f }.take(100)
                 
                 val moviesCached = allTrendingMovies.size - moviesToEnrich.size
@@ -541,7 +545,7 @@ class LoadingActivity : ComponentActivity() {
                 // === SERIES: enrich ALL trending ===
                 val allTrendingSeries = seriesDao.getByTrendingCategory("Serie Popolari")
                 val seriesToEnrich = allTrendingSeries.filter { series ->
-                    series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo
+                    series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo || series.tmdbVoteAverage == null
                 }.sortedByDescending { it.tmdbPopularity ?: 0f }.take(100)
                 
                 val seriesCached = allTrendingSeries.size - seriesToEnrich.size

@@ -1192,8 +1192,8 @@ class HomeViewModel @Inject constructor(
                 Log.d("HomeViewModel", "buildHeroItem: movie lookup for id=${progress.contentId}, found=${movie != null}")
                 if (movie == null) return null
                 
-                // Ensure trailer is available
-                if (movie!!.tmdbTrailerKey == null) {
+                // Ensure trailer AND vote are available
+                if (movie!!.tmdbTrailerKey == null || movie!!.tmdbVoteAverage == null) {
                     try {
                         movie = tmdbService.enrichMovieDetails(movie!!)
                     } catch (e: Exception) {
@@ -1209,8 +1209,8 @@ class HomeViewModel @Inject constructor(
                 Log.d("HomeViewModel", "buildHeroItem: series lookup for id=$seriesId, found=${series != null}")
                 if (series == null) return null
                 
-                // Ensure trailer is available
-                if (series!!.tmdbTrailerKey == null) {
+                // Ensure trailer AND vote are available
+                if (series!!.tmdbTrailerKey == null || series!!.tmdbVoteAverage == null) {
                     try {
                         series = tmdbService.enrichSeriesDetails(series!!)
                     } catch (e: Exception) {
