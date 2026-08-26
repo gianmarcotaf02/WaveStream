@@ -46,6 +46,7 @@ import it.wavestream.app.ui.MainTab
 import it.wavestream.app.R
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.GlassTokens
+import it.wavestream.app.ui.theme.GlassSurface
 
 @Composable
 fun ExpandableNavRail(
@@ -94,7 +95,11 @@ fun ExpandableNavRail(
         }
     }
     
-    Box(
+    GlassSurface(
+        shape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp),
+        fill = WaveStreamColors.BackgroundDark.copy(alpha = backgroundAlpha),
+        stroke = GlassTokens.StrokeGradient,
+        strokeWidth = 1.dp,
         modifier = modifier
             .width(railWidth)
             .fillMaxHeight()
@@ -103,18 +108,6 @@ fun ExpandableNavRail(
                 elevation = 6.dp,
                 shape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
             )
-            .clip(RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        WaveStreamColors.Accent.copy(alpha = 0.06f * backgroundAlpha),
-                        WaveStreamColors.BackgroundDark.copy(alpha = backgroundAlpha),
-                        WaveStreamColors.BackgroundDark.copy(alpha = backgroundAlpha * 0.97f)
-                    )
-                )
-            )
-            // Bordo vetro luminoso — pannello flottante (FASE 2)
-            .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp))
             .focusRequester(railFocusRequester)
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && 
@@ -141,48 +134,48 @@ fun ExpandableNavRail(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.logo),
                         contentDescription = "WaveStream",
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(24.dp)
                     )
                     Text(
                         text = "WaveStream",
                         style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                         color = WaveStreamColors.TextPrimary,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         modifier = Modifier.alpha(textAlpha)
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 
                 HorizontalDivider(
-                    color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.4f),
-                    thickness = 0.5.dp,
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    color = WaveStreamColors.TextTertiary.copy(alpha = 0.25f),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             } else {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
+                        .height(44.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.logo),
                         contentDescription = "WaveStream",
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(28.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
             
             // Navigation items
@@ -287,9 +280,9 @@ fun ExpandableNavRail(
                 Spacer(modifier = Modifier.height(8.dp))
                 
                 HorizontalDivider(
-                    color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.4f),
-                    thickness = 0.5.dp,
-                    modifier = Modifier.padding(horizontal = 12.dp)
+                    color = WaveStreamColors.TextTertiary.copy(alpha = 0.25f),
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
