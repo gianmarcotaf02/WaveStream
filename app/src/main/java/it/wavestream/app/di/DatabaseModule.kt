@@ -368,6 +368,39 @@ object DatabaseModule {
         }
     }
 
+    /**
+     * Migration from version 26 to 27 (FASE 4 — EPG in Room):
+     * - Creates the `epg_programs` table (entity was already defined, now active)
+     * The EPG data is now persisted and queryable via EPGDao.
+     */
+    private val MIGRATION_26_27 = object : Migration(26, 27) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS epg_programs (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    channelId INTEGER NOT NULL,
+                    epgChannelId TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    description TEXT,
+                    startTime INTEGER NOT NULL,
+                    endTime INTEGER NOT NULL,
+                    category TEXT,
+                    iconUrl TEXT,
+                    rating TEXT,
+                    episode TEXT,
+                    hasCatchup INTEGER NOT NULL,
+                    catchupUrl TEXT,
+                    addedAt INTEGER NOT NULL,
+                    FOREIGN KEY(channelId) REFERENCES channels(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                )
+            """)
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_epg_programs_channelId ON epg_programs(channelId)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_epg_programs_startTime ON epg_programs(startTime)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_epg_programs_endTime ON epg_programs(endTime)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_epg_programs_channelId_startTime ON epg_programs(channelId, startTime)")
+        }
+    }
+
 
     @Provides
     @Singleton
@@ -379,7 +412,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -437,6 +470,9 @@ object DatabaseModule {
 
     @Provides
     fun provideFtsSearchDao(db: AppDatabase): FtsSearchDao = db.ftsSearchDao()
+
+    @Provides
+    fun provideEpgDao(db: AppDatabase): EPGDao = db.epgDao()
     
     @Provides
     @Singleton
