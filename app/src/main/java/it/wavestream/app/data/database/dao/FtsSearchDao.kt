@@ -3,6 +3,9 @@ package it.wavestream.app.data.database.dao
 import androidx.room.Dao
 import androidx.room.RawQuery
 import androidx.sqlite.db.SupportSQLiteQuery
+import it.wavestream.app.data.database.entity.Channel
+import it.wavestream.app.data.database.entity.Movie
+import it.wavestream.app.data.database.entity.Series
 
 /**
  * FASE 4 — Indice Full-Text Search (FTS5).
@@ -45,4 +48,20 @@ interface FtsSearchDao {
      */
     @RawQuery
     fun reindexAll(query: SupportSQLiteQuery): Int
+
+    /** Rileva se il modulo FTS5 è compilato nel SQLite di sistema (0/1+). */
+    @RawQuery
+    fun isFts5Available(query: SupportSQLiteQuery): Int
+
+    /** Ricerca canali via indice FTS (JOIN con la tabella sorgente). */
+    @RawQuery
+    fun searchChannelsFts(query: SupportSQLiteQuery): List<Channel>
+
+    /** Ricerca film via indice FTS (JOIN con la tabella sorgente). */
+    @RawQuery
+    fun searchMoviesFts(query: SupportSQLiteQuery): List<Movie>
+
+    /** Ricerca serie via indice FTS (JOIN con la tabella sorgente). */
+    @RawQuery
+    fun searchSeriesFts(query: SupportSQLiteQuery): List<Series>
 }
