@@ -1234,16 +1234,17 @@ private fun ModernNextEpisodeOverlay(
         label = "countdownProgress"
     )
     
-    Box(
+    GlassSurface(
+        shape = RoundedCornerShape(16.dp),
+        fill = GlassTokens.SurfaceFillStrong,
+        stroke = Brush.solidColor(borderColor),
+        strokeWidth = 2.dp,
         modifier = modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
             .width(340.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.Black.copy(alpha = 0.9f))
-            .border(2.dp, borderColor, RoundedCornerShape(16.dp))
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
