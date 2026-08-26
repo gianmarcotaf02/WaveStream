@@ -886,10 +886,13 @@ class TMDBService @Inject constructor(
             return@withContext movie
         }
         
-        // Skip if already enriched recently AND has TMDB data AND has original title (for OMDB fallback).
+        // Skip if already enriched recently AND has TMDB data AND has original title (for OMDB
+        // fallback) AND has a vote. The vote is required: a title enriched without tmdbVoteAverage
+        // (vote_average was 0, or a previous partial enrichment) must be re-fetched.
         // Note: tmdbTrailerKey is intentionally NOT required here: many titles simply have no
         // trailer, and requiring it forced a full TMDB search pipeline on every detail open.
-        val hasRealData = movie.tmdbId != null && movie.tmdbOverview != null && movie.tmdbOriginalTitle != null
+        val hasRealData = movie.tmdbId != null && movie.tmdbOverview != null &&
+            movie.tmdbOriginalTitle != null && movie.tmdbVoteAverage != null
         if (hasRealData && movie.tmdbLastFetchAt != null && 
             System.currentTimeMillis() - movie.tmdbLastFetchAt < 7 * 24 * 60 * 60 * 1000) {  // 7 days cache
             Log.d(TAG, "SKIP: Movie '${movie.name}' already enriched, returning cached (rating=${movie.tmdbVoteAverage})")
@@ -902,6 +905,15 @@ class TMDBService @Inject constructor(
             return@withContext movie
         }
         
+        // If the title has TMDB data but is missing the vote and was fetched very recently,
+        // avoid hammering TMDB (the vote may genuinely be 0 on TMDB). Retry after 24h.
+        if (movie.tmdbId != null && movie.tmdbOverview != null && movie.tmdbOriginalTitle != null &&
+            movie.tmdbVoteAverage == null && movie.tmdbLastFetchAt != null &&
+            System.currentTimeMillis() - movie.tmdbLastFetchAt < 24 * 60 * 60 * 1000) {
+            Log.d(TAG, "Movie '${movie.name}' has TMDB data but no vote; fetched recently, skipping")
+            return@withContext movie
+        }
+        
         try {
             // Clean title for TMDB search - remove year tags, quality suffixes, etc.
             val cleanedTitle = cleanTitleForSearch(movie.name)
@@ -911,8 +923,8 @@ class TMDBService @Inject constructor(
             val yearFromTitle = Regex("""\\((\\d{4})\\)""").find(movie.name)?.groupValues?.get(1)?.toIntOrNull()
             val year = movie.year ?: yearFromTitle
             
-            // Try multiple search strategies
-            var tmdbId: Int? = searchMovieOnTMDB(cleanedTitle, year, "it-IT")
+            // Try multiple search strategies (reuse the known TMDB id to fetch the missing vote directly)
+            var tmdbId: Int? = movie.tmdbId ?: searchMovieOnTMDB(cleanedTitle, year, "it-IT")
             
             // Strategy 2: If no results, try without year
             if (tmdbId == null && year != null) {
@@ -1295,8 +1307,9 @@ class TMDBService @Inject constructor(
      * Uses multiple search strategies for better matching
      */
     suspend fun enrichSeriesDetails(series: Series): Series = withContext(Dispatchers.IO) {
-        // Cache hit: recently searched AND has full data (trailer not required, see movie path)
-        val hasRealData = series.tmdbId != null && series.tmdbOverview != null
+        // Cache hit: recently searched AND has full data AND has a vote (vote required so that
+        // a partial enrichment without tmdbVoteAverage is re-fetched).
+        val hasRealData = series.tmdbId != null && series.tmdbOverview != null && series.tmdbVoteAverage != null
         if (hasRealData && series.tmdbLastFetchAt != null && 
             System.currentTimeMillis() - series.tmdbLastFetchAt < 24 * 60 * 60 * 1000) {
             Log.d(TAG, "Series '${series.name}' already enriched with data, skipping")
