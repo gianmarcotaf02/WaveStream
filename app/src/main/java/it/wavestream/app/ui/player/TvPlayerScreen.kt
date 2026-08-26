@@ -30,6 +30,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.font.FontWeight
@@ -1237,7 +1238,7 @@ private fun ModernNextEpisodeOverlay(
     GlassSurface(
         shape = RoundedCornerShape(16.dp),
         fill = GlassTokens.SurfaceFillStrong,
-        stroke = Brush.solidColor(borderColor),
+        stroke = SolidColor(borderColor),
         strokeWidth = 2.dp,
         modifier = modifier
             .graphicsLayer {
