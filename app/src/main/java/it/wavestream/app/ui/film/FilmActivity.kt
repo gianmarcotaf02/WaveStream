@@ -39,7 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import coil3.compose.AsyncImage
+import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.dao.CategoryWithCount

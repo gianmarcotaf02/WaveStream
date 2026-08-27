@@ -50,7 +50,7 @@ import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
-import coil3.compose.AsyncImage
+import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.entity.Channel

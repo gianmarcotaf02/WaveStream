@@ -124,7 +124,6 @@ dependencies {
     // Image Loading (Coil only - unified cache)
     implementation(libs.coil)
     implementation(libs.coil.compose)
-    implementation(libs.coil.network.okhttp)
 
     // Hilt / DI
     implementation(libs.hilt.android)

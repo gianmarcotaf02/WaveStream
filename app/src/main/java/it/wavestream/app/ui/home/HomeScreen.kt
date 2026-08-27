@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
+import coil.compose.AsyncImage
 import it.wavestream.app.R
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
@@ -510,8 +510,8 @@ fun PosterCard(
                 model = item.posterUrl,
                 contentDescription = item.title,
                 contentScale = ContentScale.Crop,
-                placeholder = coil3.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
-                error = coil3.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
+                placeholder = coil.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
+                error = coil.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
                 modifier = Modifier.fillMaxSize()
             )
             

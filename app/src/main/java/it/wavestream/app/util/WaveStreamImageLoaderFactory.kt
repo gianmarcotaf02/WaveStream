@@ -1,10 +1,10 @@
 package it.wavestream.app.util
 
 import android.content.Context
-import coil3.ImageLoader
-import coil3.ImageLoaderFactory
-import coil3.disk.DiskCache
-import coil3.memory.MemoryCache
+import coil.ImageLoader
+import coil.ImageLoaderFactory
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
