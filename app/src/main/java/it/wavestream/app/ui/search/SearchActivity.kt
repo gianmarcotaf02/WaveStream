@@ -55,7 +55,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.R
 import it.wavestream.app.data.database.dao.ChannelDao
