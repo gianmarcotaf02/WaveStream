@@ -41,8 +41,8 @@ class CoilImagePreloader @Inject constructor(
                 .data(url)
                 .size(targetSize)
                 .precision(Precision.INEXACT)
-                .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
-                .diskCachePolicy(coil.request.CachePolicy.ENABLED)
+                .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
+                .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
                 .build()
             imageLoader.enqueue(request)
         }

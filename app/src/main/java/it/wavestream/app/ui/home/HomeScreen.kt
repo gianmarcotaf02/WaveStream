@@ -510,8 +510,8 @@ fun PosterCard(
                 model = item.posterUrl,
                 contentDescription = item.title,
                 contentScale = ContentScale.Crop,
-                placeholder = coil.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
-                error = coil.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
+                placeholder = coil3.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
+                error = coil3.compose.rememberAsyncImagePainter(R.drawable.placeholder_poster),
                 modifier = Modifier.fillMaxSize()
             )
             
