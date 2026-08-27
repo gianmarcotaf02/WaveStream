@@ -34,7 +34,7 @@ class FtsSearchRepository @Inject constructor(
             try {
                 ftsSearchDao.isFts5Available(
                     SimpleSQLiteQuery(
-                        "SELECT count(*) FROM pragma_compile_options WHERE compile_options = 'ENABLE_FTS5'"
+                        "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='fts_channel'"
                     )
                 ) > 0
             } catch (e: Exception) {
