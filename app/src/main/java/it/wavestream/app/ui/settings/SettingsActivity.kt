@@ -2908,7 +2908,7 @@ private fun VpnSettings(
                     }
                     if (added > 0) {
                         refreshConfigs()
-                        feedback = "$added configurazioni importate dal file."
+                        feedback = "$added configurazioni importate dai file selezionati."
                         showFilePicker = false
                     } else {
                         feedback = "File non valido: ${firstError ?: "errore"}"
