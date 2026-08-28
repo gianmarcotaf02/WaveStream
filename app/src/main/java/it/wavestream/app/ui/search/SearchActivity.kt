@@ -623,6 +623,37 @@ private fun SearchInput(
 }
 
 /**
+ * Netflix-style suggestion item (text-only, left-aligned)
+ */
+@Composable
+private fun SuggestionItem(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    Box(
+        modifier = modifier
+            .height(36.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.2f) else Color.Transparent)
+            .focusable(interactionSource = interactionSource)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Text(
+            text = text,
+            color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+            fontSize = 16.sp,
+            fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal
+        )
+    }
+}
+
+/**
  * Search result card
  */
 @OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
