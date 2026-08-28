@@ -382,7 +382,33 @@ private fun MainActivityScreen(
             return
         }
         
-        // Navigate to CategoryActivity (same as sidebar navigation)
+        // "Vedi tutto" must show exactly the same items as the carousel. The
+        // carousel already holds the final item list, so pass its ids + types to
+        // CategoryActivity instead of the raw row title (which is often NOT a real
+        // DB category — e.g. "Continua a guardare", "Film per te", "Prossimo episodio").
+        val row = homeState.carouselRows.find { it.title == rowTitle }
+        if (row != null && row.items.isNotEmpty()) {
+            val ids = LongArray(row.items.size) { index -> row.items[index].id }
+            val types = ArrayList<String>(row.items.size)
+            row.items.forEach { types.add(it.contentType) }
+            
+            val contentType = when {
+                types.all { it == "MOVIE" } -> "CATEGORY_MOVIE"
+                types.all { it == "SERIES" } -> "CATEGORY_SERIES"
+                types.all { it == "CHANNEL" } -> "CATEGORY_LIVE"
+                else -> "SEE_ALL"
+            }
+            
+            startActivityWithTransition(Intent(context, it.wavestream.app.ui.category.CategoryActivity::class.java).apply {
+                putExtra("categoryName", rowTitle)
+                putExtra("contentType", contentType)
+                putExtra("item_ids", ids)
+                putStringArrayListExtra("item_types", types)
+            })
+            return
+        }
+        
+        // Fallback: navigate to CategoryActivity with the row title (same as sidebar navigation)
         val contentType = when (selectedTab) {
             MainTab.MOVIES -> "CATEGORY_MOVIE"
             MainTab.SERIES -> "CATEGORY_SERIES"
