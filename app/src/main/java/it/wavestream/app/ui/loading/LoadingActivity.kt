@@ -281,10 +281,12 @@ class LoadingActivity : ComponentActivity() {
                     isComplete = true
                 ))
                 delay(500) // brief pause to show "Tutto pronto!"
+                startVpnIfNeeded()
                 goToMain()
                 
             } catch (e: Exception) {
                 Log.e("LoadingActivity", "Error in startLoading", e)
+                startVpnIfNeeded()
                 goToMain()
             }
         }
@@ -317,6 +319,39 @@ class LoadingActivity : ComponentActivity() {
         return false
     }
     
+    /**
+     * Avvia automaticamente la VPN (se l'opzione è attiva) dopo la scelta del profilo,
+     * rispettando le ultime impostazioni (strategia, rotazione, intervallo).
+     * Viene avviato solo se il consenso VPN è già stato concesso (non si può mostrare
+     * il dialogo di consenso durante il caricamento); altrimenti viene saltato.
+     */
+    private suspend fun startVpnIfNeeded() {
+        try {
+            if (!userPreferences.getVpnAutoStart()) return
+            if (vpnManager.isRunning()) return
+            if (vpnManager.getConsentIntent() != null) {
+                Log.d("LoadingActivity", "VPN auto-start skipped: consent non ancora concesso")
+                return
+            }
+            val pool = userPreferences.getVpnConfigs()
+            if (pool.isEmpty()) return
+            val strategy = when (userPreferences.getVpnStrategy()) {
+                "round_robin" -> VpnStrategy.ROUND_ROBIN
+                "fastest" -> VpnStrategy.FASTEST
+                else -> VpnStrategy.RANDOM
+            }
+            val chosen = vpnManager.selectConfig(pool, strategy) ?: return
+            val r = vpnManager.start(chosen)
+            if (r.isSuccess && userPreferences.getVpnAutoRotate()) {
+                val interval = userPreferences.getVpnRotateInterval().toLongOrNull() ?: 60L
+                vpnManager.startAutoRotation(pool, strategy, interval)
+            }
+            Log.d("LoadingActivity", "VPN auto-start completato (strategia=$strategy)")
+        } catch (e: Exception) {
+            Log.e("LoadingActivity", "VPN auto-start error", e)
+        }
+    }
+
     private fun goToMain() {
         val intent = Intent(this, MainActivity::class.java).apply {
             putExtra("profile_id", profileId)
