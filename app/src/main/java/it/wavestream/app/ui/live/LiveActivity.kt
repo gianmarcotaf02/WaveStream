@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -63,7 +64,6 @@ import it.wavestream.app.data.repository.EpgRepository
 import it.wavestream.app.ui.epg.EpgProgram
 import it.wavestream.app.ui.multiscreen.MultiscreenActivity
 import it.wavestream.app.ui.player.PlayerActivity
-import it.wavestream.app.ui.search.SearchActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
