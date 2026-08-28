@@ -352,7 +352,8 @@ private fun SettingsSidebar(
 private fun SettingsMenuItemRow(
     item: SettingsMenuItem,
     isSelected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -406,7 +407,7 @@ private fun SettingsMenuItemRow(
     }
     
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 2.dp)
             .graphicsLayer { scaleX = scale; scaleY = scale }
