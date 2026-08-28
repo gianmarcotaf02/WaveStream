@@ -102,12 +102,9 @@ data class Movie(
     val omdbLastFetchAt: Long? = null
 ) {
     // Convenience properties for UI (Waterfall Logic)
-    // When TMDB ID exists, prefer TMDB poster over provider's logo (fixes wrong covers from IPTV providers)
-    val posterUrl: String? get() = if (tmdbId != null) {
-        tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: logoUrl
-    } else {
-        logoUrl ?: tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
-    }
+    // Prefer the TMDB poster/backdrop (authoritative) over the provider's logo/backdrop,
+    // since IPTV providers often supply incorrect covers (e.g. a different movie with same title).
+    val posterUrl: String? get() = tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: logoUrl
     val backdropUrl: String? get() = if (tmdbId != null) {
         tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: xtreamBackdropUrl
     } else {

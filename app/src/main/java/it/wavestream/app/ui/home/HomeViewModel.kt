@@ -309,7 +309,10 @@ class HomeViewModel @Inject constructor(
                         loadPopularMovies()?.let { movies ->
                             if (movies.isNotEmpty()) {
                                 val newItems = movies.map { it.toCarouselItem() }
-                                val idx = updatedRows.indexOfFirst { it.title == "Film popolari" }
+                                // HOME tab uses "Film per te"; MOVIES tab uses "Film popolari"
+                                val idx = updatedRows.indexOfFirst {
+                                    it.title == "Film per te" || it.title == "Film popolari"
+                                }
                                 if (idx >= 0) {
                                     updatedRows[idx] = updatedRows[idx].copy(items = newItems)
                                 }
@@ -322,7 +325,10 @@ class HomeViewModel @Inject constructor(
                         loadPopularSeries()?.let { series ->
                             if (series.isNotEmpty()) {
                                 val newItems = series.map { it.toCarouselItem() }
-                                val idx = updatedRows.indexOfFirst { it.title == "Serie TV popolari" }
+                                // HOME tab uses "Serie TV per te"; SERIES tab uses "Serie TV popolari"
+                                val idx = updatedRows.indexOfFirst {
+                                    it.title == "Serie TV per te" || it.title == "Serie TV popolari"
+                                }
                                 if (idx >= 0) {
                                     updatedRows[idx] = updatedRows[idx].copy(items = newItems)
                                 }
