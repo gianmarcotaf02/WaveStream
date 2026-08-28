@@ -13,6 +13,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -2540,8 +2541,11 @@ private fun VpnActionButton(
         onClick = onClick,
         enabled = enabled,
         interactionSource = interactionSource,
+        shape = ButtonDefaults.shape,
         colors = ButtonDefaults.buttonColors(containerColor = containerColor),
-        modifier = modifier.border(2.dp, borderColor, RoundedCornerShape(10.dp))
+        // Use the Button's native border so it follows the exact same shape/size as the button
+        border = BorderStroke(2.dp, borderColor),
+        modifier = modifier
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(8.dp))
