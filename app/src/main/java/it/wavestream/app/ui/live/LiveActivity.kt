@@ -756,7 +756,7 @@ private fun EpgChannelRow(
                     )
                 }
             } else {
-                items(programs, key = { it.start }) { program ->
+                items(programs, key = { program -> "${program.start}_${program.end}_${program.title}" }) { program ->
                     val isCurrent = program.start <= currentTime && program.end > currentTime
                     val durationMinutes = ((program.end - program.start) / 60_000).toInt()
                     
@@ -931,10 +931,10 @@ private fun LiveHeader(
                 )
             }
             
-            // Toggle button
-            Box(
+            // Toggle button (Griglia / EPG) - labeled so it's discoverable
+            Row(
                 modifier = Modifier
-                    .size(48.dp)
+                    .height(48.dp)
                     .focusRequester(toggleButtonFocusRequester)
                     .clip(RoundedCornerShape(8.dp))
                     .border(2.dp, toggleBorderColor, RoundedCornerShape(8.dp))
@@ -944,13 +944,22 @@ private fun LiveHeader(
                         interactionSource = toggleInteractionSource,
                         indication = null,
                         onClick = onToggleMode
-                    ),
-                contentAlignment = Alignment.Center
+                    )
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
                     imageVector = if (isGridMode) Icons.AutoMirrored.Filled.List else Icons.Default.GridView,
-                    contentDescription = if (isGridMode) "Mostra timeline" else "Mostra griglia",
-                    tint = WaveStreamColors.TextPrimary
+                    contentDescription = null,
+                    tint = if (isToggleFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = if (isGridMode) "EPG" else "Griglia",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isToggleFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }

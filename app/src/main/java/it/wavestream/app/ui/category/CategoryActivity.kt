@@ -246,13 +246,18 @@ class CategoryActivity : ComponentActivity() {
 
     private suspend fun loadCategoryChannels(): List<Channel> {
         return withContext(Dispatchers.IO) {
-            if (contentType == "CATEGORY_LIVE") {
-                channelDao.getChannelsByCategoryList(categoryName)
-            } else if (contentType == "SEE_ALL" && itemIds.isNotEmpty() && itemTypes.size == itemIds.size) {
+            // "Vedi tutto" passed the exact channel list — use it (reordered)
+            if (itemIds.isNotEmpty() && itemTypes.size == itemIds.size) {
                 val channelIds = itemIds.indices
                     .filter { itemTypes[it] == "CHANNEL" }
                     .map { itemIds[it] }
-                channelDao.getChannelsByIds(channelIds)
+                if (channelIds.isNotEmpty()) {
+                    val byId = channelDao.getChannelsByIds(channelIds).associateBy { it.id }
+                    return@withContext channelIds.mapNotNull { byId[it] }
+                }
+            }
+            if (contentType == "CATEGORY_LIVE") {
+                channelDao.getChannelsByCategoryList(categoryName)
             } else {
                 emptyList()
             }
