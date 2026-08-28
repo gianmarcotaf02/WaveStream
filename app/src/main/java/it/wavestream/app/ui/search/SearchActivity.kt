@@ -373,38 +373,25 @@ fun SearchScreen(
         // Top spacing
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Search header: back button + query display (Netflix style)
+        // Search header: query display (Netflix style - simple text, no rounded bar)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 48.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = WaveStreamColors.TextPrimary
-                )
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Query display (keyboard writes here)
+            // Query display (keyboard writes here - Netflix simple style)
             Box(
                 modifier = Modifier
                     .weight(1f)
                     .height(48.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(WaveStreamColors.BackgroundSecondary)
-                    .border(2.dp, WaveStreamColors.Accent, RoundedCornerShape(24.dp))
                     .padding(horizontal = 20.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 Text(
-                    text = query.ifEmpty { "Digita con la tastiera..." },
-                    color = if (query.isEmpty()) WaveStreamColors.TextTertiary else WaveStreamColors.TextPrimary,
-                    style = MaterialTheme.typography.titleLarge,
+                    text = query.ifEmpty { " " },
+                    color = WaveStreamColors.TextPrimary,
+                    style = MaterialTheme.typography.headlineMedium,
                     maxLines = 1
                 )
             }
