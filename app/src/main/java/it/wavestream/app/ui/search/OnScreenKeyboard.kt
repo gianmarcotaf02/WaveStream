@@ -67,7 +67,7 @@ fun OnScreenKeyboard(
                             modifier = Modifier.weight(1f)
                         )
                         KeyboardKey.Backspace -> KeyboardButton(
-                            label = "✕",
+                            label = "⌫",
                             onClick = { onQueryChange(query.dropLast(1)) },
                             modifier = Modifier.weight(1f)
                         )
