@@ -20,6 +20,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
@@ -232,6 +233,18 @@ private fun SettingsSidebar(
     val regularItems = menuItems.filter { !it.isDestructive }
     val destructiveItems = menuItems.filter { it.isDestructive }
     
+    // Auto-focus on the first menu item (e.g. "Profilo") when the settings open,
+    // instead of falling through to the last focusable ("Disconnetti").
+    val firstItemFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(350) // wait for the LazyColumn item to compose
+        try {
+            firstItemFocus.requestFocus()
+        } catch (e: Exception) {
+            // ignore focus errors
+        }
+    }
+    
     Column(
         modifier = modifier
             .background(
@@ -317,11 +330,12 @@ private fun SettingsSidebar(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            items(regularItems) { item ->
+            itemsIndexed(regularItems) { index, item ->
                 SettingsMenuItemRow(
                     item = item,
                     isSelected = selectedItem == item.id,
-                    onClick = { onItemClick(item) }
+                    onClick = { onItemClick(item) },
+                    modifier = if (index == 0) Modifier.focusRequester(firstItemFocus) else Modifier
                 )
             }
         }
