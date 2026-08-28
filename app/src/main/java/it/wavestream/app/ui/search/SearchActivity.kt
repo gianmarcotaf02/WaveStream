@@ -121,6 +121,8 @@ class SearchActivity : ComponentActivity() {
 
         // Launcher per la ricerca vocale (attiva il microfono del telecomando)
         voiceSearchLauncher = registerForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+        ) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
                 val spokenText = result.data
                     ?.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS)
@@ -142,6 +144,16 @@ class SearchActivity : ComponentActivity() {
                 SearchScreenContent()
             }
         }
+    }
+
+    // Il tasto microfono del telecomando attiva la ricerca vocale
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent?): Boolean {
+        if (keyCode == android.view.KeyEvent.KEYCODE_VOICE_ASSIST ||
+            keyCode == android.view.KeyEvent.KEYCODE_SEARCH) {
+            startVoiceSearch()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
     
     @Composable
