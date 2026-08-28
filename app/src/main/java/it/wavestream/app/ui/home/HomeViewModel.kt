@@ -322,7 +322,7 @@ class HomeViewModel @Inject constructor(
                         loadPopularSeries()?.let { series ->
                             if (series.isNotEmpty()) {
                                 val newItems = series.map { it.toCarouselItem() }
-                                val idx = updatedRows.indexOfFirst { it.title == "Serie popolari" }
+                                val idx = updatedRows.indexOfFirst { it.title == "Serie TV popolari" }
                                 if (idx >= 0) {
                                     updatedRows[idx] = updatedRows[idx].copy(items = newItems)
                                 }
