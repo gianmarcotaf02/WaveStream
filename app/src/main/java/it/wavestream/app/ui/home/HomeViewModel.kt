@@ -2571,10 +2571,18 @@ class HomeViewModel @Inject constructor(
      * Results are cached for 15 minutes to avoid reshuffling on every resume
      */
     private suspend fun loadPopularMovies(): List<Movie>? {
-        val cached = contentCache.popularMoviesCache
-        if (cached != null && (System.currentTimeMillis() - contentCache.popularMoviesCacheTime) < POPULAR_CACHE_DURATION) {
-            Log.d("HomeViewModel", "Using cached popular movies (${cached.size} items)")
-            return cached
+        // Cache stores only IDs (10 days) to keep ordering stable; objects are re-fetched fresh
+        // from DB each time so poster/backdrop updates (e.g. from detail enrichment) are reflected.
+        val cachedIds = contentCache.popularMoviesCache
+        if (cachedIds != null && (System.currentTimeMillis() - contentCache.popularMoviesCacheTime) < POPULAR_CACHE_DURATION) {
+            Log.d("HomeViewModel", "Using cached popular movie IDs (${cachedIds.size} items)")
+            return withContext(Dispatchers.IO) {
+                val fresh = movieDao.getMoviesByIds(cachedIds)
+                // Preserve cached ordering, dropping any that no longer exist
+                val byId = fresh.associateBy { it.id }
+                val ordered = cachedIds.mapNotNull { byId[it] }
+                ordered.ifEmpty { null }
+            }
         }
         
         return withContext(Dispatchers.IO) {
@@ -2599,7 +2607,7 @@ class HomeViewModel @Inject constructor(
                 if (movies.isEmpty()) return@withContext null
                 
                 val result = movies.shuffled().take(10)
-                contentCache.popularMoviesCache = result
+                contentCache.popularMoviesCache = result.map { it.id }
                 contentCache.popularMoviesCacheTime = System.currentTimeMillis()
                 result
             } catch (e: Exception) {
@@ -2615,10 +2623,18 @@ class HomeViewModel @Inject constructor(
      * Results are cached for 15 minutes to avoid reshuffling on every resume
      */
     private suspend fun loadPopularSeries(): List<Series>? {
-        val cached = contentCache.popularSeriesCache
-        if (cached != null && (System.currentTimeMillis() - contentCache.popularSeriesCacheTime) < POPULAR_CACHE_DURATION) {
-            Log.d("HomeViewModel", "Using cached popular series (${cached.size} items)")
-            return cached
+        // Cache stores only IDs (10 days) to keep ordering stable; objects are re-fetched fresh
+        // from DB each time so poster/backdrop updates (e.g. from detail enrichment) are reflected.
+        val cachedIds = contentCache.popularSeriesCache
+        if (cachedIds != null && (System.currentTimeMillis() - contentCache.popularSeriesCacheTime) < POPULAR_CACHE_DURATION) {
+            Log.d("HomeViewModel", "Using cached popular series IDs (${cachedIds.size} items)")
+            return withContext(Dispatchers.IO) {
+                val fresh = seriesDao.getSeriesByIds(cachedIds)
+                // Preserve cached ordering, dropping any that no longer exist
+                val byId = fresh.associateBy { it.id }
+                val ordered = cachedIds.mapNotNull { byId[it] }
+                ordered.ifEmpty { null }
+            }
         }
         
         return withContext(Dispatchers.IO) {
@@ -2643,7 +2659,7 @@ class HomeViewModel @Inject constructor(
                 if (series.isEmpty()) return@withContext null
                 
                 val result = series.shuffled().take(10)
-                contentCache.popularSeriesCache = result
+                contentCache.popularSeriesCache = result.map { it.id }
                 contentCache.popularSeriesCacheTime = System.currentTimeMillis()
                 result
             } catch (e: Exception) {

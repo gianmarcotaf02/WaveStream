@@ -50,11 +50,13 @@ class ContentCache @Inject constructor(
     private val moviesByCategoryCache = LruCache<String, List<Movie>>(CATEGORY_CACHE_SIZE)
     private val seriesByCategoryCache = LruCache<String, List<Series>>(CATEGORY_CACHE_SIZE)
     
-    // Popular content caches (15 min)
-    var popularMoviesCache: List<Movie>? = null
+    // Popular content caches (10 days)
+    // Store only IDs to keep ordering stable while always re-fetching fresh objects from DB
+    // (so poster/backdrop updates from detail enrichment are reflected in the home carousels)
+    var popularMoviesCache: List<Long>? = null
     var popularMoviesCacheTime: Long = 0
     
-    var popularSeriesCache: List<Series>? = null
+    var popularSeriesCache: List<Long>? = null
     var popularSeriesCacheTime: Long = 0
     
     // Cooldown for failed trending populate attempts (prevents redundant TMDB calls)
