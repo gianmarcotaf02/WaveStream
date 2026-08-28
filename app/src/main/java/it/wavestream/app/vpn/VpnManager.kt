@@ -129,8 +129,14 @@ class VpnManager @Inject constructor(
         }
 
     /**
-     * Euristico di latenza: tempo di risoluzione DNS + tentativo di connessione TCP
-     * verso l'endpoint WireGuard. Restituisce null se il server non è raggiungibile.
+     * Euristico di latenza: tempo di risoluzione DNS + latenza di rete verso l'host
+     * dell'endpoint.
+     *
+     * WireGuard parla UDP, quindi un TCP connect sulla porta dell'endpoint fallirebbe
+     * quasi sempre (la porta UDP non accetta connessioni TCP) e la misura risulterebbe
+     * falsata. Usiamo la porta 443 (HTTPS) come proxy della latenza di rete verso quel
+     * nodo; se l'host non espone HTTPS ricadiamo sul solo tempo di risoluzione DNS.
+     * Restituisce null solo se nemmeno il nome dell'host è risolvibile.
      */
     fun measureLatency(configText: String): Long? {
         val endpoint = parseEndpoint(configText) ?: return null
@@ -140,7 +146,7 @@ class VpnManager @Inject constructor(
             val dnsTime = SystemClock.elapsedRealtime() - start
             val tcpTime = try {
                 val s = SystemClock.elapsedRealtime()
-                Socket().use { it.connect(InetSocketAddress(address, endpoint.port), 1500) }
+                Socket().use { it.connect(InetSocketAddress(address, 443), 1500) }
                 SystemClock.elapsedRealtime() - s
             } catch (e: Exception) {
                 null
