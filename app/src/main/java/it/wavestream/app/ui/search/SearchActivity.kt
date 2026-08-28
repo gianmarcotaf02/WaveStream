@@ -492,28 +492,30 @@ fun SearchScreen(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    if (query.isEmpty()) {
-                        Text(
-                            text = "Cerca film, serie TV e canali",
-                            color = WaveStreamColors.TextTertiary,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
+
+                    // Cursore bianco lampeggiante all'inizio della riga
+                    // (in overlay sul placeholder quando il box è vuoto)
+                    Box {
+                        if (query.isEmpty()) {
+                            Text(
+                                text = "Cerca film, serie TV e canali",
+                                color = WaveStreamColors.TextTertiary,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1
+                            )
+                        } else {
+                            Text(
+                                text = query,
+                                color = WaveStreamColors.TextPrimary,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1
+                            )
+                        }
+                        BlinkingCursor(
+                            modifier = Modifier.align(Alignment.CenterStart)
                         )
-                        // Cursore bianco anche quando il box è vuoto
-                        Spacer(modifier = Modifier.width(2.dp))
-                        BlinkingCursor()
-                    } else {
-                        Text(
-                            text = query,
-                            color = WaveStreamColors.TextPrimary,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
-                        )
-                        // Indicatore bianco davanti alla prossima lettera
-                        Spacer(modifier = Modifier.width(2.dp))
-                        BlinkingCursor()
                     }
                 }
             }
