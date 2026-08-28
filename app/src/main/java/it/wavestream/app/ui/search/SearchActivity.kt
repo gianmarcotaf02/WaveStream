@@ -16,6 +16,8 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -416,12 +418,33 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(start = 48.dp)
         ) {
-            // Left column: keyboard + suggestions
+            // Left column: back button + keyboard + suggestions
             Column(
                 modifier = Modifier
                     .width(500.dp)
                     .padding(top = 8.dp)
             ) {
+                // "Back to Browse" button (Netflix-style)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(WaveStreamColors.BackgroundTertiary)
+                        .focusable()
+                        .clickable(onClick = onBackClick),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Back to Browse",
+                        color = WaveStreamColors.TextPrimary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 // On-screen keyboard (Netflix style)
                 OnScreenKeyboard(
                     query = query,
