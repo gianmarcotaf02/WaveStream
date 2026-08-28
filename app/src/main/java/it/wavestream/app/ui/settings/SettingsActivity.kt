@@ -3205,6 +3205,8 @@ private fun VpnFilePickerDialog(
     var files by remember { mutableStateOf<List<FoundConfig>?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var permissionNeeded by remember { mutableStateOf(false) }
+    var importing by remember { mutableStateOf(false) }
+    val selected = remember { mutableStateMapOf<FoundConfig, Boolean>() }
 
     fun search() {
         files = null
@@ -3296,25 +3298,91 @@ private fun VpnFilePickerDialog(
                     }
                     else -> {
                         LazyColumn(
-                            modifier = Modifier.height(300.dp),
+                            modifier = Modifier.height(260.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(files ?: emptyList()) { found ->
                                 VpnFileRow(
                                     found = found,
-                                    onClick = {
-                                        scope.launch {
-                                            error = null
+                                    isSelected = selected[found] == true,
+                                    onClick = { selected[found] = !(selected[found] ?: false) }
+                                )
+                            }
+                        }
+                        val fileList = files ?: emptyList()
+                        val selectedCount = selected.count { it.value }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    val allSelected = fileList.isNotEmpty() && fileList.all { selected[it] == true }
+                                    fileList.forEach { f -> selected[f] = !allSelected }
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = WaveStreamColors.TextSecondary)
+                            ) {
+                                Icon(
+                                    Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = if (fileList.isNotEmpty() && fileList.all { selected[it] == true })
+                                        WaveStreamColors.Accent else WaveStreamColors.TextSecondary
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    if (fileList.isNotEmpty() && fileList.all { selected[it] == true })
+                                        "Deseleziona tutti" else "Seleziona tutti"
+                                )
+                            }
+                            Spacer(modifier = Modifier.weight(1f))
+                            Button(
+                                enabled = selectedCount > 0 && !importing,
+                                onClick = {
+                                    if (selectedCount == 0) return@Button
+                                    importing = true
+                                    error = null
+                                    scope.launch {
+                                        val combined = StringBuilder()
+                                        var firstError: String? = null
+                                        for ((found, isSel) in selected) {
+                                            if (!isSel) continue
                                             val text = withContext(Dispatchers.IO) {
                                                 VpnConfigFinder.readConfig(context, found)
                                             }
                                             if (text.isNullOrBlank()) {
-                                                error = "Impossibile leggere il file selezionato."
+                                                if (firstError == null) {
+                                                    firstError = "Impossibile leggere ${found.displayName}"
+                                                }
                                             } else {
-                                                onSelected(text)
+                                                if (combined.isNotEmpty()) combined.append('\n')
+                                                combined.append(text.trim())
                                             }
                                         }
+                                        importing = false
+                                        if (combined.isNotBlank()) {
+                                            onSelected(combined.toString())
+                                        } else {
+                                            error = firstError ?: "Nessun file selezionato valido."
+                                        }
                                     }
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
+                            ) {
+                                if (importing) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        strokeWidth = 2.dp,
+                                        color = WaveStreamColors.TextPrimary
+                                    )
+                                } else {
+                                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(20.dp))
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    if (selectedCount > 0) "Importa selezionati ($selectedCount)"
+                                    else "Seleziona i file da importare"
                                 )
                             }
                         }
@@ -3339,21 +3407,31 @@ private fun VpnFilePickerDialog(
 @Composable
 private fun VpnFileRow(
     found: FoundConfig,
+    isSelected: Boolean,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused || isSelected) WaveStreamColors.Accent else Color.Transparent,
         animationSpec = tween(150),
         label = "fileRowBorder"
+    )
+    val bgColor by animateColorAsState(
+        targetValue = when {
+            isSelected -> WaveStreamColors.Accent.copy(alpha = 0.18f)
+            isFocused -> WaveStreamColors.BackgroundTertiary
+            else -> WaveStreamColors.SurfaceDark
+        },
+        animationSpec = tween(150),
+        label = "fileRowBg"
     )
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.SurfaceDark)
+            .background(bgColor)
             .border(2.dp, borderColor, RoundedCornerShape(10.dp))
             .focusable(interactionSource = interactionSource)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
@@ -3364,7 +3442,7 @@ private fun VpnFileRow(
         Icon(
             imageVector = Icons.Default.Description,
             contentDescription = null,
-            tint = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
+            tint = if (isFocused || isSelected) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
             modifier = Modifier.size(24.dp)
         )
         Column(modifier = Modifier.weight(1f)) {
@@ -3372,7 +3450,7 @@ private fun VpnFileRow(
                 text = found.displayName,
                 style = MaterialTheme.typography.bodyLarge,
                 color = WaveStreamColors.TextPrimary,
-                fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Medium
+                fontWeight = if (isFocused || isSelected) FontWeight.SemiBold else FontWeight.Medium
             )
             Text(
                 text = found.source,
@@ -3381,9 +3459,11 @@ private fun VpnFileRow(
             )
         }
         Icon(
-            imageVector = Icons.Default.ChevronRight,
+            imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.ChevronRight,
             contentDescription = null,
-            tint = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary.copy(alpha = 0.5f),
+            tint = if (isSelected) WaveStreamColors.Accent
+                   else if (isFocused) WaveStreamColors.Accent
+                   else WaveStreamColors.TextTertiary.copy(alpha = 0.5f),
             modifier = Modifier.size(18.dp)
         )
     }
