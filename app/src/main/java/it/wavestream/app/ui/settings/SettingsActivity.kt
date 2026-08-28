@@ -233,17 +233,7 @@ private fun SettingsSidebar(
     val regularItems = menuItems.filter { !it.isDestructive }
     val destructiveItems = menuItems.filter { it.isDestructive }
     
-    // Auto-focus on the first menu item (e.g. "Profilo") when the settings open,
-    // instead of falling through to the last focusable ("Disconnetti").
-    val firstItemFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(350) // wait for the LazyColumn item to compose
-        try {
-            firstItemFocus.requestFocus()
-        } catch (e: Exception) {
-            // ignore focus errors
-        }
-    }
+
     
     Column(
         modifier = modifier
