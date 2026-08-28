@@ -52,11 +52,11 @@ fun OnScreenKeyboard(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         rows.forEach { row ->
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 row.forEach { key ->
@@ -105,12 +105,12 @@ private fun KeyboardButton(
 
     Box(
         modifier = modifier
-            .height(40.dp)
+            .height(32.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(4.dp))
             .background(
                 if (isFocused) WaveStreamColors.Accent
                 else Color(0xFF2A2A2A)  // Dark gray, Netflix-style
@@ -118,7 +118,7 @@ private fun KeyboardButton(
             .border(
                 width = if (isFocused) 2.dp else 0.dp,
                 color = if (isFocused) WaveStreamColors.AccentLight else Color.Transparent,
-                shape = RoundedCornerShape(6.dp)
+                shape = RoundedCornerShape(4.dp)
             )
             .focusable(interactionSource = interactionSource)
             .clickable(onClick = onClick),
@@ -128,7 +128,7 @@ private fun KeyboardButton(
             text = label,
             color = if (isFocused) Color.White else Color(0xFFCCCCCC), // Light gray text
             fontWeight = FontWeight.Medium,
-            fontSize = 16.sp
+            fontSize = 13.sp
         )
     }
 }
