@@ -161,6 +161,14 @@ class SearchActivity : ComponentActivity() {
                 // Ignore focus/keyboard errors on TV devices
             }
         }
+
+        // Collega il risultato della ricerca vocale alla query
+        DisposableEffect(Unit) {
+            voiceResultCallback = { voiceText ->
+                query = voiceText
+            }
+            onDispose { voiceResultCallback = null }
+        }
         
         // Debounced search
         LaunchedEffect(query) {
@@ -205,6 +213,35 @@ class SearchActivity : ComponentActivity() {
         )
     }
     
+    private fun startVoiceSearch() {
+        try {
+            val intent = android.content.Intent(
+                android.speech.RecognizerIntent.ACTION_RECOGNIZE_SPEECH
+            ).apply {
+                putExtra(
+                    android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    android.speech.RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                )
+                putExtra(
+                    android.speech.RecognizerIntent.EXTRA_PROMPT,
+                    "Parla per cercare film, serie TV e canali"
+                )
+            }
+            // Se non è disponibile un servizio di riconoscimento, ignora silenziosamente
+            if (intent.resolveActivity(packageManager) != null) {
+                voiceSearchLauncher.launch(intent)
+            } else {
+                android.widget.Toast.makeText(
+                    this,
+                    "Riconoscimento vocale non disponibile",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        } catch (e: Exception) {
+            // Ignora errori di avvio riconoscimento vocale
+        }
+    }
+
     private suspend fun performSearch(query: String): List<SearchResultItem> {
         val results = mutableListOf<SearchResultItem>()
         val profileId = userPreferences.getCurrentProfileId() ?: 1L
