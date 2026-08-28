@@ -28,6 +28,8 @@ import it.wavestream.app.data.tmdb.TMDBService
 import it.wavestream.app.ui.MainActivity
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.util.ContentFilters
+import it.wavestream.app.vpn.VpnManager
+import it.wavestream.app.vpn.VpnStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -62,6 +64,7 @@ class LoadingActivity : ComponentActivity() {
     @Inject lateinit var imdbRatingsRepository: ImdbRatingsRepository
     @Inject lateinit var watchProgressDao: it.wavestream.app.data.database.dao.WatchProgressDao
     @Inject lateinit var profileDao: ProfileDao
+    @Inject lateinit var vpnManager: VpnManager
     @Inject @ApplicationScope lateinit var applicationScope: CoroutineScope
     @Inject lateinit var contentCache: ContentCache
     
