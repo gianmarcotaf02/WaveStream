@@ -102,7 +102,12 @@ data class Movie(
     val omdbLastFetchAt: Long? = null
 ) {
     // Convenience properties for UI (Waterfall Logic)
-    val posterUrl: String? get() = logoUrl ?: tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+    // When TMDB ID exists, prefer TMDB poster over provider's logo (fixes wrong covers from IPTV providers)
+    val posterUrl: String? get() = if (tmdbId != null) {
+        tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: logoUrl
+    } else {
+        logoUrl ?: tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
+    }
     val backdropUrl: String? get() = xtreamBackdropUrl ?: tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" }
     val rating: Float? get() = xtreamRating?.toFloatOrNull() ?: tmdbVoteAverage ?: omdbImdbRating?.toFloatOrNull()
     val plot: String? get() = xtreamPlot ?: tmdbOverview
