@@ -503,18 +503,28 @@ class DetailsActivity : ComponentActivity() {
                     
                     val vodInfo = api.getVodInfo(playlist.username, playlist.password, vodId = movie.xtreamStreamId ?: 0)
                     vodInfo.info?.let { info ->
-                        overview = info.plot ?: overview
-                        cast = info.cast ?: cast
-                        director = info.director ?: director
-                        genre = info.genre ?: genre
-                        duration = info.duration ?: info.durationSecs?.let { "${it / 60} min" }
-                        
-                        // Save it back to DB for next time
+                        // Sanitize provider data: blank/placeholder values ("", "00:00:00")
+                        // must NOT block the TMDB fallback.
+                        val infoPlot = info.plot?.takeIf { it.isNotBlank() }
+                        val infoCast = info.cast?.takeIf { it.isNotBlank() }
+                        val infoDirector = info.director?.takeIf { it.isNotBlank() }
+                        val infoGenre = info.genre?.takeIf { it.isNotBlank() }
+                        val infoDuration = info.duration
+                            ?.takeIf { it.isNotBlank() && it != "00:00:00" && it != "0" }
+                            ?: info.durationSecs?.takeIf { it > 0 }?.let { "${it / 60} min" }
+
+                        if (infoPlot != null) overview = infoPlot
+                        if (infoCast != null) cast = infoCast
+                        if (infoDirector != null) director = infoDirector
+                        if (infoGenre != null) genre = infoGenre
+                        if (infoDuration != null) duration = infoDuration
+
+                        // Save it back to DB for next time (only non-blank values)
                         movieDao.update(movie.copy(
-                            xtreamPlot = info.plot ?: movie.xtreamPlot,
-                            xtreamCast = info.cast ?: movie.xtreamCast,
-                            xtreamDirector = info.director ?: movie.xtreamDirector,
-                            xtreamGenre = info.genre ?: movie.xtreamGenre,
+                            xtreamPlot = infoPlot ?: movie.xtreamPlot,
+                            xtreamCast = infoCast ?: movie.xtreamCast,
+                            xtreamDirector = infoDirector ?: movie.xtreamDirector,
+                            xtreamGenre = infoGenre ?: movie.xtreamGenre,
                             xtreamRating = info.rating ?: movie.xtreamRating,
                             xtreamYoutubeTrailer = info.youtubeTrailer ?: movie.xtreamYoutubeTrailer
                         ))
