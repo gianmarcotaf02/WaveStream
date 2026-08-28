@@ -102,11 +102,7 @@ data class Series(
     // Prefer the TMDB poster/backdrop (authoritative) over the provider's logo/backdrop,
     // since IPTV providers often supply incorrect covers (e.g. a different movie with same title).
     val posterUrl: String? get() = tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: logoUrl
-    val backdropUrl: String? get() = if (tmdbId != null) {
-        tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: xtreamBackdropUrl
-    } else {
-        xtreamBackdropUrl ?: tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" }
-    }
+    val backdropUrl: String? get() = tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: xtreamBackdropUrl
     val rating: Float? get() = xtreamRating?.toFloatOrNull() ?: tmdbVoteAverage ?: omdbImdbRating?.toFloatOrNull()
     val plot: String? get() = xtreamPlot ?: tmdbOverview
     val genre: String? get() = xtreamGenre ?: tmdbGenres
