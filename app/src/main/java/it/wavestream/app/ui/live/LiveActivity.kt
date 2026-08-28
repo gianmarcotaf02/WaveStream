@@ -554,13 +554,13 @@ fun LiveScreen(
                                 up = toggleButtonFocusRequester
                             }
                     ) {
-                        tvGridItems(channels, key = { it.id }) { channel ->
+                        tvGridItems(filteredChannels, key = { it.id }) { channel ->
                             LiveChannelCard(
                                 channel = channel,
                                 currentProgram = currentPrograms[channel.id],
                                 currentTime = currentTime,
                                 onClick = { onChannelClick(channel) },
-                                modifier = if (channels.isNotEmpty() && channel.id == channels.first().id) {
+                                modifier = if (filteredChannels.isNotEmpty() && channel.id == filteredChannels.first().id) {
                                     Modifier.focusRequester(firstChannelFocusRequester)
                                 } else {
                                     Modifier
@@ -589,14 +589,14 @@ fun LiveScreen(
                                     },
                                 verticalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                tvListItems(channels, key = { it.id }) { channel ->
+                                tvListItems(filteredChannels, key = { it.id }) { channel ->
                                     EpgChannelRow(
                                         channel = channel,
                                         programs = channelPrograms[channel.id] ?: emptyList(),
                                         currentTime = currentTime,
                                         timeFormat = timeFormat,
                                         onClick = { onChannelClick(channel) },
-                                        modifier = if (channels.isNotEmpty() && channel.id == channels.first().id) {
+                                        modifier = if (filteredChannels.isNotEmpty() && channel.id == filteredChannels.first().id) {
                                             Modifier.focusRequester(firstChannelFocusRequester)
                                         } else {
                                             Modifier
@@ -1010,6 +1010,78 @@ private fun LiveHeader(
                     fontWeight = FontWeight.SemiBold
                 )
             }
+        }
+    }
+}
+
+/**
+ * In-category search bar.
+ * Filters only the currently selected category's channels.
+ */
+@Composable
+private fun LiveSearchBar(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    onClose: () -> Unit,
+    focusRequester: FocusRequester
+) {
+    val closeInteractionSource = remember { MutableInteractionSource() }
+    val isCloseFocused by closeInteractionSource.collectIsFocusedAsState()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = onSearchQueryChange,
+            modifier = Modifier
+                .weight(1f)
+                .focusRequester(focusRequester),
+            placeholder = { Text("Cerca nella categoria...", color = WaveStreamColors.TextTertiary) },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = WaveStreamColors.TextSecondary) },
+            trailingIcon = if (searchQuery.isNotEmpty()) {
+                {
+                    IconButton(onClick = { onSearchQueryChange("") }) {
+                        Icon(Icons.Default.Close, contentDescription = "Cancella", tint = WaveStreamColors.TextSecondary)
+                    }
+                }
+            } else null,
+            singleLine = true,
+            shape = RoundedCornerShape(10.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = WaveStreamColors.Accent,
+                unfocusedBorderColor = WaveStreamColors.BackgroundTertiary,
+                focusedContainerColor = WaveStreamColors.BackgroundSecondary,
+                unfocusedContainerColor = WaveStreamColors.BackgroundSecondary,
+                cursorColor = WaveStreamColors.Accent
+            ),
+            textStyle = MaterialTheme.typography.bodyMedium.copy(color = WaveStreamColors.TextPrimary)
+        )
+
+        // Close button (hides the search bar and clears the filter)
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(CircleShape)
+                .border(2.dp, if (isCloseFocused) WaveStreamColors.Accent else Color.Transparent, CircleShape)
+                .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f))
+                .focusable(interactionSource = closeInteractionSource)
+                .clickable(
+                    interactionSource = closeInteractionSource,
+                    indication = null,
+                    onClick = onClose
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Chiudi ricerca",
+                tint = if (isCloseFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary
+            )
         }
     }
 }
