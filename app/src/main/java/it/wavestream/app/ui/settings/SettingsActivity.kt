@@ -2795,7 +2795,7 @@ private fun VpnSettings(
 
             // ---- Attiva / Disattiva ----
             if (configs.isNotEmpty()) {
-                Button(
+                VpnActionButton(
                     onClick = {
                         scope.launch {
                             if (vpnManager.isRunning()) {
@@ -2825,14 +2825,10 @@ private fun VpnSettings(
                         }
                     },
                     enabled = !isBusy,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRunning) WaveStreamColors.Error else WaveStreamColors.Accent
-                    )
-                ) {
-                    Icon(Icons.Default.PowerSettingsNew, contentDescription = null, modifier = Modifier.size(20.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (isRunning) "Disattiva VPN" else "Attiva VPN")
-                }
+                    containerColor = if (isRunning) WaveStreamColors.Error else WaveStreamColors.Accent,
+                    icon = Icons.Default.PowerSettingsNew,
+                    label = if (isRunning) "Disattiva VPN" else "Attiva VPN"
+                )
             }
 
             feedback?.let {
