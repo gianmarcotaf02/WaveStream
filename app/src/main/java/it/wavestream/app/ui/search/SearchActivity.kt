@@ -410,6 +410,7 @@ class SearchActivity : ComponentActivity() {
 fun SearchScreen(
     query: String,
     onQueryChange: (String) -> Unit,
+    onVoiceSearch: () -> Unit,
     results: List<SearchResultItem>,
     isLoading: Boolean,
     focusRequester: FocusRequester,
@@ -450,13 +451,29 @@ fun SearchScreen(
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = query.ifEmpty { "Cerca film, serie TV e canali" },
-                        color = if (query.isEmpty()) WaveStreamColors.TextTertiary else WaveStreamColors.TextPrimary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
-                    )
+                    if (query.isEmpty()) {
+                        Text(
+                            text = "Cerca film, serie TV e canali",
+                            color = WaveStreamColors.TextTertiary,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
+                        )
+                        // Cursore bianco anche quando il box è vuoto
+                        Spacer(modifier = Modifier.width(2.dp))
+                        BlinkingCursor()
+                    } else {
+                        Text(
+                            text = query,
+                            color = WaveStreamColors.TextPrimary,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1
+                        )
+                        // Indicatore bianco davanti alla prossima lettera
+                        Spacer(modifier = Modifier.width(2.dp))
+                        BlinkingCursor()
+                    }
                 }
             }
         }
