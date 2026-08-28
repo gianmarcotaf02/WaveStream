@@ -16,8 +16,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -373,31 +371,43 @@ fun SearchScreen(
         // Top spacing
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Search header: query display (Netflix style - simple text, no rounded bar)
+        // Search header: real-time search bar (query shown as you type)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 48.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Query display (keyboard writes here - Netflix simple style)
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(48.dp)
-                    .padding(horizontal = 20.dp),
+                    .height(52.dp)
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(WaveStreamColors.BackgroundSecondary)
+                    .border(2.dp, WaveStreamColors.Accent, RoundedCornerShape(26.dp))
+                    .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
-                Text(
-                    text = query.ifEmpty { " " },
-                    color = WaveStreamColors.TextPrimary,
-                    style = MaterialTheme.typography.headlineMedium,
-                    maxLines = 1
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = null,
+                        tint = WaveStreamColors.TextTertiary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = query.ifEmpty { "Cerca film, serie TV e canali" },
+                        color = if (query.isEmpty()) WaveStreamColors.TextTertiary else WaveStreamColors.TextPrimary,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Content: keyboard on left, results grid on right
         Row(
@@ -405,82 +415,21 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(start = 48.dp)
         ) {
-            // Left column: back button + keyboard + suggestions
+            // Left column: compact keyboard only
             Column(
                 modifier = Modifier
-                    .width(500.dp)
+                    .width(320.dp)
                     .padding(top = 8.dp)
             ) {
-                // "Back to Browse" button (Netflix-style)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(WaveStreamColors.BackgroundTertiary)
-                        .focusable()
-                        .clickable(onClick = onBackClick),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Back to Browse",
-                        color = WaveStreamColors.TextPrimary,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // On-screen keyboard (Netflix style)
+                // On-screen keyboard (compact Netflix style)
                 OnScreenKeyboard(
                     query = query,
                     onQueryChange = onQueryChange,
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Quick suggestions list (Netflix-style categories below keyboard)
-                val suggestions = remember {
-                    listOf(
-                        "Commedia",
-                        "Azione",
-                        "Avventura",
-                        "Drammatico",
-                        "Fantascienza",
-                        "Horror",
-                        "Romantico",
-                        "Documentari",
-                        "Animazione",
-                        "Thriller"
-                    )
-                }
-
-                // Filter suggestions based on current query
-                val filteredSuggestions = if (query.isNotEmpty()) {
-                    suggestions.filter { it.contains(query, ignoreCase = true) }
-                } else {
-                    suggestions.take(6) // Show first 6 when empty
-                }
-
-                if (filteredSuggestions.isNotEmpty()) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        items(filteredSuggestions) { suggestion ->
-                            SuggestionItem(
-                                text = suggestion,
-                                onClick = { onQueryChange(suggestion) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-                }
             }
 
-            Spacer(modifier = Modifier.width(32.dp))
+            Spacer(modifier = Modifier.width(28.dp))
 
             // Results grid (right)
             Box(
@@ -629,37 +578,6 @@ private fun SearchInput(
                 }
             }
         }
-    }
-}
-
-/**
- * Netflix-style suggestion item (text-only, left-aligned)
- */
-@Composable
-private fun SuggestionItem(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-
-    Box(
-        modifier = modifier
-            .height(36.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.2f) else Color.Transparent)
-            .focusable(interactionSource = interactionSource)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Text(
-            text = text,
-            color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
-            fontSize = 16.sp,
-            fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal
-        )
     }
 }
 
