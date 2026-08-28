@@ -113,11 +113,11 @@ private fun KeyboardButton(
             .clip(RoundedCornerShape(4.dp))
             .background(
                 if (isFocused) WaveStreamColors.Accent
-                else Color(0xFF2A2A2A)  // Dark gray, Netflix-style
+                else Color.Black  // OLED black
             )
             .border(
-                width = if (isFocused) 2.dp else 0.dp,
-                color = if (isFocused) WaveStreamColors.AccentLight else Color.Transparent,
+                width = 1.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.7f), // white border, accent on focus
                 shape = RoundedCornerShape(4.dp)
             )
             .focusable(interactionSource = interactionSource)
