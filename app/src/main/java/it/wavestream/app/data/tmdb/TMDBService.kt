@@ -318,11 +318,12 @@ class TMDBService @Inject constructor(
                         seriesDao.updatePopularityScore(series.id, popularityScore)
                     } else {
                         // Update popularity + basic TMDB data
+                        // Always update poster/backdrop from TMDB to fix mismatched covers from IPTV providers
                         val updated = series.copy(
                             tmdbPopularity = popularityScore,
-                            tmdbId = series.tmdbId ?: tmdb.id,
-                            tmdbPosterPath = series.tmdbPosterPath ?: tmdb.posterPath,
-                            tmdbBackdropPath = series.tmdbBackdropPath ?: tmdb.backdropPath
+                            tmdbId = tmdb.id,
+                            tmdbPosterPath = tmdb.posterPath ?: series.tmdbPosterPath,
+                            tmdbBackdropPath = tmdb.backdropPath ?: series.tmdbBackdropPath
                         )
                         seriesDao.update(updated)
                     }
@@ -394,12 +395,13 @@ class TMDBService @Inject constructor(
                     }
                     
                     val popularityScore = (1000 - index).toFloat()
+                    // Always update poster/backdrop from TMDB to fix mismatched covers from IPTV providers
                     val updated = movie.copy(
                         trendingCategory = "Film Popolari",
                         tmdbPopularity = popularityScore,
-                        tmdbId = movie.tmdbId ?: tmdb.id,
-                        tmdbPosterPath = movie.tmdbPosterPath ?: tmdb.posterPath,
-                        tmdbBackdropPath = movie.tmdbBackdropPath ?: tmdb.backdropPath
+                        tmdbId = tmdb.id,
+                        tmdbPosterPath = tmdb.posterPath ?: movie.tmdbPosterPath,
+                        tmdbBackdropPath = tmdb.backdropPath ?: movie.tmdbBackdropPath
                     )
                     movieDao.update(updated)
                     matchCount++
