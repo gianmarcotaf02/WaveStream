@@ -46,18 +46,24 @@ fun OnScreenKeyboard(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { key ->
                     when (key) {
-                        is KeyboardKey.Letter -> KeyboardButton(key.char.toString()) {
-                            onQueryChange(query + key.char)
-                        }
-                        KeyboardKey.Backspace -> KeyboardButton("⌫") {
-                            onQueryChange(query.dropLast(1))
-                        }
-                        KeyboardKey.Space -> KeyboardButton("Spazio", wide = true) {
-                            onQueryChange(query + " ")
-                        }
-                        KeyboardKey.Clear -> KeyboardButton("Cancella", wide = true) {
-                            onQueryChange("")
-                        }
+                        is KeyboardKey.Letter -> KeyboardButton(
+                            label = key.char.toString(),
+                            onClick = { onQueryChange(query + key.char) }
+                        )
+                        KeyboardKey.Backspace -> KeyboardButton(
+                            label = "⌫",
+                            onClick = { onQueryChange(query.dropLast(1)) }
+                        )
+                        KeyboardKey.Space -> KeyboardButton(
+                            label = "Spazio",
+                            wide = true,
+                            onClick = { onQueryChange(query + " ") }
+                        )
+                        KeyboardKey.Clear -> KeyboardButton(
+                            label = "Cancella",
+                            wide = true,
+                            onClick = { onQueryChange("") }
+                        )
                     }
                 }
             }
@@ -99,8 +105,8 @@ private fun KeyboardButton(
                 color = if (isFocused) WaveStreamColors.AccentLight else Color.Transparent,
                 shape = RoundedCornerShape(8.dp)
             )
-            .focusable(interactionSource)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+            .focusable(interactionSource = interactionSource)
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Text(
