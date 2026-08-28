@@ -129,6 +129,8 @@ class LiveActivity : ComponentActivity() {
         var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
         var favoriteCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
         var channelCounts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
+        var searchQuery by remember { mutableStateOf("") }
+        var isSearchActive by remember { mutableStateOf(false) }
         
         // D-pad/system back: go back to the category grid first, then exit.
         // Also releases the heavy per-category data (channels + EPG map) so the
@@ -137,6 +139,8 @@ class LiveActivity : ComponentActivity() {
             channels = emptyList()
             channelPrograms = emptyMap()
             selectedCategory = null
+            searchQuery = ""
+            isSearchActive = false
         }
         BackHandler(enabled = selectedCategory != null) { backToGrid() }
         
@@ -307,11 +311,21 @@ class LiveActivity : ComponentActivity() {
             onCategorySelect = {
                 selectedCategory = it
                 lastSelectedCategory = it
+                searchQuery = ""
+                isSearchActive = false
             },
             onChannelClick = { playChannel(it) },
             onToggleMode = { isGridMode = !isGridMode },
             onSearchClick = {
-                startActivity(Intent(this@LiveActivity, SearchActivity::class.java))
+                isSearchActive = !isSearchActive
+                if (!isSearchActive) searchQuery = ""
+            },
+            searchQuery = searchQuery,
+            isSearchActive = isSearchActive,
+            onSearchQueryChange = { searchQuery = it },
+            onSearchClose = {
+                isSearchActive = false
+                searchQuery = ""
             },
             onBackClick = {
                 if (selectedCategory != null) {
