@@ -2512,6 +2512,39 @@ private fun SettingsSwitch(
 
 // ============ VPN in-app (WireGuard) ============
 
+/**
+ * Pulsante d'azione della sezione VPN con bordo di focus visibile su TV.
+ * Mostra un contorno accentato quando è selezionato col D-pad.
+ */
+@Composable
+private fun VpnActionButton(
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    containerColor: Color = WaveStreamColors.BackgroundTertiary,
+    icon: ImageVector,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val borderColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        animationSpec = tween(150),
+        label = "vpnActionBorder"
+    )
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        interactionSource = interactionSource,
+        colors = ButtonDefaults.buttonColors(containerColor = containerColor),
+        modifier = modifier.border(2.dp, borderColor, RoundedCornerShape(10.dp))
+    ) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(label)
+    }
+}
+
 @Composable
 private fun VpnSettings(
     userPreferences: UserPreferences,
@@ -2685,45 +2718,33 @@ private fun VpnSettings(
             }
 
             // ---- Aggiungi configurazioni ----
-            Button(
+            VpnActionButton(
                 onClick = { showConfigDialog = true },
                 enabled = !isBusy,
-                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
-            ) {
-                Icon(Icons.Default.ContentPaste, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Aggiungi configurazione (incolla)")
-            }
+                icon = Icons.Default.ContentPaste,
+                label = "Aggiungi configurazione (incolla)"
+            )
 
-            Button(
+            VpnActionButton(
                 onClick = { showQrImport = true },
                 enabled = !isBusy,
-                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
-            ) {
-                Icon(Icons.Default.QrCode, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Aggiungi dal telefono (QR)")
-            }
+                icon = Icons.Default.QrCode,
+                label = "Aggiungi dal telefono (QR)"
+            )
 
-            Button(
+            VpnActionButton(
                 onClick = { showFilePicker = true },
                 enabled = !isBusy,
-                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
-            ) {
-                Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Cerca file .conf sulla TV")
-            }
+                icon = Icons.Default.Search,
+                label = "Cerca file .conf sulla TV"
+            )
 
-            Button(
+            VpnActionButton(
                 onClick = { usbFilePicker.launch(arrayOf("*/*")) },
                 enabled = !isBusy,
-                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
-            ) {
-                Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Importa da file (USB)")
-            }
+                icon = Icons.Default.FolderOpen,
+                label = "Importa da file (USB)"
+            )
 
             HorizontalDivider(
                 color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
