@@ -174,7 +174,7 @@ class MetacriticScraper {
      *   {"name":"Metascore","bestRating":100,"worstRating":0,"ratingValue":88,...}
      */
     private fun extractMetascore(html: String): Int? {
-        val ldJsonMatch = Regex("""<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>""")
+        val ldJsonMatch = Regex("""<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>""", RegexOption.DOT_MATCHES_ALL)
             .find(html) ?: run {
             Log.d(TAG, "✗ No JSON-LD block found")
             return null
