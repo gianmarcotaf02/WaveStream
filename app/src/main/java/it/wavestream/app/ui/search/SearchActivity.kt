@@ -40,6 +40,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
@@ -120,8 +121,6 @@ class SearchActivity : ComponentActivity() {
 
         // Launcher per la ricerca vocale (attiva il microfono del telecomando)
         voiceSearchLauncher = registerForActivityResult(
-            androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
-        ) { result ->
             if (result.resultCode == RESULT_OK && result.data != null) {
                 val spokenText = result.data
                     ?.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS)
