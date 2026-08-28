@@ -60,13 +60,17 @@ class CategoryActivity : ComponentActivity() {
     @Inject lateinit var epgRepository: EpgRepository
     
     private var categoryName: String = ""
-    private var contentType: String = "" // "CATEGORY_MOVIE", "CATEGORY_SERIES", "CATEGORY_LIVE"
+    private var contentType: String = "" // "CATEGORY_MOVIE", "CATEGORY_SERIES", "CATEGORY_LIVE", "SEE_ALL"
+    private var itemIds: LongArray = LongArray(0)
+    private var itemTypes: List<String> = emptyList()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         categoryName = intent.getStringExtra("categoryName") ?: ""
         contentType = intent.getStringExtra("contentType") ?: ""
+        itemIds = intent.getLongArrayExtra("item_ids") ?: LongArray(0)
+        itemTypes = intent.getStringArrayListExtra("item_types") ?: emptyList()
         
         setContent {
             WaveStreamTheme {
@@ -93,6 +97,13 @@ class CategoryActivity : ComponentActivity() {
     
     private suspend fun loadCategoryItems(): List<CarouselItem> {
         return withContext(Dispatchers.IO) {
+            // "Vedi tutto" path: the home carousel passed the exact item list
+            // (ids + types) so we can reproduce the same grid without relying on
+            // category names that may not exist in the DB.
+            if (itemIds.isNotEmpty() && itemTypes.size == itemIds.size) {
+                return@withContext loadItemsByIds()
+            }
+            
             // Check for special popular carousel names first
             val isPopularMovies = categoryName.contains("popolari", ignoreCase = true) && !categoryName.contains("serie", ignoreCase = true)
             val isPopularSeries = categoryName.contains("popolari", ignoreCase = true) && categoryName.contains("serie", ignoreCase = true)
@@ -173,10 +184,75 @@ class CategoryActivity : ComponentActivity() {
         }
     }
     
+    /**
+     * Loads the exact item list passed by the home "Vedi tutto" action.
+     * The SQL `IN` queries don't preserve order, so the result is reordered
+     * according to the original ids.
+     */
+    private suspend fun loadItemsByIds(): List<CarouselItem> {
+        val movieIds = mutableListOf<Long>()
+        val seriesIds = mutableListOf<Long>()
+        val channelIds = mutableListOf<Long>()
+        for (i in itemIds.indices) {
+            when (itemTypes[i]) {
+                "MOVIE" -> movieIds.add(itemIds[i])
+                "SERIES" -> seriesIds.add(itemIds[i])
+                "CHANNEL" -> channelIds.add(itemIds[i])
+            }
+        }
+        
+        val moviesById = if (movieIds.isEmpty()) emptyMap() else movieDao.getMoviesByIds(movieIds).associateBy { it.id }
+        val seriesById = if (seriesIds.isEmpty()) emptyMap() else seriesDao.getSeriesByIds(seriesIds).associateBy { it.id }
+        val channelsById = if (channelIds.isEmpty()) emptyMap() else channelDao.getChannelsByIds(channelIds).associateBy { it.id }
+        
+        return itemIds.indices.mapNotNull { index ->
+            val id = itemIds[index]
+            when (itemTypes[index]) {
+                "MOVIE" -> moviesById[id]?.let { movie ->
+                    CarouselItem(
+                        id = movie.id,
+                        title = movie.name,
+                        posterUrl = movie.posterUrl,
+                        backdropUrl = movie.backdropUrl,
+                        contentType = "MOVIE",
+                        year = movie.year,
+                        rating = movie.rating
+                    )
+                }
+                "SERIES" -> seriesById[id]?.let { series ->
+                    CarouselItem(
+                        id = series.id,
+                        title = series.name,
+                        posterUrl = series.posterUrl,
+                        backdropUrl = series.backdropUrl,
+                        contentType = "SERIES",
+                        year = series.year,
+                        rating = series.rating
+                    )
+                }
+                "CHANNEL" -> channelsById[id]?.let { channel ->
+                    CarouselItem(
+                        id = channel.id,
+                        title = channel.name,
+                        posterUrl = channel.logoUrl,
+                        backdropUrl = null,
+                        contentType = "CHANNEL"
+                    )
+                }
+                else -> null
+            }
+        }
+    }
+
     private suspend fun loadCategoryChannels(): List<Channel> {
         return withContext(Dispatchers.IO) {
             if (contentType == "CATEGORY_LIVE") {
                 channelDao.getChannelsByCategoryList(categoryName)
+            } else if (contentType == "SEE_ALL" && itemIds.isNotEmpty() && itemTypes.size == itemIds.size) {
+                val channelIds = itemIds.indices
+                    .filter { itemTypes[it] == "CHANNEL" }
+                    .map { itemIds[it] }
+                channelDao.getChannelsByIds(channelIds)
             } else {
                 emptyList()
             }
