@@ -394,15 +394,13 @@ private fun deriveCurrentPrograms(
     channelPrograms: Map<Long, List<EpgProgram>>,
     currentTime: Long
 ): Map<Long, EpgProgram?> {
-    return remember(channels, channelPrograms) {
-        derivedStateOf {
-            channels.associate { channel ->
-                val programs = channelPrograms[channel.id] ?: emptyList()
-                val currentProgram = programs.find { it.start <= currentTime && it.end > currentTime }
-                channel.id to currentProgram
-            }
+    return remember(channels, channelPrograms, currentTime) {
+        channels.associate { channel ->
+            val programs = channelPrograms[channel.id] ?: emptyList()
+            val currentProgram = programs.find { it.start <= currentTime && it.end > currentTime }
+            channel.id to currentProgram
         }
-    }.value
+    }
 }
 
 /**
@@ -786,28 +784,27 @@ private fun EpgChannelRow(
             )
         }
         
-        // Programs timeline (horizontal lazy row - only composes visible items)
-        LazyRow(
-            modifier = Modifier.weight(1f),
+        // Programs timeline (scrollable row — same proven approach as EPGActivity,
+        // avoids nested lazy lists which can crash the TV timeline)
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .horizontalScroll(rememberScrollState())
+                .padding(end = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(2.dp)
-            // Nota: beyondViewportPageCount/beyondBoundsItemCount non esistono su
-            // LazyRow in foundation 1.6.1 (beyondBoundsItemCount è arrivato in 1.7+)
         ) {
             if (programs.isEmpty()) {
-                item {
-                    EpgProgramBlock(
-                        title = "Nessun programma disponibile",
-                        timeRange = "",
-                        durationMinutes = TIMELINE_HOURS * 60,
-                        isCurrent = false,
-                        isEmpty = true
-                    )
-                }
+                EpgProgramBlock(
+                    title = "Nessun programma disponibile",
+                    timeRange = "",
+                    durationMinutes = TIMELINE_HOURS * 60,
+                    isCurrent = false,
+                    isEmpty = true
+                )
             } else {
-                items(programs, key = { program -> "${program.start}_${program.end}_${program.title}" }) { program ->
+                programs.forEach { program ->
                     val isCurrent = program.start <= currentTime && program.end > currentTime
                     val durationMinutes = ((program.end - program.start) / 60_000).toInt()
-                    
                     EpgProgramBlock(
                         title = program.title,
                         timeRange = "${timeFormat.format(Date(program.start))} - ${timeFormat.format(Date(program.end))}",
@@ -832,7 +829,7 @@ private fun EpgProgramBlock(
     isCurrent: Boolean,
     isEmpty: Boolean
 ) {
-    val widthDp = (durationMinutes * PIXELS_PER_MINUTE).coerceAtLeast(60)
+    val widthDp = (durationMinutes * PIXELS_PER_MINUTE).coerceIn(60, 400)
     
     val backgroundColor = when {
         isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.4f)
