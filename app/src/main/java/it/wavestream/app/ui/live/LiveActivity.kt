@@ -424,6 +424,10 @@ fun LiveScreen(
     onChannelClick: (Channel) -> Unit,
     onToggleMode: () -> Unit,
     onSearchClick: () -> Unit,
+    searchQuery: String = "",
+    isSearchActive: Boolean = false,
+    onSearchQueryChange: (String) -> Unit = {},
+    onSearchClose: () -> Unit = {},
     onBackClick: () -> Unit,
     onMultiscreenClick: () -> Unit = {},
     favoriteCategories: Set<String> = emptySet(),
@@ -431,6 +435,13 @@ fun LiveScreen(
     channelCounts: Map<String, Int> = emptyMap()
 ) {
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    
+    // In-category search filter: searches only within the currently selected
+    // category's channels, without touching the global SearchActivity.
+    val filteredChannels = remember(channels, searchQuery) {
+        if (searchQuery.isBlank()) channels
+        else channels.filter { it.name.contains(searchQuery.trim(), ignoreCase = true) }
+    }
     
     // Hoisted category-grid state: LiveCategoryGrid leaves composition while a
     // category is open, so without hoisting it would be recreated from scratch on
@@ -443,10 +454,20 @@ fun LiveScreen(
     val searchButtonFocusRequester = remember { FocusRequester() }
     val toggleButtonFocusRequester = remember { FocusRequester() }
     
+    // Dedicated requester for the in-category search field
+    val searchFieldFocusRequester = remember { FocusRequester() }
+    // Auto-focus the search field when it opens (so the TV IME appears)
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) {
+            delay(100)
+            try { searchFieldFocusRequester.requestFocus() } catch (e: Exception) { /* ignore */ }
+        }
+    }
+    
     // Request focus on the first channel (top-left) when a category is opened
     val firstChannelFocusRequester = remember { FocusRequester() }
-    LaunchedEffect(selectedCategory, isLoading, channels) {
-        if (!isLoading && channels.isNotEmpty()) {
+    LaunchedEffect(selectedCategory, isLoading, filteredChannels) {
+        if (!isLoading && filteredChannels.isNotEmpty()) {
             delay(150)
             requestFocusWithRetry(firstChannelFocusRequester)
         }
@@ -477,7 +498,7 @@ fun LiveScreen(
         // Header with back button, category name, search, toggle
         LiveHeader(
             selectedCategory = selectedCategory,
-            channelCount = channels.size,
+            channelCount = filteredChannels.size,
             isGridMode = isGridMode,
             onToggleMode = onToggleMode,
             onSearchClick = onSearchClick,
@@ -485,6 +506,16 @@ fun LiveScreen(
             searchButtonFocusRequester = searchButtonFocusRequester,
             toggleButtonFocusRequester = toggleButtonFocusRequester
         )
+        
+        // In-category search bar (shown only while the search is active)
+        if (isSearchActive) {
+            LiveSearchBar(
+                searchQuery = searchQuery,
+                onSearchQueryChange = onSearchQueryChange,
+                onClose = onSearchClose,
+                focusRequester = searchFieldFocusRequester
+            )
+        }
         
         // Content
         Box(
@@ -497,9 +528,12 @@ fun LiveScreen(
                         color = WaveStreamColors.Accent
                     )
                 }
-                channels.isEmpty() -> {
+                filteredChannels.isEmpty() -> {
                     Text(
-                        text = "Nessun canale in questa categoria",
+                        text = if (searchQuery.isNotBlank())
+                            "Nessun canale trovato per \"$searchQuery\""
+                        else
+                            "Nessun canale in questa categoria",
                         style = MaterialTheme.typography.bodyLarge,
                         color = WaveStreamColors.TextSecondary,
                         modifier = Modifier.align(Alignment.Center)
