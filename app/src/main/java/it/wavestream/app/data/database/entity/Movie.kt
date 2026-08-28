@@ -107,10 +107,12 @@ data class Movie(
     val posterUrl: String? get() = tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: logoUrl
     val backdropUrl: String? get() = tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: xtreamBackdropUrl
     val rating: Float? get() = xtreamRating?.toFloatOrNull() ?: tmdbVoteAverage ?: omdbImdbRating?.toFloatOrNull()
-    val plot: String? get() = xtreamPlot ?: tmdbOverview
-    val genre: String? get() = xtreamGenre ?: tmdbGenres
-    val cast: String? get() = xtreamCast ?: tmdbCast
-    val director: String? get() = xtreamDirector ?: tmdbDirector
+    // Blank-safe fallbacks: providers often return empty/placeholder strings ("", "00:00:00")
+    // which must NOT block the TMDB data.
+    val plot: String? get() = xtreamPlot?.takeIf { it.isNotBlank() } ?: tmdbOverview
+    val genre: String? get() = xtreamGenre?.takeIf { it.isNotBlank() } ?: tmdbGenres
+    val cast: String? get() = xtreamCast?.takeIf { it.isNotBlank() } ?: tmdbCast
+    val director: String? get() = xtreamDirector?.takeIf { it.isNotBlank() } ?: tmdbDirector
     val imdbId: String? get() = tmdbImdbId
     val title: String get() = tmdbTitle?.takeIf { it.isNotEmpty() } ?: name
 }
