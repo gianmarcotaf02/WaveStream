@@ -99,6 +99,7 @@ class UserPreferences @Inject constructor(
         private val VPN_STRATEGY = stringPreferencesKey("vpn_strategy")
         private val VPN_AUTO_ROTATE = booleanPreferencesKey("vpn_auto_rotate")
         private val VPN_ROTATE_INTERVAL = stringPreferencesKey("vpn_rotate_interval")
+        private val VPN_AUTO_START = booleanPreferencesKey("vpn_auto_start")
         
         // TMDB Cache Update
         private val TMDB_LAST_UPDATE = longPreferencesKey("tmdb_last_update")
@@ -634,6 +635,15 @@ class UserPreferences @Inject constructor(
 
     suspend fun getVpnRotateInterval(): String {
         return dataStore.data.first()[VPN_ROTATE_INTERVAL] ?: "60"
+    }
+
+    /** Avvio automatico della VPN all'avvio dell'app (dopo la scelta del profilo). */
+    suspend fun setVpnAutoStart(enabled: Boolean) {
+        dataStore.edit { it[VPN_AUTO_START] = enabled }
+    }
+
+    suspend fun getVpnAutoStart(): Boolean {
+        return dataStore.data.first()[VPN_AUTO_START] ?: false
     }
     
 } // end of UserPreferences

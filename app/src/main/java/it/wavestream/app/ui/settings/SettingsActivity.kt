@@ -2568,6 +2568,7 @@ private fun VpnSettings(
     var configs by remember { mutableStateOf<List<String>>(emptyList()) }
     var strategy by remember { mutableStateOf("random") }
     var autoRotate by remember { mutableStateOf(false) }
+    var autoStart by remember { mutableStateOf(false) }
     var rotateInterval by remember { mutableStateOf("60") }
     var showConfigDialog by remember { mutableStateOf(false) }
     var showQrImport by remember { mutableStateOf(false) }
@@ -2642,6 +2643,7 @@ private fun VpnSettings(
         configs = userPreferences.getVpnConfigs()
         strategy = userPreferences.getVpnStrategy()
         autoRotate = userPreferences.getVpnAutoRotate()
+        autoStart = userPreferences.getVpnAutoStart()
         rotateInterval = userPreferences.getVpnRotateInterval()
     }
 
