@@ -88,7 +88,9 @@ class OpenSubtitlesRepository @Inject constructor(
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
+            // Catch Throwable (not just Exception) because R8/Tink failures can
+            // surface as VerifyError / NoClassDefFoundError on release builds.
             Log.w(TAG, "Encrypted prefs unavailable, falling back to plain storage", e)
             context.getSharedPreferences(PREFS_NAME + "_plain", Context.MODE_PRIVATE)
         }
@@ -96,26 +98,26 @@ class OpenSubtitlesRepository @Inject constructor(
 
     private fun secureGetString(key: String, default: String? = null): String? = try {
         encryptedPrefs.getString(key, default)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         Log.w(TAG, "Failed to read $key", e); default
     }
 
     private fun secureGetInt(key: String, default: Int = 0): Int = try {
         encryptedPrefs.getInt(key, default)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         Log.w(TAG, "Failed to read $key", e); default
     }
 
     private fun secureGetLong(key: String, default: Long = 0L): Long = try {
         encryptedPrefs.getLong(key, default)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         Log.w(TAG, "Failed to read $key", e); default
     }
 
     private fun securePut(block: SharedPreferences.Editor.() -> Unit) {
         try {
             encryptedPrefs.edit().apply { block(); apply() }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.w(TAG, "Failed to write preferences", e)
         }
     }

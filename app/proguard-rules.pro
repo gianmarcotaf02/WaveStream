@@ -379,3 +379,18 @@
 
 # NanoHTTPD (local HTTP relay server for VPN config transfer)
 -keep class fi.iki.elonen.** { *; }
+
+# =================== SECURITY CRYPTO / TINK ===================
+# EncryptedSharedPreferences + MasterKey rely on Tink, which uses reflection
+# and shaded protobuf. Without these rules R8 strips/renames Tink classes and
+# the OpenSubtitles settings screen crashes on release builds with
+# VerifyError / NoClassDefFoundError (debug works because there is no shrinking).
+-keep class androidx.security.crypto.** { *; }
+-keep class com.google.crypto.tink.** { *; }
+-dontwarn com.google.crypto.tink.**
+-keepclassmembers class * extends com.google.crypto.tink.shaded.protobuf.GeneratedMessageLite {
+  <fields>;
+}
+-keepclassmembers class * extends com.google.crypto.tink.shaded.protobuf.MessageLite {
+  <fields>;
+}
