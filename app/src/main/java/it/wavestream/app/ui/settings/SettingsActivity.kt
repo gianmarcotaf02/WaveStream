@@ -2785,6 +2785,15 @@ private fun VpnSettings(
                 }
             )
 
+            SettingsSwitch(
+                label = "Avvia VPN all'avvio dell'app",
+                checked = autoStart,
+                onCheckedChange = {
+                    autoStart = it
+                    scope.launch { userPreferences.setVpnAutoStart(it) }
+                }
+            )
+
             if (autoRotate) {
                 SettingsDropdown(
                     label = "Intervallo di rotazione",
