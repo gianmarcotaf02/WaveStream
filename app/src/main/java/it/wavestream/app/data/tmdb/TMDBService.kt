@@ -474,12 +474,13 @@ class TMDBService @Inject constructor(
                     }
                     
                     val popularityScore = (1000 - index).toFloat()
+                    // Always update poster/backdrop from TMDB to fix mismatched covers from IPTV providers
                     val updated = series.copy(
                         trendingCategory = "Serie Popolari",
                         tmdbPopularity = popularityScore,
-                        tmdbId = series.tmdbId ?: tmdb.id,
-                        tmdbPosterPath = series.tmdbPosterPath ?: tmdb.posterPath,
-                        tmdbBackdropPath = series.tmdbBackdropPath ?: tmdb.backdropPath
+                        tmdbId = tmdb.id,
+                        tmdbPosterPath = tmdb.posterPath ?: series.tmdbPosterPath,
+                        tmdbBackdropPath = tmdb.backdropPath ?: series.tmdbBackdropPath
                     )
                     seriesDao.update(updated)
                     matchCount++
