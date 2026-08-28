@@ -1257,12 +1257,19 @@ class HomeViewModel @Inject constructor(
                             movie.year,
                             "movie"
                         )
-                        if (ratings != null) {
+                        // Metacritic scraper fallback when OMDB Metascore is missing.
+                        val effectiveRatings = if (ratings?.metacriticScore == null) {
+                            val mc = imdbRatingsRepository.fetchMetacriticScore(
+                                movie.tmdbOriginalTitle ?: movie.title, movie.year, true
+                            )
+                            if (mc != null) ratings?.copy(metacriticScore = mc) else ratings
+                        } else ratings
+                        if (effectiveRatings != null) {
                             movie = movie.copy(
-                                omdbImdbRating = ratings.getFormattedImdbRating(),
-                                omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
-                                omdbMetacriticScore = ratings.metacriticScore,
-                                omdbAudienceScore = ratings.audienceScore,
+                                omdbImdbRating = effectiveRatings.getFormattedImdbRating(),
+                                omdbRottenTomatoesScore = effectiveRatings.rottenTomatoesScore,
+                                omdbMetacriticScore = effectiveRatings.metacriticScore,
+                                omdbAudienceScore = effectiveRatings.audienceScore,
                                 omdbLastFetchAt = System.currentTimeMillis()
                             )
                             viewModelScope.launch(Dispatchers.IO) { movieDao.update(movie) }
@@ -1287,6 +1294,7 @@ class HomeViewModel @Inject constructor(
                             year = series.year,
                             type = "series"
                         )
+                        // getRatingsWithFallbacks already includes the Metacritic fallback.
                         if (ratings != null) {
                             series = series.copy(
                                 omdbImdbRating = ratings.getFormattedImdbRating(),

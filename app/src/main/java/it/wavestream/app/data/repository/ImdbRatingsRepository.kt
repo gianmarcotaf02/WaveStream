@@ -283,7 +283,43 @@ class ImdbRatingsRepository @Inject constructor(
                 return@withContext ratings
             }
         }
-        
+
+        // Strategy 7: Metacritic scraper fallback.
+        // If OMDB couldn't provide a Metascore (N/A or no match), try scraping
+        // the Metacritic detail page directly. This is the automatic fallback used
+        // during hero enrichment (LoadingActivity) and the detail-view skeleton.
+        // The English title maps best to Metacritic's slug, so prefer it.
+        if (ratings?.metacriticScore == null) {
+            val metacriticTitle = englishTitle ?: cleanedOriginal
+            if (metacriticTitle.isNotBlank()) {
+                Log.d(TAG, "Strategy 7: Metacritic scraper fallback for: $metacriticTitle")
+                val mcScore = fetchMetacriticScore(
+                    title = metacriticTitle,
+                    year = year,
+                    isMovie = type != "series"
+                )
+                if (mcScore != null) {
+                    Log.d(TAG, "✓ Found Metacritic score via scraper: $mcScore")
+                    val base = ratings ?: RatingInfo(
+                        imdbRating = null,
+                        imdbVotes = null,
+                        imdbId = imdbId,
+                        rottenTomatoesScore = null,
+                        audienceScore = null,
+                        metacriticScore = null,
+                        rated = null,
+                        awards = null,
+                        boxOffice = null
+                    )
+                    val updated = base.copy(metacriticScore = mcScore)
+                    // Cache by IMDB ID + title key so hero reloads hit memory.
+                    imdbId?.let { ratingsCache[it] = CachedRating(updated, System.currentTimeMillis()) }
+                    ratingsCache["$metacriticTitle:$year:$type"] = CachedRating(updated, System.currentTimeMillis())
+                    return@withContext updated
+                }
+            }
+        }
+
         Log.d(TAG, "✗ No ratings found for: $originalTitle")
         return@withContext ratings
     }
