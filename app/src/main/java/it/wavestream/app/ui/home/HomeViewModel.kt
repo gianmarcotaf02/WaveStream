@@ -302,6 +302,36 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                     
+                    // Also refresh the popular carousels with fresh DB data, so poster/backdrop
+                    // corrections (e.g. after opening the detail view and enriching via TMDB)
+                    // are reflected in the home rows.
+                    try {
+                        loadPopularMovies()?.let { movies ->
+                            if (movies.isNotEmpty()) {
+                                val newItems = movies.map { it.toCarouselItem() }
+                                val idx = updatedRows.indexOfFirst { it.title == "Film popolari" }
+                                if (idx >= 0) {
+                                    updatedRows[idx] = updatedRows[idx].copy(items = newItems)
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error refreshing popular movies row", e)
+                    }
+                    try {
+                        loadPopularSeries()?.let { series ->
+                            if (series.isNotEmpty()) {
+                                val newItems = series.map { it.toCarouselItem() }
+                                val idx = updatedRows.indexOfFirst { it.title == "Serie popolari" }
+                                if (idx >= 0) {
+                                    updatedRows[idx] = updatedRows[idx].copy(items = newItems)
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error refreshing popular series row", e)
+                    }
+                    
                     // Update cache with the patched rows
                     cachedCarouselRows[contentType] = updatedRows
                     cachedCarouselRowsTime[contentType] = System.currentTimeMillis()
