@@ -420,10 +420,10 @@ class PlayerActivity : ComponentActivity() {
         // Live TV keeps minimal buffers for low latency
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                if (isLive) 5_000 else 15_000,      // minBuffer
-                if (isLive) 15_000 else 30_000,     // maxBuffer (was 90s, too much RAM on TV)
-                if (isLive) 2_500 else 2_500,       // bufferForPlayback (rebuffer → playback)
-                if (isLive) 5_000 else 5_000        // bufferForPlaybackAfterRebuffer
+                if (isLive) 1_000 else 15_000,      // minBuffer (1s per zapping rapido)
+                if (isLive) 8_000 else 30_000,      // maxBuffer (8s: latenza bassa senza stutter)
+                if (isLive) 500 else 2_500,         // bufferForPlayback (avvio quasi immediato)
+                if (isLive) 1_000 else 5_000        // bufferForPlaybackAfterRebuffer
             )
             .setPrioritizeTimeOverSizeThresholds(true)
             .setBackBuffer(10_000, true) // Keep last 10s for back-skip without re-downloading
