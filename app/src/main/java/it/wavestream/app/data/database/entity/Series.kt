@@ -105,7 +105,11 @@ data class Series(
     } else {
         logoUrl ?: tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
     }
-    val backdropUrl: String? get() = xtreamBackdropUrl ?: tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" }
+    val backdropUrl: String? get() = if (tmdbId != null) {
+        tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: xtreamBackdropUrl
+    } else {
+        xtreamBackdropUrl ?: tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" }
+    }
     val rating: Float? get() = xtreamRating?.toFloatOrNull() ?: tmdbVoteAverage ?: omdbImdbRating?.toFloatOrNull()
     val plot: String? get() = xtreamPlot ?: tmdbOverview
     val genre: String? get() = xtreamGenre ?: tmdbGenres
