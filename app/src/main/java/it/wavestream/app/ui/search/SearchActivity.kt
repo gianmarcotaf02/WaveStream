@@ -416,14 +416,59 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(start = 48.dp)
         ) {
-            // On-screen keyboard (left, Netflix style)
-            OnScreenKeyboard(
-                query = query,
-                onQueryChange = onQueryChange,
+            // Left column: keyboard + suggestions
+            Column(
                 modifier = Modifier
                     .width(500.dp)
                     .padding(top = 8.dp)
-            )
+            ) {
+                // On-screen keyboard (Netflix style)
+                OnScreenKeyboard(
+                    query = query,
+                    onQueryChange = onQueryChange,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Quick suggestions list (Netflix-style categories below keyboard)
+                val suggestions = remember {
+                    listOf(
+                        "Commedia",
+                        "Azione",
+                        "Avventura",
+                        "Drammatico",
+                        "Fantascienza",
+                        "Horror",
+                        "Romantico",
+                        "Documentari",
+                        "Animazione",
+                        "Thriller"
+                    )
+                }
+
+                // Filter suggestions based on current query
+                val filteredSuggestions = if (query.isNotEmpty()) {
+                    suggestions.filter { it.contains(query, ignoreCase = true) }
+                } else {
+                    suggestions.take(6) // Show first 6 when empty
+                }
+
+                if (filteredSuggestions.isNotEmpty()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(filteredSuggestions) { suggestion ->
+                            SuggestionItem(
+                                text = suggestion,
+                                onClick = { onQueryChange(suggestion) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.width(32.dp))
 

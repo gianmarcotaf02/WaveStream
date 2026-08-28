@@ -22,8 +22,9 @@ import androidx.compose.ui.unit.sp
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 /**
- * On-screen keyboard in Netflix style, controlled with the D-pad.
- * Letters A-Z, Backspace, Space, Clear. Applies the accent color on focus.
+ * On-screen keyboard in Netflix TV style (alphabetical grid, not QWERTY).
+ * Letters a-z in lowercase, numbers 0-9, Backspace (X), Space (bar).
+ * Controlled with the D-pad, applies accent color on focus.
  */
 @Composable
 fun OnScreenKeyboard(
@@ -31,38 +32,49 @@ fun OnScreenKeyboard(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Netflix-style alphabetical keyboard layout:
+    // Row 1: a b c d e f
+    // Row 2: g h i j k l
+    // Row 3: m n o p q r
+    // Row 4: s t u v w x
+    // Row 5: y z 1 2 3 4
+    // Row 6: 5 6 7 8 9 0
+    // Row 7: [Space] [Backspace X]
     val rows: List<List<KeyboardKey>> = listOf(
-        listOf('Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P').map { KeyboardKey.Letter(it) },
-        listOf('A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L').map { KeyboardKey.Letter(it) },
-        listOf('Z', 'X', 'C', 'V', 'B', 'N', 'M').map { KeyboardKey.Letter(it) } + KeyboardKey.Backspace,
-        listOf(KeyboardKey.Space, KeyboardKey.Clear)
+        listOf("a", "b", "c", "d", "e", "f").map { KeyboardKey.Letter(it) },
+        listOf("g", "h", "i", "j", "k", "l").map { KeyboardKey.Letter(it) },
+        listOf("m", "n", "o", "p", "q", "r").map { KeyboardKey.Letter(it) },
+        listOf("s", "t", "u", "v", "w", "x").map { KeyboardKey.Letter(it) },
+        listOf("y", "z").map { KeyboardKey.Letter(it) } + listOf("1", "2", "3", "4").map { KeyboardKey.Letter(it) },
+        listOf("5", "6", "7", "8", "9", "0").map { KeyboardKey.Letter(it) },
+        listOf(KeyboardKey.Space, KeyboardKey.Backspace)
     )
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         rows.forEach { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 row.forEach { key ->
                     when (key) {
                         is KeyboardKey.Letter -> KeyboardButton(
-                            label = key.char.toString(),
-                            onClick = { onQueryChange(query + key.char) }
+                            label = key.value,
+                            onClick = { onQueryChange(query + key.value) },
+                            modifier = Modifier.weight(1f)
                         )
                         KeyboardKey.Backspace -> KeyboardButton(
-                            label = "⌫",
-                            onClick = { onQueryChange(query.dropLast(1)) }
+                            label = "✕",
+                            onClick = { onQueryChange(query.dropLast(1)) },
+                            modifier = Modifier.weight(1f)
                         )
                         KeyboardKey.Space -> KeyboardButton(
-                            label = "Spazio",
-                            wide = true,
-                            onClick = { onQueryChange(query + " ") }
-                        )
-                        KeyboardKey.Clear -> KeyboardButton(
-                            label = "Cancella",
-                            wide = true,
-                            onClick = { onQueryChange("") }
+                            label = "",
+                            onClick = { onQueryChange(query + " ") },
+                            modifier = Modifier.weight(2f)
                         )
                     }
                 }
@@ -72,38 +84,41 @@ fun OnScreenKeyboard(
 }
 
 private sealed class KeyboardKey {
-    data class Letter(val char: Char) : KeyboardKey()
+    data class Letter(val value: String) : KeyboardKey()
     object Backspace : KeyboardKey()
     object Space : KeyboardKey()
-    object Clear : KeyboardKey()
 }
 
 @Composable
 private fun KeyboardButton(
     label: String,
     onClick: () -> Unit,
-    wide: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
+        targetValue = if (isFocused) 1.15f else 1f,
         label = "keyboardScale"
     )
 
     Box(
         modifier = modifier
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .width(if (wide) 92.dp else 44.dp)
-            .height(44.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (isFocused) WaveStreamColors.Accent else WaveStreamColors.BackgroundTertiary)
+            .height(40.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(6.dp))
+            .background(
+                if (isFocused) WaveStreamColors.Accent
+                else Color(0xFF2A2A2A)  // Dark gray, Netflix-style
+            )
             .border(
-                width = 1.dp,
+                width = if (isFocused) 2.dp else 0.dp,
                 color = if (isFocused) WaveStreamColors.AccentLight else Color.Transparent,
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(6.dp)
             )
             .focusable(interactionSource = interactionSource)
             .clickable(onClick = onClick),
@@ -111,9 +126,9 @@ private fun KeyboardButton(
     ) {
         Text(
             text = label,
-            color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = if (wide) 14.sp else 18.sp
+            color = if (isFocused) Color.White else Color(0xFFCCCCCC), // Light gray text
+            fontWeight = FontWeight.Medium,
+            fontSize = 16.sp
         )
     }
 }
