@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -404,6 +405,31 @@ class SearchActivity : ComponentActivity() {
 }
 
 /**
+ * Blinking white text cursor shown in the search bar,
+ * indicates where the next letter will be typed.
+ */
+@Composable
+private fun BlinkingCursor(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition(label = "cursor")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(500),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cursorAlpha"
+    )
+    Box(
+        modifier = modifier
+            .width(3.dp)
+            .height(24.dp)
+            .alpha(alpha)
+            .background(Color.White, RoundedCornerShape(2.dp))
+    )
+}
+
+/**
  * Search Screen Composable
  */
 @Composable
@@ -475,6 +501,36 @@ fun SearchScreen(
                         BlinkingCursor()
                     }
                 }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Voice search button (activates TV remote microphone)
+            val micInteractionSource = remember { MutableInteractionSource() }
+            val micIsFocused by micInteractionSource.collectIsFocusedAsState()
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(
+                        if (micIsFocused) WaveStreamColors.Accent
+                        else WaveStreamColors.BackgroundSecondary
+                    )
+                    .border(
+                        2.dp,
+                        if (micIsFocused) WaveStreamColors.AccentLight else WaveStreamColors.Accent,
+                        RoundedCornerShape(26.dp)
+                    )
+                    .focusable(micInteractionSource)
+                    .clickable(onClick = onVoiceSearch),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Mic,
+                    contentDescription = "Ricerca vocale",
+                    tint = if (micIsFocused) Color.White else WaveStreamColors.TextPrimary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
 
