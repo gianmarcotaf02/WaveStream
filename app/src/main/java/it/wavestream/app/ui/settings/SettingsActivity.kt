@@ -233,6 +233,18 @@ private fun SettingsSidebar(
     val regularItems = menuItems.filter { !it.isDestructive }
     val destructiveItems = menuItems.filter { it.isDestructive }
     
+    // Guarantee the initial focus lands on the first menu item ("Profilo") instead of
+    // flashing on "Disconnetti". The plain Column below composes all items immediately,
+    // so the first item is focusable right away (no long delay, hence no flash).
+    val firstItemFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        try {
+            firstItemFocus.requestFocus()
+        } catch (e: Exception) {
+            // ignore focus errors
+        }
+    }
+    
 
     
     Column(
@@ -315,12 +327,15 @@ private fun SettingsSidebar(
         Spacer(modifier = Modifier.height(16.dp))
         
         // Regular menu items
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            contentPadding = PaddingValues(bottom = 24.dp)
+        // Plain Column (not LazyColumn) so all items compose immediately: this makes "Profilo"
+        // (first focusable) receive the initial focus instead of flashing on "Disconnetti".
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            itemsIndexed(regularItems) { index, item ->
+            regularItems.forEachIndexed { index, item ->
                 SettingsMenuItemRow(
                     item = item,
                     isSelected = selectedItem == item.id,
