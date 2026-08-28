@@ -106,9 +106,25 @@ class SearchActivity : ComponentActivity() {
     @Inject lateinit var userPreferences: it.wavestream.app.data.preferences.UserPreferences
     
     private var searchJob: Job? = null
+    private var voiceResultCallback: ((String) -> Unit)? = null
+    private lateinit var voiceSearchLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Launcher per la ricerca vocale (attiva il microfono del telecomando)
+        voiceSearchLauncher = registerForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                val spokenText = result.data
+                    ?.getStringArrayListExtra(android.speech.RecognizerIntent.EXTRA_RESULTS)
+                    ?.firstOrNull()
+                if (!spokenText.isNullOrBlank()) {
+                    voiceResultCallback?.invoke(spokenText)
+                }
+            }
+        }
         
         // Force keyboard to show on Android TV
         window.setSoftInputMode(
@@ -161,6 +177,7 @@ class SearchActivity : ComponentActivity() {
         SearchScreen(
             query = query,
             onQueryChange = { query = it },
+            onVoiceSearch = { startVoiceSearch() },
             results = results,
             isLoading = isLoading,
             focusRequester = focusRequester,
