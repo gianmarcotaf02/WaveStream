@@ -1342,7 +1342,7 @@ private fun formatTime(ms: Long): String {
 }
 
 /**
- * Fixed clock overlay for player - always visible, semi-transparent white
+ * Fixed clock overlay for player - always visible, subtle semi-transparent text (no box)
  */
 @Composable
 private fun PlayerClockOverlay(modifier: Modifier = Modifier) {
@@ -1355,19 +1355,13 @@ private fun PlayerClockOverlay(modifier: Modifier = Modifier) {
         }
     }
     
-    GlassSurface(
-        shape = RoundedCornerShape(8.dp),
-        fill = GlassTokens.SurfaceFill,
+    Text(
+        text = currentTime,
+        color = Color.White.copy(alpha = 0.45f),
+        style = MaterialTheme.typography.bodySmall,
+        fontWeight = FontWeight.Normal,
         modifier = modifier
-    ) {
-        Text(
-            text = currentTime,
-            color = Color.White.copy(alpha = 0.9f),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-        )
-    }
+    )
 }
 
 private fun getPlayerCurrentTime(): String {
