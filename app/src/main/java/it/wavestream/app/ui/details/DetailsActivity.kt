@@ -441,8 +441,8 @@ class DetailsActivity : ComponentActivity() {
         Log.d(TAG, "FAST PATH movie: showing DB state immediately for '${movie.name}'")
         
         // ===== FAST PATH: show the DB state immediately, no network =====
-        // The skeleton disappears right away; Xtream VOD + TMDB enrichment below
-        // run afterwards and update the UI in place when they complete.
+        // Se il DB contiene già trama e votazione mostra subito il contenuto, altrimenti
+        // la skeleton resta attiva finché TMDB/OMDB non completano l'arricchimento.
         val fastProgress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
         onStateUpdate(
             DetailsState(
@@ -459,7 +459,8 @@ class DetailsActivity : ComponentActivity() {
                 backdropUrl = movie.backdropUrl,
                 contentType = ContentType.MOVIE,
                 isFavorite = isFavorite,
-                isLoading = false,
+                // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
+                isLoading = movie.plot.isNullOrEmpty() || movie.tmdbVoteAverage == null,
                 tmdbRating = movie.tmdbVoteAverage,
                 imdbRating = movie.omdbImdbRating,
                 rottenTomatoesScore = movie.omdbRottenTomatoesScore,
@@ -688,8 +689,8 @@ class DetailsActivity : ComponentActivity() {
         Log.d(TAG, "FAST PATH series: showing DB state immediately for '${series.name}'")
         
         // ===== FAST PATH: show the DB state immediately, no network =====
-        // The skeleton disappears right away; TMDB enrichment + episode loading
-        // below run afterwards and update the UI in place when they complete.
+        // Se il DB contiene già trama e votazione mostra subito il contenuto, altrimenti
+        // la skeleton resta attiva finché TMDB/OMDB non completano l'arricchimento.
         val dbIsFavorite = favoriteDao.getFavorite(profileId, ContentType.SERIES, contentId) != null
         onStateUpdate(
             DetailsState(
@@ -705,7 +706,8 @@ class DetailsActivity : ComponentActivity() {
                 backdropUrl = series.backdropUrl,
                 contentType = ContentType.SERIES,
                 isFavorite = dbIsFavorite,
-                isLoading = false,
+                // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
+                isLoading = series.plot.isNullOrEmpty() || series.tmdbVoteAverage == null,
                 tmdbRating = series.tmdbVoteAverage,
                 imdbRating = series.omdbImdbRating,
                 rottenTomatoesScore = series.omdbRottenTomatoesScore,
