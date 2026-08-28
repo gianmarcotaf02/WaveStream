@@ -34,13 +34,20 @@ class UserPreferences @Inject constructor(
     private val syncPrefs = context.getSharedPreferences(SYNC_PREFS_NAME, Context.MODE_PRIVATE)
 
     private val encryptedPrefs by lazy {
-        EncryptedSharedPreferences.create(
-            context,
-            ENCRYPTED_PREFS_NAME,
-            MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        try {
+            EncryptedSharedPreferences.create(
+                context,
+                ENCRYPTED_PREFS_NAME,
+                MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Throwable) {
+            // Catch Throwable (not just Exception): R8/Tink failures can surface as
+            // VerifyError / NoClassDefFoundError on release builds.
+            android.util.Log.w("UserPreferences", "Encrypted prefs unavailable, falling back to plain storage", e)
+            context.getSharedPreferences(ENCRYPTED_PREFS_NAME + "_plain", Context.MODE_PRIVATE)
+        }
     }
     
     companion object {
