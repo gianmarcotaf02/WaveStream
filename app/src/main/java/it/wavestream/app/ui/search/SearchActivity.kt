@@ -371,14 +371,13 @@ fun SearchScreen(
         // Top spacing
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Search header
+        // Search header: back button + query display (Netflix style)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 48.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Back button
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -386,75 +385,108 @@ fun SearchScreen(
                     tint = WaveStreamColors.TextPrimary
                 )
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
-            // Search input
-            SearchInput(
+
+            // Query display (keyboard writes here)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(WaveStreamColors.BackgroundSecondary)
+                    .border(2.dp, WaveStreamColors.Accent, RoundedCornerShape(24.dp))
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = query.ifEmpty { "Digita con la tastiera..." },
+                    color = if (query.isEmpty()) WaveStreamColors.TextTertiary else WaveStreamColors.TextPrimary,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 1
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Content: keyboard on left, results grid on right
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 48.dp)
+        ) {
+            // On-screen keyboard (left, Netflix style)
+            OnScreenKeyboard(
                 query = query,
                 onQueryChange = onQueryChange,
-                focusRequester = focusRequester,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .width(500.dp)
+                    .padding(top = 8.dp)
             )
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Content
-        Box(modifier = Modifier.fillMaxSize()) {
-            when {
-                isLoading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = WaveStreamColors.Accent
-                    )
-                }
-                query.length >= 2 && results.isEmpty() -> {
-                    Text(
-                        text = "Nessun risultato per \"$query\"",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = WaveStreamColors.TextSecondary,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-                results.isNotEmpty() -> {
-                    TvLazyVerticalGrid(
-                        columns = TvGridCells.Adaptive(minSize = 140.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(24.dp),
-                        contentPadding = PaddingValues(start = 48.dp, top = 24.dp, end = 48.dp, bottom = 24.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                    tvGridItems(results, key = { item -> 
-                        if (item.isCategory) "cat_${item.categoryType}_${item.title}" 
-                        else "${item.type}_${item.id}" 
-                    }) { item ->
-                        SearchResultCard(
-                            item = item,
-                            onClick = { onItemClick(item) },
-                            onLongClick = { onItemLongClick(item) }
+
+            Spacer(modifier = Modifier.width(32.dp))
+
+            // Results grid (right)
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(end = 48.dp)
+            ) {
+                when {
+                    isLoading -> {
+                        CircularProgressIndicator(
+                            modifier = Modifier.align(Alignment.Center),
+                            color = WaveStreamColors.Accent
                         )
                     }
-                    }
-                }
-                else -> {
-                    // Empty state - waiting for input
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            tint = WaveStreamColors.TextTertiary,
-                            modifier = Modifier.size(64.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+                    query.length >= 2 && results.isEmpty() -> {
                         Text(
-                            text = "Cerca film, serie TV e canali",
+                            text = "Nessun risultato per \"$query\"",
                             style = MaterialTheme.typography.bodyLarge,
-                            color = WaveStreamColors.TextSecondary
+                            color = WaveStreamColors.TextSecondary,
+                            modifier = Modifier.align(Alignment.Center)
                         )
+                    }
+                    results.isNotEmpty() -> {
+                        TvLazyVerticalGrid(
+                            columns = TvGridCells.Adaptive(minSize = 140.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            tvGridItems(results, key = { item ->
+                                if (item.isCategory) "cat_${item.categoryType}_${item.title}"
+                                else "${item.type}_${item.id}"
+                            }) { item ->
+                                SearchResultCard(
+                                    item = item,
+                                    onClick = { onItemClick(item) },
+                                    onLongClick = { onItemLongClick(item) }
+                                )
+                            }
+                        }
+                    }
+                    else -> {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = null,
+                                tint = WaveStreamColors.TextTertiary,
+                                modifier = Modifier.size(64.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Cerca film, serie TV e canali",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = WaveStreamColors.TextSecondary
+                            )
+                        }
                     }
                 }
             }
