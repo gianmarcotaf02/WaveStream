@@ -22,8 +22,9 @@ import javax.inject.Singleton
 class ImdbRatingsRepository @Inject constructor(
     private val userPreferences: UserPreferences
 ) {
-    // Create scraper instance internally to avoid Hilt injection issues
+    // Create scraper instances internally to avoid Hilt injection issues
     private val rtScraper = RottenTomatoesScraper()
+    private val metacriticScraper = MetacriticScraper()
     companion object {
         private const val TAG = "ImdbRatings"
         private const val CACHE_DURATION_MS = 24 * 60 * 60 * 1000L // 24 hours
@@ -303,6 +304,27 @@ class ImdbRatingsRepository @Inject constructor(
         }
     }
     
+    /**
+     * Fetch the Metacritic score (Metascore, /100) via web scraping.
+     * Call this as a fallback when OMDB returns N/A for the Metascore field.
+     *
+     * @param title Cleaned title (prefer the English title from TMDB)
+     * @param year Release year
+     * @param isMovie true for movies, false for TV series
+     */
+    suspend fun fetchMetacriticScore(
+        title: String,
+        year: Int? = null,
+        isMovie: Boolean = true
+    ): Int? = withContext(Dispatchers.IO) {
+        val scores = if (isMovie) {
+            metacriticScraper.getScoresForMovie(title = title, year = year)
+        } else {
+            metacriticScraper.getScoresForSeries(title = title, year = year)
+        }
+        scores?.criticScore
+    }
+
     /**
      * Search using OMDB search endpoint, then get full details of the best match.
      * First tries with year + type (most precise), then falls back to a fuzzy
