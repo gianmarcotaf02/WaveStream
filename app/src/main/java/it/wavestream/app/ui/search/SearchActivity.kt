@@ -536,7 +536,7 @@ fun SearchScreen(
                         if (micIsFocused) WaveStreamColors.AccentLight else WaveStreamColors.Accent,
                         RoundedCornerShape(26.dp)
                     )
-                    .focusable(micInteractionSource)
+                    .focusable(interactionSource = micInteractionSource)
                     .clickable(onClick = onVoiceSearch),
                 contentAlignment = Alignment.Center
             ) {
