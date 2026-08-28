@@ -317,12 +317,11 @@ class ImdbRatingsRepository @Inject constructor(
         year: Int? = null,
         isMovie: Boolean = true
     ): Int? = withContext(Dispatchers.IO) {
-        val scores = if (isMovie) {
-            metacriticScraper.getScoresForMovie(title = title, year = year)
+        if (isMovie) {
+            metacriticScraper.getScoreForMovie(title = title, year = year)
         } else {
-            metacriticScraper.getScoresForSeries(title = title, year = year)
+            metacriticScraper.getScoreForSeries(title = title, year = year)
         }
-        scores?.criticScore
     }
 
     /**

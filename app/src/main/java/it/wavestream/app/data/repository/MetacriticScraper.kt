@@ -5,18 +5,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 /**
- * HTML scraper for Metacritic scores, used as a fallback when OMDB returns
- * N/A for the Metascore field.
+ * HTML scraper for the Metacritic score (Metascore, critic), used as a
+ * fallback when OMDB returns N/A for its "Metascore" field.
  *
- * This is pure HTML scraping (Metacritic has no public API):
+ * Metacritic has no public API. This is pure HTML scraping:
  *  - the detail page URL is built directly from the title slug (like the RT
  *    scraper) to keep it to a single request, avoiding the search page which
  *    is the most Cloudflare-protected.
- *  - the Metascore (critic, /100) and the user score (via JSON-LD, /10) are
- *    extracted from the same page.
+ *  - the Metascore is read from the single embedded JSON-LD block
+ *    (`<script type="application/ld+json">`), whose `aggregateRating` is the
+ *    Metascore on a /100 scale — the same scale OMDB uses. Example:
+ *    {"name":"Metascore","bestRating":100,"worstRating":0,"ratingValue":88,...}
  *
  * CLOUDFLARE: Metacritic is behind Cloudflare and may answer with a JS
  * challenge that a plain OkHttp client cannot solve. We do NOT try to bypass
@@ -40,72 +43,63 @@ class MetacriticScraper {
         .followRedirects(true)
         .build()
 
-    /**
-     * Scores extracted from Metacritic.
-     * criticScore is out of 100 (Metascore), userScore out of 10.
-     */
-    data class McScores(
-        val criticScore: Int?,
-        val userScore: Int?
-    )
-
     // In-memory cache
     private val scoresCache = mutableMapOf<String, CachedScore>()
 
     data class CachedScore(
-        val scores: McScores?,
+        val metacriticScore: Int?,
         val timestamp: Long
     )
 
     /**
-     * Get Metacritic scores for a movie.
+     * Get the Metacritic score (Metascore, /100) for a movie.
      */
-    suspend fun getScoresForMovie(
+    suspend fun getScoreForMovie(
         title: String,
         year: Int? = null
-    ): McScores? = getScores(title, year, isMovie = true)
+    ): Int? = getScore(title, year, isMovie = true)
 
     /**
-     * Get Metacritic scores for a TV series.
+     * Get the Metacritic score (Metascore, /100) for a TV series.
      */
-    suspend fun getScoresForSeries(
+    suspend fun getScoreForSeries(
         title: String,
         year: Int? = null
-    ): McScores? = getScores(title, year, isMovie = false)
+    ): Int? = getScore(title, year, isMovie = false)
 
-    private suspend fun getScores(
+    private suspend fun getScore(
         title: String,
         year: Int?,
         isMovie: Boolean
-    ): McScores? = withContext(Dispatchers.IO) {
+    ): Int? = withContext(Dispatchers.IO) {
         val cacheTag = if (isMovie) "movie" else "tv"
         val cacheKey = "$title:$year:$cacheTag"
 
         // Check cache
         scoresCache[cacheKey]?.let { cached ->
             if (System.currentTimeMillis() - cached.timestamp < CACHE_DURATION_MS) {
-                Log.d(TAG, "Cache hit for $cacheTag: $title -> Critic: ${cached.scores?.criticScore}")
-                return@withContext cached.scores
+                Log.d(TAG, "Cache hit for $cacheTag: $title -> $cached")
+                return@withContext cached.metacriticScore
             }
         }
 
-        val scores = try {
+        val score = try {
             fetchFromDetailPage(title, year, isMovie)
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching Metacritic for $cacheTag '$title'", e)
             null
         }
 
-        scoresCache[cacheKey] = CachedScore(scores, System.currentTimeMillis())
-        Log.d(TAG, "Metacritic scores for '$title': Critic: ${scores?.criticScore}, User: ${scores?.userScore}")
-        scores
+        scoresCache[cacheKey] = CachedScore(score, System.currentTimeMillis())
+        Log.d(TAG, "Metacritic score for '$title': $score")
+        score
     }
 
     /**
-     * Fetches the Metacritic detail page for the title and extracts both scores.
-     * Builds candidate slugs and stops at the first page that yields a critic score.
+     * Fetches the Metacritic detail page for the title and extracts the Metascore.
+     * Builds candidate slugs and stops at the first page that yields a score.
      */
-    private fun fetchFromDetailPage(title: String, year: Int?, isMovie: Boolean): McScores? {
+    private fun fetchFromDetailPage(title: String, year: Int?, isMovie: Boolean): Int? {
         val section = if (isMovie) "movie" else "tv"
         val baseSlug = createSlug(title)
 
@@ -118,20 +112,20 @@ class MetacriticScraper {
             }
         }.distinct()
 
-        var scores: McScores? = null
+        var score: Int? = null
         for (url in candidates) {
             Log.d(TAG, "Fetching: $url")
-            scores = fetchPage(url)
-            if (scores != null) break
+            score = fetchPage(url)
+            if (score != null) break
         }
-        return scores
+        return score
     }
 
     /**
-     * Fetches a single page and parses scores from its HTML.
+     * Fetches a single page and extracts the Metascore from its JSON-LD.
      * Returns null on Cloudflare block, HTTP error, or no parseable score.
      */
-    private fun fetchPage(url: String): McScores? {
+    private fun fetchPage(url: String): Int? {
         val request = Request.Builder()
             .url(url)
             .header("User-Agent", USER_AGENT)
@@ -166,79 +160,41 @@ class MetacriticScraper {
             return null
         }
 
-        val criticScore = extractCriticScore(html)
-        val userScore = extractUserScore(html)
+        val score = extractMetascore(html)
+        if (score == null) {
+            Log.w(TAG, "✗ No Metascore found in HTML for $url")
+        }
+        return score
+    }
 
-        if (criticScore == null && userScore == null) {
-            Log.w(TAG, "✗ No scores found in HTML for $url")
+    /**
+     * Extracts the Metascore from the page's JSON-LD.
+     * On Metacritic the embedded `aggregateRating` is the Metascore itself
+     * (scale /100), NOT the user score:
+     *   {"name":"Metascore","bestRating":100,"worstRating":0,"ratingValue":88,...}
+     */
+    private fun extractMetascore(html: String): Int? {
+        val ldJsonMatch = Regex("""<script[^>]*type="application/ld\+json"[^>]*>(.*?)</script>""")
+            .find(html) ?: run {
+            Log.d(TAG, "✗ No JSON-LD block found")
             return null
         }
 
-        return McScores(criticScore = criticScore, userScore = userScore)
-    }
-
-    /**
-     * Extracts the Metascore (critic score, /100) from the detail page HTML.
-     */
-    private fun extractCriticScore(html: String): Int? {
-        // Pattern 1: c-siteReviewScore value element (current markup)
-        val scoreValue = Regex("""class="[^"]*c-siteReviewScore__value[^"]*"[^>]*>\s*(\d{1,3})\s*<""")
-            .find(html)
-        scoreValue?.groupValues?.get(1)?.toIntOrNull()?.let {
-            if (it in 0..100) {
-                Log.d(TAG, "✓ Found critic score via c-siteReviewScore__value: $it")
-                return it
-            }
+        val value = try {
+            val root = JSONObject(ldJsonMatch.groupValues[1])
+            val aggregate = root.optJSONObject("aggregateRating")
+            aggregate?.optInt("ratingValue", -1)?.takeIf { it >= 0 }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing JSON-LD", e)
+            null
         }
 
-        // Pattern 2: embedded JSON "metascore":74
-        Regex(""""metascore"\s*:\s*"?(\d{1,3})""").find(html)
-            ?.groupValues?.get(1)?.toIntOrNull()?.let {
-                if (it in 0..100) {
-                    Log.d(TAG, "✓ Found critic score via metascore JSON: $it")
-                    return it
-                }
-            }
-
-        // Pattern 3: generic score panel wrapper
-        Regex("""class="[^"]*c-siteReviewScore[^"]*"[^>]*>\s*(\d{1,3})\s*<""")
-            .find(html)?.groupValues?.get(1)?.toIntOrNull()?.let {
-                if (it in 0..100) {
-                    Log.d(TAG, "✓ Found critic score via c-siteReviewScore: $it")
-                    return it
-                }
-            }
-
-        Log.d(TAG, "✗ Could not find critic score")
-        return null
-    }
-
-    /**
-     * Extracts the user score (converted to /100) from JSON-LD aggregateRating.
-     */
-    private fun extractUserScore(html: String): Int? {
-        // JSON-LD aggregateRating.ratingValue is the user score on a /10 scale.
-        Regex(""""aggregateRating"\s*:\s*\{[^}]*?"ratingValue"\s*:\s*"?([0-9.]+)""")
-            .find(html)?.groupValues?.get(1)?.toDoubleOrNull()?.let {
-                val userScore = (it * 10).toInt()
-                if (userScore in 0..100) {
-                    Log.d(TAG, "✓ Found user score via JSON-LD: $userScore (/100)")
-                    return userScore
-                }
-            }
-
-        // Fallback: inline "userScore" JSON field (also /10 scale)
-        Regex(""""userScore"\s*:\s*"?([0-9.]+)""").find(html)
-            ?.groupValues?.get(1)?.toDoubleOrNull()?.let {
-                val userScore = (it * 10).toInt()
-                if (userScore in 0..100) {
-                    Log.d(TAG, "✓ Found user score via userScore JSON: $userScore (/100)")
-                    return userScore
-                }
-            }
-
-        Log.d(TAG, "✗ Could not find user score")
-        return null
+        if (value != null) {
+            Log.d(TAG, "✓ Found Metascore via JSON-LD: $value")
+        } else {
+            Log.d(TAG, "✗ Metascore not found in JSON-LD")
+        }
+        return value
     }
 
     /**
