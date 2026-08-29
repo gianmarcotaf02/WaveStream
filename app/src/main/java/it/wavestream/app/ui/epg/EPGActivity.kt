@@ -373,7 +373,7 @@ private fun EPGProgramBlock(
         targetValue = when {
             isFocused -> WaveStreamColors.Accent
             isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.5f)
-            else -> Color.Transparent
+            else -> WaveStreamColors.SurfaceBorder
         },
         label = "programBorder"
     )
