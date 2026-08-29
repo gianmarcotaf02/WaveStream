@@ -973,9 +973,10 @@ fun HeroBanner(
                             // anziché a metà sotto il nero della colonna testo.
                             // 0.15f = 15% della larghezza hero — alzare/abbassare per regolare.
                             val backdropShift = size.width * 0.15f
+                            val content = this
                             clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
                                 translate(left = backdropShift) {
-                                    drawContent()
+                                    content.drawContent()
                                 }
                             }
                             drawRect(brush = imageFadeH, blendMode = BlendMode.DstIn)
