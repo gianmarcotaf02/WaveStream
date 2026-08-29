@@ -40,6 +40,7 @@ import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -1511,7 +1512,7 @@ private fun LiveChannelCard(
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
         label = "channelBorder"
     )
     
@@ -1552,7 +1553,7 @@ private fun LiveChannelCard(
                 .fillMaxWidth()
                 .height(90.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .border(2.dp, borderColor, RoundedCornerShape(12.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(12.dp))
                 .background(WaveStreamColors.CardBackground),
             contentAlignment = Alignment.Center
         ) {
