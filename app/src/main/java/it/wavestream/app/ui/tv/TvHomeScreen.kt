@@ -919,10 +919,9 @@ fun HeroBanner(
             val leftGradient = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to WaveStreamColors.BackgroundDark,
-                    0.20f to WaveStreamColors.BackgroundDark, // solid over text area for readability
-                    0.32f to WaveStreamColors.BackgroundDark.copy(alpha = 0.80f),
-                    0.46f to WaveStreamColors.BackgroundDark.copy(alpha = 0.45f),
-                    0.60f to Color.Transparent
+                    0.22f to WaveStreamColors.BackgroundDark, // solid over text area for readability
+                    0.34f to WaveStreamColors.BackgroundDark.copy(alpha = 0.50f),
+                    0.46f to Color.Transparent
                 ))
             }
 
@@ -930,9 +929,16 @@ fun HeroBanner(
             // sui bordi con rampa STRETTA, così l'immagine arriva brillante fin quasi al
             // bordo e poi si fonde nello sfondo — nessuna banda scura intermedia.
             val imageFadeH = remember {
+                // Rampa sinistra lunga ed "eased" (curva dolce, non lineare): su backdrop
+                // brillanti una rampa lineare corta si percepisce comunque come un bordo.
+                // L'immagine emerge su ~metà larghezza, senza punto di inizio visibile.
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to Color.Transparent,
-                    0.16f to Color.Black,
+                    0.06f to Color.Transparent,
+                    0.15f to Color.Black.copy(alpha = 0.30f),
+                    0.28f to Color.Black.copy(alpha = 0.55f),
+                    0.42f to Color.Black.copy(alpha = 0.80f),
+                    0.58f to Color.Black,
                     0.88f to Color.Black,
                     1f to Color.Transparent
                 ))
