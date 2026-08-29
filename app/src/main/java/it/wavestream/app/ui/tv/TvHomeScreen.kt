@@ -762,8 +762,8 @@ private fun SectionHeader(title: String) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = WaveStreamColors.Accent,
-                modifier = Modifier.size(28.dp)
+                tint = WaveStreamColors.Accent.copy(alpha = 0.85f),
+                modifier = Modifier.size(20.dp)
             )
             
             Spacer(modifier = Modifier.width(12.dp))
@@ -778,7 +778,7 @@ private fun SectionHeader(title: String) {
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Subtle divider line
+        // Subtle divider line — Aurora: ancora più discreta
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -786,8 +786,8 @@ private fun SectionHeader(title: String) {
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
-                            WaveStreamColors.Accent.copy(alpha = 0.5f),
-                            WaveStreamColors.Accent.copy(alpha = 0.2f),
+                            WaveStreamColors.Accent.copy(alpha = 0.35f),
+                            WaveStreamColors.Accent.copy(alpha = 0.1f),
                             Color.Transparent
                         )
                     )
@@ -876,23 +876,25 @@ fun HeroBanner(
             label = "heroSlide"
         ) { hero ->
             // Static gradient brushes - created once and reused for every recompose/frame
+            // Aurora: ambient Obsidian (#050608) al posto del nero puro — sfondo e
+            // contenuto si fondono senza il taglio netto del #000
             val topGradient = remember {
-                Brush.verticalGradient(colors = listOf(Color.Black, Color.Black.copy(alpha = 0.5f), Color.Transparent))
+                Brush.verticalGradient(colors = listOf(WaveStreamColors.BackgroundDark, WaveStreamColors.BackgroundDark.copy(alpha = 0.5f), Color.Transparent))
             }
             val bottomGradient = remember {
-                Brush.verticalGradient(colors = listOf(Color.Transparent, Color.Black), startY = 300f, endY = Float.POSITIVE_INFINITY)
+                Brush.verticalGradient(colors = listOf(Color.Transparent, WaveStreamColors.BackgroundDark), startY = 300f, endY = Float.POSITIVE_INFINITY)
             }
             val leftGradient = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
-                    0f to Color.Black,
-                    0.35f to Color.Black, // Keep solid black over text area for readability
-                    0.45f to Color.Black.copy(alpha = 0.85f),
-                    0.65f to Color.Black.copy(alpha = 0.30f),
+                    0f to WaveStreamColors.BackgroundDark,
+                    0.35f to WaveStreamColors.BackgroundDark, // solid over text area for readability
+                    0.45f to WaveStreamColors.BackgroundDark.copy(alpha = 0.85f),
+                    0.65f to WaveStreamColors.BackgroundDark.copy(alpha = 0.30f),
                     0.80f to Color.Transparent
                 ))
             }
             val rightGradient = remember {
-                Brush.horizontalGradient(colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.3f)))
+                Brush.horizontalGradient(colors = listOf(Color.Transparent, WaveStreamColors.BackgroundDark.copy(alpha = 0.3f)))
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
@@ -995,14 +997,16 @@ fun HeroBanner(
                         
                         Spacer(modifier = Modifier.height(8.dp))
                         
-                        // Ratings badges with logos (matching DetailsScreen style)
-                        // Ratings - Modern minimal style
+                        // Ratings — Aurora: gerarchia informativa. IMDb è il badge
+                        // primario (sempre visibile, fallback N/A); Tomatometer /
+                        // Popcornmeter / Metacritic / TMDb appaiono SOLO se il dato
+                        // esiste — gli "N/A" restano disponibili nella schermata
+                        // dettaglio. Da 5 badge fissi a 2–5 solo-dati.
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(20.dp),
                             verticalAlignment = Alignment.Top,
                             modifier = Modifier.padding(vertical = 4.dp)
                         ) {
-                            // IMDB - Always show, N/A if null
                             val imdbRating = hero.imdbRating
                             if (imdbRating != null) {
                                 HeroRatingItem(
@@ -1017,69 +1021,37 @@ fun HeroBanner(
                                     label = "IMDb"
                                 )
                             }
-                            
-                            // Tomatometer (Critics Score) - Always show, N/A if null
-                            val rtScore = hero.rottenTomatoesScore
-                            if (rtScore != null) {
+
+                            hero.rottenTomatoesScore?.let { rtScore ->
                                 val isFresh = rtScore >= 60
                                 HeroRatingItem(
                                     iconResId = if (isFresh) R.drawable.rotten_tomatoes_logo else R.drawable.rotten_tomatoes_rotten,
                                     value = "$rtScore%",
                                     label = "Tomatometer®"
                                 )
-                            } else {
-                                HeroRatingItem(
-                                    iconResId = R.drawable.rotten_tomatoes_no_score,
-                                    value = "N/A",
-                                    label = "Tomatometer®"
-                                )
                             }
-                            
-                            // Popcornmeter (Audience Score) - Always show, N/A if null
-                            val audScore = hero.audienceScore
-                            if (audScore != null) {
+
+                            hero.audienceScore?.let { audScore ->
                                 val isFresh = audScore >= 60
                                 HeroRatingItem(
                                     iconResId = if (isFresh) R.drawable.popcornmeter_fresh else R.drawable.popcornmeter_rotten,
                                     value = "$audScore%",
                                     label = "Popcornmeter®"
                                 )
-                            } else {
-                                HeroRatingItem(
-                                    iconResId = R.drawable.popcornmeter_na,
-                                    value = "N/A",
-                                    label = "Popcornmeter®"
-                                )
                             }
-                            
-                            // Metacritic - Always show, N/A if null
-                            val metaScore = hero.metacriticScore
-                            if (metaScore != null) {
+
+                            hero.metacriticScore?.let { metaScore ->
                                 HeroRatingItem(
                                     iconResId = R.drawable.metacritic_logo,
                                     value = "$metaScore",
                                     label = "Metascore"
                                 )
-                            } else {
-                                HeroRatingItem(
-                                    iconResId = R.drawable.metacritic_na,
-                                    value = "N/A",
-                                    label = "Metascore"
-                                )
                             }
-                            
-                            // TMDB (always show, with N/A if not available)
-                            val tmdbRating = hero.tmdbRating?.takeIf { it > 0 }
-                            if (tmdbRating != null) {
+
+                            hero.tmdbRating?.takeIf { it > 0 }?.let { tmdbRating ->
                                 HeroRatingItem(
                                     iconResId = R.drawable.tmdb_logo,
                                     value = String.format("%.1f", tmdbRating),
-                                    label = "TMDb"
-                                )
-                            } else {
-                                HeroRatingItem(
-                                    iconResId = R.drawable.tmdb_na,
-                                    value = "N/A",
                                     label = "TMDb"
                                 )
                             }
