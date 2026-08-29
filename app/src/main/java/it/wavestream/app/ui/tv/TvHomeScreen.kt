@@ -858,39 +858,11 @@ fun HeroBanner(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(340.dp)  // Aurora: leggermente più contenuto (v1: 360)
+            .height(340.dp)
     ) {
-        // ═══ AURORA — alone ambientale dietro il contenuto ═══
-        // Due glori radiali statici (accent + deep accent): danno profondità e
-        // colore alla zona hero anche quando il backdrop è scuro. Zero blur —
-        // un radial gradient è un semplice fill per la GPU.
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .size(620.dp, 520.dp)
-                .background(
-                    Brush.radialGradient(
-                        listOf(
-                            WaveStreamColors.Accent.copy(alpha = 0.11f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .offset(x = (-140).dp, y = 60.dp)
-                .size(560.dp, 460.dp)
-                .background(
-                    Brush.radialGradient(
-                        listOf(
-                            WaveStreamColors.AccentDark.copy(alpha = 0.14f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
+        // NOTA: niente overlay ambientali (aurora) né scrim sinistri — la zona testo
+        // deve mostrare SOLO lo sfondo nero dell'app. Il backdrop è reso invisibile
+        // lì dalla maschera alpha (imageFadeH, trasparente fino al 52%).
         
         // Animated content with slide transition - ENTIRE HERO BLOCK slides
         AnimatedContent(
