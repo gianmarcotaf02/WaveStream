@@ -919,9 +919,10 @@ fun HeroBanner(
             val leftGradient = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to WaveStreamColors.BackgroundDark,
-                    0.26f to WaveStreamColors.BackgroundDark, // solid over text area for readability
-                    0.38f to WaveStreamColors.BackgroundDark.copy(alpha = 0.85f),
-                    0.50f to Color.Transparent
+                    0.20f to WaveStreamColors.BackgroundDark, // solid over text area for readability
+                    0.32f to WaveStreamColors.BackgroundDark.copy(alpha = 0.80f),
+                    0.46f to WaveStreamColors.BackgroundDark.copy(alpha = 0.45f),
+                    0.60f to Color.Transparent
                 ))
             }
 
@@ -931,7 +932,7 @@ fun HeroBanner(
             val imageFadeH = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to Color.Transparent,
-                    0.10f to Color.Black,
+                    0.16f to Color.Black,
                     0.88f to Color.Black,
                     1f to Color.Transparent
                 ))
