@@ -69,7 +69,7 @@ fun SkeletonLoader(
                 .fillMaxWidth()
                 .height(260.dp) // Matching HeroBanner height in TvHomeScreen
                 .padding(horizontal = 48.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(shimmerBrush)
         )
         
@@ -106,7 +106,7 @@ fun SkeletonLoader(
                             modifier = Modifier
                                 .width(130.dp) // Matching PosterCard width
                                 .height(195.dp) // Matching PosterCard height
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(shimmerBrush)
                         )
                     }

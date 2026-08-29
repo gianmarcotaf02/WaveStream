@@ -128,7 +128,7 @@ fun ChannelCard(
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
         label = "channelBorder"
     )
     
@@ -137,6 +137,11 @@ fun ChannelCard(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                // Aurora: glow accent sul focus
+                shadowElevation = if (isFocused) AppAnimations.FocusGlowElevation
+                                  else AppAnimations.UnfocusedGlowElevation
+                ambientShadowColor = WaveStreamColors.Accent
+                spotShadowColor = WaveStreamColors.Accent
             }
             .width(width)
             .focusable(interactionSource = interactionSource)
@@ -220,7 +225,7 @@ fun ContinueWatchingCard(
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
         label = "continueBorder"
     )
     
@@ -229,11 +234,15 @@ fun ContinueWatchingCard(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                shadowElevation = if (isFocused) AppAnimations.FocusGlowElevation
+                                  else AppAnimations.UnfocusedGlowElevation
+                ambientShadowColor = WaveStreamColors.Accent
+                spotShadowColor = WaveStreamColors.Accent
             }
             .width(280.dp)
             .height(157.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(16.dp))
             .background(WaveStreamColors.CardBackground)
             .focusable(interactionSource = interactionSource)
             .clickable(
@@ -413,7 +422,7 @@ private fun ContentPosterCard(
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
         label = "posterBorder"
     )
     
@@ -422,6 +431,10 @@ private fun ContentPosterCard(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
+                shadowElevation = if (isFocused) AppAnimations.FocusGlowElevation
+                                  else AppAnimations.UnfocusedGlowElevation
+                ambientShadowColor = WaveStreamColors.Accent
+                spotShadowColor = WaveStreamColors.Accent
             }
             .width(width)
             .focusable(interactionSource = interactionSource)
@@ -436,8 +449,8 @@ private fun ContentPosterCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height)
-                .clip(RoundedCornerShape(8.dp))
-                .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(12.dp))
                 .background(WaveStreamColors.CardBackground)
         ) {
             AsyncImage(
@@ -453,8 +466,9 @@ private fun ContentPosterCard(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(WaveStreamColors.Accent)
+                        .clip(RoundedCornerShape(6.dp))
+                        // Aurora: rating in scrim scuro, non più pillola accent piena
+                        .background(WaveStreamColors.BackgroundDark.copy(alpha = 0.78f))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(

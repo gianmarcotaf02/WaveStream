@@ -201,12 +201,12 @@ private fun TvSeeAllCard(onClick: () -> Unit) {
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary.copy(alpha = 0.3f),
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorderStrong,
         label = "seeAllCardBorder"
     )
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.2f) else WaveStreamColors.BackgroundTertiary,
+        targetValue = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.15f) else WaveStreamColors.BackgroundTertiary,
         label = "seeAllCardBg"
     )
     
@@ -218,8 +218,8 @@ private fun TvSeeAllCard(onClick: () -> Unit) {
             }
             .width(130.dp)
             .height(195.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(12.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .onKeyEvent { event ->
                 if (event.type == KeyEventType.KeyUp && 

@@ -53,15 +53,17 @@ fun CategoryCard(
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
         label = "categoryCardBorder"
     )
     
     // Determine icon and accent based on content type
+    // Aurora: tinte pastello desaturate coerenti con la palette Obsidian
+    // (niente colori material casuali fuori tema)
     val (icon, accentColor, label) = when (item.contentType) {
-        "CATEGORY_MOVIE" -> Triple(Icons.Default.Movie, Color(0xFFE91E63), "film")
-        "CATEGORY_SERIES" -> Triple(Icons.Default.Tv, Color(0xFF9C27B0), "serie")
-        "CATEGORY_LIVE" -> Triple(Icons.Default.LiveTv, Color(0xFF4CAF50), "canali")
+        "CATEGORY_MOVIE" -> Triple(Icons.Default.Movie, Color(0xFF6EA8FE), "film")
+        "CATEGORY_SERIES" -> Triple(Icons.Default.Tv, Color(0xFFB48CFA), "serie")
+        "CATEGORY_LIVE" -> Triple(Icons.Default.LiveTv, Color(0xFF5EEAD4), "canali")
         else -> Triple(Icons.Default.Movie, WaveStreamColors.Accent, "contenuti")
     }
     
@@ -78,7 +80,7 @@ fun CategoryCard(
             .background(
                 Brush.linearGradient(
                     colors = listOf(
-                        accentColor.copy(alpha = 0.3f),
+                        accentColor.copy(alpha = 0.2f),
                         WaveStreamColors.CardBackground
                     )
                 )
