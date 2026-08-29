@@ -59,16 +59,15 @@ fun SkeletonLoader(
         modifier = modifier
             .fillMaxSize()
             .background(WaveStreamColors.BackgroundDark)
-            // Padding to match TvHomeScreen content padding? 
-            // TvHomeScreen has contentPadding(top = 80.dp), matching that here.
-            .padding(top = 80.dp) 
+            // Allineato al contentPadding top del TvHomeScreen
+            .padding(top = 24.dp) 
     ) {
         // Hero Banner Placeholder
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(260.dp) // Matching HeroBanner height in TvHomeScreen
-                .padding(horizontal = 48.dp)
+                .height(300.dp) // HeroBanner
+                .padding(horizontal = 40.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(shimmerBrush)
         )
@@ -85,7 +84,7 @@ fun SkeletonLoader(
                 // Row Title
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = 48.dp)
+                        .padding(horizontal = 40.dp)
                         .width(180.dp)
                         .height(20.dp)
                         .clip(RoundedCornerShape(4.dp))
@@ -98,14 +97,14 @@ fun SkeletonLoader(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 48.dp),
+                        .padding(horizontal = 40.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     repeat(6) { // 6 cards per row
                         Box(
                             modifier = Modifier
-                                .width(130.dp) // Matching PosterCard width
-                                .height(195.dp) // Matching PosterCard height
+                                .width(122.dp) // Aurora: match TvContentCard
+                                .height(183.dp)
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(shimmerBrush)
                         )

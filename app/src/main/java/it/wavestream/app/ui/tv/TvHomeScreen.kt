@@ -231,7 +231,7 @@ private fun TvHomeScreenContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 48.dp, vertical = 16.dp),
+                        .padding(horizontal = 40.dp, vertical = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -306,8 +306,8 @@ private fun TvHomeScreenContent(
                 
                 // Grid of posters using TV Compose grid for proper D-pad navigation
                 TvLazyVerticalGrid(
-                    columns = TvGridCells.Adaptive(minSize = 140.dp),
-                    contentPadding = PaddingValues(start = 48.dp, end = 48.dp, bottom = 80.dp, top = 24.dp),
+                    columns = TvGridCells.Adaptive(minSize = 130.dp),
+                    contentPadding = PaddingValues(start = 40.dp, end = 40.dp, bottom = 80.dp, top = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),  // More space for titles
                     modifier = Modifier
@@ -744,7 +744,7 @@ private fun SectionHeader(title: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 24.dp, bottom = 8.dp, start = 48.dp, end = 48.dp)
+            .padding(top = 24.dp, bottom = 8.dp, start = 40.dp, end = 40.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -854,7 +854,7 @@ fun HeroBanner(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(360.dp)  // Standard height
+            .height(340.dp)  // Aurora: leggermente più contenuto (v1: 360)
     ) {
         // Animated content with slide transition - ENTIRE HERO BLOCK slides
         AnimatedContent(
@@ -918,7 +918,7 @@ fun HeroBanner(
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = 80.dp, end = 24.dp, top = 20.dp, bottom = 8.dp)
+                        .padding(start = 72.dp, end = 24.dp, top = 20.dp, bottom = 8.dp)
                         .fillMaxHeight()
                         .fillMaxWidth(), // Force full width for buttons
                     verticalArrangement = Arrangement.Bottom  // Put content at bottom
@@ -1377,7 +1377,7 @@ fun HeroBanner(
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 48.dp, bottom = 24.dp)
+                    .padding(end = 40.dp, bottom = 24.dp)
                     .clip(RoundedCornerShape(4.dp))
                     .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.8f))
                     .padding(horizontal = 12.dp, vertical = 6.dp)
