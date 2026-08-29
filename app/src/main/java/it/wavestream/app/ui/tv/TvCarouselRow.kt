@@ -1,6 +1,9 @@
 package it.wavestream.app.ui.tv
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +38,7 @@ import it.wavestream.app.ui.home.CarouselRow
 import it.wavestream.app.ui.components.CategoryCard
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
+import kotlinx.coroutines.delay
 
 /**
  * TV-optimized carousel row using TvLazyRow
@@ -59,6 +63,10 @@ fun TvCarouselRow(
     onLeftOnFirstItem: (() -> Unit)? = null
 ) {
     val listState = rememberTvLazyListState()
+    
+    // Aurora: chiavi già entrate in scena — l'animazione di cascata scatta una
+    // sola volta per item (non ad ogni rientro nello viewport durante lo scroll)
+    val appearedKeys = remember { mutableSetOf<String>() }
     
     var isRowFocused by remember { mutableStateOf(false) }
     var isFirstItemFocused by remember { mutableStateOf(false) }
@@ -111,6 +119,25 @@ fun TvCarouselRow(
                 val isFocused = remember { mutableStateOf(false) }
                 val isFirst = index == 0
                 
+                // Aurora: ingresso a cascata (stagger 35ms/item, max 8 step)
+                val itemKey = "${item.contentType}_${item.id}"
+                val hasAppeared = remember { mutableStateOf(itemKey in appearedKeys) }
+                val entranceAlpha = remember { Animatable(if (hasAppeared.value) 1f else 0f) }
+                LaunchedEffect(itemKey) {
+                    if (!hasAppeared.value) {
+                        delay(index.coerceAtMost(8) * AppAnimations.CascadeStaggerMs.toLong())
+                        entranceAlpha.animateTo(1f, tween(350, easing = FastOutSlowInEasing))
+                        appearedKeys.add(itemKey)
+                        hasAppeared.value = true
+                    }
+                }
+                
+                Box(
+                    modifier = Modifier.graphicsLayer {
+                        alpha = entranceAlpha.value
+                        translationY = (1f - entranceAlpha.value) * 40f
+                    }
+                ) {
                 Box(
                     modifier = Modifier
                         .onFocusChanged { focusState ->
@@ -144,6 +171,7 @@ fun TvCarouselRow(
                             )
                         }
                     }
+                }
                 }
             }
             
