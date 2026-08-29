@@ -26,8 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -45,8 +43,6 @@ import androidx.compose.ui.unit.sp
 import it.wavestream.app.ui.MainTab
 import it.wavestream.app.R
 import it.wavestream.app.ui.theme.WaveStreamColors
-import it.wavestream.app.ui.theme.GlassTokens
-import it.wavestream.app.ui.theme.GlassSurface
 
 @Composable
 fun ExpandableNavRail(
@@ -69,7 +65,7 @@ fun ExpandableNavRail(
     )
 
     val railWidth = (64.dp + 136.dp * expansionProgress)
-    val backgroundAlpha = 0.85f + 0.05f * expansionProgress
+    val backgroundAlpha = 0.94f + 0.04f * expansionProgress
     val textAlpha = expansionProgress
 
     val railFocusRequester = remember { FocusRequester() }
@@ -95,20 +91,19 @@ fun ExpandableNavRail(
         }
     }
     
-    GlassSurface(
-        shape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp),
-        fill = WaveStreamColors.BackgroundDark.copy(alpha = backgroundAlpha),
-        stroke = GlassTokens.StrokeGradient,
-        strokeWidth = 1.dp,
+    Box(
         modifier = modifier
             .width(railWidth)
             .fillMaxHeight()
-            .padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
-            .shadow(
-                elevation = 6.dp,
-                shape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp)
-            )
             .focusRequester(railFocusRequester)
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(
+                        WaveStreamColors.BackgroundSecondary.copy(alpha = backgroundAlpha),
+                        Color.Black
+                    )
+                )
+            )
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && 
                     keyEvent.key == Key.DirectionRight && isExpanded) {
