@@ -397,7 +397,7 @@ private fun SettingsMenuItemRow(
         targetValue = when {
             isFocused -> WaveStreamColors.Accent
             isSelected -> WaveStreamColors.Accent.copy(alpha = 0.5f)
-            else -> Color.Transparent
+            else -> WaveStreamColors.SurfaceBorder
         },
         animationSpec = tween(200),
         label = "menuBorder"
@@ -414,13 +414,13 @@ private fun SettingsMenuItemRow(
     )
     
     val contentColor = when {
-        item.isDestructive -> Color(0xFFEF4444)
+        item.isDestructive -> WaveStreamColors.Error
         isSelected || isFocused -> WaveStreamColors.TextPrimary
         else -> WaveStreamColors.TextSecondary
     }
     
     val iconColor = when {
-        item.isDestructive -> Color(0xFFEF4444)
+        item.isDestructive -> WaveStreamColors.Error
         isSelected || isFocused -> WaveStreamColors.Accent
         else -> WaveStreamColors.TextSecondary
     }
@@ -431,7 +431,7 @@ private fun SettingsMenuItemRow(
             .padding(horizontal = 12.dp, vertical = 2.dp)
             .graphicsLayer { scaleX = scale; scaleY = scale }
             .clip(RoundedCornerShape(14.dp))
-            .border(1.5.dp, borderColor, RoundedCornerShape(14.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
             .background(backgroundColor)
             .clickable(
                 interactionSource = interactionSource,
@@ -933,7 +933,12 @@ private fun PlaylistSettings(
                         }
                     },
                     enabled = !isRefreshing,
-                    colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent),
+                    // Aurora: azione secondaria in stile ghost — il viola pieno
+                    // resta riservato alle azioni primarie (es. "Aggiungi playlist")
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = WaveStreamColors.BackgroundTertiary,
+                        contentColor = WaveStreamColors.TextPrimary
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     if (isRefreshing) {
