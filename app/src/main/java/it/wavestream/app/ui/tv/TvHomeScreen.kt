@@ -919,9 +919,9 @@ fun HeroBanner(
             val leftGradient = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to WaveStreamColors.BackgroundDark,
-                    0.22f to WaveStreamColors.BackgroundDark, // solid over text area for readability
-                    0.34f to WaveStreamColors.BackgroundDark.copy(alpha = 0.50f),
-                    0.46f to Color.Transparent
+                    0.52f to WaveStreamColors.BackgroundDark, // nero pieno su tutta la colonna testo
+                    0.62f to WaveStreamColors.BackgroundDark.copy(alpha = 0.50f),
+                    0.72f to Color.Transparent
                 ))
             }
 
@@ -934,12 +934,12 @@ fun HeroBanner(
                 // L'immagine emerge su ~metà larghezza, senza punto di inizio visibile.
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to Color.Transparent,
-                    0.06f to Color.Transparent,
-                    0.15f to Color.Black.copy(alpha = 0.30f),
-                    0.28f to Color.Black.copy(alpha = 0.55f),
-                    0.42f to Color.Black.copy(alpha = 0.80f),
-                    0.58f to Color.Black,
-                    0.88f to Color.Black,
+                    0.52f to Color.Transparent, // nero su tutta la zona testo (titolo → cast)
+                    0.60f to Color.Black.copy(alpha = 0.30f),
+                    0.68f to Color.Black.copy(alpha = 0.60f),
+                    0.76f to Color.Black.copy(alpha = 0.85f),
+                    0.84f to Color.Black,
+                    0.90f to Color.Black,
                     1f to Color.Transparent
                 ))
             }
