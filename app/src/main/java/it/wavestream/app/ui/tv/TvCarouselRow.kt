@@ -86,7 +86,7 @@ fun TvCarouselRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 48.dp),
+                .padding(horizontal = 40.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -106,7 +106,7 @@ fun TvCarouselRow(
         
         TvLazyRow(
             state = listState,
-            contentPadding = PaddingValues(start = 48.dp, end = 48.dp),
+            contentPadding = PaddingValues(start = 40.dp, end = 40.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             pivotOffsets = androidx.tv.foundation.PivotOffsets(parentFraction = 0.1f),
             modifier = Modifier
@@ -244,8 +244,8 @@ private fun TvSeeAllCard(onClick: () -> Unit) {
                 scaleX = scale
                 scaleY = scale 
             }
-            .width(130.dp)
-            .height(195.dp)
+            .width(122.dp)
+            .height(183.dp)
             .clip(RoundedCornerShape(12.dp))
             .border(1.dp, borderColor, RoundedCornerShape(12.dp))
             .background(backgroundColor)

@@ -70,9 +70,10 @@ fun TvContentCard(
     )
 
     // Use smaller dimensions for channels (square-ish), larger for movies/series (poster)
+    // Aurora: poster compatto 122×183 (2:3) — la v1 era 130×195
     val isChannel = item.contentType == "CHANNEL"
-    val cardWidth = customWidth ?: if (isChannel) 90.dp else 130.dp
-    val cardHeight = customHeight ?: if (isChannel) 70.dp else 195.dp
+    val cardWidth = customWidth ?: if (isChannel) 90.dp else 122.dp
+    val cardHeight = customHeight ?: if (isChannel) 70.dp else 183.dp
 
     Column(
         modifier = modifier
@@ -255,8 +256,8 @@ fun TvContentCard(
         Text(
             text = item.title,
             style = MaterialTheme.typography.bodySmall.copy(
-                fontSize = 12.sp,
-                lineHeight = 16.sp
+                fontSize = 11.sp,
+                lineHeight = 15.sp
             ),
             color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
             maxLines = 2,
