@@ -856,6 +856,38 @@ fun HeroBanner(
             .fillMaxWidth()
             .height(340.dp)  // Aurora: leggermente più contenuto (v1: 360)
     ) {
+        // ═══ AURORA — alone ambientale dietro il contenuto ═══
+        // Due glori radiali statici (accent + deep accent): danno profondità e
+        // colore alla zona hero anche quando il backdrop è scuro. Zero blur —
+        // un radial gradient è un semplice fill per la GPU.
+        Box(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .size(620.dp, 520.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(
+                            WaveStreamColors.Accent.copy(alpha = 0.11f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .offset(x = (-140).dp, y = 60.dp)
+                .size(560.dp, 460.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(
+                            WaveStreamColors.AccentDark.copy(alpha = 0.14f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        
         // Animated content with slide transition - ENTIRE HERO BLOCK slides
         AnimatedContent(
             targetState = heroItem,
@@ -887,10 +919,10 @@ fun HeroBanner(
             val leftGradient = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to WaveStreamColors.BackgroundDark,
-                    0.35f to WaveStreamColors.BackgroundDark, // solid over text area for readability
-                    0.45f to WaveStreamColors.BackgroundDark.copy(alpha = 0.85f),
-                    0.65f to WaveStreamColors.BackgroundDark.copy(alpha = 0.30f),
-                    0.80f to Color.Transparent
+                    0.28f to WaveStreamColors.BackgroundDark, // solid over text area for readability
+                    0.38f to WaveStreamColors.BackgroundDark.copy(alpha = 0.85f),
+                    0.58f to WaveStreamColors.BackgroundDark.copy(alpha = 0.30f),
+                    0.75f to Color.Transparent
                 ))
             }
             val rightGradient = remember {
@@ -1137,15 +1169,12 @@ fun HeroBanner(
                             val isNextEpisode = hero.resumeMinutes == null && hero.resumeEpisodeSeason != null
                             val isCWItem = isInProgress || isNextEpisode
                             val hasProgress = isInProgress
-                            val playBg by animateColorAsState(
-                                targetValue = when {
-                                    isCWItem && isPlayFocused -> Color.White
-                                    isCWItem -> Color.White.copy(alpha = 0.95f)
-                                    isPlayFocused -> WaveStreamColors.AccentLight
-                                    else -> WaveStreamColors.Accent
-                                },
-                                label = "playBg"
-                            )
+                            // Aurora: CTA con gradiente accent → deep (profondità, non tinta piatta)
+                            val playBrush = if (isCWItem) {
+                                Brush.horizontalGradient(listOf(Color.White, Color.White.copy(alpha = 0.92f)))
+                            } else {
+                                Brush.horizontalGradient(listOf(WaveStreamColors.Accent, WaveStreamColors.AccentDark))
+                            }
                             val playContent = if (isCWItem) Color.Black else WaveStreamColors.TextPrimary
                             
                             val playBorderColor by animateColorAsState(
@@ -1177,13 +1206,18 @@ fun HeroBanner(
                                     .graphicsLayer {
                                         scaleX = playScale
                                         scaleY = playScale
+                                        // Aurora: glow accent sotto il CTA primario
+                                        shadowElevation = if (isPlayFocused) 24f else 10f
+                                        shape = RoundedCornerShape(12.dp)
+                                        ambientShadowColor = WaveStreamColors.Accent
+                                        spotShadowColor = WaveStreamColors.Accent
                                     }
                                     .then(if (playButtonFocusRequester != null) Modifier.focusRequester(playButtonFocusRequester) else Modifier)
                                     .height(52.dp)
                                     .wrapContentWidth()
                                     .widthIn(min = 140.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(playBg)
+                                    .background(playBrush)
                                     .border(3.dp, playBorderColor, RoundedCornerShape(12.dp))
                                     .focusable(interactionSource = playInteractionSource)
                                     .clickable(
