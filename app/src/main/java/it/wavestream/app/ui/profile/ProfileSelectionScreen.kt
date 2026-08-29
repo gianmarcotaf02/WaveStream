@@ -241,7 +241,7 @@ fun ProfileCard(
             modifier = Modifier
                 .size(120.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .border(3.dp, borderColor, RoundedCornerShape(16.dp))
+                .border(2.dp, borderColor, RoundedCornerShape(16.dp))
                 .background(WaveStreamColors.CardBackground)
         ) {
             // Inner glow behind avatar
