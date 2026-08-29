@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.compose.setContent
+import androidx.core.view.WindowCompat
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.animateDpAsState
@@ -132,6 +133,11 @@ class MainActivity : FragmentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Edge-to-edge: il contenuto si estende sotto le system bar, eliminando
+        // le bande nere sopra e sotto lo schermo (su TV non ci sono bar, ma
+        // emulatori/dispositivi touch le mostrano).
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         
         // Restore state
         if (savedInstanceState != null) {
