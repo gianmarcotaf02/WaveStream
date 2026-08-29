@@ -69,8 +69,10 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -945,15 +947,43 @@ fun HeroBanner(
                 ))
             }
 
+            // Maschere di feathering (BlendMode.DstIn): l'ALPHA dell'immagine va a zero
+            // sui bordi invece di coprirla con un rettangolo di nero. Così il backdrop
+            // si dissolve davvero nello sfondo, qualunque sia la luminosità dell'immagine.
+            val imageFadeH = remember {
+                Brush.horizontalGradient(colorStops = arrayOf(
+                    0f to Color.Transparent,
+                    0.16f to Color.Black,
+                    0.72f to Color.Black,
+                    1f to Color.Transparent
+                ))
+            }
+            val imageFadeV = remember {
+                Brush.verticalGradient(colorStops = arrayOf(
+                    0f to Color.Transparent,
+                    0.24f to Color.Black,
+                    1f to Color.Black
+                ))
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
-                // Backdrop image - full width to avoid sharp vertical boundaries
+                // Backdrop image - full width, con feathering alpha ai quattro bordi.
+                // Offscreen compositing: DstIn deve mascherare SOLO l'immagine,
+                // non i gradienti e il contenuto disegnati sotto/dopo.
                 AsyncImage(
                     model = hero.backdropUrl ?: hero.posterUrl,
                     contentDescription = hero.title,
                     contentScale = ContentScale.Crop,  // Maintain aspect ratio
                     alignment = Alignment.CenterEnd,  // Align right side of image content
                     alpha = 0.90f,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                        .drawWithContent {
+                            drawContent()
+                            drawRect(brush = imageFadeH, blendMode = BlendMode.DstIn)
+                            drawRect(brush = imageFadeV, blendMode = BlendMode.DstIn)
+                        }
                 )
 
                 // Static gradient overlays - reused across recompositions
