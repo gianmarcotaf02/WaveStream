@@ -914,54 +914,41 @@ fun HeroBanner(
             // contenuto si fondono senza il taglio netto del #000.
             // Tutti e quattro i bordi sfumano verso BackgroundDark: l'hero non deve
             // mai presentare un limite geometrico visibile (effetto "rettangolo incollato").
-            val topGradient = remember {
-                Brush.verticalGradient(colorStops = arrayOf(
-                    0f to WaveStreamColors.BackgroundDark,
-                    0.20f to WaveStreamColors.BackgroundDark.copy(alpha = 0.80f),
-                    0.48f to Color.Transparent
-                ))
-            }
+            // Gradienti overlay RIDOTTI all'osso: niente bande scure attorno al backdrop
+            // (erano loro a creare il "contorno nero"). Solo fondo per i bottoni e
+            // sinistra per la leggibilità del testo. I bordi li gestisce il feathering alpha.
             val bottomGradient = remember {
                 Brush.verticalGradient(colorStops = arrayOf(
                     0f to Color.Transparent,
-                    0.40f to WaveStreamColors.BackgroundDark.copy(alpha = 0.55f),
-                    0.75f to WaveStreamColors.BackgroundDark,
+                    0.55f to Color.Transparent,
+                    0.82f to WaveStreamColors.BackgroundDark.copy(alpha = 0.70f),
                     1f to WaveStreamColors.BackgroundDark
                 ))
             }
             val leftGradient = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to WaveStreamColors.BackgroundDark,
-                    0.28f to WaveStreamColors.BackgroundDark, // solid over text area for readability
-                    0.40f to WaveStreamColors.BackgroundDark.copy(alpha = 0.85f),
-                    0.62f to WaveStreamColors.BackgroundDark.copy(alpha = 0.35f),
-                    0.82f to Color.Transparent
-                ))
-            }
-            val rightGradient = remember {
-                Brush.horizontalGradient(colorStops = arrayOf(
-                    0f to Color.Transparent,
-                    0.68f to Color.Transparent,
-                    0.85f to WaveStreamColors.BackgroundDark.copy(alpha = 0.65f),
-                    1f to WaveStreamColors.BackgroundDark
+                    0.26f to WaveStreamColors.BackgroundDark, // solid over text area for readability
+                    0.38f to WaveStreamColors.BackgroundDark.copy(alpha = 0.85f),
+                    0.50f to Color.Transparent
                 ))
             }
 
             // Maschere di feathering (BlendMode.DstIn): l'ALPHA dell'immagine va a zero
-            // sui bordi invece di coprirla con un rettangolo di nero. Così il backdrop
-            // si dissolve davvero nello sfondo, qualunque sia la luminosità dell'immagine.
+            // sui bordi con rampa STRETTA, così l'immagine arriva brillante fin quasi al
+            // bordo e poi si fonde nello sfondo — nessuna banda scura intermedia.
             val imageFadeH = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to Color.Transparent,
-                    0.16f to Color.Black,
-                    0.72f to Color.Black,
+                    0.10f to Color.Black,
+                    0.88f to Color.Black,
                     1f to Color.Transparent
                 ))
             }
             val imageFadeV = remember {
                 Brush.verticalGradient(colorStops = arrayOf(
                     0f to Color.Transparent,
-                    0.24f to Color.Black,
+                    0.12f to Color.Black,
                     1f to Color.Black
                 ))
             }
@@ -986,11 +973,9 @@ fun HeroBanner(
                         }
                 )
 
-                // Static gradient overlays - reused across recompositions
-                Box(modifier = Modifier.fillMaxSize().background(topGradient))
+                // Solo i due overlay necessari — top e right rimossi (contorno nero)
                 Box(modifier = Modifier.fillMaxSize().background(bottomGradient))
                 Box(modifier = Modifier.fillMaxSize().background(leftGradient))
-                Box(modifier = Modifier.fillMaxSize().background(rightGradient))
                 
                 // Content - inside animation block for full slide effect
                 Column(
