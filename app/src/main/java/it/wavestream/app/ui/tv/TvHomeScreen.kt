@@ -73,6 +73,8 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -966,7 +968,16 @@ fun HeroBanner(
                         .fillMaxSize()
                         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                         .drawWithContent {
-                            drawContent()
+                            // Shift a destra: il soggetto del backdrop (di solito al centro
+                            // dell'immagine originale) cade nella zona visibile dell'hero,
+                            // anziché a metà sotto il nero della colonna testo.
+                            // 0.15f = 15% della larghezza hero — alzare/abbassare per regolare.
+                            val backdropShift = size.width * 0.15f
+                            clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+                                translate(left = backdropShift) {
+                                    drawContent()
+                                }
+                            }
                             drawRect(brush = imageFadeH, blendMode = BlendMode.DstIn)
                             drawRect(brush = imageFadeV, blendMode = BlendMode.DstIn)
                         }
