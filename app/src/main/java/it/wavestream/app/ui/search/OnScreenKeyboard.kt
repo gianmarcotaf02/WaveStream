@@ -126,7 +126,7 @@ private fun KeyboardButton(
     ) {
         Text(
             text = label,
-            color = if (isFocused) Color.White else Color(0xFFCCCCCC), // Light gray text
+            color = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
             fontWeight = FontWeight.Medium,
             fontSize = 13.sp
         )

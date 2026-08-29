@@ -835,9 +835,10 @@ private fun SearchResultCard(
                     .clip(RoundedCornerShape(4.dp))
                     .background(
                         when {
-                            item.isCategory -> Color(0xFF9C27B0) // Purple for categories
+                            // Aurora: tinte pastello coerenti con CategoryCard
+                            item.isCategory -> Color(0xFFB48CFA) // Soft Violet
                             item.type == ContentType.MOVIE -> WaveStreamColors.Accent
-                            item.type == ContentType.SERIES -> Color(0xFF4CAF50)
+                            item.type == ContentType.SERIES -> Color(0xFF86E0A4) // Soft Green
                             item.type == ContentType.CHANNEL -> Color.Red
                             else -> WaveStreamColors.BackgroundSecondary
                         }
