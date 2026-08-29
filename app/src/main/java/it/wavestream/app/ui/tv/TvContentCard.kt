@@ -88,7 +88,7 @@ fun TvContentCard(
                     // Focus glow via shadow - derived from focusProgress
                     shadowElevation = AppAnimations.UnfocusedGlowElevation +
                         (AppAnimations.FocusGlowElevation - AppAnimations.UnfocusedGlowElevation) * focusProgress
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(12.dp)
                     ambientShadowColor = WaveStreamColors.Accent
                     spotShadowColor = WaveStreamColors.Accent
                 },
@@ -97,19 +97,27 @@ fun TvContentCard(
                 focusedScale = 1.08f,
                 pressedScale = 0.98f
             ),
+            // Aurora: idle con bordo sottile (definizione su Surface 0), focus con ring 2dp
             border = CardDefaults.border(
+                border = Border(
+                    border = androidx.compose.foundation.BorderStroke(
+                        width = 1.dp,
+                        color = WaveStreamColors.SurfaceBorder
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ),
                 focusedBorder = Border(
                     border = androidx.compose.foundation.BorderStroke(
-                        width = 3.dp,
+                        width = 2.dp,
                         color = WaveStreamColors.Accent
                     ),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(12.dp)
                 )
             ),
             shape = CardDefaults.shape(
-                shape = RoundedCornerShape(8.dp),
-                focusedShape = RoundedCornerShape(8.dp),
-                pressedShape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(12.dp),
+                focusedShape = RoundedCornerShape(12.dp),
+                pressedShape = RoundedCornerShape(12.dp)
             ),
             colors = CardDefaults.colors(
                 containerColor = WaveStreamColors.CardBackground
@@ -157,8 +165,9 @@ fun TvContentCard(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
                                 .padding(8.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(WaveStreamColors.Accent)
+                                .clip(RoundedCornerShape(6.dp))
+                                // Aurora: rating in scrim scuro, non più pillola accent piena
+                                .background(WaveStreamColors.BackgroundDark.copy(alpha = 0.78f))
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
@@ -225,7 +234,7 @@ fun TvContentCard(
                                 .fillMaxWidth()
                                 .height(4.dp)
                                 .clip(RoundedCornerShape(2.dp))
-                                .background(Color.White.copy(alpha = 0.3f))
+                                .background(WaveStreamColors.SurfaceBorderStrong)
                         ) {
                             Box(
                                 modifier = Modifier
@@ -290,7 +299,7 @@ fun TvWideCard(
                 // Focus glow via shadow - derived from focusProgress
                 shadowElevation = AppAnimations.UnfocusedGlowElevation +
                     (AppAnimations.FocusGlowElevation - AppAnimations.UnfocusedGlowElevation) * focusProgress
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(16.dp)
                 ambientShadowColor = WaveStreamColors.Accent
                 spotShadowColor = WaveStreamColors.Accent
             },
@@ -300,16 +309,23 @@ fun TvWideCard(
             pressedScale = 0.98f
         ),
         border = CardDefaults.border(
+            border = Border(
+                border = androidx.compose.foundation.BorderStroke(
+                    width = 1.dp,
+                    color = WaveStreamColors.SurfaceBorder
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ),
             focusedBorder = Border(
                 border = androidx.compose.foundation.BorderStroke(
-                    width = 3.dp,
+                    width = 2.dp,
                     color = WaveStreamColors.Accent
                 ),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(16.dp)
             )
         ),
         shape = CardDefaults.shape(
-            shape = RoundedCornerShape(8.dp)
+            shape = RoundedCornerShape(16.dp)
         ),
         colors = CardDefaults.colors(
             containerColor = WaveStreamColors.CardBackground
