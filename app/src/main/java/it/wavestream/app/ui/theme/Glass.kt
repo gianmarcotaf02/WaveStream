@@ -44,6 +44,12 @@ object GlassTokens {
     val SurfaceFillStrong = Color(0x2EFFFFFF)    // 18% white — card flottanti
     val SurfaceFillDark = Color(0x40101418)      // scrim overlay (video)
 
+    // FASE 1 — fill di stato: vetro che si "accende" al focus, coerente col FocusSystem
+    val SurfaceFillFocused = Color(0x2BFFFFFF)   // 17% white — elemento focalizzato
+
+    /** Fill accent per elementi glass focalizzati (si accoppia a [accentStroke]). */
+    fun accentFill(accent: Color): Color = accent.copy(alpha = 0.12f)
+
     // Bordo vetro "neutro": bianco 30% → trasparente
     val StrokeGradient = Brush.linearGradient(
         colors = listOf(
