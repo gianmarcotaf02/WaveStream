@@ -888,16 +888,8 @@ fun HeroBanner(
             // contenuto si fondono senza il taglio netto del #000.
             // Tutti e quattro i bordi sfumano verso BackgroundDark: l'hero non deve
             // mai presentare un limite geometrico visibile (effetto "rettangolo incollato").
-            // Gradienti overlay: solo il sinistro per la leggibilità del testo.
-            // Top/bottom/right sono gestiti dal feathering alpha dell'immagine.
-            val leftGradient = remember {
-                Brush.horizontalGradient(colorStops = arrayOf(
-                    0f to WaveStreamColors.BackgroundDark,
-                    0.52f to WaveStreamColors.BackgroundDark, // nero pieno su tutta la colonna testo
-                    0.62f to WaveStreamColors.BackgroundDark.copy(alpha = 0.50f),
-                    0.72f to Color.Transparent
-                ))
-            }
+            // Nessun overlay: la zona testo mostra SOLO lo sfondo nero dell'app.
+            // Tutta la dissolvenza è fatta dalla maschera alpha imageFadeH sull'immagine.
 
             // Maschere di feathering (BlendMode.DstIn): l'ALPHA dell'immagine va a zero
             // sui bordi con rampa STRETTA, così l'immagine arriva brillante fin quasi al
@@ -956,8 +948,7 @@ fun HeroBanner(
                         }
                 )
 
-                // Overlay solo per il testo — i bordi li sfuma il feathering alpha
-                Box(modifier = Modifier.fillMaxSize().background(leftGradient))
+                // Nessun overlay sopra l'immagine — solo sfondo dell'app dove l'immagine è mascherata
                 
                 // Content - inside animation block for full slide effect
                 Column(
