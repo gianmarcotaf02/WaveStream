@@ -914,17 +914,8 @@ fun HeroBanner(
             // contenuto si fondono senza il taglio netto del #000.
             // Tutti e quattro i bordi sfumano verso BackgroundDark: l'hero non deve
             // mai presentare un limite geometrico visibile (effetto "rettangolo incollato").
-            // Gradienti overlay RIDOTTI all'osso: niente bande scure attorno al backdrop
-            // (erano loro a creare il "contorno nero"). Solo fondo per i bottoni e
-            // sinistra per la leggibilità del testo. I bordi li gestisce il feathering alpha.
-            val bottomGradient = remember {
-                Brush.verticalGradient(colorStops = arrayOf(
-                    0f to Color.Transparent,
-                    0.55f to Color.Transparent,
-                    0.82f to WaveStreamColors.BackgroundDark.copy(alpha = 0.70f),
-                    1f to WaveStreamColors.BackgroundDark
-                ))
-            }
+            // Gradienti overlay: solo il sinistro per la leggibilità del testo.
+            // Top/bottom/right sono gestiti dal feathering alpha dell'immagine.
             val leftGradient = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to WaveStreamColors.BackgroundDark,
@@ -949,7 +940,8 @@ fun HeroBanner(
                 Brush.verticalGradient(colorStops = arrayOf(
                     0f to Color.Transparent,
                     0.12f to Color.Black,
-                    1f to Color.Black
+                    0.78f to Color.Black,
+                    1f to Color.Transparent
                 ))
             }
 
@@ -973,8 +965,7 @@ fun HeroBanner(
                         }
                 )
 
-                // Solo i due overlay necessari — top e right rimossi (contorno nero)
-                Box(modifier = Modifier.fillMaxSize().background(bottomGradient))
+                // Overlay solo per il testo — i bordi li sfuma il feathering alpha
                 Box(modifier = Modifier.fillMaxSize().background(leftGradient))
                 
                 // Content - inside animation block for full slide effect
