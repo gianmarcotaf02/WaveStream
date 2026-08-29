@@ -40,6 +40,22 @@ enum class AccentColor(
     }
 }
 
+/**
+ * FASE 1 — "Aurora" Design Tokens 2.0.
+ *
+ * Scala di superfici "Obsidian": 5 livelli di elevazione che sostituiscono il
+ * nero assoluto della v1. I nomi delle proprietà storiche (BackgroundDark,
+ * CardBackground, SurfaceElevated, ...) sono INVARIATI — vengono solo
+ * rimappati ai nuovi valori — così tutti i file che leggono i token
+ * continuano a compilare senza modifiche.
+ *
+ * Mappa dei livelli:
+ *   Surface 0 → sfondo schermo          (ex BackgroundDark)
+ *   Surface 1 → card / righe            (ex BackgroundPrimary / CardBackground)
+ *   Surface 2 → card hover / elevated   (ex BackgroundSecondary / SurfaceElevated)
+ *   Surface 3 → card focused / rail     (ex BackgroundTertiary)
+ *   Surface 4 → dialog / dropdown       (ex BackgroundElevated)
+ */
 object WaveStreamColors {
     val BrandPrimary = Color(0xFF000000)
 
@@ -54,18 +70,27 @@ object WaveStreamColors {
 
     val BrandSecondary: Color get() = Accent
 
-    val AccentGold = Color(0xFFD4A574)
-    val AccentGoldLight = Color(0xFFE8C49A)
+    val AccentGold = Color(0xFFE8C49A)
+    val AccentGoldLight = Color(0xFFF3DCC0)
 
-    val BackgroundDark = Color(0xFF000000)
-    val BackgroundPrimary = Color(0xFF050505)
-    val BackgroundSecondary = Color(0xFF0F0F0F)
-    val BackgroundTertiary = Color(0xFF181818)
-    val BackgroundElevated = Color(0xFF1A1A1A)
+    // ── Scala Obsidian (Surface 0 → 4) ──
+    val BackgroundDark = Color(0xFF050608)
+    val BackgroundPrimary = Color(0xFF0A0C10)
+    val BackgroundSecondary = Color(0xFF101319)
+    val BackgroundTertiary = Color(0xFF171B23)
+    val BackgroundElevated = Color(0xFF1F2530)
 
-    val GradientTop = Color(0xFF1A0A2E)
-    val GradientMiddle = Color(0xFF0D0515)
-    val GradientBottom = Color(0xFF000000)
+    // Alias espliciti dei livelli, per il codice nuovo (Fase 2+)
+    val Surface0 = BackgroundDark
+    val Surface1 = BackgroundPrimary
+    val Surface2 = BackgroundSecondary
+    val Surface3 = BackgroundTertiary
+    val Surface4 = BackgroundElevated
+
+    // ── Gradiente ambientale "Aurora": tinta teal profonda, quasi impercettibile ──
+    val GradientTop = Color(0xFF07141A)
+    val GradientMiddle = Color(0xFF050608)
+    val GradientBottom = Color(0xFF030305)
 
     val BackgroundGradient: Brush
         get() = Brush.verticalGradient(
@@ -77,17 +102,21 @@ object WaveStreamColors {
             )
         )
 
-    val CardBackground = Color(0xFF0D0D0D)
-    val CardBackgroundHover = Color(0xFF141414)
-    val CardBackgroundFocused = Color(0xFF1A1A1A)
-    val SurfaceDark = Color(0xFF080808)
-    val SurfaceElevated = Color(0xFF121212)
+    val CardBackground = Color(0xFF0A0C10)
+    val CardBackgroundHover = Color(0xFF101319)
+    val CardBackgroundFocused = Color(0xFF171B23)
+    val SurfaceDark = Color(0xFF07080B)
+    val SurfaceElevated = Color(0xFF12151C)
 
-    val TextPrimary = Color(0xFFFFFFFF)
-    val TextSecondary = Color(0xFFB3B3B3)
-    val TextTertiary = Color(0xFF808080)
-    val TextHint = Color(0xFF4D4D4D)
-    val TextDisabled = Color(0xFF333333)
+    // ── Bordo universale per superfici (1dp, bianco 8%) — dà stacco senza elevazione ──
+    val SurfaceBorder = Color(0x14FFFFFF)
+    val SurfaceBorderStrong = Color(0x22FFFFFF)
+
+    val TextPrimary = Color(0xFFF2F4F8)
+    val TextSecondary = Color(0xFF9AA3B2)
+    val TextTertiary = Color(0xFF8B94A3)
+    val TextHint = Color(0xFF4A525E)
+    val TextDisabled = Color(0xFF2A2F38)
     val TextAccent: Color get() = AccentLight
 
     val Error = Color(0xFFFF453A)
@@ -97,21 +126,25 @@ object WaveStreamColors {
 
     val FocusRing: Color get() = Accent
     val FocusGlow: Color get() = Accent.copy(alpha = 0.25f)
+    val FocusGlowStrong: Color get() = Accent.copy(alpha = 0.38f)
     val SelectionBackground: Color get() = Accent.copy(alpha = 0.15f)
+
+    /** Alpha delle superfici NON focalizzate quando un elemento ha il focus (dimming ambiente). */
+    const val DimmingAlpha = 0.6f
 
     val RatingIMDb = Color(0xFFF5C518)
     val RatingTMDb = Color(0xFF01D277)
     val RatingMetacritic = Color(0xFF66CC33)
 
     val PlayerBackground = Color(0xFF000000)
-    val PlayerControlsBg = Color(0x60000000)
+    val PlayerControlsBg = Color(0x66050608)
     val PlayerSeekbarPlayed: Color get() = Accent
 
-    val RailBackground = Color(0x80000000)
-    val RailBackgroundExpanded = Color(0xCC000000)
+    val RailBackground = Color(0x99050608)
+    val RailBackgroundExpanded = Color(0xE60A0C10)
     val RailItemFocused = BackgroundTertiary
     val RailItemSelected = Accent.copy(alpha = 0.15f)
-    val RailDivider = BackgroundTertiary
+    val RailDivider = Color(0x14FFFFFF)
 
     // ============== Glass / Liquid Glass (FASE 1) ==============
     // Token vetro esposti anche dal tema per coerenza. La fonte primaria dei
@@ -266,12 +299,18 @@ fun WaveStreamTheme(
             onSurface = WaveStreamColors.TextPrimary,
             surfaceVariant = WaveStreamColors.BackgroundSecondary,
             onSurfaceVariant = WaveStreamColors.TextSecondary,
+            // Contenitori di superficie M3 mappati sulla scala Obsidian
+            surfaceContainerLowest = WaveStreamColors.SurfaceDark,
+            surfaceContainerLow = WaveStreamColors.BackgroundPrimary,
+            surfaceContainer = WaveStreamColors.BackgroundSecondary,
+            surfaceContainerHigh = WaveStreamColors.BackgroundTertiary,
+            surfaceContainerHighest = WaveStreamColors.BackgroundElevated,
 
             error = WaveStreamColors.Error,
             onError = WaveStreamColors.TextPrimary,
 
             outline = WaveStreamColors.TextTertiary,
-            outlineVariant = WaveStreamColors.TextHint
+            outlineVariant = WaveStreamColors.SurfaceBorder
         )
     }
 

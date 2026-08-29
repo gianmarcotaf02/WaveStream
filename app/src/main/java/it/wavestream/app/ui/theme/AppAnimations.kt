@@ -58,6 +58,17 @@ object AppAnimations {
         stiffness = 350f
     )
     
+    // ============== FASE 1 — Aurora motion tokens ==============
+
+    /** Fade del dimming ambientale e dei bordi focus (non-spring: lineare e discreto). */
+    val DimFade = tween<Float>(
+        durationMillis = 220,
+        easing = androidx.compose.animation.core.FastOutSlowInEasing
+    )
+
+    /** Ritardo tra un elemento e il successivo nelle cascade d'ingresso delle righe. */
+    const val CascadeStaggerMs = 35
+    
     // ============== Duration Constants ==============
     
     /** Fast fade duration (ms) */
