@@ -192,8 +192,8 @@ fun LoadingScreen(
                     text = profileName,
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp,
-                        letterSpacing = 0.5.sp
+                        fontSize = 22.sp,
+                        letterSpacing = 0.sp
                     ),
                     color = WaveStreamColors.TextPrimary,
                     textAlign = TextAlign.Center
@@ -307,7 +307,8 @@ private fun TriviaCard(
                     rotationZ = -2f
                 }
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFF161215).copy(alpha = 0.5f))
+                // Aurora: ombra foglio su Obsidian, niente tinta calda legacy
+                .background(WaveStreamColors.SurfaceDark.copy(alpha = 0.6f))
                 .border(
                     width = 1.dp,
                     color = Color.White.copy(alpha = 0.05f),
@@ -331,8 +332,8 @@ private fun TriviaCard(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xFF261D22).copy(alpha = 0.85f),
-                            Color(0xFF1B161B).copy(alpha = 0.9f)
+                            WaveStreamColors.BackgroundTertiary.copy(alpha = 0.85f),
+                            WaveStreamColors.BackgroundSecondary.copy(alpha = 0.9f)
                         )
                     )
                 )
@@ -358,8 +359,8 @@ private fun TriviaCard(
                         text = if (item.category.isNotEmpty()) "${item.category.uppercase()} • ${item.title}" else item.title,
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            letterSpacing = 0.5.sp
+                            fontSize = 11.sp,
+                            letterSpacing = 0.3.sp
                         ),
                         color = WaveStreamColors.AccentLight,
                         textAlign = TextAlign.Center
@@ -369,8 +370,8 @@ private fun TriviaCard(
                 Text(
                     text = item.text,
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        lineHeight = 22.sp,
-                        fontSize = 15.sp,
+                        lineHeight = 20.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Normal
                     ),
                     color = Color.White.copy(alpha = 0.9f),
@@ -397,7 +398,7 @@ private fun ProfileAvatarLoader(
         try {
             Color(android.graphics.Color.parseColor(avatarColorHex))
         } catch (e: Exception) {
-            Color(0xFF8B5CF6) // Default purple
+            WaveStreamColors.Accent // Aurora: fallback sull'accent dinamico
         }
     }
     
@@ -611,7 +612,8 @@ private fun AnimatedGradientBackground() {
                 .background(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            Color(0xFF6366F1).copy(alpha = 0.08f),
+                            // Aurora: secondo orbe in teal, duotone con l'accent
+                            Color(0xFF5EEAD4).copy(alpha = 0.07f),
                             Color.Transparent
                         )
                     ),

@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import it.wavestream.app.R
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.SoraFontFamily
 import kotlinx.coroutines.delay
 
 /**
@@ -149,11 +150,13 @@ fun SplashScreen(
                 ) {
                     Text(
                         text = "WaveStream",
-                        fontSize = 56.sp,
+                        // Aurora: wordmark in Sora, tracking stretto (v1: 56sp Inter-style)
+                        fontFamily = SoraFontFamily,
+                        fontSize = 48.sp,
                         fontWeight = FontWeight.Bold,
                         color = WaveStreamColors.TextPrimary,
                         modifier = Modifier.padding(start = 16.dp),
-                        letterSpacing = 2.sp
+                        letterSpacing = (-0.5).sp
                     )
                 }
             }
