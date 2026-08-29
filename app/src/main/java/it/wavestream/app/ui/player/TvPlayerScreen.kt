@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -32,6 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
+import it.wavestream.app.R
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -725,13 +728,13 @@ private fun ModernProgressBar(
             ),
         contentAlignment = Alignment.CenterStart
     ) {
-        // Background track
+        // Background track — Aurora: più discreta, la luce sta sul fill
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(barHeight)
                 .clip(RoundedCornerShape(4.dp))
-                .background(Color.White.copy(alpha = 0.25f))
+                .background(Color.White.copy(alpha = 0.16f))
         )
         
         // Progress fill with gradient
@@ -1157,43 +1160,62 @@ private fun ModernSeekIndicator(seconds: Int) {
 /**
  * Modern loading indicator
  */
+/**
+ * Aurora: loading "a brand" — il logo WaveStream pulsa con alone accent al
+ * posto dello spinner generico. Il buffering diventa un momento di branding.
+ */
 @Composable
 private fun ModernLoadingIndicator() {
     val infiniteTransition = rememberInfiniteTransition(label = "loading")
     
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
+    val logoScale by infiniteTransition.animateFloat(
+        initialValue = 0.92f,
+        targetValue = 1.08f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "rotation"
-    )
-    
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 0.9f,
-        targetValue = 1.1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(600, easing = FastOutSlowInEasing),
+            animation = tween(700, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "scale"
+        label = "logoScale"
+    )
+    
+    val logoAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "logoAlpha"
     )
     
     Box(
         modifier = Modifier
-            .size(80.dp)
+            .size(96.dp)
             .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
+                scaleX = logoScale
+                scaleY = logoScale
+                this.alpha = logoAlpha
             },
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(60.dp),
-            color = WaveStreamColors.Accent,
-            strokeWidth = 4.dp
+        // Alone accent dietro il logo (gradiente radiale, zero blur)
+        Box(
+            modifier = Modifier
+                .size(96.dp)
+                .background(
+                    Brush.radialGradient(
+                        listOf(
+                            WaveStreamColors.Accent.copy(alpha = 0.18f),
+                            Color.Transparent
+                        )
+                    ),
+                    CircleShape
+                )
+        )
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = null,
+            modifier = Modifier.size(52.dp)
         )
     }
 }
