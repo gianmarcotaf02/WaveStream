@@ -909,24 +909,40 @@ fun HeroBanner(
         ) { hero ->
             // Static gradient brushes - created once and reused for every recompose/frame
             // Aurora: ambient Obsidian (#050608) al posto del nero puro — sfondo e
-            // contenuto si fondono senza il taglio netto del #000
+            // contenuto si fondono senza il taglio netto del #000.
+            // Tutti e quattro i bordi sfumano verso BackgroundDark: l'hero non deve
+            // mai presentare un limite geometrico visibile (effetto "rettangolo incollato").
             val topGradient = remember {
-                Brush.verticalGradient(colors = listOf(WaveStreamColors.BackgroundDark, WaveStreamColors.BackgroundDark.copy(alpha = 0.5f), Color.Transparent))
+                Brush.verticalGradient(colorStops = arrayOf(
+                    0f to WaveStreamColors.BackgroundDark,
+                    0.20f to WaveStreamColors.BackgroundDark.copy(alpha = 0.80f),
+                    0.48f to Color.Transparent
+                ))
             }
             val bottomGradient = remember {
-                Brush.verticalGradient(colors = listOf(Color.Transparent, WaveStreamColors.BackgroundDark), startY = 300f, endY = Float.POSITIVE_INFINITY)
+                Brush.verticalGradient(colorStops = arrayOf(
+                    0f to Color.Transparent,
+                    0.40f to WaveStreamColors.BackgroundDark.copy(alpha = 0.55f),
+                    0.75f to WaveStreamColors.BackgroundDark,
+                    1f to WaveStreamColors.BackgroundDark
+                ))
             }
             val leftGradient = remember {
                 Brush.horizontalGradient(colorStops = arrayOf(
                     0f to WaveStreamColors.BackgroundDark,
                     0.28f to WaveStreamColors.BackgroundDark, // solid over text area for readability
-                    0.38f to WaveStreamColors.BackgroundDark.copy(alpha = 0.85f),
-                    0.58f to WaveStreamColors.BackgroundDark.copy(alpha = 0.30f),
-                    0.75f to Color.Transparent
+                    0.40f to WaveStreamColors.BackgroundDark.copy(alpha = 0.85f),
+                    0.62f to WaveStreamColors.BackgroundDark.copy(alpha = 0.35f),
+                    0.82f to Color.Transparent
                 ))
             }
             val rightGradient = remember {
-                Brush.horizontalGradient(colors = listOf(Color.Transparent, WaveStreamColors.BackgroundDark.copy(alpha = 0.3f)))
+                Brush.horizontalGradient(colorStops = arrayOf(
+                    0f to Color.Transparent,
+                    0.68f to Color.Transparent,
+                    0.85f to WaveStreamColors.BackgroundDark.copy(alpha = 0.65f),
+                    1f to WaveStreamColors.BackgroundDark
+                ))
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
