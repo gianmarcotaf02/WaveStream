@@ -660,12 +660,14 @@ private fun EpgTimeHeader(
                     .width((PIXELS_PER_MINUTE * 60).dp)
                     .fillMaxHeight()
                     .background(
-                        if (i == 0) WaveStreamColors.Accent.copy(alpha = 0.2f) 
+                        if (i == 0) WaveStreamColors.Accent.copy(alpha = 0.15f) 
                         else Color.Transparent
                     )
+                    // Aurora: bordi slot discreti + ancoraggio accent sullo slot corrente
                     .border(
                         width = 1.dp,
-                        color = WaveStreamColors.BackgroundTertiary
+                        color = if (i == 0) WaveStreamColors.Accent.copy(alpha = 0.5f)
+                                else WaveStreamColors.SurfaceBorder
                     ),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -682,7 +684,8 @@ private fun EpgTimeHeader(
 }
 
 /**
- * Current time line (RED vertical line)
+ * Current time line — Aurora: luminosa con alone a gradiente, non più una
+ * fila rossa piatta facilmente perdibile nella griglia.
  */
 @Composable
 private fun CurrentTimeLine(currentTime: Long) {
@@ -696,11 +699,35 @@ private fun CurrentTimeLine(currentTime: Long) {
     
     Box(
         modifier = Modifier
-            .offset(x = totalOffset.dp)
-            .width(2.dp)
+            .offset(x = (totalOffset - 2).dp)
+            .width(6.dp)
             .fillMaxHeight()
-            .background(Color.Red)
-    )
+    ) {
+        // Alone (glow) — gradiente orizzontale, zero blur
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(6.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            WaveStreamColors.Error.copy(alpha = 0.4f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        // Linea piena
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(2.dp)
+                .align(Alignment.CenterStart)
+                .offset(x = 2.dp)
+                .background(WaveStreamColors.Error)
+        )
+    }
 }
 
 /**
@@ -724,7 +751,7 @@ private fun EpgChannelRow(
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
         label = "rowBorder"
     )
     
@@ -733,8 +760,8 @@ private fun EpgChannelRow(
             .fillMaxWidth()
             .height(72.dp)
             .padding(horizontal = 4.dp, vertical = 2.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(10.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(10.dp))
             .background(backgroundColor)
             .clickable(
                 interactionSource = interactionSource,
@@ -826,21 +853,27 @@ private fun EpgProgramBlock(
 ) {
     val widthDp = (durationMinutes * PIXELS_PER_MINUTE).coerceIn(60, 400)
     
+    // Aurora: gerarchia EPG — in onda = tinta accent piena, futuro = outline
+    // discreto, vuoto = fantasma. La riga focalizzata aggiunge il ring.
     val backgroundColor = when {
-        isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.4f)
-        isEmpty -> WaveStreamColors.BackgroundTertiary.copy(alpha = 0.5f)
+        isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.28f)
+        isEmpty -> WaveStreamColors.BackgroundTertiary.copy(alpha = 0.4f)
         else -> WaveStreamColors.CardBackground
     }
     
-    val borderColor = if (isCurrent) WaveStreamColors.Accent else Color.Transparent
+    val borderColor = when {
+        isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.8f)
+        isEmpty -> Color.Transparent
+        else -> WaveStreamColors.SurfaceBorder
+    }
     
     Box(
         modifier = Modifier
             .width(widthDp.dp)
             .fillMaxHeight()
             .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(4.dp))
+            .clip(RoundedCornerShape(6.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(6.dp))
             .background(backgroundColor)
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
@@ -1203,19 +1236,19 @@ private fun LiveCategoryCard(
         label = "catCardScale"
     )
 
-    // Color derived from category name for visual variety
+    // Aurora: tinte pastello desaturate coerenti con la palette Obsidian
     val categoryColor = remember(category) {
         val colors = listOf(
-            Color(0xFF1E88E5), // Blue
-            Color(0xFF43A047), // Green
-            Color(0xFFE53935), // Red
-            Color(0xFF8E24AA), // Purple
-            Color(0xFFFF8F00), // Orange
-            Color(0xFF00ACC1), // Cyan
-            Color(0xFFD81B60), // Pink
-            Color(0xFF5E35B1), // Deep Purple
-            Color(0xFF3949AB), // Indigo
-            Color(0xFF00897B), // Teal
+            Color(0xFF6EA8FE), // Soft Blue
+            Color(0xFF5EEAD4), // Aurora Teal
+            Color(0xFFB48CFA), // Soft Violet
+            Color(0xFFF0A86E), // Soft Amber
+            Color(0xFFFF8FA3), // Soft Rose
+            Color(0xFF86E0A4), // Soft Green
+            Color(0xFF7DD3FC), // Sky
+            Color(0xFFC4B5FD), // Lavender
+            Color(0xFF93C5FD), // Periwinkle
+            Color(0xFFE8C49A), // Gold Aurora
         )
         colors[Math.abs(category.hashCode()) % colors.size]
     }
@@ -1235,8 +1268,8 @@ private fun LiveCategoryCard(
             containerColor = WaveStreamColors.BackgroundSecondary
         ),
         border = BorderStroke(
-            width = if (isFocused) 3.dp else 0.dp,
-            color = if (isFocused) WaveStreamColors.Accent else Color.Transparent
+            width = if (isFocused) 2.dp else 1.dp,
+            color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder
         )
     ) {
         Box(
