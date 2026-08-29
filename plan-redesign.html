@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WaveStream 2.0 — Piano di Ammodernamento UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ── Palette "Aurora" — proposta WaveStream 2.0 ── */
+    --obsidian-0:#050608;
+    --obsidian-1:#0A0C10;
+    --obsidian-2:#101319;
+    --obsidian-3:#171B23;
+    --obsidian-4:#1F2530;
+    --text-hi:#F2F4F8;
+    --text-mid:#9AA3B2;
+    --text-low:#5A6472;
+    --accent:#5EEAD4;          /* teal aurora — nuovo accento proposto */
+    --accent-deep:#14B8A6;
+    --accent-ink:#032622;
+    --violet:#8B5CF6;          /* accento attuale (v1) */
+    --gold:#E8C49A;
+    --danger:#FF6B6B;
+
+    --radius-s:10px; --radius-m:18px; --radius-l:28px;
+    --line:rgba(255,255,255,.07);
+    --line-soft:rgba(255,255,255,.045);
+    --glass:rgba(255,255,255,.035);
+
+    --font-display:'Sora',sans-serif;
+    --font-body:'Manrope',sans-serif;
+    --font-mono:'JetBrains Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--obsidian-0);
+    color:var(--text-hi);
+    font-family:var(--font-body);
+    font-size:16px;line-height:1.65;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent);color:var(--accent-ink)}
+
+  /* ── atmosfera: aurora background ── */
+  .atmos{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .atmos::before{
+    content:"";position:absolute;top:-30vh;left:-10vw;width:80vw;height:80vh;
+    background:radial-gradient(ellipse at center, rgba(94,234,212,.09), transparent 60%);
+    filter:blur(60px);
+  }
+  .atmos::after{
+    content:"";position:absolute;top:20vh;right:-25vw;width:70vw;height:90vh;
+    background:radial-gradient(ellipse at center, rgba(139,92,246,.07), transparent 60%);
+    filter:blur(80px);
+  }
+  .grain{
+    position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  main{position:relative;z-index:2}
+
+  /* ── tipografia ── */
+  h1,h2,h3,h4{font-family:var(--font-display);letter-spacing:-.02em}
+  .kicker{
+    font-family:var(--font-mono);font-size:.72rem;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--accent);
+    display:flex;align-items:center;gap:.9rem;margin-bottom:1.4rem;
+  }
+  .kicker::before{content:"";width:34px;height:1px;background:var(--accent)}
+
+  /* ── layout ── */
+  .wrap{max-width:1160px;margin:0 auto;padding:0 2.2rem}
+  section{padding:5.5rem 0;border-bottom:1px solid var(--line-soft)}
+
+  /* ── hero ── */
+  header.hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;position:relative;padding:4rem 0 3rem}
+  .hero .badge{
+    display:inline-flex;align-items:center;gap:.6rem;width:fit-content;
+    border:1px solid rgba(94,234,212,.3);background:rgba(94,234,212,.06);
+    color:var(--accent);font-family:var(--font-mono);font-size:.72rem;
+    letter-spacing:.2em;text-transform:uppercase;
+    padding:.5rem 1.1rem;border-radius:100px;margin-bottom:2.2rem;
+  }
+  .hero .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2.2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  .hero h1{font-size:clamp(3rem,7.5vw,5.6rem);font-weight:800;line-height:1.02}
+  .hero h1 .aurora{
+    background:linear-gradient(100deg,#5EEAD4 10%,#7DD3FC 45%,#A78BFA 85%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .hero .sub{max-width:640px;color:var(--text-mid);font-size:1.14rem;margin-top:1.8rem}
+  .hero .meta{display:flex;gap:2.6rem;margin-top:3.2rem;flex-wrap:wrap}
+  .hero .meta div strong{display:block;font-family:var(--font-display);font-size:1.7rem;color:var(--text-hi)}
+  .hero .meta div span{font-size:.8rem;color:var(--text-low);letter-spacing:.06em;text-transform:uppercase}
+  .hero-cta{display:flex;gap:1rem;margin-top:3rem;flex-wrap:wrap}
+  .btn{
+    font-family:var(--font-display);font-weight:600;font-size:.92rem;
+    padding:.95rem 2rem;border-radius:100px;cursor:pointer;text-decoration:none;
+    transition:transform .25s cubic-bezier(.2,.8,.2,1),box-shadow .25s;
+  }
+  .btn-primary{background:var(--accent);color:var(--accent-ink)}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px -8px rgba(94,234,212,.45)}
+  .btn-ghost{color:var(--text-hi);border:1px solid var(--line)}
+  .btn-ghost:hover{border-color:rgba(255,255,255,.25);background:var(--glass)}
+
+  /* ── cards / vetrini ── */
+  .card{
+    background:var(--obsidian-1);
+    border:1px solid var(--line);
+    border-radius:var(--radius-l);
+    padding:2.2rem 2.4rem;
+    position:relative;overflow:hidden;
+  }
+  .card::before{
+    content:"";position:absolute;inset:0 0 auto 0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  }
+  .grid{display:grid;gap:1.2rem}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+
+  /* reveal on scroll */
+  .rv{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+  .rv.in{opacity:1;transform:none}
+
+  /* ── analisi: problemi ── */
+  .issue{display:grid;grid-template-columns:52px 1fr;gap:1.3rem;align-items:start}
+  .issue .num{
+    font-family:var(--font-display);font-weight:700;font-size:.95rem;
+    width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+    background:rgba(255,107,107,.08);color:var(--danger);border:1px solid rgba(255,107,107,.22);
+  }
+  .issue h4{font-size:1.02rem;margin-bottom:.3rem}
+  .issue p{color:var(--text-mid);font-size:.92rem}
+  .issue p code, p code, li code{
+    font-family:var(--font-mono);font-size:.82em;color:var(--accent);
+    background:rgba(94,234,212,.07);padding:.12em .45em;border-radius:6px;
+  }
+
+  /* ── swatches ── */
+  .swatches{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.9rem}
+  .sw{border-radius:var(--radius-m);overflow:hidden;border:1px solid var(--line)}
+  .sw .chip{height:74px}
+  .sw .info{padding:.8rem .95rem;background:var(--obsidian-1)}
+  .sw .info b{font-family:var(--font-mono);font-weight:500;font-size:.78rem;display:block;color:var(--text-hi)}
+  .sw .info span{font-size:.72rem;color:var(--text-low)}
+
+  /* ── type scale ── */
+  .type-row{display:flex;align-items:baseline;gap:2rem;padding:1.15rem 0;border-bottom:1px dashed var(--line-soft)}
+  .type-row:last-child{border:none}
+  .type-row .tag{font-family:var(--font-mono);font-size:.72rem;color:var(--text-low);width:170px;flex-shrink:0}
+
+  /* ── fasi roadmap ── */
+  .phase{
+    display:grid;grid-template-columns:130px 1fr 220px;gap:1.6rem;
+    padding:2rem 0;border-bottom:1px solid var(--line-soft);
+  }
+  .phase:last-child{border:none}
+  .phase .ph-num{font-family:var(--font-display);font-weight:800;font-size:2rem;color:transparent;-webkit-text-stroke:1.5px rgba(94,234,212,.5);line-height:1}
+  .phase h4{font-size:1.08rem;margin-bottom:.45rem}
+  .phase p{color:var(--text-mid);font-size:.92rem;margin-bottom:.55rem}
+  .phase .files{font-family:var(--font-mono);font-size:.74rem;color:var(--text-low);line-height:1.9}
+  .phase .files b{color:var(--text-mid);font-weight:500}
+  .eff{display:flex;flex-direction:column;gap:.5rem;align-items:flex-start}
+  .pill{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;padding:.4rem .9rem;border-radius:100px;border:1px solid var(--line);color:var(--text-mid);white-space:nowrap}
+  .pill.hot{border-color:rgba(94,234,212,.4);color:var(--accent);background:rgba(94,234,212,.06)}
+  .bar{width:100%;height:4px;border-radius:4px;background:var(--obsidian-3);overflow:hidden;margin-top:.3rem}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent-deep),var(--accent));border-radius:4px}
+
+  /* ── confronto before/after ── */
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+  @media(max-width:760px){.versus{grid-template-columns:1fr}}
+  .v-col{border-radius:var(--radius-m);padding:1.6rem 1.8rem;border:1px solid var(--line)}
+  .v-col.before{background:var(--obsidian-1)}
+  .v-col.after{background:linear-gradient(160deg,rgba(94,234,212,.07),var(--obsidian-1) 55%);border-color:rgba(94,234,212,.25)}
+  .v-col h5{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:1rem}
+  .v-col.before h5{color:var(--text-low)}
+  .v-col.after h5{color:var(--accent)}
+  .v-col ul{list-style:none}
+  .v-col li{font-size:.9rem;color:var(--text-mid);padding:.42rem 0 .42rem 1.5rem;position:relative}
+  .v-col.before li::before{content:"×";position:absolute;left:0;color:var(--danger);font-weight:700}
+  .v-col.after li::before{content:"→";position:absolute;left:0;color:var(--accent)}
+
+  /* ── principi ── */
+  .principle{padding:2rem 2.1rem;border-radius:var(--radius-m);border:1px solid var(--line);background:var(--obsidian-1);transition:transform .3s,border-color .3s}
+  .principle:hover{transform:translateY(-4px);border-color:rgba(94,234,212,.35)}
+  .principle .ico{font-size:1.5rem;margin-bottom:1rem;display:block}
+  .principle h4{font-size:1.05rem;margin-bottom:.5rem}
+  .principle p{font-size:.88rem;color:var(--text-mid)}
+
+  /* ── mock focus / componenti ── */
+  .demo-row{display:flex;gap:1.4rem;flex-wrap:wrap;align-items:center;padding:1.6rem;border-radius:var(--radius-m);background:var(--obsidian-1);border:1px solid var(--line)}
+  .tv-card{width:130px;border-radius:14px;overflow:hidden;flex-shrink:0}
+  .tv-card .art{height:186px;border-radius:14px;position:relative;display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:.8rem;color:rgba(255,255,255,.85)}
+  .tv-card .art span{position:absolute;bottom:0;left:0;right:0;padding:1.6rem .7rem .6rem;font-size:.72rem;font-weight:600;background:linear-gradient(transparent,rgba(0,0,0,.8));text-align:left}
+  .tv-card.idle .art{background:linear-gradient(160deg,#1B2130,#0E1119);border:1px solid var(--line)}
+  .tv-card.focus{transform:scale(1.1);transition:transform .3s}
+  .tv-card.focus .art{background:linear-gradient(160deg,#16303A,#0E1119);border:2px solid var(--accent);box-shadow:0 0 0 6px rgba(94,234,212,.14),0 18px 50px -10px rgba(94,234,212,.35)}
+  .chip{font-family:var(--font-mono);font-size:.72rem;padding:.55rem 1.1rem;border-radius:100px;border:1px solid var(--line);color:var(--text-mid)}
+  .chip.live{border-color:rgba(255,107,107,.4);color:var(--danger)}
+  .chip.live::before{content:"● ";font-size:.6rem;animation:pulse 1.6s infinite}
+  .chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+
+  /* ── tabella impatto ── */
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-low);text-align:left;padding:.9rem 1rem;border-bottom:1px solid var(--line)}
+  td{padding:.95rem 1rem;border-bottom:1px solid var(--line-soft);color:var(--text-mid);vertical-align:top}
+  td:first-child{color:var(--text-hi);font-weight:600;font-family:var(--font-display);font-size:.88rem}
+  .tag-ok{color:var(--accent);font-family:var(--font-mono);font-size:.78rem;white-space:nowrap}
+
+  footer{padding:3.5rem 0 4.5rem;color:var(--text-low);font-size:.85rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+  footer .mono{font-family:var(--font-mono);font-size:.75rem}
+
+  /* progress nav */
+  nav.toc{position:fixed;right:1.4rem;top:50%;transform:translateY(-50%);z-index:10;display:flex;flex-direction:column;gap:.7rem}
+  nav.toc a{width:8px;height:8px;border-radius:50%;background:var(--obsidian-4);border:1px solid var(--line);transition:.3s}
+  nav.toc a:hover{background:var(--accent);transform:scale(1.3)}
+  @media(max-width:1400px){nav.toc{display:none}}
+</style>
+</head>
+<body>
+
+<div class="atmos"></div>
+<div class="grain"></div>
+
+<nav class="toc" aria-label="Indice">
+  <a href="#analisi" title="Analisi"></a>
+  <a href="#visione" title="Visione"></a>
+  <a href="#tokens" title="Design Tokens"></a>
+  <a href="#focus" title="Focus System"></a>
+  <a href="#schermi" title="Schermate"></a>
+  <a href="#roadmap" title="Roadmap"></a>
+  <a href="#impatto" title="Impatto"></a>
+</nav>
+
+<main>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="badge rv"><span class="dot"></span> Design Vision · v2.0 · Bozza 01</div>
+    <h1 class="rv">WaveStream <span class="aurora">Aurora</span><br>il piano di rinascita UI.</h1>
+    <p class="sub rv">Un ammodernamento completo del linguaggio visivo dell'app IPTV per Android&nbsp;TV: da un tema "nero + viola" funzionale ma piatto a un sistema <strong style="color:var(--text-hi)">cinematico, stratificato e reattivo al focus</strong> — costruito sui fondamenta già presenti (Glass.kt, AppAnimations, ThemeManager) senza riscrivere la logica.</p>
+    <div class="hero-cta rv">
+      <a class="btn btn-primary" href="#roadmap">Vai alla roadmap</a>
+      <a class="btn btn-ghost" href="#analisi">Analisi stato attuale</a>
+    </div>
+    <div class="meta rv">
+      <div><strong>8</strong><span>schermate analizzate</span></div>
+      <div><strong>5</strong><span>fasi di lavoro</span></div>
+      <div><strong>~30</strong><span>file UI coinvolti</span></div>
+      <div><strong>0</strong><span>modifiche a logica e DB</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ ANALISI ═══════════════ -->
+<section id="analisi">
+  <div class="wrap">
+    <p class="kicker rv">01 · Diagnosi</p>
+    <h2 class="rv" style="font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:1rem">Cosa funziona e cosa invecchia</h2>
+    <p class="rv" style="color:var(--text-mid);max-width:720px;margin-bottom:3rem">L'app ha già ossa buone: rail navigabile, hero carousel con metadata completa, EPG a timeline, glass system sperimentale. I problemi sono di <em>stratificazione visiva, coerenza e reattività al focus</em> — tipici di un tema v1.</p>
+
+    <div class="grid g2">
+      <div class="card rv">
+        <div class="issue"><div class="num">1</div><div>
+          <h4>Nero assoluto, zero profondità</h4>
+          <p><code>BackgroundDark = #000000</code> con superfici a <code>#0D0D0D</code>: card, rail e sfondo si fondono. Manca una scala di elevazione leggibile a distanza da divano (3m).</p>
+        </div></div>
+      </div>
+      <div class="card rv">
+        <div class="issue"><div class="num">2</div><div>
+          <h4>Focus sotto-sfruttato</h4>
+          <p>Il focus D-pad è un semplice bordo viola. Su TV è l'equivalente del mouse: merita scala + glow ambientale + dimming del resto, non solo un ring.</p>
+        </div></div>
+      </div>
+      <div class="card rv">
+        <div class="issue"><div class="num">3</div><div>
+          <h4>Icone emoji incoerenti (Live)</h4>
+          <p>La griglia Live usa emoji (🇮🇹 🎬 🍿 ⭐) come icone di categoria: rendering diverso per device, squadrato col resto glass. Da sostituire con un icon set vettoriale uniforme o con i logo canale.</p>
+        </div></div>
+      </div>
+      <div class="card rv">
+        <div class="issue"><div class="num">4</div><div>
+          <h4>Hero sovraccarico</h4>
+          <p>5 badge di rating (IMDb, Tomatometer, Popcornmeter, Metacritic, TMDb) sulla stessa riga + link "Leggi di più...". Gerarchia informativa assente: tutto parla allo stesso volume.</p>
+        </div></div>
+      </div>
+      <div class="card rv">
+        <div class="issue"><div class="num">5</div><div>
+          <h4>EPG denso ma anonimo</h4>
+          <p>La timeline è funzionale ma piatta: header orari senza ancoraggio visivo, programmi senza gerarchia genitore/figlio, "now line" sottilerossa facilmente perdibile.</p>
+        </div></div>
+      </div>
+      <div class="card rv">
+        <div class="issue"><div class="num">6</div><div>
+          <h4>Pulsanti giganti monolitici</h4>
+          <p>In Impostazioni i CTA ("Salva modifiche", "Aggiorna tutte le playlist") sono pill full-width viola piene: dominano la scena e competono col contenuto.</p>
+        </div></div>
+      </div>
+      <div class="card rv">
+        <div class="issue"><div class="num">7</div><div>
+          <h4>Player minimale oltre il necessario</h4>
+          <p>Nessuna indicazione di qualità (4K/FHD/HD), nessun logo canale, controlli sparsi. Il player è la schermata più guardata: è la vetrina mancata.</p>
+        </div></div>
+      </div>
+      <div class="card rv">
+        <div class="issue"><div class="num">8</div><div>
+          <h4>Cards senza varianti</h4>
+          <p>Solo poster verticale con rating chip. Mancano varianti landscape (16:9), "continue watching" con progress ben visibile, e stati hover/focus con metadata anticipata.</p>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ VISIONE ═══════════════ -->
+<section id="visione">
+  <div class="wrap">
+    <p class="kicker rv">02 · Visione</p>
+    <h2 class="rv" style="font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:3rem">"Aurora" — cinematico, stratificato, vivo</h2>
+
+    <div class="grid g3">
+      <div class="principle rv"><span class="ico">🌌</span><h4>Profondità a strati</h4><p>Obsidian non nero: 5 livelli di superficie (0→4) con bordi luminosi sottili e vignettatura ambientale. Il contenuto emette luce, lo sfondo la assorbe.</p></div>
+      <div class="principle rv"><span class="ico">🎯</span><h4>Focus come palcoscenico</h4><p>L'elemento focalizzato si illumina: scale 1.08–1.12, ring accent, glow ambientale e dimming (85%→60% opacità) su tutto il resto. Occhio segue la luce.</p></div>
+      <div class="principle rv"><span class="ico">🪟</span><h4>Glass con giudizio</h4><p>Il sistema <code>Glass.kt</code> già presente viene promosso a linguaggio ufficiale: solo su overlay statici (drawer, dialog, player OSD) con fallback &lt; API 31.</p></div>
+      <div class="principle rv"><span class="ico">🎨</span><h4>Accento dinamico dal contenuto</h4><p><code>ThemeManager</code> evoluto:palette dedicata per schermata estratta dal poster in primo piano (dominant color), con fallback sull'accent utente.</p></div>
+      <div class="principle rv"><span class="ico">⚡</span><h4>Motion con personalità</h4><p>Springs già in <code>AppAnimations</code> orchestrati in coreografie: stagger cascade sulle righe, morph fluido rail ↔ expanded, transizioni condivise home → details.</p></div>
+      <div class="principle rv"><span class="ico">📺</span><h4>GPU-first, sempre</h4><p>Niente blur in scroll, preloading Coil per riga, skeleton che anticipa il layout. Ogni effetto ha un budget: 60fps su TV entry-level sono non negoziabili.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TOKENS ═══════════════ -->
+<section id="tokens">
+  <div class="wrap">
+    <p class="kicker rv">03 · Design Tokens</p>
+    <h2 class="rv" style="font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:3rem">Il nuovo sistema, in numeri</h2>
+
+    <h3 class="rv" style="font-size:1.15rem;margin-bottom:1.2rem">Palette — superfici Obsidian</h3>
+    <div class="swatches rv" style="margin-bottom:3rem">
+      <div class="sw"><div class="chip" style="background:#050608"></div><div class="info"><b>#050608</b><span>Surface 0 · sfondo</span></div></div>
+      <div class="sw"><div class="chip" style="background:#0A0C10"></div><div class="info"><b>#0A0C10</b><span>Surface 1 · card</span></div></div>
+      <div class="sw"><div class="chip" style="background:#101319"></div><div class="info"><b>#101319</b><span>Surface 2 · elevated</span></div></div>
+      <div class="sw"><div class="chip" style="background:#171B23"></div><div class="info"><b>#171B23</b><span>Surface 3 · focused</span></div></div>
+      <div class="sw"><div class="chip" style="background:#5EEAD4"></div><div class="info"><b>#5EEAD4</b><span>Accent · Aurora teal</span></div></div>
+      <div class="sw"><div class="chip" style="background:linear-gradient(120deg,#5EEAD4,#7DD3FC,#A78BFA)"></div><div class="info"><b>Gradient</b><span>Aurora · hero/branding</span></div></div>
+    </div>
+
+    <div class="grid g2" style="margin-bottom:3rem">
+      <div class="card rv">
+        <h3 style="font-size:1.05rem;margin-bottom:1.2rem">Scala tipografica</h3>
+        <p style="color:var(--text-mid);font-size:.88rem;margin-bottom:1rem">Titoli: <code>Sora</code> (display, carattere netto). Corpo: <code>Manrope</code> o Inter migliorato in tracking. Mono per dati tecnici (canali, bitrate).</p>
+        <div class="type-row"><span class="tag">displayLarge · 56</span><span style="font-family:var(--font-display);font-size:2.4rem;font-weight:800">Frieren</span></div>
+        <div class="type-row"><span class="tag">headline · 28</span><span style="font-family:var(--font-display);font-size:1.5rem;font-weight:600">Continua a guardare</span></div>
+        <div class="type-row"><span class="tag">title · 18</span><span style="font-family:var(--font-display);font-size:1.15rem;font-weight:600">Sky Cinema (4K)</span></div>
+        <div class="type-row"><span class="tag">body · 15</span><span style="font-size:.98rem">La maga elfica Frieren e i suoi compagni…</span></div>
+        <div class="type-row"><span class="tag">mono · 13</span><span style="font-family:var(--font-mono);font-size:.84rem;color:var(--accent)">01:43 – 02:59 · FHD · 8.4 Mbps</span></div>
+      </div>
+      <div class="card rv">
+        <h3 style="font-size:1.05rem;margin-bottom:1.2rem">Forma, elevazione, motion</h3>
+        <div class="type-row"><span class="tag">Radius</span><span><span class="chip">10 card</span> <span class="chip">18 surface</span> <span class="chip">28 hero/dialog</span></span></div>
+        <div class="type-row"><span class="tag">Focus scale</span><span><span class="chip">card 1.08</span> <span class="chip">hero 1.03</span> <span class="chip">pill 1.04</span></span></div>
+        <div class="type-row"><span class="tag">Motion</span><span style="font-size:.86rem;color:var(--text-mid)">Spring <code>damping .75 / stiffness 500</code> focus · cascade <code>35ms/item</code> · fade dim <code>220ms</code></span></div>
+        <div class="type-row"><span class="tag">Spaziatura</span><span style="font-size:.86rem;color:var(--text-mid)">Base 8dp · gutter righe 32dp · padding card 12dp</span></div>
+      </div>
+    </div>
+
+    <h3 class="rv" style="font-size:1.15rem;margin-bottom:1.2rem">Componenti core — anteprima live</h3>
+    <div class="card rv">
+      <p style="color:var(--text-mid);font-size:.88rem;margin-bottom:1.4rem">Stato idle vs stato focus della nuova card TV (simulazione CSS del comportamento Compose):</p>
+      <div class="demo-row">
+        <div class="tv-card idle"><div class="art" style="background:linear-gradient(160deg,#232B3E,#0E1119)">AVATAR<span>Avatar: Fuoco e Cenere</span></div></div>
+        <div class="tv-card focus"><div class="art" style="background:linear-gradient(160deg,#1B3A44,#0E1119)">DISCLOSURE<span>Disclosure Day</span></div></div>
+        <div style="display:flex;flex-direction:column;gap:.7rem;margin-left:1rem">
+          <span class="chip live">LIVE · Sky Sport 24</span>
+          <span class="chip on">▶ Riproduci</span>
+          <span class="chip">+ La mia lista</span>
+        </div>
+        <div style="margin-left:auto;text-align:right;font-family:var(--font-mono);font-size:.75rem;color:var(--text-low);line-height:2.2">
+          IMDb <span style="color:var(--gold)">8.9</span> · TMDB <span style="color:var(--accent)">8.8</span><br>
+          progress <span style="color:var(--accent)">64%</span> · S1:E4
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOCUS SYSTEM ═══════════════ -->
+<section id="focus">
+  <div class="wrap">
+    <p class="kicker rv">04 · Focus & D-pad</p>
+    <h2 class="rv" style="font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:1rem">Il sistema di focus, ripensato</h2>
+    <p class="rv" style="color:var(--text-mid);max-width:700px;margin-bottom:3rem">Su Android TV il focus <em>è</em> l'interfaccia. Oggi è un bordo; domani sarà un sistema in tre livelli, centralizzato in un nuovo file <code>ui/theme/FocusSystem.kt</code> (un solo <code>Modifier</code> riusabile).</p>
+
+    <div class="versus">
+      <div class="v-col before rv">
+        <h5>Oggi — Before</h5>
+        <ul>
+          <li>Bordo viola statico 2dp</li>
+          <li>Nessuna scala o movimento</li>
+          <li>Contesto non si spegne</li>
+          <li>Focus ring identico ovunque</li>
+          <li>Glow solo come costante, poco usato</li>
+        </ul>
+      </div>
+      <div class="v-col after rv">
+        <h5>Aurora — After</h5>
+        <ul>
+          <li>Lvl 1 — <strong>Scale</strong> spring (<code>SpringCardFocus</code>)</li>
+          <li>Lvl 2 — <strong>Ring + glow</strong> accent con fade 220ms</li>
+          <li>Lvl 3 — <strong>Dimming ambiente</strong>: il resto della riga scende al 60%</li>
+          <li>Varianti per contesto: card, pill, EPG cell, settings row</li>
+          <li>Rumble haptico opzionale su selezione (dove supportato)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SCHERMATE ═══════════════ -->
+<section id="schermi">
+  <div class="wrap">
+    <p class="kicker rv">05 · Schermata per schermata</p>
+    <h2 class="rv" style="font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:3rem">Le dirette di redesign</h2>
+
+    <div class="grid g2">
+      <div class="card rv">
+        <h4 style="margin-bottom:.3rem">🏠 Home & Hero</h4>
+        <p style="color:var(--text-mid);font-size:.9rem;margin-bottom:1rem"><em>home.png · home_2.png</em></p>
+        <ul style="list-style:none;color:var(--text-mid);font-size:.9rem">
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Hero: rating ridotti a 2 badge chiave (IMDb + TMDb), gli altri in dettaglio. Titolo in <code>displayLarge</code>, gradiente Aurora sul logo-play.</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Ambient color: il gradiente di sfondo tinta dal poster del film in hero.</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Righe con stagger cascade in entrata e progress bar visibile su "Continua a guardare".</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Rail: expanded state con blur glass (già pronto in <code>Glass.kt</code>), indicatore attivo luminoso laterale.</li>
+        </ul>
+      </div>
+      <div class="card rv">
+        <h4 style="margin-bottom:.3rem">📺 Live TV (griglia + EPG)</h4>
+        <p style="color:var(--text-mid);font-size:.9rem;margin-bottom:1rem"><em>live_grid view.png · live_epg view.png · live_1.png</em></p>
+        <ul style="list-style:none;color:var(--text-mid);font-size:.9rem">
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Emoji eliminate: icon set vettoriale mono-colore o logo del gruppo canali.</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> EPG: header ora sticky con ancora, celle con gerarchia (in onda = pieno accent, futuro = outline), "now line" luminosa con glow e cap.</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Toggle Griglia ⇄ EPG come segmented control glass, non due bottoni separati.</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Card canale: logo centrato + nome programma in onda sempre visibile sotto.</li>
+        </ul>
+      </div>
+      <div class="card rv">
+        <h4 style="margin-bottom:.3rem">▶ Player</h4>
+        <p style="color:var(--text-mid);font-size:.9rem;margin-bottom:1rem"><em>player.png</em></p>
+        <ul style="list-style:none;color:var(--text-mid);font-size:.9rem">
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> OSD a tre zone: top (back + logo canale + qualità chip "FHD · 4K"), bottom (seekbar con anteprima tempo + play/pause/velocità/subtitle),</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Seekbar: thumb luminoso accent, buffer in grigio, marker "riprendi da".</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Loading: spinner sostituito da shimmer del logo WaveStream + nome canale (branding moment).</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Overlay glass per pannello subtitle/audio (blur API 31+, fallback scrim).</li>
+        </ul>
+      </div>
+      <div class="card rv">
+        <h4 style="margin-bottom:.3rem">⚙️ Impostazioni & Profilo</h4>
+        <p style="color:var(--text-mid);font-size:.9rem;margin-bottom:1rem"><em>settings_1.png · settings_2.png</em></p>
+        <ul style="list-style:none;color:var(--text-mid);font-size:.9rem">
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> CTA full-width viola → bottoni a peso variabile (primary accent, secondary ghost) allineati al contenuto.</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Icone sezione in squircle glass con accent monocromatico, non blocchi piatti.</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> Righe lista: focus con slide orizzontale di 4dp + chevron animato.</li>
+          <li style="padding:.35rem 0 .35rem 1.4rem;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span> "Disconnetti" mantenuto rosso ma degradé di priorità (danger ghost, non pieno).</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ROADMAP ═══════════════ -->
+<section id="roadmap">
+  <div class="wrap">
+    <p class="kicker rv">06 · Roadmap</p>
+    <h2 class="rv" style="font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:.8rem">Cinque fasi, dal fondamento al polish</h2>
+    <p class="rv" style="color:var(--text-mid);margin-bottom:2.5rem">Ogni fase è consegnabile e testabile separatamente. I file indicati sono quelli reali del progetto.</p>
+
+    <div class="phase rv">
+      <div class="ph-num">01</div>
+      <div>
+        <h4>Fondamenta — Design Tokens 2.0</h4>
+        <p>Riscrittura dei token: palette Obsidian a 5 superfici, scala tipografica (aggiunta Sora per i display), radius, spaziature, estensione <code>GlassTokens</code> con elevazioni. Aggiornamento accent esistenti (violet/red/blue/green/fuchsia restano, cambia il contesto d'uso).</p>
+        <div class="files">
+          <b>File:</b> WaveStreamTheme.kt · Glass.kt · ThemeManager.kt · AppAnimations.kt · <b>nuovo:</b> FocusSystem.kt · Dimens.kt
+        </div>
+      </div>
+      <div class="eff"><span class="pill hot">Fase chiave</span><span class="pill">≈ 3–4 gg</span><div class="bar"><i style="width:25%"></i></div></div>
+    </div>
+
+    <div class="phase rv">
+      <div class="ph-num">02</div>
+      <div>
+        <h4>Component library</h4>
+        <p>Le card TV con nuovo focus system, varianti portrait/landscape/continue-watching, chips di rating ridisegnate, skeleton aggiornati, pulsanti a peso variabile. Tutto come componenti riusabili prima di toccare gli schermi.</p>
+        <div class="files">
+          <b>File:</b> TvContentCard.kt · ContentCards.kt · TvCarouselRow.kt · CategoryCard.kt · SkeletonLoader.kt · ExpandableNavRail.kt
+        </div>
+      </div>
+      <div class="eff"><span class="pill hot">Cuore visivo</span><span class="pill">≈ 4–5 gg</span><div class="bar"><i style="width:45%"></i></div></div>
+    </div>
+
+    <div class="phase rv">
+      <div class="ph-num">03</div>
+      <div>
+        <h4>Home & Hero cinematografico</h4>
+        <p>Hero ridisegnato con ambient color e metadata gerarchica, righe con stagger cascade, rail espandibile con glass blur. È la vetrina: qui si vede il salto di qualità.</p>
+        <div class="files">
+          <b>File:</b> TvHomeScreen.kt · HomeScreen.kt · ExpandableNavRail.kt · ThemeManager.kt (ambient extraction)
+        </div>
+      </div>
+      <div class="eff"><span class="pill">Alto impatto</span><span class="pill">≈ 3–4 gg</span><div class="bar"><i style="width:65%"></i></div></div>
+    </div>
+
+    <div class="phase rv">
+      <div class="ph-num">04</div>
+      <div>
+        <h4>Live / EPG & Player</h4>
+        <p>Griglia canale senza emoji, EPG con gerarchia celle e now-line luminosa, player OSD a tre zone con chip qualità e overlay glass. Le due schermate d'uso intensivo.</p>
+        <div class="files">
+          <b>File:</b> LiveActivity.kt · EPGGridView.kt · EPGActivity.kt · TvPlayerScreen.kt · PlayerActivity.kt · StreamSelectionDialog.kt
+        </div>
+      </div>
+      <div class="eff"><span class="pill">Uso intensivo</span><span class="pill">≈ 5–6 gg</span><div class="bar"><i style="width:85%"></i></div></div>
+    </div>
+
+    <div class="phase rv">
+      <div class="ph-num">05</div>
+      <div>
+        <h4>Settings, Details & polish finale</h4>
+        <p>Impostazioni a peso variabile, Details/Person con nuovo layout metadata, Profile selection con avatars glass, icon set unificato, passaggio finale su contrasti e raggi focus su tutti gli screen minori (Search, Downloads, Taste, Welcome).</p>
+        <div class="files">
+          <b>File:</b> SettingsActivity.kt · DetailsScreen.kt · PersonScreen.kt · ProfileSelectionScreen.kt · AddProfileDialog.kt · + screen minori
+        </div>
+      </div>
+      <div class="eff"><span class="pill">Chiusura</span><span class="pill">≈ 4–5 gg</span><div class="bar"><i style="width:100%"></i></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ IMPATTO ═══════════════ -->
+<section id="impatto">
+  <div class="wrap">
+    <p class="kicker rv">07 · Vincoli & successo</p>
+    <h2 class="rv" style="font-size:clamp(1.9rem,4vw,2.8rem);margin-bottom:3rem">Performance e metriche</h2>
+
+    <div class="card rv" style="margin-bottom:2rem">
+      <table>
+        <thead><tr><th>Vincolo TV</th><th>Regola del progetto Aurora</th><th>Copertura</th></tr></thead>
+        <tbody>
+          <tr><td>GPU entry-level</td><td>Blur <code>RenderEffect</code> solo su overlay statici (drawer, dialog, OSD player) — mai durante scroll, come già documentato in <code>Glass.kt</code></td><td class="tag-ok">rispettata</td></tr>
+          <tr><td>minSdk 26</td><td>Ogni effetto API 31+ ha fallback: fill semitrasparente + bordo gradiente</td><td class="tag-ok">rispettata</td></tr>
+          <tr><td>Scroll fluido</td><td>Coil preloader per riga + skeleton che replica il layout finale (zero layout shift)</td><td class="tag-ok">migliorata</td></tr>
+          <tr><td>Leggibilità a 3m</td><td>Contrasto minimo 4.5:1 sul testo primario, corpo ≥ 14sp, focus scale ≥ 1.06 sempre</td><td class="tag-ok">garantita</td></tr>
+          <tr><td>Nessuna regression</td><td>Zero modifiche a ViewModel, Repository, Room, Retrofit: solo layer UI</td><td class="tag-ok">garantita</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid g3">
+      <div class="principle rv"><span class="ico">📏</span><h4>Come misuriamo</h4><p>Confronto before/after screenshot per schermata, test manuale su D-pad per ogni flusso (browse → play → back), verifica frame drop in scroll con profiler.</p></div>
+      <div class="principle rv"><span class="ico">🔁</span><h4>Come iteriamo</h4><p>Una fase = una build testabile da Android Studio (nessun build da CLI, come da regole progetto). Ogni fase chiudibile indipendentemente.</p></div>
+      <div class="principle rv"><span class="ico">🧩</span><h4>Cosa non cambia</h4><p>Accenti utente a scelta, struttura MVVM/Hilt, 22 Activity, logica EPG/XTream. Il piano è puramente estetico-interattivo.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;width:100%">
+    <span>WaveStream · Piano di ammodernamento UI "Aurora" — documento di visione, non ancora implementazione.</span>
+    <span class="mono">v2.0 · generato da analisi codice + 8 screenshot</span>
+  </div>
+</footer>
+
+</main>
+
+<script>
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+  document.querySelectorAll('.rv').forEach((el,i)=>{el.style.transitionDelay=(i%4)*70+'ms';io.observe(el)});
+</script>
+</body>
+</html>
