@@ -866,7 +866,8 @@ private fun RatingsBadges(
         verticalAlignment = Alignment.Top,
         modifier = Modifier.padding(vertical = 4.dp)
     ) {
-        // IMDB - Always show, N/A if null
+        // Aurora: gerarchia informativa come nell'hero — solo rating esistenti.
+        // IMDb resta il badge primario (fallback N/A), gli altri appaiono se il dato c'è.
         if (imdbRating != null) {
             ModernRatingItem(
                 iconResId = R.drawable.imdb_logo,
@@ -881,65 +882,37 @@ private fun RatingsBadges(
             )
         }
         
-        // Tomatometer (Critics Score) - Always show, N/A if null
-        if (rottenTomatoesScore != null) {
-            val isFresh = rottenTomatoesScore >= 60
+        rottenTomatoesScore?.let { rtScore ->
+            val isFresh = rtScore >= 60
             ModernRatingItem(
                 iconResId = if (isFresh) R.drawable.rotten_tomatoes_logo else R.drawable.rotten_tomatoes_rotten,
-                value = "$rottenTomatoesScore%",
-                label = "Tomatometer®"
-            )
-        } else {
-            ModernRatingItem(
-                iconResId = R.drawable.rotten_tomatoes_no_score,
-                value = "N/A",
+                value = "$rtScore%",
                 label = "Tomatometer®"
             )
         }
         
-        // Popcornmeter (Audience Score) - Always show, N/A if null
-        if (audienceScore != null) {
-            val isFresh = audienceScore >= 60
+        audienceScore?.let { audScore ->
+            val isFresh = audScore >= 60
             ModernRatingItem(
                 iconResId = if (isFresh) R.drawable.popcornmeter_fresh else R.drawable.popcornmeter_rotten,
-                value = "$audienceScore%",
-                label = "Popcornmeter®"
-            )
-        } else {
-            ModernRatingItem(
-                iconResId = R.drawable.popcornmeter_na,
-                value = "N/A",
+                value = "$audScore%",
                 label = "Popcornmeter®"
             )
         }
         
-        // Metacritic
-        if (metacriticScore != null) {
+        metacriticScore?.let { metaScore ->
             ModernRatingItem(
                 iconResId = R.drawable.metacritic_logo,
-                value = "$metacriticScore",
-                label = "Metascore"
-            )
-        } else {
-            ModernRatingItem(
-                iconResId = R.drawable.metacritic_na,
-                value = "N/A",
+                value = "$metaScore",
                 label = "Metascore"
             )
         }
         
-        // TMDB - Always show, N/A if null
         if (tmdbRating != null && tmdbRating > 0) {
             ModernRatingItem(
                 iconResId = R.drawable.tmdb_logo,
                 value = String.format("%.1f", tmdbRating),
                 label = tmdbVotes ?: "TMDb"
-            )
-        } else {
-            ModernRatingItem(
-                iconResId = R.drawable.tmdb_na,
-                value = "N/A",
-                label = "TMDb"
             )
         }
     }
