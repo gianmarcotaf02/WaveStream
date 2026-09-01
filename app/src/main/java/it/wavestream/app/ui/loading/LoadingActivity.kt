@@ -439,13 +439,19 @@ class LoadingActivity : ComponentActivity() {
      */
     private suspend fun enrichHeroContent(onStateUpdate: (LoadingState) -> Unit) {
         try {
+            // True se almeno una valutazione è stata aggiornata/scritta nel DB
+            var ratingsUpdated = false
             withContext(Dispatchers.IO) {
                 val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
                 
                 // === MOVIES: enrich ALL trending ===
                 val allTrendingMovies = movieDao.getByTrendingCategory("Film Popolari")
                 val moviesToEnrich = allTrendingMovies.filter { movie ->
-                    movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo || movie.tmdbVoteAverage == null
+                    movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo || movie.tmdbVoteAverage == null ||
+                    // Retry anche se arricchito di recente ma manca qualche voto OMDB:
+                    // un rating può comparare nelle API dopo (es. uscita recente) e
+                    // deve poter essere recuperato già all'avvio successivo.
+                    movie.omdbImdbRating == null || movie.omdbRottenTomatoesScore == null || movie.omdbMetacriticScore == null
                 }.sortedByDescending { it.tmdbPopularity ?: 0f }.take(100)
                 
                 val moviesCached = allTrendingMovies.size - moviesToEnrich.size
@@ -503,6 +509,7 @@ class LoadingActivity : ComponentActivity() {
                                                 }
                                             }
                                             movieDao.update(withRatings)
+                                            ratingsUpdated = true
                                         }
                                     } else if (enrichedMovie.omdbAudienceScore == null || enrichedMovie.omdbRottenTomatoesScore == null) {
                                         val searchTitle = enrichedMovie.tmdbOriginalTitle ?: enrichedMovie.tmdbTitle ?: movie.name
@@ -514,6 +521,7 @@ class LoadingActivity : ComponentActivity() {
                                                 omdbAudienceScore = enrichedMovie.omdbAudienceScore ?: rtScores.audienceScore,
                                                 omdbRottenTomatoesScore = enrichedMovie.omdbRottenTomatoesScore ?: rtScores.criticsScore
                                             ))
+                                            ratingsUpdated = true
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -549,7 +557,9 @@ class LoadingActivity : ComponentActivity() {
                 // === SERIES: enrich ALL trending ===
                 val allTrendingSeries = seriesDao.getByTrendingCategory("Serie Popolari")
                 val seriesToEnrich = allTrendingSeries.filter { series ->
-                    series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo || series.tmdbVoteAverage == null
+                    series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo || series.tmdbVoteAverage == null ||
+                    // Retry anche se arricchita di recente ma manca qualche voto OMDB
+                    series.omdbImdbRating == null || series.omdbRottenTomatoesScore == null || series.omdbMetacriticScore == null
                 }.sortedByDescending { it.tmdbPopularity ?: 0f }.take(100)
                 
                 val seriesCached = allTrendingSeries.size - seriesToEnrich.size
@@ -606,6 +616,7 @@ class LoadingActivity : ComponentActivity() {
                                                 }
                                             }
                                             seriesDao.update(withRatings)
+                                            ratingsUpdated = true
                                         }
                                     } else if (enrichedSeries.omdbAudienceScore == null || enrichedSeries.omdbRottenTomatoesScore == null) {
                                         val searchTitle = enrichedSeries.tmdbOriginalName ?: enrichedSeries.tmdbName ?: series.name
@@ -617,6 +628,7 @@ class LoadingActivity : ComponentActivity() {
                                                 omdbAudienceScore = enrichedSeries.omdbAudienceScore ?: rtScores.audienceScore,
                                                 omdbRottenTomatoesScore = enrichedSeries.omdbRottenTomatoesScore ?: rtScores.criticsScore
                                             ))
+                                            ratingsUpdated = true
                                         }
                                     }
                                 } catch (e: Exception) {
@@ -648,6 +660,16 @@ class LoadingActivity : ComponentActivity() {
                         ))
                     }
                 }
+            }
+            
+            // Se almeno una valutazione è stata aggiornata nel DB, invalida la cache
+            // degli hero: verranno ricostruiti leggendo i voti appena aggiornati, così
+            // un voto comparso nelle API dopo la prima enrichment diventa visibile in home.
+            if (ratingsUpdated) {
+                listOf("hero_HOME", "hero_MOVIES", "hero_SERIES").forEach { key ->
+                    contentCache.removeHomeSessionData(key)
+                }
+                android.util.Log.d("LoadingActivity", "Ratings updated → invalidata cache hero per ricostruzione con voti freschi")
             }
             
             android.util.Log.d("LoadingActivity", "Hero content enrichment complete")
