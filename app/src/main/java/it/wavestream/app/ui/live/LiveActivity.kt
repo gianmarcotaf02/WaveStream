@@ -51,7 +51,6 @@ import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.dao.CategoryWithCount
-import it.wavestream.app.data.database.dao.PlaylistDao
 import it.wavestream.app.data.database.dao.RecentlyWatchedDao
 import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.RecentlyWatchedChannel
@@ -96,7 +95,6 @@ class LiveActivity : ComponentActivity() {
     }
     
     @Inject lateinit var channelDao: ChannelDao
-    @Inject lateinit var playlistDao: PlaylistDao
     @Inject lateinit var epgRepository: EpgRepository
     @Inject lateinit var userPreferences: UserPreferences
     @Inject lateinit var recentlyWatchedDao: RecentlyWatchedDao
