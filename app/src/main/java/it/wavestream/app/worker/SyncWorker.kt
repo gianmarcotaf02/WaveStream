@@ -6,176 +6,43 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.*
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import it.wavestream.app.data.database.dao.PlaylistDao
-import it.wavestream.app.data.preferences.UserPreferences
-import it.wavestream.app.data.repository.EpgRepository
-import it.wavestream.app.data.repository.PlaylistRepository
-import java.util.concurrent.TimeUnit
 
 /**
- * Background worker for syncing playlists and EPG data
- * Supports customizable sync intervals from user preferences
+ * Worker DISABILITATO: il refresh delle playlist avviene rigorosamente e SOLO
+ * nella LoadingActivity (con progresso visibile all'utente), qualunque sia la
+ * frequenza impostata nelle preferenze (all'avvio, ogni 3h, 6h, ecc.).
+ *
+ * La classe resta solo per:
+ * 1. annullare eventuali sync periodici ancora schedulati da versioni
+ *    precedenti dell'app (WorkManager persiste tra gli avvii);
+ * 2. eseguire come no-op un eventuale lavoro residuo ancora in coda,
+ *    così che nessun refresh possa avvenire "in silenzio".
  */
 @HiltWorker
 class SyncWorker @AssistedInject constructor(
     @Assisted context: Context,
-    @Assisted workerParams: WorkerParameters,
-    private val playlistRepository: PlaylistRepository,
-    private val playlistDao: PlaylistDao,
-    private val epgRepository: EpgRepository,
-    private val userPreferences: UserPreferences
+    @Assisted workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams) {
-    
+
     companion object {
         private const val TAG = "SyncWorker"
-        
-        const val SYNC_TYPE_KEY = "sync_type"
-        const val SYNC_TYPE_PLAYLIST = "playlist"
-        const val SYNC_TYPE_EPG = "epg"
-        const val SYNC_TYPE_ALL = "all"
-        
+
         private const val WORK_NAME_PLAYLIST = "playlist_sync"
-        
+
         /**
-         * Schedule periodic playlist sync with custom interval
-         */
-        fun schedulePlaylistSync(context: Context, intervalHours: Long = 6) {
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .setRequiresStorageNotLow(true)
-                .build()
-            
-            val workRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-                intervalHours, TimeUnit.HOURS,
-                15, TimeUnit.MINUTES // Flex interval
-            )
-                .setConstraints(constraints)
-                .setInputData(workDataOf(SYNC_TYPE_KEY to SYNC_TYPE_PLAYLIST))
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.MINUTES)
-                .build()
-            
-            WorkManager.getInstance(context)
-                .enqueueUniquePeriodicWork(
-                    WORK_NAME_PLAYLIST,
-                    ExistingPeriodicWorkPolicy.UPDATE,
-                    workRequest
-                )
-            
-            Log.d(TAG, "Scheduled playlist sync every $intervalHours hours")
-        }
-        
-        /**
-         * Cancel all scheduled syncs
+         * Annulla tutti i sync schedulati (playlist + EPG).
+         * Chiamato all'avvio dell'app da [it.wavestream.app.WaveStreamApplication].
          */
         fun cancelAllSyncs(context: Context) {
             WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME_PLAYLIST)
             EpgUpdateWorker.cancel(context)
-        }
-        
-        /**
-         * Update sync schedules based on user preferences
-         */
-        suspend fun updateSchedules(context: Context, userPreferences: UserPreferences) {
-            val playlistInterval = userPreferences.getPlaylistUpdateIntervalHours().toLong()
-            
-            if (userPreferences.getPlaylistAutoUpdate()) {
-                schedulePlaylistSync(context, playlistInterval)
-            } else {
-                WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME_PLAYLIST)
-            }
-            
-            // EPG scheduling is handled by EpgUpdateWorker
-            val epgMode = userPreferences.getEpgUpdateMode()
-            val epgInterval = userPreferences.getEpgUpdateInterval()
-            if (epgMode == "auto") {
-                EpgUpdateWorker.schedule(context, epgInterval)
-            } else {
-                EpgUpdateWorker.cancel(context)
-            }
-        }
-        
-        /**
-         * Trigger immediate sync
-         */
-        fun syncNow(context: Context, syncType: String = SYNC_TYPE_ALL) {
-            val workRequest = OneTimeWorkRequestBuilder<SyncWorker>()
-                .setInputData(workDataOf(SYNC_TYPE_KEY to syncType))
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()
-                )
-                .build()
-            
-            WorkManager.getInstance(context).enqueue(workRequest)
-            Log.d(TAG, "Triggered immediate sync: $syncType")
+            Log.d(TAG, "Cancelled all scheduled syncs")
         }
     }
-    
+
     override suspend fun doWork(): Result {
-        val syncType = inputData.getString(SYNC_TYPE_KEY) ?: SYNC_TYPE_ALL
-        
-        Log.d(TAG, "Starting sync: $syncType")
-        
-        return try {
-            when (syncType) {
-                SYNC_TYPE_PLAYLIST -> syncPlaylists()
-                SYNC_TYPE_EPG -> syncEPG()
-                SYNC_TYPE_ALL -> {
-                    syncPlaylists()
-                    syncEPG()
-                }
-                else -> syncPlaylists()
-            }
-            
-            Log.d(TAG, "Sync completed successfully")
-            Result.success()
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Sync failed", e)
-            
-            if (runAttemptCount < 3) {
-                Result.retry()
-            } else {
-                Result.failure()
-            }
-        }
-    }
-    
-    private suspend fun syncPlaylists() {
-        val playlists = playlistDao.getEnabledPlaylistsList()
-        
-        for (playlist in playlists) {
-            try {
-                Log.d(TAG, "Syncing playlist: ${playlist.name}")
-                playlistRepository.refreshPlaylist(playlist.id)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to sync playlist: ${playlist.name}", e)
-            }
-        }
-    }
-    
-    private suspend fun syncEPG() {
-        val playlists = playlistDao.getEnabledPlaylistsList()
-        
-        for (playlist in playlists) {
-            try {
-                Log.d(TAG, "Syncing EPG for: ${playlist.name}")
-                if (playlist.type == "xtream" &&
-                    !playlist.username.isNullOrEmpty() &&
-                    !playlist.password.isNullOrEmpty()) {
-                    epgRepository.loadEpgFromXtream(
-                        baseUrl = playlist.url,
-                        username = playlist.username,
-                        password = playlist.password,
-                        force = true
-                    )
-                } else if (!playlist.epgUrl.isNullOrEmpty()) {
-                    epgRepository.loadEpgFromUrl(playlist.epgUrl, force = true)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to sync EPG: ${playlist.name}", e)
-            }
-        }
+        // Nessun sync in background: il refresh avviene solo nella LoadingActivity.
+        Log.d(TAG, "SyncWorker disabilitato: il refresh avviene solo nella LoadingActivity")
+        return Result.success()
     }
 }

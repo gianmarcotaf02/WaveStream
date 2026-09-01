@@ -93,9 +93,13 @@ class WaveStreamApplication : Application() {
             } catch (_: Exception) { }
         }
 
+        // Il refresh di playlist ed EPG avviene rigorosamente e SOLO nella LoadingActivity
+        // (con progresso visibile), qualunque sia la frequenza impostata. Nessun worker
+        // periodico in background: qui ci limitiamo ad annullare eventuali sync ancora
+        // schedulati da versioni precedenti dell'app.
         applicationScope.launch {
             try {
-                SyncWorker.updateSchedules(this@WaveStreamApplication, userPreferences)
+                SyncWorker.cancelAllSyncs(this@WaveStreamApplication)
             } catch (_: Exception) { }
         }
 

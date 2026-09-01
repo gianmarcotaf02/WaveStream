@@ -3,146 +3,44 @@ package it.wavestream.app.worker
 import android.content.Context
 import android.util.Log
 import androidx.hilt.work.HiltWorker
-import androidx.work.*
+import androidx.work.CoroutineWorker
+import androidx.work.WorkManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import it.wavestream.app.data.database.dao.PlaylistDao
-import it.wavestream.app.data.preferences.UserPreferences
-import it.wavestream.app.data.repository.EpgRepository
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 /**
- * Background worker for periodic EPG updates
+ * Worker DISABILITATO: l'aggiornamento dell'EPG avviene rigorosamente e SOLO
+ * nella LoadingActivity (con progresso visibile all'utente), qualunque sia la
+ * frequenza impostata nelle preferenze (all'avvio, ogni 3h, 6h, ecc.).
+ *
+ * La classe resta solo per:
+ * 1. annullare eventuali aggiornamenti periodici ancora schedulati da versioni
+ *    precedenti dell'app (WorkManager persiste tra gli avvii);
+ * 2. eseguire come no-op un eventuale lavoro residuo ancora in coda,
+ *    così che nessun aggiornamento possa avvenire "in silenzio".
  */
 @HiltWorker
 class EpgUpdateWorker @AssistedInject constructor(
     @Assisted context: Context,
-    @Assisted params: WorkerParameters,
-    private val playlistDao: PlaylistDao,
-    private val epgRepository: EpgRepository,
-    private val userPreferences: UserPreferences
+    @Assisted params: WorkerParameters
 ) : CoroutineWorker(context, params) {
 
     companion object {
         private const val TAG = "EpgUpdateWorker"
         const val WORK_NAME = "epg_update_work"
-        
+
         /**
-         * Schedule EPG update based on interval setting
-         */
-        fun schedule(context: Context, interval: String) {
-            val workManager = WorkManager.getInstance(context)
-            
-            // Cancel any existing work
-            workManager.cancelUniqueWork(WORK_NAME)
-            
-            // Don't schedule if interval is "startup" (handled by LoadingActivity)
-            if (interval == "startup") {
-                Log.d(TAG, "EPG updates set to startup only, not scheduling periodic work")
-                return
-            }
-            
-            val repeatIntervalHours = when (interval) {
-                "3h" -> 3L
-                "6h" -> 6L
-                "12h" -> 12L
-                "24h" -> 24L
-                "3d" -> 72L
-                "weekly" -> 168L // 7 * 24
-                else -> 6L
-            }
-            
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
-            
-            val workRequest = PeriodicWorkRequestBuilder<EpgUpdateWorker>(
-                repeatIntervalHours, TimeUnit.HOURS,
-                15, TimeUnit.MINUTES // Flex interval
-            )
-                .setConstraints(constraints)
-                .setBackoffCriteria(
-                    BackoffPolicy.EXPONENTIAL,
-                    WorkRequest.MIN_BACKOFF_MILLIS,
-                    TimeUnit.MILLISECONDS
-                )
-                .build()
-            
-            workManager.enqueueUniquePeriodicWork(
-                WORK_NAME,
-                ExistingPeriodicWorkPolicy.UPDATE,
-                workRequest
-            )
-            
-            Log.d(TAG, "Scheduled EPG update every $repeatIntervalHours hours")
-        }
-        
-        /**
-         * Cancel scheduled EPG updates
+         * Annulla l'eventuale aggiornamento EPG schedulato.
          */
         fun cancel(context: Context) {
             WorkManager.getInstance(context).cancelUniqueWork(WORK_NAME)
             Log.d(TAG, "Cancelled EPG update work")
         }
-        
-        /**
-         * Run EPG update immediately (one-time)
-         */
-        fun runNow(context: Context) {
-            val workRequest = OneTimeWorkRequestBuilder<EpgUpdateWorker>()
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()
-                )
-                .build()
-            
-            WorkManager.getInstance(context).enqueue(workRequest)
-            Log.d(TAG, "Enqueued immediate EPG update")
-        }
     }
 
     override suspend fun doWork(): Result {
-        Log.d(TAG, "Starting EPG update work")
-
-        return try {
-            val playlists = playlistDao.getAllPlaylists().first()
-
-            // Load EPG in parallel — each playlist can be fetched concurrently
-            coroutineScope {
-                playlists.forEach { playlist ->
-                    launch {
-                        try {
-                            if (playlist.type == "xtream" &&
-                                !playlist.username.isNullOrEmpty() &&
-                                !playlist.password.isNullOrEmpty()) {
-                                epgRepository.loadEpgFromXtream(
-                                    baseUrl = playlist.url,
-                                    username = playlist.username,
-                                    password = playlist.password
-                                )
-                            } else if (!playlist.epgUrl.isNullOrEmpty()) {
-                                epgRepository.loadEpgFromUrl(playlist.epgUrl)
-                            }
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Failed to load EPG for ${playlist.name}", e)
-                        }
-                    }
-                }
-            }
-
-            // Update last update timestamp
-            userPreferences.setEpgLastUpdate(System.currentTimeMillis())
-
-            Log.d(TAG, "EPG update completed successfully")
-            Result.success()
-
-        } catch (e: Exception) {
-            Log.e(TAG, "EPG update failed", e)
-            Result.retry()
-        }
+        // Nessun aggiornamento in background: l'EPG si aggiorna solo nella LoadingActivity.
+        Log.d(TAG, "EpgUpdateWorker disabilitato: l'EPG si aggiorna solo nella LoadingActivity")
+        return Result.success()
     }
 }
