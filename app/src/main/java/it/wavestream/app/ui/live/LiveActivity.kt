@@ -65,7 +65,6 @@ import it.wavestream.app.ui.theme.WaveStreamTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import it.wavestream.app.data.database.entity.FavoriteCategory
 import it.wavestream.app.data.database.dao.FavoriteCategoryDao
 import kotlinx.coroutines.launch
