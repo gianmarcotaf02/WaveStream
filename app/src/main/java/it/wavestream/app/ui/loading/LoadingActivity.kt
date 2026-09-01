@@ -178,86 +178,52 @@ class LoadingActivity : ComponentActivity() {
                     return@launch
                 }
                 
-                // Phase 1: Playlist sync (background for cached, foreground for fresh)
-                if (!forceRefresh) {
-                    Log.d("LoadingActivity", "Using cache, background playlist refresh")
+                // Phase 1: Playlist sync + EPG — SEMPRE in primo piano, con progresso
+                // visibile a schermo. Il refresh avviene rigorosamente e solo qui nella
+                // LoadingActivity: mai in background dopo l'avvio (né worker periodici,
+                // né coroutine che sopravvivono alla navigazione verso Main).
+                val autoUpdateEnabled = userPreferences.getPlaylistAutoUpdate()
+                val updateIntervalHours = userPreferences.getPlaylistUpdateIntervalHours()
+                val intervalMs = updateIntervalHours * 60 * 60 * 1000L
+                val now = System.currentTimeMillis()
+                val totalSteps = playlists.size
+                var refreshedAny = false
+                
+                onStateUpdate(LoadingState(status = getString(R.string.loading), detail = "Inizializzazione...", progress = 5, showProgress = true))
+                
+                playlists.forEachIndexed { index, playlist ->
+                    val timeSinceUpdate = now - playlist.lastUpdated
+                    val needsUpdate = forceRefresh || (autoUpdateEnabled && timeSinceUpdate > intervalMs)
+                    val phaseProgress = 5 + ((index + 1) * 25 / totalSteps)
                     
-                    // Background playlist refresh (non-blocking)
-                    applicationScope.launch(Dispatchers.IO) {
+                    if (needsUpdate) {
+                        refreshedAny = true
+                        onStateUpdate(LoadingState(status = getString(R.string.loading_syncing), detail = playlist.name, progress = phaseProgress, showProgress = true))
                         try {
-                            val autoUpdateEnabled = userPreferences.getPlaylistAutoUpdate()
-                            val updateIntervalHours = userPreferences.getPlaylistUpdateIntervalHours()
-                            val intervalMs = updateIntervalHours * 60 * 60 * 1000L
-                            val now = System.currentTimeMillis()
-                            
-                            playlists.forEach { playlist ->
-                                val timeSinceUpdate = now - playlist.lastUpdated
-                                if (autoUpdateEnabled && timeSinceUpdate > intervalMs) {
-                                    Log.d("LoadingActivity", "Background refresh needed for: ${playlist.name}")
-                                    try {
-                                        playlistRepository.refreshPlaylist(playlist.id)
-                                    } catch (e: Exception) {
-                                        Log.e("LoadingActivity", "Background refresh failed: ${playlist.name}", e)
-                                    }
-                                }
-                            }
-                            
-                            loadEpgIfNeeded(playlists, forceRefresh = false) { _ -> }
+                            playlistRepository.refreshPlaylist(playlist.id)
                         } catch (e: Exception) {
-                            Log.e("LoadingActivity", "Background refresh error", e)
+                            Log.e("LoadingActivity", "Failed to sync ${playlist.name}", e)
                         }
+                    } else {
+                        onStateUpdate(LoadingState(status = getString(R.string.loading_using_cache), detail = "${playlist.name}", progress = phaseProgress, showProgress = true))
                     }
-                    
-                    // Preload all 3 tabs into ContentCache (idempotent — skips cached tabs).
-                    // Needed in BOTH paths: after a playlist refresh the session cache is
-                    // invalidated, so without this the home would rebuild lazily (slow TMDB
-                    // enrichment inline) and show the skeleton for a long time.
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
-                    
-                    // Enrich hero/trending content with TMDB votes + OMDB ratings in background
-                    // so heroes and carousels have ratings ready without blocking startup.
-                    applicationScope.launch(Dispatchers.IO) { enrichHeroContent { _ -> } }
-                } else {
-                    // Force refresh: sync playlist in foreground
-                    val autoUpdateEnabled = userPreferences.getPlaylistAutoUpdate()
-                    val updateIntervalHours = userPreferences.getPlaylistUpdateIntervalHours()
-                    val intervalMs = updateIntervalHours * 60 * 60 * 1000L
-                    val now = System.currentTimeMillis()
-                    val totalSteps = playlists.size
-                    
-                    onStateUpdate(LoadingState(status = getString(R.string.loading), detail = "Inizializzazione...", progress = 5, showProgress = true))
-                    
-                    playlists.forEachIndexed { index, playlist ->
-                        val timeSinceUpdate = now - playlist.lastUpdated
-                        val needsUpdate = forceRefresh || (autoUpdateEnabled && timeSinceUpdate > intervalMs)
-                        val phaseProgress = 5 + ((index + 1) * 25 / totalSteps)
-                        
-                        if (needsUpdate) {
-                            onStateUpdate(LoadingState(status = getString(R.string.loading_syncing), detail = playlist.name, progress = phaseProgress, showProgress = true))
-                            try {
-                                playlistRepository.refreshPlaylist(playlist.id)
-                            } catch (e: Exception) {
-                                Log.e("LoadingActivity", "Failed to sync ${playlist.name}", e)
-                            }
-                        } else {
-                            onStateUpdate(LoadingState(status = getString(R.string.loading_using_cache), detail = "${playlist.name}", progress = phaseProgress, showProgress = true))
-                        }
-                    }
-                    
-                    loadEpgIfNeeded(playlists, forceRefresh, onStateUpdate)
-                    refreshTrendingCategoriesIfNeeded(onStateUpdate)
-                    enrichHeroContent(onStateUpdate)
-                    
-                    // Clear the session cache to ensure clean preloading on fresh data
-                    contentCache.clearHomeSessionData()
-                    
-                    // Preload all 3 tabs into ContentCache using applicationScope.
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
                 }
+                
+                loadEpgIfNeeded(playlists, forceRefresh, onStateUpdate)
+                refreshTrendingCategoriesIfNeeded(onStateUpdate)
+                enrichHeroContent(onStateUpdate)
+                
+                // Invalida la cache di sessione solo se i dati sono effettivamente cambiati
+                if (refreshedAny || forceRefresh) {
+                    contentCache.clearHomeSessionData()
+                }
+                
+                // Preload all 3 tabs into ContentCache (idempotent — skips cached tabs):
+                // dopo un refresh la session cache è invalidata, senza questo la home
+                // si ricostruirebbe lazy (enrichment TMDB inline) mostrando a lungo lo skeleton.
+                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
+                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
+                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
                 
                 // Phase 2: Wait for HomeViewModel tabs to be ready
                 onStateUpdate(LoadingState(
