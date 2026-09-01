@@ -80,10 +80,6 @@ class HomeViewModel @Inject constructor(
     private val _seriesCategories = MutableStateFlow<List<String>>(emptyList())
     val seriesCategories: StateFlow<List<String>> = _seriesCategories.asStateFlow()
     
-    // Trending refresh state — LoadingActivity can observe this to show overlay
-    private val _isRefreshingTrending = MutableStateFlow(false)
-    val isRefreshingTrending: StateFlow<Boolean> = _isRefreshingTrending.asStateFlow()
-    
     private var currentProfileId: Long = 1L
     private var currentContentType: HomeContentType = HomeContentType.HOME
     
@@ -238,29 +234,8 @@ class HomeViewModel @Inject constructor(
         val contentType = currentContentType
         Log.d("HomeViewModel", "Soft refresh for $contentType")
         
-        // Check if trending is > 7 days old → re-populate in background
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val lastUpdate = userPreferences.getTmdbPopularLastUpdate()
-                val sevenDaysMs = 7 * 24 * 60 * 60 * 1000L
-                if (System.currentTimeMillis() - lastUpdate > sevenDaysMs) {
-                    Log.d("HomeViewModel", "Trending > 7 days old, re-populating in background")
-                    _isRefreshingTrending.value = true
-                    try {
-                        tmdbService.populateTrendingMovies()
-                        tmdbService.populateTrendingSeries()
-                        userPreferences.setTmdbPopularLastUpdate(System.currentTimeMillis())
-                        Log.d("HomeViewModel", "Background trending refresh complete")
-                    } catch (e: Exception) {
-                        Log.e("HomeViewModel", "Background trending refresh failed", e)
-                    } finally {
-                        _isRefreshingTrending.value = false
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("HomeViewModel", "Error checking trending age", e)
-            }
-        }
+        // NOTA: il trending NON viene più aggiornato qui — il refresh avviene
+        // rigorosamente e solo nella LoadingActivity (con progresso visibile).
         
         val cachedRows = cachedCarouselRows[contentType]
         val cacheTime = cachedCarouselRowsTime[contentType] ?: 0L
