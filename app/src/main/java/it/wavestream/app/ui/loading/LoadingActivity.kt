@@ -699,11 +699,9 @@ class LoadingActivity : ComponentActivity() {
             }
             
             withContext(Dispatchers.IO) {
-                // Clear old trending categories
-                movieDao.clearTrendingCategory("Film Popolari")
-                seriesDao.clearTrendingCategory("Serie Popolari")
-                
-                android.util.Log.d("LoadingActivity", "Cleared old trending categories")
+                // NOTA: il clear delle vecchie categorie avviene DENTRO TMDBService,
+                // subito dopo il fetch riuscito — così un errore di rete non lascia
+                // mai i caroselli trending vuoti.
                 
                 // Populate new trending from TMDB
                 val movieCount = tmdbService.populateTrendingMovies()

@@ -349,11 +349,15 @@ class TMDBService @Inject constructor(
             Log.d(TAG, "Populating trending movies category (fetching 3 pages)...")
             val allTmdbItems = mutableListOf<TMDBItem>()
             
-            // Fetch first 3 pages (60 items)
+            // Fetch first 3 pages (60 items) — PRIMA la rete, poi il clear:
+            // se il fetch fallisce le categorie trending restano intatte.
             for (page in 1..3) {
                 val items = fetchFromTMDB("$BASE_URL/trending/movie/week?api_key=$API_KEY&language=$LANGUAGE&page=$page")
                 allTmdbItems.addAll(items)
             }
+            
+            // Fetch riuscito: ora è sicuro svuotare la vecchia categoria
+            movieDao.clearTrendingCategory("Film Popolari")
             
             var matchCount = 0
             
@@ -428,11 +432,15 @@ class TMDBService @Inject constructor(
             Log.d(TAG, "Populating trending series category (fetching 3 pages)...")
             val allTmdbItems = mutableListOf<TMDBItem>()
             
-            // Fetch first 3 pages (60 items)
+            // Fetch first 3 pages (60 items) — PRIMA la rete, poi il clear:
+            // se il fetch fallisce le categorie trending restano intatte.
             for (page in 1..3) {
                 val items = fetchFromTMDB("$BASE_URL/trending/tv/week?api_key=$API_KEY&language=$LANGUAGE&page=$page", isTV = true)
                 allTmdbItems.addAll(items)
             }
+            
+            // Fetch riuscito: ora è sicuro svuotare la vecchia categoria
+            seriesDao.clearTrendingCategory("Serie Popolari")
             
             var matchCount = 0
             
