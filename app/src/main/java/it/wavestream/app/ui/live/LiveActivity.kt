@@ -188,43 +188,11 @@ class LiveActivity : ComponentActivity() {
             // Don't auto-select — start with category grid view
         }
         
-        // Load EPG data if needed (respecting cache)
-        // EPG is already being loaded in background by LoadingActivity
-        // This LaunchedEffect only handles edge cases where LoadingActivity didn't load it
-        LaunchedEffect(Unit) {
-            // Check if we already have valid data in RAM
-            if (epgRepository.isCacheValid()) {
-                 isEpgLoading = false
-                 return@LaunchedEffect
-            }
-            
-            try {
-                isEpgLoading = true
-                val playlists = playlistDao.getAllPlaylists().first()
-                
-                for (playlist in playlists) {
-                    if (playlist.type == "xtream" &&
-                        !playlist.username.isNullOrEmpty() &&
-                        !playlist.password.isNullOrEmpty()) {
-                        
-                        withContext(Dispatchers.IO) {
-                            epgRepository.loadEpgFromXtream(
-                                baseUrl = playlist.url,
-                                username = playlist.username,
-                                password = playlist.password
-                            )
-                        }
-                    } else if (!playlist.epgUrl.isNullOrEmpty()) {
-                        withContext(Dispatchers.IO) {
-                            epgRepository.loadEpgFromUrl(playlist.epgUrl)
-                        }
-                    }
-                }
-                isEpgLoading = false
-            } catch (e: Exception) {
-                isEpgLoading = false
-            }
-        }
+        // NOTA: qui NON si carica mai l'EPG dalla rete — l'aggiornamento avviene
+        // rigorosamente e solo nella LoadingActivity (con progresso visibile).
+        // Se la cache RAM è vuota (caso limite, es. processo terminato durante il
+        // loading) si mostrano i canali senza guida e l'EPG verrà ricaricato al
+        // prossimo avvio dell'app.
         
         // Load channels and EPG when category changes
         LaunchedEffect(selectedCategory, isEpgLoading) {

@@ -60,8 +60,6 @@ import it.wavestream.app.ui.loading.LoadingActivity
 import it.wavestream.app.ui.MainActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.WaveStreamTheme
-import it.wavestream.app.worker.EpgUpdateWorker
-import it.wavestream.app.worker.SyncWorker
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -875,9 +873,10 @@ private fun PlaylistSettings(
                 ),
                 onValueChange = {
                     updateMode = it
+                    // Il refresh avviene SOLO nella LoadingActivity (con progresso visibile):
+                    // qui si salva solo la preferenza, nessun worker viene schedulato.
                     coroutineScope.launch {
                         userPreferences.setPlaylistUpdateMode(it)
-                        SyncWorker.updateSchedules(context, userPreferences)
                     }
                 }
             )
@@ -899,7 +898,6 @@ private fun PlaylistSettings(
                         updateInterval = it
                         coroutineScope.launch {
                             userPreferences.setPlaylistUpdateInterval(it)
-                            SyncWorker.updateSchedules(context, userPreferences)
                         }
                     }
                 )
@@ -1640,13 +1638,10 @@ private fun EpgSettings(
                 ),
                 onValueChange = {
                     updateMode = it
+                    // L'aggiornamento EPG avviene SOLO nella LoadingActivity:
+                    // nessun worker periodico viene schedulato.
                     coroutineScope.launch {
                         userPreferences.setEpgUpdateMode(it)
-                        if (it == "auto") {
-                            EpgUpdateWorker.schedule(context, updateInterval)
-                        } else {
-                            EpgUpdateWorker.cancel(context)
-                        }
                     }
                 }
             )
@@ -1669,7 +1664,6 @@ private fun EpgSettings(
                         updateInterval = it
                         coroutineScope.launch {
                             userPreferences.setEpgUpdateInterval(it)
-                            EpgUpdateWorker.schedule(context, it)
                         }
                     }
                 )
