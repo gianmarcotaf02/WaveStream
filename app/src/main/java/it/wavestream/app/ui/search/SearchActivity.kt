@@ -18,7 +18,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.rememberScrollState
@@ -582,7 +581,7 @@ fun SearchScreen(
                 .fillMaxSize()
                 .padding(start = 48.dp)
         ) {
-            // Left column: compact keyboard only
+            // Left column: keyboard + instant suggestions below it
             Column(
                 modifier = Modifier
                     .width(320.dp)
@@ -594,6 +593,19 @@ fun SearchScreen(
                     onQueryChange = onQueryChange,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                // Suggerimenti istantanei sotto la tastiera (lato sinistro):
+                // così non vengono coperti dalla griglia dei risultati a destra
+                if (suggestions.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    SuggestionPills(
+                        suggestions = suggestions,
+                        onItemClick = onItemClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.width(28.dp))
@@ -606,14 +618,6 @@ fun SearchScreen(
                     .padding(end = 48.dp)
             ) {
                 when {
-                    // Suggerimenti istantanei: visibili durante la digitazione
-                    // (già con 1 solo carattere, o mentre la ricerca completa è in corso)
-                    suggestions.isNotEmpty() && (query.length < 2 || isLoading) -> {
-                        SuggestionPills(
-                            suggestions = suggestions,
-                            onItemClick = onItemClick
-                        )
-                    }
                     isLoading -> {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
@@ -674,20 +678,19 @@ fun SearchScreen(
 }
 
 /**
- * Suggerimenti istantanei stile YouTube: pill orizzontali a forma di ovale
- * disposte in una riga scorrevole, una parola (opzione) per pill, senza icone.
+ * Suggerimenti istantanei stile YouTube: pill a forma di ovale disposte in
+ * colonna sotto la tastiera, una parola (opzione) per pill, senza icone.
  * Al focus la pill si riempie di accent (senza ingrandimento).
  */
 @Composable
 private fun SuggestionPills(
     suggestions: List<SearchResultItem>,
-    onItemClick: (SearchResultItem) -> Unit
+    onItemClick: (SearchResultItem) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Column(
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         suggestions.forEach { item ->
             val interactionSource = remember { MutableInteractionSource() }
