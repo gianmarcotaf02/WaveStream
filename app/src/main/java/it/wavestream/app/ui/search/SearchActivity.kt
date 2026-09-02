@@ -676,6 +676,107 @@ fun SearchScreen(
 }
 
 /**
+ * Dropdown di suggerimenti istantanei mostrato nell'area risultati mentre
+ * l'utente digita (max 6 risultati, navigabili con il D-pad).
+ */
+@Composable
+private fun SuggestionsDropdown(
+    suggestions: List<SearchResultItem>,
+    onItemClick: (SearchResultItem) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 420.dp)
+            .verticalScroll(rememberScrollState())
+            .clip(RoundedCornerShape(16.dp))
+            .background(WaveStreamColors.BackgroundSecondary)
+            .border(1.dp, WaveStreamColors.Accent.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+            .padding(vertical = 6.dp)
+    ) {
+        suggestions.forEach { item ->
+            val interactionSource = remember { MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+            val icon = when {
+                item.isCategory -> Icons.Default.Folder
+                item.type == ContentType.CHANNEL -> Icons.Default.LiveTv
+                item.type == ContentType.SERIES -> Icons.Default.Tv
+                else -> Icons.Default.Movie
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if (isFocused) WaveStreamColors.Accent else Color.Transparent)
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { onItemClick(item) }
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (item.posterUrl != null) {
+                    AsyncImage(
+                        model = item.posterUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .width(36.dp)
+                            .height(50.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(WaveStreamColors.BackgroundTertiary)
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .width(36.dp)
+                            .height(50.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(WaveStreamColors.BackgroundTertiary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = item.title,
+                        color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = item.subtitle ?: run {
+                            if (item.type == ContentType.MOVIE) "Film"
+                            else if (item.type == ContentType.SERIES) "Serie TV"
+                            else "Canale Live"
+                        },
+                        color = if (isFocused) Color.White.copy(alpha = 0.85f) else WaveStreamColors.TextSecondary,
+                        fontSize = 13.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                    tint = if (isFocused) Color.White else WaveStreamColors.TextTertiary,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
  * Search input field
  */
 @Composable
