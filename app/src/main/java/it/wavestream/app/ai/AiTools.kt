@@ -136,7 +136,7 @@ class AiTools @Inject constructor(
         }
         if (contentType == "ALL" || contentType == "CHANNELS") {
             channelDao.searchChannels(query).take(MAX_RESULTS).forEach { c ->
-                items.add(AiResultItem(ContentType.CHANNEL, c.id, c.name, c.logoUrl, c.category))
+                items.add(AiResultItem(ContentType.CHANNEL, c.id, c.name, c.logoUrl, c.category, c.streamUrl))
             }
         }
 
@@ -214,7 +214,7 @@ class AiTools @Inject constructor(
             .ifEmpty { channelDao.searchChannels(channelName) }
 
         val items = matches.take(MAX_RESULTS).map {
-            AiResultItem(ContentType.CHANNEL, it.id, it.name, it.logoUrl, it.category)
+            AiResultItem(ContentType.CHANNEL, it.id, it.name, it.logoUrl, it.category, it.streamUrl)
         }
 
         return if (items.isEmpty()) {

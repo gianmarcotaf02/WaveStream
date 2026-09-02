@@ -12,7 +12,8 @@ data class AiResultItem(
     val id: Long,
     val title: String,
     val imageUrl: String?,
-    val subtitle: String?
+    val subtitle: String?,
+    val streamUrl: String? = null // solo per i canali live (riproduzione diretta)
 )
 
 /** Esito dell'esecuzione di un tool */
