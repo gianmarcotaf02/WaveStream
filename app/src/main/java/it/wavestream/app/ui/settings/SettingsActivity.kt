@@ -105,6 +105,7 @@ class SettingsActivity : ComponentActivity() {
     @Inject lateinit var openSubtitlesRepository: it.wavestream.app.data.repository.OpenSubtitlesRepository
     @Inject lateinit var vpnManager: VpnManager
     @Inject lateinit var ttsManager: it.wavestream.app.voice.TtsManager
+    @Inject lateinit var sherpaTts: it.wavestream.app.voice.SherpaTtsManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -185,7 +186,7 @@ class SettingsActivity : ComponentActivity() {
                     "preferences" -> PreferencesSettings(userPreferences, contentFocusRequester)
                     "player" -> PlayerSettings(userPreferences, contentFocusRequester)
                     "subtitles" -> SubtitlesSettings(openSubtitlesRepository, userPreferences, contentFocusRequester)
-                    "assistant" -> AssistantSettings(userPreferences, ttsManager, contentFocusRequester)
+                    "assistant" -> AssistantSettings(userPreferences, ttsManager, sherpaTts, contentFocusRequester)
                     "epg" -> EpgSettings(userPreferences, epgRepository, playlistDao, contentFocusRequester)
                     "appearance" -> AppearanceSettings(userPreferences)
                     "storage" -> StorageSettings(profileDao, playlistDao, userPreferences)
@@ -3535,6 +3536,7 @@ private fun VpnFileRow(
 private fun AssistantSettings(
     userPreferences: UserPreferences,
     ttsManager: it.wavestream.app.voice.TtsManager,
+    sherpaTts: it.wavestream.app.voice.SherpaTtsManager,
     contentFocusRequester: FocusRequester? = null
 ) {
     val scope = rememberCoroutineScope()
@@ -3563,6 +3565,46 @@ private fun AssistantSettings(
             text = "L'assistente vocale usa il microfono per capire le tue richieste e Gemini (free tier) " +
                 "per cercare nella tua libreria. Genera una API key gratuita su aistudio.google.com/apikey"
         )
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // ---- Stato motore vocale (Piper neurale vs sistema) ----
+        val engineState by sherpaTts.state.collectAsState()
+        val downloadProgress by sherpaTts.downloadProgress.collectAsState()
+
+        val engineLabel = when (engineState) {
+            it.wavestream.app.voice.SherpaTtsManager.State.READY ->
+                "🎙 Voce NEURALE attiva (Piper · Riccardo) — naturale e amplificabile"
+            it.wavestream.app.voice.SherpaTtsManager.State.DOWNLOADING ->
+                "⬇ Download voce neurale… $downloadProgress%"
+            it.wavestream.app.voice.SherpaTtsManager.State.EXTRACTING ->
+                "⬇ Estrazione voce neurale…"
+            it.wavestream.app.voice.SherpaTtsManager.State.LOADING ->
+                "⏳ Caricamento voce neurale…"
+            it.wavestream.app.voice.SherpaTtsManager.State.ERROR ->
+                "⚠ Errore download voce neurale — in uso il TTS di sistema (robotico)"
+            else ->
+                "⚠ Voce neurale NON scaricata — in uso il TTS di sistema (robotico e a volume limitato)"
+        }
+        Text(
+            text = engineLabel,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (engineState == it.wavestream.app.voice.SherpaTtsManager.State.READY)
+                Color(0xFF81C784) else Color(0xFFFFB74D)
+        )
+
+        if (engineState != it.wavestream.app.voice.SherpaTtsManager.State.READY) {
+            Spacer(modifier = Modifier.height(8.dp))
+            VpnActionButton(
+                onClick = { scope.launch { sherpaTts.ensureReady() } },
+                enabled = engineState != it.wavestream.app.voice.SherpaTtsManager.State.DOWNLOADING &&
+                    engineState != it.wavestream.app.voice.SherpaTtsManager.State.EXTRACTING &&
+                    engineState != it.wavestream.app.voice.SherpaTtsManager.State.LOADING,
+                icon = Icons.Default.Download,
+                label = if (engineState == it.wavestream.app.voice.SherpaTtsManager.State.DOWNLOADING)
+                    "Download… $downloadProgress%" else "Scarica voce neurale (26 MB)"
+            )
+        }
+
         Spacer(modifier = Modifier.height(20.dp))
 
         // ---- API Key Gemini ----

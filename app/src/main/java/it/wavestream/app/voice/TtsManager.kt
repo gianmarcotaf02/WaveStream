@@ -150,6 +150,7 @@ class TtsManager @Inject constructor(
                 }
             } else {
                 // modello assente: avvia il download in background e usa il sistema ora
+                android.util.Log.w("NovaVoice", "Piper non pronto → uso TTS di sistema (fallback robotico). Download in background...")
                 if (!sherpaTts.isModelDownloaded()) preload()
                 speakWithSystemTts(text)
             }
