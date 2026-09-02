@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -3655,78 +3656,106 @@ private fun AssistantSettings(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // ---- Velocità ----
+        // ---- Velocità + Tono (con focus D-pad) ----
         var localRate by remember { mutableStateOf(speechRate) }
         var localPitch by remember { mutableStateOf(pitch) }
         LaunchedEffect(speechRate) { localRate = speechRate }
         LaunchedEffect(pitch) { localPitch = pitch }
 
-        Text(
-            text = "Velocità: ${"%.1f".format(localRate)}x",
-            style = MaterialTheme.typography.bodyMedium,
-            color = WaveStreamColors.TextPrimary
-        )
-        Slider(
+        AssistantVoiceSlider(
+            label = "Velocità",
+            valueText = "${"%.1f".format(localRate)}x",
             value = localRate,
             onValueChange = { value ->
                 localRate = value
                 ttsManager.previewRate(value)
             },
-            valueRange = 0.5f..2f,
-            steps = 5,
             onValueChangeFinished = {
                 scope.launch { userPreferences.setAssistantTtsRate(localRate) }
-            },
-            colors = SliderDefaults.colors(
-                thumbColor = WaveStreamColors.Accent,
-                activeTrackColor = WaveStreamColors.Accent.copy(alpha = 0.6f)
-            )
+            }
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ---- Tono ----
-        Text(
-            text = "Tono: ${"%.1f".format(localPitch)}",
-            style = MaterialTheme.typography.bodyMedium,
-            color = WaveStreamColors.TextPrimary
-        )
-        Slider(
+        AssistantVoiceSlider(
+            label = "Tono",
+            valueText = "${"%.1f".format(localPitch)}",
             value = localPitch,
             onValueChange = { value ->
                 localPitch = value
                 ttsManager.previewPitch(value)
             },
-            valueRange = 0.5f..2f,
-            steps = 5,
             onValueChangeFinished = {
                 scope.launch { userPreferences.setAssistantTtsPitch(localPitch) }
-            },
-            colors = SliderDefaults.colors(
-                thumbColor = WaveStreamColors.Accent,
-                activeTrackColor = WaveStreamColors.Accent.copy(alpha = 0.6f)
-            )
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ---- Prova voce ----
-        Button(
+        // ---- Prova voce (con focus D-pad) ----
+        VpnActionButton(
             onClick = {
                 ttsManager.speak("Ciao! Sono Nova, l'assistente di WaveStream. Dimmi cosa vuoi guardare stasera.")
             },
-            colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
-        ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Prova voce")
-        }
+            icon = Icons.Default.PlayArrow,
+            label = "Prova voce"
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
         SettingsInfo(
             text = "Le voci disponibili dipendono dal motore TTS installato sulla TV " +
                 "(Impostazioni TV → Accessibilità → Text-to-speech). Le voci neurali di qualità superiore " +
                 "possono essere scaricate da lì. Il microfono viene usato solo quando apri l'assistente."
+        )
+    }
+}
+
+/**
+ * Slider con evidenziazione del focus D-pad (bordo accent sul contenitore).
+ * Il focus lo prende lo Slider stesso, così ←/→ regolano il valore direttamente.
+ */
+@Composable
+private fun AssistantVoiceSlider(
+    label: String,
+    valueText: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: () -> Unit
+) {
+    var focused by remember { mutableStateOf(false) }
+    val borderColor by animateColorAsState(
+        targetValue = if (focused) WaveStreamColors.Accent else Color.Transparent,
+        animationSpec = tween(150),
+        label = "assistantSliderBorder"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .background(WaveStreamColors.SurfaceDark)
+            .padding(horizontal = 12.dp)
+    ) {
+        Text(
+            text = "$label: $valueText",
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (focused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+            modifier = Modifier.padding(top = 8.dp)
+        )
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = 0.5f..2f,
+            steps = 5,
+            onValueChangeFinished = onValueChangeFinished,
+            colors = SliderDefaults.colors(
+                thumbColor = WaveStreamColors.Accent,
+                activeTrackColor = WaveStreamColors.Accent.copy(alpha = 0.6f)
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focused = it.isFocused }
         )
     }
 }
