@@ -124,33 +124,64 @@ class AiTools @Inject constructor(
 
         val items = mutableListOf<AiResultItem>()
 
-        if (contentType == "ALL" || contentType == "MOVIES") {
-            movieDao.searchMovies(query).take(MAX_RESULTS).forEach { m ->
-                items.add(AiResultItem(ContentType.MOVIE, m.id, m.name, m.posterUrl, m.category))
-            }
-        }
-        if (contentType == "ALL" || contentType == "SERIES") {
-            seriesDao.searchSeries(query).take(MAX_RESULTS).forEach { s ->
-                items.add(AiResultItem(ContentType.SERIES, s.id, s.name, s.posterUrl, s.category))
-            }
-        }
-        if (contentType == "ALL" || contentType == "CHANNELS") {
-            channelDao.searchChannels(query).take(MAX_RESULTS).forEach { c ->
-                items.add(AiResultItem(ContentType.CHANNEL, c.id, c.name, c.logoUrl, c.category, c.streamUrl))
-            }
+        // 1. ricerca con la frase intera
+        items.addAll(doSearch(query, contentType))
+
+        // 2. se la frase intera non trova nulla, prova le singole parole significative:
+        //    "metti un film d'azione" → prova "azione", "metti", "film"...
+        if (items.isEmpty() && query.contains(" ")) {
+            query.split(" ", "'", "’")
+                .map { it.trim() }
+                .filter { it.length >= 4 }
+                .forEach { word ->
+                    if (items.size < MAX_RESULTS) {
+                        doSearch(word, contentType).forEach { found ->
+                            if (items.none { it.id == found.id && it.type == found.type }) {
+                                items.add(found)
+                            }
+                        }
+                    }
+                }
         }
 
-        return if (items.isEmpty()) {
+        val limited = items.take(MAX_RESULTS)
+        android.util.Log.d("NovaAI", "search_content('$query', $contentType) → ${limited.size} risultati")
+
+        return if (limited.isEmpty()) {
             AiToolResult(mapOf("found" to 0, "note" to "Nessun risultato per '$query'. Suggerisci all'utente di provare un altro titolo."))
         } else {
             AiToolResult(
                 response = mapOf(
-                    "found" to items.size,
-                    "titles" to items.take(6).map { "${it.title} (${typeName(it.type)})" }
+                    "found" to limited.size,
+                    "titles" to limited.take(6).map { "${it.title} (${typeName(it.type)})" }
                 ),
-                items = items
+                items = limited
             )
         }
+    }
+
+    private suspend fun doSearch(query: String, contentType: String): List<AiResultItem> {
+        val items = mutableListOf<AiResultItem>()
+        try {
+            if (contentType == "ALL" || contentType == "MOVIES") {
+                movieDao.searchMovies(query).take(MAX_RESULTS).forEach { m ->
+                    items.add(AiResultItem(ContentType.MOVIE, m.id, m.name, m.posterUrl, m.category))
+                }
+            }
+            if (contentType == "ALL" || contentType == "SERIES") {
+                seriesDao.searchSeries(query).take(MAX_RESULTS).forEach { s ->
+                    items.add(AiResultItem(ContentType.SERIES, s.id, s.name, s.posterUrl, s.category))
+                }
+            }
+            if (contentType == "ALL" || contentType == "CHANNELS") {
+                channelDao.searchChannels(query).take(MAX_RESULTS).forEach { c ->
+                    items.add(AiResultItem(ContentType.CHANNEL, c.id, c.name, c.logoUrl, c.category, c.streamUrl))
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("NovaAI", "doSearch error: ${e.message}")
+        }
+        return items
     }
 
     private suspend fun recommendContent(genre: String?, contentType: String): AiToolResult {
