@@ -138,6 +138,7 @@ class UserPreferences @Inject constructor(
         private val ASSISTANT_TTS_LANGUAGE = stringPreferencesKey("assistant_tts_language")
         private val ASSISTANT_TTS_RATE = floatPreferencesKey("assistant_tts_rate")
         private val ASSISTANT_TTS_PITCH = floatPreferencesKey("assistant_tts_pitch")
+        private val ASSISTANT_TTS_VOLUME = floatPreferencesKey("assistant_tts_volume") // 0.1..1.0
     }
     
     private val dataStore = context.dataStore
@@ -207,6 +208,15 @@ class UserPreferences @Inject constructor(
 
     fun getAssistantTtsPitchFlow(): Flow<Float> {
         return dataStore.data.map { it[ASSISTANT_TTS_PITCH] ?: 1f }
+    }
+
+    // Volume voce (0.1..1.0 — massimo = volume media del device)
+    suspend fun setAssistantTtsVolume(volume: Float) {
+        dataStore.edit { it[ASSISTANT_TTS_VOLUME] = volume.coerceIn(0.1f, 1f) }
+    }
+
+    fun getAssistantTtsVolumeFlow(): Flow<Float> {
+        return dataStore.data.map { it[ASSISTANT_TTS_VOLUME] ?: 1f }
     }
     
     // Current Profile

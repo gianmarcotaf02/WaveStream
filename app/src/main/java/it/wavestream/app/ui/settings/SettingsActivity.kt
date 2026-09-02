@@ -3545,6 +3545,7 @@ private fun AssistantSettings(
     val selectedLanguage by userPreferences.getAssistantTtsLanguageFlow().collectAsState(initial = "it-IT")
     val speechRate by userPreferences.getAssistantTtsRateFlow().collectAsState(initial = 1f)
     val pitch by userPreferences.getAssistantTtsPitchFlow().collectAsState(initial = 1f)
+    val ttsVolume by userPreferences.getAssistantTtsVolumeFlow().collectAsState(initial = 1f)
     val availableVoices by ttsManager.availableVoices.collectAsState()
 
     // API key (mascherata: mostra solo gli ultimi 4 caratteri se già impostata)
@@ -3681,12 +3682,35 @@ private fun AssistantSettings(
             label = "Tono",
             valueText = "${"%.1f".format(localPitch)}",
             value = localPitch,
+            range = 0.5f..2f,
+            steps = 5,
             onValueChange = { value ->
                 localPitch = value
                 ttsManager.previewPitch(value)
             },
             onValueChangeFinished = {
                 scope.launch { userPreferences.setAssistantTtsPitch(localPitch) }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // ---- Volume voce (0-100%, massimo = volume media del device) ----
+        var localVolume by remember { mutableStateOf(ttsVolume) }
+        LaunchedEffect(ttsVolume) { localVolume = ttsVolume }
+
+        AssistantVoiceSlider(
+            label = "Volume voce",
+            valueText = "${(localVolume * 100).toInt()}%",
+            value = localVolume,
+            range = 0.1f..1f,
+            steps = 8,
+            onValueChange = { value ->
+                localVolume = value
+                ttsManager.previewVolume(value)
+            },
+            onValueChangeFinished = {
+                scope.launch { userPreferences.setAssistantTtsVolume(localVolume) }
             }
         )
 
@@ -3719,6 +3743,8 @@ private fun AssistantVoiceSlider(
     label: String,
     valueText: String,
     value: Float,
+    range: ClosedFloatingPointRange<Float> = 0.5f..2f,
+    steps: Int = 5,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit
 ) {
@@ -3746,8 +3772,8 @@ private fun AssistantVoiceSlider(
         Slider(
             value = value,
             onValueChange = onValueChange,
-            valueRange = 0.5f..2f,
-            steps = 5,
+            valueRange = range,
+            steps = steps,
             onValueChangeFinished = onValueChangeFinished,
             colors = SliderDefaults.colors(
                 thumbColor = WaveStreamColors.Accent,

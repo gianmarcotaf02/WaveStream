@@ -43,6 +43,7 @@ class TtsManager @Inject constructor(
     // Impostazioni correnti (aggiornate dalle preferenze)
     private var speechRate: Float = 1.0f
     private var pitch: Float = 1.0f
+    private var voiceVolume: Float = 1.0f
     private var voiceName: String? = null
     private var languageTag: String = "it-IT"
 
@@ -87,6 +88,9 @@ class TtsManager @Inject constructor(
                 }
             }
         }
+        scope.launch {
+            userPreferences.getAssistantTtsVolumeFlow().collect { voiceVolume = it }
+        }
     }
 
     private fun applySettings() {
@@ -111,7 +115,10 @@ class TtsManager @Inject constructor(
         onDoneCallback = onDone
         _isSpeaking.value = true
         val utteranceId = "wavestream_assistant_${System.currentTimeMillis()}"
-        engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, utteranceId)
+        val params = android.os.Bundle().apply {
+            putFloat(android.speech.tts.TextToSpeech.Engine.KEY_PARAM_VOLUME, voiceVolume)
+        }
+        engine.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
     }
 
     fun stop() {
@@ -133,6 +140,11 @@ class TtsManager @Inject constructor(
     fun previewPitch(value: Float) {
         pitch = value.coerceIn(0.5f, 2f)
         applySettings()
+    }
+
+    /** Anteprima live del volume voce (0.1..1.0) */
+    fun previewVolume(value: Float) {
+        voiceVolume = value.coerceIn(0.1f, 1f)
     }
 
     init {
