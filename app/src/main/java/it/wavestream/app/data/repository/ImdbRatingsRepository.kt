@@ -1,6 +1,8 @@
 package it.wavestream.app.data.repository
 
 import android.util.Log
+import it.wavestream.app.data.api.CinemetaMeta
+import it.wavestream.app.data.api.CinemetaService
 import it.wavestream.app.data.api.OmdbResult
 import it.wavestream.app.data.api.OmdbService
 import it.wavestream.app.data.preferences.UserPreferences
@@ -17,6 +19,8 @@ import javax.inject.Singleton
 
 /**
  * Repository for fetching IMDB ratings via OMDb API
+ * Falls back to Cinemeta (Stremio's catalog, free / no key) when OMDb is
+ * missing or outdated — Cinemeta's IMDb ratings are refreshed continuously.
  */
 @Singleton
 class ImdbRatingsRepository @Inject constructor(
@@ -25,6 +29,7 @@ class ImdbRatingsRepository @Inject constructor(
     // Create scraper instances internally to avoid Hilt injection issues
     private val rtScraper = RottenTomatoesScraper()
     private val metacriticScraper = MetacriticScraper()
+    private lateinit var cinemeta: CinemetaService
     companion object {
         private const val TAG = "ImdbRatings"
         private const val CACHE_DURATION_MS = 24 * 60 * 60 * 1000L // 24 hours
@@ -52,6 +57,9 @@ class ImdbRatingsRepository @Inject constructor(
     
     // In-memory cache
     private val ratingsCache = mutableMapOf<String, CachedRating>()
+
+    // In-memory cache for Cinemeta IMDb ratings (keyed by IMDb ID)
+    private val cinemetaCache = mutableMapOf<String, CachedRating>()
     
     data class CachedRating(
         val rating: RatingInfo,
@@ -76,6 +84,13 @@ class ImdbRatingsRepository @Inject constructor(
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(OmdbService::class.java)
+        
+        cinemeta = Retrofit.Builder()
+            .baseUrl(CinemetaService.BASE_URL)
+            .client(client)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(CinemetaService::class.java)
     }
     
     /**
