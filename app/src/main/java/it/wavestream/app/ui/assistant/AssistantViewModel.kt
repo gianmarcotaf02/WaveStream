@@ -145,6 +145,17 @@ class AssistantViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Permesso microfono negato dall'utente: messaggio chiaro (senza auto-retry,
+     * per non tormentare l'utente con richieste ripetute).
+     */
+    fun onMicPermissionDenied() {
+        _uiState.value = _uiState.value.copy(
+            phase = Phase.ERROR,
+            errorMessage = "Permesso microfono necessario per parlarmi — concedilo e rientra"
+        )
+    }
+
     private fun stopListeningAndProcess() {
         listeningJob?.cancel()
         val audio = audioRecorder.stop()
