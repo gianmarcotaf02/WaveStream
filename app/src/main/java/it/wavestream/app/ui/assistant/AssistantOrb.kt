@@ -165,9 +165,6 @@ fun AssistantOrb(
             // particelle lungo l'orbita
             rotate(degrees = orbit.tilt, pivot = center) {
                 repeat(orbit.particles) { i ->
-                    val angle = Math.toRadians(
-                        ((orbit.rotation + (i * 360f / orbit.particles)) % 360f).toDouble()
-                    )
                     val angleDeg = ((orbit.rotation + (i * 360f / orbit.particles)) % 360f)
                     val angle = (angleDeg * (Math.PI.toFloat() / 180f))
                     val x = center.x + orbit.radius * cos(angle)
