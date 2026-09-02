@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -45,7 +46,8 @@ import kotlin.math.sin
 fun AssistantOrb(
     phase: AssistantViewModel.Phase,
     amplitude: Float,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    waveform: List<Float> = emptyList()
 ) {
     // Palette dell'accent dinamico
     val accent = if (phase == AssistantViewModel.Phase.ERROR) Color(0xFFFF5252) else WaveStreamColors.Accent
@@ -91,11 +93,18 @@ fun AssistantOrb(
         label = "breathing"
     )
 
-    // Pulse microfono (solo in ascolto, reattività istantanea)
+    // Rotazione dell'anello di pulse durante l'ascolto (solo in ascolto, reattività istantanea)
     val micPulse by animateFloatAsState(
         targetValue = if (phase == AssistantViewModel.Phase.LISTENING) amplitude else 0f,
         animationSpec = tween(70),
         label = "micPulse"
+    )
+
+    // Rotazione del visualizer musicale
+    val waveSpin by transition.animateFloat(
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween((16_000 * speedFactor).toInt(), easing = LinearEasing)),
+        label = "waveSpin"
     )
 
     Canvas(modifier = modifier) {
@@ -109,13 +118,23 @@ fun AssistantOrb(
             else -> breathing * 0.06f
         }
 
-        // ---------- 1. Alone esterno soffuso ----------
-        val glowRadius = minDim * 0.5f * (1f + pulse * 0.5f)
+        // Energia complessiva: quanta "vita" ha l'orb in questo istante.
+        // Sale quando parli tu (mic), resta alta quando parla l'AI (waveform simulata),
+        // tenue e respirata quando idle.
+        val energy = when (phase) {
+            AssistantViewModel.Phase.LISTENING -> micPulse
+            AssistantViewModel.Phase.SPEAKING -> (waveform.lastOrNull() ?: breathing) * 0.9f
+            AssistantViewModel.Phase.THINKING -> breathing * 0.45f
+            else -> breathing * 0.25f
+        }
+
+        // ---------- 1. Alone esterno soffuso (si accende con l'energia) ----------
+        val glowRadius = minDim * 0.5f * (1f + pulse * 0.5f + energy * 0.14f)
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    accentDark.copy(alpha = 0.30f + pulse * 0.4f),
-                    accentDark.copy(alpha = 0.10f),
+                    accentDark.copy(alpha = (0.22f + energy * 0.5f + pulse * 0.2f).coerceAtMost(0.85f)),
+                    accentDark.copy(alpha = 0.10f + energy * 0.15f),
                     Color.Transparent
                 ),
                 center = center,
@@ -135,6 +154,100 @@ fun AssistantOrb(
                 style = Stroke(width = 2.5.dp.toPx())
             )
         }
+
+        // ---------- 2b. Visualizer musicale circolare ----------
+        // Barre radiali che "ballano": con la voce reale in ascolto,
+        // onde sintetiche stratificate (effetto musica) quando è idle/speaking.
+        val isListening = phase == AssistantViewModel.Phase.LISTENING
+        val isSpeaking = phase == AssistantViewModel.Phase.SPEAKING
+        val sampleCount = 90
+        val barBaseRadius = minDim * 0.225f
+        // l'ampiezza massima delle barre cresce con l'energia (focus quando c'è voce)
+        val barMax = minDim * 0.075f * (0.72f + energy * 0.55f)
+        val twoPi = (2f * Math.PI.toFloat())
+        val spinRad = waveSpin * (Math.PI.toFloat() / 180f)
+
+        // Valori effettivi per ogni barra (mic/voce AI reali, o sintetici quando idle)
+        val useWaveform = (isListening || isSpeaking) && waveform.isNotEmpty()
+        val barValues = FloatArray(sampleCount) { i ->
+            if (useWaveform) {
+                // mappa i campioni mic su tutte le barre, con smoothing dai vicini
+                val micIdx = (i.toFloat() / sampleCount * waveform.size).toInt()
+                val v = waveform.getOrNull(micIdx) ?: 0f
+                val prev = waveform.getOrNull((micIdx - 1 + waveform.size) % waveform.size) ?: v
+                val next = waveform.getOrNull((micIdx + 1) % waveform.size) ?: v
+                (v * 2f + prev + next) / 4f
+            } else {
+                // effetto musica: onde multiple stratificate che ondeggiano nel tempo
+                val u = i.toFloat() / sampleCount
+                val w1 = sin(u * twoPi * 3f + spinRad * 1.6f)
+                val w2 = sin(u * twoPi * 7f - spinRad * 1.1f)
+                val w3 = sin(u * twoPi * 13f + spinRad * 2.3f)
+                ((0.30f + 0.22f * w1 + 0.12f * w2 + 0.05f * w3) * (0.65f + 0.5f * breathing))
+                    .coerceIn(0.05f, 1f)
+            }
+        }
+
+        // barre radiali + percorso dell'onda liscia attraverso le punte
+        val wavePath = Path()
+        val tipPoints = Array(sampleCount) { Offset.Zero }
+        for (i in 0 until sampleCount) {
+            val v = barValues[i]
+            val angle = ((i.toFloat() / sampleCount) * 360f + waveSpin * 0.25f) *
+                (Math.PI.toFloat() / 180f)
+            val dirX = cos(angle)
+            val dirY = sin(angle)
+            val innerR = barBaseRadius
+            val outerR = barBaseRadius + v * barMax + minDim * 0.006f
+
+            drawLine(
+                color = accentLight.copy(alpha = 0.20f + 0.65f * v),
+                start = Offset(center.x + innerR * dirX, center.y + innerR * dirY),
+                end = Offset(center.x + outerR * dirX, center.y + outerR * dirY),
+                strokeWidth = 2.4.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+
+            // puntino luminoso in cima alle barre alte
+            if (v > 0.45f) {
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.7f * v),
+                    radius = 1.8.dp.toPx(),
+                    center = Offset(center.x + outerR * dirX, center.y + outerR * dirY)
+                )
+            }
+
+            tipPoints[i] = Offset(
+                center.x + (outerR + minDim * 0.012f) * dirX,
+                center.y + (outerR + minDim * 0.012f) * dirY
+            )
+        }
+
+        // onda liscia avvolgente (curva chiusa passante per le punte, smooth quadratica)
+        wavePath.moveTo(
+            (tipPoints[sampleCount - 1].x + tipPoints[0].x) / 2f,
+            (tipPoints[sampleCount - 1].y + tipPoints[0].y) / 2f
+        )
+        for (i in 0 until sampleCount) {
+            val cur = tipPoints[i]
+            val next = tipPoints[(i + 1) % sampleCount]
+            wavePath.quadraticBezierTo(cur.x, cur.y, (cur.x + next.x) / 2f, (cur.y + next.y) / 2f)
+        }
+        wavePath.close()
+
+        // alone dell'onda + tratto nitido (l'onda si accende quando c'è voce)
+        val waveGlow = if (isListening || isSpeaking) 0.30f + energy * 0.35f else 0.15f
+        val waveLine = if (isListening || isSpeaking) 0.60f + energy * 0.35f else 0.42f
+        drawPath(
+            path = wavePath,
+            color = accent.copy(alpha = waveGlow),
+            style = Stroke(width = 7.dp.toPx())
+        )
+        drawPath(
+            path = wavePath,
+            color = accentLight.copy(alpha = waveLine),
+            style = Stroke(width = 1.8.dp.toPx())
+        )
 
         // ---------- 3. Quadrante di tacche (48 tick) ----------
         rotate(degrees = dialRotation, pivot = center) {
@@ -239,11 +352,11 @@ fun AssistantOrb(
             center = center
         )
 
-        // corpo sferico: centro incandescente → accent → bordo scuro
+        // corpo sferico: centro incandescente → accent → bordo scuro (più energetico = più bianco)
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    Color.White,
+                    Color.White.copy(alpha = (0.85f + energy * 0.15f).coerceAtMost(1f)),
                     accentLight,
                     accent,
                     accentDark

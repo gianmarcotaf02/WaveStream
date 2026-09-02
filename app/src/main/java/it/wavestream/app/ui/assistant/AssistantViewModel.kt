@@ -45,6 +45,7 @@ class AssistantViewModel @Inject constructor(
         val assistantText: String? = null,   // ultima risposta
         val results: List<AiResultItem> = emptyList(),
         val amplitude: Float = 0f,           // per il pulse dell'orb
+        val waveform: List<Float> = emptyList(), // storico ampiezze → visualizer circolare
         val ttsEnabled: Boolean = true,
         val errorMessage: String? = null
     )
