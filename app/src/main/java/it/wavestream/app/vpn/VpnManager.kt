@@ -70,7 +70,17 @@ class VpnManager @Inject constructor(
         }
     }
 
-    private val backend = GoBackend(context)
+    // Backend GoBackend: carica libwg-go.so. Se la lib nativa non è disponibile per l'ABI
+    // corrente (es. emulatori x86), degrada con grazia invece di crashare l'intera app.
+    private val backend: GoBackend? = try {
+        GoBackend(context)
+    } catch (t: Throwable) {
+        android.util.Log.e("VpnManager", "GoBackend non disponibile su questo device: ${t.message}")
+        null
+    }
+
+    /** true se il backend VPN è utilizzabile su questo device */
+    val isBackendAvailable: Boolean get() = backend != null
 
     private val _state = MutableStateFlow(Tunnel.State.DOWN)
     val state: StateFlow<Tunnel.State> = _state.asStateFlow()
