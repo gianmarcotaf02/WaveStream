@@ -1,6 +1,7 @@
 package it.wavestream.app.voice
 
 import android.content.Context
+import android.media.AudioManager
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
@@ -48,7 +49,9 @@ class TtsManager @Inject constructor(
     // Impostazioni correnti (aggiornate dalle preferenze)
     private var speechRate: Float = 1.0f
     private var pitch: Float = 1.0f
-    private var voiceVolume: Float = 1.8f // gain software (1.0 = volume naturale)
+    private var voiceVolume: Float = 2.5f // gain software (1.0 = volume naturale)
+    private var autoVolumeBoost: Boolean = true // massimizza volume device durante la risposta
+    private var savedVolumeIndex: Int? = null // per ripristino post-risposta
     private var voiceName: String? = null
     private var languageTag: String = "it-IT"
 
@@ -96,6 +99,9 @@ class TtsManager @Inject constructor(
         scope.launch {
             userPreferences.getAssistantTtsVolumeFlow().collect { voiceVolume = it }
         }
+        scope.launch {
+            userPreferences.getAssistantAutoVolumeBoostFlow().collect { autoVolumeBoost = it }
+        }
 
         // Pre-carica il modello Piper in background (download ~26MB solo al primo avvio)
         preload()
@@ -130,6 +136,7 @@ class TtsManager @Inject constructor(
         stop()
         onDoneCallback = onDone
         _isSpeaking.value = true
+        boostMediaVolume()
 
         scope.launch {
             // Piper se il modello è già scaricato e carica correttamente
@@ -139,9 +146,7 @@ class TtsManager @Inject constructor(
                     speed = speechRate,
                     gain = voiceVolume
                 ) {
-                    _isSpeaking.value = false
-                    onDoneCallback?.invoke()
-                    onDoneCallback = null
+                    finishSpeaking()
                 }
             } else {
                 // modello assente: avvia il download in background e usa il sistema ora
@@ -172,12 +177,49 @@ class TtsManager @Inject constructor(
         engine.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
     }
 
+    /** Alza il volume media del device al massimo durante la risposta di Nova */
+    private fun boostMediaVolume() {
+        if (!autoVolumeBoost) return
+        try {
+            val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            savedVolumeIndex = am.getStreamVolume(AudioManager.STREAM_MUSIC)
+            val max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+            val target = (max * 0.9f).toInt().coerceAtLeast(savedVolumeIndex ?: 0)
+            if (target != savedVolumeIndex) {
+                am.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0)
+            }
+        } catch (_: Exception) {
+            savedVolumeIndex = null
+        }
+    }
+
+    private fun restoreMediaVolume() {
+        val idx = savedVolumeIndex ?: return
+        savedVolumeIndex = null
+        try {
+            val am = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (am.getStreamVolume(AudioManager.STREAM_MUSIC) != idx) {
+                am.setStreamVolume(AudioManager.STREAM_MUSIC, idx, 0)
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    /** Fine della pronuncia: ripristina volume + notifica il completamento */
+    private fun finishSpeaking() {
+        restoreMediaVolume()
+        _isSpeaking.value = false
+        onDoneCallback?.invoke()
+        onDoneCallback = null
+    }
+
     fun stop() {
         sherpaTts.stopPlayback()
         try {
             tts?.stop()
         } catch (_: Exception) {
         }
+        restoreMediaVolume()
         _isSpeaking.value = false
         onDoneCallback = null
     }
@@ -207,16 +249,12 @@ class TtsManager @Inject constructor(
             }
 
             override fun onDone(utteranceId: String?) {
-                _isSpeaking.value = false
-                onDoneCallback?.invoke()
-                onDoneCallback = null
+                finishSpeaking()
             }
 
             @Deprecated("Deprecated in Java")
             override fun onError(utteranceId: String?) {
-                _isSpeaking.value = false
-                onDoneCallback?.invoke()
-                onDoneCallback = null
+                finishSpeaking()
             }
         })
     }

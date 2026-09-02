@@ -138,7 +138,8 @@ class UserPreferences @Inject constructor(
         private val ASSISTANT_TTS_LANGUAGE = stringPreferencesKey("assistant_tts_language")
         private val ASSISTANT_TTS_RATE = floatPreferencesKey("assistant_tts_rate")
         private val ASSISTANT_TTS_PITCH = floatPreferencesKey("assistant_tts_pitch")
-        private val ASSISTANT_TTS_VOLUME = floatPreferencesKey("assistant_tts_volume") // 0.1..1.0
+        private val ASSISTANT_TTS_VOLUME = floatPreferencesKey("assistant_tts_volume") // 0.1..3.0 (gain)
+        private val ASSISTANT_AUTO_VOLUME = booleanPreferencesKey("assistant_auto_volume") // massimizza volume durante risposta
     }
     
     private val dataStore = context.dataStore
@@ -216,7 +217,16 @@ class UserPreferences @Inject constructor(
     }
 
     fun getAssistantTtsVolumeFlow(): Flow<Float> {
-        return dataStore.data.map { it[ASSISTANT_TTS_VOLUME] ?: 1.8f }
+        return dataStore.data.map { it[ASSISTANT_TTS_VOLUME] ?: 2.5f }
+    }
+
+    // Massimizza il volume media del device mentre Nova parla (ripristinato dopo)
+    suspend fun setAssistantAutoVolumeBoost(enabled: Boolean) {
+        dataStore.edit { it[ASSISTANT_AUTO_VOLUME] = enabled }
+    }
+
+    fun getAssistantAutoVolumeBoostFlow(): Flow<Boolean> {
+        return dataStore.data.map { it[ASSISTANT_AUTO_VOLUME] ?: true }
     }
     
     // Current Profile
