@@ -7,9 +7,11 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -154,12 +156,13 @@ class UserPreferences @Inject constructor(
     }
 
     // Gemini API Key (cifrata, per l'assistente AI)
-    suspend fun setGeminiApiKey(apiKey: String) {
+    // NB: EncryptedSharedPreferences è MOLTO lento alla prima creazione → sempre su Dispatchers.IO
+    suspend fun setGeminiApiKey(apiKey: String) = withContext(Dispatchers.IO) {
         encryptedPrefs.edit().putString(ENCRYPTED_GEMINI_KEY, apiKey).apply()
     }
 
-    fun getGeminiApiKey(): String? {
-        return encryptedPrefs.getString(ENCRYPTED_GEMINI_KEY, null)
+    suspend fun getGeminiApiKey(): String? = withContext(Dispatchers.IO) {
+        encryptedPrefs.getString(ENCRYPTED_GEMINI_KEY, null)
     }
 
     // Assistente AI — voce TTS
