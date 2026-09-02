@@ -51,15 +51,26 @@ data class GeminiContent(
 data class GeminiPart(
     val text: String? = null,
     @Json(name = "function_call") val functionCall: GeminiFunctionCall? = null,
-    @Json(name = "function_response") val functionResponse: GeminiFunctionResponse? = null
+    @Json(name = "function_response") val functionResponse: GeminiFunctionResponse? = null,
+    @Json(name = "inline_data") val inlineData: GeminiInlineData? = null
 ) {
     companion object {
         fun ofText(text: String) = GeminiPart(text = text)
         fun ofCall(name: String, args: Map<String, Any?>) = GeminiPart(functionCall = GeminiFunctionCall(name, args))
         fun ofResponse(name: String, response: Map<String, Any?>) =
             GeminiPart(functionResponse = GeminiFunctionResponse(name, response))
+
+        /** Audio WAV/MP3 encodato in base64 (input vocale nativo del modello) */
+        fun ofAudio(base64Wav: String, mimeType: String = "audio/wav") =
+            GeminiPart(inlineData = GeminiInlineData(mimeType, base64Wav))
     }
 }
+
+@JsonClass(generateAdapter = true)
+data class GeminiInlineData(
+    @Json(name = "mime_type") val mimeType: String,
+    val data: String // base64
+)
 
 @JsonClass(generateAdapter = true)
 data class GeminiFunctionCall(

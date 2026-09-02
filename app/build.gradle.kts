@@ -29,10 +29,6 @@ android {
         versionName = "1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
-        }
     }
 
     signingConfigs {
@@ -66,14 +62,6 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
-    }
-
-    // whisper.cpp (assistente vocale AI) — compilazione nativa
-    externalNativeBuild {
-        cmake {
-            path = file("src/main/cpp/CMakeLists.txt")
-            version = "3.22.1"
-        }
     }
 
     applicationVariants.all {
