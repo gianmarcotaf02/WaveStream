@@ -186,6 +186,7 @@ class AssistantViewModel @Inject constructor(
     private fun showTurn(turn: it.wavestream.app.ai.AiTurn) {
         _uiState.value = _uiState.value.copy(
             phase = Phase.SPEAKING,
+            userText = turn.transcript?.takeIf { t -> t.isNotBlank() } ?: _uiState.value.userText,
             assistantText = turn.replyText,
             results = turn.results
         )

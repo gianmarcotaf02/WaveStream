@@ -40,6 +40,9 @@ REGOLE:
 - Se non trovi nulla, dillo gentilmente e proponi un'alternativa (es. categoria simile che esiste: usa list_categories per verificarla).
 - Risposte di UNA o DUE frasi, pronunciate ad alta voce: niente elenchi, markdown o emoji.
 - Per saluti e battute generiche rispondi in una frase. Non hai accesso a internet: se chiedi informazioni in tempo reale che non puoi sapere, dillo e riporta l'utente ai contenuti.
+- All'inizio di OGNI tua risposta finale, scrivi su una riga separata la trascrizione esatta di cosa ha detto l'utente, in questo formato esatto:
+<hai detto>testo trascritto</hai detto>
+Subito dopo scrivi la tua risposta vera e propria (che verrà letta ad alta voce).
 - Le domande dell'utente arrivano dalla voce e possono contenere errori: interpreta il senso, non la lettera."""
     }
 
@@ -113,6 +116,10 @@ REGOLE:
 
             val response = geminiApi.generateContent(DEFAULT_MODEL, apiKey, request)
             val parts = response.firstParts()
+            android.util.Log.d(
+                "NovaAI",
+                "Gemini round ${it + 1}: ${parts.size} parti (testo=${parts.count { p -> p.text != null }}, call=${parts.count { p -> p.functionCall != null }})"
+            )
 
             if (parts.isEmpty()) {
                 replyText = "Non ho capito, potresti ripetere?"
@@ -128,9 +135,10 @@ REGOLE:
             }
 
             if (calls.isEmpty()) {
-                // Risposta finale: aggiungila allo storico ed esci
+                // Risposta finale: aggiungila allo storico, estrai la trascrizione,
+                // e applica il fallback DB se il modello non ha prodotto risultati
                 history.add(GeminiContent(role = "model", parts = parts))
-                return AiTurn(replyText.ifEmpty { "Ecco cosa ho trovato!" }, collectedItems)
+                return finalizeTurn(replyText, collectedItems)
             }
 
             // C'è almeno una function call: registra il modello nello storico,
@@ -148,10 +156,48 @@ REGOLE:
             history.add(GeminiContent(role = "user", parts = responseParts))
         }
 
-        // Troppi round: restituisci quello che abbiamo
+        // Troppi round: restituisci comunque ciò che abbiamo
+        return finalizeTurn(replyText, collectedItems)
+    }
+
+    /**
+     * Post-processing della risposta:
+     * 1. estrae la trascrizione <hai detto>...</hai detto> dal testo
+     * 2. se il modello NON ha prodotto item nel carosello, fa una ricerca locale
+     *    nel database con le parole della trascrizione → i titoli mostrati sono
+     *    SEMPRE contenuti reali della playlist dell'utente, mai allucinazioni.
+     */
+    private suspend fun finalizeTurn(replyText: String, items: List<AiResultItem>): AiTurn {
+        var cleanReply = replyText.trim()
+        var transcript: String? = null
+
+        val regex = Regex("<hai detto>(.*?)</hai detto>", RegexOption.IGNORE_CASE)
+        regex.find(cleanReply)?.let { match ->
+            transcript = match.groupValues[1].trim()
+            cleanReply = cleanReply.replace(match.value, "").trim()
+        }
+
+        var finalItems = items
+        if (finalItems.isEmpty()) {
+            val query = transcript ?: cleanReply
+            if (query.isNotBlank() && query.length > 3) {
+                android.util.Log.w("NovaAI", "Nessun item dal modello → fallback ricerca DB con: '$query'")
+                val fallback = aiTools.searchContent(query, "ALL")
+                if (fallback.items.isNotEmpty()) {
+                    finalItems = fallback.items
+                }
+            }
+        }
+
+        android.util.Log.d(
+            "NovaAI",
+            "Turno completato: transcript='${transcript ?: "?"}' items=${finalItems.size} reply='$cleanReply'"
+        )
+
         return AiTurn(
-            replyText.ifEmpty { "Ecco i risultati!" },
-            collectedItems
+            replyText = cleanReply.ifEmpty { "Ecco cosa ho trovato!" },
+            results = finalItems,
+            transcript = transcript
         )
     }
 }
