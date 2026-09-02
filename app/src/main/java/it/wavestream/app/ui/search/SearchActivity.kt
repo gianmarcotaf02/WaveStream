@@ -493,10 +493,11 @@ fun SearchScreen(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
 
-                    // Cursore bianco lampeggiante all'inizio della riga
-                    // (in overlay sul placeholder quando il box è vuoto)
-                    Box {
-                        if (query.isEmpty()) {
+                    // Cursore bianco lampeggiante: quando la query è vuota resta in
+                    // overlay all'inizio del placeholder; con del testo si posiziona
+                    // dinamicamente subito dopo l'ultima lettera digitata
+                    if (query.isEmpty()) {
+                        Box {
                             Text(
                                 text = "Cerca film, serie TV e canali",
                                 color = WaveStreamColors.TextTertiary,
@@ -504,7 +505,12 @@ fun SearchScreen(
                                 fontWeight = FontWeight.Medium,
                                 maxLines = 1
                             )
-                        } else {
+                            BlinkingCursor(
+                                modifier = Modifier.align(Alignment.CenterStart)
+                            )
+                        }
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = query,
                                 color = WaveStreamColors.TextPrimary,
@@ -512,10 +518,9 @@ fun SearchScreen(
                                 fontWeight = FontWeight.Medium,
                                 maxLines = 1
                             )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            BlinkingCursor()
                         }
-                        BlinkingCursor(
-                            modifier = Modifier.align(Alignment.CenterStart)
-                        )
                     }
                 }
             }
