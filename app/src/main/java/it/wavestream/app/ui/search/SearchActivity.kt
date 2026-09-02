@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.rememberScrollState
@@ -35,11 +36,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -611,7 +609,7 @@ fun SearchScreen(
                     // Suggerimenti istantanei: visibili durante la digitazione
                     // (già con 1 solo carattere, o mentre la ricerca completa è in corso)
                     suggestions.isNotEmpty() && (query.length < 2 || isLoading) -> {
-                        SuggestionsDropdown(
+                        SuggestionPills(
                             suggestions = suggestions,
                             onItemClick = onItemClick
                         )
@@ -676,102 +674,47 @@ fun SearchScreen(
 }
 
 /**
- * Dropdown di suggerimenti istantanei mostrato nell'area risultati mentre
- * l'utente digita (max 6 risultati, navigabili con il D-pad).
+ * Suggerimenti istantanei stile YouTube: pill orizzontali a forma di ovale
+ * disposte in una riga scorrevole, una parola (opzione) per pill, senza icone.
+ * Al focus la pill si riempie di accent (senza ingrandimento).
  */
 @Composable
-private fun SuggestionsDropdown(
+private fun SuggestionPills(
     suggestions: List<SearchResultItem>,
     onItemClick: (SearchResultItem) -> Unit
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(max = 420.dp)
-            .verticalScroll(rememberScrollState())
-            .clip(RoundedCornerShape(16.dp))
-            .background(WaveStreamColors.BackgroundSecondary)
-            .border(1.dp, WaveStreamColors.Accent.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-            .padding(vertical = 6.dp)
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         suggestions.forEach { item ->
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
-            val icon = when {
-                item.isCategory -> Icons.Default.Folder
-                item.type == ContentType.CHANNEL -> Icons.Default.LiveTv
-                item.type == ContentType.SERIES -> Icons.Default.Tv
-                else -> Icons.Default.Movie
-            }
-            Row(
+            Text(
+                text = item.title,
+                color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (isFocused) WaveStreamColors.Accent else Color.Transparent)
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        if (isFocused) WaveStreamColors.Accent
+                        else WaveStreamColors.BackgroundSecondary
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.25f),
+                        shape = RoundedCornerShape(50)
+                    )
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
                     ) { onItemClick(item) }
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (item.posterUrl != null) {
-                    AsyncImage(
-                        model = item.posterUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(36.dp)
-                            .height(50.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(WaveStreamColors.BackgroundTertiary)
-                    )
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .width(36.dp)
-                            .height(50.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(WaveStreamColors.BackgroundTertiary),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = item.title,
-                        color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = item.subtitle ?: run {
-                            if (item.type == ContentType.MOVIE) "Film"
-                            else if (item.type == ContentType.SERIES) "Serie TV"
-                            else "Canale Live"
-                        },
-                        color = if (isFocused) Color.White.copy(alpha = 0.85f) else WaveStreamColors.TextSecondary,
-                        fontSize = 13.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                    tint = if (isFocused) Color.White else WaveStreamColors.TextTertiary,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+                    .padding(horizontal = 18.dp, vertical = 9.dp)
+            )
         }
     }
 }
