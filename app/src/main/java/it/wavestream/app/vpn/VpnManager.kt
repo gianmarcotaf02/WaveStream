@@ -240,8 +240,13 @@ class VpnManager @Inject constructor(
     suspend fun start(configText: String): Result<Unit> = withContext(Dispatchers.IO) {
         _error.value = null
         try {
+            val b = backend ?: run {
+                val msg = "VPN non disponibile su questo device (backend nativo mancante)"
+                _error.value = msg
+                return@withContext Result.failure(IllegalStateException(msg))
+            }
             val config = Config.parse(ensureAppOnly(configText).reader().buffered())
-            backend.setState(tunnel, Tunnel.State.UP, config)
+            b.setState(tunnel, Tunnel.State.UP, config)
             _currentConfig.value = configText
             Result.success(Unit)
         } catch (e: BackendException) {
@@ -273,7 +278,7 @@ class VpnManager @Inject constructor(
     suspend fun stop(): Result<Unit> = withContext(Dispatchers.IO) {
         _error.value = null
         try {
-            backend.setState(tunnel, Tunnel.State.DOWN, null)
+            backend?.setState(tunnel, Tunnel.State.DOWN, null)
             Result.success(Unit)
         } catch (e: Exception) {
             _error.value = e.message ?: "Errore durante l'arresto della VPN"

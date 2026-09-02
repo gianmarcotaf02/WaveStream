@@ -64,13 +64,6 @@ android {
         buildConfig = true
     }
 
-    // Nova voice — escludi ABI x86 32-bit (TV/PC usano x86_64 o ARM), riduce l'APK
-    packaging {
-        jniLibs {
-            excludes += setOf("lib/x86/**")
-        }
-    }
-
     applicationVariants.all {
         val variantName = name
         outputs.all {
