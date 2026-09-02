@@ -89,6 +89,7 @@ fun AssistantScreen(
                 AssistantOrb(
                     phase = uiState.phase,
                     amplitude = uiState.amplitude,
+                    waveform = uiState.waveform,
                     modifier = Modifier.size(280.dp)
                 )
             }

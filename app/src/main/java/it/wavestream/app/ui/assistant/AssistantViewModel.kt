@@ -169,8 +169,27 @@ class AssistantViewModel @Inject constructor(
             results = turn.results
         )
 
-        // Voce di risposta (se abilitata) — a fine pronuncia si riattiva l'ascolto
+        // Voce di risposta (se abilitata) — a fine pronuncia si riattiva l'ascolto.
+        // Durante la pronuncia, alimenta il visualizer con un ritmo parlato simulato
+        // (burst e pause), così l'orb "balla" con la voce dell'AI.
         if (_uiState.value.ttsEnabled && turn.replyText.isNotBlank()) {
+            viewModelScope.launch {
+                var t = 0f
+                while (_uiState.value.phase == Phase.SPEAKING) {
+                    val w1 = kotlin.math.sin(t * 5.5f) * 0.5f + 0.5f
+                    val w2 = kotlin.math.sin(t * 13.7f + 1.3f) * 0.5f + 0.5f
+                    // pseudo-pause tra le frasi (il ritmo della voce)
+                    val pauseFactor = if (kotlin.math.sin(t * 0.9f) > -0.6f) 1f else 0.25f
+                    val v = ((w1 * 0.6f + w2 * 0.4f) * pauseFactor).coerceIn(0.03f, 1f)
+                    waveformHistory.addLast(kotlin.math.sqrt(v))
+                    while (waveformHistory.size > WAVEFORM_SAMPLES) {
+                        waveformHistory.removeFirst()
+                    }
+                    _uiState.value = _uiState.value.copy(waveform = waveformHistory.toList())
+                    t += 0.09f
+                    delay(55)
+                }
+            }
             ttsManager.speak(turn.replyText) {
                 if (_uiState.value.phase == Phase.SPEAKING) {
                     startListening()
