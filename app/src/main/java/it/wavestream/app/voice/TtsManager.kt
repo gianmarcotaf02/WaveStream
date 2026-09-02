@@ -96,6 +96,16 @@ class TtsManager @Inject constructor(
         scope.launch {
             userPreferences.getAssistantTtsVolumeFlow().collect { voiceVolume = it }
         }
+
+        // Pre-carica il modello Piper in background (download ~26MB solo al primo avvio)
+        preload()
+    }
+
+    /**
+     * Pre-carica il motore neurale (download+init) in background, senza bloccare nulla.
+     */
+    fun preload() {
+        scope.launch { sherpaTts.ensureReady() }
     }
 
     private fun applySettings() {
@@ -112,21 +122,58 @@ class TtsManager @Inject constructor(
 
     /**
      * Pronuncia un testo. [onDone] opzionale chiamato a fine pronuncia.
+     *
+     * Motore primario: Piper neurale (voce naturale + gain software).
+     * Fallback: TTS di sistema (mentre il modello è in download o se non disponibile).
      */
     fun speak(text: String, onDone: (() -> Unit)? = null) {
-        val engine = tts ?: run { onDone?.invoke(); return }
-        if (!_isReady.value) { onDone?.invoke(); return }
-
+        stop()
         onDoneCallback = onDone
         _isSpeaking.value = true
+
+        scope.launch {
+            // Piper se il modello è già scaricato e carica correttamente
+            if (sherpaTts.isModelDownloaded() && sherpaTts.ensureReady()) {
+                sherpaTts.synthesizeAndPlay(
+                    text = text,
+                    speed = speechRate,
+                    gain = voiceVolume
+                ) {
+                    _isSpeaking.value = false
+                    onDoneCallback?.invoke()
+                    onDoneCallback = null
+                }
+            } else {
+                // modello assente: avvia il download in background e usa il sistema ora
+                if (!sherpaTts.isModelDownloaded()) preload()
+                speakWithSystemTts(text)
+            }
+        }
+    }
+
+    /** Fallback: TextToSpeech di sistema (volume limitato al 100%) */
+    private fun speakWithSystemTts(text: String) {
+        val engine = tts ?: run {
+            _isSpeaking.value = false
+            onDoneCallback?.invoke()
+            onDoneCallback = null
+            return
+        }
+        if (!_isReady.value) {
+            _isSpeaking.value = false
+            onDoneCallback?.invoke()
+            onDoneCallback = null
+            return
+        }
         val utteranceId = "wavestream_assistant_${System.currentTimeMillis()}"
         val params = android.os.Bundle().apply {
-            putFloat(android.speech.tts.TextToSpeech.Engine.KEY_PARAM_VOLUME, voiceVolume)
+            putFloat(android.speech.tts.TextToSpeech.Engine.KEY_PARAM_VOLUME, voiceVolume.coerceAtMost(1f))
         }
         engine.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
     }
 
     fun stop() {
+        sherpaTts.stopPlayback()
         try {
             tts?.stop()
         } catch (_: Exception) {
@@ -147,9 +194,9 @@ class TtsManager @Inject constructor(
         applySettings()
     }
 
-    /** Anteprima live del volume voce (0.1..1.0) */
+    /** Anteprima live del volume/gain voce (0.1..3.0 — oltre 1.0 amplifica) */
     fun previewVolume(value: Float) {
-        voiceVolume = value.coerceIn(0.1f, 1f)
+        voiceVolume = value.coerceIn(0.1f, 3f)
     }
 
     init {
