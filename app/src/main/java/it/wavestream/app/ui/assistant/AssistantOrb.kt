@@ -19,19 +19,27 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.unit.dp
+import it.wavestream.app.ui.theme.WaveStreamColors
 import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * L'"orb" dell'assistente: sfera luminosa con anelli di particelle orbitanti,
- * ispirata a HUD fantascientifici (glow blu su sfondo scuro).
+ * L'"orb" dell'assistente: reattore HUD futuristico nei colori dell'accent
+ * dinamico dell'app (segue il tema scelto dall'utente).
+ *
+ * Struttura (dal fuori verso l'interno):
+ * - alone luminoso soffuso
+ * - anello di tacche tipo quadrante (48 tick, i cardinali più lunghi)
+ * - 3 anelli ad archi rotanti (velocità e inclinazioni diverse)
+ * - anello di pulse espansivo durante l'ascolto
+ * - nucleo sferico con bordo nitido e riflesso speculare
  *
  * Stati:
- * - IDLE:      respiro lento e soffuso
- * - LISTENING: pulsa con l'ampiezza del microfono
- * - THINKING:  rotazione rapida, particelle accelerano
- * - SPEAKING:  pulsa a ritmo costante
- * - ERROR:     alone rosso
+ * - IDLE:      rotazioni lente, respiro soffuso
+ * - LISTENING: pulsa con l'ampiezza del microfono, anello di pulse
+ * - THINKING:  archi accelerano
+ * - SPEAKING:  respiro a ritmo sostenuto
+ * - ERROR:     tutta la palette diventa rossa
  */
 @Composable
 fun AssistantOrb(
@@ -39,93 +47,75 @@ fun AssistantOrb(
     amplitude: Float,
     modifier: Modifier = Modifier
 ) {
-    // Transizioni infinite per le rotazioni orbitali (velocità diverse per profondità)
+    // Palette dell'accent dinamico
+    val accent = if (phase == AssistantViewModel.Phase.ERROR) Color(0xFFFF5252) else WaveStreamColors.Accent
+    val accentLight = if (phase == AssistantViewModel.Phase.ERROR) Color(0xFFFF8A80) else WaveStreamColors.AccentLight
+    val accentDark = if (phase == AssistantViewModel.Phase.ERROR) Color(0xFF7A1F1F) else WaveStreamColors.AccentDark
+
     val transition = rememberInfiniteTransition(label = "orb")
 
+    // Fattore di velocità per stato (THINKING accelera tutto)
     val speedFactor = when (phase) {
-        AssistantViewModel.Phase.THINKING -> 0.25f   // rotazioni molto veloci
-        AssistantViewModel.Phase.LISTENING -> 0.6f
-        AssistantViewModel.Phase.SPEAKING -> 0.7f
+        AssistantViewModel.Phase.THINKING -> 0.22f
+        AssistantViewModel.Phase.LISTENING -> 0.55f
+        AssistantViewModel.Phase.SPEAKING -> 0.65f
         else -> 1f
     }
 
-    val rotationA by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween((18_000 * speedFactor).toInt(), easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "orbitA"
+    // Rotazioni degli anelli ad archi (alternano verso)
+    val ringAClockwise by transition.animateFloat(
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween((20_000 * speedFactor).toInt(), easing = LinearEasing)),
+        label = "ringA"
     )
-    val rotationB by transition.animateFloat(
-        initialValue = 360f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween((26_000 * speedFactor).toInt(), easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "orbitB"
+    val ringBCounter by transition.animateFloat(
+        initialValue = 360f, targetValue = 0f,
+        animationSpec = infiniteRepeatable(tween((14_000 * speedFactor).toInt(), easing = LinearEasing)),
+        label = "ringB"
     )
-    val rotationC by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween((34_000 * speedFactor).toInt(), easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "orbitC"
+    val ringCClockwise by transition.animateFloat(
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween((28_000 * speedFactor).toInt(), easing = LinearEasing)),
+        label = "ringC"
     )
-
-    // Respiro quando idle / ritmo quando parla
+    // Quadrante tacche: rotazione lentissima, quasi impercettibile
+    val dialRotation by transition.animateFloat(
+        initialValue = 0f, targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween((90_000 * speedFactor).toInt(), easing = LinearEasing)),
+        label = "dial"
+    )
+    // Respiro del nucleo
     val breathing by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2400, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
+        initialValue = 0f, targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(2200, easing = LinearEasing), RepeatMode.Reverse),
         label = "breathing"
     )
 
-    // Pulse da microfono (solo in ascolto)
+    // Pulse microfono (solo in ascolto, reattività istantanea)
     val micPulse by animateFloatAsState(
         targetValue = if (phase == AssistantViewModel.Phase.LISTENING) amplitude else 0f,
-        animationSpec = tween(80),
+        animationSpec = tween(70),
         label = "micPulse"
     )
 
-    // Colori dinamici per stato
-    val coreColor = when (phase) {
-        AssistantViewModel.Phase.ERROR -> Color(0xFFFF5252)
-        AssistantViewModel.Phase.LISTENING -> Color(0xFF64D2FF)
-        AssistantViewModel.Phase.THINKING -> Color(0xFF7EB6FF)
-        else -> Color(0xFF4DA3FF)
-    }
-    val glowColor = when (phase) {
-        AssistantViewModel.Phase.ERROR -> Color(0xFF7A1F1F)
-        else -> Color(0xFF1E5AA8)
-    }
-
     Canvas(modifier = modifier) {
         val center = Offset(size.width / 2f, size.height / 2f)
-        val baseRadius = size.minDimension * 0.14f
+        val minDim = size.minDimension
 
-        // Ampiezza di pulsazione combinata
+        // Ampiezza di pulsazione del nucleo
         val pulse = when (phase) {
-            AssistantViewModel.Phase.LISTENING -> micPulse * 0.45f
-            AssistantViewModel.Phase.SPEAKING -> breathing * 0.12f
+            AssistantViewModel.Phase.LISTENING -> micPulse * 0.5f
+            AssistantViewModel.Phase.SPEAKING -> breathing * 0.14f
             else -> breathing * 0.06f
         }
-        val coreRadius = baseRadius * (1f + pulse * 2f)
 
-        // ---- Alone esterno (glow) ----
-        val glowRadius = size.minDimension * 0.48f * (1f + pulse)
+        // ---------- 1. Alone esterno soffuso ----------
+        val glowRadius = minDim * 0.5f * (1f + pulse * 0.5f)
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
-                    glowColor.copy(alpha = 0.35f + pulse),
-                    glowColor.copy(alpha = 0.12f),
+                    accentDark.copy(alpha = 0.30f + pulse * 0.4f),
+                    accentDark.copy(alpha = 0.10f),
                     Color.Transparent
                 ),
                 center = center,
@@ -135,104 +125,177 @@ fun AssistantOrb(
             center = center
         )
 
-        // ---- Anelli orbitanti con particelle ----
-        val orbits = listOf(
-            OrbitSpec(radius = size.minDimension * 0.30f, tilt = -18f, rotation = rotationA, particles = 22, dotSize = 3.2f),
-            OrbitSpec(radius = size.minDimension * 0.38f, tilt = 14f, rotation = rotationB, particles = 28, dotSize = 2.6f),
-            OrbitSpec(radius = size.minDimension * 0.46f, tilt = -8f, rotation = rotationC, particles = 34, dotSize = 2.2f)
-        )
-
-        orbits.forEach { orbit ->
-            // traiettoria ellittica appena percettibile
-            rotate(degrees = orbit.tilt, pivot = center) {
-                drawCircle(
-                    brush = Brush.sweepGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            coreColor.copy(alpha = 0.10f),
-                            Color.Transparent,
-                            coreColor.copy(alpha = 0.05f),
-                            Color.Transparent
-                        ),
-                        center = center
-                    ),
-                    radius = orbit.radius,
-                    center = center,
-                    style = Stroke(width = 1.2.dp.toPx(), cap = StrokeCap.Round)
-                )
-            }
-
-            // particelle lungo l'orbita
-            rotate(degrees = orbit.tilt, pivot = center) {
-                repeat(orbit.particles) { i ->
-                    val angleDeg = ((orbit.rotation + (i * 360f / orbit.particles)) % 360f)
-                    val angle = (angleDeg * (Math.PI.toFloat() / 180f))
-                    val x = center.x + orbit.radius * cos(angle)
-                    val y = center.y + orbit.radius * sin(angle) * 0.96f
-
-                    // luminosità variabile: le particelle "scintillano"
-                    val twinkle = 0.35f + 0.65f * ((sin(angle * 3f + orbit.rotation * 0.05f) + 1f) / 2f)
-                    drawCircle(
-                        color = coreColor.copy(alpha = 0.55f * twinkle + 0.15f),
-                        radius = orbit.dotSize.dp.toPx() * (0.7f + twinkle * 0.6f),
-                        center = Offset(x, y)
-                    )
-                }
-            }
+        // ---------- 2. Anello di pulse durante l'ascolto ----------
+        if (phase == AssistantViewModel.Phase.LISTENING && micPulse > 0.02f) {
+            val pulseRadius = minDim * 0.24f + micPulse * minDim * 0.22f
+            drawCircle(
+                color = accentLight.copy(alpha = (1f - micPulse) * 0.5f),
+                radius = pulseRadius,
+                center = center,
+                style = Stroke(width = 2.5.dp.toPx())
+            )
         }
 
-        // ---- Segmenti di mirino attorno al nucleo (stile HUD) ----
-        val tickRadius = coreRadius * 2.1f
-        listOf(0f, 90f, 180f, 270f).forEach { deg ->
-            rotate(degrees = deg + rotationA * 0.15f, pivot = center) {
+        // ---------- 3. Quadrante di tacche (48 tick) ----------
+        rotate(degrees = dialRotation, pivot = center) {
+            val tickCount = 48
+            val tickInner = minDim * 0.475f
+            val tickOuterBase = minDim * 0.495f
+            repeat(tickCount) { i ->
+                val isCardinal = i % 12 == 0
+                val tickOuter = if (isCardinal) tickOuterBase + minDim * 0.02f else tickOuterBase
+                val angleRad = (i * 360f / tickCount) * (Math.PI.toFloat() / 180f)
+                val dirX = cos(angleRad)
+                val dirY = sin(angleRad)
                 drawLine(
-                    color = coreColor.copy(alpha = 0.8f),
-                    start = Offset(center.x, center.y - tickRadius - 6.dp.toPx()),
-                    end = Offset(center.x, center.y - tickRadius),
-                    strokeWidth = 2.dp.toPx(),
+                    color = accentLight.copy(alpha = if (isCardinal) 0.85f else 0.30f),
+                    start = Offset(center.x + tickInner * dirX, center.y + tickInner * dirY),
+                    end = Offset(center.x + tickOuter * dirX, center.y + tickOuter * dirY),
+                    strokeWidth = if (isCardinal) 2.5.dp.toPx() else 1.dp.toPx(),
                     cap = StrokeCap.Round
                 )
             }
         }
 
-        // ---- Nucleo: sfera con gradiente luminoso ----
+        // ---------- 4. Cerchio strutturale esterno ----------
+        drawCircle(
+            color = accent.copy(alpha = 0.18f),
+            radius = minDim * 0.455f,
+            center = center,
+            style = Stroke(width = 1.dp.toPx())
+        )
+
+        // ---------- 5. Anelli ad archi rotanti ----------
+        data class ArcRing(val radius: Float, val tilt: Float, val rotation: Float, val arcs: Int, val sweep: Float, val width: Float, val alpha: Float)
+
+        val rings = listOf(
+            ArcRing(minDim * 0.300f, tilt = -20f, rotation = ringAClockwise, arcs = 3, sweep = 42f, width = 2.2f, alpha = 0.65f),
+            ArcRing(minDim * 0.355f, tilt = 14f, rotation = ringBCounter, arcs = 2, sweep = 80f, width = 1.4f, alpha = 0.45f),
+            ArcRing(minDim * 0.410f, tilt = -7f, rotation = ringCClockwise, arcs = 5, sweep = 18f, width = 1.2f, alpha = 0.35f)
+        )
+
+        rings.forEach { ring ->
+            rotate(degrees = ring.tilt, pivot = center) {
+                val gap = 360f / ring.arcs
+                repeat(ring.arcs) { i ->
+                    val start = ring.rotation + i * gap
+                    drawArc(
+                        color = accentLight.copy(alpha = ring.alpha),
+                        startAngle = start - 90f,
+                        sweepAngle = ring.sweep,
+                        useCenter = false,
+                        style = Stroke(width = ring.width.dp.toPx(), cap = StrokeCap.Round)
+                    )
+                }
+                // punta luminosa in testa a ogni arco del primo anello
+                if (ring.radius < minDim * 0.32f) {
+                    repeat(ring.arcs) { i ->
+                        val headAngle = (ring.rotation + i * gap + ring.sweep - 90f) * (Math.PI.toFloat() / 180f)
+                        drawCircle(
+                            color = Color.White.copy(alpha = 0.85f),
+                            radius = 2.8.dp.toPx(),
+                            center = Offset(
+                                center.x + ring.radius * cos(headAngle),
+                                center.y + ring.radius * sin(headAngle)
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        // ---------- 6. Particelle orbitali (anello intermedio) ----------
+        rotate(degrees = ringBCounter * 1.4f, pivot = center) {
+            val orbitRadius = minDim * 0.255f
+            repeat(24) { i ->
+                val angle = (i * 360f / 24f) * (Math.PI.toFloat() / 180f)
+                val twinkle = 0.4f + 0.6f * ((sin(angle * 4f + ringBCounter * 0.08f) + 1f) / 2f)
+                drawCircle(
+                    color = accentLight.copy(alpha = 0.15f + 0.55f * twinkle),
+                    radius = (1.2f + twinkle * 1.6f).dp.toPx(),
+                    center = Offset(
+                        center.x + orbitRadius * cos(angle),
+                        center.y + orbitRadius * sin(angle)
+                    )
+                }
+            }
+        }
+
+        // ---------- 7. Nucleo sferico definito ----------
+        val coreRadius = minDim * 0.155f * (1f + pulse)
+
+        // alone del nucleo
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    accent.copy(alpha = 0.55f + pulse),
+                    accent.copy(alpha = 0.15f),
+                    Color.Transparent
+                ),
+                center = center,
+                radius = coreRadius * 2.2f
+            ),
+            radius = coreRadius * 2.2f,
+            center = center
+        )
+
+        // corpo sferico: centro incandescente → accent → bordo scuro
         drawCircle(
             brush = Brush.radialGradient(
                 colors = listOf(
                     Color.White,
-                    coreColor,
-                    glowColor.copy(alpha = 0.9f),
-                    Color(0xFF0A1628)
+                    accentLight,
+                    accent,
+                    accentDark
                 ),
-                center = center.copy(y = center.y - coreRadius * 0.15f),
-                radius = coreRadius * 1.6f
+                center = center.copy(x = center.x - coreRadius * 0.2f, y = center.y - coreRadius * 0.25f),
+                radius = coreRadius * 1.7f
             ),
             radius = coreRadius,
             center = center
         )
 
-        // riflesso alto-sinistra
-        translate(left = -coreRadius * 0.3f, top = -coreRadius * 0.35f) {
+        // bordo esterno nitido (definizione!)
+        drawCircle(
+            color = accentLight.copy(alpha = 0.9f),
+            radius = coreRadius,
+            center = center,
+            style = Stroke(width = 1.8.dp.toPx())
+        )
+        // secondo bordo, appena più esterno, tenue
+        drawCircle(
+            color = accentLight.copy(alpha = 0.25f),
+            radius = coreRadius * 1.12f,
+            center = center,
+            style = Stroke(width = 1.dp.toPx())
+        )
+
+        // riflesso speculare alto-sinistra
+        translate(left = -coreRadius * 0.34f, top = -coreRadius * 0.38f) {
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = 0.5f),
+                        Color.White.copy(alpha = 0.7f),
+                        Color.White.copy(alpha = 0.15f),
                         Color.Transparent
                     ),
                     center = center,
-                    radius = coreRadius * 0.6f
+                    radius = coreRadius * 0.55f
                 ),
-                radius = coreRadius * 0.55f,
+                radius = coreRadius * 0.5f,
                 center = center
+            )
+        }
+
+        // micro-anello orbitale attorno al nucleo (tipo anello di Saturno HUD)
+        rotate(degrees = -24f, pivot = center) {
+            drawArc(
+                color = accentLight.copy(alpha = 0.7f),
+                startAngle = 130f,
+                sweepAngle = 280f,
+                useCenter = false,
+                style = Stroke(width = 1.2.dp.toPx(), cap = StrokeCap.Round)
             )
         }
     }
 }
-
-private data class OrbitSpec(
-    val radius: Float,
-    val tilt: Float,
-    val rotation: Float,
-    val particles: Int,
-    val dotSize: Float
-)
