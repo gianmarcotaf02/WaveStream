@@ -3564,11 +3564,12 @@ private fun AssistantSettings(
         Spacer(modifier = Modifier.height(20.dp))
 
         // ---- API Key Gemini ----
+        val key = existingKey
         Text(
-            text = if (existingKey.isNullOrBlank()) "API key Gemini non configurata"
-            else "API key Gemini configurata (••••${existingKey.takeLast(4)})",
+            text = if (key.isNullOrBlank()) "API key Gemini non configurata"
+            else "API key Gemini configurata (••••${key.takeLast(4)})",
             style = MaterialTheme.typography.bodyMedium,
-            color = if (existingKey.isNullOrBlank()) Color(0xFFFFB74D) else WaveStreamColors.TextSecondary
+            color = if (key.isNullOrBlank()) Color(0xFFFFB74D) else WaveStreamColors.TextSecondary
         )
         Spacer(modifier = Modifier.height(8.dp))
 

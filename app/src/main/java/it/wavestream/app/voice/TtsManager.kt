@@ -46,9 +46,9 @@ class TtsManager @Inject constructor(
     private var voiceName: String? = null
     private var languageTag: String = "it-IT"
 
-    private val initListener = TextToSpeech.InitListener { status ->
+    private val initListener = TextToSpeech.OnInitListener { status ->
         if (status == TextToSpeech.SUCCESS) {
-            val engine = tts ?: return@InitListener
+            val engine = tts ?: return@OnInitListener
             try {
                 engine.language = Locale.ITALY
                 val voices = engine.voices?.filter {

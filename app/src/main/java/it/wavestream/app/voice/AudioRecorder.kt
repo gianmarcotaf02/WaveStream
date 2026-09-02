@@ -99,7 +99,7 @@ class AudioRecorder @Inject constructor(
                     val v = chunk[i] / 32768f
                     sum += v * v
                 }
-                val rms = kotlin.math.sqrt(sum / read).coerceIn(0f, 1f)
+                val rms = kotlin.math.sqrt(sum / read).toFloat().coerceIn(0f, 1f)
                 _amplitude.value = rms
 
                 val now = System.currentTimeMillis()

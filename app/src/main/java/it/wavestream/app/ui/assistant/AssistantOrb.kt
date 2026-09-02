@@ -168,11 +168,13 @@ fun AssistantOrb(
                     val angle = Math.toRadians(
                         ((orbit.rotation + (i * 360f / orbit.particles)) % 360f).toDouble()
                     )
-                    val x = center.x + orbit.radius * cos(angle).toFloat()
-                    val y = center.y + orbit.radius * sin(angle).toFloat() * 0.96f
+                    val angleDeg = ((orbit.rotation + (i * 360f / orbit.particles)) % 360f)
+                    val angle = (angleDeg * (Math.PI.toFloat() / 180f))
+                    val x = center.x + orbit.radius * cos(angle)
+                    val y = center.y + orbit.radius * sin(angle) * 0.96f
 
                     // luminosità variabile: le particelle "scintillano"
-                    val twinkle = 0.35f + 0.65f * ((sin(angle * 3 + orbit.rotation * 0.05) + 1f) / 2f)
+                    val twinkle = 0.35f + 0.65f * ((sin(angle * 3f + orbit.rotation * 0.05f) + 1f) / 2f)
                     drawCircle(
                         color = coreColor.copy(alpha = 0.55f * twinkle + 0.15f),
                         radius = orbit.dotSize.dp.toPx() * (0.7f + twinkle * 0.6f),
