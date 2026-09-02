@@ -65,6 +65,9 @@ class SherpaTtsManager @Inject constructor(
     private val _downloadProgress = MutableStateFlow(0)
     val downloadProgress: StateFlow<Int> = _downloadProgress // 0..100
 
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mainHandler = Handler(Looper.getMainLooper())
 
@@ -117,6 +120,8 @@ class SherpaTtsManager @Inject constructor(
             _state.value = State.READY
             true
         } catch (t: Throwable) {
+            android.util.Log.e("NovaVoice", "ensureReady fallito", t)
+            _errorMessage.value = t.message ?: t.javaClass.simpleName
             _state.value = State.ERROR
             false
         }
@@ -242,10 +247,20 @@ class SherpaTtsManager @Inject constructor(
             tarFile.delete()
 
             isModelDownloaded().also { downloaded ->
-                if (!downloaded) _state.value = State.ERROR
+                if (!downloaded) {
+                    _state.value = State.ERROR
+                    _errorMessage.value = "Il file scaricato è incompleto o corrotto"
+                }
             }
         } catch (t: Throwable) {
+            android.util.Log.e("NovaVoice", "Download modello fallito", t)
             _state.value = State.ERROR
+            _errorMessage.value = when (t) {
+                is java.net.UnknownHostException -> "DNS non raggiungibile (github.com) — controlla la rete del device"
+                is java.net.SocketTimeoutException -> "Timeout di rete durante il download"
+                is java.io.IOException -> "Errore di rete: ${t.message}"
+                else -> t.message ?: t.javaClass.simpleName
+            }
             false
         }
     }

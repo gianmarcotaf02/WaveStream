@@ -3570,6 +3570,7 @@ private fun AssistantSettings(
         // ---- Stato motore vocale (Piper neurale vs sistema) ----
         val engineState by sherpaTts.state.collectAsState()
         val downloadProgress by sherpaTts.downloadProgress.collectAsState()
+        val engineError by sherpaTts.errorMessage.collectAsState()
 
         val engineLabel = when (engineState) {
             it.wavestream.app.voice.SherpaTtsManager.State.READY ->
@@ -3581,7 +3582,7 @@ private fun AssistantSettings(
             it.wavestream.app.voice.SherpaTtsManager.State.LOADING ->
                 "⏳ Caricamento voce neurale…"
             it.wavestream.app.voice.SherpaTtsManager.State.ERROR ->
-                "⚠ Errore download voce neurale — in uso il TTS di sistema (robotico)"
+                "⚠ Errore download voce neurale${engineError?.let { e -> ": $e" } ?: ""} — in uso il TTS di sistema (robotico)"
             else ->
                 "⚠ Voce neurale NON scaricata — in uso il TTS di sistema (robotico e a volume limitato)"
         }
