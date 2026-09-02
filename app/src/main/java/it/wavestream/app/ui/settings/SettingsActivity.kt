@@ -3619,6 +3619,17 @@ private fun AssistantSettings(
             )
         }
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        val autoVolumeBoost by userPreferences.getAssistantAutoVolumeBoostFlow().collectAsState(initial = true)
+        SettingsSwitch(
+            label = "Massimizza il volume del device mentre Nova parla (ripristinato dopo)",
+            checked = autoVolumeBoost,
+            onCheckedChange = { enabled ->
+                scope.launch { userPreferences.setAssistantAutoVolumeBoost(enabled) }
+            }
+        )
+
         Spacer(modifier = Modifier.height(24.dp))
 
         // ---- Lingua ----

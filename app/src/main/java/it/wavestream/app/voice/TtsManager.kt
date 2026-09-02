@@ -158,18 +158,8 @@ class TtsManager @Inject constructor(
 
     /** Fallback: TextToSpeech di sistema (volume limitato al 100%) */
     private fun speakWithSystemTts(text: String) {
-        val engine = tts ?: run {
-            _isSpeaking.value = false
-            onDoneCallback?.invoke()
-            onDoneCallback = null
-            return
-        }
-        if (!_isReady.value) {
-            _isSpeaking.value = false
-            onDoneCallback?.invoke()
-            onDoneCallback = null
-            return
-        }
+        val engine = tts ?: run { finishSpeaking(); return }
+        if (!_isReady.value) { finishSpeaking(); return }
         val utteranceId = "wavestream_assistant_${System.currentTimeMillis()}"
         val params = android.os.Bundle().apply {
             putFloat(android.speech.tts.TextToSpeech.Engine.KEY_PARAM_VOLUME, voiceVolume.coerceAtMost(1f))
