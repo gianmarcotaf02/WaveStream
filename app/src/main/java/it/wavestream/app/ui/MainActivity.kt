@@ -457,6 +457,9 @@ private fun MainActivityScreen(
             onSettingsClick = {
                 startActivityWithTransition(Intent(context, SettingsActivity::class.java))
             },
+            onAssistantClick = {
+                startActivityWithTransition(Intent(context, it.wavestream.app.ui.assistant.AssistantActivity::class.java))
+            },
             onCollapseRequest = { railExpanded = false },
             onContentFocusRequest = {
                 try {

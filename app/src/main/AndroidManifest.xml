@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Microfono per l'assistente vocale AI -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <!-- TV Features -->
     <uses-feature
@@ -203,6 +205,13 @@
         <!-- Person Activity -->
         <activity
             android:name=".ui.person.PersonActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.WaveStream.FullScreen" />
+
+        <!-- Assistant AI Activity -->
+        <activity
+            android:name=".ui.assistant.AssistantActivity"
             android:exported="false"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.WaveStream.FullScreen" />

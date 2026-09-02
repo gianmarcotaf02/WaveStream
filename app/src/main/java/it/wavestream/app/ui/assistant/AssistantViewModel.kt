@@ -51,7 +51,6 @@ class AssistantViewModel @Inject constructor(
 
     sealed class Event {
         data class OpenContent(val item: AiResultItem) : Event()
-        object StartListening : Event()   // permesso mic concesso → inizia registrazione
     }
 
     private val _uiState = MutableStateFlow(UiState())

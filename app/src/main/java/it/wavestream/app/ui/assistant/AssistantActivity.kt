@@ -7,59 +7,66 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import dagger.hilt.android.AndroidEntryPoint
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.compose.runtime.collectAsState
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.theme.WaveStreamTheme
-import it.wavestream.app.ui.components.OnboardingBackground
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 /**
- * Assistente vocale AI: overlay a schermo intero con orb futuristica,
- * conversazione vocale (audio → Gemini) e carosello risultati.
+ * Assistente vocale AI: schermata a schermo intero con orb futuristica,
+ * conversazione vocale (audio → Gemini) e carosello dei risultati sfogliabile col D-pad.
  */
 @AndroidEntryPoint
 class AssistantActivity : ComponentActivity() {
 
+    private val viewModel: AssistantViewModel by viewModels()
+
     private val requestMicPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
-                viewModel.startListeningInternal()
-            }
+            if (granted) viewModel.onMicPressed()
         }
-
-    // Lateinit: inizializzato in onCreate prima di ogni uso
-    private lateinit var viewModel: AssistantViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel = androidx.lifecycle.ViewModelProvider(
-            this,
-            androidx.lifecycle.ViewModelProvider.NewInstanceFactory()
-        )[AssistantViewModel::class.java]
-
         setContent {
             WaveStreamTheme {
-                AssistantRoute(
-                    viewModel = viewModel,
-                    onRequestMicPermission = { requestMicPermission.launch(Manifest.permission.RECORD_AUDIO) }
+                val uiState = viewModel.uiState.collectAsState().value
+                AssistantScreen(
+                    uiState = uiState,
+                    onMicPressed = ::onMicPressed,
+                    onResultSelected = viewModel::onResultSelected
                 )
             }
         }
 
         lifecycleScope.launch {
-            viewModel.events.collect { event ->
-                when (event) {
-                    is AssistantViewModel.Event.OpenContent -> openContent(event.item)
-                    is AssistantViewModel.Event.StartListening -> {
-                        // non usato: la registrazione parte da AssistantRoute
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.events.collect { event ->
+                    when (event) {
+                        is AssistantViewModel.Event.OpenContent -> openContent(event.item)
+                        is AssistantViewModel.Event.StartListening -> { /* non usato */ }
                     }
                 }
             }
+        }
+    }
+
+    private fun onMicPressed() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            viewModel.onMicPressed()
+        } else {
+            requestMicPermission.launch(Manifest.permission.RECORD_AUDIO)
         }
     }
 

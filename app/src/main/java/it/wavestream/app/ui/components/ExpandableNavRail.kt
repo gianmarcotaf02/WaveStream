@@ -50,6 +50,7 @@ fun ExpandableNavRail(
     isExpanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
     onSettingsClick: () -> Unit,
+    onAssistantClick: () -> Unit,
     onContentFocusRequest: () -> Unit,
     onCollapseRequest: () -> Unit = {},
     onExploreCategoriesClick: (Boolean) -> Unit,
@@ -269,7 +270,7 @@ fun ExpandableNavRail(
                 )
             }
             
-            // Settings at bottom
+            // Assistant AI + Settings at bottom
             if (isExpanded) {
                 Spacer(modifier = Modifier.height(8.dp))
                 
@@ -284,6 +285,14 @@ fun ExpandableNavRail(
                 Spacer(modifier = Modifier.height(4.dp))
             }
             
+            NavRailItem(
+                icon = Icons.Default.SmartToy,
+                label = "Assistente",
+                isSelected = false,
+                isExpanded = isExpanded,
+                onClick = onAssistantClick
+            )
+
             NavRailItem(
                 icon = Icons.Default.Settings,
                 label = "Impostazioni",
