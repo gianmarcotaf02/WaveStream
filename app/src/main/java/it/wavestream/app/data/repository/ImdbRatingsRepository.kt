@@ -117,8 +117,9 @@ class ImdbRatingsRepository @Inject constructor(
     
     /**
      * Get ratings by IMDB ID
+     * @param type "movie" or "series" (only used for the Cinemeta fallback path)
      */
-    suspend fun getRatingsByImdbId(imdbId: String): RatingInfo? = withContext(Dispatchers.IO) {
+    suspend fun getRatingsByImdbId(imdbId: String, type: String? = null): RatingInfo? = withContext(Dispatchers.IO) {
         // Check cache
         ratingsCache[imdbId]?.let { cached ->
             if (System.currentTimeMillis() - cached.timestamp < CACHE_DURATION_MS) {
@@ -137,7 +138,11 @@ class ImdbRatingsRepository @Inject constructor(
             
             if (response.isSuccessful && response.body()?.Response == "True") {
                 val result = response.body()!!
-                val rating = parseRatingInfo(result)
+                var rating = parseRatingInfo(result)
+                
+                // Freshen the IMDb rating via Cinemeta: OMDb is often outdated for
+                // recent movies / ongoing series, while Cinemeta is refreshed live.
+                rating = mergeCinemetaRating(rating, imdbId)
                 
                 // Cache result
                 ratingsCache[imdbId] = CachedRating(rating, System.currentTimeMillis())
@@ -145,6 +150,13 @@ class ImdbRatingsRepository @Inject constructor(
                 return@withContext rating
             } else {
                 Log.w(TAG, "OMDb error: ${response.body()?.Error}")
+                
+                // OMDb failed entirely — try Cinemeta as a standalone fallback
+                fetchCinemetaRating(imdbId)?.let { cinemetaRating ->
+                    Log.d(TAG, "✓ Found via Cinemeta fallback (OMDb unavailable)")
+                    ratingsCache[imdbId] = CachedRating(cinemetaRating, System.currentTimeMillis())
+                    return@withContext cinemetaRating
+                }
                 return@withContext null
             }
         } catch (e: Exception) {
@@ -224,7 +236,7 @@ class ImdbRatingsRepository @Inject constructor(
         // Strategy 1: Try with IMDB ID (most reliable!)
         if (!imdbId.isNullOrEmpty()) {
             Log.d(TAG, "Strategy 1: IMDB ID = $imdbId")
-            ratings = getRatingsByImdbId(imdbId)
+            ratings = getRatingsByImdbId(imdbId, type)
             if (ratings?.hasRatings == true) {
                 Log.d(TAG, "✓ Found via IMDB ID")
                 return@withContext ratings
@@ -279,6 +291,18 @@ class ImdbRatingsRepository @Inject constructor(
             ?: englishTitle?.let { searchAndGetRatings(cleanTitleForOmdb(it), year, type) }
         if (ratings?.hasRatings == true) {
             Log.d(TAG, "✓ Found via Search API")
+            return@withContext ratings
+        }
+        
+        // Strategy 5b: Cinemeta title search (Stremio catalog).
+        // Free, no API key, and its IMDb ratings are fresher than OMDb's —
+        // useful for brand-new movies and ongoing series OMDb hasn't updated yet.
+        val cinemetaSearchTitle = englishTitle?.takeIf { it.isNotBlank() } ?: cleanedOriginal
+        Log.d(TAG, "Strategy 5b: Cinemeta search = $cinemetaSearchTitle")
+        ratings = searchCinemetaByTitle(cinemetaSearchTitle, type)
+            ?: searchCinemetaByTitle(cleanedOriginal, type)
+        if (ratings?.hasRatings == true) {
+            Log.d(TAG, "✓ Found via Cinemeta search")
             return@withContext ratings
         }
         
@@ -376,6 +400,81 @@ class ImdbRatingsRepository @Inject constructor(
     }
 
     /**
+     * Fetch the IMDb rating from Cinemeta (Stremio's official catalog addon).
+     * Free, no API key, refreshed continuously — used to freshen stale OMDb data
+     * and as a standalone fallback when OMDb fails. Result cached 24h.
+     */
+    private suspend fun fetchCinemetaRating(imdbId: String): RatingInfo? = withContext(Dispatchers.IO) {
+        cinemetaCache[imdbId]?.let { cached ->
+            if (System.currentTimeMillis() - cached.timestamp < CACHE_DURATION_MS) {
+                return@withContext cached.rating
+            }
+        }
+        try {
+            // The meta endpoint is type-insensitive: "movie" works for series too.
+            val response = cinemeta.getMeta("movie", imdbId)
+            val meta = response.body()?.meta
+            if (response.isSuccessful && meta?.imdbRatingValue != null) {
+                val rating = meta.toRatingInfo()
+                cinemetaCache[imdbId] = CachedRating(rating, System.currentTimeMillis())
+                return@withContext rating
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Cinemeta error for $imdbId", e)
+        }
+        null
+    }
+    
+    /**
+     * Merge a fresh Cinemeta IMDb rating into an OMDb-derived RatingInfo.
+     * Cinemeta wins for imdbRating/imdbVotes (fresher); the rest stays from OMDb.
+     * Silently keeps the OMDb values if Cinemeta is unavailable.
+     */
+    private suspend fun mergeCinemetaRating(base: RatingInfo, imdbId: String): RatingInfo {
+        return try {
+            fetchCinemetaRating(imdbId)?.let { cinemeta ->
+                base.copy(
+                    imdbRating = cinemeta.imdbRating ?: base.imdbRating,
+                    imdbVotes = cinemeta.imdbVotes ?: base.imdbVotes
+                )
+            } ?: base
+        } catch (e: Exception) {
+            Log.e(TAG, "Cinemeta merge error", e)
+            base
+        }
+    }
+    
+    /**
+     * Search Cinemeta by title and return the first result that has an IMDb rating.
+     * @param type "movie" or "series"
+     */
+    private suspend fun searchCinemetaByTitle(title: String, type: String?): RatingInfo? = withContext(Dispatchers.IO) {
+        if (title.isBlank()) return@withContext null
+        try {
+            val cinemetaType = if (type == "series") "series" else "movie"
+            val response = cinemeta.search(cinemetaType, title)
+            val best = response.body()?.metas.orEmpty().firstOrNull { it.imdbRatingValue != null }
+            best?.toRatingInfo()
+        } catch (e: Exception) {
+            Log.e(TAG, "Cinemeta search error for "$title"", e)
+            null
+        }
+    }
+    
+    /** Convert a Cinemeta metadata entry into a partial RatingInfo. */
+    private fun CinemetaMeta.toRatingInfo(): RatingInfo = RatingInfo(
+        imdbRating = imdbRatingValue,
+        imdbVotes = null,
+        imdbId = imdb_id,
+        rottenTomatoesScore = null,
+        audienceScore = null,
+        metacriticScore = null,
+        rated = null,
+        awards = awards,
+        boxOffice = null
+    )
+    
+    /**
      * Search using OMDB search endpoint, then get full details of the best match.
      * First tries with year + type (most precise), then falls back to a fuzzy
      * search without year (OMDB's search is loose and can still find the title).
@@ -425,7 +524,7 @@ class ImdbRatingsRepository @Inject constructor(
                 
                 if (best?.imdbID != null) {
                     Log.d(TAG, "Search found: ${best.Title} (${best.Year}) - ${best.imdbID}")
-                    return getRatingsByImdbId(best.imdbID)
+                    return getRatingsByImdbId(best.imdbID, type)
                 }
             }
         } catch (e: Exception) {
@@ -533,5 +632,6 @@ class ImdbRatingsRepository @Inject constructor(
      */
     fun clearCache() {
         ratingsCache.clear()
+        cinemetaCache.clear()
     }
 }
