@@ -123,6 +123,18 @@ class TtsManager @Inject constructor(
         onDoneCallback = null
     }
 
+    /** Anteprima live della velocità (dalla sezione impostazioni, senza salvare) */
+    fun previewRate(rate: Float) {
+        speechRate = rate.coerceIn(0.5f, 2f)
+        applySettings()
+    }
+
+    /** Anteprima live del tono (dalla sezione impostazioni, senza salvare) */
+    fun previewPitch(value: Float) {
+        pitch = value.coerceIn(0.5f, 2f)
+        applySettings()
+    }
+
     init {
         // notifica fine pronuncia
         tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {

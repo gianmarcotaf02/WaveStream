@@ -3521,3 +3521,211 @@ private fun VpnFileRow(
         )
     }
 }
+
+// ============ Assistente AI vocale ============
+
+/**
+ * Sezione impostazioni dell'assistente vocale AI:
+ * - API key Gemini (cifrata in EncryptedSharedPreferences)
+ * - risposta vocale on/off
+ * - voce, lingua, velocità e tono del TTS di sistema
+ */
+@Composable
+private fun AssistantSettings(
+    userPreferences: UserPreferences,
+    ttsManager: it.wavestream.app.voice.TtsManager,
+    contentFocusRequester: FocusRequester? = null
+) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val ttsEnabled by userPreferences.getAssistantTtsEnabledFlow().collectAsState(initial = true)
+    val selectedVoice by userPreferences.getAssistantTtsVoiceFlow().collectAsState(initial = null)
+    val selectedLanguage by userPreferences.getAssistantTtsLanguageFlow().collectAsState(initial = "it-IT")
+    val speechRate by userPreferences.getAssistantTtsRateFlow().collectAsState(initial = 1f)
+    val pitch by userPreferences.getAssistantTtsPitchFlow().collectAsState(initial = 1f)
+    val availableVoices by ttsManager.availableVoices.collectAsState()
+
+    // API key (mascherata: mostra solo gli ultimi 4 caratteri se già impostata)
+    var apiKeyInput by remember { mutableStateOf("") }
+    var existingKey by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        existingKey = userPreferences.getGeminiApiKey()
+    }
+
+    SettingsSection(title = "Assistente AI") {
+        var firstModifier: Modifier = Modifier
+        if (contentFocusRequester != null) firstModifier = firstModifier.focusRequester(contentFocusRequester)
+
+        SettingsInfo(
+            text = "L'assistente vocale usa il microfono per capire le tue richieste e Gemini (free tier) " +
+                "per cercare nella tua libreria. Genera una API key gratuita su aistudio.google.com/apikey"
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // ---- API Key Gemini ----
+        Text(
+            text = if (existingKey.isNullOrBlank()) "API key Gemini non configurata"
+            else "API key Gemini configurata (••••${existingKey.takeLast(4)})",
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (existingKey.isNullOrBlank()) Color(0xFFFFB74D) else WaveStreamColors.TextSecondary
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = apiKeyInput,
+                onValueChange = { apiKeyInput = it },
+                placeholder = { Text("Inserisci API key Gemini", color = WaveStreamColors.TextHint) },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = WaveStreamColors.Accent,
+                    unfocusedBorderColor = WaveStreamColors.TextTertiary.copy(alpha = 0.4f),
+                    focusedTextColor = WaveStreamColors.TextPrimary,
+                    unfocusedTextColor = WaveStreamColors.TextPrimary
+                ),
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Button(
+                onClick = {
+                    if (apiKeyInput.isNotBlank()) {
+                        scope.launch {
+                            userPreferences.setGeminiApiKey(apiKeyInput.trim())
+                            existingKey = apiKeyInput.trim()
+                            apiKeyInput = ""
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
+            ) {
+                Text("Salva")
+            }
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
+        // ---- Risposta vocale ----
+        Box(modifier = firstModifier) {
+            SettingsSwitch(
+                label = "Risposta vocale dell'assistente",
+                checked = ttsEnabled,
+                onCheckedChange = { enabled ->
+                    scope.launch { userPreferences.setAssistantTtsEnabled(enabled) }
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ---- Lingua ----
+        SettingsDropdown(
+            label = "Lingua della voce",
+            value = selectedLanguage,
+            options = listOf(
+                "it-IT" to "Italiano",
+                "en-US" to "English (US)",
+                "es-ES" to "Español",
+                "fr-FR" to "Français",
+                "de-DE" to "Deutsch"
+            ),
+            onValueChange = { lang ->
+                scope.launch { userPreferences.setAssistantTtsLanguage(lang) }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ---- Voce (dipende dal motore TTS installato) ----
+        val voiceOptions = remember(availableVoices) {
+            listOf("" to "Voce di sistema (predefinita)") +
+                availableVoices.map { it.name to it.name.substringAfterLast("-").uppercase() + " · " + it.locale.displayName }
+        }
+        SettingsDropdown(
+            label = "Voce",
+            value = selectedVoice ?: "",
+            options = voiceOptions,
+            onValueChange = { voiceName ->
+                scope.launch {
+                    userPreferences.setAssistantTtsVoice(voiceName.ifBlank { null })
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // ---- Velocità ----
+        var localRate by remember { mutableStateOf(speechRate) }
+        var localPitch by remember { mutableStateOf(pitch) }
+        LaunchedEffect(speechRate) { localRate = speechRate }
+        LaunchedEffect(pitch) { localPitch = pitch }
+
+        Text(
+            text = "Velocità: ${"%.1f".format(localRate)}x",
+            style = MaterialTheme.typography.bodyMedium,
+            color = WaveStreamColors.TextPrimary
+        )
+        Slider(
+            value = localRate,
+            onValueChange = { value ->
+                localRate = value
+                ttsManager.previewRate(value)
+            },
+            valueRange = 0.5f..2f,
+            steps = 5,
+            onValueChangeFinished = {
+                scope.launch { userPreferences.setAssistantTtsRate(localRate) }
+            },
+            colors = SliderDefaults.colors(
+                thumbColor = WaveStreamColors.Accent,
+                activeTrackColor = WaveStreamColors.Accent.copy(alpha = 0.6f)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // ---- Tono ----
+        Text(
+            text = "Tono: ${"%.1f".format(localPitch)}",
+            style = MaterialTheme.typography.bodyMedium,
+            color = WaveStreamColors.TextPrimary
+        )
+        Slider(
+            value = localPitch,
+            onValueChange = { value ->
+                localPitch = value
+                ttsManager.previewPitch(value)
+            },
+            valueRange = 0.5f..2f,
+            steps = 5,
+            onValueChangeFinished = {
+                scope.launch { userPreferences.setAssistantTtsPitch(localPitch) }
+            },
+            colors = SliderDefaults.colors(
+                thumbColor = WaveStreamColors.Accent,
+                activeTrackColor = WaveStreamColors.Accent.copy(alpha = 0.6f)
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ---- Prova voce ----
+        Button(
+            onClick = {
+                ttsManager.speak("Ciao! Sono l'assistente di WaveStream. Dimmi cosa vuoi guardare stasera.")
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
+        ) {
+            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Prova voce")
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        SettingsInfo(
+            text = "Le voci disponibili dipendono dal motore TTS installato sulla TV " +
+                "(Impostazioni TV → Accessibilità → Text-to-speech). Le voci neurali di qualità superiore " +
+                "possono essere scaricate da lì. Il microfono viene usato solo quando apri l'assistente."
+        )
+    }
+}
