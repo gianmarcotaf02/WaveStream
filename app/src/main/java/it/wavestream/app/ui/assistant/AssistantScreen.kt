@@ -48,7 +48,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.tv.material3.Carousel
 import coil.compose.AsyncImage
 import it.wavestream.app.ai.AiResultItem
 import it.wavestream.app.data.database.entity.ContentType
