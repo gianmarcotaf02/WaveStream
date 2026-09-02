@@ -25,5 +25,6 @@ data class AiToolResult(
 /** Un turno di conversazione dell'assistente */
 data class AiTurn(
     val replyText: String,
-    val results: List<AiResultItem>
+    val results: List<AiResultItem>,
+    val transcript: String? = null // cosa Nova ha capito dalla voce dell'utente
 )

@@ -54,7 +54,9 @@ data class GeminiPart(
     val text: String? = null,
     @Json(name = "function_call") val functionCall: GeminiFunctionCall? = null,
     @Json(name = "function_response") val functionResponse: GeminiFunctionResponse? = null,
-    @Json(name = "inline_data") val inlineData: GeminiInlineData? = null
+    @Json(name = "inline_data") val inlineData: GeminiInlineData? = null,
+    // Gemini 3.x: firma di pensiero da restituire nei turni successivi del function calling
+    @Json(name = "thought_signature") val thoughtSignature: String? = null
 ) {
     companion object {
         fun ofText(text: String) = GeminiPart(text = text)
