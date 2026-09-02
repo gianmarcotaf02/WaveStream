@@ -61,7 +61,6 @@ import it.wavestream.app.ui.theme.WaveStreamColors
 @Composable
 fun AssistantScreen(
     uiState: AssistantViewModel.UiState,
-    onMicPressed: () -> Unit,
     onResultSelected: (AiResultItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -96,22 +95,18 @@ fun AssistantScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // ---- Stato corrente ----
-            val statusText = when (uiState.phase) {
-                AssistantViewModel.Phase.IDLE -> "Premi il microfono e dimmi cosa vuoi vedere"
-                AssistantViewModel.Phase.LISTENING -> "Ti ascolto…"
-                AssistantViewModel.Phase.THINKING -> "Sto pensando…"
-                AssistantViewModel.Phase.SPEAKING -> if (uiState.results.isEmpty()) "" else "Scegli dal carosello"
-                AssistantViewModel.Phase.ERROR -> uiState.errorMessage ?: "Si è verificato un errore"
+            // ---- Stato corrente (feedback sotto il blob) ----
+            val (statusText, statusColor) = when (uiState.phase) {
+                AssistantViewModel.Phase.IDLE -> "Chiedimi pure" to WaveStreamColors.TextSecondary
+                AssistantViewModel.Phase.LISTENING -> "Ti ascolto" to WaveStreamColors.Accent
+                AssistantViewModel.Phase.THINKING -> "Sto pensando…" to WaveStreamColors.AccentLight
+                AssistantViewModel.Phase.SPEAKING -> if (uiState.results.isEmpty()) "" else "Scegli dal carosello ↓" to WaveStreamColors.TextSecondary
+                AssistantViewModel.Phase.ERROR -> (uiState.errorMessage ?: "Si è verificato un errore") to Color(0xFFFF8A80)
             }
             Text(
                 text = statusText,
-                color = when (uiState.phase) {
-                    AssistantViewModel.Phase.ERROR -> Color(0xFFFF8A80)
-                    AssistantViewModel.Phase.LISTENING -> WaveStreamColors.Accent
-                    else -> WaveStreamColors.TextSecondary
-                },
-                fontSize = 16.sp,
+                color = statusColor,
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center
             )
@@ -137,13 +132,13 @@ fun AssistantScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // ---- Bottone microfono ----
-            MicButton(
-                phase = uiState.phase,
-                onClick = onMicPressed
+            // ---- Suggerimento navigazione (discreto) ----
+            Text(
+                text = "Parla liberamente · ← → per sfogliare · OK per aprire · BACK per uscire",
+                color = WaveStreamColors.TextHint,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(bottom = 14.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             // ---- Carosello risultati ----
             if (uiState.results.isNotEmpty()) {
@@ -183,48 +178,6 @@ private fun TranscriptBubble(text: String, isUser: Boolean) {
             textAlign = TextAlign.Center,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-@Composable
-private fun MicButton(phase: AssistantViewModel.Phase, onClick: () -> Unit) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val focused by interactionSource.collectIsFocusedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (focused) 1.15f else 1f,
-        animationSpec = tween(150),
-        label = "micScale"
-    )
-    val active = phase == AssistantViewModel.Phase.LISTENING
-
-    Box(
-        modifier = Modifier
-            .size(64.dp)
-            .scale(scale)
-            .clip(CircleShape)
-            .background(
-                Brush.radialGradient(
-                    colors = if (active) listOf(Color(0xFF64D2FF), Color(0xFF1976D2))
-                    else listOf(Color(0xFF2A3B5A), Color(0xFF14213D))
-                )
-            )
-            .border(
-                width = if (focused || active) 2.dp else 1.dp,
-                color = if (active) Color(0xFF64D2FF)
-                else if (focused) WaveStreamColors.Accent
-                else Color.White.copy(alpha = 0.2f),
-                shape = CircleShape
-            )
-            .focusable(interactionSource = interactionSource)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Mic,
-            contentDescription = if (active) "Ferma l'ascolto" else "Parla con l'assistente",
-            tint = if (active) Color.White else WaveStreamColors.TextSecondary,
-            modifier = Modifier.size(30.dp)
         )
     }
 }

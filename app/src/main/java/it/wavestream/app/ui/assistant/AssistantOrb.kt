@@ -217,6 +217,7 @@ fun AssistantOrb(
                         center.x + orbitRadius * cos(angle),
                         center.y + orbitRadius * sin(angle)
                     )
+                )
                 }
             }
         }

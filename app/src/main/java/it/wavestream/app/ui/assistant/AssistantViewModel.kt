@@ -90,26 +90,11 @@ class AssistantViewModel @Inject constructor(
     }
 
     /**
-     * Chiamato dall'Activity quando l'utente preme il bottone microfono.
-     * Il permesso RECORD_AUDIO va già concesso a questo punto.
+     * Avvia l'ascolto. Chiamato automaticamente all'apertura dell'assistente
+     * e a fine di ogni risposta (conversazione continua).
+     * Il permesso RECORD_AUDIO va già concesso a questo punto (gestito dall'Activity).
      */
-    fun onMicPressed() {
-        when (_uiState.value.phase) {
-            Phase.LISTENING -> {
-                // secondo tap: ferma e invia subito
-                stopListeningAndProcess()
-            }
-            Phase.SPEAKING -> {
-                // interrompe la voce e riascolta
-                ttsManager.stop()
-                startListening()
-            }
-            Phase.IDLE, Phase.ERROR -> startListening()
-            Phase.THINKING -> { /* attendi il completamento */ }
-        }
-    }
-
-    private fun startListening() {
+    fun startListening() {
         if (!audioRecorder.start()) {
             _uiState.value = _uiState.value.copy(
                 phase = Phase.ERROR,
@@ -122,9 +107,9 @@ class AssistantViewModel @Inject constructor(
             phase = Phase.LISTENING,
             userText = null,
             assistantText = null,
-            results = emptyList(),
             errorMessage = null,
             amplitude = 0f
+            // NB: i risultati del carosello restano visibili durante il nuovo ascolto
         )
 
         // safety: se onAutoStop non dovesse scattare, timeout fisso
@@ -171,15 +156,22 @@ class AssistantViewModel @Inject constructor(
             results = turn.results
         )
 
-        // Voce di risposta (se abilitata)
+        // Voce di risposta (se abilitata) — a fine pronuncia si riattiva l'ascolto
         if (_uiState.value.ttsEnabled && turn.replyText.isNotBlank()) {
             ttsManager.speak(turn.replyText) {
                 if (_uiState.value.phase == Phase.SPEAKING) {
-                    _uiState.value = _uiState.value.copy(phase = Phase.IDLE)
+                    startListening()
                 }
             }
         } else {
             _uiState.value = _uiState.value.copy(phase = Phase.IDLE)
+            // Senza voce: dopo una pausa si torna in ascolto automaticamente
+            viewModelScope.launch {
+                delay(6_000)
+                if (_uiState.value.phase == Phase.IDLE) {
+                    startListening()
+                }
+            }
         }
     }
 
