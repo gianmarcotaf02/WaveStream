@@ -1,10 +1,13 @@
 package it.wavestream.app.voice
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import androidx.core.content.ContextCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -50,17 +53,33 @@ class AudioRecorder @Inject constructor(
     @Volatile
     var onAutoStop: (() -> Unit)? = null
 
+    /** Ultimo errore di inizializzazione (per messaggi precisi in UI) */
+    @Volatile
+    var lastError: String? = null
+        private set
+
     /**
      * Avvia la registrazione. Ritorna false se il microfono non è disponibile.
      */
     @SuppressLint("MissingPermission") // il permesso viene richiesto nell'Activity
     fun start(): Boolean {
         if (isRecording) return true
+        lastError = null
+
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            lastError = "Permesso microfono non concesso"
+            return false
+        }
 
         val minBuffer = AudioRecord.getMinBufferSize(
             SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT
         )
-        if (minBuffer <= 0) return false
+        if (minBuffer <= 0) {
+            lastError = "Registrazione audio non supportata dal device"
+            return false
+        }
 
         audioRecord = AudioRecord(
             MediaRecorder.AudioSource.MIC,
@@ -73,6 +92,7 @@ class AudioRecorder @Inject constructor(
         if (audioRecord?.state != AudioRecord.STATE_INITIALIZED) {
             audioRecord?.release()
             audioRecord = null
+            lastError = "Microfono non inizializzabile (assente, disattivato o occupato da un'altra app)"
             return false
         }
 

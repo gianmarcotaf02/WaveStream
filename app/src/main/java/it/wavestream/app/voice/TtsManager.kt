@@ -108,6 +108,17 @@ class TtsManager @Inject constructor(
         scope.launch { sherpaTts.ensureReady() }
     }
 
+    /**
+     * Permesso microfono negato dall'utente: messaggio chiaro (senza auto-retry,
+     * per non tormentare l'utente con richieste ripetute).
+     */
+    fun onMicPermissionDenied() {
+        _uiState.value = _uiState.value.copy(
+            phase = Phase.ERROR,
+            errorMessage = "Permesso microfono necessario per parlarmi — concedilo e rientra"
+        )
+    }
+
     private fun applySettings() {
         val engine = tts ?: return
         try {

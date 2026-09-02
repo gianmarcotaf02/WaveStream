@@ -31,7 +31,11 @@ class AssistantActivity : ComponentActivity() {
 
     private val requestMicPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) viewModel.startListening()
+            if (granted) {
+                viewModel.startListening()
+            } else {
+                viewModel.onMicPermissionDenied()
+            }
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {

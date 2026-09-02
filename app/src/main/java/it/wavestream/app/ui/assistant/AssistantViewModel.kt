@@ -110,8 +110,18 @@ class AssistantViewModel @Inject constructor(
         if (!audioRecorder.start()) {
             _uiState.value = _uiState.value.copy(
                 phase = Phase.ERROR,
-                errorMessage = "Microfono non disponibile su questo device"
+                errorMessage = (audioRecorder.lastError ?: "Microfono non disponibile su questo device") +
+                    " — riprovo automaticamente…"
             )
+            // Il microfono può diventare disponibile più tardi (permesso concesso,
+            // mic abilitato dall'utente): riprova periodicamente invece di arrendersi
+            listeningJob?.cancel()
+            listeningJob = viewModelScope.launch {
+                delay(8_000)
+                if (_uiState.value.phase == Phase.ERROR) {
+                    startListening()
+                }
+            }
             return
         }
         waveformHistory.clear()
