@@ -20,6 +20,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -33,8 +35,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.LiveTv
 import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -159,6 +164,7 @@ class SearchActivity : ComponentActivity() {
     private fun SearchScreenContent() {
         var query by remember { mutableStateOf("") }
         var results by remember { mutableStateOf<List<SearchResultItem>>(emptyList()) }
+        var suggestions by remember { mutableStateOf<List<SearchResultItem>>(emptyList()) }
         var isLoading by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
         val context = LocalContext.current
@@ -186,15 +192,27 @@ class SearchActivity : ComponentActivity() {
             onDispose { voiceResultCallback = null }
         }
         
+        // Suggerimenti istantanei: appaiono già dal primo carattere digitato,
+        // prima della ricerca completa (che è debounced)
+        LaunchedEffect(query) {
+            if (query.isNotEmpty()) {
+                delay(100)
+                suggestions = performSearch(query).take(6)
+            } else {
+                suggestions = emptyList()
+            }
+        }
+        
         // Debounced search
         LaunchedEffect(query) {
             if (query.length >= 2) {
-                delay(300) // Debounce
                 isLoading = true
+                delay(300) // Debounce
                 results = performSearch(query)
                 isLoading = false
             } else {
                 results = emptyList()
+                isLoading = false
             }
         }
         
@@ -203,6 +221,7 @@ class SearchActivity : ComponentActivity() {
             onQueryChange = { query = it },
             onVoiceSearch = { startVoiceSearch() },
             results = results,
+            suggestions = suggestions,
             isLoading = isLoading,
             focusRequester = focusRequester,
             onBackClick = { finish() },
@@ -453,6 +472,7 @@ fun SearchScreen(
     onQueryChange: (String) -> Unit,
     onVoiceSearch: () -> Unit,
     results: List<SearchResultItem>,
+    suggestions: List<SearchResultItem>,
     isLoading: Boolean,
     focusRequester: FocusRequester,
     onBackClick: () -> Unit,
@@ -588,6 +608,14 @@ fun SearchScreen(
                     .padding(end = 48.dp)
             ) {
                 when {
+                    // Suggerimenti istantanei: visibili durante la digitazione
+                    // (già con 1 solo carattere, o mentre la ricerca completa è in corso)
+                    suggestions.isNotEmpty() && (query.length < 2 || isLoading) -> {
+                        SuggestionsDropdown(
+                            suggestions = suggestions,
+                            onItemClick = onItemClick
+                        )
+                    }
                     isLoading -> {
                         CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center),
