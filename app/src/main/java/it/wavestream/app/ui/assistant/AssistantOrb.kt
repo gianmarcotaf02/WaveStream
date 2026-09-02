@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -238,6 +237,3 @@ private data class OrbitSpec(
     val particles: Int,
     val dotSize: Float
 )
-
-// Size import usato per future estensioni (evita warning unused in alcune configurazioni IDE)
-private val unusedSizeRef: Size get() = Size.Zero
