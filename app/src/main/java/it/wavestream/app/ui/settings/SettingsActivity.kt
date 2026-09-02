@@ -3699,7 +3699,7 @@ private fun AssistantSettings(
                 availableVoices.map { it.name to it.name.substringAfterLast("-").uppercase() + " · " + it.locale.displayName }
         }
         SettingsDropdown(
-            label = "Voce",
+            label = "Voce di riserva (solo fallback di sistema — Piper la ignora)",
             value = selectedVoice ?: "",
             options = voiceOptions,
             onValueChange = { voiceName ->
@@ -3781,9 +3781,10 @@ private fun AssistantSettings(
 
         Spacer(modifier = Modifier.height(24.dp))
         SettingsInfo(
-            text = "Le voci disponibili dipendono dal motore TTS installato sulla TV " +
-                "(Impostazioni TV → Accessibilità → Text-to-speech). Le voci neurali di qualità superiore " +
-                "possono essere scaricate da lì. Il microfono viene usato solo quando apri l'assistente."
+            text = "Quando lo stato in alto è verde, Nova parla con la voce neurale Piper (Riccardo), " +
+                "incorporata nell'app: amplificabile oltre il 100% e indipendente dal motore TTS del device. " +
+                "Le opzioni 'Voce di riserva', 'Lingua' e 'Tono' si applicano solo al motore TTS di sistema, " +
+                "usato temporaneamente se il modello non è ancora scaricato."
         )
     }
 }
