@@ -456,7 +456,7 @@ class ImdbRatingsRepository @Inject constructor(
             val best = response.body()?.metas.orEmpty().firstOrNull { it.imdbRatingValue != null }
             best?.toRatingInfo()
         } catch (e: Exception) {
-            Log.e(TAG, "Cinemeta search error for "$title"", e)
+            Log.e(TAG, "Cinemeta search error for '$title'", e)
             null
         }
     }
