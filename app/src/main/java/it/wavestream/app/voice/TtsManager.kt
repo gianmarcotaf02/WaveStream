@@ -12,18 +12,23 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Gestisce la voce dell'assistente (Text-to-Speech di sistema, gratuito e offline).
- * Rispetta le impostazioni utente: voce, lingua, velocità, tono.
+ * Gestisce la voce dell'assistente.
+ *
+ * Motore primario: TTS neurale on-device (sherpa-onnx + Piper, voce italiana naturale)
+ * con GAIN software — risolve sia la roboticità sia il volume basso.
+ * Fallback: TextToSpeech di sistema se il modello neurale non è ancora scaricato.
  */
 @Singleton
 class TtsManager @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val sherpaTts: SherpaTtsManager
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -43,7 +48,7 @@ class TtsManager @Inject constructor(
     // Impostazioni correnti (aggiornate dalle preferenze)
     private var speechRate: Float = 1.0f
     private var pitch: Float = 1.0f
-    private var voiceVolume: Float = 1.0f
+    private var voiceVolume: Float = 1.8f // gain software (1.0 = volume naturale)
     private var voiceName: String? = null
     private var languageTag: String = "it-IT"
 
