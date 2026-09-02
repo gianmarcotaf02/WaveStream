@@ -21,8 +21,11 @@ import it.wavestream.app.ui.theme.WaveStreamColors
 
 /**
  * On-screen keyboard in Netflix TV style (alphabetical grid, not QWERTY).
- * Letters a-z in lowercase, numbers 0-9, Backspace (X), Space (bar).
- * Controlled with the D-pad, applies accent color on focus.
+ * Two sections switchable with a toggle button on the bottom row:
+ * - Letters: a-z in lowercase (alphabetical)
+ * - ?123: numbers and special characters
+ * Space bar and Backspace always available on the bottom row.
+ * Controlled with the D-pad, applies accent color on focus (no scaling).
  */
 @Composable
 fun OnScreenKeyboard(
@@ -30,23 +33,28 @@ fun OnScreenKeyboard(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Netflix-style alphabetical keyboard layout:
-    // Row 1: a b c d e f
-    // Row 2: g h i j k l
-    // Row 3: m n o p q r
-    // Row 4: s t u v w x
-    // Row 5: y z 1 2 3 4
-    // Row 6: 5 6 7 8 9 0
-    // Row 7: [Space] [Backspace X]
-    val rows: List<List<KeyboardKey>> = listOf(
+    var showSymbols by remember { mutableStateOf(false) }
+
+    // Letters section (alphabetical, Netflix style):
+    // Row 1-4: a-x, Row 5: y z (wide keys, same width as 3 letters each)
+    val letterRows: List<List<KeyboardKey>> = listOf(
         listOf("a", "b", "c", "d", "e", "f").map { KeyboardKey.Letter(it) },
         listOf("g", "h", "i", "j", "k", "l").map { KeyboardKey.Letter(it) },
         listOf("m", "n", "o", "p", "q", "r").map { KeyboardKey.Letter(it) },
         listOf("s", "t", "u", "v", "w", "x").map { KeyboardKey.Letter(it) },
-        listOf("y", "z").map { KeyboardKey.Letter(it) } + listOf("1", "2", "3", "4").map { KeyboardKey.Letter(it) },
-        listOf("5", "6", "7", "8", "9", "0").map { KeyboardKey.Letter(it) },
-        listOf(KeyboardKey.Space, KeyboardKey.Backspace)
+        listOf("y", "z").map { KeyboardKey.Letter(it, weight = 3) }
     )
+
+    // Numbers & special characters section (?123)
+    val symbolRows: List<List<KeyboardKey>> = listOf(
+        listOf("1", "2", "3", "4", "5", "6").map { KeyboardKey.Letter(it) },
+        listOf("7", "8", "9", "0", ".", ",").map { KeyboardKey.Letter(it) },
+        listOf("!", "?", "@", "#", "€", "&").map { KeyboardKey.Letter(it) },
+        listOf("(", ")", "-", "_", "=", "+").map { KeyboardKey.Letter(it) },
+        listOf(":", ";", "'", "\"", "<", ">").map { KeyboardKey.Letter(it) }
+    )
+
+    val rows = if (showSymbols) symbolRows else letterRows
 
     Column(
         modifier = modifier,
@@ -62,7 +70,7 @@ fun OnScreenKeyboard(
                         is KeyboardKey.Letter -> KeyboardButton(
                             label = key.value,
                             onClick = { onQueryChange(query + key.value) },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(key.weight.toFloat())
                         )
                         KeyboardKey.Backspace -> KeyboardButton(
                             label = "⌫",
@@ -72,17 +80,39 @@ fun OnScreenKeyboard(
                         KeyboardKey.Space -> KeyboardButton(
                             label = "",
                             onClick = { onQueryChange(query + " ") },
-                            modifier = Modifier.weight(2f)
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
             }
         }
+
+        // Bottom controls row: section toggle, space, backspace
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            KeyboardButton(
+                label = if (showSymbols) "ABC" else "?123",
+                onClick = { showSymbols = !showSymbols },
+                modifier = Modifier.weight(2f)
+            )
+            KeyboardButton(
+                label = "",
+                onClick = { onQueryChange(query + " ") },
+                modifier = Modifier.weight(3f)
+            )
+            KeyboardButton(
+                label = "⌫",
+                onClick = { onQueryChange(query.dropLast(1)) },
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
 private sealed class KeyboardKey {
-    data class Letter(val value: String) : KeyboardKey()
+    data class Letter(val value: String, val weight: Int = 1) : KeyboardKey()
     object Backspace : KeyboardKey()
     object Space : KeyboardKey()
 }
