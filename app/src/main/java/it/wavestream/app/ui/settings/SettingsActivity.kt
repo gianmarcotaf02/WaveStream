@@ -3545,7 +3545,7 @@ private fun AssistantSettings(
     val selectedLanguage by userPreferences.getAssistantTtsLanguageFlow().collectAsState(initial = "it-IT")
     val speechRate by userPreferences.getAssistantTtsRateFlow().collectAsState(initial = 1f)
     val pitch by userPreferences.getAssistantTtsPitchFlow().collectAsState(initial = 1f)
-    val ttsVolume by userPreferences.getAssistantTtsVolumeFlow().collectAsState(initial = 1f)
+    val ttsVolume by userPreferences.getAssistantTtsVolumeFlow().collectAsState(initial = 1.8f)
     val availableVoices by ttsManager.availableVoices.collectAsState()
 
     // API key (mascherata: mostra solo gli ultimi 4 caratteri se già impostata)
@@ -3695,16 +3695,16 @@ private fun AssistantSettings(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // ---- Volume voce (0-100%, massimo = volume media del device) ----
+        // ---- Volume/gain voce (Piper: il gain software può superare il 100%) ----
         var localVolume by remember { mutableStateOf(ttsVolume) }
         LaunchedEffect(ttsVolume) { localVolume = ttsVolume }
 
         AssistantVoiceSlider(
-            label = "Volume voce",
+            label = "Volume voce (gain)",
             valueText = "${(localVolume * 100).toInt()}%",
             value = localVolume,
-            range = 0.1f..1f,
-            steps = 8,
+            range = 0.1f..3f,
+            steps = 27,
             onValueChange = { value ->
                 localVolume = value
                 ttsManager.previewVolume(value)

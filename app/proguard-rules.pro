@@ -394,3 +394,6 @@
 -keepclassmembers class * extends com.google.crypto.tink.shaded.protobuf.MessageLite {
   <fields>;
 }
+
+# Nova voice — sherpa-onnx (JNI)
+-keep class com.k2fsa.sherpa.onnx.** { *; }

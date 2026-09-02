@@ -210,13 +210,13 @@ class UserPreferences @Inject constructor(
         return dataStore.data.map { it[ASSISTANT_TTS_PITCH] ?: 1f }
     }
 
-    // Volume voce (0.1..1.0 — massimo = volume media del device)
+    // Volume/gain voce (0.1..3.0 — con Piper il gain software può superare il 100%)
     suspend fun setAssistantTtsVolume(volume: Float) {
-        dataStore.edit { it[ASSISTANT_TTS_VOLUME] = volume.coerceIn(0.1f, 1f) }
+        dataStore.edit { it[ASSISTANT_TTS_VOLUME] = volume.coerceIn(0.1f, 3f) }
     }
 
     fun getAssistantTtsVolumeFlow(): Flow<Float> {
-        return dataStore.data.map { it[ASSISTANT_TTS_VOLUME] ?: 1f }
+        return dataStore.data.map { it[ASSISTANT_TTS_VOLUME] ?: 1.8f }
     }
     
     // Current Profile

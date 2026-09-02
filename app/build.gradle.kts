@@ -64,8 +64,6 @@ android {
         buildConfig = true
     }
 
-    // whisper.cpp (assistente vocale AI) — rimosso: STT ora via Gemini audio nativo
-
     // Nova voice — escludi ABI x86 32-bit (TV/PC usano x86_64 o ARM), riduce l'APK
     packaging {
         jniLibs {
