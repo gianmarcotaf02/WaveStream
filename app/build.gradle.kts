@@ -64,6 +64,15 @@ android {
         buildConfig = true
     }
 
+    // whisper.cpp (assistente vocale AI) — rimosso: STT ora via Gemini audio nativo
+
+    // Nova voice — escludi ABI x86 32-bit (TV/PC usano x86_64 o ARM), riduce l'APK
+    packaging {
+        jniLibs {
+            excludes += setOf("lib/x86/**")
+        }
+    }
+
     applicationVariants.all {
         val variantName = name
         outputs.all {
@@ -172,6 +181,10 @@ dependencies {
 
     // Utils
     implementation(libs.zxing.core)
+
+    // Nova voice — sherpa-onnx (TTS neurale on-device, licenza Apache 2.0)
+    implementation(files("libs/sherpa-onnx-1.13.7.aar"))
+    implementation("org.apache.commons:commons-compress:1.26.2")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
