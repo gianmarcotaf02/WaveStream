@@ -103,6 +103,7 @@ class SettingsActivity : ComponentActivity() {
     @Inject lateinit var appUpdateManager: it.wavestream.app.update.AppUpdateManager
     @Inject lateinit var openSubtitlesRepository: it.wavestream.app.data.repository.OpenSubtitlesRepository
     @Inject lateinit var vpnManager: VpnManager
+    @Inject lateinit var ttsManager: it.wavestream.app.voice.TtsManager
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -139,6 +140,7 @@ class SettingsActivity : ComponentActivity() {
             SettingsMenuItem("preferences", "Preferenze", "Impostazioni generali", Icons.Default.Settings),
             SettingsMenuItem("player", "Player", "Impostazioni riproduzione", Icons.Default.PlayArrow),
             SettingsMenuItem("subtitles", "Sottotitoli", "OpenSubtitles e lingua", Icons.Default.Subtitles),
+            SettingsMenuItem("assistant", "Assistente AI", "Voce, microfono e Gemini", Icons.Default.SmartToy),
             SettingsMenuItem("epg", "Guida TV (EPG)", "Aggiornamento guida programmi", Icons.Default.Tv),
             SettingsMenuItem("appearance", "Aspetto", "Tema e visualizzazione", Icons.Default.Palette),
             SettingsMenuItem("storage", "Archiviazione", "Cache e dati", Icons.Default.Storage),
@@ -182,6 +184,7 @@ class SettingsActivity : ComponentActivity() {
                     "preferences" -> PreferencesSettings(userPreferences, contentFocusRequester)
                     "player" -> PlayerSettings(userPreferences, contentFocusRequester)
                     "subtitles" -> SubtitlesSettings(openSubtitlesRepository, userPreferences, contentFocusRequester)
+                    "assistant" -> AssistantSettings(userPreferences, ttsManager, contentFocusRequester)
                     "epg" -> EpgSettings(userPreferences, epgRepository, playlistDao, contentFocusRequester)
                     "appearance" -> AppearanceSettings(userPreferences)
                     "storage" -> StorageSettings(profileDao, playlistDao, userPreferences)
