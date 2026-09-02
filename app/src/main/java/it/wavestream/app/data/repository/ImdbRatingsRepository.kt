@@ -196,7 +196,13 @@ class ImdbRatingsRepository @Inject constructor(
             
             if (response.isSuccessful && response.body()?.Response == "True") {
                 val result = response.body()!!
-                val rating = parseRatingInfo(result)
+                var rating = parseRatingInfo(result)
+                
+                // If OMDb has no IMDb rating ("N/A" or missing), fill it from Cinemeta
+                if (rating.imdbRating == null && !result.imdbID.isNullOrEmpty()) {
+                    rating = mergeCinemetaRating(rating, result.imdbID)
+                }
+                
                 android.util.Log.d("ImdbRatings", "Parsed: imdb=${rating.imdbRating}, rt=${rating.rottenTomatoesScore}, audience=${rating.audienceScore}, mc=${rating.metacriticScore}")
                 
                 // Cache by IMDB ID if available
@@ -356,6 +362,29 @@ class ImdbRatingsRepository @Inject constructor(
                     ratingsCache["$metacriticTitle:$year:$type"] = CachedRating(updated, System.currentTimeMillis())
                     return@withContext updated
                 }
+            }
+        }
+
+        // Strategy 8: Final Cinemeta top-up — if the IMDb rating is still missing
+        // (regardless of the reason), fetch it from Cinemeta: by IMDb ID when we
+        // have one, otherwise by title search.
+        if (ratings?.imdbRating == null) {
+            Log.d(TAG, "Strategy 8: Cinemeta top-up for missing IMDb rating")
+            val cinemetaRating = if (!imdbId.isNullOrEmpty()) {
+                fetchCinemetaRating(imdbId)
+            } else {
+                searchCinemetaByTitle(englishTitle ?: cleanedOriginal, type)
+                    ?: searchCinemetaByTitle(cleanedOriginal, type)
+            }
+            if (cinemetaRating?.imdbRating != null) {
+                Log.d(TAG, "✓ Found IMDb rating via Cinemeta top-up: ${cinemetaRating.imdbRating}")
+                val updated = (ratings ?: cinemetaRating).copy(
+                    imdbRating = cinemetaRating.imdbRating,
+                    imdbVotes = cinemetaRating.imdbVotes ?: ratings?.imdbVotes,
+                    imdbId = ratings?.imdbId ?: cinemetaRating.imdbId
+                )
+                imdbId?.let { ratingsCache[it] = CachedRating(updated, System.currentTimeMillis()) }
+                ratings = updated
             }
         }
 
