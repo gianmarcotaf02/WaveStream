@@ -62,14 +62,25 @@ class AssistantViewModel @Inject constructor(
     private var listeningJob: Job? = null
     private var conversationJob: Job? = null
 
+    // Buffer circolare delle ampiezze del microfono → visualizer musicale dell'orb
+    private val waveformHistory = ArrayDeque<Float>()
+
     init {
         aiAssistantService.resetConversation()
 
-        // Ampiezza microfono in tempo reale → orb
+        // Ampiezza microfono in tempo reale → orb (pulse + equalizer circolare)
         viewModelScope.launch {
             audioRecorder.amplitude.collect { amp ->
                 if (_uiState.value.phase == Phase.LISTENING) {
-                    _uiState.value = _uiState.value.copy(amplitude = amp)
+                    // radice: rende visibili anche le voci basse (percezione umana)
+                    waveformHistory.addLast(kotlin.math.sqrt(amp))
+                    while (waveformHistory.size > WAVEFORM_SAMPLES) {
+                        waveformHistory.removeFirst()
+                    }
+                    _uiState.value = _uiState.value.copy(
+                        amplitude = amp,
+                        waveform = waveformHistory.toList()
+                    )
                 }
             }
         }
@@ -102,6 +113,7 @@ class AssistantViewModel @Inject constructor(
             )
             return
         }
+        waveformHistory.clear()
         ttsManager.stop()
         _uiState.value = _uiState.value.copy(
             phase = Phase.LISTENING,
@@ -191,5 +203,10 @@ class AssistantViewModel @Inject constructor(
         }
         ttsManager.stop()
         super.onCleared()
+    }
+
+    companion object {
+        /** Numero di barre del visualizer circolare */
+        private const val WAVEFORM_SAMPLES = 90
     }
 }
