@@ -220,7 +220,6 @@ fun AssistantOrb(
                 )
                 }
             }
-        }
 
         // ---------- 7. Nucleo sferico definito ----------
         val coreRadius = minDim * 0.155f * (1f + pulse)

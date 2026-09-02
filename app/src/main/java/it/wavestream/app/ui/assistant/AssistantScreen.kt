@@ -100,7 +100,7 @@ fun AssistantScreen(
                 AssistantViewModel.Phase.IDLE -> "Chiedimi pure" to WaveStreamColors.TextSecondary
                 AssistantViewModel.Phase.LISTENING -> "Ti ascolto" to WaveStreamColors.Accent
                 AssistantViewModel.Phase.THINKING -> "Sto pensando…" to WaveStreamColors.AccentLight
-                AssistantViewModel.Phase.SPEAKING -> if (uiState.results.isEmpty()) "" else "Scegli dal carosello ↓" to WaveStreamColors.TextSecondary
+                AssistantViewModel.Phase.SPEAKING -> (if (uiState.results.isEmpty()) "" else "Scegli dal carosello ↓") to WaveStreamColors.TextSecondary
                 AssistantViewModel.Phase.ERROR -> (uiState.errorMessage ?: "Si è verificato un errore") to Color(0xFFFF8A80)
             }
             Text(
