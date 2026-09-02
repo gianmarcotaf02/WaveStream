@@ -132,12 +132,12 @@ fun LoadingScreen(
     // Rotating trivia index state
     var currentTriviaIndex by remember { mutableIntStateOf(0) }
     
-    // Cycle through trivia every 5 seconds if profile name is present
+    // Cycle through trivia every 3 seconds if profile name is present
     if (profileName.isNotEmpty()) {
         LaunchedEffect(activeTriviaList) {
             if (activeTriviaList.isNotEmpty()) {
                 while (true) {
-                    delay(5000)
+                    delay(3000)
                     currentTriviaIndex = (currentTriviaIndex + 1) % activeTriviaList.size
                 }
             }
