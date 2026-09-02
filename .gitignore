@@ -97,3 +97,6 @@ terms.html
 
 # Scripts
 xtream_checker.py
+
+# Signing credentials (do not commit)
+keystore.properties
