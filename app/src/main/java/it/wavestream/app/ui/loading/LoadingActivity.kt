@@ -462,7 +462,7 @@ class LoadingActivity : ComponentActivity() {
                     withContext(Dispatchers.Main) {
                         onStateUpdate(LoadingState(
                             status = "Preparazione film...",
-                            detail = "0/${moviesToEnrich.size} già pronti ($moviesCached da cache)",
+                            detail = "",
                             progress = 55,
                             showProgress = true
                         ))
@@ -535,7 +535,7 @@ class LoadingActivity : ComponentActivity() {
                         withContext(Dispatchers.Main) {
                             onStateUpdate(LoadingState(
                                 status = "Preparazione film...",
-                                detail = "${(batchStart + batch.size)}/${moviesToEnrich.size}",
+                                detail = "",
                                 progress = progress,
                                 showProgress = true
                             ))
@@ -547,7 +547,7 @@ class LoadingActivity : ComponentActivity() {
                     withContext(Dispatchers.Main) {
                         onStateUpdate(LoadingState(
                             status = "Contenuti già pronti!",
-                            detail = "${moviesCached} film dalla cache",
+                            detail = "",
                             progress = 75,
                             showProgress = true
                         ))
@@ -570,7 +570,7 @@ class LoadingActivity : ComponentActivity() {
                     withContext(Dispatchers.Main) {
                         onStateUpdate(LoadingState(
                             status = "Preparazione serie TV...",
-                            detail = "0/${seriesToEnrich.size} già pronti ($seriesCached da cache)",
+                            detail = "",
                             progress = 76,
                             showProgress = true
                         ))
@@ -642,7 +642,7 @@ class LoadingActivity : ComponentActivity() {
                         withContext(Dispatchers.Main) {
                             onStateUpdate(LoadingState(
                                 status = "Preparazione serie TV...",
-                                detail = "${(batchStart + batch.size)}/${seriesToEnrich.size}",
+                                detail = "",
                                 progress = progress,
                                 showProgress = true
                             ))
@@ -654,7 +654,7 @@ class LoadingActivity : ComponentActivity() {
                     withContext(Dispatchers.Main) {
                         onStateUpdate(LoadingState(
                             status = "Contenuti già pronti!",
-                            detail = "${seriesCached} serie dalla cache",
+                            detail = "",
                             progress = 96,
                             showProgress = true
                         ))
