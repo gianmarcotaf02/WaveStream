@@ -22,10 +22,11 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import java.io.File
 import java.io.FileInputStream
-import java.net.URL
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.tanh
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 /**
  * Motore TTS neurale on-device di Nova: sherpa-onnx + Piper VITS
@@ -121,7 +122,16 @@ class SherpaTtsManager @Inject constructor(
             true
         } catch (t: Throwable) {
             android.util.Log.e("NovaVoice", "ensureReady fallito", t)
-            _errorMessage.value = t.message ?: t.javaClass.simpleName
+            // se il caricamento del modello fallisce, i file sono probabilmente corrotti:
+            // cancellali così il prossimo "Scarica" riparte da un download pulito
+            if (t.message?.contains("Protobuf", ignoreCase = true) == true ||
+                t.message?.contains("Load model", ignoreCase = true) == true
+            ) {
+                modelDir.deleteRecursively()
+                _errorMessage.value = "Modello corrotto eliminato — riprova il download"
+            } else {
+                _errorMessage.value = t.message ?: t.javaClass.simpleName
+            }
             _state.value = State.ERROR
             false
         }
@@ -223,20 +233,29 @@ class SherpaTtsManager @Inject constructor(
             baseDir.mkdirs()
             val tarFile = File(baseDir, "model.tar.bz2")
 
-            val connection = URL(MODEL_URL).openConnection()
-            connection.connect()
-            val total = connection.contentLengthLong
-
-            connection.getInputStream().use { input ->
-                tarFile.outputStream().use { output ->
-                    val buffer = ByteArray(256 * 1024)
-                    var read: Int
-                    var written = 0L
-                    while (input.read(buffer).also { read = it } != -1) {
-                        output.write(buffer, 0, read)
-                        written += read
-                        if (total > 0) {
-                            _downloadProgress.value = ((written * 100) / total).toInt()
+            // OkHttp segue i redirect di GitHub release in modo affidabile
+            val client = OkHttpClient.Builder()
+                .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+                .build()
+            val request = Request.Builder().url(MODEL_URL).build()
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw java.io.IOException("HTTP ${response.code} dal server modelli")
+                }
+                val body = response.body ?: throw java.io.IOException("Body vuoto dal server")
+                val total = body.contentLength()
+                body.byteStream().use { input ->
+                    tarFile.outputStream().use { output ->
+                        val buffer = ByteArray(256 * 1024)
+                        var read: Int
+                        var written = 0L
+                        while (input.read(buffer).also { read = it } != -1) {
+                            output.write(buffer, 0, read)
+                            written += read
+                            if (total > 0) {
+                                _downloadProgress.value = ((written * 100) / total).toInt()
+                            }
                         }
                     }
                 }
@@ -245,6 +264,19 @@ class SherpaTtsManager @Inject constructor(
             _state.value = State.EXTRACTING
             extractTarBz2(tarFile, baseDir)
             tarFile.delete()
+
+            // Validazione: l'ONNX corretto è ~20MB — se più piccolo è corrotto
+            if (onnxFile.length() < 10_000_000L) {
+                android.util.Log.e(
+                    "NovaVoice",
+                    "ONNX corrotto dopo estrazione (${onnxFile.length()} byte) → elimino e riprovo al prossimo tentativo"
+                )
+                modelDir.deleteRecursively()
+                _state.value = State.ERROR
+                _errorMessage.value = "File corrotto dopo l'estrazione — riprova il download"
+                return@withContext false
+            }
+            android.util.Log.d("NovaVoice", "Modello estratto OK: onnx=${onnxFile.length()} byte, tokens=${tokensFile.length()}, espeak-data=${espeakDir.exists()}")
 
             isModelDownloaded().also { downloaded ->
                 if (!downloaded) {
