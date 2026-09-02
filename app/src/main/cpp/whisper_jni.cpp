@@ -14,13 +14,13 @@ extern "C" {
 JNIEXPORT jlong JNICALL
 Java_it_wavestream_app_voice_WhisperLib_initContext(
         JNIEnv *env, jobject thiz, jstring model_path_str) {
-    UNUSED(thiz);
-    const char *model_path = (*env)->GetStringUTFChars(env, model_path_str, NULL);
+    (void) thiz;
+    const char *model_path = env->GetStringUTFChars(model_path_str, nullptr);
     LOGI("Loading model from %s", model_path);
     struct whisper_context *context = whisper_init_from_file_with_params(
             model_path, whisper_context_default_params());
-    (*env)->ReleaseStringUTFChars(env, model_path_str, model_path);
-    if (context == NULL) {
+    env->ReleaseStringUTFChars(model_path_str, model_path);
+    if (context == nullptr) {
         LOGW("Failed to load model");
         return 0;
     }
@@ -30,7 +30,7 @@ Java_it_wavestream_app_voice_WhisperLib_initContext(
 JNIEXPORT void JNICALL
 Java_it_wavestream_app_voice_WhisperLib_freeContext(
         JNIEnv *env, jobject thiz, jlong context_ptr) {
-    UNUSED(env); UNUSED(thiz);
+    (void) env; (void) thiz;
     if (context_ptr != 0) {
         whisper_free((struct whisper_context *) context_ptr);
     }
@@ -40,13 +40,13 @@ JNIEXPORT void JNICALL
 Java_it_wavestream_app_voice_WhisperLib_fullTranscribe(
         JNIEnv *env, jobject thiz, jlong context_ptr, jint num_threads,
         jfloatArray audio_data, jstring language_str) {
-    UNUSED(env); UNUSED(thiz);
+    (void) thiz;
     struct whisper_context *context = (struct whisper_context *) context_ptr;
-    if (context == NULL) return;
+    if (context == nullptr) return;
 
-    jfloat *audio = (*env)->GetFloatArrayElements(env, audio_data, NULL);
-    const jsize audio_length = (*env)->GetArrayLength(env, audio_data);
-    const char *language = (*env)->GetStringUTFChars(env, language_str, "it");
+    jfloat *audio = env->GetFloatArrayElements(audio_data, nullptr);
+    const jsize audio_length = env->GetArrayLength(audio_data);
+    const char *language = env->GetStringUTFChars(language_str, "it");
 
     struct whisper_full_params params = whisper_full_default_params(WHISPER_SAMPLING_GREEDY);
     params.print_realtime = false;
@@ -68,33 +68,33 @@ Java_it_wavestream_app_voice_WhisperLib_fullTranscribe(
         LOGW("whisper_full failed");
     }
 
-    (*env)->ReleaseStringUTFChars(env, language_str, language);
-    (*env)->ReleaseFloatArrayElements(env, audio_data, audio, JNI_ABORT);
+    env->ReleaseStringUTFChars(language_str, language);
+    env->ReleaseFloatArrayElements(audio_data, audio, JNI_ABORT);
 }
 
 JNIEXPORT jint JNICALL
 Java_it_wavestream_app_voice_WhisperLib_getTextSegmentCount(
         JNIEnv *env, jobject thiz, jlong context_ptr) {
-    UNUSED(env); UNUSED(thiz);
+    (void) env; (void) thiz;
     struct whisper_context *context = (struct whisper_context *) context_ptr;
-    if (context == NULL) return 0;
+    if (context == nullptr) return 0;
     return whisper_full_n_segments(context);
 }
 
 JNIEXPORT jstring JNICALL
 Java_it_wavestream_app_voice_WhisperLib_getTextSegment(
         JNIEnv *env, jobject thiz, jlong context_ptr, jint index) {
-    UNUSED(thiz);
+    (void) thiz;
     struct whisper_context *context = (struct whisper_context *) context_ptr;
-    if (context == NULL) return (*env)->NewStringUTF(env, "");
+    if (context == nullptr) return env->NewStringUTF("");
     const char *text = whisper_full_get_segment_text(context, index);
-    return (*env)->NewStringUTF(env, text);
+    return env->NewStringUTF(text);
 }
 
 JNIEXPORT jstring JNICALL
 Java_it_wavestream_app_voice_WhisperLib_systemInfo(JNIEnv *env, jobject thiz) {
-    UNUSED(thiz);
-    return (*env)->NewStringUTF(env, whisper_print_system_info());
+    (void) thiz;
+    return env->NewStringUTF(whisper_print_system_info());
 }
 
 } // extern "C"
