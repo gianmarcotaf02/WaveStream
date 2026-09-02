@@ -31,7 +31,7 @@ class AssistantActivity : ComponentActivity() {
 
     private val requestMicPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) viewModel.onMicPressed()
+            if (granted) viewModel.startListening()
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,10 +42,18 @@ class AssistantActivity : ComponentActivity() {
                 val uiState = viewModel.uiState.collectAsState().value
                 AssistantScreen(
                     uiState = uiState,
-                    onMicPressed = ::onMicPressed,
                     onResultSelected = viewModel::onResultSelected
                 )
             }
+        }
+
+        // Il microfono si attiva automaticamente all'apertura dell'assistente
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            viewModel.startListening()
+        } else {
+            requestMicPermission.launch(Manifest.permission.RECORD_AUDIO)
         }
 
         lifecycleScope.launch {
@@ -56,16 +64,6 @@ class AssistantActivity : ComponentActivity() {
                     }
                 }
             }
-        }
-    }
-
-    private fun onMicPressed() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            viewModel.onMicPressed()
-        } else {
-            requestMicPermission.launch(Manifest.permission.RECORD_AUDIO)
         }
     }
 
