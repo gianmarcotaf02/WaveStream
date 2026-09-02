@@ -53,7 +53,6 @@ class AssistantActivity : ComponentActivity() {
                 viewModel.events.collect { event ->
                     when (event) {
                         is AssistantViewModel.Event.OpenContent -> openContent(event.item)
-                        is AssistantViewModel.Event.StartListening -> { /* non usato */ }
                     }
                 }
             }
