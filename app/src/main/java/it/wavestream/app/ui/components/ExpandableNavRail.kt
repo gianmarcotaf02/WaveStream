@@ -286,8 +286,8 @@ fun ExpandableNavRail(
             }
             
             NavRailItem(
-                icon = Icons.Default.SmartToy,
-                label = "Assistente",
+                icon = Icons.Default.AutoAwesome,
+                label = "Nova",
                 isSelected = false,
                 isExpanded = isExpanded,
                 onClick = onAssistantClick

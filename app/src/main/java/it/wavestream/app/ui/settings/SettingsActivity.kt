@@ -140,7 +140,7 @@ class SettingsActivity : ComponentActivity() {
             SettingsMenuItem("preferences", "Preferenze", "Impostazioni generali", Icons.Default.Settings),
             SettingsMenuItem("player", "Player", "Impostazioni riproduzione", Icons.Default.PlayArrow),
             SettingsMenuItem("subtitles", "Sottotitoli", "OpenSubtitles e lingua", Icons.Default.Subtitles),
-            SettingsMenuItem("assistant", "Assistente AI", "Voce, microfono e Gemini", Icons.Default.SmartToy),
+            SettingsMenuItem("assistant", "Nova · Assistente AI", "Voce, microfono e Gemini", Icons.Default.AutoAwesome),
             SettingsMenuItem("epg", "Guida TV (EPG)", "Aggiornamento guida programmi", Icons.Default.Tv),
             SettingsMenuItem("appearance", "Aspetto", "Tema e visualizzazione", Icons.Default.Palette),
             SettingsMenuItem("storage", "Archiviazione", "Cache e dati", Icons.Default.Storage),
@@ -3713,7 +3713,7 @@ private fun AssistantSettings(
         // ---- Prova voce ----
         Button(
             onClick = {
-                ttsManager.speak("Ciao! Sono l'assistente di WaveStream. Dimmi cosa vuoi guardare stasera.")
+                ttsManager.speak("Ciao! Sono Nova, l'assistente di WaveStream. Dimmi cosa vuoi guardare stasera.")
             },
             colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.BackgroundTertiary)
         ) {
