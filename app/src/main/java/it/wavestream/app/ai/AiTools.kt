@@ -97,7 +97,8 @@ class AiTools @Inject constructor(
     }
 
     /**
-     * Esegue il tool richiesto dal modello.
+     * Esegue il tool richiesto dal modello. Pubblico per il fallback DB locale
+     * di AiAssistantService (finalizeTurn).
      */
     suspend fun execute(name: String, args: Map<String, Any?>): AiToolResult = try {
         when (name) {
@@ -119,7 +120,7 @@ class AiTools @Inject constructor(
 
     // ---------- Tool implementations ----------
 
-    private suspend fun searchContent(query: String, contentType: String): AiToolResult {
+    suspend fun searchContent(query: String, contentType: String): AiToolResult {
         if (query.isBlank()) return AiToolResult(mapOf("found" to 0, "note" to "Query vuota"))
 
         val items = mutableListOf<AiResultItem>()
