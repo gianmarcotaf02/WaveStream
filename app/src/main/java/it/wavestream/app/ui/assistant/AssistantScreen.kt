@@ -48,9 +48,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.tv.material3.carousel
+import androidx.tv.material3.Carousel
 import coil.compose.AsyncImage
 import it.wavestream.app.ai.AiResultItem
+import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 /**
@@ -346,9 +347,9 @@ private fun ResultCard(
             ) {
                 Text(
                     text = when (item.type) {
-                        it.wavestream.app.data.database.entity.ContentType.MOVIE -> "FILM"
-                        it.wavestream.app.data.database.entity.ContentType.SERIES -> "SERIE"
-                        it.wavestream.app.data.database.entity.ContentType.CHANNEL -> "LIVE"
+                        ContentType.MOVIE -> "FILM"
+                        ContentType.SERIES -> "SERIE"
+                        ContentType.CHANNEL -> "LIVE"
                         else -> ""
                     },
                     color = Color.White,
