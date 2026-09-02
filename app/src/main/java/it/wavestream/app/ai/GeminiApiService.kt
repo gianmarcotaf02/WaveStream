@@ -22,10 +22,8 @@ interface GeminiApiService {
     companion object {
         const val BASE_URL = "https://generativelanguage.googleapis.com/"
 
-        // Alias ufficiale Google → punta sempre all'ultimo Gemini Flash Lite
-        // (oggi 3.5, si aggiornerà da solo). Alternativa esplicita:
-        // "gemini-3.5-flash-lite" oppure "gemini-2.0-flash"
-        const val DEFAULT_MODEL = "gemini-flash-lite-latest"
+        // Gemini 3.5 Flash Lite (audio input nativo, free tier)
+        const val DEFAULT_MODEL = "gemini-3.5-flash-lite"
     }
 }
 
