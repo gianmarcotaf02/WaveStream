@@ -82,17 +82,16 @@ fun OnScreenKeyboard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 row.forEach { keyData ->
-                    if (keyData != null) {
-                        key(keyData) {
+                    when (keyData) {
+                        // Cella vuota per mantenere la griglia allineata su 7 colonne
+                        null -> Spacer(modifier = Modifier.weight(1f))
+                        is KeyboardKey.Letter -> key(keyData) {
                             KeyboardButton(
                                 label = keyData.value,
                                 onClick = { onQueryChange(query + keyData.value) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
-                    } else {
-                        // Cella vuota per mantenere la griglia allineata su 7 colonne
-                        Spacer(modifier = Modifier.weight(1f))
                     }
                 }
             }
