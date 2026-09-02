@@ -21,6 +21,7 @@ private const val SYNC_ACCENT_COLOR_KEY = "accent_color"
 private const val ENCRYPTED_PREFS_NAME = "wavestream_encrypted_prefs"
 private const val ENCRYPTED_TMDB_KEY = "tmdb_api_key"
 private const val ENCRYPTED_OMDB_KEY = "omdb_api_key"
+private const val ENCRYPTED_GEMINI_KEY = "gemini_api_key"
 
 /**
  * User preferences manager using DataStore
@@ -128,6 +129,13 @@ class UserPreferences @Inject constructor(
         // Onboarding
         private val WELCOME_SHOWN = booleanPreferencesKey("welcome_shown")
         private val TERMS_ACCEPTED = booleanPreferencesKey("terms_accepted")
+
+        // Assistente AI vocale
+        private val ASSISTANT_TTS_ENABLED = booleanPreferencesKey("assistant_tts_enabled")
+        private val ASSISTANT_TTS_VOICE = stringPreferencesKey("assistant_tts_voice")
+        private val ASSISTANT_TTS_LANGUAGE = stringPreferencesKey("assistant_tts_language")
+        private val ASSISTANT_TTS_RATE = floatPreferencesKey("assistant_tts_rate")
+        private val ASSISTANT_TTS_PITCH = floatPreferencesKey("assistant_tts_pitch")
     }
     
     private val dataStore = context.dataStore
@@ -143,6 +151,59 @@ class UserPreferences @Inject constructor(
 
     fun getTmdbApiKeyFlow(): Flow<String?> {
         return kotlinx.coroutines.flow.flowOf(encryptedPrefs.getString(ENCRYPTED_TMDB_KEY, null))
+    }
+
+    // Gemini API Key (cifrata, per l'assistente AI)
+    suspend fun setGeminiApiKey(apiKey: String) {
+        encryptedPrefs.edit().putString(ENCRYPTED_GEMINI_KEY, apiKey).apply()
+    }
+
+    fun getGeminiApiKey(): String? {
+        return encryptedPrefs.getString(ENCRYPTED_GEMINI_KEY, null)
+    }
+
+    // Assistente AI — voce TTS
+    suspend fun setAssistantTtsEnabled(enabled: Boolean) {
+        dataStore.edit { it[ASSISTANT_TTS_ENABLED] = enabled }
+    }
+
+    fun getAssistantTtsEnabledFlow(): Flow<Boolean> {
+        return dataStore.data.map { it[ASSISTANT_TTS_ENABLED] ?: true }
+    }
+
+    suspend fun setAssistantTtsVoice(voiceName: String?) {
+        dataStore.edit { prefs ->
+            if (voiceName != null) prefs[ASSISTANT_TTS_VOICE] = voiceName
+            else prefs.remove(ASSISTANT_TTS_VOICE)
+        }
+    }
+
+    fun getAssistantTtsVoiceFlow(): Flow<String?> {
+        return dataStore.data.map { it[ASSISTANT_TTS_VOICE] }
+    }
+
+    suspend fun setAssistantTtsLanguage(languageTag: String) {
+        dataStore.edit { it[ASSISTANT_TTS_LANGUAGE] = languageTag }
+    }
+
+    fun getAssistantTtsLanguageFlow(): Flow<String> {
+        return dataStore.data.map { it[ASSISTANT_TTS_LANGUAGE] ?: "it-IT" }
+    }
+
+    suspend fun setAssistantTtsRate(rate: Float) {
+        dataStore.edit { it[ASSISTANT_TTS_RATE] = rate.coerceIn(0.5f, 2f) }
+    }
+
+    fun getAssistantTtsRateFlow(): Flow<Float> {
+        return dataStore.data.map { it[ASSISTANT_TTS_RATE] ?: 1f }
+    }
+
+    suspend fun setAssistantTtsPitch(pitch: Float) {
+        dataStore.edit { it[ASSISTANT_TTS_PITCH] = pitch.coerceIn(0.5f, 2f) }
+    }
+
+    fun getAssistantTtsPitchFlow(): Flow<Float> {
+        return dataStore.data.map { it[ASSISTANT_TTS_PITCH] ?: 1f }
     }
     
     // Current Profile
