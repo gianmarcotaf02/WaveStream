@@ -29,12 +29,15 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.items as tvGridItems
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -78,6 +81,8 @@ import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -114,6 +119,35 @@ class SearchActivity : ComponentActivity() {
     @Inject lateinit var userPreferences: it.wavestream.app.data.preferences.UserPreferences
     
     private var searchJob: Job? = null
+    
+    // Cache delle categorie (refresh ogni 5 min): evita di ricaricare 3 liste
+    // dal DB a ogni lettera digitata
+    private var categoryCache: Triple<List<String>, List<String>, List<String>>? = null
+    private var categoryCacheTime = 0L
+    
+    // Cronologia delle ricerche recenti (persistita, mostrata a query vuota)
+    private val recentPrefs by lazy {
+        getSharedPreferences("search_recent_queries", Context.MODE_PRIVATE)
+    }
+    
+    private fun loadRecentSearches(): List<String> {
+        return recentPrefs.getString("recent_queries", null)
+            ?.split('\u0001')
+            ?.filter { it.isNotBlank() }
+            ?: emptyList()
+    }
+    
+    private fun saveRecentSearch(query: String) {
+        val q = query.trim()
+        if (q.length < 2) return
+        val updated = (listOf(q) + loadRecentSearches()).distinct().take(8)
+        recentPrefs.edit().putString("recent_queries", updated.joinToString("\u0001")).apply()
+    }
+    
+    private fun removeRecentSearch(query: String) {
+        val updated = loadRecentSearches().filter { it != query.trim() }
+        recentPrefs.edit().putString("recent_queries", updated.joinToString("\u0001")).apply()
+    }
     private var voiceResultCallback: ((String) -> Unit)? = null
     private lateinit var voiceSearchLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>
     
@@ -189,28 +223,27 @@ class SearchActivity : ComponentActivity() {
             onDispose { voiceResultCallback = null }
         }
         
-        // Suggerimenti istantanei: appaiono già dal primo carattere digitato,
-        // prima della ricerca completa (che è debounced)
-        LaunchedEffect(query) {
-            if (query.isNotEmpty()) {
-                delay(100)
-                suggestions = performSearch(query).take(6)
-            } else {
-                suggestions = emptyList()
-            }
-        }
+        // Cronologia ricerche recenti (mostrata a query vuota, cliccabile)
+        var recentSearches by remember { mutableStateOf(loadRecentSearches()) }
         
-        // Debounced search
+        // Pipeline unica di ricerca: ogni tasto cancella il lavoro precedente.
+        // 1) micro-debounce per aggregare digitazioni rapide;
+        // 2) suggerimenti istantanei (limitati, ~60ms);
+        // 3) risultati completi dopo il debounce (~220ms totali).
         LaunchedEffect(query) {
-            if (query.length >= 2) {
-                isLoading = true
-                delay(300) // Debounce
-                results = performSearch(query)
-                isLoading = false
-            } else {
+            val trimmed = query.trim()
+            if (trimmed.length < 2) {
+                suggestions = emptyList()
                 results = emptyList()
                 isLoading = false
+                return@LaunchedEffect
             }
+            isLoading = true
+            delay(60)
+            suggestions = performSearch(trimmed, limit = 6)
+            delay(160)
+            results = performSearch(trimmed, limit = 60)
+            isLoading = false
         }
         
         SearchScreen(
@@ -222,7 +255,21 @@ class SearchActivity : ComponentActivity() {
             isLoading = isLoading,
             focusRequester = focusRequester,
             onBackClick = { finish() },
+            recentSearches = recentSearches,
+            onRecentSearchClick = { recent ->
+                query = recent
+            },
+            onRecentSearchRemove = { recent ->
+                removeRecentSearch(recent)
+                recentSearches = loadRecentSearches()
+                android.widget.Toast.makeText(context, "Ricerca rimossa", android.widget.Toast.LENGTH_SHORT).show()
+            },
             onItemClick = { item ->
+                // Salva la query nella cronologia (se abbastanza lunga)
+                if (query.trim().length >= 2) {
+                    saveRecentSearch(query.trim())
+                    recentSearches = loadRecentSearches()
+                }
                 // Channels play directly, others go to details/category
                 if (item.type == ContentType.CHANNEL && !item.isCategory) {
                     playContent(item)
@@ -235,8 +282,8 @@ class SearchActivity : ComponentActivity() {
                 coroutineScope.launch {
                     toggleFavorite(item)
                     // Refresh results to update favorite status
-                    if (query.length >= 2) {
-                        results = performSearch(query)
+                    if (query.trim().length >= 2) {
+                        results = performSearch(query.trim(), limit = 60)
                     }
                     val message = if (!item.isFavorite) "Aggiunto ai preferiti" else "Rimosso dai preferiti"
                     android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show()
@@ -274,113 +321,154 @@ class SearchActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun performSearch(query: String): List<SearchResultItem> {
-        val results = mutableListOf<SearchResultItem>()
+    /**
+     * Cache con TTL delle categorie (film, serie, live): caricate dal DB al
+     * massimo una volta ogni 5 minuti, poi filtrate in memoria.
+     */
+    private suspend fun getCategoriesCached(): Triple<List<String>, List<String>, List<String>> {
+        val now = System.currentTimeMillis()
+        categoryCache?.let { cached ->
+            if (now - categoryCacheTime < 5 * 60 * 1000) return cached
+        }
+        return coroutineScope {
+            val movies = async { movieDao.getCategoriesList() }
+            val series = async { seriesDao.getCategoriesList() }
+            val live = async { channelDao.getCategoriesList() }
+            Triple(movies.await(), series.await(), live.await()).also {
+                categoryCache = it
+                categoryCacheTime = now
+            }
+        }
+    }
+    
+    /**
+     * Score di pertinenza: premia match esatti, prefissi e inizio di parola,
+     * i preferiti e le categorie (scorciatoie di navigazione); penalizza i
+     * titoli molto lunghi. I risultati sono ordinati per score decrescente.
+     */
+    private fun relevanceScore(item: SearchResultItem, query: String): Int {
+        val title = item.title.lowercase()
+        val q = query.lowercase().trim()
+        val base = when {
+            title == q -> 120          // match esatto
+            title.startsWith(q) -> 100 // inizia con la query
+            title.contains(" $q") -> 90  // inizio di una parola nel titolo
+            title.contains(q) -> 70    // contiene la query
+            else -> 50                 // match FTS parziale (token intermedi)
+        }
+        var score = base
+        if (item.isFavorite) score += 15
+        if (item.isCategory) score += 10
+        score -= title.length / 8 // titoli più corti = più pertinenti
+        return score
+    }
+    
+    private fun dedupeKey(item: SearchResultItem): String {
+        return if (item.isCategory) "cat_${item.categoryType}_${item.title}" else "${item.type}_${item.id}"
+    }
+    
+    private suspend fun performSearch(
+        query: String,
+        limit: Int = 60,
+        allowFallback: Boolean = true
+    ): List<SearchResultItem> {
+        val trimmed = query.trim()
+        if (trimmed.isEmpty()) return emptyList()
         val profileId = userPreferences.getCurrentProfileId() ?: 1L
-
-        // Helper delegato al domain use case (FASE 5)
+        
+        // UNA sola query per tutti i preferiti del profilo: elimina l'N+1
+        // di isFavorite per ogni risultato (fino a 50+ query per ricerca)
+        val favoriteKeys = coroutineScope {
+            async { favoriteDao.getFavoritesByProfileList(profileId) }
+                .await()
+                .map { "${it.contentType}_${it.contentId}" }
+                .toSet()
+        }
+        
+        // Helper delegato al domain use case
         fun isBlockedContent(name: String, category: String?) = filterBlockedContent.isBlocked(name, category)
         
-        // Search movies
-        val movies = (ftsSearchRepository.searchMovies(query) ?: movieDao.searchMovies(query))
-            .filter { !isBlockedContent(it.name, it.category) }
-        results.addAll(movies.map { movie ->
-            SearchResultItem(
-                id = movie.id,
-                title = movie.name,
-                subtitle = movie.year?.toString(),
-                posterUrl = movie.posterUrl,
-                type = ContentType.MOVIE,
-                streamUrl = movie.streamUrl,
-                isFavorite = favoriteDao.isFavorite(profileId, ContentType.MOVIE, movie.id)
-            )
-        })
-
-        // Search series
-        val series = (ftsSearchRepository.searchSeries(query) ?: seriesDao.searchSeries(query))
-            .filter { !isBlockedContent(it.name, it.category) }
-        results.addAll(series.map { s ->
-            SearchResultItem(
-                id = s.id,
-                title = s.name,
-                subtitle = s.year?.toString(),
-                posterUrl = s.posterUrl,
-                type = ContentType.SERIES,
-                streamUrl = null,
-                isFavorite = favoriteDao.isFavorite(profileId, ContentType.SERIES, s.id)
-            )
-        })
-
-        // Search channels
-        val channels = (ftsSearchRepository.searchChannels(query) ?: channelDao.searchChannels(query))
-            .filter { !isBlockedContent(it.name, it.categoryName) }
-        results.addAll(channels.map { channel ->
-            SearchResultItem(
-                id = channel.id,
-                title = channel.name,
-                subtitle = channel.categoryName,
-                posterUrl = channel.logoUrl,
-                type = ContentType.CHANNEL,
-                streamUrl = channel.streamUrl,
-                isFavorite = favoriteDao.isFavorite(profileId, ContentType.CHANNEL, channel.id)
-            )
-        })
-        
-        // Search categories (movies)
-        val movieCategories = movieDao.getCategoriesList().filter { cat ->
-            cat.contains(query, ignoreCase = true) &&
-            !isBlockedContent(cat, cat)  // Escludi categorie XXX/straniere
-        }.take(5)
-        results.addAll(0, movieCategories.map { category ->
-            SearchResultItem(
-                id = 0L,
-                title = category,
-                subtitle = "Categoria Film",
-                posterUrl = null,
-                type = ContentType.MOVIE,
-                streamUrl = null,
-                isCategory = true,
-                categoryType = "movies"
-            )
-        })
-
-        // Search categories (series)
-        val seriesCategories = seriesDao.getCategoriesList().filter { cat ->
-            cat.contains(query, ignoreCase = true) &&
-            !isBlockedContent(cat, cat)  // Escludi categorie XXX/straniere
-        }.take(5)
-        results.addAll(movieCategories.size, seriesCategories.map { category ->
-            SearchResultItem(
-                id = 0L,
-                title = category,
-                subtitle = "Categoria Serie TV",
-                posterUrl = null,
-                type = ContentType.SERIES,
-                streamUrl = null,
-                isCategory = true,
-                categoryType = "series"
-            )
-        })
-
-        // Search categories (live)
-        val liveCategories = channelDao.getCategoriesList().filter { cat ->
-            cat.contains(query, ignoreCase = true) &&
-            !isBlockedContent(cat, cat)  // Escludi categorie XXX/straniere
-        }.take(5)
-        results.addAll(movieCategories.size + seriesCategories.size, liveCategories.map { category ->
-            SearchResultItem(
-                id = 0L,
-                title = category,
-                subtitle = "Categoria Live",
-                posterUrl = null,
-                type = ContentType.CHANNEL,
-                streamUrl = null,
-                isCategory = true,
-                categoryType = "live"
-            )
-        })
-        
-        return results
+        return coroutineScope {
+            // Ricerca film/serie/canali IN PARALLELO invece che in serie
+            val movies = async {
+                (ftsSearchRepository.searchMovies(trimmed) ?: movieDao.searchMovies(trimmed))
+                    .filter { !isBlockedContent(it.name, it.category) }
+                    .map { m ->
+                        SearchResultItem(
+                            id = m.id,
+                            title = m.name,
+                            subtitle = m.year?.toString(),
+                            posterUrl = m.posterUrl,
+                            type = ContentType.MOVIE,
+                            streamUrl = m.streamUrl,
+                            isFavorite = "${ContentType.MOVIE}_${m.id}" in favoriteKeys
+                        )
+                    }
+            }
+            val series = async {
+                (ftsSearchRepository.searchSeries(trimmed) ?: seriesDao.searchSeries(trimmed))
+                    .filter { !isBlockedContent(it.name, it.category) }
+                    .map { s ->
+                        SearchResultItem(
+                            id = s.id,
+                            title = s.name,
+                            subtitle = s.year?.toString(),
+                            posterUrl = s.posterUrl,
+                            type = ContentType.SERIES,
+                            streamUrl = null,
+                            isFavorite = "${ContentType.SERIES}_${s.id}" in favoriteKeys
+                        )
+                    }
+            }
+            val channels = async {
+                (ftsSearchRepository.searchChannels(trimmed) ?: channelDao.searchChannels(trimmed))
+                    .filter { !isBlockedContent(it.name, it.categoryName) }
+                    .map { c ->
+                        SearchResultItem(
+                            id = c.id,
+                            title = c.name,
+                            subtitle = c.categoryName,
+                            posterUrl = c.logoUrl,
+                            type = ContentType.CHANNEL,
+                            streamUrl = c.streamUrl,
+                            isFavorite = "${ContentType.CHANNEL}_${c.id}" in favoriteKeys
+                        )
+                    }
+            }
+            
+            var content = movies.await() + series.await() + channels.await()
+            
+            // Fallback progressivo: se la query multi-parola non trova nulla,
+            // riprova senza l'ultima parola (es. "batman gotham" -> "batman")
+            if (content.isEmpty() && allowFallback && trimmed.contains(' ')) {
+                val shorter = trimmed.substringBeforeLast(' ').trim()
+                if (shorter.length >= 2) {
+                    content = performSearch(shorter, limit = limit, allowFallback = false)
+                }
+            }
+            
+            val contentRanked = content
+                .distinctBy { dedupeKey(it) }
+                .sortedByDescending { relevanceScore(it, trimmed) }
+            
+            // Categorie: filtrate in memoria dalla cache (nessuna query ripetuta)
+            val q = trimmed.lowercase()
+            val (movieCats, seriesCats, liveCats) = getCategoriesCached()
+            val categoryResults = buildList {
+                movieCats.filter { it.lowercase().contains(q) && !isBlockedContent(it, it) }
+                    .forEach { add(SearchResultItem(0L, it, "Categoria Film", null, ContentType.MOVIE, null, isCategory = true, categoryType = "movies")) }
+                seriesCats.filter { it.lowercase().contains(q) && !isBlockedContent(it, it) }
+                    .forEach { add(SearchResultItem(0L, it, "Categoria Serie TV", null, ContentType.SERIES, null, isCategory = true, categoryType = "series")) }
+                liveCats.filter { it.lowercase().contains(q) && !isBlockedContent(it, it) }
+                    .forEach { add(SearchResultItem(0L, it, "Categoria Live", null, ContentType.CHANNEL, null, isCategory = true, categoryType = "live")) }
+            }
+            
+            // Ranking unificato contenuti + categorie, poi dedup e limite
+            (categoryResults + contentRanked)
+                .distinctBy { dedupeKey(it) }
+                .sortedByDescending { relevanceScore(it, trimmed) }
+                .take(limit)
+        }
     }
     
     private fun openDetails(item: SearchResultItem) {
