@@ -1590,6 +1590,13 @@ class TMDBService @Inject constructor(
     }
 
     private suspend fun fetchAndUpdateSeasonEpisodes(series: Series, tmdbId: Int, seasonNumber: Int) {
+        // Skip se tutti gli episodi locali della stagione hanno già la trama TMDB (italiana):
+        // evita chiamate di rete ripetute a ogni apertura della serie.
+        val localEpisodes = episodeDao.getEpisodesBySeasonList(series.id, seasonNumber)
+        if (localEpisodes.isNotEmpty() && localEpisodes.all { !it.tmdbOverview.isNullOrBlank() }) {
+            return
+        }
+
         val seasonUrl = "$BASE_URL/tv/$tmdbId/season/$seasonNumber?api_key=$API_KEY&language=$LANGUAGE"
         val seasonResponse = fetchUrl(seasonUrl)
         val seasonJson = JSONObject(seasonResponse)
