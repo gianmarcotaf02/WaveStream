@@ -17,6 +17,10 @@ for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
 set JAVA_EXE=java.exe
+@rem Prefer JAVA_HOME (must be JDK 17+); fall back to java.exe on PATH
+if defined JAVA_HOME (
+    if exist "%JAVA_HOME%\bin\java.exe" set "JAVA_EXE=%JAVA_HOME%\bin\java.exe"
+)
 %JAVA_EXE% -version >NUL 2>&1
 if %ERRORLEVEL% equ 0 goto execute
 
