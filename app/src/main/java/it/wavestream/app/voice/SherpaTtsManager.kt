@@ -197,45 +197,64 @@ class SherpaTtsManager @Inject constructor(
     }
 
     /**
-     * Cambia la voce neurale selezionata: rilascia il motore, rimuove i modelli
-     * delle altre voci (solo una voce su disco, per risparmiare storage su TV)
-     * e scarica/carica la nuova se serve. Idempotente.
+     * Cambia la voce neurale selezionata: rilascia il motore e scarica/carica la
+     * nuova se serve. I modelli delle altre voci vengono rimossi SOLO dopo il
+     * caricamento riuscito della nuova (così un download fallito non fa perdere
+     * la voce già pronta). Idempotente.
      */
     suspend fun switchVoice(voiceId: String): Boolean = withContext(Dispatchers.IO) {
         val voice = voiceById(voiceId)
         if (voice.id == selectedVoice.id && tts != null) return@withContext true
         stopPlayback()
+        val previous = selectedVoice
         try { tts?.release() } catch (_: Exception) {}
         tts = null
         selectedVoice = voice
-        // Rimuove i modelli delle altre voci: solo la voce attiva resta su disco
-        baseDir.listFiles()?.forEach { dir ->
-            if (dir.isDirectory && dir.name != voice.modelDirName && dir.name.startsWith("vits-piper-")) {
-                dir.deleteRecursively()
-            }
-        }
         _state.value = State.NOT_DOWNLOADED
         _downloadProgress.value = 0
         _errorMessage.value = null
-        ensureReady()
+        val ok = ensureReady()
+        if (ok) {
+            // Successo: rimuove i modelli delle altre voci (solo la voce attiva su disco)
+            baseDir.listFiles()?.forEach { dir ->
+                if (dir.isDirectory && dir.name != voice.modelDirName && dir.name.startsWith("vits-piper-")) {
+                    dir.deleteRecursively()
+                }
+            }
+        } else if (previous.id != voice.id && File(baseDir, previous.modelDirName).exists()) {
+            // Fallimento: ripristina la voce precedente se il suo modello c'è ancora
+            android.util.Log.w("NovaVoice", "Switch a ${voice.id} fallito → ripristino ${previous.id}")
+            selectedVoice = previous
+            _state.value = State.NOT_DOWNLOADED
+            _errorMessage.value = null
+            ensureReady()
+        }
+        ok
     }
     
     /**
      * Sintetizza il testo e riproduce l'audio con [gain] software (>1 = amplificato).
-     * [onDone] è invocato sul main thread a fine riproduzione (o in caso di errore).
+     * [onDone] è invocato sul main thread a fine riproduzione con `true` se l'audio
+     * è stato riprodotto, `false` in caso di errore/assenza del motore (il chiamante
+     * può così fare fallback sul TTS di sistema).
      */
-    fun synthesizeAndPlay(text: String, speed: Float, gain: Float, onDone: () -> Unit) {
-        val engine = tts ?: run { onDone(); return }
+    fun synthesizeAndPlay(text: String, speed: Float, gain: Float, onDone: (Boolean) -> Unit) {
+        val engine = tts ?: run { onDone(false); return }
         scope.launch {
             try {
                 val audio = engine.generate(text = text, sid = 0, speed = speed)
                 if (audio.samples.isEmpty()) {
-                    mainHandler.post(onDone)
+                    android.util.Log.w("NovaVoice", "generate() ha prodotto audio vuoto (len=${text.length})")
+                    mainHandler.post { onDone(false) }
                     return@launch
                 }
-                playWithGain(audio.samples, audio.sampleRate, gain, onDone)
+                playWithGain(audio.samples, audio.sampleRate, gain) { onDone(true) }
             } catch (t: Throwable) {
-                mainHandler.post(onDone)
+                android.util.Log.e("NovaVoice", "Sintesi/riproduzione fallita", t)
+                _errorMessage.value = if (t is OutOfMemoryError)
+                    "Memoria insufficiente per questa voce — prova una voce più leggera (es. Riccardo)"
+                else t.message ?: t.javaClass.simpleName
+                mainHandler.post { onDone(false) }
             }
         }
     }
@@ -371,6 +390,7 @@ class SherpaTtsManager @Inject constructor(
             android.util.Log.e("NovaVoice", "Download modello fallito", t)
             _state.value = State.ERROR
             _errorMessage.value = when (t) {
+                is OutOfMemoryError -> "Memoria insufficiente per caricare questa voce — usa una voce più leggera (es. Riccardo, 25 MB)"
                 is java.net.UnknownHostException -> "DNS non raggiungibile (github.com) — controlla la rete del device"
                 is java.net.SocketTimeoutException -> "Timeout di rete durante il download"
                 is java.io.IOException -> "Errore di rete: ${t.message}"
