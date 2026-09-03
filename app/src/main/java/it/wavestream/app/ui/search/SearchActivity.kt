@@ -31,6 +31,7 @@ import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.items as tvGridItems
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -161,11 +162,13 @@ class SearchActivity : ComponentActivity() {
             }
         }
         
-        // Force keyboard to show on Android TV
+        // Force keyboard to show on Android TV.
+        // SOFT_INPUT_ADJUST_RESIZE è deprecato da API 30: il resize dell'IME
+        // ora è gestito con gli insets (imePadding() sul root del Composable).
         window.setSoftInputMode(
-            android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE or
-            android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+            android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE
         )
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
         
         setContent {
             WaveStreamTheme {
@@ -565,6 +568,7 @@ fun SearchScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(WaveStreamColors.BackgroundDark)
+            .imePadding()
     ) {
         // Top spacing
         Spacer(modifier = Modifier.height(24.dp))
