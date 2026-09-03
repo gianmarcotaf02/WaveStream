@@ -680,7 +680,9 @@ fun DetailsScreen(
                         selectedSeason = state.selectedSeason,
                         onSeasonSelected = onSeasonSelected,
                         onDownloadSeason = onDownloadSeason,
-                        firstEpisodeFocusRequester = firstEpisodeFocusRequester
+                        // Passa il requester solo se ci sono episodi: il redirect "giù" verso un
+                        // FocusRequester non attaccato a nessun composable crasha l'app.
+                        firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                 }
@@ -698,7 +700,11 @@ fun DetailsScreen(
                         onClick = { onEpisodeClick(episode) },
                         onLongClick = { onEpisodeLongClick(episode) },
                         onDownloadClick = { onDownloadEpisode(episode) },
-                        modifier = Modifier
+                        modifier = Modifier.then(
+                            // Il requester DEVE restare attaccato alla card episodio target:
+                            // è il destinatario del redirect D-pad "giù" dall'header stagione.
+                            if (index == (state.scrollToEpisodeIndex ?: 0)) Modifier.focusRequester(firstEpisodeFocusRequester) else Modifier
+                        )
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }

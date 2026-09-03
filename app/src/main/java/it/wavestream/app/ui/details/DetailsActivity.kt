@@ -672,79 +672,28 @@ class DetailsActivity : ComponentActivity() {
         }
     }
     
-    private suspend fun loadSeries(onStateUpdate: (DetailsState) -> Unit) {
-        Log.d(TAG, "loadSeries: contentId=$contentId, contentType=$contentType")
-        var series = seriesDao.getSeriesById(contentId)
-            ?: resolveSeriesByTitleFallback()
-        if (series == null) {
-            // Content not found in DB: NEVER leave the skeleton up — show intent state.
-            Log.w(TAG, "loadSeries: series NOT FOUND for contentId=$contentId, showing intent state")
-            onStateUpdate(
-                DetailsState(
-                    title = intentTitle,
-                    posterUrl = intentPosterUrl,
-                    backdropUrl = intentBackdropUrl,
-                    contentType = ContentType.SERIES,
-                    isLoading = false
-                )
-            )
-            return
-        }
-        
-        Log.d(TAG, "Loading series: ${series.name}, tmdbId=${series.tmdbId}")
-        
-        contentTitle = series.name
-        currentSeriesId = series.id
-        
-        Log.d(TAG, "FAST PATH series: showing DB state immediately for '${series.name}'")
-        
-        // ===== FAST PATH: show the DB state immediately, no network =====
-        // Se il DB contiene già trama e votazione mostra subito il contenuto, altrimenti
-        // la skeleton resta attiva finché TMDB/OMDB non completano l'arricchimento.
-        val dbIsFavorite = favoriteDao.getFavorite(profileId, ContentType.SERIES, contentId) != null
-        onStateUpdate(
-            DetailsState(
-                title = series.name,
-                year = series.year?.toString() ?: "",
-                overview = series.plot ?: "",
-                genres = series.genre ?: "",
-                cast = series.cast,
-                castPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(series.tmdbCastJson),
-                directorPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(series.tmdbCrewJson),
-                director = series.director,
-                posterUrl = series.posterUrl,
-                backdropUrl = series.backdropUrl,
-                contentType = ContentType.SERIES,
-                isFavorite = dbIsFavorite,
-                // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
-                isLoading = series.plot.isNullOrEmpty() || series.tmdbVoteAverage == null,
-                tmdbRating = series.tmdbVoteAverage,
-                imdbRating = series.omdbImdbRating,
-                rottenTomatoesScore = series.omdbRottenTomatoesScore,
-                metacriticScore = series.omdbMetacriticScore,
-                audienceScore = series.omdbAudienceScore,
-                trailerKey = series.tmdbTrailerKey
-            )
-        )
-        
-        // Enrich with TMDB data if needed
-        series = tmdbService.enrichSeriesDetails(series)
-        
-        Log.d(TAG, "After enrich series: tmdbId=${series.tmdbId}, overview=${series.tmdbOverview?.take(50)}, cast=${series.tmdbCast}")
-        
-        // Check favorite status
-        val isFavorite = favoriteDao.getFavorite(profileId, ContentType.SERIES, contentId) != null
-        
-        // Load episodes on-demand
-        val loadSuccess = playlistRepository.loadSeriesEpisodes(series.id)
-        Log.d(TAG, "loadSeriesEpisodes result: $loadSuccess for series ${series.name} (id=${series.id}, xtreamId=${series.xtreamSeriesId})")
-        
-        // Get seasons
-        val seasons = episodeDao.getSeasonNumbers(series.id)
-        Log.d(TAG, "Seasons found: ${seasons.size} -> $seasons for series ${series.name}")
-        
-        // Load watch progress for all episodes FIRST to determine last watched season
-        val allEpisodes = episodeDao.getEpisodesBySeriesList(series.id)
+    /** Stato di visione/riproduzione di una serie, calcolato solo dal DB (nessuna rete). */
+    private data class SeriesWatchState(
+        val seasons: List<Int>,
+        val selectedSeason: Int,
+        val episodes: List<Episode>,
+        val episodeProgress: Map<Long, EpisodeProgress>,
+        val resumeMinutes: Int?,
+        val resumeProgress: Float?,
+        val resumeEpisodeSeason: Int?,
+        val resumeEpisodeNumber: Int?,
+        val nextEpisodeInfo: String?,
+        val nextEpisodeId: Long?,
+        val scrollToEpisodeIndex: Int?
+    )
+
+    /**
+     * Calcola stagioni, episodi della stagione corrente e stato resume/next
+     * leggendo SOLO dal DB: usato sia dal fast path sia dal load completo.
+     */
+    private suspend fun computeSeriesWatchState(seriesId: Long): SeriesWatchState {
+        val seasons = episodeDao.getSeasonNumbers(seriesId)
+        val allEpisodes = episodeDao.getEpisodesBySeriesList(seriesId)
         val episodeProgressMap = mutableMapOf<Long, EpisodeProgress>()
         var lastWatchedEpisode: Episode? = null
         var lastWatchedProgress: it.wavestream.app.data.database.entity.WatchProgress? = null
@@ -752,7 +701,7 @@ class DetailsActivity : ComponentActivity() {
         var nextEpisodeId: Long? = null
         var resumeMinutes: Int? = null
         var resumeProgress: Float? = null
-        
+
         allEpisodes.forEach { ep ->
             val progress = watchProgressDao.getProgress(profileId, ContentType.EPISODE, ep.id)
             if (progress != null && progress.duration > 0) {
@@ -761,14 +710,14 @@ class DetailsActivity : ComponentActivity() {
                 val remainingMin = (remainingMs / 60000).toInt().coerceAtLeast(1)
                 // Consider completed if isCompleted flag OR remaining <= 6 minutes (credits threshold)
                 val effectivelyCompleted = progress.isCompleted || remainingMs <= 6 * 60 * 1000
-                
+
                 episodeProgressMap[ep.id] = EpisodeProgress(
                     episodeId = ep.id,
                     progress = progressPercent,
                     remainingMinutes = remainingMin,
                     isCompleted = effectivelyCompleted
                 )
-                
+
                 // Track the most recently watched episode
                 if (lastWatchedProgress == null || progress.lastWatchedAt > lastWatchedProgress!!.lastWatchedAt) {
                     lastWatchedEpisode = ep
@@ -776,17 +725,16 @@ class DetailsActivity : ComponentActivity() {
                 }
             }
         }
-        
+
         // Determine resume state or next episode
-        // Sort all episodes by season and episode number
         val sortedEpisodes = allEpisodes.sortedWith(compareBy({ it.seasonNumber }, { it.episodeNumber }))
-        
+
         if (lastWatchedEpisode != null && lastWatchedProgress != null) {
             val progressPercent = (lastWatchedProgress!!.position.toFloat() / lastWatchedProgress!!.duration.toFloat()).coerceIn(0f, 1f)
             val remainingMs = lastWatchedProgress!!.duration - lastWatchedProgress!!.position
             val remainingMin = (remainingMs / 60000).toInt().coerceAtLeast(1)
             val effectivelyCompleted = lastWatchedProgress!!.isCompleted || remainingMs <= 6 * 60 * 1000
-            
+
             if (!effectivelyCompleted && progressPercent > 0.01f) {
                 // Episode is in progress - show resume
                 resumeMinutes = remainingMin
@@ -820,25 +768,127 @@ class DetailsActivity : ComponentActivity() {
                 lastWatchedEpisode = firstEp
             }
         }
-        
+
         // Default to the season of the next/resume episode, or first season if no watch history
-        val selectedSeason = lastWatchedEpisode?.seasonNumber 
-            ?: seasons.firstOrNull() 
+        val selectedSeason = lastWatchedEpisode?.seasonNumber
+            ?: seasons.firstOrNull()
             ?: 1
-        
+
         // Load episodes for the selected season
         val episodes = if (seasons.isNotEmpty()) {
-            episodeDao.getEpisodesBySeasonList(series.id, selectedSeason)
+            episodeDao.getEpisodesBySeasonList(seriesId, selectedSeason)
         } else emptyList()
-        
-        Log.d(TAG, "Episodes found for season $selectedSeason: ${episodes.size}")
-        
+
         // Calculate episode index to auto-scroll to (in-progress or next unwatched)
         val scrollToEpisodeIndex = if (lastWatchedEpisode != null && lastWatchedEpisode!!.seasonNumber == selectedSeason) {
             val sortedSeasonEpisodes = episodes.sortedBy { it.episodeNumber }
             sortedSeasonEpisodes.indexOfFirst { it.id == lastWatchedEpisode!!.id }.takeIf { it >= 0 }
         } else null
-        Log.d(TAG, "Auto-scroll to episode index: $scrollToEpisodeIndex (target: ${lastWatchedEpisode?.let { "S${it.seasonNumber}E${it.episodeNumber}" }})")
+
+        return SeriesWatchState(
+            seasons = seasons,
+            selectedSeason = selectedSeason,
+            episodes = episodes,
+            episodeProgress = episodeProgressMap,
+            resumeMinutes = resumeMinutes,
+            resumeProgress = resumeProgress,
+            resumeEpisodeSeason = lastWatchedEpisode?.seasonNumber,
+            resumeEpisodeNumber = lastWatchedEpisode?.episodeNumber,
+            nextEpisodeInfo = nextEpisodeInfo,
+            nextEpisodeId = nextEpisodeId,
+            scrollToEpisodeIndex = scrollToEpisodeIndex
+        )
+    }
+
+    private suspend fun loadSeries(onStateUpdate: (DetailsState) -> Unit) {
+        Log.d(TAG, "loadSeries: contentId=$contentId, contentType=$contentType")
+        var series = seriesDao.getSeriesById(contentId)
+            ?: resolveSeriesByTitleFallback()
+        if (series == null) {
+            // Content not found in DB: NEVER leave the skeleton up — show intent state.
+            Log.w(TAG, "loadSeries: series NOT FOUND for contentId=$contentId, showing intent state")
+            onStateUpdate(
+                DetailsState(
+                    title = intentTitle,
+                    posterUrl = intentPosterUrl,
+                    backdropUrl = intentBackdropUrl,
+                    contentType = ContentType.SERIES,
+                    isLoading = false
+                )
+            )
+            return
+        }
+        
+        Log.d(TAG, "Loading series: ${series.name}, tmdbId=${series.tmdbId}")
+        
+        contentTitle = series.name
+        currentSeriesId = series.id
+        
+        Log.d(TAG, "FAST PATH series: showing DB state immediately for '${series.name}'")
+        
+        // ===== FAST PATH: show the DB state immediately, no network =====
+        // Stagioni/episodi/stato resume letti dal DB: il bottone mostra subito
+        // "Riproduci S1E1" / "Riprendi SxEy" / "Riproduci SxEy" senza attendere la rete.
+        val fastWatchState = computeSeriesWatchState(series.id)
+        Log.d(TAG, "FAST PATH watch state: seasons=${fastWatchState.seasons.size}, episodes=${fastWatchState.episodes.size}, resumeMinutes=${fastWatchState.resumeMinutes}, next=${fastWatchState.nextEpisodeInfo}")
+        val dbIsFavorite = favoriteDao.getFavorite(profileId, ContentType.SERIES, contentId) != null
+        onStateUpdate(
+            DetailsState(
+                title = series.name,
+                year = series.year?.toString() ?: "",
+                overview = series.plot ?: "",
+                genres = series.genre ?: "",
+                cast = series.cast,
+                castPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(series.tmdbCastJson),
+                directorPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(series.tmdbCrewJson),
+                director = series.director,
+                posterUrl = series.posterUrl,
+                backdropUrl = series.backdropUrl,
+                contentType = ContentType.SERIES,
+                isFavorite = dbIsFavorite,
+                // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
+                isLoading = series.plot.isNullOrEmpty() || series.tmdbVoteAverage == null,
+                tmdbRating = series.tmdbVoteAverage,
+                imdbRating = series.omdbImdbRating,
+                rottenTomatoesScore = series.omdbRottenTomatoesScore,
+                metacriticScore = series.omdbMetacriticScore,
+                audienceScore = series.omdbAudienceScore,
+                trailerKey = series.tmdbTrailerKey,
+                seasons = fastWatchState.seasons,
+                selectedSeason = fastWatchState.selectedSeason,
+                episodes = fastWatchState.episodes,
+                episodeProgress = fastWatchState.episodeProgress,
+                resumeMinutes = fastWatchState.resumeMinutes,
+                resumeProgress = fastWatchState.resumeProgress,
+                resumeEpisodeSeason = fastWatchState.resumeEpisodeSeason,
+                resumeEpisodeNumber = fastWatchState.resumeEpisodeNumber,
+                nextEpisodeInfo = fastWatchState.nextEpisodeInfo,
+                nextEpisodeId = fastWatchState.nextEpisodeId,
+                scrollToEpisodeIndex = fastWatchState.scrollToEpisodeIndex
+            )
+        )
+        
+        // Enrich with TMDB data if needed
+        series = tmdbService.enrichSeriesDetails(series)
+        
+        Log.d(TAG, "After enrich series: tmdbId=${series.tmdbId}, overview=${series.tmdbOverview?.take(50)}, cast=${series.tmdbCast}")
+        
+        // Check favorite status
+        val isFavorite = favoriteDao.getFavorite(profileId, ContentType.SERIES, contentId) != null
+        
+        // Load episodes on-demand
+        val loadSuccess = playlistRepository.loadSeriesEpisodes(series.id)
+        Log.d(TAG, "loadSeriesEpisodes result: $loadSuccess for series ${series.name} (id=${series.id}, xtreamId=${series.xtreamSeriesId})")
+        
+        // Get seasons/episodes/watch state from DB (episodes already synced by loadSeriesEpisodes above)
+        val watchState = computeSeriesWatchState(series.id)
+        Log.d(TAG, "Watch state: seasons=${watchState.seasons.size}, selectedSeason=${watchState.selectedSeason}, episodes=${watchState.episodes.size}, resumeMinutes=${watchState.resumeMinutes}, next=${watchState.nextEpisodeInfo}")
+        val seasons = watchState.seasons
+        val selectedSeason = watchState.selectedSeason
+        val episodes = watchState.episodes
+        val episodeProgressMap = watchState.episodeProgress
+        val resumeMinutes = watchState.resumeMinutes
+        val resumeProgress = watchState.resumeProgress
         
         // Fetch downloaded episodes status
         val downloadedEpisodes = downloadManager.getDownloadedEpisodes(series.id)
@@ -874,11 +924,11 @@ class DetailsActivity : ComponentActivity() {
             episodeDownloadStates = episodeDownloadStates, // Pass the download states
             resumeMinutes = resumeMinutes,
             resumeProgress = resumeProgress,
-            resumeEpisodeSeason = lastWatchedEpisode?.seasonNumber,
-            resumeEpisodeNumber = lastWatchedEpisode?.episodeNumber,
-            nextEpisodeInfo = nextEpisodeInfo,
-            nextEpisodeId = nextEpisodeId,
-            scrollToEpisodeIndex = scrollToEpisodeIndex,
+            resumeEpisodeSeason = watchState.resumeEpisodeSeason,
+            resumeEpisodeNumber = watchState.resumeEpisodeNumber,
+            nextEpisodeInfo = watchState.nextEpisodeInfo,
+            nextEpisodeId = watchState.nextEpisodeId,
+            scrollToEpisodeIndex = watchState.scrollToEpisodeIndex,
             // Use cached OMDB ratings immediately for instant display
             imdbRating = series.omdbImdbRating,
             rottenTomatoesScore = series.omdbRottenTomatoesScore,
