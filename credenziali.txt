@@ -1,2 +1,0 @@
-sandtv.jks
-alias sandtv ; password Sandtv ; key sandtv; password Sandtv
