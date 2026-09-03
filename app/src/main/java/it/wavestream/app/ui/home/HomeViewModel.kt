@@ -1548,6 +1548,19 @@ class HomeViewModel @Inject constructor(
                 actualProgressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
                 actualResumeEpisodeSeason = progress.season
                 actualResumeEpisodeNumber = progress.episode
+            } else if (progress != null && progress.isCompleted) {
+                // Ultimo episodio visto completato: il bottone deve proporre il PROSSIMO episodio,
+                // non il primo della serie né un nuovo episodio non ancora raggiunto
+                val nextEp = findNextEpisodeAfter(series.id, progress.season, progress.episode)
+                // Se il prossimo è proprio il nuovo episodio annunciato, lascia il bottone
+                // al ramo "Nuovo episodio" (che richiede di essere arrivati a quel punto)
+                val isTheNewEpisode = nextEp != null &&
+                    nextEp.seasonNumber == currentSeries.latestEpisodeSeason &&
+                    nextEp.episodeNumber == currentSeries.latestEpisodeNumber
+                if (nextEp != null && !isTheNewEpisode) {
+                    actualResumeEpisodeSeason = nextEp.seasonNumber
+                    actualResumeEpisodeNumber = nextEp.episodeNumber
+                }
             }
         }
         // Try to get overview from TMDB first, if null try Xtream API
@@ -1698,17 +1711,26 @@ class HomeViewModel @Inject constructor(
         // Check for new episode
         var newEpisodeSeason: Int? = null
         var newEpisodeNumber: Int? = null
+        var newEpisodeCaughtUp = false
 
         if (currentSeries.latestEpisodeAddedAt != null &&
             currentSeries.latestEpisodeSeason != null &&
             currentSeries.latestEpisodeNumber != null) {
 
-            val episode = episodeDao.getEpisode(currentSeries.id, currentSeries.latestEpisodeSeason!!, currentSeries.latestEpisodeNumber!!)
-            if (episode != null) {
-                val progress = watchProgressDao.getProgress(currentProfileId, ContentType.EPISODE, episode.id)
-                if (progress == null || !progress.isCompleted) {
-                    newEpisodeSeason = currentSeries.latestEpisodeSeason
-                    newEpisodeNumber = currentSeries.latestEpisodeNumber
+            // "Nuovo episodio" solo se l'episodio è stato aggiunto alla playlist da meno di 8 giorni
+            val isFresh = currentSeries.latestEpisodeAddedAt!! >= System.currentTimeMillis() - 8L * 24 * 60 * 60 * 1000
+
+            if (isFresh) {
+                val episode = episodeDao.getEpisode(currentSeries.id, currentSeries.latestEpisodeSeason!!, currentSeries.latestEpisodeNumber!!)
+                if (episode != null) {
+                    val progress = watchProgressDao.getProgress(currentProfileId, ContentType.EPISODE, episode.id)
+                    if (progress == null || !progress.isCompleted) {
+                        newEpisodeSeason = currentSeries.latestEpisodeSeason
+                        newEpisodeNumber = currentSeries.latestEpisodeNumber
+                        // Il bottone play porta al nuovo episodio SOLO se l'utente ha già
+                        // visto tutti gli episodi precedenti (è "arrivato a quel punto")
+                        newEpisodeCaughtUp = isCaughtUpToEpisode(currentSeries.id, newEpisodeSeason!!, newEpisodeNumber!!)
+                    }
                 }
             }
         }
@@ -1742,8 +1764,44 @@ class HomeViewModel @Inject constructor(
             resumeEpisodeSeason = actualResumeEpisodeSeason,
             resumeEpisodeNumber = actualResumeEpisodeNumber,
             newEpisodeSeason = newEpisodeSeason,
-            newEpisodeNumber = newEpisodeNumber
+            newEpisodeNumber = newEpisodeNumber,
+            newEpisodeCaughtUp = newEpisodeCaughtUp
         )
+    }
+
+    /**
+     * Restituisce l'episodio successivo a (season, episodeNumber) nella sequenza della serie
+     * (prossimo nella stessa stagione, altrimenti primo della stagione successiva), o null se finiti.
+     */
+    private suspend fun findNextEpisodeAfter(seriesId: Long, season: Int, episodeNumber: Int): Episode? {
+        return try {
+            episodeDao.getEpisode(seriesId, season, episodeNumber + 1)
+                ?: episodeDao.getEpisodesBySeasonList(seriesId, season + 1).minByOrNull { it.episodeNumber }
+        } catch (e: Exception) {
+            Log.e("HomeViewModel", "findNextEpisodeAfter failed", e)
+            null
+        }
+    }
+
+    /**
+     * True solo se l'utente ha COMPLETATO l'episodio immediatamente precedente a (season, episodeNumber),
+     * cioè è "arrivato" a quel punto della serie.
+     */
+    private suspend fun isCaughtUpToEpisode(seriesId: Long, season: Int, episodeNumber: Int): Boolean {
+        return try {
+            val prev = if (episodeNumber > 1) {
+                episodeDao.getEpisode(seriesId, season, episodeNumber - 1)
+            } else {
+                // Primo episodio della stagione: il precedente è l'ultimo della stagione precedente
+                episodeDao.getEpisodesBySeasonList(seriesId, season - 1).maxByOrNull { it.episodeNumber }
+            } ?: return false // nessun episodio precedente: la serie "parte" da questo episodio
+
+            val progress = watchProgressDao.getProgress(currentProfileId, ContentType.EPISODE, prev.id)
+            progress != null && progress.isCompleted
+        } catch (e: Exception) {
+            Log.e("HomeViewModel", "isCaughtUpToEpisode failed", e)
+            false
+        }
     }
 
     /**
