@@ -72,6 +72,7 @@ class LoadingActivity : ComponentActivity() {
 
     
     private var profileId: Long = 1L
+    private var preloadJobs: List<kotlinx.coroutines.Job> = emptyList()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,9 +99,11 @@ class LoadingActivity : ComponentActivity() {
             // Preload all 3 tabs into ContentCache using applicationScope.
             // These coroutines survive Activity transitions (unlike ViewModel-scoped ones).
             // ContentCache is a @Singleton, so data persists to MainActivity's ViewModel.
-            applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
-            applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
-            applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
+            preloadJobs = listOf(
+                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) },
+                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) },
+                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
+            )
         }
         
         setContent {
@@ -221,9 +224,11 @@ class LoadingActivity : ComponentActivity() {
                 // Preload all 3 tabs into ContentCache (idempotent — skips cached tabs):
                 // dopo un refresh la session cache è invalidata, senza questo la home
                 // si ricostruirebbe lazy (enrichment TMDB inline) mostrando a lungo lo skeleton.
-                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) }
-                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) }
-                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
+                preloadJobs = listOf(
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) },
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) },
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
+                )
                 
                 // Phase 2: Wait for HomeViewModel tabs to be ready
                 onStateUpdate(LoadingState(
@@ -272,6 +277,12 @@ class LoadingActivity : ComponentActivity() {
             val elapsed = System.currentTimeMillis() - start
             if (readyCount == tabs.size) {
                 Log.d("LoadingActivity", "All 3 tabs ready in ${elapsed}ms")
+                return true
+            }
+            // Se i preload sono terminati ma qualche tab resta "non pronta" (es. hero vuoti
+            // per catalogo piccolo o errore), non bloccare fino al timeout di 120s: procedi.
+            if (preloadJobs.isNotEmpty() && preloadJobs.all { it.isCompleted }) {
+                Log.d("LoadingActivity", "Preload completati ma solo $readyCount/3 tabs pronte dopo ${elapsed}ms — procedo comunque")
                 return true
             }
             if (elapsed % 3000 < 300) {
@@ -445,13 +456,14 @@ class LoadingActivity : ComponentActivity() {
                 val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
                 
                 // === MOVIES: enrich ALL trending ===
+                // Backoff rating (7 giorni): molti titoli NON hanno voti RT/Metacritic —
+                // senza backoff verrebbero ri-tentati (8+ chiamate rete l'uno) a ogni avvio.
                 val allTrendingMovies = movieDao.getByTrendingCategory("Film Popolari")
                 val moviesToEnrich = allTrendingMovies.filter { movie ->
-                    movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo || movie.tmdbVoteAverage == null ||
-                    // Retry anche se arricchito di recente ma manca qualche voto OMDB:
-                    // un rating può comparare nelle API dopo (es. uscita recente) e
-                    // deve poter essere recuperato già all'avvio successivo.
-                    movie.omdbImdbRating == null || movie.omdbRottenTomatoesScore == null || movie.omdbMetacriticScore == null
+                    val needsTmdb = movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo || movie.tmdbVoteAverage == null
+                    val hasAllRatings = movie.omdbImdbRating != null && movie.omdbRottenTomatoesScore != null && movie.omdbMetacriticScore != null
+                    val ratingsAttemptedRecently = movie.omdbLastFetchAt != null && movie.omdbLastFetchAt >= sevenDaysAgo
+                    needsTmdb || (!hasAllRatings && !ratingsAttemptedRecently)
                 }.sortedByDescending { it.tmdbPopularity ?: 0f }.take(100)
                 
                 val moviesCached = allTrendingMovies.size - moviesToEnrich.size
@@ -476,11 +488,15 @@ class LoadingActivity : ComponentActivity() {
                             async(Dispatchers.IO) {
                                 try {
                                     val enrichedMovie = tmdbService.enrichMovieDetails(movie)
-                                    // Refresh whenever any rating field is empty (not only imdb)
-                                    if (enrichedMovie.omdbImdbRating == null ||
+                                    // Backoff: se un tentativo rating è stato fatto negli ultimi 7 giorni,
+                                    // non ritentare (evita centinaia di chiamate inutili a ogni avvio per
+                                    // titoli che semplicemente non hanno voti RT/Metacritic).
+                                    val ratingsAttemptedRecently = enrichedMovie.omdbLastFetchAt != null && enrichedMovie.omdbLastFetchAt >= sevenDaysAgo
+                                    if (!ratingsAttemptedRecently && (
+                                        enrichedMovie.omdbImdbRating == null ||
                                         enrichedMovie.omdbRottenTomatoesScore == null ||
                                         enrichedMovie.omdbMetacriticScore == null
-                                    ) {
+                                    )) {
                                         val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
                                             imdbId = enrichedMovie.tmdbImdbId,
                                             originalTitle = movie.name,
@@ -510,8 +526,14 @@ class LoadingActivity : ComponentActivity() {
                                             }
                                             movieDao.update(withRatings)
                                             ratingsUpdated = true
+                                        } else {
+                                            // Nessun rating trovato: registra comunque il tentativo
+                                            // per il backoff di 7 giorni (altrimenti retry a ogni avvio)
+                                            movieDao.update(enrichedMovie.copy(omdbLastFetchAt = System.currentTimeMillis()))
                                         }
-                                    } else if (enrichedMovie.omdbAudienceScore == null || enrichedMovie.omdbRottenTomatoesScore == null) {
+                                    } else if (!ratingsAttemptedRecently && (
+                                        enrichedMovie.omdbAudienceScore == null || enrichedMovie.omdbRottenTomatoesScore == null
+                                    )) {
                                         val searchTitle = enrichedMovie.tmdbOriginalTitle ?: enrichedMovie.tmdbTitle ?: movie.name
                                         val rtScores = imdbRatingsRepository.fetchRtScores(
                                             title = searchTitle, year = enrichedMovie.year, isMovie = true
@@ -555,11 +577,13 @@ class LoadingActivity : ComponentActivity() {
                 }
 
                 // === SERIES: enrich ALL trending ===
+                // Stesso backoff rating di 7 giorni dei film
                 val allTrendingSeries = seriesDao.getByTrendingCategory("Serie Popolari")
                 val seriesToEnrich = allTrendingSeries.filter { series ->
-                    series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo || series.tmdbVoteAverage == null ||
-                    // Retry anche se arricchita di recente ma manca qualche voto OMDB
-                    series.omdbImdbRating == null || series.omdbRottenTomatoesScore == null || series.omdbMetacriticScore == null
+                    val needsTmdb = series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo || series.tmdbVoteAverage == null
+                    val hasAllRatings = series.omdbImdbRating != null && series.omdbRottenTomatoesScore != null && series.omdbMetacriticScore != null
+                    val ratingsAttemptedRecently = series.omdbLastFetchAt != null && series.omdbLastFetchAt >= sevenDaysAgo
+                    needsTmdb || (!hasAllRatings && !ratingsAttemptedRecently)
                 }.sortedByDescending { it.tmdbPopularity ?: 0f }.take(100)
                 
                 val seriesCached = allTrendingSeries.size - seriesToEnrich.size
@@ -583,11 +607,13 @@ class LoadingActivity : ComponentActivity() {
                             async(Dispatchers.IO) {
                                 try {
                                     val enrichedSeries = tmdbService.enrichSeriesDetails(series)
-                                    // Refresh whenever any rating field is empty (not only imdb)
-                                    if (enrichedSeries.omdbImdbRating == null ||
+                                    // Stesso backoff di 7 giorni dei film
+                                    val ratingsAttemptedRecently = enrichedSeries.omdbLastFetchAt != null && enrichedSeries.omdbLastFetchAt >= sevenDaysAgo
+                                    if (!ratingsAttemptedRecently && (
+                                        enrichedSeries.omdbImdbRating == null ||
                                         enrichedSeries.omdbRottenTomatoesScore == null ||
                                         enrichedSeries.omdbMetacriticScore == null
-                                    ) {
+                                    )) {
                                         val ratings = imdbRatingsRepository.getRatingsWithFallbacks(
                                             imdbId = enrichedSeries.tmdbImdbId,
                                             originalTitle = series.name,
@@ -617,8 +643,14 @@ class LoadingActivity : ComponentActivity() {
                                             }
                                             seriesDao.update(withRatings)
                                             ratingsUpdated = true
+                                        } else {
+                                            // Nessun rating trovato: registra comunque il tentativo
+                                            // per il backoff di 7 giorni (altrimenti retry a ogni avvio)
+                                            seriesDao.update(enrichedSeries.copy(omdbLastFetchAt = System.currentTimeMillis()))
                                         }
-                                    } else if (enrichedSeries.omdbAudienceScore == null || enrichedSeries.omdbRottenTomatoesScore == null) {
+                                    } else if (!ratingsAttemptedRecently && (
+                                        enrichedSeries.omdbAudienceScore == null || enrichedSeries.omdbRottenTomatoesScore == null
+                                    )) {
                                         val searchTitle = enrichedSeries.tmdbOriginalName ?: enrichedSeries.tmdbName ?: series.name
                                         val rtScores = imdbRatingsRepository.fetchRtScores(
                                             title = searchTitle, year = enrichedSeries.year, isMovie = false
