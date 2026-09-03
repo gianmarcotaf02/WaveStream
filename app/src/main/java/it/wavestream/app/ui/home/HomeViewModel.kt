@@ -1551,12 +1551,12 @@ class HomeViewModel @Inject constructor(
             } else if (progress != null && progress.isCompleted) {
                 // Ultimo episodio visto completato: il bottone deve proporre il PROSSIMO episodio,
                 // non il primo della serie né un nuovo episodio non ancora raggiunto
-                val nextEp = findNextEpisodeAfter(series.id, progress.season, progress.episode)
+                val nextEp = findNextEpisodeAfter(series.id, progress.season ?: 1, progress.episode ?: 1)
                 // Se il prossimo è proprio il nuovo episodio annunciato, lascia il bottone
                 // al ramo "Nuovo episodio" (che richiede di essere arrivati a quel punto)
                 val isTheNewEpisode = nextEp != null &&
-                    nextEp.seasonNumber == currentSeries.latestEpisodeSeason &&
-                    nextEp.episodeNumber == currentSeries.latestEpisodeNumber
+                    nextEp.seasonNumber == series.latestEpisodeSeason &&
+                    nextEp.episodeNumber == series.latestEpisodeNumber
                 if (nextEp != null && !isTheNewEpisode) {
                     actualResumeEpisodeSeason = nextEp.seasonNumber
                     actualResumeEpisodeNumber = nextEp.episodeNumber
