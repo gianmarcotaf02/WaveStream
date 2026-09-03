@@ -247,7 +247,7 @@ private fun MainActivityScreen(
     
     // State
     var selectedTab by remember { mutableStateOf(initialTab) }
-    var railExpanded by remember { mutableStateOf(true) }
+    var railExpanded by remember { mutableStateOf(false) }
     var showCreateListDialog by remember { mutableStateOf(false) }
     
     // Handle back press to exit grid mode (See All view) - restore previous scroll position
