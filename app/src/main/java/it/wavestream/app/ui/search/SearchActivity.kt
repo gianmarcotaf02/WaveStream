@@ -222,10 +222,14 @@ class SearchActivity : ComponentActivity() {
         // Cronologia ricerche recenti (mostrata a query vuota, cliccabile)
         var recentSearches by remember { mutableStateOf(loadRecentSearches()) }
         
-        // Pipeline unica di ricerca: ogni tasto cancella il lavoro precedente.
-        // 1) micro-debounce per aggregare digitazioni rapide;
-        // 2) suggerimenti istantanei (limitati, ~60ms);
-        // 3) risultati completi dopo il debounce (~220ms totali).
+        // Pipeline unica di ricerca: ogni tasto cancella il lavoro precedente
+        // (LaunchedEffect keyed su query) e viene eseguita UNA sola query al DB
+        // dopo un unico debounce. I risultati sono riusati sia per i suggerimenti
+        // (prime pill a sinistra) sia per la griglia (a destra): eliminare la
+        // vecchia doppia ricerca concorrente (limit=6 + limit=60) evitava bug di
+        // schermata, e il limit non rendeva la query da 6 più veloce perché le
+        // searchMovies/searchSeries/searchChannels restituiscono comunque tutti i
+        // match e il limit agisce solo sul truncate finale.
         LaunchedEffect(query) {
             val trimmed = query.trim()
             if (trimmed.length < 2) {
@@ -235,10 +239,10 @@ class SearchActivity : ComponentActivity() {
                 return@LaunchedEffect
             }
             isLoading = true
-            delay(60)
-            suggestions = performSearch(trimmed, limit = 6)
-            delay(160)
-            results = performSearch(trimmed, limit = 60)
+            delay(220)
+            val all = performSearch(trimmed, limit = 60)
+            suggestions = all.take(6)
+            results = all
             isLoading = false
         }
         
@@ -279,7 +283,9 @@ class SearchActivity : ComponentActivity() {
                     toggleFavorite(item)
                     // Refresh results to update favorite status
                     if (query.trim().length >= 2) {
-                        results = performSearch(query.trim(), limit = 60)
+                        val refreshed = performSearch(query.trim(), limit = 60)
+                        results = refreshed
+                        suggestions = refreshed.take(6)
                     }
                     val message = if (!item.isFavorite) "Aggiunto ai preferiti" else "Rimosso dai preferiti"
                     android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show()
