@@ -551,6 +551,7 @@ private fun BlinkingCursor(modifier: Modifier = Modifier) {
 /**
  * Search Screen Composable
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SearchScreen(
     query: String,
