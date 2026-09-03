@@ -174,15 +174,8 @@ fun DetailsScreen(
     // Solo redirect D-pad (giù dall'header stagione → primo episodio): NON richiede mai il focus
     val firstEpisodeFocusRequester = remember { FocusRequester() }
 
-    // Auto-scroll to target episode when entering detail view.
-    // NOTE: il focus deve RESTARE sul bottone Riproduci — non va spostato sull'episodio.
-    LaunchedEffect(state.scrollToEpisodeIndex, state.selectedSeason) {
-        val targetIndex = state.scrollToEpisodeIndex
-        if (targetIndex != null && targetIndex >= 0) {
-            // +2 offset: item 0 = top content block, item 1 = season header
-            listState.animateScrollToItem(targetIndex + 2)
-        }
-    }
+    // NOTE: nessun auto-scroll né auto-focus sulla lista episodi all'apertura:
+    // la vista resta in alto e il focus va SOLO al bottone Riproduci.
     
     // Request focus on Play button when content loads.
     // RIPROVA finché il bottone non ha davvero il focus: nei primi frame può non essere
@@ -436,12 +429,13 @@ fun DetailsScreen(
                                 }
                                 state.contentType == ContentType.CHANNEL -> stringResource(R.string.watch_live)
                                 state.contentType == ContentType.SERIES -> {
-                                    // Serie mai iniziata: primo episodio della stagione selezionata (S1E1), bottone viola
+                                    // Serie mai iniziata: primo episodio della stagione selezionata (S1E1), bottone viola.
+                                    // Con episodi non ancora caricati (sync in corso) mostri comunque S1E1 come default.
                                     val firstEpisode = state.episodes.minByOrNull { it.episodeNumber }
                                     if (firstEpisode != null) {
                                         "Riproduci S${firstEpisode.seasonNumber}E${firstEpisode.episodeNumber}"
                                     } else {
-                                        stringResource(R.string.play)
+                                        "Riproduci S1E1"
                                     }
                                 }
                                 else -> stringResource(R.string.play)
@@ -719,9 +713,10 @@ fun DetailsScreen(
                                 if (index == 0) Modifier.focusProperties { up = playButtonFocusRequester } else Modifier
                             )
                             .then(
-                                // Il requester DEVE restare attaccato alla card episodio target:
+                                // Il requester DEVE restare attaccato alla PRIMA card episodio:
                                 // è il destinatario del redirect D-pad "giù" dall'header stagione.
-                                if (index == (state.scrollToEpisodeIndex ?: 0)) Modifier.focusRequester(firstEpisodeFocusRequester) else Modifier
+                                // (nessun auto-scroll: la prima card visibile è sempre la index 0)
+                                if (index == 0) Modifier.focusRequester(firstEpisodeFocusRequester) else Modifier
                             )
                     )
                     Spacer(modifier = Modifier.height(12.dp))
