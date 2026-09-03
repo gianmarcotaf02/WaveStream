@@ -71,7 +71,10 @@ class SherpaTtsManager @Inject constructor(
     companion object {
         private const val MODELS_BASE_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models"
         
-        /** Catalogo delle voci neurali italiane disponibili. */
+        /** Catalogo delle voci neurali italiane disponibili.
+         *  NOTE LICENZA: riccardo-x_low = MIT; paola/miro/dii (OpenVoiceOS piper1-gpl)
+         *  = CC BY-NC-ND 4.0 → solo uso NON commerciale.
+         */
         val AVAILABLE_VOICES = listOf(
             NovaVoice(
                 id = "riccardo-x_low",
@@ -183,13 +186,18 @@ class SherpaTtsManager @Inject constructor(
             android.util.Log.e("NovaVoice", "ensureReady fallito", t)
             // se il caricamento del modello fallisce, i file sono probabilmente corrotti:
             // cancellali così il prossimo "Scarica" riparte da un download pulito
-            if (t.message?.contains("Protobuf", ignoreCase = true) == true ||
-                t.message?.contains("Load model", ignoreCase = true) == true
-            ) {
-                modelDir.deleteRecursively()
-                _errorMessage.value = "Modello corrotto eliminato — riprova il download"
-            } else {
-                _errorMessage.value = t.message ?: t.javaClass.simpleName
+            when {
+                t is OutOfMemoryError -> {
+                    _errorMessage.value = "Memoria insufficiente per caricare questa voce — usa una voce più leggera (es. Riccardo, 25 MB)"
+                }
+                t.message?.contains("Protobuf", ignoreCase = true) == true ||
+                    t.message?.contains("Load model", ignoreCase = true) == true -> {
+                    modelDir.deleteRecursively()
+                    _errorMessage.value = "Modello corrotto eliminato — riprova il download"
+                }
+                else -> {
+                    _errorMessage.value = t.message ?: t.javaClass.simpleName
+                }
             }
             _state.value = State.ERROR
             false
