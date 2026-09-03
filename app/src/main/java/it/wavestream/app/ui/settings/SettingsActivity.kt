@@ -3609,43 +3609,49 @@ private fun AssistantSettings(
         Spacer(modifier = Modifier.height(20.dp))
 
         // ---- API Key Gemini ----
+        // Il box di input è mostrato SOLO se la chiave non è ancora configurata:
+        // a chiave già presente resta solo il testo di stato (niente campo fastidioso
+        // durante lo scorrimento nella sezione)
         val key = existingKey
         Text(
             text = if (key.isNullOrBlank()) "API key Gemini non configurata"
             else "API key Gemini configurata (••••${key.takeLast(4)})",
             style = MaterialTheme.typography.bodyMedium,
-            color = if (key.isNullOrBlank()) Color(0xFFFFB74D) else WaveStreamColors.TextSecondary
+            color = if (key.isNullOrBlank()) Color(0xFFFFB74D) else Color(0xFF81C784)
         )
-        Spacer(modifier = Modifier.height(8.dp))
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            OutlinedTextField(
-                value = apiKeyInput,
-                onValueChange = { apiKeyInput = it },
-                placeholder = { Text("Inserisci API key Gemini", color = WaveStreamColors.TextHint) },
-                singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = WaveStreamColors.Accent,
-                    unfocusedBorderColor = WaveStreamColors.TextTertiary.copy(alpha = 0.4f),
-                    focusedTextColor = WaveStreamColors.TextPrimary,
-                    unfocusedTextColor = WaveStreamColors.TextPrimary
-                ),
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Button(
-                onClick = {
-                    if (apiKeyInput.isNotBlank()) {
-                        scope.launch {
-                            userPreferences.setGeminiApiKey(apiKeyInput.trim())
-                            existingKey = apiKeyInput.trim()
-                            apiKeyInput = ""
+        if (key.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = apiKeyInput,
+                    onValueChange = { apiKeyInput = it },
+                    placeholder = { Text("Inserisci API key Gemini", color = WaveStreamColors.TextHint) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = WaveStreamColors.Accent,
+                        unfocusedBorderColor = WaveStreamColors.TextTertiary.copy(alpha = 0.4f),
+                        focusedTextColor = WaveStreamColors.TextPrimary,
+                        unfocusedTextColor = WaveStreamColors.TextPrimary
+                    ),
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Button(
+                    onClick = {
+                        if (apiKeyInput.isNotBlank()) {
+                            scope.launch {
+                                userPreferences.setGeminiApiKey(apiKeyInput.trim())
+                                existingKey = apiKeyInput.trim()
+                                apiKeyInput = ""
+                            }
                         }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
-            ) {
-                Text("Salva")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
+                ) {
+                    Text("Salva")
+                }
             }
         }
 
