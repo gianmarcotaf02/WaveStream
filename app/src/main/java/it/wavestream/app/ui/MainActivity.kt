@@ -3,6 +3,7 @@ package it.wavestream.app.ui
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import java.time.LocalTime
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateColorAsState
@@ -840,6 +841,19 @@ private fun MainTopBar(
  * Mostra solo orologio e azioni (search, download, profile)
  * Usata con il Navigation Rail
  */
+/**
+ * Restituisce un saluto in base all'ora corrente:
+ * Buongiorno (05:00 - 13:59), Buon pomeriggio (14:00 - 18:59), Buonasera (19:00 - 04:59)
+ */
+private fun timeBasedGreeting(): String {
+    val hour = LocalTime.now().hour
+    return when (hour) {
+        in 5..13 -> "Buongiorno"
+        in 14..18 -> "Buon pomeriggio"
+        else -> "Buonasera"
+    }
+}
+
 @Composable
 private fun MiniTopBar(
     profileName: String = "",
@@ -865,16 +879,10 @@ private fun MiniTopBar(
         ) {
             if (profileName.isNotEmpty()) {
                 Text(
-                    text = "Ciao, $profileName",
+                    text = "${timeBasedGreeting()}, $profileName",
                     style = MaterialTheme.typography.titleMedium,
                     color = WaveStreamColors.TextPrimary,
                     fontWeight = FontWeight.SemiBold
-                )
-                Box(
-                    modifier = Modifier
-                        .width(1.dp)
-                        .height(20.dp)
-                        .background(Color.White.copy(alpha = 0.2f))
                 )
             }
         }
