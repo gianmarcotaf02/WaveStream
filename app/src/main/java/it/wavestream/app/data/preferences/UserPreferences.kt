@@ -139,6 +139,7 @@ class UserPreferences @Inject constructor(
         private val ASSISTANT_TTS_RATE = floatPreferencesKey("assistant_tts_rate")
         private val ASSISTANT_TTS_PITCH = floatPreferencesKey("assistant_tts_pitch")
         private val ASSISTANT_TTS_VOLUME = floatPreferencesKey("assistant_tts_volume") // 0.1..3.0 (gain)
+        private val ASSISTANT_SHERPA_VOICE = stringPreferencesKey("assistant_sherpa_voice") // id voce neurale Piper
         private val ASSISTANT_AUTO_VOLUME = booleanPreferencesKey("assistant_auto_volume") // massimizza volume durante risposta
     }
     
@@ -214,6 +215,15 @@ class UserPreferences @Inject constructor(
     // Volume/gain voce (0.1..3.0 — con Piper il gain software può superare il 100%)
     suspend fun setAssistantTtsVolume(volume: Float) {
         dataStore.edit { it[ASSISTANT_TTS_VOLUME] = volume.coerceIn(0.1f, 3f) }
+    }
+
+    /** Voce neurale (Piper/sherpa) selezionata per Nova — id dal catalogo SherpaTtsManager.AVAILABLE_VOICES */
+    suspend fun setAssistantSherpaVoice(voiceId: String) {
+        dataStore.edit { it[ASSISTANT_SHERPA_VOICE] = voiceId }
+    }
+
+    fun getAssistantSherpaVoiceFlow(): Flow<String> {
+        return dataStore.data.map { it[ASSISTANT_SHERPA_VOICE] ?: "riccardo-x_low" }
     }
 
     fun getAssistantTtsVolumeFlow(): Flow<Float> {

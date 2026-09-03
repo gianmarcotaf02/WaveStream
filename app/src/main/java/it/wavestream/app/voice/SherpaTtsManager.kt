@@ -29,15 +29,29 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 
 /**
+ * Descrive una voce neurale Piper scaricabile per Nova (catalogo sherpa-onnx).
+ */
+data class NovaVoice(
+    val id: String,
+    val label: String,
+    val description: String,
+    val modelUrl: String,
+    val modelDirName: String,
+    val onnxFileName: String
+)
+
+/**
  * Motore TTS neurale on-device di Nova: sherpa-onnx + Piper VITS
- * (voce `it_IT-riccardo-x_low`, ~28 MB, licenza MIT, motore Apache 2.0).
+ * (voci italiane con licenza MIT, motore Apache 2.0).
+ * La voce è selezionabile dalle impostazioni (catalogo in [SherpaTtsManager.AVAILABLE_VOICES])
+ * e persistita in UserPreferences; sul disco è mantenuta solo la voce attiva.
  *
  * Vantaggi sul TTS di sistema:
  * - voce naturale (VITS neurale) invece di quella robotica
  * - output PCM gestito da noi → GAIN software libero (anche oltre il 100%)
  * - sintesi in ~300-600ms per frasi brevi su TV low-end
  *
- * Il modello (~26 MB compressi) viene scaricato al primo utilizzo ed estratto
+ * Il modello (~26-64 MB compressi) viene scaricato al primo utilizzo ed estratto
  * nella memoria interna dell'app.
  */
 @Singleton
@@ -55,9 +69,49 @@ class SherpaTtsManager @Inject constructor(
     }
 
     companion object {
-        private const val MODEL_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/vits-piper-it_IT-riccardo-x_low.tar.bz2"
-        private const val MODEL_DIR = "vits-piper-it_IT-riccardo-x_low"
-        private const val MODEL_ONNX = "it_IT-riccardo-x_low.onnx"
+        private const val MODELS_BASE_URL = "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models"
+        
+        /** Catalogo delle voci neurali italiane disponibili. */
+        val AVAILABLE_VOICES = listOf(
+            NovaVoice(
+                id = "riccardo-x_low",
+                label = "Riccardo",
+                description = "Maschile · compatto · 25 MB",
+                modelUrl = "$MODELS_BASE_URL/vits-piper-it_IT-riccardo-x_low.tar.bz2",
+                modelDirName = "vits-piper-it_IT-riccardo-x_low",
+                onnxFileName = "it_IT-riccardo-x_low.onnx"
+            ),
+            NovaVoice(
+                id = "paola-medium",
+                label = "Paola",
+                description = "Femminile · naturale · 64 MB",
+                modelUrl = "$MODELS_BASE_URL/vits-piper-it_IT-paola-medium.tar.bz2",
+                modelDirName = "vits-piper-it_IT-paola-medium",
+                onnxFileName = "it_IT-paola-medium.onnx"
+            ),
+            NovaVoice(
+                id = "miro-high",
+                label = "Miro",
+                description = "Maschile · alta qualità · 64 MB",
+                modelUrl = "$MODELS_BASE_URL/vits-piper-it_IT-miro-high.tar.bz2",
+                modelDirName = "vits-piper-it_IT-miro-high",
+                onnxFileName = "it_IT-miro-high.onnx"
+            ),
+            NovaVoice(
+                id = "dii-high",
+                label = "Dii",
+                description = "Alta qualità · 64 MB",
+                modelUrl = "$MODELS_BASE_URL/vits-piper-it_IT-dii-high.tar.bz2",
+                modelDirName = "vits-piper-it_IT-dii-high",
+                onnxFileName = "it_IT-dii-high.onnx"
+            )
+        )
+        
+        const val DEFAULT_VOICE_ID = "riccardo-x_low"
+        
+        fun voiceById(id: String?): NovaVoice {
+            return AVAILABLE_VOICES.firstOrNull { it.id == id } ?: AVAILABLE_VOICES[0]
+        }
     }
 
     private val _state = MutableStateFlow(State.NOT_DOWNLOADED)
@@ -73,8 +127,13 @@ class SherpaTtsManager @Inject constructor(
     private val mainHandler = Handler(Looper.getMainLooper())
 
     private val baseDir: File get() = File(context.filesDir, "sherpa-tts")
-    private val modelDir: File get() = File(baseDir, MODEL_DIR)
-    private val onnxFile: File get() = File(modelDir, MODEL_ONNX)
+    
+    // Voce attiva: cambia via switchVoice() dalle impostazioni
+    @Volatile
+    private var selectedVoice: NovaVoice = voiceById(DEFAULT_VOICE_ID)
+    
+    private val modelDir: File get() = File(baseDir, selectedVoice.modelDirName)
+    private val onnxFile: File get() = File(modelDir, selectedVoice.onnxFileName)
     private val tokensFile: File get() = File(modelDir, "tokens.txt")
     private val espeakDir: File get() = File(modelDir, "espeak-ng-data")
 
@@ -137,6 +196,30 @@ class SherpaTtsManager @Inject constructor(
         }
     }
 
+    /**
+     * Cambia la voce neurale selezionata: rilascia il motore, rimuove i modelli
+     * delle altre voci (solo una voce su disco, per risparmiare storage su TV)
+     * e scarica/carica la nuova se serve. Idempotente.
+     */
+    suspend fun switchVoice(voiceId: String): Boolean = withContext(Dispatchers.IO) {
+        val voice = voiceById(voiceId)
+        if (voice.id == selectedVoice.id && tts != null) return@withContext true
+        stopPlayback()
+        try { tts?.release() } catch (_: Exception) {}
+        tts = null
+        selectedVoice = voice
+        // Rimuove i modelli delle altre voci: solo la voce attiva resta su disco
+        baseDir.listFiles()?.forEach { dir ->
+            if (dir.isDirectory && dir.name != voice.modelDirName && dir.name.startsWith("vits-piper-")) {
+                dir.deleteRecursively()
+            }
+        }
+        _state.value = State.NOT_DOWNLOADED
+        _downloadProgress.value = 0
+        _errorMessage.value = null
+        ensureReady()
+    }
+    
     /**
      * Sintetizza il testo e riproduce l'audio con [gain] software (>1 = amplificato).
      * [onDone] è invocato sul main thread a fine riproduzione (o in caso di errore).
@@ -231,14 +314,14 @@ class SherpaTtsManager @Inject constructor(
         _downloadProgress.value = 0
         try {
             baseDir.mkdirs()
-            val tarFile = File(baseDir, "model.tar.bz2")
+            val tarFile = File(baseDir, "${selectedVoice.id}.tar.bz2")
 
             // OkHttp segue i redirect di GitHub release in modo affidabile
             val client = OkHttpClient.Builder()
                 .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
                 .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
                 .build()
-            val request = Request.Builder().url(MODEL_URL).build()
+            val request = Request.Builder().url(selectedVoice.modelUrl).build()
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     throw java.io.IOException("HTTP ${response.code} dal server modelli")
