@@ -3549,6 +3549,11 @@ private fun AssistantSettings(
     val pitch by userPreferences.getAssistantTtsPitchFlow().collectAsState(initial = 1f)
     val ttsVolume by userPreferences.getAssistantTtsVolumeFlow().collectAsState(initial = 1.8f)
     val availableVoices by ttsManager.availableVoices.collectAsState()
+    
+    // Voce neurale (Piper) selezionata per Nova
+    val sherpaVoiceId by userPreferences.getAssistantSherpaVoiceFlow()
+        .collectAsState(initial = it.wavestream.app.voice.SherpaTtsManager.DEFAULT_VOICE_ID)
+    val sherpaVoice = it.wavestream.app.voice.SherpaTtsManager.voiceById(sherpaVoiceId)
 
     // API key (mascherata: mostra solo gli ultimi 4 caratteri se già impostata)
     var apiKeyInput by remember { mutableStateOf("") }
@@ -3574,9 +3579,9 @@ private fun AssistantSettings(
 
         val engineLabel = when (engineState) {
             it.wavestream.app.voice.SherpaTtsManager.State.READY ->
-                "🎙 Voce NEURALE attiva (Piper · Riccardo) — naturale e amplificabile"
+                "🎙 Voce NEURALE attiva (Piper · ${sherpaVoice.label}) — naturale e amplificabile"
             it.wavestream.app.voice.SherpaTtsManager.State.DOWNLOADING ->
-                "⬇ Download voce neurale… $downloadProgress%"
+                "⬇ Download voce neurale ${sherpaVoice.label}… $downloadProgress%"
             it.wavestream.app.voice.SherpaTtsManager.State.EXTRACTING ->
                 "⬇ Estrazione voce neurale…"
             it.wavestream.app.voice.SherpaTtsManager.State.LOADING ->
@@ -3602,9 +3607,28 @@ private fun AssistantSettings(
                     engineState != it.wavestream.app.voice.SherpaTtsManager.State.LOADING,
                 icon = Icons.Default.Download,
                 label = if (engineState == it.wavestream.app.voice.SherpaTtsManager.State.DOWNLOADING)
-                    "Download… $downloadProgress%" else "Scarica voce neurale (26 MB)"
+                    "Download… $downloadProgress%" else "Scarica voce neurale"
             )
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // ---- Selezione voce neurale (catalogo Piper italiano) ----
+        SettingsDropdown(
+            label = "Voce neurale di Nova",
+            value = sherpaVoiceId,
+            options = it.wavestream.app.voice.SherpaTtsManager.AVAILABLE_VOICES
+                .map { v -> v.id to "${v.label} — ${v.description}" },
+            onValueChange = { id ->
+                if (id != sherpaVoiceId) {
+                    scope.launch {
+                        userPreferences.setAssistantSherpaVoice(id)
+                        // scarica/cambia modello: il progresso appare nello stato qui sopra
+                        sherpaTts.switchVoice(id)
+                    }
+                }
+            }
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
