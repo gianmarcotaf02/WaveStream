@@ -561,6 +561,9 @@ fun SearchScreen(
     isLoading: Boolean,
     focusRequester: FocusRequester,
     onBackClick: () -> Unit,
+    recentSearches: List<String>,
+    onRecentSearchClick: (String) -> Unit,
+    onRecentSearchRemove: (String) -> Unit,
     onItemClick: (SearchResultItem) -> Unit,
     onItemLongClick: (SearchResultItem) -> Unit
 ) {
@@ -693,6 +696,14 @@ fun SearchScreen(
                             .fillMaxWidth()
                             .weight(1f)
                     )
+                } else if (query.trim().length >= 2) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Nessun suggerimento",
+                        color = WaveStreamColors.TextTertiary,
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(start = 6.dp)
+                    )
                 }
             }
 
@@ -712,13 +723,43 @@ fun SearchScreen(
                             color = WaveStreamColors.Accent
                         )
                     }
-                    query.length >= 2 && results.isEmpty() -> {
-                        Text(
-                            text = "Nessun risultato per \"$query\"",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = WaveStreamColors.TextSecondary,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                    query.trim().length >= 2 && results.isEmpty() -> {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Nessun risultato per \"$query\"",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = WaveStreamColors.TextSecondary
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Prova con meno parole o controlla la ortografia",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = WaveStreamColors.TextTertiary
+                            )
+                            // Suggerisci comunque i primi match parziali come pill
+                            if (suggestions.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    suggestions.take(3).forEach { item ->
+                                        Text(
+                                            text = item.title,
+                                            color = WaveStreamColors.TextPrimary,
+                                            fontSize = 14.sp,
+                                            maxLines = 1,
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(50))
+                                                .background(WaveStreamColors.BackgroundSecondary)
+                                                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50))
+                                                .clickable { onItemClick(item) }
+                                                .padding(horizontal = 14.dp, vertical = 8.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                     results.isNotEmpty() -> {
                         TvLazyVerticalGrid(
@@ -741,8 +782,12 @@ fun SearchScreen(
                         }
                     }
                     else -> {
+                        // Stato iniziale (query vuota): icona + cronologia ricerche recenti
                         Column(
-                            modifier = Modifier.align(Alignment.Center),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Icon(
@@ -757,6 +802,30 @@ fun SearchScreen(
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = WaveStreamColors.TextSecondary
                             )
+                            
+                            // Ricerche recenti: un tap (o D-pad OK) ripete la ricerca
+                            if (recentSearches.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(28.dp))
+                                Text(
+                                    text = "Ricerche recenti",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = WaveStreamColors.TextTertiary
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                FlowRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    recentSearches.forEach { recent ->
+                                        RecentSearchPill(
+                                            text = recent,
+                                            onClick = { onRecentSearchClick(recent) },
+                                            onLongClick = { onRecentSearchRemove(recent) }
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -766,9 +835,22 @@ fun SearchScreen(
 }
 
 /**
+ * Etichetta breve del tipo di contenuto, mostrata nelle pill di suggerimento
+ * per renderle immediatamente riconoscibili a colpo d'occhio.
+ */
+private fun suggestionTypeLabel(item: SearchResultItem): String = when {
+    item.isCategory -> "Categoria"
+    item.type == ContentType.MOVIE -> "Film"
+    item.type == ContentType.SERIES -> "Serie"
+    item.type == ContentType.CHANNEL -> "Live"
+    else -> ""
+}
+
+/**
  * Suggerimenti istantanei stile YouTube: pill a forma di ovale disposte in
- * colonna sotto la tastiera, una parola (opzione) per pill, senza icone.
- * Al focus la pill si riempie di accent (senza ingrandimento).
+ * colonna sotto la tastiera, una parola (opzione) per pill. Ogni pill mostra
+ * anche il tipo di contenuto (Film/Serie/Live/Categoria). Al focus la pill
+ * si riempie di accent (senza ingrandimento).
  */
 @Composable
 private fun SuggestionPills(
@@ -783,12 +865,8 @@ private fun SuggestionPills(
         suggestions.forEach { item ->
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
-            Text(
-                text = item.title,
-                color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
                     .background(
@@ -805,8 +883,97 @@ private fun SuggestionPills(
                         indication = null
                     ) { onItemClick(item) }
                     .padding(horizontal = 18.dp, vertical = 9.dp)
-            )
+            ) {
+                Text(
+                    text = item.title,
+                    color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
+                )
+                // Etichetta tipo: "Film", "Serie", "Live", "Categoria"
+                suggestionTypeLabel(item).takeIf { it.isNotEmpty() }?.let { label ->
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = label,
+                        color = if (isFocused) Color.White.copy(alpha = 0.8f) else WaveStreamColors.TextTertiary,
+                        fontSize = 11.sp,
+                        maxLines = 1
+                    )
+                }
+            }
         }
+    }
+}
+
+/**
+ * Pill per le ricerche recenti: icona cronologia + testo della query.
+ * Tap = ripete la ricerca, long press = rimuove dalla cronologia.
+ */
+@OptIn(androidx.compose.ui.ExperimentalComposeUiApi::class)
+@Composable
+private fun RecentSearchPill(
+    text: String,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    
+    // Long press detection via key events (D-pad OK)
+    var pressStartTime by remember { mutableStateOf(0L) }
+    val longPressThreshold = 500L
+    
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (isFocused) WaveStreamColors.Accent
+                else WaveStreamColors.BackgroundSecondary
+            )
+            .border(
+                width = 1.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.25f),
+                shape = RoundedCornerShape(50)
+            )
+            .focusable(interactionSource = interactionSource)
+            .onPreviewKeyEvent { keyEvent ->
+                when {
+                    keyEvent.key == Key.DirectionCenter || keyEvent.key == Key.Enter -> {
+                        if (keyEvent.type == KeyEventType.KeyDown) {
+                            if (pressStartTime == 0L) pressStartTime = System.currentTimeMillis()
+                            true
+                        } else if (keyEvent.type == KeyEventType.KeyUp) {
+                            val duration = System.currentTimeMillis() - pressStartTime
+                            pressStartTime = 0L
+                            if (duration >= longPressThreshold) onLongClick() else onClick()
+                            true
+                        } else false
+                    }
+                    else -> false
+                }
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { onClick() }
+            .padding(horizontal = 16.dp, vertical = 10.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.History,
+            contentDescription = null,
+            tint = if (isFocused) Color.White else WaveStreamColors.TextTertiary,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = text,
+            color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1
+        )
     }
 }
 
