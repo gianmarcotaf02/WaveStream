@@ -145,8 +145,14 @@ class TtsManager @Inject constructor(
                     text = text,
                     speed = speechRate,
                     gain = voiceVolume
-                ) {
-                    finishSpeaking()
+                ) { success ->
+                    if (success) {
+                        finishSpeaking()
+                    } else {
+                        // Sintesi neurale fallita (es. OOM su modelli grandi): fallback sistema
+                        android.util.Log.w("NovaVoice", "Piper ha fallito la sintesi → fallback TTS di sistema")
+                        speakWithSystemTts(text)
+                    }
                 }
             } else {
                 // modello assente: avvia il download in background e usa il sistema ora
