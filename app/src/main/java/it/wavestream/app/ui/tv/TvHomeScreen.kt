@@ -1199,6 +1199,9 @@ fun HeroBanner(
                                     "${episodeInfo}Guarda il successivo"
                                 } else if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null) {
                                     "Nuovo episodio S${hero.newEpisodeSeason} E${hero.newEpisodeNumber}"
+                                } else if (hero.contentType == "SERIES") {
+                                    // Serie mai iniziata: puntarello sul primo episodio, come nel detail view
+                                    "Riproduci S1E1"
                                 } else {
                                     "Riproduci"
                                 }

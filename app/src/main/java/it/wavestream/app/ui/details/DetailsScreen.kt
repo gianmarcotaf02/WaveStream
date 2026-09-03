@@ -163,6 +163,8 @@ fun DetailsScreen(
 ) {
     // FocusRequester for automatic focus on Play button
     val playButtonFocusRequester = remember { FocusRequester() }
+    // True quando il bottone Riproduci ha DAVVERO il focus (usato dal retry di autofocus)
+    var playButtonFocused by remember { mutableStateOf(false) }
     
     // Dialog state for mark as watched confirmation
     var showMarkAsWatchedDialog by remember { mutableStateOf(false) }
@@ -182,13 +184,20 @@ fun DetailsScreen(
         }
     }
     
-    // Request focus on Play button when content loads
+    // Request focus on Play button when content loads.
+    // RIPROVA finché il bottone non ha davvero il focus: nei primi frame può non essere
+    // ancora composto (AnimatedVisibility) o il focus può essere rivendicato da altri elementi.
     LaunchedEffect(state.isLoading) {
         if (!state.isLoading) {
-            try {
-                playButtonFocusRequester.requestFocus()
-            } catch (e: Exception) {
-                // Ignore if focus request fails
+            var attempts = 0
+            while (!playButtonFocused && attempts < 20) {
+                kotlinx.coroutines.delay(100)
+                attempts++
+                try {
+                    playButtonFocusRequester.requestFocus()
+                } catch (e: Exception) {
+                    // Bottone non ancora attaccato: riprova al prossimo giro
+                }
             }
         }
     }
@@ -441,7 +450,8 @@ fun DetailsScreen(
                             isResume = state.resumeMinutes != null || state.nextEpisodeInfo != null,
                             resumeProgress = state.resumeProgress,
                             onClick = onPlayClick,
-                            focusRequester = playButtonFocusRequester
+                            focusRequester = playButtonFocusRequester,
+                            onFocusedChanged = { playButtonFocused = it }
                         )
                         
                         // Trailer button
@@ -682,7 +692,9 @@ fun DetailsScreen(
                         onDownloadSeason = onDownloadSeason,
                         // Passa il requester solo se ci sono episodi: il redirect "giù" verso un
                         // FocusRequester non attaccato a nessun composable crasha l'app.
-                        firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null
+                        firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
+                        // "su" dall'header stagione deve tornare al bottone Riproduci
+                        upFocusRequester = playButtonFocusRequester
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                 }
@@ -700,11 +712,17 @@ fun DetailsScreen(
                         onClick = { onEpisodeClick(episode) },
                         onLongClick = { onEpisodeLongClick(episode) },
                         onDownloadClick = { onDownloadEpisode(episode) },
-                        modifier = Modifier.then(
-                            // Il requester DEVE restare attaccato alla card episodio target:
-                            // è il destinatario del redirect D-pad "giù" dall'header stagione.
-                            if (index == (state.scrollToEpisodeIndex ?: 0)) Modifier.focusRequester(firstEpisodeFocusRequester) else Modifier
-                        )
+                        modifier = Modifier
+                            // Dal primo episodio, "su" deve andare al bottone Riproduci,
+                            // NON al bottone indietro in alto a sinistra
+                            .then(
+                                if (index == 0) Modifier.focusProperties { up = playButtonFocusRequester } else Modifier
+                            )
+                            .then(
+                                // Il requester DEVE restare attaccato alla card episodio target:
+                                // è il destinatario del redirect D-pad "giù" dall'header stagione.
+                                if (index == (state.scrollToEpisodeIndex ?: 0)) Modifier.focusRequester(firstEpisodeFocusRequester) else Modifier
+                            )
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -972,7 +990,8 @@ private fun PlayButton(
     isResume: Boolean = false,
     resumeProgress: Float? = null,
     onClick: () -> Unit,
-    focusRequester: FocusRequester? = null
+    focusRequester: FocusRequester? = null,
+    onFocusedChanged: (Boolean) -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1014,6 +1033,7 @@ private fun PlayButton(
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .onFocusChanged { onFocusedChanged(it.isFocused) }
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1372,7 +1392,8 @@ private fun EpisodesSectionHeader(
     selectedSeason: Int,
     onSeasonSelected: (Int) -> Unit,
     onDownloadSeason: (Int) -> Unit = {},
-    firstEpisodeFocusRequester: FocusRequester? = null
+    firstEpisodeFocusRequester: FocusRequester? = null,
+    upFocusRequester: FocusRequester? = null
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -1389,6 +1410,11 @@ private fun EpisodesSectionHeader(
             .then(
                 if (firstEpisodeFocusRequester != null) {
                     Modifier.focusProperties { down = firstEpisodeFocusRequester }
+                } else Modifier
+            )
+            .then(
+                if (upFocusRequester != null) {
+                    Modifier.focusProperties { up = upFocusRequester }
                 } else Modifier
             ),
         horizontalArrangement = Arrangement.SpaceBetween,
