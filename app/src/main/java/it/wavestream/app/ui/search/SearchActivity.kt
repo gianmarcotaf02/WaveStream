@@ -32,9 +32,7 @@ import androidx.tv.foundation.lazy.grid.items as tvGridItems
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.History
@@ -57,10 +55,8 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,7 +76,6 @@ import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -117,8 +112,6 @@ class SearchActivity : ComponentActivity() {
     @Inject lateinit var filterBlockedContent: FilterBlockedContentUseCase
     @Inject lateinit var favoriteDao: it.wavestream.app.data.database.dao.FavoriteDao
     @Inject lateinit var userPreferences: it.wavestream.app.data.preferences.UserPreferences
-    
-    private var searchJob: Job? = null
     
     // Cache delle categorie (refresh ogni 5 min): evita di ricaricare 3 liste
     // dal DB a ogni lettera digitata
