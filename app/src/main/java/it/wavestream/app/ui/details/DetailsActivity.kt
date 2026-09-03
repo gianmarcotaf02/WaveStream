@@ -797,7 +797,7 @@ class DetailsActivity : ComponentActivity() {
                 val lastIndex = sortedEpisodes.indexOfFirst { it.id == lastWatchedEpisode!!.id }
                 if (lastIndex != -1 && lastIndex + 1 < sortedEpisodes.size) {
                     val nextEp = sortedEpisodes[lastIndex + 1]
-                    nextEpisodeInfo = "Riproduci S${nextEp.seasonNumber} E${nextEp.episodeNumber}"
+                    nextEpisodeInfo = "Riproduci S${nextEp.seasonNumber}E${nextEp.episodeNumber}"
                     nextEpisodeId = nextEp.id
                     lastWatchedEpisode = nextEp // Point to next episode's season/details
                 } else {
@@ -807,7 +807,7 @@ class DetailsActivity : ComponentActivity() {
                         epProgress == null || !epProgress.isCompleted
                     }
                     if (firstUnwatchedEp != null) {
-                        nextEpisodeInfo = "Riproduci S${firstUnwatchedEp.seasonNumber} E${firstUnwatchedEp.episodeNumber}"
+                        nextEpisodeInfo = "Riproduci S${firstUnwatchedEp.seasonNumber}E${firstUnwatchedEp.episodeNumber}"
                         nextEpisodeId = firstUnwatchedEp.id
                         lastWatchedEpisode = firstUnwatchedEp
                     }

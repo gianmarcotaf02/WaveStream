@@ -169,21 +169,14 @@ fun DetailsScreen(
     
     // Lazy list state for auto-scroll to current/next episode
     val listState = remember { androidx.tv.foundation.lazy.list.TvLazyListState() }
-    val targetEpisodeFocusRequester = remember { FocusRequester() }
 
-    // Auto-scroll to target episode when entering detail view
+    // Auto-scroll to target episode when entering detail view.
+    // NOTE: il focus deve RESTARE sul bottone Riproduci — non va spostato sull'episodio.
     LaunchedEffect(state.scrollToEpisodeIndex, state.selectedSeason) {
         val targetIndex = state.scrollToEpisodeIndex
         if (targetIndex != null && targetIndex >= 0) {
             // +2 offset: item 0 = top content block, item 1 = season header
             listState.animateScrollToItem(targetIndex + 2)
-            // After scroll completes, move focus to the target episode
-            kotlinx.coroutines.delay(400)
-            try {
-                targetEpisodeFocusRequester.requestFocus()
-            } catch (e: Exception) {
-                // Ignore if focus request fails (composable not yet laid out)
-            }
         }
     }
     
@@ -419,9 +412,12 @@ fun DetailsScreen(
                                 state.nextEpisodeInfo != null -> {
                                     state.nextEpisodeInfo
                                 }
-                                // If there's watch progress, show resume with S/E info only
+                                // If there's watch progress, show resume with S/E info only.
+                                // Il caso "Riprendi S1E1" non esiste: se l'episodio in corso è S1E1
+                                // mostro solo "Riprendi" (l'utente è ancora all'inizio della serie).
                                 state.resumeMinutes != null -> {
-                                    if (state.resumeEpisodeSeason != null && state.resumeEpisodeNumber != null) {
+                                    val isS1E1 = state.resumeEpisodeSeason == 1 && state.resumeEpisodeNumber == 1
+                                    if (!isS1E1 && state.resumeEpisodeSeason != null && state.resumeEpisodeNumber != null) {
                                         "Riprendi S${state.resumeEpisodeSeason}E${state.resumeEpisodeNumber}"
                                     } else {
                                         "Riprendi"
@@ -429,10 +425,10 @@ fun DetailsScreen(
                                 }
                                 state.contentType == ContentType.CHANNEL -> stringResource(R.string.watch_live)
                                 state.contentType == ContentType.SERIES -> {
-                                    // Show first episode of selected season
+                                    // Serie mai iniziata: primo episodio della stagione selezionata (S1E1), bottone viola
                                     val firstEpisode = state.episodes.minByOrNull { it.episodeNumber }
                                     if (firstEpisode != null) {
-                                        "Riproduci - S${firstEpisode.seasonNumber}E${firstEpisode.episodeNumber}"
+                                        "Riproduci S${firstEpisode.seasonNumber}E${firstEpisode.episodeNumber}"
                                     } else {
                                         stringResource(R.string.play)
                                     }
@@ -700,9 +696,7 @@ fun DetailsScreen(
                         onClick = { onEpisodeClick(episode) },
                         onLongClick = { onEpisodeLongClick(episode) },
                         onDownloadClick = { onDownloadEpisode(episode) },
-                        modifier = Modifier.then(
-                            if (index == (state.scrollToEpisodeIndex ?: 0)) Modifier.focusRequester(targetEpisodeFocusRequester) else Modifier
-                        )
+                        modifier = Modifier
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
