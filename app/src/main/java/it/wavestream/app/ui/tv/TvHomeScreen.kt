@@ -1186,7 +1186,7 @@ fun HeroBanner(
                                 label = "playBorder"
                             )
 
-                            val buttonText = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber) {
+                            val buttonText = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber, hero.newEpisodeCaughtUp, hero.contentType) {
                                 if (isInProgress) {
                                     val episodeInfo = if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
                                         "S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber} - "
@@ -1197,10 +1197,12 @@ fun HeroBanner(
                                         "S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber} - "
                                     } else ""
                                     "${episodeInfo}Guarda il successivo"
-                                } else if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null) {
+                                } else if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null && hero.newEpisodeCaughtUp) {
+                                    // Il bottone porta al nuovo episodio SOLO se l'utente ha visto
+                                    // tutti gli episodi precedenti; altrimenti comportamento normale
                                     "Nuovo episodio S${hero.newEpisodeSeason} E${hero.newEpisodeNumber}"
                                 } else if (hero.contentType == "SERIES") {
-                                    // Serie mai iniziata: puntarello sul primo episodio, come nel detail view
+                                    // Serie mai iniziata (o non ancora arrivati al nuovo episodio): primo episodio
                                     "Riproduci S1E1"
                                 } else {
                                     "Riproduci"

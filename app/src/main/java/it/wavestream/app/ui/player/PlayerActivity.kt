@@ -531,7 +531,12 @@ class PlayerActivity : ComponentActivity() {
                 val progress = watchProgressDao.getSeriesProgress(profileId, contentId)
                 if (progress != null) {
                     // Get episode stream URL from episodeDao
-                    val episode = episodeDao.getEpisodeById(progress.contentId)
+                    var episode = episodeDao.getEpisodeById(progress.contentId)
+                    // Se l'ultimo episodio visto è completato, passa al successivo non ancora visto
+                    // (coerente col detail view: "Riproduci SxEy" dopo aver finito un episodio)
+                    if (episode != null && progress.isCompleted) {
+                        findNextUnwatchedEpisode(episode)?.let { episode = it }
+                    }
                     if (episode != null) {
                         // Update local state for proper progress tracking
                         this.seriesId = contentId
@@ -571,6 +576,27 @@ class PlayerActivity : ComponentActivity() {
         }
     }
     
+    /**
+     * Trova il prossimo episodio non ancora completato nella sequenza della serie
+     * (prossimo nella stessa stagione, altrimenti stagioni successive), o null se finiti.
+     */
+    private suspend fun findNextUnwatchedEpisode(current: it.wavestream.app.data.database.entity.Episode): it.wavestream.app.data.database.entity.Episode? {
+        var season = current.seasonNumber
+        var episodeNumber = current.episodeNumber
+        var attempts = 0
+        while (attempts < 500) {
+            attempts++
+            val next = episodeDao.getEpisode(current.seriesId, season, episodeNumber + 1)
+                ?: episodeDao.getEpisodesBySeasonList(current.seriesId, season + 1).minByOrNull { it.episodeNumber }
+                ?: return null
+            val progress = watchProgressDao.getProgress(profileId, ContentType.EPISODE, next.id)
+            if (progress == null || !progress.isCompleted) return next
+            season = next.seasonNumber
+            episodeNumber = next.episodeNumber
+        }
+        return null
+    }
+
     @androidx.annotation.OptIn(UnstableApi::class)
     private fun startPlayback() {
         try {
