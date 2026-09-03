@@ -125,6 +125,23 @@ class DetailsActivity : ComponentActivity() {
             }
         }
         
+        // Popola le trame degli episodi in italiano da TMDB (dove mancanti), una sola volta per apertura.
+        // L'UI mostra già tmdbOverview (it-IT) con fallback alla plot Xtream.
+        LaunchedEffect(contentId, hasLoadedOnce) {
+            if (!hasLoadedOnce || contentType != ContentType.SERIES) return@LaunchedEffect
+            val series = seriesDao.getSeriesById(contentId) ?: return@LaunchedEffect
+            if (series.tmdbId == null) return@LaunchedEffect
+            try {
+                tmdbService.enrichEpisodesFromTMDB(series)
+                // Aggiorna gli episodi della stagione attualmente selezionata con le trame appena salvate
+                loadEpisodesForSeason(state.selectedSeason) { episodes ->
+                    state = state.copy(episodes = episodes)
+                }
+            } catch (e: Exception) {
+                Log.e("DetailsActivity", "Error enriching episode plots from TMDB", e)
+            }
+        }
+        
         // Reload on resume (e.g., after returning from player)
         val lifecycleOwner = LocalLifecycleOwner.current
         androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
