@@ -169,6 +169,8 @@ fun DetailsScreen(
     
     // Lazy list state for auto-scroll to current/next episode
     val listState = remember { androidx.tv.foundation.lazy.list.TvLazyListState() }
+    // Solo redirect D-pad (giù dall'header stagione → primo episodio): NON richiede mai il focus
+    val firstEpisodeFocusRequester = remember { FocusRequester() }
 
     // Auto-scroll to target episode when entering detail view.
     // NOTE: il focus deve RESTARE sul bottone Riproduci — non va spostato sull'episodio.
@@ -678,7 +680,7 @@ fun DetailsScreen(
                         selectedSeason = state.selectedSeason,
                         onSeasonSelected = onSeasonSelected,
                         onDownloadSeason = onDownloadSeason,
-                        firstEpisodeFocusRequester = targetEpisodeFocusRequester
+                        firstEpisodeFocusRequester = firstEpisodeFocusRequester
                     )
                     Spacer(modifier = Modifier.height(20.dp))
                 }
