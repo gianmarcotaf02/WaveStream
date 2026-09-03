@@ -438,7 +438,11 @@ fun DetailsScreen(
                                         "Riproduci S1E1"
                                     }
                                 }
-                                else -> stringResource(R.string.play)
+                                else -> {
+                                    // DEBUG TEMPORANEO: rende visibile il contentType arrivato allo schermo.
+                                    // Rimuovere dopo la diagnosi.
+                                    "${stringResource(R.string.play)} [${state.contentType.name}]"
+                                }
                             },
                             // Use white button for resume/next episode states
                             isResume = state.resumeMinutes != null || state.nextEpisodeInfo != null,
