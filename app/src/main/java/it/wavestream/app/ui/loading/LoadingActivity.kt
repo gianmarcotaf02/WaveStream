@@ -65,6 +65,7 @@ class LoadingActivity : ComponentActivity() {
     @Inject lateinit var watchProgressDao: it.wavestream.app.data.database.dao.WatchProgressDao
     @Inject lateinit var profileDao: ProfileDao
     @Inject lateinit var vpnManager: VpnManager
+    @Inject lateinit var serieAMatchRepository: it.wavestream.app.data.repository.SerieAMatchRepository
     @Inject @ApplicationScope lateinit var applicationScope: CoroutineScope
     @Inject lateinit var contentCache: ContentCache
     
@@ -216,6 +217,20 @@ class LoadingActivity : ComponentActivity() {
                 refreshTrendingCategoriesIfNeeded(onStateUpdate)
                 enrichHeroContent(onStateUpdate)
                 
+                // Calendario Serie A (football-data.org) per l'hero live — sync in
+                // parallelo ai preload, con timeout: mai un blocco duro se l'API
+                // non risponde (l'HomeViewModel rincorre comunque la sync da solo).
+                onStateUpdate(LoadingState(
+                    status = "Calendario Serie A...",
+                    detail = "Verifica partite in programma",
+                    progress = 96,
+                    showProgress = true
+                ))
+                val serieASyncJob = applicationScope.launch(Dispatchers.IO) {
+                    runCatching { serieAMatchRepository.syncIfStale() }
+                        .onFailure { Log.e("LoadingActivity", "Serie A calendar sync failed", it) }
+                }
+                
                 // Invalida la cache di sessione solo se i dati sono effettivamente cambiati
                 if (refreshedAny || forceRefresh) {
                     contentCache.clearHomeSessionData()
@@ -242,6 +257,10 @@ class LoadingActivity : ComponentActivity() {
                 if (!tabsReady) {
                     Log.w("LoadingActivity", "Some tabs did not load in time, proceeding anyway")
                 }
+                
+                // Attende (max 8s) il termine del sync del calendario Serie A,
+                // così l'hero live è già pronto alla prima frame della Home.
+                runCatching { withTimeoutOrNull(8_000) { serieASyncJob.join() } }
                 
                 // Phase 3: Navigate to main screen
                 onStateUpdate(LoadingState(
