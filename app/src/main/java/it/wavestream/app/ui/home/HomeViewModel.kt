@@ -58,7 +58,8 @@ class HomeViewModel @Inject constructor(
     private val playlistDao: PlaylistDao,
     private val episodeDao: EpisodeDao,
     private val profileDao: ProfileDao,
-    private val recommendationEngine: it.wavestream.app.data.tmdb.RecommendationEngine
+    private val recommendationEngine: it.wavestream.app.data.tmdb.RecommendationEngine,
+    private val serieAMatchRepository: it.wavestream.app.data.repository.SerieAMatchRepository
 ) : ViewModel() {
 
     companion object {
@@ -174,6 +175,9 @@ class HomeViewModel @Inject constructor(
     init {
         // Load HOME tab content (the critical first-frame path)
         loadContent(HomeContentType.HOME)
+
+        // Serie A live hero (football-data.org): sync calendario + prima slide hero
+        startSerieAHeroSync()
 
         // Defer non-critical background work to avoid CPU contention during first frame.
         viewModelScope.launch {
@@ -822,9 +826,8 @@ class HomeViewModel @Inject constructor(
         // Preload the upcoming hero's backdrop so the 7s auto-rotation slides are seamless
         preloadAdjacentHeroBackdrop(offset = 1)
         _uiState.update { state ->
-            val newIndex = if (state.heroItems.isNotEmpty()) {
-                (state.currentHeroIndex + 1) % state.heroItems.size
-            } else 0
+            val total = state.heroItems.size + if (state.serieAMatchHero != null) 1 else 0
+            val newIndex = if (total > 0) (state.currentHeroIndex + 1) % total else 0
             state.copy(currentHeroIndex = newIndex)
         }
     }
@@ -836,8 +839,9 @@ class HomeViewModel @Inject constructor(
         // Preload the upcoming hero's backdrop before navigating to it
         preloadAdjacentHeroBackdrop(offset = -1)
         _uiState.update { state ->
-            val newIndex = if (state.heroItems.isNotEmpty()) {
-                if (state.currentHeroIndex == 0) state.heroItems.size - 1
+            val total = state.heroItems.size + if (state.serieAMatchHero != null) 1 else 0
+            val newIndex = if (total > 0) {
+                if (state.currentHeroIndex == 0) total - 1
                 else state.currentHeroIndex - 1
             } else 0
             state.copy(currentHeroIndex = newIndex)
@@ -848,9 +852,11 @@ class HomeViewModel @Inject constructor(
      * Preload the hero backdrop at [offset] from the current one (for smooth rotation).
      */
     private fun preloadAdjacentHeroBackdrop(offset: Int) {
-        val heroes = _uiState.value.heroItems
+        val state = _uiState.value
+        // La rotazione include la slide Serie A (sempre prima)
+        val heroes = listOfNotNull(state.serieAMatchHero) + state.heroItems
         if (heroes.isNotEmpty()) {
-            val index = (heroes.size + _uiState.value.currentHeroIndex + offset) % heroes.size
+            val index = (heroes.size + state.currentHeroIndex + offset) % heroes.size
             heroes.getOrNull(index)?.let { hero ->
                 imagePreloader.preloadBackdrop(hero.backdropUrl ?: hero.posterUrl)
             }

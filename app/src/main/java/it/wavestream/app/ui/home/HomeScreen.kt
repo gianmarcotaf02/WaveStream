@@ -1,6 +1,7 @@
 package it.wavestream.app.ui.home
 
 import android.content.res.Configuration
+import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
