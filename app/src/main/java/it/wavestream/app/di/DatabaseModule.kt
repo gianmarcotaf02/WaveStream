@@ -402,6 +402,36 @@ object DatabaseModule {
     }
 
 
+    /**
+     * Migration from version 27 to 28 (Serie A live hero):
+     * - Creates the `serie_a_matches` table (calendar cache from football-data.org).
+     */
+    private val MIGRATION_27_28 = object : Migration(27, 28) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS serie_a_matches (
+                    id INTEGER NOT NULL PRIMARY KEY,
+                    utcDateMillis INTEGER NOT NULL,
+                    status TEXT NOT NULL,
+                    matchday INTEGER,
+                    homeName TEXT NOT NULL,
+                    homeShortName TEXT NOT NULL,
+                    homeTla TEXT NOT NULL,
+                    homeCrest TEXT,
+                    awayName TEXT NOT NULL,
+                    awayShortName TEXT NOT NULL,
+                    awayTla TEXT NOT NULL,
+                    awayCrest TEXT,
+                    homeScore INTEGER,
+                    awayScore INTEGER,
+                    lastUpdated INTEGER NOT NULL
+                )
+            """)
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_serie_a_matches_utcDateMillis ON serie_a_matches(utcDateMillis)")
+        }
+    }
+
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -412,7 +442,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -473,6 +503,9 @@ object DatabaseModule {
 
     @Provides
     fun provideEpgDao(db: AppDatabase): EPGDao = db.epgDao()
+
+    @Provides
+    fun provideSerieAMatchDao(db: AppDatabase): SerieAMatchDao = db.serieAMatchDao()
     
     @Provides
     @Singleton

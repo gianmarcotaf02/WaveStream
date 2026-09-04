@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import it.wavestream.app.data.api.FootballDataService
 import it.wavestream.app.data.api.TMDBApiService
 import okhttp3.Cache
 import okhttp3.CacheControl
@@ -80,5 +81,16 @@ object NetworkModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(TMDBApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFootballDataService(okHttpClient: OkHttpClient, moshi: Moshi): FootballDataService {
+        return Retrofit.Builder()
+            .baseUrl(FootballDataService.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(FootballDataService::class.java)
     }
 }
