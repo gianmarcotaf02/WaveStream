@@ -144,6 +144,10 @@ data class HomeScreenState(
     val heroItems: List<HeroItem> = emptyList(),
     val currentHeroIndex: Int = 0,
     val isContinueWatchingHero: Boolean = false,  // True if heroes are from continue watching
+    // Serie A live hero (football-data.org) — prima slide del carosello hero
+    val serieAMatchHero: HeroItem? = null,
+    val serieAMatch: SerieAMatchEntity? = null,
+    val serieAChannelPicker: SerieAChannelPickerState? = null,
     // Category filter fields (for grid view)
     val availableCategories: List<String> = emptyList(),  // All categories available for filtering
     val selectedCategoryFilters: Set<String> = emptySet(),  // Currently selected category filters

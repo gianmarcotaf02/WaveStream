@@ -51,6 +51,12 @@ import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.ui.theme.WaveStreamColors
 
+data class SerieAChannelPickerState(
+    val match: SerieAMatchEntity,
+    val channels: List<Channel>,
+    val isLoading: Boolean = false
+)
+
 /**
  * Dialog with the playlist channels that broadcast the match (matched via
  * team-name aliases), grouped by category with visible category headers.
