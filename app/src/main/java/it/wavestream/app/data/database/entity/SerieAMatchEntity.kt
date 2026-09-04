@@ -1,6 +1,7 @@
 package it.wavestream.app.data.database.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
@@ -8,7 +9,10 @@ import androidx.room.PrimaryKey
  * The hero on the Home screen shows every match in its "hero window"
  * (kickoff - 30 min → kickoff + 3h), one hero per match (simultaneous matches supported).
  */
-@Entity(tableName = "serie_a_matches")
+@Entity(
+    tableName = "serie_a_matches",
+    indices = [Index("utcDateMillis")]
+)
 data class SerieAMatchEntity(
     @PrimaryKey val id: Long,                    // football-data.org match id
     val utcDateMillis: Long,                     // kickoff time (UTC millis)
