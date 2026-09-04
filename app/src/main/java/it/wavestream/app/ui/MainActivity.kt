@@ -242,6 +242,11 @@ private fun MainActivityScreen(
     // ViewModel for home content
     val homeViewModel: HomeViewModel = hiltViewModel()
 
+    // ViewModel for Serie A live hero (football-data.org)
+    val serieALiveViewModel: SerieALiveViewModel = hiltViewModel()
+    val serieAHeroMatches by serieALiveViewModel.heroMatches.collectAsStateWithLifecycle()
+    val serieAChannelPicker by serieALiveViewModel.channelPicker.collectAsStateWithLifecycle()
+
     val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
     
 
@@ -515,7 +520,18 @@ private fun MainActivityScreen(
                 searchButtonFocusRequester = searchButtonFocusRequester,
                 modifier = Modifier.fillMaxWidth()
             )
-            
+
+            // ===== Serie A live hero (one card per match, shown 30 min before kickoff) =====
+            serieAHeroMatches.firstOrNull()?.let { match ->
+                SerieAMatchHeroCard(
+                    match = match,
+                    onWatchClick = { serieALiveViewModel.openChannelPicker(it) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(2.1f)
+                )
+            }
+
             // Main content with animated tab transition
             androidx.compose.animation.AnimatedContent(
                 targetState = selectedTab,
@@ -591,7 +607,27 @@ private fun MainActivityScreen(
                     )
             }
         }
-        
+
+        // Serie A channel picker dialog ("Guarda adesso")
+        serieAChannelPicker?.let { picker ->
+            SerieAChannelPickerDialog(
+                match = picker.match,
+                channels = picker.channels,
+                isLoading = picker.isLoading,
+                onDismiss = { serieALiveViewModel.dismissChannelPicker() },
+                onChannelClick = { channel ->
+                    serieALiveViewModel.dismissChannelPicker()
+                    val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
+                        putExtra("content_id", channel.id)
+                        putExtra("content_type", "CHANNEL")
+                        putExtra("stream_url", channel.streamUrl)
+                        putExtra("title", channel.name)
+                    }
+                    startActivityWithTransition(intent)
+                }
+            )
+        }
+
         // Create list dialog
         if (showCreateListDialog) {
             CreateListDialog(
