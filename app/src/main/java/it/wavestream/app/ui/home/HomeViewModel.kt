@@ -66,6 +66,9 @@ class HomeViewModel @Inject constructor(
         private const val HERO_CACHE_DURATION = 10 * 24 * 60 * 60 * 1000L // 10 days
         private const val POPULAR_CACHE_DURATION = 10 * 24 * 60 * 60 * 1000L // 10 days
         private const val CAROUSEL_CACHE_DURATION = 10 * 24 * 60 * 60 * 1000L // 10 days - carousel order stays stable
+
+        /** DEBUG: mostra l'hero partita sempre (partita più vicina, anche fuori finestra). */
+        private const val FORCE_SERIEA_HERO_DEBUG = true
     }
 
     private val _uiState = MutableStateFlow(HomeScreenState())
@@ -226,13 +229,20 @@ class HomeViewModel @Inject constructor(
 
     private fun refreshSerieAHero() {
         val now = System.currentTimeMillis()
-        val match = serieAUpcoming
+        var match = serieAUpcoming
             .filter { it.isInHeroWindow(now) }
             .sortedWith(
                 compareByDescending<SerieAMatchEntity> { it.isLive }
                     .thenBy { it.utcDateMillis }
             )
             .firstOrNull()
+        // === DEBUG: forza l'hero Serie A anche fuori finestra (partita più vicina) ===
+        // Ricordarsi di reimpostare a false prima del rilascio!
+        if (match == null && FORCE_SERIEA_HERO_DEBUG) {
+            match = serieAUpcoming
+                .filter { it.status != "POSTPONED" && it.status != "CANCELLED" }
+                .minByOrNull { kotlin.math.abs(it.utcDateMillis - now) }
+        }
         Log.d(
             "SerieA",
             "refreshSerieAHero: cached=${serieAUpcoming.size}, " +
