@@ -873,7 +873,7 @@ fun SearchScreen(
             // Left column: keyboard + instant suggestions below it
             Column(
                 modifier = Modifier
-                    .width(320.dp)
+                    .width(240.dp)
                     .padding(top = 8.dp)
             ) {
                 // On-screen keyboard (compact Netflix style)

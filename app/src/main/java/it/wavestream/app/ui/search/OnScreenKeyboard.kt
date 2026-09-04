@@ -77,12 +77,12 @@ fun OnScreenKeyboard(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         // Top row (stile Netflix): toggle sezione + backspace, con una
         // cella vuota in mezzo a separare i due comandi.
         Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             KeyboardButton(
@@ -106,7 +106,7 @@ fun OnScreenKeyboard(
         // Griglia 6 colonne: lettere/numeri (oppure simboli)
         rows.forEach { rowChars ->
             Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 rowChars.forEach { ch ->
@@ -121,7 +121,7 @@ fun OnScreenKeyboard(
 
         // Bottom row: barra spazio larga (4 unità su 6, centrata)
         Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.weight(1f))
@@ -147,7 +147,7 @@ private fun KeyboardButton(
     // Solo cambio colore al focus, senza ingrandimento
     Box(
         modifier = modifier
-            .height(40.dp)
+            .height(28.dp)
             .clip(RoundedCornerShape(4.dp))
             .background(
                 if (isFocused) WaveStreamColors.Accent
@@ -166,7 +166,7 @@ private fun KeyboardButton(
             text = label,
             color = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
             fontWeight = FontWeight.Medium,
-            fontSize = 15.sp
+            fontSize = 12.sp
         )
     }
 }
