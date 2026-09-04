@@ -208,7 +208,10 @@ class HomeViewModel @Inject constructor(
     private fun startSerieAHeroSync() {
         viewModelScope.launch {
             runCatching { serieAMatchRepository.syncIfStale() }
+                .onFailure { Log.e("SerieA", "syncIfStale failed", it) }
+                .onSuccess { count -> Log.d("SerieA", "syncIfStale -> $count matches") }
             serieAMatchRepository.observeHeroMatches().collect { list ->
+                Log.d("SerieA", "DB emit: ${list.size} matches in query window")
                 serieAUpcoming = list
                 refreshSerieAHero()
             }
@@ -230,6 +233,12 @@ class HomeViewModel @Inject constructor(
                     .thenBy { it.utcDateMillis }
             )
             .firstOrNull()
+        Log.d(
+            "SerieA",
+            "refreshSerieAHero: cached=${serieAUpcoming.size}, " +
+                "match=${match?.let { "${it.homeShortName}-${it.awayShortName} live=${it.isLive} " +
+                "kickoff=${java.util.Date(it.utcDateMillis)}" } ?: "none"}"
+        )
         _uiState.update { s ->
             s.copy(
                 serieAMatch = match,

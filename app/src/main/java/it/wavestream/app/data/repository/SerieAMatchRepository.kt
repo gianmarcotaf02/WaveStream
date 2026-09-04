@@ -71,14 +71,15 @@ class SerieAMatchRepository @Inject constructor(
     }
 
     /**
-     * Tutte le partite delle prossime 24h (e delle 3h precedenti), ordinate per kickoff.
-     * Il filtro della finestra hero (kickoff - 30 min → + 2h) lo fa il ViewModel
-     * con un ticker, così l'hero appare/scompare anche senza nuove emissioni dal DB.
+     * Tutte le partite delle prossime 24h (e delle 12h precedenti, margine di sicurezza),
+     * ordinate per kickoff. Il filtro della finestra hero (kickoff - 30 min → + 2h)
+     * lo fa il ViewModel con un ticker, così l'hero appare/scompare anche senza
+     * nuove emissioni dal DB.
      */
     fun observeHeroMatches(): Flow<List<SerieAMatchEntity>> {
         val now = System.currentTimeMillis()
         return serieAMatchDao.observeWindow(
-            from = now - SerieAMatchEntity.HERO_WINDOW_AFTER_MILLIS,
+            from = now - 12L * 60 * 60 * 1000,
             to = now + 24L * 60 * 60 * 1000
         )
     }
