@@ -298,7 +298,14 @@ class HomeViewModel @Inject constructor(
         } else {
             serieAKickoffLabel(match, serieAMatchRepository.adjustedNow())
         },
-        genres = "Serie A • Giornata ${match.matchday ?: "-"}"
+        genres = buildString {
+            append("Serie A • Giornata ${match.matchday ?: "-"}")
+            append(" • ORE " + java.time.ZonedDateTime.ofInstant(
+                java.time.Instant.ofEpochMilli(match.utcDateMillis),
+                java.time.ZoneId.of("Europe/Rome")
+            ).format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")))
+            SerieATeamColors.stadiumForTla(match.homeTla)?.let { append(" • $it") }
+        }
     )
 
     /** Apre il dialog dei canali che trasmettono il match (matching per alias squadre). */

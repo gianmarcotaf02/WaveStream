@@ -50,16 +50,20 @@ fun SerieAMatchHeroBackdrop(
     modifier: Modifier = Modifier
 ) {
     Box(modifier) {
-        // Split diagonale + slash
+        // Split diagonale + slash. La diagonale è più inclinata (verticale) rispetto
+        // alla piena larghezza: passa fra i due crest sulla metà destra dell'hero.
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
+            val slashBottomX = w * 0.65f   // punto di arrivo in basso
+            val slashTopX = w * 0.95f      // punto di arrivo in alto
 
+            // Quadrilatero casa (a sinistra della slash) e ospite (a destra)
             val homePath = Path().apply {
-                moveTo(0f, 0f); lineTo(w, 0f); lineTo(0f, h); close()
+                moveTo(0f, 0f); lineTo(slashTopX, 0f); lineTo(slashBottomX, h); lineTo(0f, h); close()
             }
             val awayPath = Path().apply {
-                moveTo(w, 0f); lineTo(w, h); lineTo(0f, h); close()
+                moveTo(slashTopX, 0f); lineTo(w, 0f); lineTo(w, h); lineTo(slashBottomX, h); close()
             }
 
             val (homeTop, homeBottom) = SerieATeamColors.forTla(match.homeTla)
@@ -68,9 +72,9 @@ fun SerieAMatchHeroBackdrop(
             drawPath(homePath, Brush.verticalGradient(listOf(homeTop, homeBottom)))
             drawPath(awayPath, Brush.verticalGradient(listOf(awayTop, awayBottom)))
 
-            // Slash bianco (basso-sx → alto-dx), sfumato con tratti sovrapposti
-            val a = Offset(0f, h)
-            val b = Offset(w, 0f)
+            // Slash bianco, sfumato con tratti sovrapposti
+            val a = Offset(slashBottomX, h)
+            val b = Offset(slashTopX, 0f)
             drawLine(Color.White.copy(alpha = 0.10f), a, b, strokeWidth = h * 0.085f, cap = StrokeCap.Butt)
             drawLine(Color.White.copy(alpha = 0.22f), a, b, strokeWidth = h * 0.045f, cap = StrokeCap.Butt)
             drawLine(Color.White.copy(alpha = 0.95f), a, b, strokeWidth = h * 0.016f, cap = StrokeCap.Butt)

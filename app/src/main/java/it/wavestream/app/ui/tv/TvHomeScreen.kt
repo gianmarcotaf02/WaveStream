@@ -937,7 +937,20 @@ fun HeroBanner(
                     // alpha dei backdrop film/serie (nero verso sinistra dove sta il testo,
                     // feathering ai quattro bordi — nessun limite geometrico visibile).
                     val matchBackdrop = serieAMatch!!
-                    Box(
+            val matchImageFadeH = remember {
+                // Per il match il colore si espande oltre la metà dell'hero verso sx:
+                // sfumatura morbida che comincia prima rispetto ai backdrop film/serie.
+                Brush.horizontalGradient(colorStops = arrayOf(
+                    0f to Color.Transparent,
+                    0.14f to Color.Black.copy(alpha = 0.08f),
+                    0.30f to Color.Black.copy(alpha = 0.40f),
+                    0.44f to Color.Black.copy(alpha = 0.80f),
+                    0.58f to Color.Black,
+                    0.90f to Color.Black,
+                    1f to Color.Transparent
+                ))
+            }
+            Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
@@ -946,7 +959,7 @@ fun HeroBanner(
                                 clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
                                     content.drawContent()
                                 }
-                                drawRect(brush = imageFadeH, blendMode = BlendMode.DstIn)
+                                drawRect(brush = matchImageFadeH, blendMode = BlendMode.DstIn)
                                 drawRect(brush = imageFadeV, blendMode = BlendMode.DstIn)
                             }
                     ) {
@@ -1084,12 +1097,8 @@ fun HeroBanner(
                         
                         Spacer(modifier = Modifier.height(8.dp))
                         
-                        // Ratings — Aurora: gerarchia informativa. IMDb è il badge
-                        // primario (sempre visibile, fallback N/A); Tomatometer /
-                        // Popcornmeter / Metacritic / TMDb appaiono SOLO se il dato
-                        // esiste — gli "N/A" restano disponibili nella schermata
-                        // dettaglio. Da 5 badge fissi a 2–5 solo-dati.
-                        Row(
+                        // Ratings — nascoste per l'hero partita (nessun dato)
+                        if (hero.contentType != "SERIEA_MATCH") Row(
                             horizontalArrangement = Arrangement.spacedBy(20.dp),
                             verticalAlignment = Alignment.Top,
                             modifier = Modifier.padding(vertical = 4.dp)

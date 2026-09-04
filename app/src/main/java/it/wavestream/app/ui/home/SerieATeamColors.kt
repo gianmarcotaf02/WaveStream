@@ -37,4 +37,35 @@ object SerieATeamColors {
 
     fun forTla(tla: String?): Pair<Color, Color> =
         tla?.let { COLORS[it.trim().uppercase()] } ?: DEFAULT_COLORS
+
+    /**
+     * Stadio di casa per squadra (TLA). L'API football-data.org non espone il venue
+     * negli endpoint matches, quindi usiamo una tabella locale curata.
+     */
+    private val STADIUMS: Map<String, String> = mapOf(
+        "ATA" to "Gewiss Stadium, Bergamo",
+        "BOL" to "Renato Dall'Ara, Bologna",
+        "CAG" to "Unipol Domus, Cagliari",
+        "COM" to "Giuseppe Sinigaglia, Como",
+        "CRE" to "Giovanni Zini, Cremona",
+        "FIO" to "Artemio Franchi, Firenze",
+        "GEN" to "Stadio Luigi Ferraris, Genova",
+        "VER" to "Marcantonio Bentegodi, Verona",
+        "INT" to "Giuseppe Meazza, Milano",
+        "JUV" to "Allianz Stadium, Torino",
+        "LAZ" to "Stadio Olimpico, Roma",
+        "LEC" to "Via del Mare, Lecce",
+        "MIL" to "Giuseppe Meazza, Milano",
+        "NAP" to "Diego Armando Maradona, Napoli",
+        "PAR" to "Ennio Tardini, Parma",
+        "PIS" to "Arena Garibaldi, Pisa",
+        "ROM" to "Stadio Olimpico, Roma",
+        "SAS" to "Mapei Stadium, Reggio Emilia",
+        "TOR" to "Olimpico Grande Torino",
+        "UDI" to "Bluenergy Stadium, Udine"
+    )
+
+    /** Stadio della squadra di casa (TLA), null se squadra sconosciuta. */
+    fun stadiumForTla(tla: String?): String? =
+        tla?.let { STADIUMS[it.trim().uppercase()] }
 }
