@@ -344,7 +344,15 @@ class SearchActivity : ComponentActivity() {
             isLoading = true
             delay(220)
             val all = performSearch(trimmed, limit = 60)
-            suggestions = all.take(6)
+            val exact = all.take(6)
+            // Se i suggerimenti esatti sono pochi (o nulli, tipico di un typo),
+            // il "correttore" fuzzy li riempie con i titoli più vicini alla query,
+            // scartando quelli già presenti tra i risultati.
+            suggestions = if (exact.size < 6) {
+                (exact + findFuzzySuggestions(trimmed, already = all)).take(6)
+            } else {
+                exact
+            }
             results = all
             isLoading = false
         }
@@ -575,7 +583,90 @@ class SearchActivity : ComponentActivity() {
                 .take(limit)
         }
     }
-    
+
+    /**
+     * Costruisce (una sola volta per sessione) l'indice leggero dei titoli da
+     * cui attingere per i suggerimenti fuzzy: carica le liste complete dal DB
+     * una volta e tiene in memoria solo i campi servono al matching + al click.
+     */
+    private suspend fun ensureFuzzyIndex(): List<FuzzyTitle> {
+        fuzzyIndex?.let { return it }
+        val built = withContext(Dispatchers.IO) {
+            val list = ArrayList<FuzzyTitle>()
+            movieDao.getAllMoviesList().forEach { m ->
+                list += FuzzyTitle(
+                    ContentType.MOVIE, m.id, m.name, m.year?.toString(),
+                    m.posterUrl, m.streamUrl, m.category, normalizeTokens(m.name)
+                )
+            }
+            seriesDao.getAllSeriesList().forEach { s ->
+                list += FuzzyTitle(
+                    ContentType.SERIES, s.id, s.name, s.year?.toString(),
+                    s.posterUrl, null, s.category, normalizeTokens(s.name)
+                )
+            }
+            channelDao.getAllChannelsList().forEach { c ->
+                list += FuzzyTitle(
+                    ContentType.CHANNEL, c.id, c.name, c.categoryName,
+                    c.logoUrl, c.streamUrl, c.categoryName, normalizeTokens(c.name)
+                )
+            }
+            list
+        }
+        fuzzyIndex = built
+        return built
+    }
+
+    /**
+     * Suggerimenti fuzzy ("correttore ortografico"): se la query contiene un typo
+     * (es. "breakinf" per "breaking bad") la ricerca LIKE/FTS non trova nulla, quindi
+     * si scansiona l'indice in memoria e si restituiscono i titoli più vicini in
+     * termini di distanza Damerau–Levenshtein. Vengono scartati i contenuti già
+     * presenti tra i risultati (`already`) e quelli bloccati per il profilo.
+     */
+    private suspend fun findFuzzySuggestions(
+        query: String,
+        already: List<SearchResultItem>
+    ): List<SearchResultItem> {
+        val trimmed = query.trim()
+        // Query molto corte danno solo falsi positivi: fuzzy serve su parole da 3+.
+        if (trimmed.length < 3) return emptyList()
+        val qTokens = normalizeTokens(trimmed)
+        if (qTokens.isEmpty()) return emptyList()
+
+        val alreadyKeys = already.mapTo(HashSet()) { "${it.type}_${it.id}" }
+
+        return withContext(Dispatchers.Default) {
+            val index = ensureFuzzyIndex()
+            if (index.isEmpty()) return@withContext emptyList()
+
+            // Tollera errori in proporzione alla lunghezza della query (min 1).
+            val qLen = trimmed.count { it.isLetterOrDigit() }
+            val allowedTotal = maxOf(1, qLen / 4)
+
+            val best = index.mapNotNull { cand ->
+                val score = fuzzyCandidateScore(cand, qTokens)
+                if (score == null || score / 10 > allowedTotal) null else cand to score
+            }.sortedBy { it.second }
+
+            val out = ArrayList<SearchResultItem>()
+            for ((cand, _) in best) {
+                if (out.size >= 6) break
+                if ("${cand.type}_${cand.id}" in alreadyKeys) continue
+                if (filterBlockedContent.isBlocked(cand.title, cand.category)) continue
+                out += SearchResultItem(
+                    id = cand.id,
+                    title = cand.title,
+                    subtitle = cand.subtitle,
+                    posterUrl = cand.posterUrl,
+                    type = cand.type,
+                    streamUrl = cand.streamUrl
+                )
+            }
+            out
+        }
+    }
+
     private fun openDetails(item: SearchResultItem) {
         if (item.isCategory) {
             // Navigate to CategoryActivity (same as sidebar navigation)
