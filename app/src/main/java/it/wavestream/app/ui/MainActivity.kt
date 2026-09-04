@@ -87,6 +87,9 @@ import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.HeroItem
 import it.wavestream.app.ui.home.HomeContentType
 import it.wavestream.app.ui.home.HomeViewModel
+import it.wavestream.app.ui.home.SerieAChannelPickerDialog
+import it.wavestream.app.ui.home.SerieALiveViewModel
+import it.wavestream.app.ui.home.SerieAMatchHeroCard
 import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.search.SearchActivity
 import it.wavestream.app.ui.settings.SettingsActivity
