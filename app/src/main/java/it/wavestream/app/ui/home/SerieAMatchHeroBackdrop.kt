@@ -136,9 +136,10 @@ fun SerieAMatchLiveBadge() {
     }
 }
 
-/** "ORE 20:45" oppure "INIZIA TRA X MIN" quando manca meno di un'ora. */
-fun serieAKickoffLabel(match: SerieAMatchEntity): String {
-    val now = System.currentTimeMillis()
+/** "ORE 20:45" oppure "INIZIA TRA X MIN" quando manca meno di un'ora.
+ *  [nowMillis] va passato col tempo corretto server (repository.adjustedNow()). */
+fun serieAKickoffLabel(match: SerieAMatchEntity, nowMillis: Long = System.currentTimeMillis()): String {
+    val now = nowMillis
     val diffMin = (match.utcDateMillis - now) / 60_000L
     return when {
         diffMin in 0..59 -> "INIZIA TRA $diffMin MIN"

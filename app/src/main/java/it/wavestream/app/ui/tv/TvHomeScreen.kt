@@ -1030,8 +1030,10 @@ fun HeroBanner(
                                 SerieAMatchLiveBadge()
                                 Spacer(modifier = Modifier.height(8.dp))
                             } else {
+                                // hero.duration contiene la label kickoff calcolata dal
+                                // ViewModel col tempo corretto server
                                 Text(
-                                    text = serieAKickoffLabel(serieAMatch),
+                                    text = hero.duration ?: serieAKickoffLabel(serieAMatch),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = WaveStreamColors.AccentGold,
                                     fontWeight = FontWeight.Bold,
