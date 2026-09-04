@@ -7,6 +7,7 @@ import it.wavestream.app.data.database.dao.SerieAMatchDao
 import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.data.parser.SerieATeamAliases
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 import java.time.LocalDate
@@ -80,6 +81,10 @@ class SerieAMatchRepository @Inject constructor(
         serieAMatchDao.deleteBefore(
             System.currentTimeMillis() - 2L * 24 * 60 * 60 * 1000
         )
+        val liveScores = matches.filter { it.isLive }
+            .joinToString { "${it.homeShortName} ${it.homeScore}-${it.awayScore} ${it.awayShortName}" }
+        Log.d("SerieA", "sync: ${matches.size} matches" +
+            if (liveScores.isNotEmpty()) " | LIVE: $liveScores" else "")
         matches.size
     }
 

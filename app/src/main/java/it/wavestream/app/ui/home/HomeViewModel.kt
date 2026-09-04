@@ -259,13 +259,13 @@ class HomeViewModel @Inject constructor(
         manageSerieAPolling(match != null)
     }
 
-    /** Mentre un match è in finestra hero, ri-sync ogni 2 minuti. */
+    /** Mentre un match è in finestra hero, ri-sync ogni 60s (stato live/punteggio). */
     private fun manageSerieAPolling(active: Boolean) {
         if (active) {
             if (serieAPollingJob?.isActive != true) {
                 serieAPollingJob = viewModelScope.launch {
                     while (isActive) {
-                        delay(2 * 60 * 1000L)
+                        delay(60_000L)
                         runCatching { serieAMatchRepository.syncMatches() }
                     }
                 }
