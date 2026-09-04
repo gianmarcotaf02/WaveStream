@@ -22,7 +22,7 @@ import javax.inject.Singleton
  * - `syncMatches()` fetches the calendar around today and caches it in Room
  *   (kickoff times are fixed well in advance, a sync every few hours is enough).
  * - `observeHeroMatches()` exposes every match inside its hero window
- *   (kickoff - 30 min → kickoff + 3h), one hero per match — simultaneous
+ *   (kickoff - 30 min → kickoff + 2h), one hero per match — simultaneous
  *   matches produce multiple heroes.
  * - `findChannelsForMatch()` filters playlist channels whose name contains
  *   an alias of either team.
@@ -72,7 +72,7 @@ class SerieAMatchRepository @Inject constructor(
 
     /**
      * Tutte le partite delle prossime 24h (e delle 3h precedenti), ordinate per kickoff.
-     * Il filtro della finestra hero (kickoff - 30 min → + 3h) lo fa il ViewModel
+     * Il filtro della finestra hero (kickoff - 30 min → + 2h) lo fa il ViewModel
      * con un ticker, così l'hero appare/scompare anche senza nuove emissioni dal DB.
      */
     fun observeHeroMatches(): Flow<List<SerieAMatchEntity>> {

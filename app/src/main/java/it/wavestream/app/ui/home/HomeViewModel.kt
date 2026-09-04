@@ -201,7 +201,7 @@ class HomeViewModel @Inject constructor(
 
     /**
      * Sync del calendario + osservazione dei match vicino alla finestra hero.
-     * Un ticker ogni 30s rivaluta la finestra (kickoff - 30 min → + 3h) così
+     * Un ticker ogni 30s rivaluta la finestra (kickoff - 30 min → + 2h) così
      * l'hero appare/scompare al momento giusto e le label restano fresche.
      * Mentre un match è in finestra, ri-sync ogni 2 min (stato live/punteggio).
      */

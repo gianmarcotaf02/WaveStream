@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 /**
  * Serie A match from football-data.org, cached locally.
  * The hero on the Home screen shows every match in its "hero window"
- * (kickoff - 30 min → kickoff + 3h), one hero per match (simultaneous matches supported).
+ * (kickoff - 30 min → kickoff + 2h), one hero per match (simultaneous matches supported).
  */
 @Entity(
     tableName = "serie_a_matches",
@@ -33,7 +33,7 @@ data class SerieAMatchEntity(
 
     val isLive: Boolean get() = status in LIVE_STATUSES
 
-    /** Hero window: starts 30 min before kickoff, ends 3h after kickoff. */
+    /** Hero window: starts 30 min before kickoff, ends 2h after kickoff. */
     fun isInHeroWindow(now: Long = System.currentTimeMillis()): Boolean {
         if (status == "POSTPONED" || status == "CANCELLED") return false
         val windowStart = utcDateMillis - HERO_WINDOW_BEFORE_MILLIS
@@ -47,6 +47,6 @@ data class SerieAMatchEntity(
         )
 
         const val HERO_WINDOW_BEFORE_MILLIS = 30L * 60 * 1000        // 30 min before kickoff
-        const val HERO_WINDOW_AFTER_MILLIS = 3L * 60 * 60 * 1000     // 3h after kickoff
+        const val HERO_WINDOW_AFTER_MILLIS = 2L * 60 * 60 * 1000     // 2h after kickoff
     }
 }
