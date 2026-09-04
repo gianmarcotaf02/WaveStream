@@ -77,10 +77,12 @@ import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -98,6 +100,103 @@ data class SearchResultItem(
     val categoryType: String? = null,  // "movies", "series", or "live"
     val isFavorite: Boolean = false   // True if item is in favorites
 )
+
+/**
+ * Voce dell'indice leggero usato dal "correttore ortografico": un'istantanea
+ * in memoria di tutti i titoli (id/tipo/poster/stream) per eseguire il fuzzy
+ * match senza ricaricare intere entità dal DB a ogni tasto.
+ */
+@Immutable
+private data class FuzzyTitle(
+    val type: ContentType,
+    val id: Long,
+    val title: String,
+    val subtitle: String?,
+    val posterUrl: String?,
+    val streamUrl: String?,
+    val category: String?,
+    val tokens: List<String>
+)
+
+/**
+ * Tokenizza un testo in parole minuscole alfanumeriche (es. "Breaking Bad!"
+ * -> ["breaking", "bad"]), usato sia per la query sia per i titoli candidati.
+ */
+private fun normalizeTokens(s: String): List<String> =
+    s.lowercase()
+        .map { if (it.isLetterOrDigit()) it else ' ' }
+        .joinToString("")
+        .trim()
+        .split(' ')
+        .filter { it.isNotBlank() }
+
+/**
+ * Distanza Damerau–Levenshtein (Ottimal String Alignment): transposizioni
+ * adiacenti (tipico errore di battitura, es. "brakeing" per "breaking")
+ * contano 1 come una sostituzione. Implementazione iterativa O(n*m).
+ */
+private fun damerauLevenshtein(a: String, b: String): Int {
+    if (a == b) return 0
+    val m = a.length
+    val n = b.length
+    if (m == 0) return n
+    if (n == 0) return m
+    val d = Array(m + 1) { IntArray(n + 1) }
+    for (i in 0..m) d[i][0] = i
+    for (j in 0..n) d[0][j] = j
+    for (i in 1..m) {
+        for (j in 1..n) {
+            val cost = if (a[i - 1] == b[j - 1]) 0 else 1
+            var v = (d[i - 1][j] + 1).coerceAtMost(d[i][j - 1] + 1)
+            v = v.coerceAtMost(d[i - 1][j - 1] + cost)
+            if (i > 1 && j > 1 && a[i - 1] == b[j - 2] && a[i - 2] == b[j - 1]) {
+                v = v.coerceAtMost(d[i - 2][j - 2] + 1)
+            }
+            d[i][j] = v
+        }
+    }
+    return d[m][n]
+}
+
+/**
+ * Quante lettere differenti (max distanza) tolleriamo per una parola: parole più
+ * lunghe sopportano più errori di battitura.
+ */
+private fun fuzzyWordLimit(tokenLen: Int): Int = when {
+    tokenLen >= 9 -> 3
+    tokenLen >= 6 -> 2
+    else -> 1
+}
+
+/**
+ * Score di vicinanza tra la query tokenizzata e un titolo candidato. La query
+ * deve corrispondere a una sequenza di parole consecutive del titolo a partire
+ * da una posizione `start` (preferita 0, cioè dall'inizio). Ritorna un punteggio
+ * PIÙ BASSO = PIÙ vicino, oppure null se il candidato non è abbastanza simile.
+ * Ogni parola deve iniziare con la stessa lettera (taglia il rumore) ed essere
+ * entro la tolleranza di distanza; si penalizza anche la posizione di partenza.
+ */
+private fun fuzzyCandidateScore(cand: FuzzyTitle, qTokens: List<String>): Int? {
+    val t = cand.tokens
+    // Query con più parole del titolo: la gestisce già la ricerca normale.
+    if (t.isEmpty() || qTokens.size > t.size) return null
+    val maxStart = t.size - qTokens.size
+    var best = Int.MAX_VALUE
+    for (start in 0..maxStart) {
+        var total = 0
+        var ok = true
+        for (i in qTokens.indices) {
+            val q = qTokens[i]
+            val w = t[start + i]
+            if (w.firstOrNull() != q.firstOrNull()) { ok = false; break }
+            val dist = damerauLevenshtein(q, w)
+            if (dist > fuzzyWordLimit(w.length)) { ok = false; break }
+            total += dist
+        }
+        if (ok) best = best.coerceAtMost(total * 10 + start)
+    }
+    return if (best == Int.MAX_VALUE) null else best
+}
 
 /**
  * Search Activity - Voice and text search
@@ -118,6 +217,10 @@ class SearchActivity : ComponentActivity() {
     // dal DB a ogni lettera digitata
     private var categoryCache: Triple<List<String>, List<String>, List<String>>? = null
     private var categoryCacheTime = 0L
+
+    // Indice leggero dei titoli (id/tipo/poster) per il "correttore ortografico":
+    // costruito pigramente una volta per sessione di ricerca.
+    private var fuzzyIndex: List<FuzzyTitle>? = null
     
     // Cronologia delle ricerche recenti (persistita, mostrata a query vuota)
     private val recentPrefs by lazy {
