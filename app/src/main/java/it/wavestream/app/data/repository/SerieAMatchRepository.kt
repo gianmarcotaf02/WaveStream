@@ -35,6 +35,18 @@ class SerieAMatchRepository @Inject constructor(
 ) {
 
     /**
+     * Differenza (server - dispositivo) in millisecondi, misurata dall'header HTTP
+     * `Date` dell'ultima risposta di football-data.org. Molti TV box hanno l'orologio
+     * o il timezone sballati: tutte le valutazioni di finestra usano il tempo corretto
+     * [adjustedNow] invece di System.currentTimeMillis().
+     */
+    @Volatile
+    private var clockOffsetMillis: Long = 0L
+
+    /** Tempo corretto secondo il server API. */
+    fun adjustedNow(): Long = System.currentTimeMillis() + clockOffsetMillis
+
+    /**
      * Fetches Serie A matches from yesterday to +14 days and upserts them in Room.
      * Returns the number of matches stored, or a failure.
      */
@@ -48,6 +60,17 @@ class SerieAMatchRepository @Inject constructor(
             dateFrom = dateFrom,
             dateTo = dateTo
         )
+
+        // Auto-correzione orologio dispositivo dal server (header HTTP Date)
+        response.headers()["Date"]?.let { dateHeader ->
+            runCatching {
+                val serverMillis = java.time.ZonedDateTime
+                    .parse(dateHeader, java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME)
+                    .toInstant().toEpochMilli()
+                clockOffsetMillis = serverMillis - System.currentTimeMillis()
+                android.util.Log.d("SerieA", "Clock offset vs server: ${clockOffsetMillis / 1000}s")
+            }
+        }
         val dto = response.body()
             ?: throw IllegalStateException("football-data.org: empty response (code ${response.code()})")
         val matches = dto.matches.orEmpty().map { it.toEntity() }
@@ -77,7 +100,7 @@ class SerieAMatchRepository @Inject constructor(
      * nuove emissioni dal DB.
      */
     fun observeHeroMatches(): Flow<List<SerieAMatchEntity>> {
-        val now = System.currentTimeMillis()
+        val now = adjustedNow()
         return serieAMatchDao.observeWindow(
             from = now - 12L * 60 * 60 * 1000,
             to = now + 24L * 60 * 60 * 1000

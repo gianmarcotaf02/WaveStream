@@ -228,7 +228,8 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun refreshSerieAHero() {
-        val now = System.currentTimeMillis()
+        // Tempo corretto col server: l'orologio del dispositivo può essere sballato
+        val now = serieAMatchRepository.adjustedNow()
         var match = serieAUpcoming
             .filter { it.isInHeroWindow(now) }
             .sortedWith(
@@ -295,7 +296,7 @@ class HomeViewModel @Inject constructor(
         duration = if (match.isLive && match.homeScore != null && match.awayScore != null) {
             "${match.homeScore} - ${match.awayScore}"
         } else {
-            serieAKickoffLabel(match)
+            serieAKickoffLabel(match, serieAMatchRepository.adjustedNow())
         },
         genres = "Serie A • Giornata ${match.matchday ?: "-"}"
     )
