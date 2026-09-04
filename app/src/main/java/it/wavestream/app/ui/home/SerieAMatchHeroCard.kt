@@ -90,9 +90,9 @@ fun SerieAMatchHeroCard(
             // White slash (bottom-left → top-right), feathered with layered strokes
             val a = Offset(0f, h)
             val b = Offset(w, 0f)
-            drawLine(Color.White.copy(alpha = 0.10f), a, b, strokeWidth = h * 0.085f, strokeCap = StrokeCap.Butt)
-            drawLine(Color.White.copy(alpha = 0.22f), a, b, strokeWidth = h * 0.045f, strokeCap = StrokeCap.Butt)
-            drawLine(Color.White.copy(alpha = 0.95f), a, b, strokeWidth = h * 0.016f, strokeCap = StrokeCap.Butt)
+            drawLine(Color.White.copy(alpha = 0.10f), a, b, strokeWidth = h * 0.085f, cap = StrokeCap.Butt)
+            drawLine(Color.White.copy(alpha = 0.22f), a, b, strokeWidth = h * 0.045f, cap = StrokeCap.Butt)
+            drawLine(Color.White.copy(alpha = 0.95f), a, b, strokeWidth = h * 0.016f, cap = StrokeCap.Butt)
 
             // Bottom scrim for text legibility
             drawRect(

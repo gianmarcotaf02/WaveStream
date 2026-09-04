@@ -31,7 +31,7 @@ data class SerieAMatchEntity(
 
     /** Hero window: starts 30 min before kickoff, ends 3h after kickoff. */
     fun isInHeroWindow(now: Long = System.currentTimeMillis()): Boolean {
-        if (status == STATUS_POSTPONED || status == STATUS_CANCELLED) return false
+        if (status == "POSTPONED" || status == "CANCELLED") return false
         val windowStart = utcDateMillis - HERO_WINDOW_BEFORE_MILLIS
         val windowEnd = utcDateMillis + HERO_WINDOW_AFTER_MILLIS
         return now in windowStart..windowEnd
