@@ -22,12 +22,12 @@ import androidx.compose.ui.unit.sp
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 /**
- * On-screen keyboard, layout QWERTY italiano.
- * Uniform grid: all keys have the same width (10-unit columns, no oversized keys).
- * Two sections switchable with a toggle button on the bottom row:
- * - Letters: QWERTY italiano (qwertyuiop / asdfghjkl / zxcvbnm), righe centrate
- * - ?123: numbers, punctuation and Italian accented vowels (à è é ì ò ù, apostrofo, €)
- * Space bar and Backspace always available on the bottom row.
+ * On-screen keyboard in Netflix TV style.
+ * Uniform 6-column grid with near-square keys, like the Netflix app:
+ * - Top row: section toggle ("abc" / "?123") + Backspace
+ * - Letters & numbers integrated: a-f / g-l / m-r / s-x / y-z + 1-4 / 5-0
+ * - Wide space bar on the bottom row
+ * - ?123 page: punctuation and Italian accented vowels on the same 6-column grid
  * Controlled with the D-pad, applies accent color on focus (no scaling).
  * After switching section, focus is restored on the toggle button itself.
  */
@@ -40,7 +40,7 @@ fun OnScreenKeyboard(
     var showSymbols by remember { mutableStateOf(false) }
 
     // Contatore dei cambi di sezione: dopo ogni cambio il focus viene
-    // riportato sul bottone toggle (?123 / ABC), che altrimenti perderebbe
+    // riportato sul bottone toggle (abc / ?123), che altrimenti perderebbe
     // il focus perché l'intera griglia dei tasti viene ricomposta.
     var sectionToggleCount by remember { mutableStateOf(0) }
     val toggleFocusRequester = remember { FocusRequester() }
@@ -53,22 +53,24 @@ fun OnScreenKeyboard(
         }
     }
 
-    // LETTERE: layout QWERTY italiano su 10 colonne uniformi. Ogni riga è
-    // centrata simmetricamente: quelle con meno tasti (9 e 7) ricevono spaziature
-    // laterali uguali, così OGNI tasto ha la stessa larghezza (1 unità su 10).
-    // Riga italiana standard: qwertyuiop / asdfghjkl / zxcvbnm.
+    // LETTERE + NUMERI (layout Netflix): griglia uniforme 6x6, numeri
+    // integrati nelle ultime due righe come sull'app Netflix.
     val letterRows = listOf(
-        KeyboardRowSpec("qwertyuiop", paddingUnits = 0f),
-        KeyboardRowSpec("asdfghjkl", paddingUnits = 0.5f),
-        KeyboardRowSpec("zxcvbnm", paddingUnits = 1.5f)
+        "abcdef",
+        "ghijkl",
+        "mnopqr",
+        "stuvwx",
+        "yz1234",
+        "567890"
     )
 
-    // SIMBOLI (?123): numeri, punteggiatura e vocali accentate italiane
-    // (à è é ì ò ù) con apostrofo ed €, anch'esse su 10 colonne uniformi.
+    // Simboli (?123): punteggiatura e vocali accentate italiane,
+    // stessa griglia a 6 colonne per non cambiare dimensioni ai tasti.
     val symbolRows = listOf(
-        KeyboardRowSpec("1234567890", paddingUnits = 0f),
-        KeyboardRowSpec(".,!?-_+()#", paddingUnits = 0f),
-        KeyboardRowSpec("àèéìòù'\"@€", paddingUnits = 0f)
+        ".,!?'\"",
+        "-_:;+=",
+        "àèéìòù",
+        "()#@€*"
     )
 
     val rows = if (showSymbols) symbolRows else letterRows
@@ -77,24 +79,14 @@ fun OnScreenKeyboard(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        rows.forEach { spec ->
-            CenteredKeysRow(
-                keys = spec.chars,
-                paddingUnits = spec.paddingUnits
-            ) { ch ->
-                onQueryChange(query + ch)
-            }
-        }
-
-        // Bottom controls row (simmetrica su 10 unità): 1 sp. + toggle(2) +
-        // space(4) + backspace(2) + 1 sp.
+        // Top row (stile Netflix): toggle sezione + backspace, con una
+        // cella vuota in mezzo a separare i due comandi.
         Row(
             horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Spacer(modifier = Modifier.weight(1f))
             KeyboardButton(
-                label = if (showSymbols) "ABC" else "?123",
+                label = if (showSymbols) "abc" else "?123",
                 onClick = {
                     showSymbols = !showSymbols
                     sectionToggleCount++
@@ -103,51 +95,43 @@ fun OnScreenKeyboard(
                     .weight(2f)
                     .focusRequester(toggleFocusRequester)
             )
-            KeyboardButton(
-                label = "",
-                onClick = { onQueryChange(query + " ") },
-                modifier = Modifier.weight(4f)
-            )
+            Spacer(modifier = Modifier.weight(1f))
             KeyboardButton(
                 label = "⌫",
                 onClick = { onQueryChange(query.dropLast(1)) },
                 modifier = Modifier.weight(2f)
             )
+        }
+
+        // Griglia 6 colonne: lettere/numeri (oppure simboli)
+        rows.forEach { rowChars ->
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                rowChars.forEach { ch ->
+                    KeyboardButton(
+                        label = ch.toString(),
+                        onClick = { onQueryChange(query + ch) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+
+        // Bottom row: barra spazio larga (4 unità su 6, centrata)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Spacer(modifier = Modifier.weight(1f))
+            KeyboardButton(
+                label = "",
+                onClick = { onQueryChange(query + " ") },
+                modifier = Modifier.weight(4f)
+            )
             Spacer(modifier = Modifier.weight(1f))
         }
-    }
-}
-
-/** Specifica di una riga di tasti e le sue spaziature laterali in unità. */
-private data class KeyboardRowSpec(
-    val chars: String,
-    val paddingUnits: Float = 0f
-)
-
-/**
- * Riga di tasti centrata su 10 colonne uniformi: i tasti pesano 1 unità l'uno,
- * e `paddingUnits` (stesso valore a sinistra e a destra) centra le righe più
- * corte mantenendo la stessa larghezza dei tasti in tutta la tastiera.
- */
-@Composable
-private fun CenteredKeysRow(
-    keys: String,
-    paddingUnits: Float,
-    onKey: (String) -> Unit
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        if (paddingUnits > 0f) Spacer(modifier = Modifier.weight(paddingUnits))
-        keys.forEach { ch ->
-            KeyboardButton(
-                label = ch.toString(),
-                onClick = { onKey(ch.toString()) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-        if (paddingUnits > 0f) Spacer(modifier = Modifier.weight(paddingUnits))
     }
 }
 
@@ -163,7 +147,7 @@ private fun KeyboardButton(
     // Solo cambio colore al focus, senza ingrandimento
     Box(
         modifier = modifier
-            .height(32.dp)
+            .height(40.dp)
             .clip(RoundedCornerShape(4.dp))
             .background(
                 if (isFocused) WaveStreamColors.Accent
@@ -182,7 +166,7 @@ private fun KeyboardButton(
             text = label,
             color = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
             fontWeight = FontWeight.Medium,
-            fontSize = 13.sp
+            fontSize = 15.sp
         )
     }
 }
