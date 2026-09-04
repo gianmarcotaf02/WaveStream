@@ -438,11 +438,7 @@ fun DetailsScreen(
                                         "Riproduci S1E1"
                                     }
                                 }
-                                else -> {
-                                    // DEBUG TEMPORANEO: rende visibile il contentType arrivato allo schermo.
-                                    // Rimuovere dopo la diagnosi.
-                                    "${stringResource(R.string.play)} [${state.contentType.name}]"
-                                }
+                                else -> stringResource(R.string.play)
                             },
                             // Use white button for resume/next episode states
                             isResume = state.resumeMinutes != null || state.nextEpisodeInfo != null,
@@ -1025,8 +1021,7 @@ private fun PlayButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .width(IntrinsicSize.Min)
-            .widthIn(min = 260.dp)  // TEST: larghezza aumentata per verificare eventuale clipping del testo
+            .widthIn(min = 120.dp)
             .height(52.dp)
             .border(3.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
