@@ -931,10 +931,31 @@ fun HeroBanner(
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
-                // Backdrop image - full width, con feathering alpha ai quattro bordi.
-                // Offscreen compositing: DstIn deve mascherare SOLO l'immagine,
-                // non i gradienti e il contenuto disegnati sotto/dopo.
-                AsyncImage(
+                val isMatchHero = hero.contentType == "SERIEA_MATCH" && serieAMatch != null
+                if (isMatchHero) {
+                    // Backdrop partita: split diagonale + crests, con le STESSE maschere
+                    // alpha dei backdrop film/serie (nero verso sinistra dove sta il testo,
+                    // feathering ai quattro bordi — nessun limite geometrico visibile).
+                    val matchBackdrop = serieAMatch!!
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                            .drawWithContent {
+                                val content = this
+                                clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
+                                    content.drawContent()
+                                }
+                                drawRect(brush = imageFadeH, blendMode = BlendMode.DstIn)
+                                drawRect(brush = imageFadeV, blendMode = BlendMode.DstIn)
+                            }
+                    ) {
+                        SerieAMatchHeroBackdrop(
+                            match = matchBackdrop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                } else AsyncImage(
                     model = hero.backdropUrl ?: hero.posterUrl,
                     contentDescription = hero.title,
                     contentScale = ContentScale.Crop,  // Maintain aspect ratio
@@ -1001,6 +1022,22 @@ fun HeroBanner(
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold
                                 )
+                            }
+                        }
+                        // LIVE pill o orario kickoff (solo per l'hero partita)
+                        if (hero.contentType == "SERIEA_MATCH" && serieAMatch != null) {
+                            if (serieAMatch.isLive) {
+                                SerieAMatchLiveBadge()
+                                Spacer(modifier = Modifier.height(8.dp))
+                            } else {
+                                Text(
+                                    text = serieAKickoffLabel(serieAMatch),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = WaveStreamColors.AccentGold,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 2.sp
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                         Text(
@@ -1199,7 +1236,9 @@ fun HeroBanner(
                             )
 
                             val buttonText = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber, hero.newEpisodeCaughtUp, hero.contentType) {
-                                if (isInProgress) {
+                                if (hero.contentType == "SERIEA_MATCH") {
+                                    "Guarda adesso"
+                                } else if (isInProgress) {
                                     val episodeInfo = if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
                                         "S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber} - "
                                     } else ""
@@ -1308,34 +1347,40 @@ fun HeroBanner(
                                 Spacer(modifier = Modifier.width(4.dp))
                             }
                             
-                            // Favorite button
-                            HeroIconButton(
-                                icon = if (hero.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = if (hero.isFavorite) "Rimuovi dai preferiti" else "Aggiungi ai preferiti",
-                                onClick = { onFavoriteClick(hero) },
-                                onFocusChange = { if (it) isPaused = true },
-                                isActive = hero.isFavorite  // Red when favorite
-                            )
+                            // Favorite button (nascosto per l'hero partita)
+                            if (hero.contentType != "SERIEA_MATCH") {
+                                HeroIconButton(
+                                    icon = if (hero.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    contentDescription = if (hero.isFavorite) "Rimuovi dai preferiti" else "Aggiungi ai preferiti",
+                                    onClick = { onFavoriteClick(hero) },
+                                    onFocusChange = { if (it) isPaused = true },
+                                    isActive = hero.isFavorite  // Red when favorite
+                                )
+                            }
                             
                             Spacer(modifier = Modifier.width(4.dp))
                             
-                            // List button
-                            HeroIconButton(
-                                icon = Icons.AutoMirrored.Filled.PlaylistAdd,
-                                contentDescription = "Aggiungi alla lista",
-                                onClick = { onAddToPlaylistClick(hero) },
-                                onFocusChange = { if (it) isPaused = true }
-                            )
+                            // List button (nascosto per l'hero partita)
+                            if (hero.contentType != "SERIEA_MATCH") {
+                                HeroIconButton(
+                                    icon = Icons.AutoMirrored.Filled.PlaylistAdd,
+                                    contentDescription = "Aggiungi alla lista",
+                                    onClick = { onAddToPlaylistClick(hero) },
+                                    onFocusChange = { if (it) isPaused = true }
+                                )
+                            }
                             
                             Spacer(modifier = Modifier.width(4.dp))
                             
-                            // Info button
-                            HeroIconButton(
-                                icon = Icons.Default.Info,
-                                contentDescription = "Info",
-                                onClick = { onInfoClick(hero) },
-                                onFocusChange = { if (it) isPaused = true }
-                            )
+                            // Info button (nascosto per l'hero partita — non c'è un dettaglio)
+                            if (hero.contentType != "SERIEA_MATCH") {
+                                HeroIconButton(
+                                    icon = Icons.Default.Info,
+                                    contentDescription = "Info",
+                                    onClick = { onInfoClick(hero) },
+                                    onFocusChange = { if (it) isPaused = true }
+                                )
+                            }
                             
                             // Mark as watched button (only for in-progress items)
                             if (isInProgress) {

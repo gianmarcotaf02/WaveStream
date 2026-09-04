@@ -88,8 +88,6 @@ import it.wavestream.app.ui.home.HeroItem
 import it.wavestream.app.ui.home.HomeContentType
 import it.wavestream.app.ui.home.HomeViewModel
 import it.wavestream.app.ui.home.SerieAChannelPickerDialog
-import it.wavestream.app.ui.home.SerieALiveViewModel
-import it.wavestream.app.ui.home.SerieAMatchHeroCard
 import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.search.SearchActivity
 import it.wavestream.app.ui.settings.SettingsActivity
@@ -244,11 +242,6 @@ private fun MainActivityScreen(
 
     // ViewModel for home content
     val homeViewModel: HomeViewModel = hiltViewModel()
-
-    // ViewModel for Serie A live hero (football-data.org)
-    val serieALiveViewModel: SerieALiveViewModel = hiltViewModel()
-    val serieAHeroMatches by serieALiveViewModel.heroMatches.collectAsStateWithLifecycle()
-    val serieAChannelPicker by serieALiveViewModel.channelPicker.collectAsStateWithLifecycle()
 
     val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
     
@@ -524,17 +517,6 @@ private fun MainActivityScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // ===== Serie A live hero (one card per match, shown 30 min before kickoff) =====
-            serieAHeroMatches.firstOrNull()?.let { match ->
-                SerieAMatchHeroCard(
-                    match = match,
-                    onWatchClick = { serieALiveViewModel.openChannelPicker(it) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(2.1f)
-                )
-            }
-
             // Main content with animated tab transition
             androidx.compose.animation.AnimatedContent(
                 targetState = selectedTab,
@@ -576,12 +558,17 @@ private fun MainActivityScreen(
                             startActivityWithTransition(intent)
                         },
                         onHeroPlayClick = { heroItem ->
-                            val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
-                                putExtra("content_id", heroItem.id)
-                                putExtra("content_type", heroItem.contentType)
-                                putExtra("title", heroItem.title)
+                            if (heroItem.contentType == "SERIEA_MATCH") {
+                                // "Guarda adesso" → griglia canali della partita
+                                homeViewModel.openSerieAChannelPicker()
+                            } else {
+                                val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
+                                    putExtra("content_id", heroItem.id)
+                                    putExtra("content_type", heroItem.contentType)
+                                    putExtra("title", heroItem.title)
+                                }
+                                startActivityWithTransition(intent)
                             }
-                            startActivityWithTransition(intent)
                         },
                         onTrailerClick = { heroItem ->
                             heroItem.trailerKey?.let { activity.playTrailer(it) }
@@ -612,14 +599,14 @@ private fun MainActivityScreen(
         }
 
         // Serie A channel picker dialog ("Guarda adesso")
-        serieAChannelPicker?.let { picker ->
+        homeState.serieAChannelPicker?.let { picker ->
             SerieAChannelPickerDialog(
                 match = picker.match,
                 channels = picker.channels,
                 isLoading = picker.isLoading,
-                onDismiss = { serieALiveViewModel.dismissChannelPicker() },
+                onDismiss = { homeViewModel.dismissSerieAChannelPicker() },
                 onChannelClick = { channel ->
-                    serieALiveViewModel.dismissChannelPicker()
+                    homeViewModel.dismissSerieAChannelPicker()
                     val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
                         putExtra("content_id", channel.id)
                         putExtra("content_type", "CHANNEL")
