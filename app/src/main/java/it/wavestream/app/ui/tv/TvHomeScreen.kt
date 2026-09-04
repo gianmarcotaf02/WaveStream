@@ -1037,23 +1037,30 @@ fun HeroBanner(
                                 )
                             }
                         }
-                        // LIVE pill o orario kickoff (solo per l'hero partita)
+                        // LIVE pill / countdown + label competizione (solo per l'hero partita)
                         if (hero.contentType == "SERIEA_MATCH" && serieAMatch != null) {
-                            if (serieAMatch.isLive) {
-                                SerieAMatchLiveBadge()
-                                Spacer(modifier = Modifier.height(8.dp))
-                            } else {
-                                // hero.duration contiene la label kickoff calcolata dal
-                                // ViewModel col tempo corretto server
+                            serieAKickoffLabel(serieAMatch)?.let { label ->
                                 Text(
-                                    text = hero.duration ?: serieAKickoffLabel(serieAMatch),
+                                    text = label,
                                     style = MaterialTheme.typography.labelMedium,
                                     color = WaveStreamColors.AccentGold,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 2.sp
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(6.dp))
                             }
+                            if (serieAMatch.isLive) {
+                                SerieAMatchLiveBadge()
+                                Spacer(modifier = Modifier.height(6.dp))
+                            }
+                            Text(
+                                text = "Serie A • Giornata ${serieAMatch.matchday ?: "-"}",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = Color.White.copy(alpha = 0.85f),
+                                fontWeight = FontWeight.SemiBold,
+                                letterSpacing = 2.sp
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
                         }
                         Text(
                             text = hero.title,

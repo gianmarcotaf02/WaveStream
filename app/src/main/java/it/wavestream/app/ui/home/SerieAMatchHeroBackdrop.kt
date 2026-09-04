@@ -167,19 +167,14 @@ fun SerieAMatchLiveBadge() {
     }
 }
 
-/** "ORE 20:45" oppure "INIZIA TRA X MIN" quando manca meno di un'ora.
+/** "INIZIA TRA X MIN" se il kickoff è imminente, altrimenti null (data e ora
+ *  di inizio sono già mostrate nella riga meta dell'hero).
  *  [nowMillis] va passato col tempo corretto server (repository.adjustedNow()). */
-fun serieAKickoffLabel(match: SerieAMatchEntity, nowMillis: Long = System.currentTimeMillis()): String {
+fun serieAKickoffLabel(match: SerieAMatchEntity, nowMillis: Long = System.currentTimeMillis()): String? {
     val now = nowMillis
     val diffMin = (match.utcDateMillis - now) / 60_000L
     return when {
         diffMin in 0..59 -> "INIZIA TRA $diffMin MIN"
-        else -> {
-            val local = ZonedDateTime.ofInstant(
-                Instant.ofEpochMilli(match.utcDateMillis),
-                ZoneId.of("Europe/Rome")
-            )
-            "ORE " + local.format(DateTimeFormatter.ofPattern("HH:mm"))
-        }
+        else -> null
     }
 }

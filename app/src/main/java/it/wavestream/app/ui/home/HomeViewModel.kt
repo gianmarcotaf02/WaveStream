@@ -300,11 +300,14 @@ class HomeViewModel @Inject constructor(
             serieAKickoffLabel(match, serieAMatchRepository.adjustedNow())
         },
         genres = buildString {
-            append("Serie A • Giornata ${match.matchday ?: "-"}")
-            append(" • ORE " + java.time.ZonedDateTime.ofInstant(
+            // Data + ora di inizio (ora italiana) + stadio
+            val local = java.time.ZonedDateTime.ofInstant(
                 java.time.Instant.ofEpochMilli(match.utcDateMillis),
                 java.time.ZoneId.of("Europe/Rome")
-            ).format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")))
+            )
+            val date = local.format(java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", java.util.Locale.ITALY))
+                .replaceFirstChar { it.uppercase() }
+            append("$date • ${local.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))}")
             SerieATeamColors.stadiumForTla(match.homeTla)?.let { append(" • $it") }
         }
     )
