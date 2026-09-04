@@ -1026,7 +1026,7 @@ private fun PlayButton(
                 scaleY = scale
             }
             .width(IntrinsicSize.Min)
-            .widthIn(min = 120.dp)
+            .widthIn(min = 260.dp)  // TEST: larghezza aumentata per verificare eventuale clipping del testo
             .height(52.dp)
             .border(3.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
