@@ -55,8 +55,8 @@ fun SerieAMatchHeroBackdrop(
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
-            val slashBottomX = w * 0.65f   // punto di arrivo in basso
-            val slashTopX = w * 0.95f      // punto di arrivo in alto
+            val slashBottomX = w * 0.62f   // punto di arrivo in basso
+            val slashTopX = w * 0.80f      // punto di arrivo in alto — passa fra i due crest
 
             // Quadrilatero casa (a sinistra della slash) e ospite (a destra)
             val homePath = Path().apply {
@@ -78,6 +78,29 @@ fun SerieAMatchHeroBackdrop(
             drawLine(Color.White.copy(alpha = 0.10f), a, b, strokeWidth = h * 0.085f, cap = StrokeCap.Butt)
             drawLine(Color.White.copy(alpha = 0.22f), a, b, strokeWidth = h * 0.045f, cap = StrokeCap.Butt)
             drawLine(Color.White.copy(alpha = 0.95f), a, b, strokeWidth = h * 0.016f, cap = StrokeCap.Butt)
+        }
+
+        // Punteggio grande, centrato sulla slash (stile grafica broadcast)
+        if (match.homeScore != null && match.awayScore != null) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = "${match.homeScore} - ${match.awayScore}",
+                    color = Color.White,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 46.sp,
+                    letterSpacing = 2.sp,
+                    style = LocalTextStyle.current.copy(
+                        shadow = Shadow(
+                            color = Color.Black.copy(alpha = 0.6f),
+                            offset = Offset(0f, 3f),
+                            blurRadius = 12f
+                        )
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .offset(x = maxWidth * 0.615f)
+                )
+            }
         }
 
         // Crest delle due squadre sulla zona visibile (destra)

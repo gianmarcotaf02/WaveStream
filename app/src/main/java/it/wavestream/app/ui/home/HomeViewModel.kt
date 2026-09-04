@@ -294,7 +294,8 @@ class HomeViewModel @Inject constructor(
         progressPercent = null,
         year = null,
         duration = if (match.isLive && match.homeScore != null && match.awayScore != null) {
-            "${match.homeScore} - ${match.awayScore}"
+            // Punteggio mostrato grande al centro del backdrop — niente duplicato qui
+            null
         } else {
             serieAKickoffLabel(match, serieAMatchRepository.adjustedNow())
         },
