@@ -97,6 +97,10 @@ import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.CarouselRow
 import it.wavestream.app.ui.home.HeroItem
 import it.wavestream.app.ui.home.HomeScreenState
+import it.wavestream.app.ui.home.SerieAMatchHeroBackdrop
+import it.wavestream.app.ui.home.SerieAMatchLiveBadge
+import it.wavestream.app.ui.home.serieAKickoffLabel
+import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.ui.home.PosterCard
 import it.wavestream.app.ui.theme.WaveStreamColors
 import kotlinx.coroutines.delay
@@ -556,7 +560,7 @@ private fun TvHomeScreenContent(
             val coroutineScope = rememberCoroutineScope()
             val heroPlayButtonFocusRequester = remember { FocusRequester() }
             
-            val hasHero = state.heroItems.isNotEmpty() && !state.isListsTab && !state.isHistoryTab
+            val hasHero = (state.heroItems.isNotEmpty() || state.serieAMatchHero != null) && !state.isListsTab && !state.isHistoryTab
 
             // Single sealed class for hero focus state - avoids triple mutableStateOf thrash
             var heroFocusState by remember { mutableStateOf<HeroFocusState>(HeroFocusState.None) }
@@ -586,7 +590,13 @@ private fun TvHomeScreenContent(
                 if (hasHero) {
                     val firstHeroId = state.heroItems.firstOrNull()?.id ?: 0
                     item(key = "hero_banner_$firstHeroId") {
-                        val currentHero = state.heroItems.getOrNull(state.currentHeroIndex)
+                        // La rotazione include la slide Serie A (sempre prima, se presente)
+                        val allHeroes = remember(state.heroItems, state.serieAMatchHero) {
+                            listOfNotNull(state.serieAMatchHero) + state.heroItems
+                        }
+                        val currentHero = allHeroes.getOrNull(
+                            ((state.currentHeroIndex % allHeroes.size) + allHeroes.size) % allHeroes.size
+                        )
                         currentHero?.let { hero ->
                             // Track Hero focus state and handle UP/DOWN navigation
                             Box(
@@ -622,7 +632,8 @@ private fun TvHomeScreenContent(
                                 HeroBanner(
                                     heroItem = hero,
                                     currentIndex = state.currentHeroIndex,
-                                    totalCount = state.heroItems.size,
+                                    totalCount = allHeroes.size,
+                                    serieAMatch = state.serieAMatch,
                                     isContinueWatching = state.isContinueWatchingHero,
                                     onPlayClick = { onHeroPlayClick(hero) },
                                     onInfoClick = { clickedHero -> onHeroClick(clickedHero) },
@@ -819,6 +830,7 @@ fun HeroBanner(
     heroItem: HeroItem,
     currentIndex: Int,
     totalCount: Int,
+    serieAMatch: SerieAMatchEntity? = null,
     isContinueWatching: Boolean,
     onPlayClick: () -> Unit,
     onInfoClick: (HeroItem) -> Unit,

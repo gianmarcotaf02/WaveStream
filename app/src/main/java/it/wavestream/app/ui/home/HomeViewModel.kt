@@ -194,6 +194,115 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    // =================== SERIE A LIVE HERO ===================
+
+    private var serieAUpcoming: List<SerieAMatchEntity> = emptyList()
+    private var serieAPollingJob: Job? = null
+
+    /**
+     * Sync del calendario + osservazione dei match vicino alla finestra hero.
+     * Un ticker ogni 30s rivaluta la finestra (kickoff - 30 min → + 3h) così
+     * l'hero appare/scompare al momento giusto e le label restano fresche.
+     * Mentre un match è in finestra, ri-sync ogni 2 min (stato live/punteggio).
+     */
+    private fun startSerieAHeroSync() {
+        viewModelScope.launch {
+            runCatching { serieAMatchRepository.syncIfStale() }
+            serieAMatchRepository.observeHeroMatches().collect { list ->
+                serieAUpcoming = list
+                refreshSerieAHero()
+            }
+        }
+        viewModelScope.launch {
+            while (true) {
+                delay(30_000L)
+                refreshSerieAHero()
+            }
+        }
+    }
+
+    private fun refreshSerieAHero() {
+        val now = System.currentTimeMillis()
+        val match = serieAUpcoming
+            .filter { it.isInHeroWindow(now) }
+            .sortedWith(
+                compareByDescending<SerieAMatchEntity> { it.isLive }
+                    .thenBy { it.utcDateMillis }
+            )
+            .firstOrNull()
+        _uiState.update { s ->
+            s.copy(
+                serieAMatch = match,
+                serieAMatchHero = match?.let { serieAHeroItem(it) }
+            )
+        }
+        manageSerieAPolling(match != null)
+    }
+
+    /** Mentre un match è in finestra hero, ri-sync ogni 2 minuti. */
+    private fun manageSerieAPolling(active: Boolean) {
+        if (active) {
+            if (serieAPollingJob?.isActive != true) {
+                serieAPollingJob = viewModelScope.launch {
+                    while (isActive) {
+                        delay(2 * 60 * 1000L)
+                        runCatching { serieAMatchRepository.syncMatches() }
+                    }
+                }
+            }
+        } else {
+            serieAPollingJob?.cancel()
+            serieAPollingJob = null
+        }
+    }
+
+    /** HeroItem sintetico per la slide del match (contentType = "SERIEA_MATCH"). */
+    private fun serieAHeroItem(match: SerieAMatchEntity): HeroItem = HeroItem(
+        id = 7_000_000_000L + (match.id % 1_000_000_000L),
+        title = "${match.homeShortName.uppercase()} - ${match.awayShortName.uppercase()}",
+        backdropUrl = null,
+        posterUrl = match.homeCrest,
+        contentType = "SERIEA_MATCH",
+        overview = null,
+        cast = null,
+        imdbRating = null,
+        rottenTomatoesScore = null,
+        audienceScore = null,
+        metacriticScore = null,
+        tmdbRating = null,
+        resumeMinutes = null,
+        progressPercent = null,
+        year = null,
+        duration = if (match.isLive && match.homeScore != null && match.awayScore != null) {
+            "${match.homeScore} - ${match.awayScore}"
+        } else {
+            serieAKickoffLabel(match)
+        },
+        genres = "Serie A • Giornata ${match.matchday ?: "-"}"
+    )
+
+    /** Apre il dialog dei canali che trasmettono il match (matching per alias squadre). */
+    fun openSerieAChannelPicker() {
+        val match = _uiState.value.serieAMatch ?: return
+        _uiState.update {
+            it.copy(serieAChannelPicker = SerieAChannelPickerState(match, emptyList(), isLoading = true))
+        }
+        viewModelScope.launch {
+            val channels = runCatching { serieAMatchRepository.findChannelsForMatch(match) }
+                .getOrDefault(emptyList())
+            _uiState.update { s ->
+                s.copy(serieAChannelPicker = s.serieAChannelPicker?.copy(
+                    channels = channels,
+                    isLoading = false
+                ))
+            }
+        }
+    }
+
+    fun dismissSerieAChannelPicker() {
+        _uiState.update { it.copy(serieAChannelPicker = null) }
+    }
+
     /**
      * Remove WatchProgress entries that reference movies/series that no longer exist
      * This happens when playlists are reimported and content gets new IDs
@@ -235,6 +344,7 @@ class HomeViewModel @Inject constructor(
      * A full reload only happens if the carousel cache has expired.
      */
     fun forceRefresh() {
+        refreshSerieAHero()
         val contentType = currentContentType
         Log.d("HomeViewModel", "Soft refresh for $contentType")
         
