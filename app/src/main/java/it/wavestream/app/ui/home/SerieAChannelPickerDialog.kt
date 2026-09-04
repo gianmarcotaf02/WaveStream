@@ -9,7 +9,6 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -19,9 +18,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -54,8 +52,9 @@ import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 /**
- * Dialog with the grid of playlist channels that broadcast the match
- * (matched via team-name aliases). D-pad navigable, click → player.
+ * Dialog with the playlist channels that broadcast the match (matched via
+ * team-name aliases), grouped by category with visible category headers.
+ * D-pad navigable, click → player.
  */
 @Composable
 fun SerieAChannelPickerDialog(
@@ -66,6 +65,14 @@ fun SerieAChannelPickerDialog(
     onChannelClick: (Channel) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Channels grouped by category, categories sorted alphabetically
+    val grouped: List<Pair<String, List<Channel>>> = remember(channels) {
+        channels
+            .groupBy { it.category?.trim()?.takeUnless { c -> c.isEmpty() } ?: "Altri canali" }
+            .map { (category, chans) -> category to chans.sortedBy { it.name.lowercase() } }
+            .sortedBy { it.first.lowercase() }
+    }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -131,7 +138,7 @@ fun SerieAChannelPickerDialog(
                         )
                     }
                 }
-                channels.isEmpty() -> {
+                grouped.isEmpty() -> {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             "Nessun canale trovato per questa partita nella tua playlist",
@@ -142,26 +149,73 @@ fun SerieAChannelPickerDialog(
                 }
                 else -> {
                     val firstFocusRequester = remember { FocusRequester() }
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = 220.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        contentPadding = PaddingValues(bottom = 16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        items(channels, key = { it.id }) { channel ->
-                            val isFirst = channels.firstOrNull()?.id == channel.id
-                            ChannelPickCard(
-                                channel = channel,
-                                modifier = if (isFirst) {
-                                    Modifier.focusRequester(firstFocusRequester)
-                                } else Modifier
-                            ) {
-                                onChannelClick(channel)
+                        grouped.forEach { (category, chans) ->
+                            // Category header
+                            item(key = "header_$category") {
+                                Column {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Text(
+                                            text = category.uppercase(),
+                                            style = MaterialTheme.typography.titleSmall,
+                                            color = WaveStreamColors.Accent,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 2.sp
+                                        )
+                                        Text(
+                                            text = "(${chans.size})",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = WaveStreamColors.TextSecondary
+                                        )
+                                    }
+                                    Spacer(Modifier.height(4.dp))
+                                    Box(
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .height(1.dp)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                    )
+                                }
+                            }
+                            // Channel cards, 2 per row
+                            item(key = "grid_$category") {
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    chans.chunked(2).forEach { rowChans ->
+                                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                            rowChans.forEachIndexed { index, channel ->
+                                                val isFirstOverall =
+                                                    category === grouped.first().first &&
+                                                        rowChans === chans.take(2) && index == 0
+                                                Box(Modifier.weight(1f)) {
+                                                    ChannelPickCard(
+                                                        channel = channel,
+                                                        modifier = if (isFirstOverall) {
+                                                            Modifier.focusRequester(firstFocusRequester)
+                                                        } else {
+                                                            Modifier
+                                                        }
+                                                    ) {
+                                                        onChannelClick(channel)
+                                                    }
+                                                }
+                                            }
+                                            // Pad incomplete rows so cards keep equal width
+                                            repeat(2 - rowChans.size) {
+                                                Spacer(Modifier.weight(1f))
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
-                    // Request focus once the grid is laid out
+                    // Request focus once the first card is laid out
                     Box(
                         Modifier
                             .size(1.dp)
