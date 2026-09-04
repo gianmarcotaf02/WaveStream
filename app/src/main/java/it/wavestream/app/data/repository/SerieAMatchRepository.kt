@@ -71,14 +71,15 @@ class SerieAMatchRepository @Inject constructor(
     }
 
     /**
-     * All matches currently inside their hero window (kickoff - 30 min → + 3h),
-     * live ones first, then by kickoff time. Simultaneous matches → multiple heroes.
+     * Tutte le partite delle prossime 24h (e delle 3h precedenti), ordinate per kickoff.
+     * Il filtro della finestra hero (kickoff - 30 min → + 3h) lo fa il ViewModel
+     * con un ticker, così l'hero appare/scompare anche senza nuove emissioni dal DB.
      */
     fun observeHeroMatches(): Flow<List<SerieAMatchEntity>> {
         val now = System.currentTimeMillis()
         return serieAMatchDao.observeWindow(
             from = now - SerieAMatchEntity.HERO_WINDOW_AFTER_MILLIS,
-            to = now + SerieAMatchEntity.HERO_WINDOW_BEFORE_MILLIS + HERO_MARGIN
+            to = now + 24L * 60 * 60 * 1000
         )
     }
 
@@ -129,8 +130,5 @@ class SerieAMatchRepository @Inject constructor(
         private val ITALY_ZONE: ZoneId = ZoneId.of("Europe/Rome")
         private val API_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
         private const val DEFAULT_SYNC_INTERVAL_MILLIS = 4L * 60 * 60 * 1000 // 4 hours
-
-        /** Extra margin so "next match" queries don't miss matches just outside the window. */
-        private const val HERO_MARGIN = 6L * 60 * 60 * 1000
     }
 }
