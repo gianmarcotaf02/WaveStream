@@ -98,6 +98,7 @@ object NetworkModule {
     /** OkHttp dedicato a Sofascore: Cloudflare richiede gli header browser. */
     @Provides
     @Singleton
+    @javax.inject.Named("sofascore")
     fun provideSofascoreOkHttpClient(): OkHttpClient {
         val browserInterceptor = Interceptor { chain ->
             chain.proceed(
