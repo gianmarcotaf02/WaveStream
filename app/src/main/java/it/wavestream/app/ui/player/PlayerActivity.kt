@@ -19,10 +19,13 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.DefaultLivePlaybackSpeedControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.SeekParameters
+import androidx.media3.exoplayer.source.hls.HlsMediaSource
 import androidx.media3.session.MediaSession
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.cache.NetworkMonitor
@@ -447,21 +450,64 @@ class PlayerActivity : ComponentActivity() {
             .setBufferDurationsMs(
                 if (isLive) 1_000 else 15_000,      // minBuffer (1s per zapping rapido)
                 if (isLive) 8_000 else 30_000,      // maxBuffer (8s: latenza bassa senza stutter)
-                if (isLive) 500 else 2_500,         // bufferForPlayback (avvio quasi immediato)
-                if (isLive) 1_000 else 5_000        // bufferForPlaybackAfterRebuffer
+                if (isLive) 800 else 2_500,         // bufferForPlayback (800ms: avvio rapido ma senza stutter su stream deboli)
+                if (isLive) 1_500 else 5_000        // bufferForPlaybackAfterRebuffer (più stabilità post-rebuffer)
             )
             .setPrioritizeTimeOverSizeThresholds(true)
             .setBackBuffer(10_000, true) // Keep last 10s for back-skip without re-downloading
             .build()
 
-        // Custom HTTP DataSource with optimized timeouts and keep-alive
-        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-            .setConnectTimeoutMs(if (isLive) 10_000 else 15_000)
-            .setReadTimeoutMs(if (isLive) 15_000 else 20_000)
+        // OkHttp DataSource: connection pooling + keep-alive RIUSATI tra segmenti HLS e
+        // cambi canale (zapping più rapido: niente nuovo handshake DNS/TLS a ogni canale),
+        // redirect cross-protocol (http↔https) gestiti nativamente — con
+        // DefaultHttpDataSource i canali dietro redirect spesso non partivano
+        val streamingHttpClient = okhttp3.OkHttpClient.Builder()
+            .connectTimeout(if (isLive) 10_000 else 15_000, java.util.concurrent.TimeUnit.MILLISECONDS)
+            .readTimeout(if (isLive) 15_000 else 20_000, java.util.concurrent.TimeUnit.MILLISECONDS)
+            .retryOnConnectionFailure(true)
+            .connectionPool(okhttp3.ConnectionPool(6, 5, java.util.concurrent.TimeUnit.MINUTES))
+            .build()
+        val httpDataSourceFactory = OkHttpDataSource.Factory(streamingHttpClient)
             .setUserAgent("WaveStream/1.0")
 
         val dataSourceFactory = DefaultDataSource.Factory(this, httpDataSourceFactory)
-        val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory)
+
+        // Factory "live-aware": sui canali HLS (.m3u8) usa chunkless preparation
+        // (avvio senza scaricare prima l'intera playlist media), il resto invariato
+        val hlsFactory = HlsMediaSource.Factory(dataSourceFactory)
+            .setAllowChunklessPreparation(true)
+        val delegateFactory = DefaultMediaSourceFactory(dataSourceFactory)
+        val mediaSourceFactory = object : MediaSource.Factory {
+            override fun setDrmSessionManagerProvider(
+                drmSessionManagerProvider: androidx.media3.exoplayer.drm.DrmSessionManagerProvider?
+            ): MediaSource.Factory {
+                hlsFactory.setDrmSessionManagerProvider(drmSessionManagerProvider)
+                delegateFactory.setDrmSessionManagerProvider(drmSessionManagerProvider)
+                return this
+            }
+
+            override fun setLoadErrorHandlingPolicy(
+                loadErrorHandlingPolicy: androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy?
+            ): MediaSource.Factory {
+                hlsFactory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy)
+                delegateFactory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy)
+                return this
+            }
+
+            override fun createMediaSource(mediaItem: MediaItem): MediaSource {
+                val url = mediaItem.localConfiguration?.uri?.toString().orEmpty()
+                return if (isLive && url.contains(".m3u8")) {
+                    hlsFactory.createMediaSource(mediaItem)
+                } else {
+                    delegateFactory.createMediaSource(mediaItem)
+                }
+            }
+
+            override fun getSupportedTypes(): IntArray = intArrayOf(
+                androidx.media3.common.C.CONTENT_TYPE_HLS,
+                androidx.media3.common.C.CONTENT_TYPE_OTHER
+            )
+        }
 
         // Explicit HW decoder configuration for better TV compatibility
         val renderersFactory = DefaultRenderersFactory(this)
@@ -472,6 +518,17 @@ class PlayerActivity : ComponentActivity() {
             .setLoadControl(loadControl)
             .setMediaSourceFactory(mediaSourceFactory)
             .setHandleAudioBecomingNoisy(true)
+            // Live catch-up: dopo un buffering il player accelera leggermente (0.98-1.04x)
+            // per tornare al bordo live invece di restare indietro per sempre
+            .setLivePlaybackSpeedControl(
+                DefaultLivePlaybackSpeedControl.Builder()
+                    .setFallbackMinPlaybackSpeed(0.98f)
+                    .setFallbackMaxPlaybackSpeed(1.04f)
+                    .build()
+            )
+            // Seek su TS: salta direttamente al keyframe più vicino (istantaneo) invece
+            // del seek esatto che richiede ri-decodifica — solo per i live
+            .setSeekParameters(if (isLive) SeekParameters.CLOSEST_SYNC else SeekParameters.DEFAULT)
             .build()
         
         player.addListener(object : Player.Listener {

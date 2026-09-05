@@ -116,6 +116,7 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.ui.leanback)
     implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.media3.datasource.okhttp)
 
     // Room
     implementation(libs.androidx.room.runtime)
