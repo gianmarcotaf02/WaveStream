@@ -354,28 +354,24 @@ private fun IncidentColumn(
     incidents: List<SofascoreIncident>,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    // Column non-lazy compatta: tutto visibile senza scroll (D-pad non scorre
+    // i LazyColumn di questo dialog)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = modifier
     ) {
-        item(key = "team_$teamName") {
-            Text(
-                text = teamName.uppercase(),
-                style = MaterialTheme.typography.titleSmall,
-                color = WaveStreamColors.Accent,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 2.sp
-            )
-        }
-        if (incidents.isEmpty()) {
-            item(key = "empty_$teamName") {
-                Text("—", color = WaveStreamColors.TextSecondary)
-            }
-        }
-        // Ordina per minuto (null in fondo)
+        Text(
+            text = teamName.uppercase(),
+            style = MaterialTheme.typography.titleSmall,
+            color = WaveStreamColors.Accent,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp
+        )
         val sorted = incidents.sortedBy { it.time ?: 999 }
-        items(sorted.size, key = { "${teamName}_$it" }) { index ->
-            val incident = sorted[index]
+        if (sorted.isEmpty()) {
+            Text("—", color = WaveStreamColors.TextSecondary, fontSize = 13.sp)
+        }
+        sorted.forEach { incident ->
             when (incident.incidentType) {
                 "goal" -> GoalRow(incident)
                 "card" -> CardRow(incident)
@@ -533,44 +529,48 @@ private fun LineupColumn(
     val starters = players.filter { it.substitute != true }
     val subs = players.filter { it.substitute == true }
 
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = modifier
-    ) {
-        item(key = "${teamName}_head") {
-            Column {
-                Text(
-                    text = teamName.uppercase(),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = WaveStreamColors.Accent,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 2.sp
-                )
-                formation?.let {
-                    Text(
-                        text = "Modulo $it",
-                        color = WaveStreamColors.TextSecondary,
-                        fontSize = 13.sp
-                    )
+    // Column non-lazy compatta: titolari su 2 sotto-colonne, panchina come testo
+    // riunito — tutta la formazione visibile senza scroll (D-pad non scorre
+    // i LazyColumn di questo dialog)
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier) {
+        Text(
+            text = teamName.uppercase(),
+            style = MaterialTheme.typography.titleSmall,
+            color = WaveStreamColors.Accent,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp
+        )
+        formation?.let {
+            Text(
+                text = "Modulo $it",
+                color = WaveStreamColors.TextSecondary,
+                fontSize = 12.sp
+            )
+        }
+        Spacer(Modifier.height(2.dp))
+        SectionLabel("TITOLARI")
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            starters.chunked((starters.size + 1) / 2).forEach { chunk ->
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    chunk.forEach { p ->
+                        PlayerRow(shirt = p.shirtNumber, name = p.player?.name.orEmpty())
+                    }
                 }
-                Spacer(Modifier.height(4.dp))
             }
-        }
-        item(key = "${teamName}_starters_header") {
-            SectionLabel("TITOLARI")
-        }
-        items(starters.size, key = { "${teamName}_s_$it" }) { index ->
-            val p = starters[index]
-            PlayerRow(shirt = p.shirtNumber, name = p.player?.name.orEmpty())
         }
         if (subs.isNotEmpty()) {
-            item(key = "${teamName}_subs_header") {
-                SectionLabel("PANCHINA")
-            }
-            items(subs.size, key = { "${teamName}_b_$it" }) { index ->
-                val p = subs[index]
-                PlayerRow(shirt = p.shirtNumber, name = p.player?.name.orEmpty(), dimmed = true)
-            }
+            Spacer(Modifier.height(4.dp))
+            SectionLabel("PANCHINA")
+            Text(
+                text = subs.mapNotNull { p ->
+                    p.player?.name?.let { name -> p.shirtNumber?.let { "$it. $name" } ?: name }
+                }.joinToString(" • "),
+                color = WaveStreamColors.TextSecondary,
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -579,19 +579,19 @@ private fun LineupColumn(
 private fun PlayerRow(shirt: Int?, name: String, dimmed: Boolean = false) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
             text = shirt?.toString() ?: "·",
-            color = if (dimmed) WaveStreamColors.TextTertiary else WaveStreamColors.AccentGold,
-            fontSize = 13.sp,
+            color = WaveStreamColors.AccentGold,
+            fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.width(24.dp)
+            modifier = Modifier.width(20.dp)
         )
         Text(
             text = name,
-            color = if (dimmed) WaveStreamColors.TextSecondary else Color.White,
-            fontSize = 14.sp,
+            color = Color.White,
+            fontSize = 13.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
