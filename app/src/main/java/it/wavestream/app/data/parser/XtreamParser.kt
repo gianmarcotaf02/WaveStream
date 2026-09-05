@@ -67,17 +67,43 @@ class XtreamParser @Inject constructor() {
                 }
             }
             Log.d(TAG, "parseLiveStreams: JSON array length=${array.length()}, jsonSize=${json.length}")
-            (0 until array.length()).map { i ->
+            var sampled = 0
+            val result = (0 until array.length()).mapNotNull { i ->
                 val obj = array.getJSONObject(i)
+                val name = obj.optString("name", "")
+
+                // Filter out category delimiters (e.g. "=== SPORT ===", "- - - - - -"),
+                // fake "streams" inserted as separators. They never carry a logo and only
+                // inflate the "channel without cover" count.
+                if (isCategoryDelimiter(name)) return@mapNotNull null
+
+                // Debug: log raw logo-ish fields for the first few real streams so we can
+                // see exactly which field (and format) the provider actually sends.
+                if (sampled < 3) {
+                    sampled++
+                    Log.d(TAG, "LIVE[$i] raw fields: stream_icon='${obj.optString("stream_icon", "")}' logo='${obj.optString("logo", "")}' icon='${obj.optString("icon", "")}' cover='${obj.optString("cover", "")}' stream_image='${obj.optString("stream_image", "")}' image='${obj.optString("image", "")}' name='$name'")
+                }
+
+                // Try multiple fields for the logo (different panels use different names).
+                // stream_icon is the Xtream standard, the rest are common aliases.
+                val logoUrl = obj.optString("stream_icon", "").takeIf { it.isNotEmpty() }
+                    ?: obj.optString("logo", "").takeIf { it.isNotEmpty() }
+                    ?: obj.optString("icon", "").takeIf { it.isNotEmpty() }
+                    ?: obj.optString("stream_image", "").takeIf { it.isNotEmpty() }
+                    ?: obj.optString("image", "").takeIf { it.isNotEmpty() }
+
                 XtreamStream(
                     id = obj.optInt("stream_id", 0),
-                    name = obj.optString("name", ""),
-                    logo = obj.optString("stream_icon", "").takeIf { it.isNotEmpty() },
+                    name = name,
+                    logo = logoUrl,
                     epgId = obj.optString("epg_channel_id", "").takeIf { it.isNotEmpty() },
                     categoryId = obj.optString("category_id", "").takeIf { it.isNotEmpty() },
                     hasArchive = obj.optInt("tv_archive", 0)
                 )
             }
+            val withLogo = result.count { it.logo != null }
+            Log.d(TAG, "parseLiveStreams: result=${result.size} streams (filtered ${array.length() - result.size} delimiters), withLogo=$withLogo, withoutLogo=${result.size - withLogo}")
+            result
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing live streams: ${e.javaClass.simpleName}: ${e.message?.take(200)}")
             emptyList()
