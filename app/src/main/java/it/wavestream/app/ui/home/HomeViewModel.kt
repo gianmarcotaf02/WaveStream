@@ -299,12 +299,9 @@ class HomeViewModel @Inject constructor(
         resumeMinutes = null,
         progressPercent = null,
         year = null,
-        duration = if (match.isLive && match.homeScore != null && match.awayScore != null) {
-            // Punteggio mostrato grande al centro del backdrop — niente duplicato qui
-            null
-        } else {
-            serieAKickoffLabel(match, serieAMatchRepository.adjustedNow())
-        },
+        // Punteggio live: grande al centro del backdrop. Countdown: solo nello slot
+        // in alto (hero duration null per non duplicarlo nella riga meta).
+        duration = null,
         genres = buildString {
             // Data + ora di inizio (ora italiana) + stadio
             val local = java.time.ZonedDateTime.ofInstant(

@@ -66,6 +66,7 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .cache(cache)
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(it.wavestream.app.util.ServerClockInterceptor())
             .addNetworkInterceptor(tmdbCacheInterceptor)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -114,6 +115,7 @@ object NetworkModule {
         }
         return OkHttpClient.Builder()
             .addInterceptor(browserInterceptor)
+            .addInterceptor(it.wavestream.app.util.ServerClockInterceptor())
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .build()

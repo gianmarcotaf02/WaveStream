@@ -38,17 +38,8 @@ class SerieAMatchRepository @Inject constructor(
     private val channelDao: ChannelDao
 ) {
 
-    /**
-     * Differenza (server - dispositivo) in millisecondi, misurata dall'header HTTP
-     * `Date` dell'ultima risposta di football-data.org. Molti TV box hanno l'orologio
-     * o il timezone sballati: tutte le valutazioni di finestra usano il tempo corretto
-     * [adjustedNow] invece di System.currentTimeMillis().
-     */
-    @Volatile
-    private var clockOffsetMillis: Long = 0L
-
-    /** Tempo corretto secondo il server API. */
-    fun adjustedNow(): Long = System.currentTimeMillis() + clockOffsetMillis
+    /** Tempo corretto col server (ServerClock, alimentato da tutti i client HTTP). */
+    fun adjustedNow(): Long = it.wavestream.app.util.ServerClock.now()
 
     // =================== SOFASCORE (punteggi live rapidi) ===================
 
@@ -184,17 +175,6 @@ class SerieAMatchRepository @Inject constructor(
             dateFrom = dateFrom,
             dateTo = dateTo
         )
-
-        // Auto-correzione orologio dispositivo dal server (header HTTP Date)
-        response.headers()["Date"]?.let { dateHeader ->
-            runCatching {
-                val serverMillis = java.time.ZonedDateTime
-                    .parse(dateHeader, java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME)
-                    .toInstant().toEpochMilli()
-                clockOffsetMillis = serverMillis - System.currentTimeMillis()
-                android.util.Log.d("SerieA", "Clock offset vs server: ${clockOffsetMillis / 1000}s")
-            }
-        }
         val dto = response.body()
             ?: throw IllegalStateException("football-data.org: empty response (code ${response.code()})")
         val matches = dto.matches.orEmpty().map { it.toEntity() }
