@@ -96,3 +96,59 @@ data class SofascoreScore(
     val current: Int? = null,
     val display: Int? = null
 )
+
+// ========== Incidents (tabellino) ==========
+
+@JsonClass(generateAdapter = true)
+data class SofascoreIncidentsResponse(
+    val incidents: List<SofascoreIncident> = emptyList()
+)
+
+/**
+ * incidentType: "goal" / "card" / "substitution" / "period" / "injuryTime" / "varDecision".
+ * cardType (solo per "card"): "yellow" / "red" / "yellowRed".
+ * incidentClass per i goal: "regular" / "penalty" / "ownGoal".
+ */
+@JsonClass(generateAdapter = true)
+data class SofascoreIncident(
+    @Json(name = "incidentType") val incidentType: String? = null,
+    val time: Int? = null,
+    @Json(name = "isHome") val isHome: Boolean? = null,
+    val player: SofascorePerson? = null,
+    @Json(name = "playerIn") val playerIn: SofascorePerson? = null,
+    @Json(name = "playerOut") val playerOut: SofascorePerson? = null,
+    @Json(name = "cardType") val cardType: String? = null,
+    @Json(name = "homeScore") val homeScore: Int? = null,
+    @Json(name = "awayScore") val awayScore: Int? = null,
+    @Json(name = "incidentClass") val incidentClass: String? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class SofascorePerson(
+    val id: Long? = null,
+    val name: String? = null
+)
+
+// ========== Lineups (formazioni ufficiali) ==========
+
+@JsonClass(generateAdapter = true)
+data class SofascoreLineupsResponse(
+    val confirmed: Boolean? = null,
+    val home: SofascoreTeamLineup? = null,
+    val away: SofascoreTeamLineup? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class SofascoreTeamLineup(
+    val players: List<SofascoreLineupPlayer> = emptyList(),
+    val formation: String? = null,
+    val coach: SofascorePerson? = null
+)
+
+@JsonClass(generateAdapter = true)
+data class SofascoreLineupPlayer(
+    val player: SofascorePerson? = null,
+    @Json(name = "shirtNumber") val shirtNumber: Int? = null,
+    val position: String? = null,
+    val substitute: Boolean? = null
+)
