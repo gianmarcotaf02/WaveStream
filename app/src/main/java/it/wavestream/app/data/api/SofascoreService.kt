@@ -120,7 +120,9 @@ data class SofascoreIncident(
     @Json(name = "cardType") val cardType: String? = null,
     @Json(name = "homeScore") val homeScore: Int? = null,
     @Json(name = "awayScore") val awayScore: Int? = null,
-    @Json(name = "incidentClass") val incidentClass: String? = null
+    @Json(name = "incidentClass") val incidentClass: String? = null,
+    val assist1: SofascorePerson? = null,
+    val text: String? = null
 )
 
 @JsonClass(generateAdapter = true)

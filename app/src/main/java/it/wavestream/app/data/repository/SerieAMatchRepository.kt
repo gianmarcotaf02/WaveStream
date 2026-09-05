@@ -150,7 +150,7 @@ class SerieAMatchRepository @Inject constructor(
             ?: throw IllegalStateException("Nessun evento Sofascore per il match ${match.id}")
 
         val incidents = sofascoreService.getIncidents(resolvedEventId).incidents
-            .filter { it.incidentType in listOf("goal", "card", "substitution") }
+            .filter { it.incidentType in listOf("goal", "card", "substitution", "period") }
 
         val lineups = runCatching { sofascoreService.getLineups(resolvedEventId) }.getOrNull()
 
