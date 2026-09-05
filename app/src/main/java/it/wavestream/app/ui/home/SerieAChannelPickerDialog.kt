@@ -155,7 +155,7 @@ fun SerieAChannelPickerDialog(
                         fontWeight = FontWeight.Black
                     )
                 }
-                CloseButton(onDismiss)
+                CloseButton(onDismiss, modifier = Modifier.align(Alignment.TopEnd))
             }
 
             Spacer(Modifier.height(16.dp))
@@ -643,13 +643,15 @@ private fun CenterMessage(message: String) {
 }
 
 @Composable
-private fun CloseButton(onDismiss: () -> Unit) {
+private fun CloseButton(
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .align(Alignment.TopEnd)
+        modifier = modifier
             .padding(16.dp)
             .size(44.dp)
             .graphicsLayer {
