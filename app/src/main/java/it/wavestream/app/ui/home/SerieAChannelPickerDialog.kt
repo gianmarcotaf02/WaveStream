@@ -147,29 +147,40 @@ fun SerieAChannelPickerDialog(
                             )
                         )
                 )
-                // Titolo partita in basso a sx
-                Column(
+                // Titolo partita in basso a sx: logo Serie A + testo
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(start = 28.dp, bottom = 10.dp)
                 ) {
-                    if (match.isLive) {
-                        SerieAMatchLiveBadge()
-                        Spacer(Modifier.height(2.dp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_serie_a_logo),
+                        contentDescription = "Serie A",
+                        modifier = Modifier
+                            .height(58.dp)
+                            .align(Alignment.Bottom)
+                    )
+                    Column {
+                        if (match.isLive) {
+                            SerieAMatchLiveBadge()
+                            Spacer(Modifier.height(2.dp))
+                        }
+                        Text(
+                            text = "Serie A • Giornata ${match.matchday ?: "-"}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 2.sp
+                        )
+                        Text(
+                            text = "${match.homeShortName.uppercase()} - ${match.awayShortName.uppercase()}",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White,
+                            fontWeight = FontWeight.Black
+                        )
                     }
-                    Text(
-                        text = "Serie A • Giornata ${match.matchday ?: "-"}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 2.sp
-                    )
-                    Text(
-                        text = "${match.homeShortName.uppercase()} - ${match.awayShortName.uppercase()}",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
-                        fontWeight = FontWeight.Black
-                    )
                 }
                 CloseButton(onDismiss, modifier = Modifier.align(Alignment.TopEnd))
             }
