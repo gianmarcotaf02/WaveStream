@@ -1181,6 +1181,19 @@ fun HeroBanner(
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
+
+                        // Punteggio live/finito sotto data e orario (solo hero partita)
+                        if (hero.contentType == "SERIEA_MATCH" && serieAMatch != null &&
+                            serieAMatch.homeScore != null && serieAMatch.awayScore != null
+                        ) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "${serieAMatch.homeScore} - ${serieAMatch.awayScore}",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
                         
                         // Overview with "Leggi di più" - Limited width for readability
                         hero.overview?.let { overview ->

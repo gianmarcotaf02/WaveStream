@@ -84,25 +84,6 @@ fun SerieAMatchHeroBackdrop(
             drawLine(Color.White.copy(alpha = 0.95f), a, b, strokeWidth = h * 0.016f, cap = StrokeCap.Butt)
         }
 
-        // Punteggio: pill scura centrata sulla slash, stile score bug da diretta TV
-        if (match.homeScore != null && match.awayScore != null) {
-            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = "${match.homeScore} - ${match.awayScore}",
-                    color = Color.White,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 40.sp,
-                    letterSpacing = 2.sp,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .offset(x = maxWidth * 0.21f)
-                        .background(Color.Black.copy(alpha = 0.45f), RoundedCornerShape(14.dp))
-                        .padding(horizontal = 20.dp, vertical = 6.dp)
-                )
-            }
-        }
-
         // Crest delle due squadre sulla zona visibile (destra)
         Row(
             modifier = Modifier
