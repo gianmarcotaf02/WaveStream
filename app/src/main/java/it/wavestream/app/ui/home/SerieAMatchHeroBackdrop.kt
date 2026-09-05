@@ -72,6 +72,22 @@ fun SerieAMatchHeroBackdrop(
             drawPath(homePath, Brush.verticalGradient(listOf(homeTop, homeBottom)))
             drawPath(awayPath, Brush.verticalGradient(listOf(awayTop, awayBottom)))
 
+            // Gradiente Serie A da sinistra verso il centro: bilancia la composizione
+            // (blu Serie A → colore squadra di casa), così nessuna zona resta scura
+            drawRect(
+                brush = Brush.horizontalGradient(
+                    colorStops = arrayOf(
+                        0f to Color(0xFF04184A),
+                        0.28f to Color(0xFF0B54B4).copy(alpha = 0.85f),
+                        0.45f to Color.Transparent
+                    ),
+                    startX = 0f,
+                    endX = w * 0.45f
+                ),
+                topLeft = Offset.Zero,
+                size = androidx.compose.ui.geometry.Size(w * 0.45f, h)
+            )
+
             // Slash bianco, sfumato con tratti sovrapposti
             val a = Offset(slashBottomX, h)
             val b = Offset(slashTopX, 0f)
