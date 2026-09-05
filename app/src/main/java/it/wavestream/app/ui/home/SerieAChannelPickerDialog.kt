@@ -75,6 +75,22 @@ data class SerieATabellinoState(
     val error: Boolean = false
 )
 
+/** Categorie canali da escludere (canali DAZN di altri paesi). */
+private val COUNTRY_WORDS = listOf(
+    "germania", "spagna", "francia", "inghilterra", "england", "portogallo",
+    "olanda", "belgio", "turchia", "grecia", "svizzera", "austria",
+    "danimarca", "svezia", "norvegia", "finlandia", "polonia", "croazia",
+    "serbia", "romania", "bulgaria", "ungheria", "usa", "argentina",
+    "brasile", "giappone", "cina", "india", "marocco", "algeria", "tunisia",
+    "egitto", "world", "mundial"
+)
+
+/** true se la categoria è un canale DAZN italiano (esclude DAZN di altri paesi). */
+private fun isItalianDaznCategory(category: String): Boolean {
+    val c = category.lowercase()
+    return c.contains("dazn") && COUNTRY_WORDS.none { c.contains(it) }
+}
+
 private enum class SerieAMatchTab(val label: String) {
     CANALI("Canali"),
     TABELLINO("Tabellino"),
@@ -108,11 +124,11 @@ fun SerieAChannelPickerDialog(
                 .background(WaveStreamColors.BackgroundDark)
                 .padding(24.dp)
         ) {
-            // ===== Header: backdrop hero + close =====
+            // ===== Header: backdrop hero + close (compatto) =====
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(230.dp)
+                    .height(140.dp)
                     .clip(RoundedCornerShape(24.dp))
             ) {
                 SerieAMatchHeroBackdrop(
@@ -135,22 +151,22 @@ fun SerieAChannelPickerDialog(
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(start = 28.dp, bottom = 16.dp)
+                        .padding(start = 28.dp, bottom = 10.dp)
                 ) {
                     if (match.isLive) {
                         SerieAMatchLiveBadge()
-                        Spacer(Modifier.height(4.dp))
+                        Spacer(Modifier.height(2.dp))
                     }
                     Text(
                         text = "Serie A • Giornata ${match.matchday ?: "-"}",
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.85f),
                         fontWeight = FontWeight.SemiBold,
                         letterSpacing = 2.sp
                     )
                     Text(
                         text = "${match.homeShortName.uppercase()} - ${match.awayShortName.uppercase()}",
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.titleLarge,
                         color = Color.White,
                         fontWeight = FontWeight.Black
                     )
@@ -208,6 +224,7 @@ private fun ChannelsTab(
         channels
             .groupBy { it.category?.trim()?.takeUnless { c -> c.isEmpty() } ?: "Altri canali" }
             .map { (category, chans) -> category to chans.sortedBy { it.name.lowercase() } }
+            .filter { (category, _) -> isItalianDaznCategory(category) }
             .sortedBy { it.first.lowercase() }
     }
 
