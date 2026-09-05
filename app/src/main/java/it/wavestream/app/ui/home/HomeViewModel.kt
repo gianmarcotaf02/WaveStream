@@ -68,7 +68,7 @@ class HomeViewModel @Inject constructor(
         private const val CAROUSEL_CACHE_DURATION = 10 * 24 * 60 * 60 * 1000L // 10 days - carousel order stays stable
 
         /** DEBUG: mostra l'hero partita sempre (partita più vicina, anche fuori finestra). */
-        private const val FORCE_SERIEA_HERO_DEBUG = true
+        private const val FORCE_SERIEA_HERO_DEBUG = false
     }
 
     private val _uiState = MutableStateFlow(HomeScreenState())

@@ -169,50 +169,6 @@ class LoadingActivity : ComponentActivity() {
         }
     }
     
-    /**
-     * PROBE TEMPORANEA: verifica se l'API pubblica di Sofascore (usata in SandTV)
-     * è raggiungibile da Android — Cloudflare blocca i client desktop ma il
-     * fingerprint di OkHttp da mobile potrebbe passare. Risultato in logcat tag
-     * "SofascoreProbe". Da rimuovere (o trasformare in integrazione) dopo il test.
-     */
-    private fun probeSofascore() {
-        applicationScope.launch(Dispatchers.IO) {
-            val hosts = listOf(
-                "https://api.sofascore.com/api/v1/",
-                "https://api.sofascore.app/api/v1/"
-            )
-            val client = okhttp3.OkHttpClient.Builder()
-                .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .readTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
-                .addInterceptor { chain ->
-                    chain.proceed(
-                        chain.request().newBuilder()
-                            .header(
-                                "User-Agent",
-                                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                            )
-                            .header("Referer", "https://www.sofascore.com/")
-                            .header("Accept", "application/json")
-                            .build()
-                    )
-                }
-                .build()
-            hosts.forEach { host ->
-                try {
-                    val request = okhttp3.Request.Builder()
-                        .url(host + "unique-tournament/23/seasons")
-                        .build()
-                    client.newCall(request).execute().use { response ->
-                        val snippet = response.body?.string().orEmpty().take(200)
-                        Log.d("SofascoreProbe", "$host → HTTP ${response.code} | $snippet")
-                    }
-                } catch (e: Exception) {
-                    Log.e("SofascoreProbe", "$host → ${e.message}")
-                }
-            }
-        }
-    }
-
     private fun startLoading(
         forceRefresh: Boolean = false,
         onStateUpdate: (LoadingState) -> Unit
@@ -276,7 +232,6 @@ class LoadingActivity : ComponentActivity() {
                     // Primi score rapidi da Sofascore (calendario di base già in DB)
                     runCatching { serieAMatchRepository.refreshLiveScoresFromSofascore() }
                 }
-                probeSofascore()
                 
                 // Invalida la cache di sessione solo se i dati sono effettivamente cambiati
                 if (refreshedAny || forceRefresh) {
