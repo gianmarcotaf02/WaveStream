@@ -155,7 +155,7 @@ fun SerieAChannelPickerDialog(
                         .align(Alignment.BottomStart)
                         .padding(start = 28.dp, bottom = 10.dp)
                 ) {
-                    Icon(
+                    androidx.compose.foundation.Image(
                         painter = painterResource(id = R.drawable.ic_serie_a_logo),
                         contentDescription = "Serie A",
                         modifier = Modifier
