@@ -1,6 +1,8 @@
 package it.wavestream.app.data.repository
 
 import it.wavestream.app.data.api.FootballDataService
+import it.wavestream.app.data.api.SofascoreIncident
+import it.wavestream.app.data.api.SofascoreLineupPlayer
 import it.wavestream.app.data.api.FootballMatchDto
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.dao.SerieAMatchDao
@@ -52,6 +54,9 @@ class SerieAMatchRepository @Inject constructor(
 
     private var sofascoreSeasonId: Long? = null
 
+    /** football-data match id → Sofascore event id (popolato dai poll live, in memoria). */
+    private val sofascoreEventIds = java.util.concurrent.ConcurrentHashMap<Long, Long>()
+
     /**
      * Aggiorna score e stato delle partite in DB con gli eventi Sofascore del round
      * corrente (goal quasi in tempo reale, molto più veloci del free tier di
@@ -85,6 +90,8 @@ class SerieAMatchRepository @Inject constructor(
                 SerieATeamAliases.channelMatchesTeam(e.homeTeam?.name.orEmpty(), homeAliases) &&
                     SerieATeamAliases.channelMatchesTeam(e.awayTeam?.name.orEmpty(), awayAliases)
             } ?: return@forEach
+
+            sofascoreEventIds[match.id] = event.id
 
             val newStatus = mapSofascoreStatus(event.status?.type)
             val newHome = event.homeScore?.current
@@ -130,6 +137,37 @@ class SerieAMatchRepository @Inject constructor(
         "canceled" -> "CANCELLED"
         "suspended" -> "SUSPENDED"
         else -> null
+    }
+
+    // =================== TABELLINO (incidents + lineups) ===================
+
+    /**
+     * Tabellino della partita da Sofascore: gol, cartellini, sostituzioni +
+     * formazioni ufficiali. Richiede che l'event id sia noto: se in memoria non
+     * c'è (es. processo ricreato), riprova con un refresh live.
+     */
+    suspend fun getMatchTabellino(match: SerieAMatchEntity): Result<SerieATabellino> = runCatching {
+        var eventId = sofascoreEventIds[match.id]
+        if (eventId == null) {
+            refreshLiveScoresFromSofascore()
+            eventId = sofascoreEventIds[match.id]
+        }
+        val resolvedEventId = eventId
+            ?: throw IllegalStateException("Nessun evento Sofascore per il match ${match.id}")
+
+        val incidents = sofascoreService.getIncidents(resolvedEventId).incidents
+            .filter { it.incidentType in listOf("goal", "card", "substitution") }
+
+        val lineups = runCatching { sofascoreService.getLineups(resolvedEventId) }.getOrNull()
+
+        SerieATabellino(
+            incidents = incidents,
+            homeFormation = lineups?.home?.formation,
+            awayFormation = lineups?.away?.formation,
+            homePlayers = lineups?.home?.players.orEmpty(),
+            awayPlayers = lineups?.away?.players.orEmpty(),
+            lineupsConfirmed = lineups?.confirmed == true
+        )
     }
 
     /**
@@ -216,7 +254,22 @@ class SerieAMatchRepository @Inject constructor(
             .sortedBy { it.name.lowercase() }
     }
 
-    // ========== Helpers ==========
+    // ========== Tabellino (UI model) ==========
+
+/**
+ * Tabellino della partita per il match center dell'hero: incidenti (gol,
+ * cartellini, sostituzioni) + formazioni ufficiali.
+ */
+data class SerieATabellino(
+    val incidents: List<SofascoreIncident>,
+    val homeFormation: String?,
+    val awayFormation: String?,
+    val homePlayers: List<SofascoreLineupPlayer>,
+    val awayPlayers: List<SofascoreLineupPlayer>,
+    val lineupsConfirmed: Boolean
+)
+
+// ========== Helpers ==========
 
     private fun FootballMatchDto.toEntity(): SerieAMatchEntity {
         val kickoffMillis = runCatching {
