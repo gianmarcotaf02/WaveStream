@@ -31,6 +31,14 @@ interface SofascoreService {
         @Path("seasonId") seasonId: Long,
         @Path("round") round: Int
     ): SofascoreEventsResponse
+
+    /** Tabellino: gol, cartellini, sostituzioni (per minuto). */
+    @GET("event/{eventId}/incidents")
+    suspend fun getIncidents(@Path("eventId") eventId: Long): SofascoreIncidentsResponse
+
+    /** Formazioni ufficiali. */
+    @GET("event/{eventId}/lineups")
+    suspend fun getLineups(@Path("eventId") eventId: Long): SofascoreLineupsResponse
 }
 
 // ========== Response Models ==========

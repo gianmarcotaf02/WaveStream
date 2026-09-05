@@ -632,18 +632,6 @@ private fun LiveButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    // Pulse del pallino quando si è sul live
-    val pulse = rememberInfiniteTransition(label = "livePulse")
-    val dotAlpha by pulse.animateFloat(
-        initialValue = 0.45f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(900, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "dotAlpha"
-    )
-
     val backgroundColor by animateColorAsState(
         targetValue = when {
             isFocused && !isAtLiveEdge -> LiveRed
