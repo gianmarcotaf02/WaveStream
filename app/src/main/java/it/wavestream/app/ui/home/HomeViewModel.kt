@@ -3111,15 +3111,17 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Load series with new episodes added this week (SERIES tab only)
+     * Load series with recent new episodes (SERIES tab only).
+     * "Nuovo episodio" solo se l'episodio è stato inserito in playlist
+     * entro massimo 8 giorni prima della data attuale.
      */
     private suspend fun loadNewEpisodesThisWeek(limit: Int = 10): List<CarouselItem>? {
         return withContext(Dispatchers.IO) {
             try {
-                val oneWeekAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+                val cutoff = System.currentTimeMillis() - (8L * 24 * 60 * 60 * 1000)
                 val series = seriesDao.getRecentlyAddedSeries(50)
                     .filter { s ->
-                        val isRecent = s.latestEpisodeAddedAt != null && s.latestEpisodeAddedAt > oneWeekAgo
+                        val isRecent = s.latestEpisodeAddedAt != null && s.latestEpisodeAddedAt >= cutoff
                         isRecent && !ContentFilters.isHiddenSeriesName(s.name)
                     }
                     .take(limit)
