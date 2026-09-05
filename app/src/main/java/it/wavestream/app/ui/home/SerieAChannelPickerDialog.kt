@@ -363,8 +363,8 @@ private fun TabellinoTab(
 private fun PeriodHeader(incident: SofascoreIncident) {
     val lower = incident.text?.lowercase().orEmpty()
     val text = when {
-        lower.contains("half") && lower.contains("1") -> "1° TEMPO"
-        lower.contains("half") && lower.contains("2") -> "2° TEMPO"
+        lower.contains("half") && (lower.contains("1") || lower.contains("first")) -> "1° TEMPO"
+        lower.contains("half") && (lower.contains("2") || lower.contains("second")) -> "2° TEMPO"
         lower == "ht" -> "INTERVALLO"
         lower == "ft" -> "FINE PARTITA"
         else -> incident.text ?: ""
@@ -473,14 +473,14 @@ private fun EventContent(incident: SofascoreIncident, alignment: Alignment.Horiz
                             }
                         }
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
+                        Image(
                             painter = painterResource(id = R.drawable.ic_goal),
                             contentDescription = "Gol",
                             modifier = Modifier.size(20.dp)
                         )
                     } else {
                         // Away: icona → nome
-                        Icon(
+                        Image(
                             painter = painterResource(id = R.drawable.ic_goal),
                             contentDescription = "Gol",
                             modifier = Modifier.size(20.dp)
@@ -521,13 +521,13 @@ private fun EventContent(incident: SofascoreIncident, alignment: Alignment.Horiz
                             color = Color.White
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
+                        Image(
                             painter = painterResource(id = iconRes),
                             contentDescription = "Cartellino",
                             modifier = Modifier.size(18.dp)
                         )
                     } else {
-                        Icon(
+                        Image(
                             painter = painterResource(id = iconRes),
                             contentDescription = "Cartellino",
                             modifier = Modifier.size(18.dp)
@@ -556,13 +556,13 @@ private fun EventContent(incident: SofascoreIncident, alignment: Alignment.Horiz
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
+                        Image(
                             painter = painterResource(id = R.drawable.ic_substitution),
                             contentDescription = "Cambio",
                             modifier = Modifier.size(20.dp)
                         )
                     } else {
-                        Icon(
+                        Image(
                             painter = painterResource(id = R.drawable.ic_substitution),
                             contentDescription = "Cambio",
                             modifier = Modifier.size(20.dp)
