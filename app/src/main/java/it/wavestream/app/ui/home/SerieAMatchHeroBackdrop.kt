@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -47,7 +48,9 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun SerieAMatchHeroBackdrop(
     match: SerieAMatchEntity,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    crestSpacing: Dp = 56.dp,
+    crestEndPadding: Dp = 72.dp
 ) {
     Box(modifier) {
         // Split diagonale + slash. La diagonale è più inclinata (verticale) rispetto
@@ -100,8 +103,8 @@ fun SerieAMatchHeroBackdrop(
         Row(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 72.dp),
-            horizontalArrangement = Arrangement.spacedBy(56.dp),
+                .padding(end = crestEndPadding),
+            horizontalArrangement = Arrangement.spacedBy(crestSpacing),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(

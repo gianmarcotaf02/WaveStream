@@ -135,7 +135,10 @@ fun SerieAChannelPickerDialog(
             ) {
                 SerieAMatchHeroBackdrop(
                     match = match,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    // Stemmi più distanziati: lo stemma di casa va più a sx,
+                    // lontano dalla slash
+                    crestSpacing = 110.dp
                 )
                 // Fade in basso verso lo sfondo del dialog
                 Box(
