@@ -3,6 +3,7 @@ package it.wavestream.app.ui.player
 import android.os.Build
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,9 +30,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import it.wavestream.app.R
@@ -71,6 +76,9 @@ fun TvPlayerScreen(
     onSeekCancel: () -> Unit,
     onSubtitles: () -> Unit,
     onBack: () -> Unit,
+    isLiveChannel: Boolean = false,
+    isAtLiveEdge: Boolean = true,
+    onReturnToLive: () -> Unit = {},
     onRestart: () -> Unit = {},
     nextEpisode: NextEpisodeInfo? = null,
     onPlayNext: () -> Unit = {},
@@ -177,6 +185,9 @@ fun TvPlayerScreen(
                 isLoading = isLoading,
                 onPlayPause = onPlayPause,
                 onBack = onBack,
+                isLiveChannel = isLiveChannel,
+                isAtLiveEdge = isAtLiveEdge,
+                onReturnToLive = onReturnToLive,
                 onRestart = onRestart,
                 onSubtitles = onSubtitles,
                 cumulativeSeekSeconds = cumulativeSeekSeconds, // Pass cumulative seconds
@@ -324,6 +335,9 @@ private fun ModernPlayerControls(
     isLoading: Boolean,
     onPlayPause: () -> Unit,
     onBack: () -> Unit,
+    isLiveChannel: Boolean,
+    isAtLiveEdge: Boolean,
+    onReturnToLive: () -> Unit,
     onRestart: () -> Unit,
     onSubtitles: () -> Unit,
     cumulativeSeekSeconds: Int,
@@ -420,8 +434,17 @@ private fun ModernPlayerControls(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Restart Button (Bottom Left) - Expands on focus
-                RestartButton(onClick = onRestart)
+                // Live button (solo canali live): badge LIVE sul diretto,
+                // bottone rosso "Torna al live" quando si è dietro al diretto
+                if (isLiveChannel) {
+                    LiveButton(
+                        isAtLiveEdge = isAtLiveEdge,
+                        onClick = onReturnToLive
+                    )
+                } else {
+                    // Restart Button (Bottom Left) - Expands on focus
+                    RestartButton(onClick = onRestart)
+                }
 
                 // Play/Pause button (LEFT - Netflix style)
                 if (!isLoading) {
@@ -457,14 +480,28 @@ private fun ModernPlayerControls(
                     modifier = Modifier.weight(1f)
                 )
                 
-                // Duration / Remaining time
-                val remaining = duration - displayPosition
-                Text(
-                    text = "${formatTime(duration)} / -${formatTime(remaining.coerceAtLeast(0))}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontWeight = FontWeight.Medium
-                )
+                // Duration / Remaining time (per i live: badge LIVE o offset dal diretto)
+                if (isLiveChannel) {
+                    if (isAtLiveEdge) {
+                        LiveEdgeBadge()
+                    } else {
+                        val remaining = duration - displayPosition
+                        Text(
+                            text = "-${formatTime(remaining.coerceAtLeast(0))}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                } else {
+                    val remaining = duration - displayPosition
+                    Text(
+                        text = "${formatTime(duration)} / -${formatTime(remaining.coerceAtLeast(0))}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -572,6 +609,197 @@ private fun RestartButton(onClick: () -> Unit) {
                 color = Color.White,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1
+            )
+        }
+    }
+}
+
+/**
+ * Colore rosso "broadcast" usato per l'identità LIVE (come Sky/DAZN)
+ */
+private val LiveRed = Color(0xFFE8112D)
+
+/**
+ * Live button:
+ * - Sul diretto: badge non focusable con pallino rosso che pulsa
+ * - Dietro al diretto: bottone attivo che su focus espande "Torna al live"
+ */
+@Composable
+private fun LiveButton(
+    isAtLiveEdge: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    // Pulse del pallino quando si è sul live
+    val pulse = rememberInfiniteTransition(label = "livePulse")
+    val dotAlpha by pulse.animateFloat(
+        initialValue = 0.45f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "dotAlpha"
+    )
+
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            isFocused && !isAtLiveEdge -> LiveRed
+            isAtLiveEdge -> Color.Transparent
+            else -> Color.White.copy(alpha = 0.2f)
+        },
+        label = "liveBg"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.05f else 1f,
+        label = "scale"
+    )
+
+    Row(
+        modifier = Modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .height(48.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(backgroundColor)
+            .then(
+                if (isAtLiveEdge) {
+                    // Sul live: solo indicatore, non ruba il focus al D-pad
+                    Modifier
+                } else {
+                    Modifier
+                        .focusable(interactionSource = interactionSource)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null,
+                            onClick = onClick
+                        )
+                }
+            )
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .animateContentSize(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        LiveIcon(
+            tint = LiveRed,
+            pulsing = isAtLiveEdge,
+            modifier = Modifier.size(24.dp)
+        )
+
+        if (!isAtLiveEdge && isFocused) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Torna al live",
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/**
+ * Badge "LIVE" mostrato accanto alla barra quando si è sul diretto
+ */
+@Composable
+private fun LiveEdgeBadge() {
+    val pulse = rememberInfiniteTransition(label = "liveBadge")
+    val alpha by pulse.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        LiveIcon(
+            tint = LiveRed,
+            pulsing = true,
+            modifier = Modifier
+                .size(18.dp)
+                .graphicsLayer { this.alpha = alpha }
+        )
+        Text(
+            text = "LIVE",
+            style = MaterialTheme.typography.labelLarge,
+            color = LiveRed,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+    }
+}
+
+/**
+ * Icona "live" (pallino con archi di diffusione, stile broadcast)
+ * disegnata via Canvas per non dipendere da drawable
+ */
+@Composable
+private fun LiveIcon(
+    tint: Color,
+    pulsing: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val pulse = rememberInfiniteTransition(label = "liveIcon")
+    val arcAlpha by pulse.animateFloat(
+        initialValue = 0.5f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(900, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "arcAlpha"
+    )
+
+    Canvas(modifier = modifier) {
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val stroke = Stroke(width = size.width * 0.11f, cap = StrokeCap.Round)
+
+        // Pallino centrale
+        drawCircle(
+            color = tint,
+            radius = size.width * 0.15f,
+            center = center
+        )
+
+        // Due archi per lato (destra e sinistra)
+        listOf(0.30f, 0.46f).forEach { radiusFactor ->
+            val radius = size.width * radiusFactor
+            val topLeft = Offset(center.x - radius, center.y - radius)
+            val arcSize = Size(radius * 2f, radius * 2f)
+            val alpha = if (pulsing) arcAlpha else 1f
+
+            // Arco destro
+            drawArc(
+                color = tint.copy(alpha = alpha),
+                startAngle = -55f,
+                sweepAngle = 110f,
+                useCenter = false,
+                topLeft = topLeft,
+                size = arcSize,
+                style = stroke
+            )
+            // Arco sinistro
+            drawArc(
+                color = tint.copy(alpha = alpha),
+                startAngle = 125f,
+                sweepAngle = 110f,
+                useCenter = false,
+                topLeft = topLeft,
+                size = arcSize,
+                style = stroke
             )
         }
     }

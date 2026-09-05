@@ -90,6 +90,10 @@ class PlayerActivity : ComponentActivity() {
     private val _hasNextEpisode = mutableStateOf(false)
     private val _hasPreviousEpisode = mutableStateOf(false)
     private val _controlsVisible = mutableStateOf(true)
+
+    // Live/DVR state (solo canali live) - timeshift stile Sky/DAZN
+    private val _isLive = mutableStateOf(false)
+    private val _isAtLiveEdge = mutableStateOf(true)
     
     // Seek state management - prevents reset during hold-to-seek
     private var isSeekingForward = false
@@ -113,6 +117,9 @@ class PlayerActivity : ComponentActivity() {
     private val FIRST_RETRY_DELAY_MS = 3000L
     private val MAX_RETRY_DELAY_MS = 30000L
     
+    // Sotto questa soglia (ms) si considera il player "sul live"
+    private val LIVE_EDGE_THRESHOLD_MS = 5_000L
+
     private fun calculateRetryDelay(attempt: Int): Long {
         return (FIRST_RETRY_DELAY_MS + (attempt.toLong() * attempt * 500L))
             .coerceAtMost(MAX_RETRY_DELAY_MS)
@@ -395,6 +402,9 @@ class PlayerActivity : ComponentActivity() {
                     hasNextEpisode = hasNextEpisode,
                     hasPreviousEpisode = hasPreviousEpisode,
                     onPlayPrevious = { playPreviousEpisode() },
+                    isLiveChannel = contentType == ContentType.CHANNEL,
+                    isAtLiveEdge = _isAtLiveEdge.value,
+                    onReturnToLive = { returnToLive() },
                     cumulativeSeekSeconds = cumulativeSeekSeconds,
                     seekIndicatorVisible = seekIndicatorVisible,
                     showStillWatching = remember { _showStillWatching }.value,
@@ -466,6 +476,7 @@ class PlayerActivity : ComponentActivity() {
                         bufferingHandler.removeCallbacks(bufferingTimeoutRunnable) // Cancel timeout
                         bufferingRetryCount = 0  // Reset retry counter on successful playback
                         updateAudioTracks()  // Populate audio tracks when ready
+                        if (contentType == ContentType.CHANNEL) updateLiveState()
                     }
                     Player.STATE_ENDED, Player.STATE_IDLE -> {
                          bufferingHandler.removeCallbacks(bufferingTimeoutRunnable) // Cancel timeout
@@ -612,10 +623,57 @@ class PlayerActivity : ComponentActivity() {
     }
     
     /**
+     * Aggiorna lo stato live/DVR del canale (sul live o dietro al diretto)
+     */
+    private fun updateLiveState() {
+        if (!::player.isInitialized) return
+        _isLive.value = player.isCurrentMediaItemLive || player.duration == androidx.media3.common.C.TIME_UNSET
+        val behindLiveMs = if (player.duration > 0) {
+            player.duration - player.currentPosition
+        } else {
+            player.currentLiveOffset
+        }
+        _isAtLiveEdge.value = behindLiveMs < LIVE_EDGE_THRESHOLD_MS
+    }
+
+    /**
+     * Torna al bordo del live (solo canali live) - stile Sky/DAZN
+     */
+    private fun returnToLive() {
+        resetAutoPlayCounter()
+        if (!::player.isInitialized) return
+        android.util.Log.d("PlayerActivity", "Returning to live edge")
+        player.seekToDefaultPosition()
+        player.play()
+        _isAtLiveEdge.value = true
+        if (player.duration > 0) {
+            _currentPosition.longValue = player.duration
+        }
+    }
+
+    /**
+     * Limite superiore del seek per i live: il bordo del diretto
+     */
+    private fun liveSeekMaxMs(): Long {
+        return if (player.duration > 0) player.duration else player.currentPosition
+    }
+
+    /**
      * Simple seek by milliseconds (for media keys)
      */
     private fun seekBy(ms: Long) {
         resetAutoPlayCounter()
+        if (contentType == ContentType.CHANNEL) {
+            updateLiveState()
+            val target = player.currentPosition + ms
+            if (target >= liveSeekMaxMs() - 2_000) {
+                // Oltre il bordo del live: torna al diretto
+                returnToLive()
+            } else {
+                player.seekTo(target.coerceAtLeast(0))
+            }
+            return
+        }
         val newPosition = (player.currentPosition + ms).coerceIn(0, player.duration.coerceAtLeast(0))
         player.seekTo(newPosition)
     }
@@ -663,6 +721,13 @@ class PlayerActivity : ComponentActivity() {
                 (currentPos + offsetMs).coerceAtLeast(0)
             }
             
+            // Live: non si può andare oltre il diretto (stile Sky/DAZN)
+            if (contentType == ContentType.CHANNEL && newPosition >= liveSeekMaxMs() - 2_000) {
+                returnToLive()
+                cancelSeek()
+                return
+            }
+            
             android.util.Log.d("PlayerActivity", "Confirming seek: current=$currentPos, offset=$offsetMs, new=$newPosition")
             
             // Optimistic UI update for instant feedback
@@ -690,6 +755,9 @@ class PlayerActivity : ComponentActivity() {
     private fun startProgressUpdates() {
         progressHandler.post(object : Runnable {
             override fun run() {
+                if (contentType == ContentType.CHANNEL) {
+                    updateLiveState()
+                }
                 if (player.duration > 0) {
                     _currentPosition.longValue = player.currentPosition
                     _duration.longValue = player.duration
