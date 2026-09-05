@@ -68,16 +68,12 @@ class XtreamParser @Inject constructor() {
             }
             Log.d(TAG, "parseLiveStreams: JSON array length=${array.length()}, jsonSize=${json.length}")
             var sampled = 0
-            val result = (0 until array.length()).mapNotNull { i ->
+            val noLogoSamples = mutableListOf<String>()
+            val result = (0 until array.length()).map { i ->
                 val obj = array.getJSONObject(i)
                 val name = obj.optString("name", "")
 
-                // Filter out category delimiters (e.g. "=== SPORT ===", "- - - - - -"),
-                // fake "streams" inserted as separators. They never carry a logo and only
-                // inflate the "channel without cover" count.
-                if (isCategoryDelimiter(name)) return@mapNotNull null
-
-                // Debug: log raw logo-ish fields for the first few real streams so we can
+                // Debug: log raw logo-ish fields for the first few streams so we can
                 // see exactly which field (and format) the provider actually sends.
                 if (sampled < 3) {
                     sampled++
@@ -92,6 +88,12 @@ class XtreamParser @Inject constructor() {
                     ?: obj.optString("stream_image", "").takeIf { it.isNotEmpty() }
                     ?: obj.optString("image", "").takeIf { it.isNotEmpty() }
 
+                // Capture a few no-logo entries to understand why the provider omits them
+                // (name variants? genuinely missing icon? different field?).
+                if (logoUrl == null && noLogoSamples.size < 5) {
+                    noLogoSamples.add("[$i] name='$name' stream_icon='${obj.optString("stream_icon", "")}' logo='${obj.optString("logo", "")}' icon='${obj.optString("icon", "")}' cover='${obj.optString("cover", "")}'")
+                }
+
                 XtreamStream(
                     id = obj.optInt("stream_id", 0),
                     name = name,
@@ -102,7 +104,10 @@ class XtreamParser @Inject constructor() {
                 )
             }
             val withLogo = result.count { it.logo != null }
-            Log.d(TAG, "parseLiveStreams: result=${result.size} streams (filtered ${array.length() - result.size} delimiters), withLogo=$withLogo, withoutLogo=${result.size - withLogo}")
+            Log.d(TAG, "parseLiveStreams: result=${result.size} streams, withLogo=$withLogo, withoutLogo=${result.size - withLogo}")
+            if (noLogoSamples.isNotEmpty()) {
+                Log.d(TAG, "parseLiveStreams: no-logo samples -> " + noLogoSamples.joinToString(" | "))
+            }
             result
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing live streams: ${e.javaClass.simpleName}: ${e.message?.take(200)}")
