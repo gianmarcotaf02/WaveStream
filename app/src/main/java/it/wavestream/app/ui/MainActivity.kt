@@ -604,6 +604,7 @@ private fun MainActivityScreen(
                 match = picker.match,
                 channels = picker.channels,
                 isLoading = picker.isLoading,
+                tabellinoState = homeState.serieATabellino,
                 onDismiss = { homeViewModel.dismissSerieAChannelPicker() },
                 onChannelClick = { channel ->
                     homeViewModel.dismissSerieAChannelPicker()
