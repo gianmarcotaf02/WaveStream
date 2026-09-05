@@ -49,11 +49,17 @@ object SerieATeamAliases {
             aliasesForTeam(awayTla, awayShortName)
     }
 
-    private fun aliasesForTeam(tla: String?, shortName: String): List<String> {
+    /**
+     * Alias di una singola squadra (pubblico, usato anche per il matching
+     * degli eventi Sofascore con le partite football-data).
+     */
+    fun teamAliases(tla: String?, shortName: String): List<String> {
         val fromTla = tla?.let { TLA_ALIASES[it.trim().uppercase()] }
         val fromShortName = normalize(shortName).takeIf { it.isNotBlank() }
         return ((fromTla ?: emptyList()) + listOfNotNull(fromShortName)).distinct()
     }
+
+    private fun aliasesForTeam(tla: String?, shortName: String): List<String> = teamAliases(tla, shortName)
 
     /**
      * True if the channel name contains at least one alias of the teams

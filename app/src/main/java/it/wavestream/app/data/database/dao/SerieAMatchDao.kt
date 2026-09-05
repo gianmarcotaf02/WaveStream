@@ -16,6 +16,9 @@ interface SerieAMatchDao {
     @Query("SELECT * FROM serie_a_matches WHERE utcDateMillis >= :from AND utcDateMillis <= :to ORDER BY utcDateMillis")
     fun observeWindow(from: Long, to: Long): Flow<List<SerieAMatchEntity>>
 
+    @Query("SELECT * FROM serie_a_matches WHERE utcDateMillis >= :from AND utcDateMillis <= :to ORDER BY utcDateMillis")
+    suspend fun getWindowList(from: Long, to: Long): List<SerieAMatchEntity>>
+
     @Query("SELECT * FROM serie_a_matches WHERE id = :id")
     suspend fun getById(id: Long): SerieAMatchEntity?
 
