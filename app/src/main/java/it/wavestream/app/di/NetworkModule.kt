@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import it.wavestream.app.data.api.FootballDataService
+import it.wavestream.app.data.api.SofascoreService
 import it.wavestream.app.data.api.TMDBApiService
 import okhttp3.Cache
 import okhttp3.CacheControl
@@ -92,5 +93,39 @@ object NetworkModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(FootballDataService::class.java)
+    }
+
+    /** OkHttp dedicato a Sofascore: Cloudflare richiede gli header browser. */
+    @Provides
+    @Singleton
+    fun provideSofascoreOkHttpClient(): OkHttpClient {
+        val browserInterceptor = Interceptor { chain ->
+            chain.proceed(
+                chain.request().newBuilder()
+                    .header(
+                        "User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                    )
+                    .header("Referer", "https://www.sofascore.com/")
+                    .header("Accept", "application/json")
+                    .build()
+            )
+        }
+        return OkHttpClient.Builder()
+            .addInterceptor(browserInterceptor)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSofascoreService(moshi: Moshi, @javax.inject.Named("sofascore") client: OkHttpClient): SofascoreService {
+        return Retrofit.Builder()
+            .baseUrl(SofascoreService.BASE_URL)
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(SofascoreService::class.java)
     }
 }

@@ -31,6 +31,7 @@ import javax.inject.Singleton
 @Singleton
 class SerieAMatchRepository @Inject constructor(
     private val footballDataService: FootballDataService,
+    private val sofascoreService: it.wavestream.app.data.api.SofascoreService,
     private val serieAMatchDao: SerieAMatchDao,
     private val channelDao: ChannelDao
 ) {
@@ -46,6 +47,90 @@ class SerieAMatchRepository @Inject constructor(
 
     /** Tempo corretto secondo il server API. */
     fun adjustedNow(): Long = System.currentTimeMillis() + clockOffsetMillis
+
+    // =================== SOFASCORE (punteggi live rapidi) ===================
+
+    private var sofascoreSeasonId: Long? = null
+
+    /**
+     * Aggiorna score e stato delle partite in DB con gli eventi Sofascore del round
+     * corrente (goal quasi in tempo reale, molto più veloci del free tier di
+     * football-data.org). Il calendario di base resta su football-data: qui si
+     * aggiornano SOLO score, stato e lastUpdated delle partite già presenti.
+     * @return true se Sofascore ha risposto (anche con 0 modifiche), false altrimenti.
+     */
+    suspend fun refreshLiveScoresFromSofascore(): Boolean = runCatching {
+        val seasonId = sofascoreSeasonId ?: fetchSofascoreSeasonId()
+        val now = adjustedNow()
+
+        val rows = serieAMatchDao.getWindowList(
+            from = now - 12L * 60 * 60 * 1000,
+            to = now + 5L * 24 * 60 * 60 * 1000
+        )
+        // Round corrente: quello di una partita live, altrimenti la giornata più vicina
+        val round = rows.filter { it.matchday != null }
+            .let { list ->
+                list.firstOrNull { it.isLive }?.matchday
+                    ?: list.filter { it.utcDateMillis >= now - 12L * 60 * 60 * 1000 }
+                        .minOfOrNull { it.matchday!! }
+            } ?: return@runCatching false
+
+        val events = sofascoreService.getRoundEvents(seasonId = seasonId, round = round).events
+        var updated = 0
+
+        rows.filter { it.matchday == round }.forEach { match ->
+            val homeAliases = SerieATeamAliases.teamAliases(match.homeTla, match.homeShortName)
+            val awayAliases = SerieATeamAliases.teamAliases(match.awayTla, match.awayShortName)
+            val event = events.firstOrNull { e ->
+                SerieATeamAliases.channelMatchesTeam(e.homeTeam?.name.orEmpty(), homeAliases) &&
+                    SerieATeamAliases.channelMatchesTeam(e.awayTeam?.name.orEmpty(), awayAliases)
+            } ?: return@forEach
+
+            val newStatus = mapSofascoreStatus(event.status?.type)
+            val newHome = event.homeScore?.current
+            val newAway = event.awayScore?.current
+            val changed = (newStatus != null && newStatus != match.status) ||
+                (newHome != null && newHome != match.homeScore) ||
+                (newAway != null && newAway != match.awayScore)
+            if (changed) {
+                serieAMatchDao.upsertAll(
+                    listOf(
+                        match.copy(
+                            status = newStatus ?: match.status,
+                            homeScore = newHome ?: match.homeScore,
+                            awayScore = newAway ?: match.awayScore,
+                            lastUpdated = System.currentTimeMillis()
+                        )
+                    )
+                )
+                updated++
+            }
+        }
+        Log.d(
+            "SerieA",
+            "Sofascore: round $round, ${events.size} events, $updated rows updated"
+        )
+        true
+    }.getOrDefault(false)
+
+    private suspend fun fetchSofascoreSeasonId(): Long {
+        val id = runCatching {
+            sofascoreService.getSeasons().seasons.firstOrNull()?.id
+        }.getOrNull() ?: 95836L // 2026/27
+        sofascoreSeasonId = id
+        Log.d("SerieA", "Sofascore season id: $id")
+        return id
+    }
+
+    private fun mapSofascoreStatus(type: String?): String? = when (type) {
+        "notstarted" -> "TIMED"
+        "inprogress" -> "IN_PLAY"
+        "finished" -> "FINISHED"
+        "postponed" -> "POSTPONED"
+        "canceled" -> "CANCELLED"
+        "suspended" -> "SUSPENDED"
+        else -> null
+    }
 
     /**
      * Fetches Serie A matches from yesterday to +14 days and upserts them in Room.
