@@ -165,8 +165,11 @@ fun SerieAMatchLiveBadge() {
 
 /** "INIZIA TRA X MIN" se il kickoff è imminente, altrimenti null (data e ora
  *  di inizio sono già mostrate nella riga meta dell'hero).
- *  [nowMillis] va passato col tempo corretto server (repository.adjustedNow()). */
-fun serieAKickoffLabel(match: SerieAMatchEntity, nowMillis: Long = System.currentTimeMillis()): String? {
+ *  Il default usa il tempo corretto server ([ServerClock]). */
+fun serieAKickoffLabel(
+    match: SerieAMatchEntity,
+    nowMillis: Long = it.wavestream.app.util.ServerClock.now()
+): String? {
     val now = nowMillis
     val diffMin = (match.utcDateMillis - now) / 60_000L
     return when {
