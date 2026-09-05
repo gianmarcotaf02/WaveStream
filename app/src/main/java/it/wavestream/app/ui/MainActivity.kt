@@ -607,7 +607,8 @@ private fun MainActivityScreen(
                 tabellinoState = homeState.serieATabellino,
                 onDismiss = { homeViewModel.dismissSerieAChannelPicker() },
                 onChannelClick = { channel ->
-                    homeViewModel.dismissSerieAChannelPicker()
+                    // Niente dismiss: il dialog resta aperto sotto il player,
+                    // così il BACK dal live riporta alla griglia canali
                     val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
                         putExtra("content_id", channel.id)
                         putExtra("content_type", "CHANNEL")

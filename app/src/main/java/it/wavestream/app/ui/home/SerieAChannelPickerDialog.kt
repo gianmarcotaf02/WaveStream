@@ -87,9 +87,13 @@ private val COUNTRY_WORDS = listOf(
     "egitto", "world", "mundial"
 )
 
+/** Categorie consentite anche se contengono parole della lista paesi. */
+private val ALLOWED_CATEGORY_WORDS = listOf("dazn hermes")
+
 /** true se la categoria è un canale DAZN italiano (esclude DAZN di altri paesi). */
 private fun isItalianDaznCategory(category: String): Boolean {
     val c = category.lowercase()
+    if (ALLOWED_CATEGORY_WORDS.any { c.contains(it) }) return true
     return c.contains("dazn") && COUNTRY_WORDS.none { c.contains(it) }
 }
 
