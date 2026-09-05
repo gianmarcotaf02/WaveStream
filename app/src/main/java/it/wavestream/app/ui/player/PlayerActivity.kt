@@ -25,7 +25,7 @@ import androidx.media3.exoplayer.DefaultLivePlaybackSpeedControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.SeekParameters
-import androidx.media3.exoplayer.source.hls.HlsMediaSource
+import androidx.media3.exoplayer.hls.HlsMediaSource
 import androidx.media3.session.MediaSession
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.cache.NetworkMonitor
@@ -479,7 +479,7 @@ class PlayerActivity : ComponentActivity() {
         val delegateFactory = DefaultMediaSourceFactory(dataSourceFactory)
         val mediaSourceFactory = object : MediaSource.Factory {
             override fun setDrmSessionManagerProvider(
-                drmSessionManagerProvider: androidx.media3.exoplayer.drm.DrmSessionManagerProvider?
+                drmSessionManagerProvider: androidx.media3.exoplayer.drm.DrmSessionManagerProvider
             ): MediaSource.Factory {
                 hlsFactory.setDrmSessionManagerProvider(drmSessionManagerProvider)
                 delegateFactory.setDrmSessionManagerProvider(drmSessionManagerProvider)
@@ -487,7 +487,7 @@ class PlayerActivity : ComponentActivity() {
             }
 
             override fun setLoadErrorHandlingPolicy(
-                loadErrorHandlingPolicy: androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy?
+                loadErrorHandlingPolicy: androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
             ): MediaSource.Factory {
                 hlsFactory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy)
                 delegateFactory.setLoadErrorHandlingPolicy(loadErrorHandlingPolicy)
