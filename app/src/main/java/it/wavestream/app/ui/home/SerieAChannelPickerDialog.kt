@@ -155,7 +155,7 @@ fun SerieAChannelPickerDialog(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier
                         .align(Alignment.BottomStart)
-                        .padding(start = 28.dp, bottom = 10.dp)
+                        .padding(start = 12.dp, bottom = 10.dp)
                 ) {
                     androidx.compose.foundation.Image(
                         painter = painterResource(id = R.drawable.ic_serie_a_logo),
