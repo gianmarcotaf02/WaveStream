@@ -13,6 +13,8 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,10 +44,12 @@ import androidx.compose.ui.res.painterResource
 import it.wavestream.app.R
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -79,6 +83,14 @@ fun TvPlayerScreen(
     isLiveChannel: Boolean = false,
     isAtLiveEdge: Boolean = true,
     onReturnToLive: () -> Unit = {},
+    isMiniPlayer: Boolean = false,
+    onToggleMiniPlayer: () -> Unit = {},
+    liveCategories: List<String> = emptyList(),
+    liveCategoryIndex: Int = 0,
+    onCategoryChange: (Int) -> Unit = {},
+    liveChannels: List<MiniChannelInfo> = emptyList(),
+    currentChannelId: Long = 0L,
+    onChannelSelect: (Long) -> Unit = {},
     onRestart: () -> Unit = {},
     nextEpisode: NextEpisodeInfo? = null,
     onPlayNext: () -> Unit = {},
@@ -139,7 +151,7 @@ fun TvPlayerScreen(
         }
     }
     
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
@@ -147,6 +159,13 @@ fun TvPlayerScreen(
             // This prevents play/pause when focus is on other buttons like Subtitles
             .focusable()
     ) {
+        // Larghezza video animata: full screen oppure mini player (a sinistra)
+        val videoWidth by animateDpAsState(
+            targetValue = if (isMiniPlayer) maxWidth * 0.42f else maxWidth,
+            animationSpec = tween(250),
+            label = "videoWidth"
+        )
+        
         // Video Player
         AndroidView(
             factory = { context ->
@@ -157,22 +176,56 @@ fun TvPlayerScreen(
                 }
             },
             update = { it.player = player },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .width(videoWidth)
+                .then(
+                    if (isMiniPlayer) {
+                        Modifier
+                            .padding(start = 40.dp)
+                            .aspectRatio(16f / 9f)
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(12.dp))
+                    } else {
+                        Modifier.height(maxHeight)
+                    }
+                )
         )
         
-        // Loading indicator (minimal design)
+        // Loading indicator (minimal design) - centrato sul video anche in mini mode
         AnimatedVisibility(
             visible = isLoading,
             enter = fadeIn(),
             exit = fadeOut(),
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier
+                .align(Alignment.Center)
+                .offset(
+                    x = if (isMiniPlayer) (videoWidth - maxWidth) / 2f + 40.dp else 0.dp
+                )
         ) {
             ModernLoadingIndicator()
         }
         
+        // Mini player: pannello canali/categorie a destra
+        if (isMiniPlayer) {
+            LiveMiniPanel(
+                categories = liveCategories,
+                categoryIndex = liveCategoryIndex,
+                channels = liveChannels,
+                currentChannelId = currentChannelId,
+                onCategoryChange = onCategoryChange,
+                onChannelSelect = onChannelSelect,
+                onExpand = onToggleMiniPlayer,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight()
+                    .width((maxWidth - videoWidth).coerceAtLeast(0.dp))
+            )
+        }
+        
         // Controls overlay
         AnimatedVisibility(
-            visible = controlsVisible,
+            visible = controlsVisible && !isMiniPlayer,
             enter = fadeIn(tween(200)),
             exit = fadeOut(tween(300))
         ) {
@@ -188,6 +241,7 @@ fun TvPlayerScreen(
                 isLiveChannel = isLiveChannel,
                 isAtLiveEdge = isAtLiveEdge,
                 onReturnToLive = onReturnToLive,
+                onToggleMiniPlayer = onToggleMiniPlayer,
                 onRestart = onRestart,
                 onSubtitles = onSubtitles,
                 cumulativeSeekSeconds = cumulativeSeekSeconds, // Pass cumulative seconds
@@ -210,7 +264,7 @@ fun TvPlayerScreen(
         
         // Seek indicator (always visible when seeking)
         AnimatedVisibility(
-            visible = seekIndicatorVisible && cumulativeSeekSeconds != 0,
+            visible = seekIndicatorVisible && cumulativeSeekSeconds != 0 && !isMiniPlayer,
             enter = fadeIn(tween(100)) + scaleIn(initialScale = 0.9f),
             exit = fadeOut(tween(200)),
             modifier = Modifier.align(Alignment.Center)
@@ -234,11 +288,13 @@ fun TvPlayerScreen(
         }
         
         // Fixed clock overlay (always visible, semi-transparent)
-        PlayerClockOverlay(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(16.dp)
-        )
+        if (!isMiniPlayer) {
+            PlayerClockOverlay(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            )
+        }
         
         // Still Watching Overlay
         if (showStillWatching) {
@@ -338,6 +394,7 @@ private fun ModernPlayerControls(
     isLiveChannel: Boolean,
     isAtLiveEdge: Boolean,
     onReturnToLive: () -> Unit,
+    onToggleMiniPlayer: () -> Unit,
     onRestart: () -> Unit,
     onSubtitles: () -> Unit,
     cumulativeSeekSeconds: Int,
@@ -539,6 +596,16 @@ private fun ModernPlayerControls(
                         onClick = onSubtitles,
                         size = 36.dp
                     )
+                    
+                    // Mini player con lista canali (solo live)
+                    if (isLiveChannel) {
+                        ModernIconButton(
+                            icon = Icons.Default.Apps,
+                            contentDescription = "Lista canali",
+                            onClick = onToggleMiniPlayer,
+                            size = 36.dp
+                        )
+                    }
                     
                     // Previous episode button (for series)
                     if (hasPreviousEpisode) {
@@ -788,6 +855,224 @@ private fun LiveIcon(
                 topLeft = topLeft,
                 size = arcSize,
                 style = stroke
+            )
+        }
+    }
+}
+
+/**
+ * Info ridotta di un canale per la lista del mini player
+ */
+data class MiniChannelInfo(
+    val id: Long,
+    val name: String,
+    val logoUrl: String? = null
+)
+
+/**
+ * Pannello laterale del mini player live:
+ * - in alto: tasto espandi + selettore categoria con frecce ‹ ›
+ * - sotto: lista dei canali della categoria corrente
+ */
+@Composable
+private fun LiveMiniPanel(
+    categories: List<String>,
+    categoryIndex: Int,
+    channels: List<MiniChannelInfo>,
+    currentChannelId: Long,
+    onCategoryChange: (Int) -> Unit,
+    onChannelSelect: (Long) -> Unit,
+    onExpand: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val listFocusRequester = remember { FocusRequester() }
+    val focusIndex = channels.indexOfFirst { it.id == currentChannelId }.let { if (it >= 0) it else 0 }
+    
+    // Focus sulla lista quando si apre il mini player o cambia categoria
+    LaunchedEffect(channels) {
+        if (channels.isNotEmpty()) {
+            delay(120)
+            try {
+                listFocusRequester.requestFocus()
+            } catch (_: Exception) {
+            }
+        }
+    }
+    
+    Column(
+        modifier = modifier
+            .background(Color.Black.copy(alpha = 0.92f))
+            .padding(horizontal = 28.dp, vertical = 24.dp)
+    ) {
+        // Header: espandi + switch categoria con frecce
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ModernIconButton(
+                icon = Icons.Default.Fullscreen,
+                contentDescription = "Espandi player",
+                onClick = onExpand,
+                size = 44.dp
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            // Freccia categoria precedente
+            ModernIconButton(
+                icon = Icons.Default.ChevronLeft,
+                contentDescription = "Categoria precedente",
+                onClick = { onCategoryChange(categoryIndex - 1) },
+                size = 40.dp
+            )
+            
+            // Nome categoria corrente
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.widthIn(max = 220.dp)
+            ) {
+                Text(
+                    text = "CATEGORIA ${categoryIndex + 1}/${categories.size}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = WaveStreamColors.Accent,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    maxLines = 1
+                )
+                Text(
+                    text = categories.getOrNull(categoryIndex) ?: "",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            
+            // Freccia categoria successiva
+            ModernIconButton(
+                icon = Icons.Default.ChevronRight,
+                contentDescription = "Categoria successiva",
+                onClick = { onCategoryChange(categoryIndex + 1) },
+                size = 40.dp
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+        }
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Text(
+            text = "${channels.size} canali",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White.copy(alpha = 0.5f)
+        )
+        
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        // Lista canali della categoria
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            itemsIndexed(channels, key = { _, ch -> ch.id }) { index, channel ->
+                MiniChannelRow(
+                    channel = channel,
+                    selected = channel.id == currentChannelId,
+                    onClick = { onChannelSelect(channel.id) },
+                    modifier = if (index == focusIndex) {
+                        Modifier.focusRequester(listFocusRequester)
+                    } else {
+                        Modifier
+                    }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Riga canale della lista mini player
+ */
+@Composable
+private fun MiniChannelRow(
+    channel: MiniChannelInfo,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            isFocused -> WaveStreamColors.Accent
+            selected -> Color.White.copy(alpha = 0.14f)
+            else -> Color.Transparent
+        },
+        label = "channelRowBg"
+    )
+    
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(backgroundColor)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Logo canale
+        if (channel.logoUrl != null) {
+            AsyncImage(
+                model = channel.logoUrl,
+                contentDescription = null,
+                contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                modifier = Modifier
+                    .size(width = 72.dp, height = 40.dp)
+                    .clip(RoundedCornerShape(6.dp))
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .size(width = 72.dp, height = 40.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color.White.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Tv,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.6f),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        
+        Text(
+            text = channel.name,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        
+        if (selected) {
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "In riproduzione",
+                tint = Color.White,
+                modifier = Modifier.size(18.dp)
             )
         }
     }

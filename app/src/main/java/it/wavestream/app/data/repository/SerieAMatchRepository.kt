@@ -254,22 +254,7 @@ class SerieAMatchRepository @Inject constructor(
             .sortedBy { it.name.lowercase() }
     }
 
-    // ========== Tabellino (UI model) ==========
-
-/**
- * Tabellino della partita per il match center dell'hero: incidenti (gol,
- * cartellini, sostituzioni) + formazioni ufficiali.
- */
-data class SerieATabellino(
-    val incidents: List<SofascoreIncident>,
-    val homeFormation: String?,
-    val awayFormation: String?,
-    val homePlayers: List<SofascoreLineupPlayer>,
-    val awayPlayers: List<SofascoreLineupPlayer>,
-    val lineupsConfirmed: Boolean
-)
-
-// ========== Helpers ==========
+    // ========== Helpers ==========
 
     private fun FootballMatchDto.toEntity(): SerieAMatchEntity {
         val kickoffMillis = runCatching {
@@ -299,3 +284,16 @@ data class SerieATabellino(
         private const val DEFAULT_SYNC_INTERVAL_MILLIS = 4L * 60 * 60 * 1000 // 4 hours
     }
 }
+
+/**
+ * Tabellino della partita per il match center dell'hero: incidenti (gol,
+ * cartellini, sostituzioni) + formazioni ufficiali.
+ */
+data class SerieATabellino(
+    val incidents: List<SofascoreIncident>,
+    val homeFormation: String?,
+    val awayFormation: String?,
+    val homePlayers: List<SofascoreLineupPlayer>,
+    val awayPlayers: List<SofascoreLineupPlayer>,
+    val lineupsConfirmed: Boolean
+)

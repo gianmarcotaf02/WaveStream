@@ -94,6 +94,13 @@ class PlayerActivity : ComponentActivity() {
     // Live/DVR state (solo canali live) - timeshift stile Sky/DAZN
     private val _isLive = mutableStateOf(false)
     private val _isAtLiveEdge = mutableStateOf(true)
+
+    // Mini player live: video ridotto + lista canali della categoria
+    private val _isMiniPlayer = mutableStateOf(false)
+    private val _liveCategories = mutableStateOf<List<String>>(emptyList())
+    private val _liveCategoryIndex = mutableIntStateOf(0)
+    private val _liveChannels = mutableStateOf<List<MiniChannelInfo>>(emptyList())
+    private val _currentChannelId = mutableLongStateOf(0L)
     
     // Seek state management - prevents reset during hold-to-seek
     private var isSeekingForward = false
@@ -405,6 +412,14 @@ class PlayerActivity : ComponentActivity() {
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
                     onReturnToLive = { returnToLive() },
+                    isMiniPlayer = _isMiniPlayer.value,
+                    onToggleMiniPlayer = { toggleMiniPlayer() },
+                    liveCategories = _liveCategories.value,
+                    liveCategoryIndex = _liveCategoryIndex.intValue,
+                    onCategoryChange = { loadChannelsForCategory(it) },
+                    liveChannels = _liveChannels.value,
+                    currentChannelId = _currentChannelId.longValue,
+                    onChannelSelect = { onMiniChannelSelected(it) },
                     cumulativeSeekSeconds = cumulativeSeekSeconds,
                     seekIndicatorVisible = seekIndicatorVisible,
                     showStillWatching = remember { _showStillWatching }.value,
@@ -656,6 +671,102 @@ class PlayerActivity : ComponentActivity() {
      */
     private fun liveSeekMaxMs(): Long {
         return if (player.duration > 0) player.duration else player.currentPosition
+    }
+
+    // ===================== Mini Player Live =====================
+
+    /**
+     * Attiva/disattiva la modalità mini player (solo canali live):
+     * video ridotto a sinistra + lista canali della categoria a destra
+     */
+    private fun toggleMiniPlayer() {
+        if (contentType != ContentType.CHANNEL) return
+        resetAutoPlayCounter()
+        _isMiniPlayer.value = !_isMiniPlayer.value
+        if (_isMiniPlayer.value) {
+            _controlsVisible.value = false
+            _currentChannelId.longValue = contentId
+            loadMiniPlayerData()
+        } else {
+            _controlsVisible.value = true
+        }
+    }
+
+    /**
+     * Carica categorie e canali per il mini player
+     */
+    private fun loadMiniPlayerData() {
+        lifecycleScope.launch {
+            try {
+                val cats = withContext(Dispatchers.IO) { channelDao.getCategoriesList() }
+                if (cats.isEmpty()) return@launch
+                _liveCategories.value = cats
+
+                val current = withContext(Dispatchers.IO) { channelDao.getChannelById(contentId) }
+                val currentCategory = current?.category
+                val idx = cats.indexOf(currentCategory).takeIf { it >= 0 } ?: 0
+                _liveCategoryIndex.intValue = idx
+                loadChannelsForCategory(idx)
+            } catch (e: Exception) {
+                android.util.Log.e("PlayerActivity", "Mini player data load failed: ${e.message}", e)
+            }
+        }
+    }
+
+    /**
+     * Cambia categoria nel mini player (chiamato dalle frecce ‹ ›)
+     */
+    private fun loadChannelsForCategory(index: Int) {
+        val cats = _liveCategories.value
+        if (cats.isEmpty()) return
+        val clamped = index.coerceIn(0, cats.size - 1)
+        _liveCategoryIndex.intValue = clamped
+        lifecycleScope.launch {
+            try {
+                val channels = withContext(Dispatchers.IO) {
+                    channelDao.getChannelsByCategoryList(cats[clamped])
+                }
+                _liveChannels.value = channels.map {
+                    MiniChannelInfo(it.id, it.name, it.logoUrl)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("PlayerActivity", "Mini channel list load failed: ${e.message}", e)
+            }
+        }
+    }
+
+    /**
+     * Switch canale dal mini player: cambia stream senza uscire dal player
+     */
+    private fun onMiniChannelSelected(channelId: Long) {
+        if (channelId == contentId) return
+        lifecycleScope.launch {
+            try {
+                val channel = withContext(Dispatchers.IO) { channelDao.getChannelById(channelId) }
+                    ?: return@launch
+
+                contentId = channel.id
+                streamUrl = channel.streamUrl
+                title = channel.name
+                subtitle = channel.category
+                _currentChannelId.longValue = channel.id
+                _isAtLiveEdge.value = true
+                bufferingRetryCount = 0
+                resetAutoPlayCounter()
+
+                android.util.Log.d("PlayerActivity", "Mini player switching to channel: ${channel.name}")
+                player.setMediaItem(MediaItem.fromUri(Uri.parse(channel.streamUrl)))
+                player.prepare()
+                player.play()
+            } catch (e: Exception) {
+                android.util.Log.e("PlayerActivity", "Mini channel switch failed: ${e.message}", e)
+                android.widget.Toast.makeText(
+                    this@PlayerActivity,
+                    "Errore nel cambio canale",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     /**
@@ -1199,6 +1310,11 @@ class PlayerActivity : ComponentActivity() {
             }
             // Back key - hide controls if visible, otherwise finish
             KeyEvent.KEYCODE_BACK -> {
+                if (_isMiniPlayer.value) {
+                    // Dal mini player: torna al player a schermo intero
+                    toggleMiniPlayer()
+                    return true
+                }
                 if (_controlsVisible.value) {
                     _controlsVisible.value = false
                     return true
