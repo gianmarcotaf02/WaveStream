@@ -1000,10 +1000,16 @@ fun HeroBanner(
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
-                        .padding(start = 72.dp, end = 24.dp, top = 20.dp, bottom = 8.dp)
+                        .padding(
+                            start = 72.dp, end = 24.dp,
+                            top = if (isMatchHero) 28.dp else 20.dp,
+                            bottom = 8.dp
+                        )
                         .fillMaxHeight()
                         .fillMaxWidth(), // Force full width for buttons
-                    verticalArrangement = Arrangement.Bottom  // Put content at bottom
+                    // Hero partita: testo in alto a sx (slot riservato per il LIVE tag),
+                    // bottone in basso. Film/serie: tutto in basso come prima.
+                    verticalArrangement = if (isMatchHero) Arrangement.Top else Arrangement.Bottom
                 ) {
                         // Title
                         if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null) {
@@ -1037,22 +1043,26 @@ fun HeroBanner(
                                 )
                             }
                         }
-                        // LIVE pill / countdown + label competizione (solo per l'hero partita)
+                        // LIVE pill / countdown + label competizione (solo per l'hero partita).
+                        // Slot riservato in alto: quando scatterà il LIVE non sposta nulla.
                         if (hero.contentType == "SERIEA_MATCH" && serieAMatch != null) {
-                            serieAKickoffLabel(serieAMatch)?.let { label ->
-                                Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = WaveStreamColors.AccentGold,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 2.sp
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
+                            Box(modifier = Modifier.height(32.dp)) {
+                                if (serieAMatch.isLive) {
+                                    SerieAMatchLiveBadge()
+                                } else {
+                                    serieAKickoffLabel(serieAMatch)?.let { label ->
+                                        Text(
+                                            text = label,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = WaveStreamColors.AccentGold,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 2.sp,
+                                            modifier = Modifier.align(Alignment.CenterStart)
+                                        )
+                                    }
+                                }
                             }
-                            if (serieAMatch.isLive) {
-                                SerieAMatchLiveBadge()
-                                Spacer(modifier = Modifier.height(6.dp))
-                            }
+                            Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = "Serie A • Giornata ${serieAMatch.matchday ?: "-"}",
                                 style = MaterialTheme.typography.labelMedium,
@@ -1217,6 +1227,11 @@ fun HeroBanner(
                         }
                         
                         Spacer(modifier = Modifier.height(10.dp))
+                        
+                        // Hero partita: spinge i bottoni in fondo (testo in alto)
+                        if (isMatchHero) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                         
                         // Action buttons - exactly like DetailsScreen
                         Row(
