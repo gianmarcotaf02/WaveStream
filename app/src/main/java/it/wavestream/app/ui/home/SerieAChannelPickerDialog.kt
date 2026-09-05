@@ -57,6 +57,13 @@ data class SerieAChannelPickerState(
     val isLoading: Boolean = false
 )
 
+/** Stato del tabellino (incidents + formazioni) mostrato nel match center. */
+data class SerieATabellinoState(
+    val loading: Boolean = false,
+    val tabellino: SerieATabellino? = null,
+    val error: Boolean = false
+)
+
 /**
  * Dialog with the playlist channels that broadcast the match (matched via
  * team-name aliases), grouped by category with visible category headers.

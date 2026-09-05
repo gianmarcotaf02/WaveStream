@@ -149,6 +149,7 @@ data class HomeScreenState(
     val serieAMatchHero: HeroItem? = null,
     val serieAMatch: SerieAMatchEntity? = null,
     val serieAChannelPicker: SerieAChannelPickerState? = null,
+    val serieATabellino: SerieATabellinoState = SerieATabellinoState(),
     // Category filter fields (for grid view)
     val availableCategories: List<String> = emptyList(),  // All categories available for filtering
     val selectedCategoryFilters: Set<String> = emptySet(),  // Currently selected category filters

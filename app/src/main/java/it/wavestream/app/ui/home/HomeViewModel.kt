@@ -322,7 +322,10 @@ class HomeViewModel @Inject constructor(
     fun openSerieAChannelPicker() {
         val match = _uiState.value.serieAMatch ?: return
         _uiState.update {
-            it.copy(serieAChannelPicker = SerieAChannelPickerState(match, emptyList(), isLoading = true))
+            it.copy(
+                serieAChannelPicker = SerieAChannelPickerState(match, emptyList(), isLoading = true),
+                serieATabellino = SerieATabellinoState(loading = true)
+            )
         }
         viewModelScope.launch {
             val channels = runCatching { serieAMatchRepository.findChannelsForMatch(match) }
@@ -334,10 +337,24 @@ class HomeViewModel @Inject constructor(
                 ))
             }
         }
+        // Tabellino in parallelo (gol, cartellini, sostituzioni, formazioni)
+        viewModelScope.launch {
+            val result = serieAMatchRepository.getMatchTabellino(match)
+            _uiState.update { s ->
+                s.copy(
+                    serieATabellino = result.fold(
+                        onSuccess = { SerieATabellinoState(tabellino = it) },
+                        onFailure = { SerieATabellinoState(error = true) }
+                    )
+                )
+            }
+        }
     }
 
     fun dismissSerieAChannelPicker() {
-        _uiState.update { it.copy(serieAChannelPicker = null) }
+        _uiState.update {
+            it.copy(serieAChannelPicker = null, serieATabellino = SerieATabellinoState())
+        }
     }
 
     /**
