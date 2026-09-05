@@ -1023,6 +1023,10 @@ private fun PlaylistSettings(
     
     // Restart Dialog
     if (showRestartDialog) {
+        val restartButtonFocus = remember { FocusRequester() }
+        LaunchedEffect(Unit) {
+            restartButtonFocus.requestFocus()
+        }
         AlertDialog(
             onDismissRequest = { showRestartDialog = false },
             containerColor = WaveStreamColors.BackgroundElevated,
@@ -1036,6 +1040,8 @@ private fun PlaylistSettings(
                 )
             },
             confirmButton = {
+                val interactionSource = remember { MutableInteractionSource() }
+                val isFocused by interactionSource.collectIsFocusedAsState()
                 Button(
                     onClick = {
                         showRestartDialog = false
@@ -1048,14 +1054,39 @@ private fun PlaylistSettings(
                         (context as? android.app.Activity)?.finish()
                         android.os.Process.killProcess(android.os.Process.myPid())
                     },
+                    modifier = Modifier
+                        .focusRequester(restartButtonFocus)
+                        .graphicsLayer {
+                            scaleX = if (isFocused) 1.05f else 1f
+                            scaleY = if (isFocused) 1.05f else 1f
+                        }
+                        .border(
+                            width = if (isFocused) 2.dp else 0.dp,
+                            color = if (isFocused) Color.White else Color.Transparent,
+                            shape = RoundedCornerShape(20.dp)
+                        ),
+                    interactionSource = interactionSource,
                     colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
                 ) {
                     Text("Riavvia app")
                 }
             },
             dismissButton = {
+                val interactionSource = remember { MutableInteractionSource() }
+                val isFocused by interactionSource.collectIsFocusedAsState()
                 TextButton(
                     onClick = { showRestartDialog = false },
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scaleX = if (isFocused) 1.05f else 1f
+                            scaleY = if (isFocused) 1.05f else 1f
+                        }
+                        .border(
+                            width = if (isFocused) 2.dp else 0.dp,
+                            color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                            shape = RoundedCornerShape(20.dp)
+                        ),
+                    interactionSource = interactionSource,
                     colors = ButtonDefaults.textButtonColors(contentColor = WaveStreamColors.TextSecondary)
                 ) {
                     Text("Dopo")
