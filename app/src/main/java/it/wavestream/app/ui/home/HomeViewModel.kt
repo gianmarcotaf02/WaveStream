@@ -325,13 +325,29 @@ class HomeViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            val channels = runCatching { serieAMatchRepository.findChannelsForMatch(match) }
+            // 1. Canali salvati (istantanei, mapping persistente per squadra)
+            val saved = runCatching { serieAMatchRepository.getSavedChannelsForMatch(match) }
+                .getOrDefault(emptyList())
+            if (saved.isNotEmpty()) {
+                _uiState.update { s ->
+                    s.copy(serieAChannelPicker = s.serieAChannelPicker?.copy(
+                        channels = saved,
+                        isLoading = false
+                    ))
+                }
+            }
+            // 2. Ricerca aggiornata (auto-aggiorna il mapping salvato: nuovi canali
+            //    col nome squadra entrano, quelli spariti con la playlist escono)
+            val fresh = runCatching { serieAMatchRepository.findChannelsForMatch(match) }
                 .getOrDefault(emptyList())
             _uiState.update { s ->
-                s.copy(serieAChannelPicker = s.serieAChannelPicker?.copy(
-                    channels = channels,
-                    isLoading = false
-                ))
+                val current = s.serieAChannelPicker ?: return@update s
+                val updated = when {
+                    fresh.isNotEmpty() -> fresh
+                    saved.isNotEmpty() -> saved   // fallback: niente aggiornamento, tieni i salvati
+                    else -> current.channels
+                }
+                s.copy(serieAChannelPicker = current.copy(channels = updated, isLoading = false))
             }
         }
         // Tabellino in parallelo (gol, cartellini, sostituzioni, formazioni)

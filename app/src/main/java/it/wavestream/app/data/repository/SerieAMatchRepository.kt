@@ -6,8 +6,10 @@ import it.wavestream.app.data.api.SofascoreLineupPlayer
 import it.wavestream.app.data.api.FootballMatchDto
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.dao.SerieAMatchDao
+import it.wavestream.app.data.database.dao.SerieATeamChannelDao
 import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
+import it.wavestream.app.data.database.entity.SerieATeamChannelEntity
 import it.wavestream.app.data.parser.SerieATeamAliases
 import android.util.Log
 import kotlinx.coroutines.flow.Flow
@@ -35,6 +37,7 @@ class SerieAMatchRepository @Inject constructor(
     private val footballDataService: FootballDataService,
     private val sofascoreService: it.wavestream.app.data.api.SofascoreService,
     private val serieAMatchDao: SerieAMatchDao,
+    private val serieATeamChannelDao: SerieATeamChannelDao,
     private val channelDao: ChannelDao
 ) {
 
@@ -228,10 +231,62 @@ class SerieAMatchRepository @Inject constructor(
         )
         if (aliases.isEmpty()) return emptyList()
 
-        return channelDao.getAllChannelsList()
-            .filter { SerieATeamAliases.channelMatchesTeam(it.name, aliases) }
+        val allChannels = channelDao.getAllChannelsList()
+        val matchedHome = matchChannelsForTeam(allChannels, match.homeTla, match.homeShortName)
+        val matchedAway = matchChannelsForTeam(allChannels, match.awayTla, match.awayShortName)
+
+        return (matchedHome + matchedAway)
             .distinctBy { it.streamUrl }
             .sortedBy { it.name.lowercase() }
+    }
+
+    /**
+     * Canali salvati localmente per le due squadre (lettura istantanea dal DB).
+     * Usata per mostrare subito i canali prima della ricerca di aggiornamento.
+     */
+    suspend fun getSavedChannelsForMatch(match: SerieAMatchEntity): List<Channel> {
+        val tlas = listOf(match.homeTla, match.awayTla).filter { it.isNotBlank() }
+        if (tlas.isEmpty()) return emptyList()
+        val savedUrls = serieATeamChannelDao.getByTeams(tlas)
+            .map { it.channelStreamUrl }
+            .toSet()
+        if (savedUrls.isEmpty()) return emptyList()
+        return channelDao.getAllChannelsList()
+            .filter { it.streamUrl in savedUrls }
+            .distinctBy { it.streamUrl }
+            .sortedBy { it.name.lowercase() }
+    }
+
+    /** Matching per una squadra + aggiornamento del mapping persistente. */
+    private suspend fun matchChannelsForTeam(
+        allChannels: List<Channel>,
+        teamTla: String,
+        teamShortName: String
+    ): List<Channel> {
+        if (teamTla.isBlank()) return emptyList()
+        val aliases = SerieATeamAliases.teamAliases(teamTla, teamShortName)
+        if (aliases.isEmpty()) return emptyList()
+
+        val matched = allChannels
+            .filter { SerieATeamAliases.channelMatchesTeam(it.name, aliases) }
+            .distinctBy { it.streamUrl }
+
+        // Aggiorna il mapping persistente: upsert dei correnti, rimozione dei
+        // canali spariti con l'aggiornamento playlist
+        if (matched.isNotEmpty()) {
+            serieATeamChannelDao.upsertAll(
+                matched.map {
+                    SerieATeamChannelEntity(
+                        teamTla = teamTla,
+                        channelStreamUrl = it.streamUrl,
+                        teamShortName = teamShortName,
+                        channelName = it.name
+                    )
+                }
+            )
+            serieATeamChannelDao.deleteStaleForTeam(teamTla, matched.map { it.streamUrl })
+        }
+        return matched
     }
 
     // ========== Helpers ==========
