@@ -254,9 +254,18 @@ class SerieAMatchRepository @Inject constructor(
             .toSet()
         if (savedUrls.isEmpty()) return@withContext emptyList()
         return@withContext channelDao.getAllChannelsList()
-            .filter { it.streamUrl in savedUrls }
+            .filter { it.streamUrl in savedUrls && !it.isExcludedCategory() }
             .distinctBy { it.streamUrl }
             .sortedBy { it.name.lowercase() }
+    }
+
+    /** Categorie escluse dalla ricerca canali dei match (campionati minori con
+     *  squadre omonime, es. canali "Serie B" che matchano gli alias delle squadre Serie A). */
+    private val EXCLUDED_CATEGORY_KEYWORDS = listOf("serie b")
+
+    private fun Channel.isExcludedCategory(): Boolean {
+        val cat = category?.lowercase()?.replace('-', ' ') ?: return false
+        return EXCLUDED_CATEGORY_KEYWORDS.any { cat.contains(it) }
     }
 
     /** Matching per una squadra + aggiornamento del mapping persistente. */
@@ -270,7 +279,7 @@ class SerieAMatchRepository @Inject constructor(
         if (aliases.isEmpty()) return emptyList()
 
         val matched = allChannels
-            .filter { SerieATeamAliases.channelMatchesTeam(it.name, aliases) }
+            .filter { !it.isExcludedCategory() && SerieATeamAliases.channelMatchesTeam(it.name, aliases) }
             .distinctBy { it.streamUrl }
 
         // Aggiorna il mapping persistente: upsert dei correnti, rimozione dei
