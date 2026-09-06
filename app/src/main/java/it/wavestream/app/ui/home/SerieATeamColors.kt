@@ -17,12 +17,16 @@ object SerieATeamColors {
         "COM" to Pair(Color(0xFF0A1C4D), Color(0xFF1330A0)), // Como — blu
         "CRE" to Pair(Color(0xFF1F1F23), Color(0xFFB3122E)), // Cremonese — grigio/rosso
         "FIO" to Pair(Color(0xFF241048), Color(0xFF6A3FD1)), // Fiorentina — viola
+        "FRO" to Pair(Color(0xFF0A2050), Color(0xFF2E6FD8)), // Frosinone — blu (giallazzi)
         "GEN" to Pair(Color(0xFF0D1B3D), Color(0xFFB01D2E)), // Genoa — rosso/blu
+        "MON" to Pair(Color(0xFF2A0A14), Color(0xFFC8102E)), // Monza — rosso/bianco
+        "VEN" to Pair(Color(0xFF101010), Color(0xFFE8720C)), // Venezia — nero/arancio
+        "USL" to Pair(Color(0xFF5C0E20), Color(0xFFB3122E)), // Lecce — giallorosso (API: USL)
         "VER" to Pair(Color(0xFF0D1B3D), Color(0xFFD9B40F)), // Hellas Verona — giallo/blu
         "INT" to Pair(Color(0xFF060B18), Color(0xFF0B3D91)), // Inter — nero/blu
         "JUV" to Pair(Color(0xFF0A0A0A), Color(0xFF2B2B33)), // Juventus — bianco/nero
         "LAZ" to Pair(Color(0xFF0D2B5B), Color(0xFF6EC6E8)), // Lazio — celeste
-        "LEC" to Pair(Color(0xFF5C0E20), Color(0xFFB3122E)), // Lecce — giallorosso
+        "LEC" to Pair(Color(0xFF5C0E20), Color(0xFFB3122E)), // Lecce (legacy TLA — il codice API è USL)
         "MIL" to Pair(Color(0xFF0A0A0A), Color(0xFFB0122E)), // Milan — rossonero
         "NAP" to Pair(Color(0xFF00284D), Color(0xFF0F8CD9)), // Napoli — azzurro
         "PAR" to Pair(Color(0xFF0A1C4D), Color(0xFFF2C500)), // Parma — giallo/blu
@@ -49,7 +53,11 @@ object SerieATeamColors {
         "COM" to "Giuseppe Sinigaglia, Como",
         "CRE" to "Giovanni Zini, Cremona",
         "FIO" to "Artemio Franchi, Firenze",
+        "FRO" to "Stadio Benito Stirpe, Frosinone",
         "GEN" to "Stadio Luigi Ferraris, Genova",
+        "MON" to "U-Power Stadium, Monza",
+        "VEN" to "Stadio Penzo, Venezia",
+        "USL" to "Via del Mare, Lecce",
         "VER" to "Marcantonio Bentegodi, Verona",
         "INT" to "Giuseppe Meazza, Milano",
         "JUV" to "Allianz Stadium, Torino",

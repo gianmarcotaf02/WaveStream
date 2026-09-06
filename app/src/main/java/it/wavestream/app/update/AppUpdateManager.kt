@@ -176,41 +176,77 @@ class AppUpdateManager @Inject constructor(
                 apkFile.delete()
             }
             
-            // Download using OkHttp
-            val request = Request.Builder()
-                .url(downloadUrl)
+            // Client dedicato al download: timeout lunghi (la Wi-Fi dei TV va in power-save
+            // e le connessioni lente fanno scattare i 30s di default) e retry automatico
+            val downloadClient = okHttpClient.newBuilder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(120, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
                 .build()
             
-            val response = okHttpClient.newCall(request).execute()
-            
-            if (!response.isSuccessful) {
-                Log.e(TAG, "Download failed: ${response.code}")
-                _downloadState.value = DownloadState.Failed("Errore HTTP: ${response.code}")
-                return@withContext false
-            }
-            
-            val body = response.body ?: run {
-                _downloadState.value = DownloadState.Failed("Risposta vuota dal server")
-                return@withContext false
-            }
-            
-            val totalBytes = body.contentLength()
+            // Fino a 3 tentativi con resume via Range header: se la rete scatta,
+            // si riprende da dove si era fermati invece di ripartire da zero
+            val maxAttempts = 3
             var downloadedBytes = 0L
+            var totalBytes = -1L
             
-            FileOutputStream(apkFile).use { output ->
-                body.byteStream().use { input ->
-                    val buffer = ByteArray(8192)
-                    var bytesRead: Int
+            for (attempt in 1..maxAttempts) {
+                try {
+                    val requestBuilder = Request.Builder().url(downloadUrl)
+                    if (downloadedBytes > 0) {
+                        requestBuilder.header("Range", "bytes=$downloadedBytes-")
+                        Log.d(TAG, "Download retry $attempt, resuming from byte $downloadedBytes")
+                    }
                     
-                    while (input.read(buffer).also { bytesRead = it } != -1) {
-                        output.write(buffer, 0, bytesRead)
-                        downloadedBytes += bytesRead
+                    downloadClient.newCall(requestBuilder.build()).execute().use { response ->
+                        // Un 206 Partial Content va bene per il resume, un 200 significa
+                        // che il server non supporta il Range: ripartiamo da zero
+                        val isResumed = response.code == 206
+                        if (!response.isSuccessful) {
+                            Log.e(TAG, "Download failed: ${response.code}")
+                            _downloadState.value = DownloadState.Failed("Errore HTTP: ${response.code}")
+                            return@withContext false
+                        }
                         
-                        if (totalBytes > 0) {
-                            val progress = ((downloadedBytes * 100) / totalBytes).toInt()
-                            _downloadState.value = DownloadState.Downloading(progress)
+                        val body = response.body ?: run {
+                            _downloadState.value = DownloadState.Failed("Risposta vuota dal server")
+                            return@withContext false
+                        }
+                        
+                        if (!isResumed) {
+                            downloadedBytes = 0L
+                        }
+                        
+                        val contentLength = body.contentLength()
+                        totalBytes = if (contentLength > 0) {
+                            contentLength + downloadedBytes
+                        } else {
+                            -1L
+                        }
+                        
+                        FileOutputStream(apkFile, isResumed).use { output ->
+                            body.byteStream().use { input ->
+                                val buffer = ByteArray(8192)
+                                var bytesRead: Int
+                                
+                                while (input.read(buffer).also { bytesRead = it } != -1) {
+                                    output.write(buffer, 0, bytesRead)
+                                    downloadedBytes += bytesRead
+                                    
+                                    if (totalBytes > 0) {
+                                        val progress = ((downloadedBytes * 100) / totalBytes).toInt()
+                                        _downloadState.value = DownloadState.Downloading(progress)
+                                    }
+                                }
+                            }
                         }
                     }
+                    break // completato
+                } catch (e: IOException) {
+                    if (attempt == maxAttempts) throw e
+                    Log.w(TAG, "Download interrupted (attempt $attempt), retrying: ${e.message}")
+                    delay(2000L * attempt)
                 }
             }
             
