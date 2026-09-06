@@ -104,6 +104,7 @@ data class HeroItem(
     val newEpisodeSeason: Int? = null,     // Season number for new episode (series only)
     val newEpisodeNumber: Int? = null,      // Episode number for new episode (series only)
     val newEpisodeCaughtUp: Boolean = false // True solo se l'utente ha visto tutti gli episodi precedenti al nuovo
+    val serieAMatchId: Long? = null           // Se contentType == "SERIEA_MATCH", id del match associato
 )
 
 /**
@@ -145,7 +146,11 @@ data class HomeScreenState(
     val heroItems: List<HeroItem> = emptyList(),
     val currentHeroIndex: Int = 0,
     val isContinueWatchingHero: Boolean = false,  // True if heroes are from continue watching
-    // Serie A live hero (football-data.org) — prima slide del carosello hero
+    // Serie A live hero (football-data.org) — slide del carosello hero (solo tab Home).
+    // Supporta PIU' partite simultanee: una hero per match in finestra.
+    val serieAMatches: List<SerieAMatchEntity> = emptyList(),
+    val serieAMatchHeroes: List<HeroItem> = emptyList(),
+    // Primaria (prima in lista): usata dal picker canali di default. Retro-compat.
     val serieAMatchHero: HeroItem? = null,
     val serieAMatch: SerieAMatchEntity? = null,
     val serieAChannelPicker: SerieAChannelPickerState? = null,

@@ -285,6 +285,7 @@ class HomeViewModel @Inject constructor(
     /** HeroItem sintetico per la slide del match (contentType = "SERIEA_MATCH"). */
     private fun serieAHeroItem(match: SerieAMatchEntity): HeroItem = HeroItem(
         id = 7_000_000_000L + (match.id % 1_000_000_000L),
+        serieAMatchId = match.id,
         title = "${match.homeShortName.uppercase()} - ${match.awayShortName.uppercase()}",
         backdropUrl = null,
         posterUrl = match.homeCrest,
