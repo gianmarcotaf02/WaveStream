@@ -75,13 +75,13 @@ enum class AccentColor(
 object WaveStreamColors {
     val BrandPrimary = Color(0xFF000000)
 
-    private val _accent = mutableStateOf(AccentColor.Violet.primary)
+    private val _accent = mutableStateOf(AccentColor.Lagoon.primary)
     val Accent: Color get() = _accent.value
 
-    private val _accentLight = mutableStateOf(AccentColor.Violet.light)
+    private val _accentLight = mutableStateOf(AccentColor.Lagoon.light)
     val AccentLight: Color get() = _accentLight.value
 
-    private val _accentDark = mutableStateOf(AccentColor.Violet.dark)
+    private val _accentDark = mutableStateOf(AccentColor.Lagoon.dark)
     val AccentDark: Color get() = _accentDark.value
 
     val BrandSecondary: Color get() = Accent
@@ -89,12 +89,14 @@ object WaveStreamColors {
     val AccentGold = Color(0xFFE8C49A)
     val AccentGoldLight = Color(0xFFF3DCC0)
 
-    // ── Scala Obsidian (Surface 0 → 4) ──
-    val BackgroundDark = Color(0xFF050608)
-    val BackgroundPrimary = Color(0xFF0A0C10)
-    val BackgroundSecondary = Color(0xFF101319)
-    val BackgroundTertiary = Color(0xFF171B23)
-    val BackgroundElevated = Color(0xFF1F2530)
+    // ── Scala "Abyss" (Surface 0 → 4) — oscurità oceanica blu-teal, MAI nero puro ──
+    // Base fredda e stratificata: ogni livello sale leggermente di tono e di profondità,
+    // con una tinta acqua appena percettibile (niente grigi sterili).
+    val BackgroundDark = Color(0xFF04070C)
+    val BackgroundPrimary = Color(0xFF08111A)
+    val BackgroundSecondary = Color(0xFF0C1A28)
+    val BackgroundTertiary = Color(0xFF12263A)
+    val BackgroundElevated = Color(0xFF19304A)
 
     // Alias espliciti dei livelli, per il codice nuovo (Fase 2+)
     val Surface0 = BackgroundDark
@@ -103,47 +105,48 @@ object WaveStreamColors {
     val Surface3 = BackgroundTertiary
     val Surface4 = BackgroundElevated
 
-    // ── Gradiente ambientale "Aurora": tinta teal profonda, quasi impercettibile ──
-    val GradientTop = Color(0xFF07141A)
-    val GradientMiddle = Color(0xFF050608)
-    val GradientBottom = Color(0xFF030305)
+    // ── Aura ambientale "Corrente": luce teal che affiora dall'alto, poi affonda ──
+    // Sostituisce il vuoto nero: dà profondità e "aria" a tutta la scena.
+    val GradientTop = Color(0xFF0C3348)      // bagliore acqua-blu intenso in alto
+    val GradientMiddle = Color(0xFF06101C)   // transizione profonda
+    val GradientBottom = Color(0xFF02050A)   // fondale quasi nero ma mai puro
 
     val BackgroundGradient: Brush
         get() = Brush.verticalGradient(
             colorStops = arrayOf(
                 0.0f to GradientTop,
-                0.3f to GradientMiddle,
+                0.22f to GradientMiddle,
                 0.6f to GradientBottom,
                 1.0f to GradientBottom
             )
         )
 
-    val CardBackground = Color(0xFF0A0C10)
-    val CardBackgroundHover = Color(0xFF101319)
-    val CardBackgroundFocused = Color(0xFF171B23)
-    val SurfaceDark = Color(0xFF07080B)
-    val SurfaceElevated = Color(0xFF12151C)
+    val CardBackground = Color(0xFF08111A)
+    val CardBackgroundHover = Color(0xFF0C1A28)
+    val CardBackgroundFocused = Color(0xFF12263A)
+    val SurfaceDark = Color(0xFF050A12)
+    val SurfaceElevated = Color(0xFF0F1E2E)
 
-    // ── Bordo universale per superfici (1dp, bianco 8%) — dà stacco senza elevazione ──
-    val SurfaceBorder = Color(0x14FFFFFF)
-    val SurfaceBorderStrong = Color(0x22FFFFFF)
+    // ── Bordo universale: bianco 10%, con una leggera tinta azzurra per unione col fondo ──
+    val SurfaceBorder = Color(0x1FE6F5FF)
+    val SurfaceBorderStrong = Color(0x2EE9F6FF)
 
-    val TextPrimary = Color(0xFFF2F4F8)
-    val TextSecondary = Color(0xFF9AA3B2)
-    val TextTertiary = Color(0xFF8B94A3)
-    val TextHint = Color(0xFF4A525E)
-    val TextDisabled = Color(0xFF2A2F38)
+    val TextPrimary = Color(0xFFF4F8FC)
+    val TextSecondary = Color(0xFF9DB4C9)
+    val TextTertiary = Color(0xFF7E93A9)
+    val TextHint = Color(0xFF46586B)
+    val TextDisabled = Color(0xFF2A3846)
     val TextAccent: Color get() = AccentLight
 
-    val Error = Color(0xFFFF453A)
-    val Success = Color(0xFF30D158)
-    val Warning = Color(0xFFFF9F0A)
-    val Info = Color(0xFF0A84FF)
+    val Error = Color(0xFFFF6B5E)
+    val Success = Color(0xFF4CE0A8)
+    val Warning = Color(0xFFFFB74D)
+    val Info = Color(0xFF58A6FF)
 
     val FocusRing: Color get() = Accent
-    val FocusGlow: Color get() = Accent.copy(alpha = 0.25f)
-    val FocusGlowStrong: Color get() = Accent.copy(alpha = 0.38f)
-    val SelectionBackground: Color get() = Accent.copy(alpha = 0.15f)
+    val FocusGlow: Color get() = Accent.copy(alpha = 0.22f)
+    val FocusGlowStrong: Color get() = Accent.copy(alpha = 0.34f)
+    val SelectionBackground: Color get() = Accent.copy(alpha = 0.16f)
 
     /** Alpha delle superfici NON focalizzate quando un elemento ha il focus (dimming ambiente). */
     const val DimmingAlpha = 0.6f
@@ -153,23 +156,23 @@ object WaveStreamColors {
     val RatingMetacritic = Color(0xFF66CC33)
 
     val PlayerBackground = Color(0xFF000000)
-    val PlayerControlsBg = Color(0x66050608)
+    val PlayerControlsBg = Color(0x9905090D)
     val PlayerSeekbarPlayed: Color get() = Accent
 
-    val RailBackground = Color(0x99050608)
-    val RailBackgroundExpanded = Color(0xE60A0C10)
+    val RailBackground = Color(0x9904090E)
+    val RailBackgroundExpanded = Color(0xE609111A)
     val RailItemFocused = BackgroundTertiary
-    val RailItemSelected = Accent.copy(alpha = 0.15f)
-    val RailDivider = Color(0x14FFFFFF)
+    val RailItemSelected = Accent.copy(alpha = 0.16f)
+    val RailDivider = Color(0x16FFFFFF)
 
     // ============== Glass / Liquid Glass (FASE 1) ==============
     // Token vetro esposti anche dal tema per coerenza. La fonte primaria dei
     // componenti è `GlassTokens` (ui/theme/Glass.kt); qui servono per i composable
     // che leggono i colori direttamente dal tema.
-    val GlassSurfaceFill = Color(0x1FFFFFFF)
-    val GlassSurfaceFillStrong = Color(0x2EFFFFFF)
-    val GlassSurfaceFillDark = Color(0x40101418)
-    val GlassBorderSubtle = Color(0x26FFFFFF)
+    val GlassSurfaceFill = Color(0x1EE9F6FF)
+    val GlassSurfaceFillStrong = Color(0x2AE9F6FF)
+    val GlassSurfaceFillDark = Color(0x330A141D)
+    val GlassBorderSubtle = Color(0x2AE9F6FF)
     val GlassBorderAccent get() = Accent.copy(alpha = 0.55f)
 
     fun updateAccent(accentColor: AccentColor) {

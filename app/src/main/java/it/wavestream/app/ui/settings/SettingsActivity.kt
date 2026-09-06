@@ -1872,7 +1872,7 @@ private fun EpgSettings(
 
 @Composable
 private fun AppearanceSettings(userPreferences: UserPreferences) {
-    val currentAccentId by userPreferences.getAccentColorFlow().collectAsState(initial = "violet")
+    val currentAccentId by userPreferences.getAccentColorFlow().collectAsState(initial = "lagoon")
     val scope = rememberCoroutineScope()
     
     SettingsSection(title = "Aspetto") {
@@ -1890,7 +1890,7 @@ private fun AppearanceSettings(userPreferences: UserPreferences) {
             AccentColor.entries.forEach { accentOption ->
                 // Check if selected (handle null as violet/default)
                 val isSelected = (currentAccentId == accentOption.id) || 
-                               (currentAccentId == null && accentOption.id == "violet")
+                               (currentAccentId == null && accentOption.id == "lagoon")
                 
                 val interactionSource = remember { MutableInteractionSource() }
                 val isFocused by interactionSource.collectIsFocusedAsState()

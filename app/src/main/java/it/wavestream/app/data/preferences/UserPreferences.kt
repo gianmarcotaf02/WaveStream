@@ -277,17 +277,17 @@ class UserPreferences @Inject constructor(
      */
     fun getAccentColorSync(): String {
         val start = System.currentTimeMillis()
-        val color = syncPrefs.getString(SYNC_ACCENT_COLOR_KEY, "violet") ?: "violet"
+        val color = syncPrefs.getString(SYNC_ACCENT_COLOR_KEY, "lagoon") ?: "lagoon"
         android.util.Log.d("WaveStreamDebug", "getAccentColorSync took ${System.currentTimeMillis() - start}ms (SharedPreferences)")
         return color
     }
     
     suspend fun getAccentColor(): String {
-        return dataStore.data.first()[ACCENT_COLOR] ?: "violet"
+        return dataStore.data.first()[ACCENT_COLOR] ?: "lagoon"
     }
     
     fun getAccentColorFlow(): Flow<String> {
-        return dataStore.data.map { it[ACCENT_COLOR] ?: "violet" }
+        return dataStore.data.map { it[ACCENT_COLOR] ?: "lagoon" }
     }
     
     // Audio/Subtitle
