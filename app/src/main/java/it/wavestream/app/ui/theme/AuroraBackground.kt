@@ -1,5 +1,7 @@
 package it.wavestream.app.ui.theme
 
+import android.app.ActivityManager
+import android.content.Context
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -15,24 +17,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 
 /**
- * FASE 3 — "Corrente" ambientale animata.
+ * FASE 3 — "Corrente" ambientale.
  *
- * Una luce organica che respira dietro il contenuto: due bagliori radiali molto
- * morbidi (uno accent, uno blu profondo) che derivano lentamente sullo schermo.
+ * Una luce organica dietro il contenuto: due bagliori radiali morbidi (uno accent,
+ * uno blu profondo) che danno profondità e aria alla scena.
  *
- * PERCHE' È ECONOMICO SU TV:
- *  - Il gradiente radiale viene disegnato UNA volta dentro un Box a misura fissa.
- *  - Il movimento avviene SOLO tramite `graphicsLayer` (translation), che è una
- *    pura trasformazione di matrice sulla GPU: NESSUNA ricomposizione per frame.
- *  - Ciclo lungo (~45s) e easing lineare → la GPU non deve mai disegnare nulla di
- *    nuovo tra un frame e l'altro, solo spostare due layer.
+ * ADATTIVA PER HARDWARE DEBOLE (Xiaomi TV Stick 2GB ecc.):
+ *  - Se il device è low-RAM o ha < 3.5 GB, il componente renderizza SOLO la
+ *    versione STATICA: i due bagliori vengono disegnati una volta e restano
+ *    fermi (layer cacheati, costo praticamente nullo per frame).
+ *  - L'animazione continua (drift lento) parte SOLO su device con memoria
+ *    sufficiente. È fatta via `graphicsLayer` (pura traslazione GPU, nessuna
+ *    ricomposizione), ma su stick economici anche questo può competere con lo
+ *    scroll delle righe: meglio sacrificare il movimento che i frame.
  *
  * Da mettere come PRIMO figlio dietro al contenuto di una schermata.
  */
@@ -40,15 +46,65 @@ import androidx.compose.ui.unit.dp
 fun AuroraBackground(
     modifier: Modifier = Modifier.fillMaxSize()
 ) {
+    val context = LocalContext.current
+    val animate = remember(context) { isAnimationCapable(context) }
+
+    if (animate) {
+        AnimatedAurora(modifier)
+    } else {
+        StaticAurora(modifier)
+    }
+}
+
+/**
+ * Soglia conservativa: l'animazione continua vale il costo solo con memoria
+ * abbondante. Xiaomi TV Stick (2GB) e simili restano sotto soglia → statico.
+ */
+private fun isAnimationCapable(context: Context): Boolean {
+    val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    if (am.isLowRamDevice) return false
+    val mem = ActivityManager.MemoryInfo()
+    am.getMemoryInfo(mem)
+    return mem.totalMem >= 3_500_000_000L // 3.5 GB
+}
+
+/** Bagliori statici: disegnati una volta, zero lavoro per frame. */
+@Composable
+private fun StaticAurora(modifier: Modifier) {
+    Box(modifier = modifier) {
+        AuroraGlow(
+            baseColor = WaveStreamColors.Accent,
+            sizeFraction = 0.72f,
+            alpha = 0.085f,
+            anchor = Alignment.TopEnd,
+            translationX = 60f,
+            translationY = -40f,
+            modifier = Modifier.fillMaxSize()
+        )
+        AuroraGlow(
+            baseColor = WaveStreamColors.GradientTop,
+            sizeFraction = 0.9f,
+            alpha = 0.16f,
+            anchor = Alignment.BottomStart,
+            translationX = -40f,
+            translationY = 60f,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Composable
+private fun AnimatedAurora(modifier: Modifier) {
     val transition = rememberInfiniteTransition(label = "aurora")
 
-    // 0f..1f su cicli lunghi e sfasati: i bagliori non si muovono mai in sincrono.
+    // Cicli lunghi e SFASATI, entrambi in Reverse: il movimento è sinusoidale
+    // (nessuno scatto di ritorno a inizio ciclo).
     val driftA by transition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 42000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Reverse
         ),
         label = "auroraA"
     )
@@ -62,56 +118,49 @@ fun AuroraBackground(
         label = "auroraB"
     )
 
+    val amplitude = 220f
+
     Box(modifier = modifier) {
-        // Bagliore accent (in alto a destra) — illumina come una "luce d'acqua".
         AuroraGlow(
             baseColor = WaveStreamColors.Accent,
             sizeFraction = 0.72f,
             alpha = 0.085f,
             anchor = Alignment.TopEnd,
-            drift = driftA,
-            baseDrift = 0f,
+            translationX = driftA * amplitude,
+            translationY = driftA * (amplitude * 0.5f),
             modifier = Modifier.fillMaxSize()
         )
-        // Bagliore blu profondo (in basso a sinistra) — profondità oceanica.
         AuroraGlow(
             baseColor = WaveStreamColors.GradientTop,
             sizeFraction = 0.9f,
             alpha = 0.16f,
             anchor = Alignment.BottomStart,
-            drift = driftB,
-            baseDrift = 0f,
+            translationX = driftB * amplitude,
+            translationY = driftB * (amplitude * 0.6f),
             modifier = Modifier.fillMaxSize()
         )
     }
 }
 
 /**
- * Un singolo bagliore radiale morbido, ancorato a un angolo e fatto derivare
- * lentamente via graphicsLayer. La forma circolare è grande quanto la schermata
- * e fuoriesce dai bordi (soft, senza tagli netti).
+ * Un singolo bagliore radiale morbido, ancorato a un angolo e spostato via
+ * `graphicsLayer` (solo trasformazione GPU, nessun redraw del gradiente).
  */
 @Composable
 private fun BoxScope.AuroraGlow(
-    baseColor: androidx.compose.ui.graphics.Color,
+    baseColor: Color,
     sizeFraction: Float,
     alpha: Float,
     anchor: Alignment,
-    drift: Float,
-    baseDrift: Float,
+    translationX: Float,
+    translationY: Float,
     modifier: Modifier
 ) {
-    // Range di spostamento in px: abbastanza da far "respirare" ma senza
-    // sbilanciare la scena.
-    val amplitude = 220f
-
     Box(
-        modifier = modifier
-            // Solo traslazione: il layer è cacheato, nessun redraw per frame.
-            .graphicsLayer {
-                translationX = (drift - baseDrift) * amplitude
-                translationY = (drift * 0.6f) * (amplitude * 0.6f)
-            },
+        modifier = modifier.graphicsLayer {
+            this.translationX = translationX
+            this.translationY = translationY
+        },
         contentAlignment = anchor
     ) {
         Box(
@@ -123,7 +172,7 @@ private fun BoxScope.AuroraGlow(
                         colors = listOf(
                             baseColor.copy(alpha = alpha),
                             baseColor.copy(alpha = alpha * 0.35f),
-                            androidx.compose.ui.graphics.Color.Transparent
+                            Color.Transparent
                         ),
                         radius = 900f
                     ),
