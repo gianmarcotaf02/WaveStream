@@ -559,8 +559,8 @@ private fun MainActivityScreen(
                         },
                         onHeroPlayClick = { heroItem ->
                             if (heroItem.contentType == "SERIEA_MATCH") {
-                                // "Guarda adesso" → griglia canali della partita
-                                homeViewModel.openSerieAChannelPicker()
+                                // "Guarda adesso" → griglia canali della partita mostrata
+                                homeViewModel.openSerieAChannelPicker(heroItem.serieAMatchId)
                             } else {
                                 val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
                                     putExtra("content_id", heroItem.id)
