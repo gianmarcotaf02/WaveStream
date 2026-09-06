@@ -219,6 +219,9 @@ private fun TvHomeScreenContent(
             .fillMaxSize()
             .background(WaveStreamColors.BackgroundGradient)
     ) {
+        // Aurora ambientale animata — luce viva dietro il contenuto.
+        AuroraBackground()
+
         if (state.isLoading) {
             // Loading state
             SkeletonLoader()
