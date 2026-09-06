@@ -560,7 +560,9 @@ private fun TvHomeScreenContent(
             val coroutineScope = rememberCoroutineScope()
             val heroPlayButtonFocusRequester = remember { FocusRequester() }
             
-            val hasHero = (state.heroItems.isNotEmpty() || state.serieAMatchHero != null) && !state.isListsTab && !state.isHistoryTab
+            // Hero Serie A attive nella rotazione: solo su tab Home.
+            val serieAHeroes = if (state.isHomeTab) state.serieAMatchHeroes else emptyList()
+            val hasHero = (state.heroItems.isNotEmpty() || serieAHeroes.isNotEmpty()) && !state.isListsTab && !state.isHistoryTab
 
             // Single sealed class for hero focus state - avoids triple mutableStateOf thrash
             var heroFocusState by remember { mutableStateOf<HeroFocusState>(HeroFocusState.None) }
@@ -590,14 +592,16 @@ private fun TvHomeScreenContent(
                 if (hasHero) {
                     val firstHeroId = state.heroItems.firstOrNull()?.id ?: 0
                     item(key = "hero_banner_$firstHeroId") {
-                        // La rotazione include la slide Serie A (sempre prima, se presente)
-                        val allHeroes = remember(state.heroItems, state.serieAMatchHero) {
-                            listOfNotNull(state.serieAMatchHero) + state.heroItems
+                        // Rotazione: slide Serie A (una per match, solo su Home) + hero del contenuto.
+                        val allHeroes = remember(serieAHeroes, state.heroItems) {
+                            serieAHeroes + state.heroItems
                         }
                         val currentHero = allHeroes.getOrNull(
                             ((state.currentHeroIndex % allHeroes.size) + allHeroes.size) % allHeroes.size
                         )
                         currentHero?.let { hero ->
+                            // Per una slide Serie A risolve il match esatto che sta mostrando.
+                            val currentMatch = state.serieAMatches.firstOrNull { it.id == hero.serieAMatchId }
                             // Track Hero focus state and handle UP/DOWN navigation
                             Box(
                                 modifier = Modifier
@@ -633,7 +637,7 @@ private fun TvHomeScreenContent(
                                     heroItem = hero,
                                     currentIndex = state.currentHeroIndex,
                                     totalCount = allHeroes.size,
-                                    serieAMatch = state.serieAMatch,
+                                    serieAMatch = currentMatch,
                                     isContinueWatching = state.isContinueWatchingHero,
                                     onPlayClick = { onHeroPlayClick(hero) },
                                     onInfoClick = { clickedHero -> onHeroClick(clickedHero) },
