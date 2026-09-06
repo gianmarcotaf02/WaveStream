@@ -1502,7 +1502,14 @@ fun HeroBanner(
                     onPrevClick()
                 },
                 onLeftPress = onRailFocusRequest,
-                onUpPress = { topBarFocusRequester?.requestFocus() },
+                onUpPress = {
+                    // FIX crash: topBarFocusRequester puo' non essere attachato
+                    // (requestFocus lancerebbe IllegalStateException). Il focus
+                    // search di default gestisce comunque UP.
+                    try {
+                        topBarFocusRequester?.requestFocus()
+                    } catch (_: IllegalStateException) { /* noop */ }
+                },
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .padding(start = 16.dp)
@@ -1515,7 +1522,12 @@ fun HeroBanner(
                     slideDirection = 1
                     onNextClick()
                 },
-                onUpPress = { topBarFocusRequester?.requestFocus() },
+                onUpPress = {
+                    // FIX crash: vedi nota sulla freccia sinistra
+                    try {
+                        topBarFocusRequester?.requestFocus()
+                    } catch (_: IllegalStateException) { /* noop */ }
+                },
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 16.dp)
