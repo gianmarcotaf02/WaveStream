@@ -44,15 +44,15 @@ enum class AccentColor(
     val light: Color,
     val dark: Color
 ) {
-    /** DEFAULT — Lagoon: bio-luminescente, l'identità WaveStream. */
+    Violet("violet", Color(0xFF8B5CF6), Color(0xFFA78BFA), Color(0xFF7C3AED)),
     Lagoon("lagoon", Color(0xFF23E0C4), Color(0xFF6FF2DF), Color(0xFF0BAE97)),
-    Ultraviolet("violet", Color(0xFF8B5CF6), Color(0xFFA78BFA), Color(0xFF7C3AED)),
     Tide("blue", Color(0xFF2E9BFF), Color(0xFF6FC4FF), Color(0xFF1E6FD0)),
     Ember("red", Color(0xFFFF4D3A), Color(0xFFFF8A7A), Color(0xFFD93A28)),
-    Glacier("green", Color(0xFF5AD1FF), Color(0xFF9BE4FF), Color(0xFF2F9FD0));
+    Glacier("green", Color(0xFF5AD1FF), Color(0xFF9BE4FF), Color(0xFF2F9FD0)),
+    Fuchsia("fuchsia", Color(0xFFFF2D92), Color(0xFFFF6BB3), Color(0xFFCC005F));
 
     companion object {
-        fun fromId(id: String): AccentColor = entries.find { it.id == id } ?: Lagoon
+        fun fromId(id: String): AccentColor = entries.find { it.id == id } ?: Violet
     }
 }
 
@@ -75,13 +75,13 @@ enum class AccentColor(
 object WaveStreamColors {
     val BrandPrimary = Color(0xFF000000)
 
-    private val _accent = mutableStateOf(AccentColor.Lagoon.primary)
+    private val _accent = mutableStateOf(AccentColor.Violet.primary)
     val Accent: Color get() = _accent.value
 
-    private val _accentLight = mutableStateOf(AccentColor.Lagoon.light)
+    private val _accentLight = mutableStateOf(AccentColor.Violet.light)
     val AccentLight: Color get() = _accentLight.value
 
-    private val _accentDark = mutableStateOf(AccentColor.Lagoon.dark)
+    private val _accentDark = mutableStateOf(AccentColor.Violet.dark)
     val AccentDark: Color get() = _accentDark.value
 
     val BrandSecondary: Color get() = Accent
