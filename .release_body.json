@@ -1,1 +1,0 @@
-{"tag_name":"1.0.12","name":"WaveStream 1.0.12","body":"## Corretto\n- **Avvio canali live**: fix del vincolo ExoPlayer sui buffer (minBuffer >= bufferForPlaybackAfterRebuffer) che poteva causare un errore all'avvio dei canali live. La latenza di zapping resta bassa (minBuffer 1.5s in live).","target_commitish":"main"}
