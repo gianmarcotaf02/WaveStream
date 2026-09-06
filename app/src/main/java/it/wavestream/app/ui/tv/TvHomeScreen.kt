@@ -2083,7 +2083,7 @@ fun CategoryFilterButton(
             modifier = Modifier
                 .width(320.dp)
                 .heightIn(max = 400.dp)
-                .background(Color.Black)  // OLED black
+                .background(WaveStreamColors.BackgroundElevated.copy(alpha = 0.94f))  // pannello flottante
         ) {
             // Search bar
             OutlinedTextField(

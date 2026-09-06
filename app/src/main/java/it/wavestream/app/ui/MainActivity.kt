@@ -1447,7 +1447,7 @@ private fun CategorySidebar(
         modifier = Modifier
             .width(280.dp)
             .fillMaxHeight()
-            .background(Color.Black)  // OLED black for premium look
+            .background(WaveStreamColors.BackgroundElevated.copy(alpha = 0.92f))  // pannello flottante, non nero pieno
     ) {
         // Header with close button
         Row(
