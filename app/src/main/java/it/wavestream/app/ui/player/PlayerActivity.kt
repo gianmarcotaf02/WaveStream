@@ -448,7 +448,8 @@ class PlayerActivity : ComponentActivity() {
         // Live TV keeps minimal buffers for low latency
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
-                if (isLive) 1_000 else 15_000,      // minBuffer (1s per zapping rapido)
+                // minBuffer deve essere >= bufferForPlaybackAfterRebuffer (vincolo ExoPlayer)
+                if (isLive) 1_500 else 15_000,      // minBuffer (1.5s: zapping rapido, >= afterRebuffer)
                 if (isLive) 8_000 else 30_000,      // maxBuffer (8s: latenza bassa senza stutter)
                 if (isLive) 800 else 2_500,         // bufferForPlayback (800ms: avvio rapido ma senza stutter su stream deboli)
                 if (isLive) 1_500 else 5_000        // bufferForPlaybackAfterRebuffer (più stabilità post-rebuffer)
