@@ -44,14 +44,15 @@ enum class AccentColor(
     val light: Color,
     val dark: Color
 ) {
-    Violet("violet", Color(0xFF8B5CF6), Color(0xFFA78BFA), Color(0xFF7C3AED)),
-    Red("red", Color(0xFFE50914), Color(0xFFFF4F4F), Color(0xFFB20710)),
-    Blue("blue", Color(0xFF0A84FF), Color(0xFF5AA9FF), Color(0xFF0062CC)),
-    Green("green", Color(0xFF30D158), Color(0xFF66E085), Color(0xFF249642)),
-    Fuchsia("fuchsia", Color(0xFFFF2D92), Color(0xFFFF6BB3), Color(0xFFCC005F));
+    /** DEFAULT — Lagoon: bio-luminescente, l'identità WaveStream. */
+    Lagoon("lagoon", Color(0xFF23E0C4), Color(0xFF6FF2DF), Color(0xFF0BAE97)),
+    Ultraviolet("violet", Color(0xFF8B5CF6), Color(0xFFA78BFA), Color(0xFF7C3AED)),
+    Tide("blue", Color(0xFF2E9BFF), Color(0xFF6FC4FF), Color(0xFF1E6FD0)),
+    Ember("red", Color(0xFFFF4D3A), Color(0xFFFF8A7A), Color(0xFFD93A28)),
+    Glacier("green", Color(0xFF5AD1FF), Color(0xFF9BE4FF), Color(0xFF2F9FD0));
 
     companion object {
-        fun fromId(id: String): AccentColor = entries.find { it.id == id } ?: Violet
+        fun fromId(id: String): AccentColor = entries.find { it.id == id } ?: Lagoon
     }
 }
 
