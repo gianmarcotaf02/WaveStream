@@ -94,8 +94,20 @@ object SerieATeamAliases {
      * the last one does NOT match ("hd" glued to the word is handled by
      * the right lookahead). E.g. "interhd" does not match "inter".
      */
+    /**
+     * Cache delle regex per alias: la compilazione è costosa e viene ripetuta
+     * per OGNI canale della playlist (decine di migliaia) — senza cache la ricerca
+     * canali impiega secondi anche su TV prestanti. Le parole distinte sono poche
+     * (~60 alias), quindi la cache è piccola e stabile. Regex è thread-safe.
+     */
+    private val regexCache = java.util.concurrent.ConcurrentHashMap<String, Regex>()
+
+    private fun wordRegex(word: String): Regex =
+        regexCache.getOrPut(word) {
+            Regex("(?<![a-z0-9])${Regex.escape(word)}(?![a-z0-9])")
+        }
+
     private fun String.containsWord(word: String): Boolean {
-        val regex = Regex("(?<![a-z0-9])${Regex.escape(word)}(?![a-z0-9])")
-        return regex.containsMatchIn(this)
+        return wordRegex(word).containsMatchIn(this)
     }
 }
