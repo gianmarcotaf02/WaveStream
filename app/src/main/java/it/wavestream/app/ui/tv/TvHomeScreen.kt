@@ -217,7 +217,7 @@ private fun TvHomeScreenContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(WaveStreamColors.BackgroundGradient)
     ) {
         if (state.isLoading) {
             // Loading state

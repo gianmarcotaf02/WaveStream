@@ -406,7 +406,7 @@ private fun CategorySidebar(
 ) {
     TvLazyColumn(
         modifier = modifier
-            .background(Color.Black)  // OLED black for premium look
+            .background(WaveStreamColors.BackgroundGradient)  // atmosfera oceanica, mai nero puro
             .padding(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {

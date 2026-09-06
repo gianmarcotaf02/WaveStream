@@ -443,9 +443,9 @@ private fun MainActivityScreen(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        WaveStreamColors.Accent.copy(alpha = 0.03f),
-                        Color.Black,
-                        Color.Black
+                        WaveStreamColors.Accent.copy(alpha = 0.045f),
+                        WaveStreamColors.GradientMiddle,
+                        WaveStreamColors.GradientBottom
                     )
                 )
             )
