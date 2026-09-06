@@ -103,7 +103,7 @@ data class HeroItem(
     val resumeEpisodeNumber: Int? = null,  // Episode number for resume (series only)
     val newEpisodeSeason: Int? = null,     // Season number for new episode (series only)
     val newEpisodeNumber: Int? = null,      // Episode number for new episode (series only)
-    val newEpisodeCaughtUp: Boolean = false // True solo se l'utente ha visto tutti gli episodi precedenti al nuovo
+    val newEpisodeCaughtUp: Boolean = false, // True solo se l'utente ha visto tutti gli episodi precedenti al nuovo
     val serieAMatchId: Long? = null           // Se contentType == "SERIEA_MATCH", id del match associato
 )
 
