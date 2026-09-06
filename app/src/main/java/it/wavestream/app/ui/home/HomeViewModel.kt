@@ -230,33 +230,39 @@ class HomeViewModel @Inject constructor(
     private fun refreshSerieAHero() {
         // Tempo corretto col server: l'orologio del dispositivo può essere sballato
         val now = serieAMatchRepository.adjustedNow()
-        var match = serieAUpcoming
+        // TUTTE le partite in finestra (kickoff -30' → kickoff +2h), live prima.
+        // Se alle 15:00 ci sono più match, ognuno diventa una propria slide hero.
+        var matches = serieAUpcoming
             .filter { it.isInHeroWindow(now) }
             .sortedWith(
                 compareByDescending<SerieAMatchEntity> { it.isLive }
                     .thenBy { it.utcDateMillis }
             )
-            .firstOrNull()
         // === DEBUG: forza l'hero Serie A anche fuori finestra (partita più vicina) ===
         // Ricordarsi di reimpostare a false prima del rilascio!
-        if (match == null && FORCE_SERIEA_HERO_DEBUG) {
-            match = serieAUpcoming
+        if (matches.isEmpty() && FORCE_SERIEA_HERO_DEBUG) {
+            val nearest = serieAUpcoming
                 .filter { it.status != "POSTPONED" && it.status != "CANCELLED" }
                 .minByOrNull { kotlin.math.abs(it.utcDateMillis - now) }
+            if (nearest != null) matches = listOf(nearest)
         }
         Log.d(
             "SerieA",
             "refreshSerieAHero: cached=${serieAUpcoming.size}, " +
-                "match=${match?.let { "${it.homeShortName}-${it.awayShortName} live=${it.isLive} " +
-                "kickoff=${java.util.Date(it.utcDateMillis)}" } ?: "none"}"
+                "heroMatches=${matches.size} -> " +
+                matches.take(3).joinToString("; ") { "${it.homeShortName}-${it.awayShortName} live=${it.isLive}" }
         )
+        val primary = matches.firstOrNull()
         _uiState.update { s ->
             s.copy(
-                serieAMatch = match,
-                serieAMatchHero = match?.let { serieAHeroItem(it) }
+                serieAMatches = matches,
+                serieAMatchHeroes = matches.map { serieAHeroItem(it) },
+                // Retro-compat: la primaria è la prima della lista (picker di default).
+                serieAMatch = primary,
+                serieAMatchHero = primary?.let { serieAHeroItem(it) }
             )
         }
-        manageSerieAPolling(match != null)
+        manageSerieAPolling(matches.isNotEmpty())
     }
 
     /** Mentre un match è in finestra hero, ri-sync ogni 60s: prima Sofascore
@@ -316,9 +322,13 @@ class HomeViewModel @Inject constructor(
         }
     )
 
-    /** Apre il dialog dei canali che trasmettono il match (matching per alias squadre). */
-    fun openSerieAChannelPicker() {
-        val match = _uiState.value.serieAMatch ?: return
+    /** Apre il dialog dei canali che trasmettono il match (matching per alias squadre).
+     *  Se [matchId] è null usa la primaria (prima partita in finestra). */
+    fun openSerieAChannelPicker(matchId: Long? = null) {
+        val match = _uiState.value.serieAMatches
+            .firstOrNull { it.id == matchId }
+            ?: _uiState.value.serieAMatch
+            ?: return
         _uiState.update {
             it.copy(
                 serieAChannelPicker = SerieAChannelPickerState(match, emptyList(), isLoading = true),
@@ -997,6 +1007,14 @@ class HomeViewModel @Inject constructor(
     }
 
     
+    /** Slide Serie A attive nella rotazione: solo su tab HOME (mai su Film/Serie/altro). */
+    private fun HomeScreenState.activeSerieAHeroes(): List<HeroItem> =
+        if (isHomeTab) serieAMatchHeroes else emptyList()
+
+    /** Elenco hero completo della rotazione (Serie A davanti, solo su Home). */
+    private fun HomeScreenState.allRotatingHeroes(): List<HeroItem> =
+        activeSerieAHeroes() + heroItems
+
     /**
      * Navigate to next hero
      */
@@ -1004,7 +1022,7 @@ class HomeViewModel @Inject constructor(
         // Preload the upcoming hero's backdrop so the 7s auto-rotation slides are seamless
         preloadAdjacentHeroBackdrop(offset = 1)
         _uiState.update { state ->
-            val total = state.heroItems.size + if (state.serieAMatchHero != null) 1 else 0
+            val total = state.allRotatingHeroes().size
             val newIndex = if (total > 0) (state.currentHeroIndex + 1) % total else 0
             state.copy(currentHeroIndex = newIndex)
         }
@@ -1017,7 +1035,7 @@ class HomeViewModel @Inject constructor(
         // Preload the upcoming hero's backdrop before navigating to it
         preloadAdjacentHeroBackdrop(offset = -1)
         _uiState.update { state ->
-            val total = state.heroItems.size + if (state.serieAMatchHero != null) 1 else 0
+            val total = state.allRotatingHeroes().size
             val newIndex = if (total > 0) {
                 if (state.currentHeroIndex == 0) total - 1
                 else state.currentHeroIndex - 1
@@ -1031,8 +1049,7 @@ class HomeViewModel @Inject constructor(
      */
     private fun preloadAdjacentHeroBackdrop(offset: Int) {
         val state = _uiState.value
-        // La rotazione include la slide Serie A (sempre prima)
-        val heroes = listOfNotNull(state.serieAMatchHero) + state.heroItems
+        val heroes = state.allRotatingHeroes()
         if (heroes.isNotEmpty()) {
             val index = (heroes.size + state.currentHeroIndex + offset) % heroes.size
             heroes.getOrNull(index)?.let { hero ->
