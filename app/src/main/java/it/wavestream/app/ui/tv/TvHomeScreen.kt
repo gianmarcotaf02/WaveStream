@@ -218,11 +218,8 @@ private fun TvHomeScreenContent(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundGradient)
+            .background(Color.Black)  // l'hero sfuma nel nero: qui va tenuto nero puro
     ) {
-        // Aurora ambientale animata — luce viva dietro il contenuto.
-        AuroraBackground()
-
         if (state.isLoading) {
             // Loading state
             SkeletonLoader()
