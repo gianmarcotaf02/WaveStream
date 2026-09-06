@@ -54,6 +54,15 @@
 
 # Coil (Image Loading)
 -keep class coil.** { *; }
+-keep interface coil.** { *; }
+-dontwarn coil.**
+
+# Okio — stack HTTP di OkHttp/Coil. Con R8 full mode (AGP 9, non disattivabile)
+# e proguard-android-optimize la sua omissione ha causato il mancato download
+# delle copertine dei canali in release (in debug, senza minify, tutto ok).
+-keep class okio.** { *; }
+-keep interface okio.** { *; }
+-dontwarn okio.**
 
 # Keep data classes for serialization
 -keepclassmembers class * implements java.io.Serializable {
