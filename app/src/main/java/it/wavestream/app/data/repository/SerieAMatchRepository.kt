@@ -12,7 +12,9 @@ import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.data.database.entity.SerieATeamChannelEntity
 import it.wavestream.app.data.parser.SerieATeamAliases
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -222,20 +224,20 @@ class SerieAMatchRepository @Inject constructor(
      * Playlist channels (all playlists) whose name contains an alias of either
      * team of [match], deduplicated by stream URL, sorted by name.
      */
-    suspend fun findChannelsForMatch(match: SerieAMatchEntity): List<Channel> {
+    suspend fun findChannelsForMatch(match: SerieAMatchEntity): List<Channel> = withContext(Dispatchers.IO) {
         val aliases = SerieATeamAliases.aliasesForMatch(
             homeTla = match.homeTla,
             homeShortName = match.homeShortName,
             awayTla = match.awayTla,
             awayShortName = match.awayShortName
         )
-        if (aliases.isEmpty()) return emptyList()
+        if (aliases.isEmpty()) return@withContext emptyList()
 
         val allChannels = channelDao.getAllChannelsList()
         val matchedHome = matchChannelsForTeam(allChannels, match.homeTla, match.homeShortName)
         val matchedAway = matchChannelsForTeam(allChannels, match.awayTla, match.awayShortName)
 
-        return (matchedHome + matchedAway)
+        return@withContext (matchedHome + matchedAway)
             .distinctBy { it.streamUrl }
             .sortedBy { it.name.lowercase() }
     }
@@ -244,14 +246,14 @@ class SerieAMatchRepository @Inject constructor(
      * Canali salvati localmente per le due squadre (lettura istantanea dal DB).
      * Usata per mostrare subito i canali prima della ricerca di aggiornamento.
      */
-    suspend fun getSavedChannelsForMatch(match: SerieAMatchEntity): List<Channel> {
+    suspend fun getSavedChannelsForMatch(match: SerieAMatchEntity): List<Channel> = withContext(Dispatchers.IO) {
         val tlas = listOf(match.homeTla, match.awayTla).filter { it.isNotBlank() }
-        if (tlas.isEmpty()) return emptyList()
+        if (tlas.isEmpty()) return@withContext emptyList()
         val savedUrls = serieATeamChannelDao.getByTeams(tlas)
             .map { it.channelStreamUrl }
             .toSet()
-        if (savedUrls.isEmpty()) return emptyList()
-        return channelDao.getAllChannelsList()
+        if (savedUrls.isEmpty()) return@withContext emptyList()
+        return@withContext channelDao.getAllChannelsList()
             .filter { it.streamUrl in savedUrls }
             .distinctBy { it.streamUrl }
             .sortedBy { it.name.lowercase() }
