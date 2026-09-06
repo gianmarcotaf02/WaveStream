@@ -161,24 +161,24 @@ fun TvHomeScreen(
     // facendo perdere il focus al D-pad (l'app sembrava bloccata).
     // Il reset delle tab è già garantito dall'AnimatedContent in MainActivity.
     TvHomeScreenContent(
-            state = state,
-            onItemClick = onItemClick,
-            onSeeAllClick = onSeeAllClick,
-            onPlayClick = onPlayClick,
-            onTopBarFocusRequest = onTopBarFocusRequest,
-            topBarFocusRequester = topBarFocusRequester,
-            onCreateListClick = onCreateListClick,
-            onHeroClick = onHeroClick,
-            onHeroPlayClick = onHeroPlayClick,
-            onNextHero = onNextHero,
-            onPrevHero = onPrevHero,
-            onToggleCategoryFilter = onToggleCategoryFilter,
-            onSelectAllCategories = onSelectAllCategories,
-            onClearCategoryFilters = onClearCategoryFilters,
-            onToggleHeroFavorite = onToggleHeroFavorite,
-            onAddHeroToPlaylist = onAddHeroToPlaylist,
-            onTrailerClick = onTrailerClick,
-            onMarkAsWatchedClick = onMarkAsWatchedClick,
+        state = state,
+        onItemClick = onItemClick,
+        onSeeAllClick = onSeeAllClick,
+        onPlayClick = onPlayClick,
+        onTopBarFocusRequest = onTopBarFocusRequest,
+        topBarFocusRequester = topBarFocusRequester,
+        onCreateListClick = onCreateListClick,
+        onHeroClick = onHeroClick,
+        onHeroPlayClick = onHeroPlayClick,
+        onNextHero = onNextHero,
+        onPrevHero = onPrevHero,
+        onToggleCategoryFilter = onToggleCategoryFilter,
+        onSelectAllCategories = onSelectAllCategories,
+        onClearCategoryFilters = onClearCategoryFilters,
+        onToggleHeroFavorite = onToggleHeroFavorite,
+        onAddHeroToPlaylist = onAddHeroToPlaylist,
+        onTrailerClick = onTrailerClick,
+        onMarkAsWatchedClick = onMarkAsWatchedClick,
         onRailFocusRequest = onRailFocusRequest,
         modifier = modifier
     )
@@ -591,8 +591,7 @@ private fun TvHomeScreenContent(
             ) {
                 // Hero Banner as first item
                 if (hasHero) {
-                    val firstHeroId = state.heroItems.firstOrNull()?.id ?: 0
-                    item(key = "hero_banner_$firstHeroId") {
+                    item(key = "hero_banner") {
                         // Rotazione: slide Serie A (una per match, solo su Home) + hero del contenuto.
                         val allHeroes = remember(serieAHeroes, state.heroItems) {
                             serieAHeroes + state.heroItems
