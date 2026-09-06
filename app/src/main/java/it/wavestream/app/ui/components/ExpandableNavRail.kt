@@ -79,15 +79,19 @@ fun ExpandableNavRail(
     // Merged two duplicate LaunchedEffect into one
     LaunchedEffect(isExpanded, selectedTab) {
         if (isExpanded) {
-            when (selectedTab) {
-                MainTab.HOME -> homeFocusRequester.requestFocus()
-                MainTab.MOVIES -> moviesFocusRequester.requestFocus()
-                MainTab.SERIES -> seriesFocusRequester.requestFocus()
-                MainTab.LIVE -> homeFocusRequester.requestFocus()
-                MainTab.FAVORITES -> favoritesFocusRequester.requestFocus()
-                MainTab.LISTS -> listsFocusRequester.requestFocus()
-                MainTab.HISTORY -> historyFocusRequester.requestFocus()
-            }
+            // try/catch: se gli item non sono ancora attachati requestFocus
+            // lancerebbe IllegalStateException e crasherebbe l'app
+            try {
+                when (selectedTab) {
+                    MainTab.HOME -> homeFocusRequester.requestFocus()
+                    MainTab.MOVIES -> moviesFocusRequester.requestFocus()
+                    MainTab.SERIES -> seriesFocusRequester.requestFocus()
+                    MainTab.LIVE -> homeFocusRequester.requestFocus()
+                    MainTab.FAVORITES -> favoritesFocusRequester.requestFocus()
+                    MainTab.LISTS -> listsFocusRequester.requestFocus()
+                    MainTab.HISTORY -> historyFocusRequester.requestFocus()
+                }
+            } catch (_: IllegalStateException) { /* noop */ }
         }
     }
     

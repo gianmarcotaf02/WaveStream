@@ -155,10 +155,12 @@ fun TvHomeScreen(
     onRailFocusRequest: () -> Unit = {},  // Called when LEFT from first carousel item
     modifier: Modifier = Modifier
 ) {
-    // Key scroll state on first hero ID to reset when switching tabs
-    val heroKey = state.heroItems.firstOrNull()?.id ?: 0
-    key(heroKey) {
-        TvHomeScreenContent(
+    // NOTA: niente key(heroKey) qui. La key forzava lo smontaggio completo del
+    // contenuto quando la lista hero si riordinava (es. refresh al ritorno dal
+    // player che inserisce la partita Serie A live in prima posizione),
+    // facendo perdere il focus al D-pad (l'app sembrava bloccata).
+    // Il reset delle tab è già garantito dall'AnimatedContent in MainActivity.
+    TvHomeScreenContent(
             state = state,
             onItemClick = onItemClick,
             onSeeAllClick = onSeeAllClick,
@@ -177,10 +179,9 @@ fun TvHomeScreen(
             onAddHeroToPlaylist = onAddHeroToPlaylist,
             onTrailerClick = onTrailerClick,
             onMarkAsWatchedClick = onMarkAsWatchedClick,
-            onRailFocusRequest = onRailFocusRequest,
-            modifier = modifier
-        )
-    }
+        onRailFocusRequest = onRailFocusRequest,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class, ExperimentalComposeUiApi::class)

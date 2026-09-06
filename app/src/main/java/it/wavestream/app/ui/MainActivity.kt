@@ -514,6 +514,7 @@ private fun MainActivityScreen(
                     }
                 },
                 searchButtonFocusRequester = searchButtonFocusRequester,
+                firstButtonFocusRequester = topBarFocusRequester,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -891,6 +892,7 @@ private fun MiniTopBar(
     onDownloadsClick: () -> Unit = {},
     onContentFocusRequest: () -> Unit = {},
     searchButtonFocusRequester: FocusRequester? = null,
+    firstButtonFocusRequester: FocusRequester? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -929,7 +931,8 @@ private fun MiniTopBar(
                 painter = androidx.compose.ui.res.painterResource(it.wavestream.app.R.drawable.dadi),
                 contentDescription = "Contenuto casuale",
                 onClick = onRandomClick,
-                onDownPress = onContentFocusRequest
+                onDownPress = onContentFocusRequest,
+                focusRequester = firstButtonFocusRequester
             )
             
             TopBarIconButton(
