@@ -409,36 +409,39 @@ fun DetailsScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Play button - compact text, remaining time shown separately
+                        // Play button - compatto: etichetta breve + badge SxEy ridotto
+                        // accanto al testo, così il bottone non si allarga e non schiaccia
+                        // gli altri pulsanti della riga (trailer, preferiti, liste...).
+                        val episodeBadgeRegex = remember { Regex("S\\d+E\\d+") }
+                        val nextEpisodeBadge = state.nextEpisodeInfo?.let { episodeBadgeRegex.find(it)?.value }
+                        val resumeBadge = run {
+                            // Il caso "Riprendi S1E1" non esiste: se l'episodio in corso è S1E1
+                            // mostro solo "Riprendi" (l'utente è ancora all'inizio della serie).
+                            val isS1E1 = state.resumeEpisodeSeason == 1 && state.resumeEpisodeNumber == 1
+                            if (!isS1E1 && state.resumeEpisodeSeason != null && state.resumeEpisodeNumber != null) {
+                                "S${state.resumeEpisodeSeason}E${state.resumeEpisodeNumber}"
+                            } else null
+                        }
+                        val seriesBadge = if (state.contentType == ContentType.SERIES) {
+                            // Serie mai iniziata: primo episodio della stagione selezionata (S1E1).
+                            // Con episodi non ancora caricati (sync in corso) mostri comunque S1E1 come default.
+                            state.episodes.minByOrNull { it.episodeNumber }
+                                ?.let { "S${it.seasonNumber}E${it.episodeNumber}" } ?: "S1E1"
+                        } else null
                         PlayButton(
                             text = when {
                                 // If there's a next episode to watch (previous completed)
-                                state.nextEpisodeInfo != null -> {
-                                    state.nextEpisodeInfo
-                                }
+                                state.nextEpisodeInfo != null -> "Riproduci"
                                 // If there's watch progress, show resume with S/E info only.
-                                // Il caso "Riprendi S1E1" non esiste: se l'episodio in corso è S1E1
-                                // mostro solo "Riprendi" (l'utente è ancora all'inizio della serie).
-                                state.resumeMinutes != null -> {
-                                    val isS1E1 = state.resumeEpisodeSeason == 1 && state.resumeEpisodeNumber == 1
-                                    if (!isS1E1 && state.resumeEpisodeSeason != null && state.resumeEpisodeNumber != null) {
-                                        "Riprendi S${state.resumeEpisodeSeason}E${state.resumeEpisodeNumber}"
-                                    } else {
-                                        "Riprendi"
-                                    }
-                                }
+                                state.resumeMinutes != null -> "Riprendi"
                                 state.contentType == ContentType.CHANNEL -> stringResource(R.string.watch_live)
-                                state.contentType == ContentType.SERIES -> {
-                                    // Serie mai iniziata: primo episodio della stagione selezionata (S1E1), bottone viola.
-                                    // Con episodi non ancora caricati (sync in corso) mostri comunque S1E1 come default.
-                                    val firstEpisode = state.episodes.minByOrNull { it.episodeNumber }
-                                    if (firstEpisode != null) {
-                                        "Riproduci S${firstEpisode.seasonNumber}E${firstEpisode.episodeNumber}"
-                                    } else {
-                                        "Riproduci S1E1"
-                                    }
-                                }
                                 else -> stringResource(R.string.play)
+                            },
+                            badge = when {
+                                state.nextEpisodeInfo != null -> nextEpisodeBadge
+                                state.resumeMinutes != null -> resumeBadge
+                                state.contentType == ContentType.SERIES -> seriesBadge
+                                else -> null
                             },
                             // Use white button for resume/next episode states
                             isResume = state.resumeMinutes != null || state.nextEpisodeInfo != null,
@@ -982,6 +985,7 @@ private fun ModernRatingItem(
 @Composable
 private fun PlayButton(
     text: String,
+    badge: String? = null,
     isResume: Boolean = false,
     resumeProgress: Float? = null,
     onClick: () -> Unit,
@@ -1055,6 +1059,18 @@ private fun PlayButton(
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1
             )
+            // Badge episodio (SxEy) — piccolo e leggermente attenuato,
+            // affiancato all'etichetta principale invece che incluso in essa
+            badge?.let {
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = contentColor.copy(alpha = 0.75f),
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
+                )
+            }
         }
         
         // Progress bar at bottom of button (for resume state)
