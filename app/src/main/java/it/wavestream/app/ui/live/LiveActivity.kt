@@ -1200,6 +1200,7 @@ private fun LiveCategoryGrid(
     }
 }
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun LiveCategoryCard(
     category: String,
