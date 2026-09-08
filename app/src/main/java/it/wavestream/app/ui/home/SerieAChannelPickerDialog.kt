@@ -97,6 +97,16 @@ private fun isItalianDaznCategory(category: String): Boolean {
     return c.contains("dazn") && COUNTRY_WORDS.none { c.contains(it) }
 }
 
+/** true se la categoria è "ammessa": non è esclusa dalla lista paesi. */
+private fun isAllowedCategory(category: String): Boolean {
+    val c = category.lowercase()
+    return COUNTRY_WORDS.none { c.contains(it) }
+}
+
+/** true se il canale si chiama "DAZN 1" (es. "DAZN 1", "DAZN 1 HD", "IT: DAZN 1"). */
+private fun isDazn1Channel(channel: Channel): Boolean =
+    channel.name.lowercase().contains("dazn 1")
+
 private enum class SerieAMatchTab(val label: String) {
     CANALI("Canali"),
     TABELLINO("Tabellino"),
@@ -244,7 +254,20 @@ private fun ChannelsTab(
         channels
             .groupBy { it.category?.trim()?.takeUnless { c -> c.isEmpty() } ?: "Altri canali" }
             .map { (category, chans) -> category to chans.sortedBy { it.name.lowercase() } }
-            .filter { (category, _) -> isItalianDaznCategory(category) }
+            .mapNotNull { (category, chans) ->
+                when {
+                    // Categoria DAZN italiana: mostra tutti i canali
+                    isItalianDaznCategory(category) -> category to chans
+                    // Categoria ammessa (non esclusa) che contiene canali "DAZN ":
+                    // mostra solo quelli, così DAZN 1 compare anche fuori dalle
+                    // categorie DAZN dedicate
+                    isAllowedCategory(category) -> {
+                        val dazn1 = chans.filter { isDazn1Channel(it) }
+                        if (dazn1.isNotEmpty()) category to dazn1 else null
+                    }
+                    else -> null
+                }
+            }
             .sortedBy { it.first.lowercase() }
     }
 
