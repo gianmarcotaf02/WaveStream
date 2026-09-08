@@ -404,10 +404,10 @@ private fun TvHomeScreenContent(
             }
         } else if (state.isFavoritesTab && state.carouselRows.isEmpty()) {
             // Empty state for Favorites/Preferiti tab
+            // Nessun padding top extra: il contenuto resta centrato verticalmente
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 120.dp),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -437,10 +437,10 @@ private fun TvHomeScreenContent(
             }
         } else if (state.isListsTab && state.carouselRows.isEmpty()) {
             // Empty state for Lists tab - show create first list prompt
+            // Nessun padding top extra: il contenuto resta centrato verticalmente
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 120.dp),
+                    .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

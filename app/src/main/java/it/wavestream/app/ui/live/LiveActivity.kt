@@ -7,10 +7,12 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -147,12 +149,20 @@ class LiveActivity : ComponentActivity() {
         }
         
         val onToggleFavorite: (String) -> Unit = { category ->
+            val wasFavorite = favoriteCategories.contains(category)
             lifecycleScope.launch(Dispatchers.IO) {
                 val profileId = userPreferences.getCurrentProfileId() ?: 1L
                 val item = FavoriteCategory(profileId = profileId, categoryType = "channels", categoryName = category)
                 favoriteCategoryDao.toggleFavoriteCategory(item)
                 val favs = favoriteCategoryDao.getFavoriteCategoriesByType(profileId, "channels")
                 favoriteCategories = favs.map { it.categoryName }.toSet()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@LiveActivity,
+                        if (wasFavorite) "\"$category\" rimossa dai preferiti" else "\"$category\" aggiunta ai preferiti",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
         
@@ -443,7 +453,8 @@ fun LiveScreen(
             categoryFocusRequester = categoryFocusRequester,
             onCategorySelect = onCategorySelect,
             onBackClick = onBackClick,
-            onMultiscreenClick = onMultiscreenClick
+            onMultiscreenClick = onMultiscreenClick,
+            onToggleFavorite = onToggleFavorite
         )
         return
     }
@@ -1090,7 +1101,8 @@ private fun LiveCategoryGrid(
     categoryFocusRequester: FocusRequester,
     onCategorySelect: (String) -> Unit,
     onBackClick: () -> Unit,
-    onMultiscreenClick: () -> Unit = {}
+    onMultiscreenClick: () -> Unit = {},
+    onToggleFavorite: (String) -> Unit = {}
 ) {
     val backFocusRequester = remember { FocusRequester() }
     val restoreIndex = if (restoreCategory != null) categories.indexOf(restoreCategory) else -1
@@ -1175,6 +1187,8 @@ private fun LiveCategoryGrid(
                     channelCount = count,
                     isFavorite = isFav,
                     onClick = { onCategorySelect(category) },
+                    // Tasto OK tenuto premuto ~2s = toggle preferito
+                    onLongClick = { onToggleFavorite(category) },
                     modifier = if (index == focusIndex) {
                         Modifier.focusRequester(categoryFocusRequester)
                     } else {
@@ -1192,6 +1206,7 @@ private fun LiveCategoryCard(
     channelCount: Int,
     isFavorite: Boolean,
     onClick: () -> Unit,
+    onLongClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -1219,8 +1234,9 @@ private fun LiveCategoryCard(
         colors[Math.abs(category.hashCode()) % colors.size]
     }
 
+    // Card non cliccabile + combinedClickable: così gestiamo sia il click
+    // (apre la categoria) sia il long-press (toggle preferiti) dal telecomando.
     Card(
-        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
@@ -1228,7 +1244,13 @@ private fun LiveCategoryCard(
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
-            },
+            }
+            .combinedClickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = WaveStreamColors.BackgroundSecondary

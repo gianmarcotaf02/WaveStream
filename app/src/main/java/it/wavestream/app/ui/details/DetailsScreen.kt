@@ -431,7 +431,7 @@ fun DetailsScreen(
                         PlayButton(
                             text = when {
                                 // If there's a next episode to watch (previous completed)
-                                state.nextEpisodeInfo != null -> "Riproduci"
+                                state.nextEpisodeInfo != null -> stringResource(R.string.play)
                                 // If there's watch progress, show resume with S/E info only.
                                 state.resumeMinutes != null -> "Riprendi"
                                 state.contentType == ContentType.CHANNEL -> stringResource(R.string.watch_live)
