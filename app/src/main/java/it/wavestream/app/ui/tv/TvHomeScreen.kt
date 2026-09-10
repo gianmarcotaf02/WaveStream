@@ -1016,7 +1016,13 @@ fun HeroBanner(
                     verticalArrangement = if (isMatchHero) Arrangement.Top else Arrangement.Bottom
                 ) {
                         // Title
-                        if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null) {
+                        // Badge "Nuovo episodio": SOLO se l'utente è "arrivato a quel punto"
+                        // (ha completato tutti gli episodi precedenti), come per il pulsante
+                        // play. Senza questo check il badge appariva anche su serie che si sta
+                        // guardando da un punto molto precedente al nuovo episodio.
+                        if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null &&
+                            hero.newEpisodeCaughtUp
+                        ) {
                             Box(
                                 modifier = Modifier
                                     .padding(bottom = 8.dp)
@@ -1025,22 +1031,6 @@ fun HeroBanner(
                             ) {
                                 Text(
                                     text = "Nuovo episodio S${hero.newEpisodeSeason} E${hero.newEpisodeNumber}",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                        // Prossimo episodio badge (for series with resume point)
-                        if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(4.dp))
-                                    .background(WaveStreamColors.Accent.copy(alpha = 0.9f))
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "Prossimo episodio S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber}",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold
