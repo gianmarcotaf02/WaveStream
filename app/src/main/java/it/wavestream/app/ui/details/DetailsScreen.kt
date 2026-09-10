@@ -403,10 +403,10 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(6.dp))
                     
-                    // Action buttons (allineati al bordo sinistro della colonna,
-                    // stessa partenza del testo "xx min rimasti" qui sotto)
+                    // Action buttons — leggermente indentati a destra rispetto al bordo
+                    // della colonna (il testo "xx min rimasti" qui sotto parte invece flush)
                     Row(
-                        modifier = Modifier,
+                        modifier = Modifier.padding(start = 10.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -751,8 +751,7 @@ private fun DetailsTopBar(
         label = "backScale"
     )
     
-    // Staccato dal bordo sinistro: piccolo margine a destra dello screenshot
-    Row(modifier = modifier.padding(start = 12.dp)) {
+    Row(modifier = modifier) {
         Box(
             modifier = Modifier
                 .graphicsLayer {
