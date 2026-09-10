@@ -70,6 +70,7 @@ class UserPreferences @Inject constructor(
         private val SUBTITLES_ENABLED = booleanPreferencesKey("subtitles_enabled")
         private val SKIP_INTRO_ENABLED = booleanPreferencesKey("skip_intro_enabled")
         private val AUTO_PLAY_NEXT = booleanPreferencesKey("auto_play_next")
+        private val CREDITS_DETECTION_ENABLED = booleanPreferencesKey("credits_detection_enabled")
         private val YOUTUBE_PLAYER_PACKAGE = stringPreferencesKey("youtube_player_package")
         
         // Playback
@@ -323,6 +324,23 @@ class UserPreferences @Inject constructor(
     
     fun getAutoPlayNextFlow(): Flow<Boolean> {
         return dataStore.data.map { it[AUTO_PLAY_NEXT] ?: true }
+    }
+
+    /**
+     * Rilevamento automatico dei titoli di coda (lettura frame, nessuna IA).
+     * Se attivo, l'overlay "Prossimo episodio" compare all'inizio dei credits
+     * invece che negli ultimi 10 secondi del file.
+     */
+    suspend fun setCreditsDetectionEnabled(enabled: Boolean) {
+        dataStore.edit { it[CREDITS_DETECTION_ENABLED] = enabled }
+    }
+
+    suspend fun getCreditsDetectionEnabled(): Boolean {
+        return dataStore.data.first()[CREDITS_DETECTION_ENABLED] ?: true
+    }
+
+    fun getCreditsDetectionEnabledFlow(): Flow<Boolean> {
+        return dataStore.data.map { it[CREDITS_DETECTION_ENABLED] ?: true }
     }
     
     suspend fun setYoutubePlayerPackage(packageName: String?) {
