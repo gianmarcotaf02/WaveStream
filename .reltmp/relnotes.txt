@@ -1,0 +1,6 @@
+- Dettaglio contenuto: fix definitivo del bottone "Riprendi" sproporzionato (la barra di avanzamento espandeva il pulsante); ora compatto, con il codice episodio (SxEy) sempre visibile e allineato al testo "min rimasti"
+- Home: pulsante play dell'hero compatto, con codice episodio dentro il box; altezza ridotta per i pulsanti serie TV
+- "Nuovo episodio": badge mostrato solo quando si è effettivamente arrivati a quel punto della serie; rimosso il badge "Prossimo episodio"
+- "Nuovo episodio" ora basato sul timestamp di inserimento del server (come "Aggiunti di recente"), non più sul momento del sync locale
+- Player: se si riproduce una serie mai aperta dal dettaglio, gli episodi vengono sincronizzati al volo (fix "URL streaming mancante") e i progressi con ID non più validi vengono rimappati correttamente
+- Rimozione dai "Continua a guardare": il contenuto non riappare più negli hero né nelle righe al prossimo avvio dell'app
