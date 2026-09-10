@@ -376,6 +376,7 @@ class LoadingActivity : ComponentActivity() {
         onStateUpdate: (LoadingState) -> Unit
     ) {
         try {
+            val epgMode = userPreferences.getEpgUpdateMode()
             val epgLastUpdate = userPreferences.getEpgLastUpdate()
             val epgInterval = userPreferences.getEpgUpdateInterval()
             val now = System.currentTimeMillis()
@@ -393,13 +394,21 @@ class LoadingActivity : ComponentActivity() {
             }
             
             val timeSinceUpdate = now - epgLastUpdate
-            val needsUpdate = forceRefresh || 
-                              (epgInterval == "startup") ||
-                              (intervalMs > 0 && timeSinceUpdate > intervalMs)
+            
+            // In modalità "manual" l'EPG NON si ricarica a ogni avvio: si aggiorna solo
+            // alla prima esecuzione (bootstrap, epgLastUpdate == 0) o con forceRefresh.
+            // La modalità "auto" segue invece l'intervallo impostato (startup/3h/6h/...).
+            val isManualMode = epgMode == "manual"
+            val needsUpdate = forceRefresh ||
+                              (isManualMode && epgLastUpdate == 0L) ||
+                              (!isManualMode && (
+                                  epgInterval == "startup" ||
+                                  (intervalMs > 0 && timeSinceUpdate > intervalMs)
+                              ))
             
             if (!needsUpdate) {
                 val hoursAgo = timeSinceUpdate / (60 * 60 * 1000)
-                android.util.Log.d("LoadingActivity", "EPG cache still valid (updated ${hoursAgo}h ago)")
+                android.util.Log.d("LoadingActivity", "EPG cache still valid (updated ${hoursAgo}h ago, mode=$epgMode)")
                 return
             }
             
