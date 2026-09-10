@@ -1,6 +1,8 @@
 package it.wavestream.app.ui.player
 
+import android.graphics.Bitmap
 import android.os.Build
+import android.view.SurfaceView
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -53,11 +55,14 @@ import coil.compose.AsyncImage
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import it.wavestream.app.player.CreditsDetector
+import it.wavestream.app.player.ScreenFrameCapture
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.theme.GlassTokens
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 
 /**
  * Modern TV Player Screen with clean, fluid design
@@ -105,6 +110,8 @@ fun TvPlayerScreen(
     hasNextEpisode: Boolean = false,
     hasPreviousEpisode: Boolean = false,
     onPlayPrevious: () -> Unit = {},
+    creditsDetectionEnabled: Boolean = true,
+    onCreditsDetected: () -> Unit = {},
     cumulativeSeekSeconds: Int = 0,
     seekIndicatorVisible: Boolean = false,
     showStillWatching: Boolean = false,
@@ -113,6 +120,18 @@ fun TvPlayerScreen(
 ) {
     val centerFocusRequester = remember { FocusRequester() }
     val bottomFirstFocusRequester = remember { FocusRequester() }
+
+    // Riferimento alla view del player: serve per leggere i frame (rilevamento titoli di coda)
+    val playerViewState = remember { mutableStateOf<PlayerView?>(null) }
+
+    CreditsWatchdog(
+        playerView = playerViewState.value,
+        enabled = creditsDetectionEnabled,
+        isLiveChannel = isLiveChannel,
+        positionMs = currentPosition,
+        durationMs = duration,
+        onCreditsDetected = onCreditsDetected
+    )
     
     // Show controls when seeking
     LaunchedEffect(seekIndicatorVisible) {
@@ -173,6 +192,7 @@ fun TvPlayerScreen(
                     this.player = player
                     useController = false
                     setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
+                    playerViewState.value = this
                 }
             },
             update = { it.player = player },
@@ -1892,3 +1912,87 @@ private fun getPlayerCurrentTime(): String {
     return formatter.format(java.util.Date())
 }
 
+
+// ============================================================================
+// Rilevamento titoli di coda (lettura frame, nessuna IA)
+// ============================================================================
+
+private const val CREDITS_TAG = "CreditsWatchdog"
+private const val CREDITS_MAX_CAPTURE_FAILURES = 3
+
+/**
+ * Campiona periodicamente un frame del video e chiede a [CreditsDetector] se sono
+ * iniziati i titoli di coda. Quando il rilevamento è confermato chiama
+ * [onCreditsDetected] una sola volta per episodio.
+ *
+ * Il campionamento avviene solo negli ultimi minuti del contenuto (vedi
+ * [CreditsDetector.WINDOW_MS]) e mai su canali live o in mini player.
+ * In caso di catture non disponibili (surface protette, box problematici) il
+ * watchdog si spegne silenziosamente e resta attivo il trigger temporale del player.
+ */
+@Composable
+private fun CreditsWatchdog(
+    playerView: PlayerView?,
+    enabled: Boolean,
+    isLiveChannel: Boolean,
+    positionMs: Long,
+    durationMs: Long,
+    onCreditsDetected: () -> Unit
+) {
+    val latestPosition by rememberUpdatedState(positionMs)
+    val latestDuration by rememberUpdatedState(durationMs)
+    val latestCallback by rememberUpdatedState(onCreditsDetected)
+
+    LaunchedEffect(enabled, isLiveChannel, playerView) {
+        if (!enabled || isLiveChannel || playerView == null) return@LaunchedEffect
+
+        val detector = CreditsDetector()
+        var frame: Bitmap? = null
+        var failedCaptures = 0
+
+        while (isActive && !detector.isTriggered) {
+            delay(CreditsDetector.SAMPLE_INTERVAL_MS)
+
+            val duration = latestDuration
+            if (duration <= 0L) continue
+
+            val position = latestPosition
+            val remaining = duration - position
+            if (position < CreditsDetector.MIN_POSITION_MS || remaining > CreditsDetector.WINDOW_MS) {
+                // Fuori dalla finestra utile: nuovo episodio o seek verso l'inizio
+                detector.reset()
+                continue
+            }
+            if (remaining < 1_000L) continue
+
+            val surfaceView = playerView.videoSurfaceView as? SurfaceView ?: break
+            val width = surfaceView.width
+            val height = surfaceView.height
+            if (width <= 0 || height <= 0) continue
+
+            var bitmap = frame
+            if (bitmap == null || bitmap.width != width || bitmap.height != height) {
+                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                frame = bitmap
+            }
+
+            if (!ScreenFrameCapture.capture(surfaceView, bitmap)) {
+                failedCaptures++
+                if (failedCaptures >= CREDITS_MAX_CAPTURE_FAILURES) {
+                    android.util.Log.d(
+                        CREDITS_TAG,
+                        "Frame non leggibili: rilevamento credits disattivato per questo episodio"
+                    )
+                    break
+                }
+                continue
+            }
+            failedCaptures = 0
+
+            if (detector.analyze(bitmap).triggered) {
+                android.util.Log.d(CREDITS_TAG, "Notifica titoli di coda al player")
+                latestCallback()
+            }
+        }
+    }
+}
