@@ -403,9 +403,10 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(6.dp))
                     
-                    // Action buttons
+                    // Action buttons (allineati al bordo sinistro della colonna,
+                    // stessa partenza del testo "xx min rimasti" qui sotto)
                     Row(
-                        modifier = Modifier.padding(start = 14.dp),
+                        modifier = Modifier,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -415,10 +416,9 @@ fun DetailsScreen(
                         val episodeBadgeRegex = remember { Regex("S\\d+E\\d+") }
                         val nextEpisodeBadge = state.nextEpisodeInfo?.let { episodeBadgeRegex.find(it)?.value }
                         val resumeBadge = run {
-                            // Il caso "Riprendi S1E1" non esiste: se l'episodio in corso è S1E1
-                            // mostro solo "Riprendi" (l'utente è ancora all'inizio della serie).
-                            val isS1E1 = state.resumeEpisodeSeason == 1 && state.resumeEpisodeNumber == 1
-                            if (!isS1E1 && state.resumeEpisodeSeason != null && state.resumeEpisodeNumber != null) {
+                            // Codice episodio corrente SEMPRE visibile nel bottone
+                            // (incluso S1E1: l'utente vuole vedere l'episodio in corso)
+                            if (state.resumeEpisodeSeason != null && state.resumeEpisodeNumber != null) {
                                 "S${state.resumeEpisodeSeason}E${state.resumeEpisodeNumber}"
                             } else null
                         }
@@ -758,7 +758,7 @@ private fun DetailsTopBar(
                 scaleX = scale
                 scaleY = scale
             }
-                .size(48.dp)
+                .size(36.dp)
                 .clip(CircleShape)
                 .background(WaveStreamColors.BackgroundTertiary.copy(alpha = 0.8f))
                 .focusable(interactionSource = interactionSource)
@@ -773,7 +773,7 @@ private fun DetailsTopBar(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 tint = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(18.dp)
             )
         }
     }
