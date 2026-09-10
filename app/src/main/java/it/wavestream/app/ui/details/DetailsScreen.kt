@@ -1025,8 +1025,8 @@ private fun PlayButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .widthIn(min = 120.dp)
-            .height(52.dp)
+            .widthIn(min = if (badge != null) 132.dp else 120.dp)
+            .height(if (badge != null) 62.dp else 52.dp)
             .border(3.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
@@ -1040,34 +1040,60 @@ private fun PlayButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Button content
-        Row(
-            modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                color = contentColor,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1
-            )
-            // Badge episodio (SxEy) — piccolo e leggermente attenuato,
-            // affiancato all'etichetta principale invece che incluso in essa
-            badge?.let {
-                Spacer(modifier = Modifier.width(6.dp))
+        if (badge != null) {
+            // Layout verticale: etichetta principale in alto e codice episodio
+            // (SxEy) subito sotto, in piccolo — entrambi DENTRO il box del bottone.
+            // Mantiene il pulsante compatto in larghezza.
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(horizontal = 20.dp).padding(top = 2.dp, bottom = 6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = contentColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = text,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = contentColor,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1
+                    )
+                }
+                Spacer(modifier = Modifier.height(1.dp))
                 Text(
-                    text = it,
+                    text = badge,
                     style = MaterialTheme.typography.labelSmall,
-                    color = contentColor.copy(alpha = 0.75f),
-                    fontWeight = FontWeight.Medium,
+                    color = contentColor.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+            }
+        } else {
+            // Button content (senza badge): icona + testo su una sola riga
+            Row(
+                modifier = Modifier.padding(horizontal = 24.dp).padding(bottom = 2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = null,
+                    tint = contentColor,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = contentColor,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 1
                 )
             }
