@@ -622,15 +622,25 @@ class PlayerActivity : ComponentActivity() {
                     if (episode != null && progress.isCompleted) {
                         findNextUnwatchedEpisode(episode)?.let { episode = it }
                     }
+                    // Id orfano nei progressi: un re-sync rigenera le PK degli episodi
+                    // (INSERT OR REPLACE) → il vecchio contentId può non esistere più.
+                    // Rimappiamo via (stagione, numero episodio) salvati nel progresso.
+                    if (episode == null && (progress.season ?: 0) > 0 && (progress.episode ?: 0) > 0) {
+                        episode = episodeDao.getEpisode(contentId, progress.season!!, progress.episode!!)
+                        if (episode != null && progress.isCompleted) {
+                            findNextUnwatchedEpisode(episode)?.let { episode = it }
+                        }
+                    }
                 }
                 if (episode == null) {
-                    // No progress (o progresso orfano) - try to get first episode
+                    // No progress (o progresso non rimappabile) — primo episodio disponibile
                     episode = episodeDao.getFirstEpisodeForSeries(contentId)
                 }
                 // Gli episodi vengono sincronizzati nel DB solo aprendo il dettaglio della
                 // serie: se il play arriva direttamente dall'hero (senza passare dal
                 // dettaglio) la tabella episodes può essere vuota e si finiva con
-                // "URL streaming mancante". Sincronizziamo ora dal provider e riproviamo.
+                // "URL streaming mancante" — sia col bottone "Riproduci" sia con
+                // "Riprendi". Sincronizziamo ora dal provider e riproviamo.
                 if (episode == null) {
                     android.util.Log.d("PlayerActivity", "Nessun episodio in DB per la serie $contentId — sync episodi dal provider…")
                     android.widget.Toast.makeText(this@PlayerActivity, "Caricamento episodi in corso…", android.widget.Toast.LENGTH_SHORT).show()
@@ -639,8 +649,14 @@ class PlayerActivity : ComponentActivity() {
                     } catch (e: Exception) {
                         android.util.Log.e("PlayerActivity", "Sync episodi fallita per serie $contentId: ${e.message}")
                     }
-                    episode = episodeDao.getFirstEpisodeForSeries(contentId)
-                        ?: progress?.let { episodeDao.getEpisodeById(it.contentId) }
+                    if (progress != null && (progress.season ?: 0) > 0 && (progress.episode ?: 0) > 0) {
+                        // Riprendi: risale all'episodio del progresso via (stagione, episodio)
+                        episode = episodeDao.getEpisode(contentId, progress.season!!, progress.episode!!)
+                        if (episode != null && progress.isCompleted) {
+                            findNextUnwatchedEpisode(episode)?.let { episode = it }
+                        }
+                    }
+                    episode = episode ?: episodeDao.getFirstEpisodeForSeries(contentId)
                 }
                 if (episode != null) {
                     // Update local state for proper progress tracking
