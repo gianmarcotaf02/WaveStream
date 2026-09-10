@@ -94,6 +94,7 @@ class PlayerActivity : ComponentActivity() {
     private val _hasNextEpisode = mutableStateOf(false)
     private val _hasPreviousEpisode = mutableStateOf(false)
     private val _creditsDetectionEnabled = mutableStateOf(true)
+    private val _creditsDebugEnabled = mutableStateOf(false)
     private val _controlsVisible = mutableStateOf(true)
 
     // Live/DVR state (solo canali live) - timeshift stile Sky/DAZN
@@ -341,6 +342,7 @@ class PlayerActivity : ComponentActivity() {
             // Check auto-play preferences
             _autoPlayNextEnabled.value = userPreferences.getAutoPlayNext()
             _creditsDetectionEnabled.value = userPreferences.getCreditsDetectionEnabled()
+            _creditsDebugEnabled.value = userPreferences.getCreditsDebugEnabled()
             
             // Check if next episode exists
             val next = playNextManager.getNext(
@@ -422,6 +424,7 @@ class PlayerActivity : ComponentActivity() {
                     onPlayPrevious = { playPreviousEpisode() },
                     creditsDetectionEnabled = _creditsDetectionEnabled.value,
                     onCreditsDetected = { onCreditsDetected() },
+                    creditsDetectionDebug = _creditsDebugEnabled.value,
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
                     onReturnToLive = { returnToLive() },

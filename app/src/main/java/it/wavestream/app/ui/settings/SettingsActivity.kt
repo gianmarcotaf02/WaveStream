@@ -1319,6 +1319,7 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
     val subtitleLanguage by userPreferences.getDefaultSubtitleLanguageFlow().collectAsState(initial = "ita")
     val subtitlesEnabled by userPreferences.getSubtitlesEnabledFlow().collectAsState(initial = false)
     val creditsDetectionEnabled by userPreferences.getCreditsDetectionEnabledFlow().collectAsState(initial = true)
+    val creditsDebugEnabled by userPreferences.getCreditsDebugEnabledFlow().collectAsState(initial = false)
     
     SettingsSection(title = "Player") {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -1346,6 +1347,12 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
                 label = "Rileva titoli di coda (prossimo episodio)",
                 checked = creditsDetectionEnabled,
                 onCheckedChange = { coroutineScope.launch { userPreferences.setCreditsDetectionEnabled(it) } }
+            )
+
+            SettingsSwitch(
+                label = "Debug rilevamento titoli di coda (mostra a video le metriche)",
+                checked = creditsDebugEnabled,
+                onCheckedChange = { coroutineScope.launch { userPreferences.setCreditsDebugEnabled(it) } }
             )
             
             // Seek settings
