@@ -1026,7 +1026,8 @@ private fun PlayButton(
                 scaleY = scale
             }
             .widthIn(min = if (badge != null) 132.dp else 120.dp)
-            .height(if (badge != null) 62.dp else 52.dp)
+            // Serie TV (badge episodio): altezza ridotta — il codice SxEy sta sotto in piccolo
+            .height(if (badge != null) 56.dp else 52.dp)
             .border(3.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)

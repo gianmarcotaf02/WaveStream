@@ -1318,7 +1318,8 @@ fun HeroBanner(
                                         spotShadowColor = WaveStreamColors.Accent
                                     }
                                     .then(if (playButtonFocusRequester != null) Modifier.focusRequester(playButtonFocusRequester) else Modifier)
-                                    .height(if (buttonBadge != null) 62.dp else 52.dp)
+                                    // Serie TV (badge episodio): altezza ridotta rispetto ai film
+                                    .height(if (buttonBadge != null) 56.dp else 52.dp)
                                     .wrapContentWidth()
                                     .widthIn(min = 140.dp)
                                     .clip(RoundedCornerShape(12.dp))
