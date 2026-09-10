@@ -63,6 +63,7 @@ class PlayerActivity : ComponentActivity() {
     @Inject lateinit var seriesDao: it.wavestream.app.data.database.dao.SeriesDao
     @Inject lateinit var channelDao: it.wavestream.app.data.database.dao.ChannelDao
     @Inject lateinit var episodeDao: it.wavestream.app.data.database.dao.EpisodeDao
+    @Inject lateinit var playlistRepository: it.wavestream.app.data.repository.PlaylistRepository
     @Inject lateinit var downloadContentManager: DownloadContentManager
     @Inject lateinit var downloadedContentDao: DownloadedContentDao
     
@@ -613,40 +614,45 @@ class PlayerActivity : ComponentActivity() {
             ContentType.SERIES -> {
                 // For series, find the most recent episode being watched
                 val progress = watchProgressDao.getSeriesProgress(profileId, contentId)
+                var episode: it.wavestream.app.data.database.entity.Episode? = null
                 if (progress != null) {
-                    // Get episode stream URL from episodeDao
-                    var episode = episodeDao.getEpisodeById(progress.contentId)
+                    episode = episodeDao.getEpisodeById(progress.contentId)
                     // Se l'ultimo episodio visto è completato, passa al successivo non ancora visto
                     // (coerente col detail view: "Riproduci SxEy" dopo aver finito un episodio)
                     if (episode != null && progress.isCompleted) {
                         findNextUnwatchedEpisode(episode)?.let { episode = it }
                     }
-                    if (episode != null) {
-                        // Update local state for proper progress tracking
-                        this.seriesId = contentId
-                        this.contentId = episode.id
-                        this.contentType = ContentType.EPISODE
-                        this.season = episode.seasonNumber
-                        this.episode = episode.episodeNumber
-                        this.subtitle = "Stagione ${episode.seasonNumber} Episodio ${episode.episodeNumber}"
-                        episode.streamUrl
-                    } else {
-                        null
+                }
+                if (episode == null) {
+                    // No progress (o progresso orfano) - try to get first episode
+                    episode = episodeDao.getFirstEpisodeForSeries(contentId)
+                }
+                // Gli episodi vengono sincronizzati nel DB solo aprendo il dettaglio della
+                // serie: se il play arriva direttamente dall'hero (senza passare dal
+                // dettaglio) la tabella episodes può essere vuota e si finiva con
+                // "URL streaming mancante". Sincronizziamo ora dal provider e riproviamo.
+                if (episode == null) {
+                    android.util.Log.d("PlayerActivity", "Nessun episodio in DB per la serie $contentId — sync episodi dal provider…")
+                    android.widget.Toast.makeText(this@PlayerActivity, "Caricamento episodi in corso…", android.widget.Toast.LENGTH_SHORT).show()
+                    try {
+                        playlistRepository.loadSeriesEpisodes(contentId)
+                    } catch (e: Exception) {
+                        android.util.Log.e("PlayerActivity", "Sync episodi fallita per serie $contentId: ${e.message}")
                     }
+                    episode = episodeDao.getFirstEpisodeForSeries(contentId)
+                        ?: progress?.let { episodeDao.getEpisodeById(it.contentId) }
+                }
+                if (episode != null) {
+                    // Update local state for proper progress tracking
+                    this.seriesId = contentId
+                    this.contentId = episode.id
+                    this.contentType = ContentType.EPISODE
+                    this.season = episode.seasonNumber
+                    this.episode = episode.episodeNumber
+                    this.subtitle = "Stagione ${episode.seasonNumber} Episodio ${episode.episodeNumber}"
+                    episode.streamUrl
                 } else {
-                    // No progress - try to get first episode
-                    val firstEpisode = episodeDao.getFirstEpisodeForSeries(contentId)
-                    if (firstEpisode != null) {
-                        this.seriesId = contentId
-                        this.contentId = firstEpisode.id
-                        this.contentType = ContentType.EPISODE
-                        this.season = firstEpisode.seasonNumber
-                        this.episode = firstEpisode.episodeNumber
-                        this.subtitle = "Stagione ${firstEpisode.seasonNumber} Episodio ${firstEpisode.episodeNumber}"
-                        firstEpisode.streamUrl
-                    } else {
-                        null
-                    }
+                    null
                 }
             }
             ContentType.CHANNEL -> {
