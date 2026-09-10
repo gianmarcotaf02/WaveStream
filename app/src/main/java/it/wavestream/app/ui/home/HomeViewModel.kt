@@ -1416,9 +1416,13 @@ class HomeViewModel @Inject constructor(
                     Log.d("HomeViewModel", "loadHeroItems: popular heroes added, total now=${mergedHeroes.size}")
                 }
 
-                val hasAnyCW = mergedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
-                Log.d("HomeViewModel", "loadHeroItems: final mergedHeroes=${mergedHeroes.size}, hasAnyCW=$hasAnyCW")
-                HeroPairData(mergedHeroes.toList(), hasAnyCW)
+                // Arricchisce TUTTI gli hero col progresso reale dal DB: anche gli hero
+                // da raccomandazione/popolari mostrano così "Riprendi SxEy" invece del
+                // fallback S1E1 (bug: hero senza resume info pur avendo contenuti in corso).
+                val enrichedHeroes = refreshHeroItemsWatchProgress(mergedHeroes.toList())
+                val hasAnyCW = enrichedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
+                Log.d("HomeViewModel", "loadHeroItems: final mergedHeroes=${enrichedHeroes.size}, hasAnyCW=$hasAnyCW")
+                HeroPairData(enrichedHeroes, hasAnyCW)
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading hero items: ${e.message}", e)
                 null
@@ -2229,9 +2233,11 @@ class HomeViewModel @Inject constructor(
                     Log.d("HomeViewModel", "loadHomeHeroItems: popular heroes added, total now=${mergedHeroes.size}")
                 }
 
-                val hasAnyCW = mergedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
-                Log.d("HomeViewModel", "loadHomeHeroItems: final mergedHeroes=${mergedHeroes.size}, hasAnyCW=$hasAnyCW")
-                if (mergedHeroes.isNotEmpty()) HeroPairData(mergedHeroes.toList(), hasAnyCW) else null
+                // Arricchisce TUTTI gli hero col progresso reale dal DB (anche raccomandazioni)
+                val enrichedHeroes = refreshHeroItemsWatchProgress(mergedHeroes.toList())
+                val hasAnyCW = enrichedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
+                Log.d("HomeViewModel", "loadHomeHeroItems: final mergedHeroes=${enrichedHeroes.size}, hasAnyCW=$hasAnyCW")
+                if (enrichedHeroes.isNotEmpty()) HeroPairData(enrichedHeroes, hasAnyCW) else null
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading home heroes", e)
                 null
