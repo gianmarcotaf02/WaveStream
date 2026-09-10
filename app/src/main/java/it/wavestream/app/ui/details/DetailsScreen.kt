@@ -751,7 +751,8 @@ private fun DetailsTopBar(
         label = "backScale"
     )
     
-    Row(modifier = modifier) {
+    // Staccato dal bordo sinistro: piccolo margine a destra dello screenshot
+    Row(modifier = modifier.padding(start = 12.dp)) {
         Box(
             modifier = Modifier
                 .graphicsLayer {
