@@ -572,6 +572,40 @@ class HomeViewModel @Inject constructor(
                     Log.d("HomeViewModel", "Marked as watched (series): ${hero.title} (seriesId=${hero.id})")
                 }
                 
+                // Rimuovi il contenuto anche dalle cache persistite su disco (hero + riga
+                // "Continua a guardare"): al prossimo avvio NON deve riprendere il posto
+                // di altri contenuti negli hero/raccomandazioni.
+                try {
+                    HomeContentType.entries.forEach { tab ->
+                        // Hero persistiti
+                        cachedHeroItems[tab]?.let { cached ->
+                            val filtered = cached.heroes.filter { h ->
+                                !(h.id == hero.id && h.contentType == hero.contentType)
+                            }
+                            if (filtered.size != cached.heroes.size) {
+                                cachedHeroItems[tab] = HeroPairData(filtered, cached.isContinueWatching)
+                            }
+                        }
+                        // Riga "Continua a guardare" nelle righe carosello persistite
+                        cachedCarouselRows[tab]?.let { rows ->
+                            val cwIndex = rows.indexOfFirst { it.title == "Continua a guardare" }
+                            if (cwIndex >= 0) {
+                                val cwRow = rows[cwIndex]
+                                if (cwRow.items.any { it.id == hero.id && it.contentType == hero.contentType }) {
+                                    val updatedCw = cwRow.copy(items = cwRow.items.filter {
+                                        !(it.id == hero.id && it.contentType == hero.contentType)
+                                    })
+                                    val newRows = rows.toMutableList()
+                                    if (updatedCw.items.isEmpty()) newRows.removeAt(cwIndex) else newRows[cwIndex] = updatedCw
+                                    cachedCarouselRows[tab] = newRows
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "markAsWatched: errore aggiornando le cache persistite", e)
+                }
+                
                 // Force refresh to update the UI
                 withContext(Dispatchers.Main) {
                     forceRefresh()
