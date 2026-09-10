@@ -1285,28 +1285,33 @@ fun HeroBanner(
                                 label = "playBorder"
                             )
 
-                            val buttonText = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber, hero.newEpisodeCaughtUp, hero.contentType) {
-                                if (hero.contentType == "SERIEA_MATCH") {
-                                    "Guarda adesso"
-                                } else if (isInProgress) {
-                                    val episodeInfo = if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
-                                        "S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber} - "
-                                    } else ""
-                                    "${episodeInfo}Riprendi"
-                                } else if (isNextEpisode) {
-                                    val episodeInfo = if (hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null) {
-                                        "S${hero.resumeEpisodeSeason} E${hero.resumeEpisodeNumber} - "
-                                    } else ""
-                                    "${episodeInfo}Guarda il successivo"
-                                } else if (hero.newEpisodeSeason != null && hero.newEpisodeNumber != null && hero.newEpisodeCaughtUp) {
+                            // Etichetta compatta + badge episodio separato (SxEy).
+                            // Il codice NON è più anteposto/incluso nell'etichetta: così il
+                            // pulsante resta stretto e non spinge fuori gli altri pulsanti.
+                            val buttonLabel = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber, hero.newEpisodeCaughtUp, hero.contentType) {
+                                when {
+                                    hero.contentType == "SERIEA_MATCH" -> "Guarda adesso"
+                                    isInProgress -> "Riprendi"
+                                    isNextEpisode -> "Guarda il successivo"
                                     // Il bottone porta al nuovo episodio SOLO se l'utente ha visto
                                     // tutti gli episodi precedenti; altrimenti comportamento normale
-                                    "Nuovo episodio S${hero.newEpisodeSeason} E${hero.newEpisodeNumber}"
-                                } else if (hero.contentType == "SERIES") {
+                                    hero.newEpisodeSeason != null && hero.newEpisodeNumber != null && hero.newEpisodeCaughtUp -> "Nuovo episodio"
                                     // Serie mai iniziata (o non ancora arrivati al nuovo episodio): primo episodio
-                                    "Riproduci S1E1"
-                                } else {
-                                    "Riproduci"
+                                    else -> "Riproduci"
+                                }
+                            }
+                            // Codice episodio mostrato in piccolo SOTTO l'etichetta, dentro il box
+                            val buttonBadge = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber, hero.newEpisodeCaughtUp, hero.contentType) {
+                                when {
+                                    hero.contentType == "SERIEA_MATCH" -> null
+                                    isInProgress && hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null ->
+                                        "S${hero.resumeEpisodeSeason}E${hero.resumeEpisodeNumber}"
+                                    isNextEpisode && hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null ->
+                                        "S${hero.resumeEpisodeSeason}E${hero.resumeEpisodeNumber}"
+                                    hero.newEpisodeSeason != null && hero.newEpisodeNumber != null && hero.newEpisodeCaughtUp ->
+                                        "S${hero.newEpisodeSeason}E${hero.newEpisodeNumber}"
+                                    hero.contentType == "SERIES" -> "S1E1"
+                                    else -> null
                                 }
                             }
 
@@ -1323,7 +1328,7 @@ fun HeroBanner(
                                         spotShadowColor = WaveStreamColors.Accent
                                     }
                                     .then(if (playButtonFocusRequester != null) Modifier.focusRequester(playButtonFocusRequester) else Modifier)
-                                    .height(52.dp)
+                                    .height(if (buttonBadge != null) 62.dp else 52.dp)
                                     .wrapContentWidth()
                                     .widthIn(min = 140.dp)
                                     .clip(RoundedCornerShape(12.dp))
@@ -1337,29 +1342,70 @@ fun HeroBanner(
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxHeight()
-                                        .padding(horizontal = 24.dp)
-                                        .padding(bottom = 2.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = null,
-                                        tint = playContent,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        text = buttonText,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        color = playContent,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                if (buttonBadge != null) {
+                                    // Etichetta in alto + codice episodio sotto, entrambi DENTRO il box
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .padding(horizontal = 20.dp)
+                                            .padding(top = 2.dp, bottom = 6.dp),
+                                        verticalArrangement = Arrangement.Center,
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.PlayArrow,
+                                                contentDescription = null,
+                                                tint = playContent,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(6.dp))
+                                            Text(
+                                                text = buttonLabel,
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = playContent,
+                                                fontWeight = FontWeight.SemiBold,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(1.dp))
+                                        Text(
+                                            text = buttonBadge,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = playContent.copy(alpha = 0.7f),
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1
+                                        )
+                                    }
+                                } else {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxHeight()
+                                            .padding(horizontal = 24.dp)
+                                            .padding(bottom = 2.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = null,
+                                            tint = playContent,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = buttonLabel,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = playContent,
+                                            fontWeight = FontWeight.SemiBold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                                 
                                 // Progress bar integrated flush at the bottom edge of the button
