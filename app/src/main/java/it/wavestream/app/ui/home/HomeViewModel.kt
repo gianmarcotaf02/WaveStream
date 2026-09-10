@@ -1781,7 +1781,7 @@ class HomeViewModel @Inject constructor(
         var actualResumeEpisodeNumber = resumeEpisodeNumber
 
         if (actualResumeMinutes == null) {
-            val progress = watchProgressDao.getSeriesProgress(currentProfileId, series.id)
+            val progress = getSeriesProgressResilient(series.id)
             if (progress != null && !progress.isCompleted) {
                 actualResumeMinutes = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(1)
                 actualProgressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
