@@ -93,6 +93,7 @@ class PlayerActivity : ComponentActivity() {
     private val _autoPlayNextEnabled = mutableStateOf(true)
     private val _hasNextEpisode = mutableStateOf(false)
     private val _hasPreviousEpisode = mutableStateOf(false)
+    private val _creditsDetectionEnabled = mutableStateOf(true)
     private val _controlsVisible = mutableStateOf(true)
 
     // Live/DVR state (solo canali live) - timeshift stile Sky/DAZN
@@ -115,12 +116,17 @@ class PlayerActivity : ComponentActivity() {
     private val _seekIndicatorVisible = mutableStateOf(false)
     private var seekAccumulationJob: kotlinx.coroutines.Job? = null
     
+    // Countdown overlay "Prossimo episodio": classico vs anticipato sui titoli di coda
+    private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 10
+    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 20
+
     private val progressHandler = Handler(Looper.getMainLooper())
     private val nextEpisodeHandler = Handler(Looper.getMainLooper())
     private val bufferingHandler = Handler(Looper.getMainLooper())
     private var autoSaveCounter = 0
-    private var nextEpisodeCountdown = 10
+    private var nextEpisodeCountdown = DEFAULT_NEXT_COUNTDOWN_SECONDS
     private var nextEpisodeTriggered = false  // Prevent double trigger
+    private var creditsDetected = false       // Titoli di coda rilevati dall'analisi frame
     
     // Auto-retry for live channel buffering
     private var bufferingRetryCount = 0
@@ -334,6 +340,7 @@ class PlayerActivity : ComponentActivity() {
             
             // Check auto-play preferences
             _autoPlayNextEnabled.value = userPreferences.getAutoPlayNext()
+            _creditsDetectionEnabled.value = userPreferences.getCreditsDetectionEnabled()
             
             // Check if next episode exists
             val next = playNextManager.getNext(
@@ -413,6 +420,8 @@ class PlayerActivity : ComponentActivity() {
                     hasNextEpisode = hasNextEpisode,
                     hasPreviousEpisode = hasPreviousEpisode,
                     onPlayPrevious = { playPreviousEpisode() },
+                    creditsDetectionEnabled = _creditsDetectionEnabled.value,
+                    onCreditsDetected = { onCreditsDetected() },
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
                     onReturnToLive = { returnToLive() },
@@ -706,6 +715,7 @@ class PlayerActivity : ComponentActivity() {
     @androidx.annotation.OptIn(UnstableApi::class)
     private fun startPlayback() {
         try {
+            creditsDetected = false
             val mediaItem = MediaItem.fromUri(Uri.parse(streamUrl))
             player.setMediaItem(mediaItem)
             player.prepare()
@@ -961,12 +971,16 @@ class PlayerActivity : ComponentActivity() {
                         saveProgress()
                     }
                     
-                    // Show next episode overlay 10 seconds before end
+                    // Show next episode overlay: ultimi 10s del file, oppure appena
+                    // vengono rilevati i titoli di coda (analisi immagini, nessuna IA).
+                    // Il trigger anticipato è attivo solo con autoplay attivo: altrimenti
+                    // l'overlay coprirebbe lo schermo per l'intera durata dei credits.
                     if (!nextEpisodeTriggered && contentType == ContentType.EPISODE) {
                         val remainingMs = player.duration - player.currentPosition
-                        if (remainingMs in 1..10_000) {
+                        val creditsTrigger = creditsDetected && _autoPlayNextEnabled.value
+                        if (remainingMs in 1..10_000 || creditsTrigger) {
                             nextEpisodeTriggered = true
-                            triggerNextEpisodeOverlay()
+                            triggerNextEpisodeOverlay(fromCredits = creditsTrigger)
                         }
                     }
                 }
@@ -975,7 +989,16 @@ class PlayerActivity : ComponentActivity() {
         })
     }
     
-    private fun triggerNextEpisodeOverlay() {
+    /**
+     * Chiamato dal watchdog dei frame quando i titoli di coda vengono rilevati a video.
+     */
+    private fun onCreditsDetected() {
+        if (creditsDetected) return
+        creditsDetected = true
+        android.util.Log.d("PlayerActivity", "Titoli di coda rilevati: overlay prossimo episodio anticipato")
+    }
+
+    private fun triggerNextEpisodeOverlay(fromCredits: Boolean = false) {
         lifecycleScope.launch {
             val next = playNextManager.getNext(
                 contentType = contentType,
@@ -986,7 +1009,10 @@ class PlayerActivity : ComponentActivity() {
                 groupId = groupId
             )
             if (next != null) {
-                showNextEpisodeOverlay(next)
+                showNextEpisodeOverlay(
+                    next = next,
+                    countdownSeconds = if (fromCredits) CREDITS_NEXT_COUNTDOWN_SECONDS else DEFAULT_NEXT_COUNTDOWN_SECONDS
+                )
             }
         }
     }
@@ -1026,8 +1052,11 @@ class PlayerActivity : ComponentActivity() {
         }
     }
     
-    private fun showNextEpisodeOverlay(next: PlayNextManager.NextContent) {
-        nextEpisodeCountdown = 10  // 10 second countdown
+    private fun showNextEpisodeOverlay(
+        next: PlayNextManager.NextContent,
+        countdownSeconds: Int = DEFAULT_NEXT_COUNTDOWN_SECONDS
+    ) {
+        nextEpisodeCountdown = countdownSeconds
         _nextEpisode.value = NextEpisodeInfo(
             title = next.title,
             subtitle = next.subtitle,
@@ -1060,6 +1089,7 @@ class PlayerActivity : ComponentActivity() {
         _nextEpisode.value = null
         nextEpisodeHandler.removeCallbacksAndMessages(null)
         nextEpisodeTriggered = false
+        creditsDetected = false
     }
     
     // Still Watching Check
