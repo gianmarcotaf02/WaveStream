@@ -1,0 +1,4 @@
+- Dettaglio contenuto: il pulsante "Riprendi"/"Riproduci" resta compatto e mostra il codice episodio (SxEy) dentro il box, senza schiacciare gli altri pulsanti (lista, preferiti, ecc.)
+- Categorie Live: tieni premuto OK per ~2 secondi su una categoria per aggiungerla o rimuoverla dai Preferiti (con conferma a schermo)
+- Preferiti e Liste: corretto il posizionamento del testo nelle schermate vuote (ora centrato verticalmente)
+- Serie A: nella ricerca canali di una partita vengono inclusi anche i canali "DAZN 1" presenti nelle categorie ammesse
