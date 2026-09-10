@@ -1104,19 +1104,26 @@ private fun PlayButton(
         if (isResume) {
             // Use actual progress if available, otherwise show a minimal bar
             val effectiveProgress = (resumeProgress ?: 0.1f).coerceIn(0.05f, 1f)
+            // matchParentSize: la barra segue la larghezza FINALE del bottone (decisa dal
+            // contenuto) senza influenzarla. Con fillMaxWidth la barra costringeva il Box
+            // a espandersi su tutta la larghezza disponibile → bottone "Riprendi" enorme.
             Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .background(Color.Black.copy(alpha = 0.15f))  // Consistent track
+                modifier = Modifier.matchParentSize()
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(effectiveProgress)
-                        .background(WaveStreamColors.Accent)
-                )
+                        .align(Alignment.BottomStart)
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .background(Color.Black.copy(alpha = 0.15f))  // Consistent track
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(effectiveProgress)
+                            .background(WaveStreamColors.Accent)
+                    )
+                }
             }
         }
     }
