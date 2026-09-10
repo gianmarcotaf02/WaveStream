@@ -289,7 +289,7 @@ class AppUpdateManager @Inject constructor(
     }
     
     /**
-     * Availabile free space on the primary (emulated) storage, in bytes; -1 if unknown.
+     * Spazio libero sullo storage primario (emulato) in byte; -1 se non determinabile.
      * `getExternalFilesDir` di un'app TV vive sullo stesso storage di /data, quindi
      * questo valore copre sia il download dell'APK sia la copia usata dall'installer.
      */
