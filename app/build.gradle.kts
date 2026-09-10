@@ -50,6 +50,15 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+
+            // Fire TV / Android TV sono dispositivi ARM: includere le lib native x86/x86_64
+            // (onnxruntime di sherpa-onnx + wg-go) aggiunge ~90 MB inutili all'APK e fa
+            // fallire l'update in-place per spazio insufficiente. Debug resta multi-ABI
+            // per supportare gli emulatori.
+            ndk {
+                abiFilters.clear()
+                abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+            }
         }
     }
     compileOptions {
