@@ -112,6 +112,7 @@ fun TvPlayerScreen(
     onPlayPrevious: () -> Unit = {},
     creditsDetectionEnabled: Boolean = true,
     onCreditsDetected: () -> Unit = {},
+    creditsDetectionDebug: Boolean = false,
     cumulativeSeekSeconds: Int = 0,
     seekIndicatorVisible: Boolean = false,
     showStillWatching: Boolean = false,
@@ -123,6 +124,7 @@ fun TvPlayerScreen(
 
     // Riferimento alla view del player: serve per leggere i frame (rilevamento titoli di coda)
     val playerViewState = remember { mutableStateOf<PlayerView?>(null) }
+    val creditsDebugText = remember { mutableStateOf("") }
 
     CreditsWatchdog(
         playerView = playerViewState.value,
@@ -130,6 +132,7 @@ fun TvPlayerScreen(
         isLiveChannel = isLiveChannel,
         positionMs = currentPosition,
         durationMs = duration,
+        debugText = if (creditsDetectionDebug) creditsDebugText else null,
         onCreditsDetected = onCreditsDetected
     )
     
@@ -212,6 +215,20 @@ fun TvPlayerScreen(
                 )
         )
         
+        // Debug overlay: rilevamento titoli di coda (attivabile dalle impostazioni)
+        if (creditsDetectionDebug) {
+            Text(
+                text = creditsDebugText.value,
+                color = Color.Yellow,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 24.dp, end = 24.dp)
+                    .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(6.dp))
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            )
+        }
+
         // Loading indicator (minimal design) - centrato sul video anche in mini mode
         AnimatedVisibility(
             visible = isLoading,

@@ -15,46 +15,55 @@ import kotlin.math.abs
 
 /**
  * Rilevatore di titoli di coda basato su elaborazione immagini classica.
+ * NESSUNA intelligenza artificiale: statistiche su un frame ridotto a bassa risoluzione.
  *
- * NESSUNA intelligenza artificiale: solo statistiche su un frame ridotto a bassa risoluzione.
+ * Come funziona (pipeline per campione):
+ *  1. il frame viene portato (se serve) a max 1280px di larghezza con filtro bilineare
+ *  2. viene costruita una griglia 96x54 con un VERO box filter (media dei pixel di ogni cella,
+ *     con passo di campionamento STRIDE): questo elimina la grana pellicola e rende il testo
+ *     una macchia grigia coerente invece di rumore casuale
+ *  3. si misurano:
+ *     - darkness      = 1 - luminanza media (credits = sfondo nero/scuro)
+ *     - textDensity   = frazione di celle con luminanza "da testo" (grigio su nero)
+ *     - peakRowDensity= densità della riga più "piena" di celle testuali (testo allineato)
+ *     - staticScore   = stabilità rispetto al campione precedente, con compensazione scroll
+ *  4. il campione è positivo se lo sfondo è scuro, c'è una quantità di testo plausibile
+ *     (né troppo poco né troppo) e almeno una riga è chiaramente allineata
+ *  5. servono [MIN_CONSECUTIVE_HITS] campioni consecutivi positivi (persistenza ~6s)
  *
- * Firme tipiche dei titoli di coda (VOD / stream IPTV):
- *  1. luminanza media bassa (sfondo nero o molto scuro)
- *  2. molte transizioni chiare/scure nella fascia centrale (testo bianco su fondo scuro)
- *  3. contenuto temporalmente stabile (scena ferma o con lento scroll verticale)
- *
- * Il rilevamento scatta solo dopo [minConsecutiveHits] campioni consecutivi positivi
- * (per default 3 campioni x 2s = ~6s di persistenza), così da non reagire a
- * fade-to-black, scene notturne o cartelli pubblicitari isolati.
- *
- * L'analisi avviene su una griglia 96x54 (5184 pixel): costo CPU trascurabile,
- * compatibile con i box Android TV più lenti.
+ * Le soglie sono pensate per i titoli di coda: schermo nero + testo bianco, statico o
+ * con lento scroll verticale. Sono volutamente in un OR di condizioni semplici, così da
+ * essere leggibili e tarabili con l'overlay di debug.
  */
-class CreditsDetector(
-    private val threshold: Float = SCORE_THRESHOLD,
-    private val minConsecutiveHits: Int = MIN_CONSECUTIVE_HITS
-) {
+class CreditsDetector {
 
     data class Result(
         val score: Float,
         val darkness: Float,
-        val textRatio: Float,
+        val textDensity: Float,
+        val peakRowDensity: Float,
         val staticScore: Float,
         val hit: Boolean,
         val triggered: Boolean
     )
 
-    private val gridBitmap: Bitmap = Bitmap.createBitmap(GRID_W, GRID_H, Bitmap.Config.ARGB_8888)
-    private val canvas = Canvas(gridBitmap)
-    private val paint = Paint().apply {
-        isFilterBitmap = false
-        isAntiAlias = false
-    }
-    private val dstRect = Rect(0, 0, GRID_W, GRID_H)
-    private val argb = IntArray(GRID_W * GRID_H)
-    private val luma = FloatArray(GRID_W * GRID_H)
+    private val gridLuma = FloatArray(GRID_W * GRID_H)
+    private val acc = FloatArray(GRID_W * GRID_H)
+    private val cellCount = IntArray(GRID_W * GRID_H)
 
-    private var previousLuma: FloatArray? = null
+    private var pixels: IntArray? = null
+    private var gxTable: IntArray? = null
+    private var gyTable: IntArray? = null
+
+    private var workBitmap: Bitmap? = null
+    private var workCanvas: Canvas? = null
+    private val workPaint = Paint().apply {
+        isFilterBitmap = true
+        isAntiAlias = false
+        isDither = false
+    }
+
+    private var previousGrid: FloatArray? = null
     private var consecutiveHits = 0
     private var sampleCount = 0
 
@@ -64,113 +73,188 @@ class CreditsDetector(
 
     /** Da chiamare ad ogni nuovo episodio / seek verso l'inizio. */
     fun reset() {
-        previousLuma = null
+        previousGrid = null
         consecutiveHits = 0
         sampleCount = 0
         isTriggered = false
     }
 
     /**
-     * Analizza un frame di playback (bitmap a piena risoluzione, verrà ridotta internamente).
+     * Analizza un frame di playback (bitmap a piena risoluzione).
      * Non lancia eccezioni: in caso di problema restituisce un risultato neutro.
      */
     fun analyze(source: Bitmap): Result {
         if (source.width <= 0 || source.height <= 0) return neutral()
 
-        // Downscale su griglia fissa: drawBitmap con filtro disattivato è nativo e veloce
-        canvas.drawBitmap(source, null, dstRect, paint)
-        gridBitmap.getPixels(argb, 0, GRID_W, 0, 0, GRID_W, GRID_H)
+        val work = prepareWork(source) ?: return neutral()
+        val w = work.width
+        val h = work.height
 
-        // Luminanza (Rec.601)
-        var lumaSum = 0f
-        for (i in argb.indices) {
-            val c = argb[i]
-            val l = 0.299f * ((c shr 16) and 0xFF) +
-                    0.587f * ((c shr 8) and 0xFF) +
-                    0.114f * (c and 0xFF)
-            luma[i] = l
-            lumaSum += l
+        var pix = pixels
+        if (pix == null || pix.size != w * h) {
+            pix = IntArray(w * h)
+            pixels = pix
         }
-        val meanLuma = lumaSum / (GRID_W * GRID_H)
+        work.getPixels(pix, 0, w, 0, 0, w, h)
+
+        buildGrid(pix, w, h)
+
+        // ---- metriche di luminanza / testo ----
+        var lumaSum = 0f
+        var textCells = 0
+        for (i in gridLuma.indices) {
+            val l = gridLuma[i]
+            lumaSum += l
+            if (l >= TEXT_LOW && l <= TEXT_HIGH) textCells++
+        }
+        val cellTotal = gridLuma.size
+        val meanLuma = lumaSum / cellTotal
         val darkness = (1f - meanLuma / 255f).coerceIn(0f, 1f)
+        val textDensity = textCells.toFloat() / cellTotal
 
-        // Densità di bordi nella fascia centrale: il testo produce molte transizioni
-        val textRatio = computeTextRatio(luma)
+        // Riga più densa di celle "testuali": nei credits il testo è allineato orizzontalmente
+        var peakRowDensity = 0f
+        val yStart = (GRID_H * 0.08f).toInt()
+        val yEnd = (GRID_H * 0.92f).toInt()
+        for (y in yStart until yEnd) {
+            val base = y * GRID_W
+            var c = 0
+            for (x in 0 until GRID_W) {
+                val l = gridLuma[base + x]
+                if (l >= TEXT_LOW && l <= TEXT_HIGH) c++
+            }
+            val density = c.toFloat() / GRID_W
+            if (density > peakRowDensity) peakRowDensity = density
+        }
 
-        // Stabilità temporale, con tolleranza per lo scroll verticale dei credits
-        val previous = previousLuma
+        // ---- stabilità temporale (con compensazione dello scroll verticale) ----
+        val previous = previousGrid
         val staticScore = if (previous == null) {
             NEUTRAL_STATIC
         } else {
-            val bestDiff = bestShiftedDiff(luma, previous)
+            val bestDiff = bestShiftedDiff(gridLuma, previous)
             (1f - bestDiff / STATIC_DIFF_SCALE).coerceIn(0f, 1f)
         }
-        previousLuma = luma.copyOf()
+        previousGrid = gridLuma.copyOf()
 
-        val textNorm = (textRatio / TEXT_RATIO_REFERENCE).coerceIn(0f, 1f)
-        val score = (W_DARKNESS * darkness + W_TEXT * textNorm + W_STATIC * staticScore)
-            .coerceIn(0f, 1f)
+        // ---- classificazione: condizioni semplici e leggibili ----
+        val hit = darkness >= MIN_DARKNESS &&
+                textDensity in MIN_TEXT_DENSITY..MAX_TEXT_DENSITY &&
+                peakRowDensity >= MIN_PEAK_ROW_DENSITY
 
-        val hit = score >= threshold &&
-                textRatio >= MIN_TEXT_RATIO &&
-                darkness >= MIN_DARKNESS
+        // Punteggio solo informativo (log / debug overlay)
+        val score = (
+                0.45f * darkness +
+                        0.35f * (textDensity / TEXT_DENSITY_REFERENCE).coerceAtMost(1f) +
+                        0.20f * staticScore
+                ).coerceIn(0f, 1f)
 
-        if (hit) {
-            consecutiveHits++
-        } else {
-            consecutiveHits = 0
-        }
+        if (hit) consecutiveHits++ else consecutiveHits = 0
 
         sampleCount++
         var triggered = false
-        if (!isTriggered && consecutiveHits >= minConsecutiveHits) {
+        if (!isTriggered && consecutiveHits >= MIN_CONSECUTIVE_HITS) {
             isTriggered = true
             triggered = true
-            Log.d(
-                TAG,
-                "Titoli di coda rilevati (score=%.3f dark=%.2f text=%.3f static=%.2f campioni=%d)"
-                    .format(score, darkness, textRatio, staticScore, sampleCount)
-            )
-        } else if (sampleCount % 5 == 0) {
-            Log.d(
-                TAG,
-                "campione #$sampleCount score=%.3f dark=%.2f text=%.3f static=%.2f hits=$consecutiveHits"
-                    .format(score, darkness, textRatio, staticScore)
-            )
+            Log.d(TAG, "Titoli di coda rilevati dopo $sampleCount campioni")
         }
 
         return Result(
             score = score,
             darkness = darkness,
-            textRatio = textRatio,
+            textDensity = textDensity,
+            peakRowDensity = peakRowDensity,
             staticScore = staticScore,
             hit = hit,
             triggered = triggered
         )
     }
 
-    private fun computeTextRatio(frame: FloatArray): Float {
-        val yStart = (GRID_H * TEXT_BAND_TOP).toInt().coerceAtLeast(1)
-        val yEnd = (GRID_H * TEXT_BAND_BOTTOM).toInt().coerceAtMost(GRID_H - 1)
-        if (yEnd <= yStart) return 0f
+    /** Righe di log+debug da mostrare a video quando il debug è attivo. */
+    fun describe(result: Result): String {
+        return "d=%.2f t=%.3f p=%.2f s=%.2f | score=%.2f hits=%d/%d%s".format(
+            result.darkness,
+            result.textDensity,
+            result.peakRowDensity,
+            result.staticScore,
+            result.score,
+            consecutiveHits,
+            MIN_CONSECUTIVE_HITS,
+            if (consecutiveHits > 0 || result.hit) "  HIT" else ""
+        )
+    }
 
-        var accumulator = 0f
-        var rows = 0
-        for (y in yStart until yEnd) {
-            val base = y * GRID_W
-            var edges = 0
-            for (x in 1 until GRID_W) {
-                if (abs(frame[base + x] - frame[base + x - 1]) > EDGE_THRESHOLD) edges++
-            }
-            accumulator += edges.toFloat() / (GRID_W - 1)
-            rows++
+    /**
+     * Porta il frame a una dimensione di lavoro ragionevole (max 1280px di larghezza)
+     * usando un filtro bilineare: su 4K evita di processare milioni di pixel.
+     */
+    private fun prepareWork(source: Bitmap): Bitmap? {
+        if (source.width <= MAX_ANALYSIS_WIDTH) return source
+
+        val targetW = MAX_ANALYSIS_WIDTH
+        val targetH = (source.height.toLong() * targetW / source.width).toInt().coerceAtLeast(1)
+
+        var bitmap = workBitmap
+        var canvas = workCanvas
+        if (bitmap == null || bitmap.width != targetW || bitmap.height != targetH || canvas == null) {
+            bitmap = Bitmap.createBitmap(targetW, targetH, Bitmap.Config.ARGB_8888)
+            canvas = Canvas(bitmap)
+            workBitmap = bitmap
+            workCanvas = canvas
         }
-        return if (rows > 0) accumulator / rows else 0f
+        canvas.drawBitmap(source, null, Rect(0, 0, targetW, targetH), workPaint)
+        return bitmap
+    }
+
+    /**
+     * Box filter: ogni cella della griglia è la MEDIA dei pixel reali che ricadono in essa
+     * (campionati con passo STRIDE). Media vera = la grana video sparisce e il testo
+     * diventa una macchia grigia stabile, riconoscibile anche con scorrimento.
+     */
+    private fun buildGrid(pix: IntArray, w: Int, h: Int) {
+        ensureTables(w, h)
+        val gx = gxTable ?: return
+        val gy = gyTable ?: return
+
+        java.util.Arrays.fill(acc, 0f)
+        java.util.Arrays.fill(cellCount, 0)
+
+        var y = 0
+        while (y < h) {
+            val rowBase = y * w
+            val gRowBase = gy[y] * GRID_W
+            var x = 0
+            while (x < w) {
+                val c = pix[rowBase + x]
+                val l = 0.299f * ((c shr 16) and 0xFF) +
+                        0.587f * ((c shr 8) and 0xFF) +
+                        0.114f * (c and 0xFF)
+                val idx = gRowBase + gx[x]
+                acc[idx] += l
+                cellCount[idx]++
+                x += STRIDE
+            }
+            y += STRIDE
+        }
+
+        for (i in gridLuma.indices) {
+            val n = cellCount[i]
+            gridLuma[i] = if (n > 0) acc[i] / n else 0f
+        }
+    }
+
+    private fun ensureTables(w: Int, h: Int) {
+        if (gxTable?.size != w) {
+            gxTable = IntArray(w) { (it.toLong() * GRID_W / w).toInt().coerceIn(0, GRID_W - 1) }
+        }
+        if (gyTable?.size != h) {
+            gyTable = IntArray(h) { (it.toLong() * GRID_H / h).toInt().coerceIn(0, GRID_H - 1) }
+        }
     }
 
     /**
      * Differenza media minima tra frame corrente e precedente su diversi offset verticali.
-     * Compensare lo scroll permette di riconoscere i titoli di coda che scorrono.
+     * Compensare lo scroll permette di riconoscere anche titoli di coda che scorrono.
      */
     private fun bestShiftedDiff(current: FloatArray, previous: FloatArray): Float {
         var best = Float.MAX_VALUE
@@ -193,7 +277,7 @@ class CreditsDetector(
                 val avg = sum / count
                 if (avg < best) best = avg
             }
-            dy += 2
+            dy++
         }
         return if (best == Float.MAX_VALUE) STATIC_DIFF_SCALE else best
     }
@@ -201,7 +285,8 @@ class CreditsDetector(
     private fun neutral() = Result(
         score = 0f,
         darkness = 0f,
-        textRatio = 0f,
+        textDensity = 0f,
+        peakRowDensity = 0f,
         staticScore = NEUTRAL_STATIC,
         hit = false,
         triggered = false
@@ -210,7 +295,7 @@ class CreditsDetector(
     companion object {
         private const val TAG = "CreditsDetector"
 
-        /** Risoluzione di analisi: più bassa = più economica, firma del testo ancora leggibile. */
+        /** Risoluzione di analisi: alta abbastanza da distinguere le righe di testo. */
         const val GRID_W = 96
         const val GRID_H = 54
 
@@ -221,24 +306,26 @@ class CreditsDetector(
         const val WINDOW_MS = 8 * 60 * 1000L
 
         /** Non si analizza prima di questo punto (esclude intro/recap). */
-        const val MIN_POSITION_MS = 120_000L
+        const val MIN_POSITION_MS = 90_000L
 
-        private const val SCORE_THRESHOLD = 0.67f
+        private const val MAX_ANALYSIS_WIDTH = 1280
+        private const val STRIDE = 2
+
+        // Banda di luminanza che identifica una cella "di testo" (grigio su nero)
+        private const val TEXT_LOW = 22f
+        private const val TEXT_HIGH = 185f
+
+        // Soglie di classificazione
+        private const val MIN_DARKNESS = 0.62f
+        private const val MIN_TEXT_DENSITY = 0.010f
+        private const val MAX_TEXT_DENSITY = 0.32f
+        private const val MIN_PEAK_ROW_DENSITY = 0.20f
+
         private const val MIN_CONSECUTIVE_HITS = 3
-        private const val MIN_TEXT_RATIO = 0.06f
-        private const val MIN_DARKNESS = 0.35f
-
-        private const val EDGE_THRESHOLD = 55f
-        private const val TEXT_RATIO_REFERENCE = 0.20f
-        private const val TEXT_BAND_TOP = 0.12f
-        private const val TEXT_BAND_BOTTOM = 0.88f
-        private const val MAX_SHIFT = 10
+        private const val TEXT_DENSITY_REFERENCE = 0.08f
+        private const val MAX_SHIFT = 8
         private const val STATIC_DIFF_SCALE = 60f
         private const val NEUTRAL_STATIC = 0.5f
-
-        private const val W_DARKNESS = 0.45f
-        private const val W_TEXT = 0.35f
-        private const val W_STATIC = 0.20f
     }
 }
 
