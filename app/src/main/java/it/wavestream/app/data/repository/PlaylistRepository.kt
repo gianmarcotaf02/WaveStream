@@ -254,7 +254,12 @@ class PlaylistRepository @Inject constructor(
                         containerExtension = extension,
                         thumbnailUrl = ep.info?.image,
                         plot = ep.info?.plot,
-                        duration = ep.info?.durationSecs?.toLong()
+                        duration = ep.info?.durationSecs?.toLong(),
+                        // Timestamp di inserimento lato PROVIDER (unix secondi → millis).
+                        // È lo stesso meccanismo del carosello "Aggiunti di recente":
+                        // rispecchia l'ordine di inserimento DAL SERVER, non il momento
+                        // del sync locale. Fallback: tempo corrente (es. provider senza "added").
+                        addedAt = ep.added?.let { it * 1000L } ?: System.currentTimeMillis()
                     ))
                 }
             }
@@ -263,12 +268,24 @@ class PlaylistRepository @Inject constructor(
                 episodeDao.insertAll(episodeEntities)
                 val latest = episodeEntities.maxByOrNull { it.episodeNumber * 100 + it.seasonNumber }
                 if (latest != null) {
-                    if (series.latestEpisodeSeason != latest.seasonNumber || 
-                        series.latestEpisodeNumber != latest.episodeNumber) {
+                    // Timestamp di inserimento DEL SERVER per l'episodio più recente
+                    // (unix secondi → millis), stesso principio del carosello
+                    // "Aggiunti di recente". Null se il provider non espone "added".
+                    val latestProviderAdded = seriesInfoResult.episodes?.get(latest.seasonNumber.toString())
+                        ?.firstOrNull { it.episodeNum == latest.episodeNumber }
+                        ?.added?.let { it * 1000L }
+                    val changed = series.latestEpisodeSeason != latest.seasonNumber ||
+                        series.latestEpisodeNumber != latest.episodeNumber
+                    // Con il timestamp del provider quest'ultimo è la fonte di verità:
+                    // si riallinea anche se è più vecchio di quello memorizzato in locale
+                    // (es. memorizzato in passato come "ora del sync").
+                    val tsChanged = latestProviderAdded != null &&
+                        latestProviderAdded != series.latestEpisodeAddedAt
+                    if (changed || tsChanged) {
                         seriesDao.update(series.copy(
                             latestEpisodeSeason = latest.seasonNumber,
                             latestEpisodeNumber = latest.episodeNumber,
-                            latestEpisodeAddedAt = System.currentTimeMillis()
+                            latestEpisodeAddedAt = latestProviderAdded ?: System.currentTimeMillis()
                         ))
                     }
                 }

@@ -284,6 +284,10 @@ class XtreamParser @Inject constructor() {
                 episodes[season] = (0 until seasonArray.length()).map { i ->
                     val ep = seasonArray.getJSONObject(i)
                     val epInfoObj = ep.optJSONObject("info")
+                    // Timestamp di inserimento lato provider (unix SECONDI) — stesso
+                    // schema usato per VOD/serie: può arrivare come numero o stringa
+                    val epAdded = ep.optLong("added", 0).takeIf { it != 0L }
+                        ?: ep.optString("added", "").toLongOrNull()
                     val epInfo = epInfoObj?.let {
                         XtreamEpisodeInfo(
                             image = it.optString("movie_image", "").takeIf { s -> s.isNotEmpty() }
@@ -300,7 +304,8 @@ class XtreamParser @Inject constructor() {
                         episodeNum = ep.optInt("episode_num", 0),
                         title = ep.optString("title", "").takeIf { s -> s.isNotEmpty() },
                         extension = ep.optString("container_extension", "").takeIf { s -> s.isNotEmpty() },
-                        info = epInfo
+                        info = epInfo,
+                        added = epAdded
                     )
                 }
             }
@@ -466,7 +471,8 @@ data class XtreamEpisode(
     val episodeNum: Int,
     val title: String?,
     val extension: String?,
-    val info: XtreamEpisodeInfo?
+    val info: XtreamEpisodeInfo?,
+    val added: Long? = null  // Unix timestamp (SECONDI) di inserimento sul server del provider
 )
 
 data class XtreamEpisodeInfo(
