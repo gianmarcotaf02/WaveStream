@@ -30,6 +30,19 @@ interface WatchProgressDao {
     
     @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND seriesId = :seriesId ORDER BY lastWatchedAt DESC LIMIT 1")
     suspend fun getSeriesProgress(profileId: Long, seriesId: Long): WatchProgress?
+
+    /**
+     * Fallback robusto: risolve il progresso di una serie passando dalla tabella
+     * episodi. Copre i progressi con seriesId NULL (righe create da versioni
+     * precedenti o da playback avviato direttamente su un episodio).
+     */
+    @Query(
+        "SELECT wp.* FROM watch_progress wp " +
+        "INNER JOIN episodes e ON e.id = wp.contentId " +
+        "WHERE wp.profileId = :profileId AND wp.contentType = :contentType " +
+        "AND e.seriesId = :seriesId ORDER BY wp.lastWatchedAt DESC LIMIT 1"
+    )
+    suspend fun getSeriesProgressByEpisodes(profileId: Long, contentType: ContentType, seriesId: Long): WatchProgress?
     
     @Query("SELECT * FROM watch_progress")
     suspend fun getAllProgress(): List<WatchProgress>

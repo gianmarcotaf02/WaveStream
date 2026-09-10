@@ -2043,6 +2043,20 @@ class HomeViewModel @Inject constructor(
      * Dynamically updates the watch progress fields of a list of HeroItems using the database.
      * This is useful to correct stale progress data when items are loaded from cache or when returning to home.
      */
+    /**
+     * Progresso di una serie con fallback: prima la query diretta su seriesId,
+     * poi la risoluzione via tabella episodi (copre progressi con seriesId NULL).
+     */
+    private suspend fun getSeriesProgressResilient(seriesId: Long): it.wavestream.app.data.database.entity.WatchProgress? {
+        return try {
+            watchProgressDao.getSeriesProgress(currentProfileId, seriesId)
+                ?: watchProgressDao.getSeriesProgressByEpisodes(currentProfileId, ContentType.EPISODE, seriesId)
+        } catch (e: Exception) {
+            Log.e("HomeViewModel", "getSeriesProgressResilient failed for seriesId=$seriesId", e)
+            null
+        }
+    }
+
     private suspend fun refreshHeroItemsWatchProgress(heroes: List<HeroItem>): List<HeroItem> {
         return withContext(Dispatchers.IO) {
             heroes.map { hero ->
@@ -2062,7 +2076,7 @@ class HomeViewModel @Inject constructor(
                         )
                     }
                 } else if (hero.contentType == ContentType.SERIES.name) {
-                    val progress = watchProgressDao.getSeriesProgress(currentProfileId, hero.id)
+                    val progress = getSeriesProgressResilient(hero.id)
                     if (progress != null && !progress.isCompleted) {
                         val remainingMinutes = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(1)
                         val progressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
@@ -2071,6 +2085,18 @@ class HomeViewModel @Inject constructor(
                             progressPercent = progressPercent,
                             resumeEpisodeSeason = progress.season,
                             resumeEpisodeNumber = progress.episode
+                        )
+                    } else if (progress != null && progress.isCompleted) {
+                        // Ultimo episodio completato: proponi il SUCCESSIVO non ancora visto
+                        // (non azzerare il resume: finiva sul fallback "Riproduci S1E1").
+                        val currentEp = if ((progress.season ?: 0) > 0 && (progress.episode ?: 0) > 0)
+                            episodeDao.getEpisode(hero.id, progress.season!!, progress.episode!!) else null
+                        val nextEp = currentEp?.let { findNextEpisodeAfter(hero.id, it.seasonNumber, it.episodeNumber) }
+                        hero.copy(
+                            resumeMinutes = null,
+                            progressPercent = null,
+                            resumeEpisodeSeason = nextEp?.seasonNumber,
+                            resumeEpisodeNumber = nextEp?.episodeNumber
                         )
                     } else {
                         hero.copy(
