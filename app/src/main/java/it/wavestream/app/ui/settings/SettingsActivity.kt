@@ -1318,6 +1318,7 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
     val audioLanguage by userPreferences.getDefaultAudioLanguageFlow().collectAsState(initial = "ita")
     val subtitleLanguage by userPreferences.getDefaultSubtitleLanguageFlow().collectAsState(initial = "ita")
     val subtitlesEnabled by userPreferences.getSubtitlesEnabledFlow().collectAsState(initial = false)
+    val creditsDetectionEnabled by userPreferences.getCreditsDetectionEnabledFlow().collectAsState(initial = true)
     
     SettingsSection(title = "Player") {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -1339,6 +1340,12 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
                 label = "Abilita sottotitoli automatici",
                 checked = subtitlesEnabled,
                 onCheckedChange = { coroutineScope.launch { userPreferences.setSubtitlesEnabled(it) } }
+            )
+
+            SettingsSwitch(
+                label = "Rileva titoli di coda (prossimo episodio)",
+                checked = creditsDetectionEnabled,
+                onCheckedChange = { coroutineScope.launch { userPreferences.setCreditsDetectionEnabled(it) } }
             )
             
             // Seek settings
