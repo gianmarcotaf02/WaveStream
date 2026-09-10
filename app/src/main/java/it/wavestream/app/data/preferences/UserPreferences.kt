@@ -71,6 +71,7 @@ class UserPreferences @Inject constructor(
         private val SKIP_INTRO_ENABLED = booleanPreferencesKey("skip_intro_enabled")
         private val AUTO_PLAY_NEXT = booleanPreferencesKey("auto_play_next")
         private val CREDITS_DETECTION_ENABLED = booleanPreferencesKey("credits_detection_enabled")
+        private val CREDITS_DETECTION_DEBUG = booleanPreferencesKey("credits_detection_debug")
         private val YOUTUBE_PLAYER_PACKAGE = stringPreferencesKey("youtube_player_package")
         
         // Playback
@@ -341,6 +342,19 @@ class UserPreferences @Inject constructor(
 
     fun getCreditsDetectionEnabledFlow(): Flow<Boolean> {
         return dataStore.data.map { it[CREDITS_DETECTION_ENABLED] ?: true }
+    }
+
+    /** Overlay di debug con le metriche del rilevamento titoli di coda. */
+    suspend fun setCreditsDebugEnabled(enabled: Boolean) {
+        dataStore.edit { it[CREDITS_DETECTION_DEBUG] = enabled }
+    }
+
+    suspend fun getCreditsDebugEnabled(): Boolean {
+        return dataStore.data.first()[CREDITS_DETECTION_DEBUG] ?: false
+    }
+
+    fun getCreditsDebugEnabledFlow(): Flow<Boolean> {
+        return dataStore.data.map { it[CREDITS_DETECTION_DEBUG] ?: false }
     }
     
     suspend fun setYoutubePlayerPackage(packageName: String?) {

@@ -1935,7 +1935,7 @@ private fun getPlayerCurrentTime(): String {
 // ============================================================================
 
 private const val CREDITS_TAG = "CreditsWatchdog"
-private const val CREDITS_MAX_CAPTURE_FAILURES = 3
+private const val CREDITS_MAX_CAPTURE_FAILURES = 6
 
 /**
  * Campiona periodicamente un frame del video e chiede a [CreditsDetector] se sono
@@ -1946,6 +1946,8 @@ private const val CREDITS_MAX_CAPTURE_FAILURES = 3
  * [CreditsDetector.WINDOW_MS]) e mai su canali live o in mini player.
  * In caso di catture non disponibili (surface protette, box problematici) il
  * watchdog si spegne silenziosamente e resta attivo il trigger temporale del player.
+ *
+ * Con [debugText] non nullo scrive a video lo stato corrente (overlay di debug).
  */
 @Composable
 private fun CreditsWatchdog(
@@ -1954,6 +1956,7 @@ private fun CreditsWatchdog(
     isLiveChannel: Boolean,
     positionMs: Long,
     durationMs: Long,
+    debugText: MutableState<String>?,
     onCreditsDetected: () -> Unit
 ) {
     val latestPosition by rememberUpdatedState(positionMs)
@@ -1961,6 +1964,13 @@ private fun CreditsWatchdog(
     val latestCallback by rememberUpdatedState(onCreditsDetected)
 
     LaunchedEffect(enabled, isLiveChannel, playerView) {
+        debugText?.value = when {
+            !enabled -> "credits: OFF (impostazione disattivata)"
+            isLiveChannel -> "credits: OFF (canale live)"
+            playerView == null -> "credits: in attesa della PlayerView..."
+            else -> "credits: avvio watchdog..."
+        }
+
         if (!enabled || isLiveChannel || playerView == null) return@LaunchedEffect
 
         val detector = CreditsDetector()
@@ -1971,21 +1981,37 @@ private fun CreditsWatchdog(
             delay(CreditsDetector.SAMPLE_INTERVAL_MS)
 
             val duration = latestDuration
-            if (duration <= 0L) continue
+            if (duration <= 0L) {
+                debugText?.value = "credits: durata non disponibile"
+                continue
+            }
 
             val position = latestPosition
             val remaining = duration - position
             if (position < CreditsDetector.MIN_POSITION_MS || remaining > CreditsDetector.WINDOW_MS) {
                 // Fuori dalla finestra utile: nuovo episodio o seek verso l'inizio
                 detector.reset()
+                debugText?.value = "credits: in attesa (mancano ${formatRemainingTime(remaining)})"
                 continue
             }
             if (remaining < 1_000L) continue
 
-            val surfaceView = playerView.videoSurfaceView as? SurfaceView ?: break
+            val surfaceView = playerView.videoSurfaceView as? SurfaceView
+            if (surfaceView == null) {
+                android.util.Log.w(
+                    CREDITS_TAG,
+                    "videoSurfaceView non è una SurfaceView (${playerView.videoSurfaceView?.javaClass?.name}): watchdog interrotto"
+                )
+                debugText?.value = "credits: view non supportata"
+                break
+            }
+
             val width = surfaceView.width
             val height = surfaceView.height
-            if (width <= 0 || height <= 0) continue
+            if (width <= 0 || height <= 0) {
+                debugText?.value = "credits: view ${width}x${height}"
+                continue
+            }
 
             var bitmap = frame
             if (bitmap == null || bitmap.width != width || bitmap.height != height) {
@@ -1995,8 +2021,10 @@ private fun CreditsWatchdog(
 
             if (!ScreenFrameCapture.capture(surfaceView, bitmap)) {
                 failedCaptures++
+                android.util.Log.w(CREDITS_TAG, "Cattura frame fallita ($failedCaptures/$CREDITS_MAX_CAPTURE_FAILURES)")
+                debugText?.value = "credits: cattura fallita x$failedCaptures"
                 if (failedCaptures >= CREDITS_MAX_CAPTURE_FAILURES) {
-                    android.util.Log.d(
+                    android.util.Log.w(
                         CREDITS_TAG,
                         "Frame non leggibili: rilevamento credits disattivato per questo episodio"
                     )
@@ -2006,10 +2034,23 @@ private fun CreditsWatchdog(
             }
             failedCaptures = 0
 
-            if (detector.analyze(bitmap).triggered) {
+            val result = detector.analyze(bitmap)
+            val line = detector.describe(result)
+            android.util.Log.d(CREDITS_TAG, "rem=${formatRemainingTime(remaining)} $line")
+            debugText?.value = "credits: $line  (mancano ${formatRemainingTime(remaining)})"
+
+            if (result.triggered) {
                 android.util.Log.d(CREDITS_TAG, "Notifica titoli di coda al player")
                 latestCallback()
             }
         }
     }
+}
+
+private fun formatRemainingTime(ms: Long): String {
+    if (ms <= 0L) return "0:00"
+    val totalSeconds = ms / 1000
+    val minutes = totalSeconds / 60
+    val seconds = totalSeconds % 60
+    return "%d:%02d".format(minutes, seconds)
 }
