@@ -228,6 +228,11 @@
             android:foregroundServiceType="dataSync"
             tools:node="merge" />
 
+        <!-- Riceve l'esito dell'installazione APK tramite PackageInstaller -->
+        <receiver
+            android:name="it.wavestream.app.update.UpdateInstallReceiver"
+            android:exported="false" />
+
         <!-- FileProvider for APK installation -->
         <provider
             android:name="androidx.core.content.FileProvider"

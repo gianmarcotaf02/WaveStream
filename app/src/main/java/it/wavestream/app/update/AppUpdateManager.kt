@@ -1,11 +1,16 @@
 package it.wavestream.app.update
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.os.StatFs
 import android.provider.Settings
 import android.util.Log
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -39,6 +44,13 @@ class AppUpdateManager @Inject constructor(
         private const val TAG = "AppUpdateManager"
         private const val UPDATE_NODE = "app_update"
         private const val APK_FILENAME = "wavestream_update.apk"
+
+        /**
+         * Spazio libero minimo richiesto prima di scaricare/installare un aggiornamento.
+         * Durante un update in-place Android deve conservare l'APK installato E scrivere
+         * il nuovo: senza margine l'installer Fire OS fallisce con "App non installata".
+         */
+        private const val MIN_FREE_BYTES_FOR_UPDATE = 500L * 1024L * 1024L
     }
     
     private val database by lazy {
@@ -163,6 +175,17 @@ class AppUpdateManager @Inject constructor(
             return@withContext false
         }
         
+        // Controllo spazio libero: è la causa n.1 del fallimento su Fire TV Stick
+        val freeBytes = getFreeSpaceBytes()
+        if (freeBytes in 1 until MIN_FREE_BYTES_FOR_UPDATE) {
+            val freeMb = freeBytes / (1024L * 1024L)
+            _downloadState.value = DownloadState.Failed(
+                "Spazio insufficiente: ${freeMb} MB liberi, servono almeno 500 MB. " +
+                    "Libera spazio (o disinstalla temporaneamente altre app) e riprova."
+            )
+            return@withContext false
+        }
+
         try {
             _downloadState.value = DownloadState.Downloading(0)
             Log.d(TAG, "Starting APK download from: $downloadUrl")
@@ -266,8 +289,27 @@ class AppUpdateManager @Inject constructor(
     }
     
     /**
-     * Install the downloaded APK
-     * This will show the standard Android package installer
+     * Availabile free space on the primary (emulated) storage, in bytes; -1 if unknown.
+     * `getExternalFilesDir` di un'app TV vive sullo stesso storage di /data, quindi
+     * questo valore copre sia il download dell'APK sia la copia usata dall'installer.
+     */
+    private fun getFreeSpaceBytes(): Long {
+        return try {
+            StatFs(Environment.getDataDirectory().absolutePath).availableBytes
+        } catch (e: Exception) {
+            Log.w(TAG, "Impossibile leggere lo spazio libero: ${e.message}")
+            -1L
+        }
+    }
+
+    /**
+     * Install the downloaded APK.
+     *
+     * Usa l'API [PackageInstaller] (disponibile da API 26, la nostra minSdk) invece di
+     * ACTION_VIEW + FileProvider: su Fire OS il percorso content:// viene letto in modo
+     * inaffidabile dall'installer di sistema e fallisce con il generico "App non installata"
+     * senza esporre il motivo. Con PackageInstaller l'installer copia lui stesso l'APK e
+     * [UpdateInstallReceiver] riceve il codice di errore reale.
      */
     fun installUpdate() {
         if (downloadedApkFile == null) {
@@ -277,48 +319,114 @@ class AppUpdateManager @Inject constructor(
                 downloadedApkFile = apkFile
             }
         }
-        
-        val apkFile = downloadedApkFile ?: return
-        
-        if (!apkFile.exists()) {
-            Log.e(TAG, "APK file not found")
+
+        val apkFile = downloadedApkFile ?: run {
+            Log.e(TAG, "Nessun APK scaricato da installare")
             return
         }
-        
-        try {
-            // Check for install unknown apps permission on Android O (API 26) and above
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.packageManager.canRequestPackageInstalls()) {
-                Log.d(TAG, "Requesting install packages permission (Unknown Sources settings page)")
+
+        if (!apkFile.exists() || apkFile.length() == 0L) {
+            Log.e(TAG, "File APK non trovato o vuoto: ${apkFile.absolutePath}")
+            Toast.makeText(context, "File di aggiornamento non valido, riscarica", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        // Verifica permesso "installa app sconosciute"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            !context.packageManager.canRequestPackageInstalls()
+        ) {
+            Log.d(TAG, "Richiesta permesso installazione pacchetti")
+            try {
                 val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
                     data = Uri.parse("package:${context.packageName}")
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
                 context.startActivity(intent)
-                return
+            } catch (e: Exception) {
+                Log.e(TAG, "Impossibile aprire le impostazioni installazione", e)
+                Toast.makeText(
+                    context,
+                    "Abilita \"Origini sconosciute\" per WaveStream e riprova",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            return
+        }
+
+        // Avviso preventivo sullo spazio (causa più comune di fallimento su Fire TV)
+        val freeBytes = getFreeSpaceBytes()
+        if (freeBytes in 1 until (apkFile.length() + 100L * 1024L * 1024L)) {
+            Toast.makeText(
+                context,
+                "Spazio insufficiente per aggiornare. Libera almeno 500 MB e riprova.",
+                Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        try {
+            installWithPackageInstaller(apkFile)
+        } catch (e: Exception) {
+            Log.e(TAG, "PackageInstaller fallito, provo con ACTION_VIEW", e)
+            try {
+                installWithViewIntent(apkFile)
+            } catch (fallback: Exception) {
+                Log.e(TAG, "Anche il fallback ACTION_VIEW è fallito", fallback)
+                Toast.makeText(context, "Installazione non avviata: ${fallback.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun installWithPackageInstaller(apkFile: File) {
+        val packageInstaller = context.packageManager.packageInstaller
+        val params = PackageInstaller.SessionParams(
+            PackageInstaller.SessionParams.MODE_FULL_INSTALL
+        )
+
+        val sessionId = packageInstaller.createSession(params)
+        val session = packageInstaller.openSession(sessionId)
+        try {
+            session.openWrite("base.apk", 0L, apkFile.length()).use { output ->
+                apkFile.inputStream().use { input ->
+                    input.copyTo(output)
+                }
+                session.fsync(output)
             }
 
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                val apkUri: Uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    FileProvider.getUriForFile(
-                        context,
-                        "${context.packageName}.fileprovider",
-                        apkFile
-                    )
-                } else {
-                    Uri.fromFile(apkFile)
-                }
-                
-                setDataAndType(apkUri, "application/vnd.android.package-archive")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val resultIntent = Intent(context, UpdateInstallReceiver::class.java).apply {
+                action = UpdateInstallReceiver.ACTION_INSTALL_RESULT
             }
-            
-            context.startActivity(intent)
-            Log.d(TAG, "Installation intent started")
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to start installation", e)
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                sessionId,
+                resultIntent,
+                flags
+            )
+            session.commit(pendingIntent.intentSender)
+            Log.d(TAG, "Sessione PackageInstaller $sessionId avviata")
+        } finally {
+            session.close()
         }
+    }
+
+    private fun installWithViewIntent(apkFile: File) {
+        val apkUri: Uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            apkFile
+        )
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(apkUri, "application/vnd.android.package-archive")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        context.startActivity(intent)
+        Log.d(TAG, "Installation intent started (fallback)")
     }
     
     /**
