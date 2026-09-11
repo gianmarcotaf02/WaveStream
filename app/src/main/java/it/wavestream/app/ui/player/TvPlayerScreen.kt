@@ -1988,13 +1988,17 @@ private fun CreditsWatchdog(
 
             val position = latestPosition
             val remaining = duration - position
-            if (position < CreditsDetector.MIN_POSITION_MS || remaining > CreditsDetector.WINDOW_MS) {
-                // Fuori dalla finestra utile: nuovo episodio o seek verso l'inizio
+
+            // Finestra utile: ultimi minuti dell'episodio, esclusa l'intro.
+            val inWindow = position >= CreditsDetector.MIN_POSITION_MS &&
+                    remaining <= CreditsDetector.WINDOW_MS
+
+            // Fuori finestra: senza debug non si campiona affatto (risparmio CPU)
+            if (!inWindow && debugText == null) {
                 detector.reset()
-                debugText?.value = "credits: in attesa (mancano ${formatRemainingTime(remaining)})"
                 continue
             }
-            if (remaining < 1_000L) continue
+            if (inWindow && remaining < 1_000L) continue
 
             val surfaceView = playerView.videoSurfaceView as? SurfaceView
             if (surfaceView == null) {
@@ -2034,12 +2038,20 @@ private fun CreditsWatchdog(
             }
             failedCaptures = 0
 
+            if (!inWindow) {
+                // Debug fuori finestra: si mostrano i valori ma non si accumulano hit
+                detector.clearAccumulator()
+            }
             val result = detector.analyze(bitmap)
             val line = detector.describe(result)
-            android.util.Log.d(CREDITS_TAG, "rem=${formatRemainingTime(remaining)} $line")
-            debugText?.value = "credits: $line  (mancano ${formatRemainingTime(remaining)})"
+            android.util.Log.d(CREDITS_TAG, "rem=${formatRemainingTime(remaining)} ${if (inWindow) "" else "TEST"} $line")
+            debugText?.value = if (inWindow) {
+                "credits: $line  (mancano ${formatRemainingTime(remaining)})"
+            } else {
+                "credits TEST fuori finestra: $line  (mancano ${formatRemainingTime(remaining)})"
+            }
 
-            if (result.triggered) {
+            if (inWindow && result.triggered) {
                 android.util.Log.d(CREDITS_TAG, "Notifica titoli di coda al player")
                 latestCallback()
             }

@@ -134,6 +134,13 @@ class PlayerActivity : ComponentActivity() {
     private val MAX_BUFFERING_RETRIES = 8
     private val FIRST_RETRY_DELAY_MS = 3000L
     private val MAX_RETRY_DELAY_MS = 30000L
+
+    // Varianti di formato per i canali live: molti provider servono lo stesso canale
+    // sia come MPEG-TS (.ts) sia come HLS (.m3u8). Se il formato scelto non parte
+    // (caricamento infinito) si passa automaticamente all'altro. Indice corrente in
+    // streamVariantIndex, 0 = URL originale memorizzato in DB.
+    private var streamVariants: List<String> = emptyList()
+    private var streamVariantIndex = 0
     
     // Sotto questa soglia (ms) si considera il player "sul live"
     private val LIVE_EDGE_THRESHOLD_MS = 5_000L
@@ -152,6 +159,10 @@ class PlayerActivity : ComponentActivity() {
     
     private fun handleBufferingTimeout() {
         if (contentType == ContentType.CHANNEL && ::player.isInitialized) {
+            // Prima di ritentare lo stesso URL, prova il formato alternativo (es. .ts -> .m3u8).
+            // È la causa tipica del "caricamento infinito" sui canali live serviti in HLS.
+            if (trySwitchStreamVariant()) return
+
             bufferingRetryCount++
             android.util.Log.w("PlayerActivity", "Buffering timeout - retry attempt $bufferingRetryCount of $MAX_BUFFERING_RETRIES")
             
@@ -185,13 +196,14 @@ class PlayerActivity : ComponentActivity() {
         if (!::player.isInitialized) return
         
         try {
-            android.util.Log.d("PlayerActivity", "Force reloading stream: $streamUrl")
+            val urlToLoad = currentVariantUrl()
+            android.util.Log.d("PlayerActivity", "Force reloading stream: $urlToLoad")
             
             player.stop()
             player.clearMediaItems()
             
             val mediaItem = androidx.media3.common.MediaItem.Builder()
-                .setUri(android.net.Uri.parse(streamUrl))
+                .setUri(android.net.Uri.parse(urlToLoad))
                 .build()
             
             player.setMediaItem(mediaItem)
@@ -211,6 +223,51 @@ class PlayerActivity : ComponentActivity() {
                 bufferingHandler.postDelayed({ forceReloadStream() }, retryDelay)
             }
         }
+    }
+
+    /**
+     * Costruisce le varianti di URL per un canale live. Per un URL Xtream/M3U .ts
+     * aggiunge la variante .m3u8 (e viceversa), preservando l'eventuale query string.
+     * Per i contenuti VOD resta una sola variante (l'URL originale).
+     */
+    private fun buildStreamVariants(url: String): List<String> {
+        if (contentType != ContentType.CHANNEL || url.isBlank()) return listOf(url)
+        val queryIndex = url.indexOf('?')
+        val pathEnd = if (queryIndex >= 0) queryIndex else url.length
+        val path = url.substring(0, pathEnd)
+        return when {
+            path.endsWith(".ts", ignoreCase = true) -> listOf(
+                url,
+                url.replaceRange(pathEnd - 3, pathEnd, ".m3u8")
+            )
+            path.endsWith(".m3u8", ignoreCase = true) -> listOf(
+                url,
+                url.replaceRange(pathEnd - 5, pathEnd, ".ts")
+            )
+            else -> listOf(url)
+        }
+    }
+
+    /** URL attualmente in uso (variante selezionata). */
+    private fun currentVariantUrl(): String =
+        streamVariants.getOrElse(streamVariantIndex) { streamUrl }
+
+    /**
+     * Se esiste una variante di formato non ancora provata, passa alla successiva e
+     * ricarica. Ritorna true se il reload è stato avviato.
+     */
+    private fun trySwitchStreamVariant(): Boolean {
+        if (contentType != ContentType.CHANNEL) return false
+        if (streamVariantIndex >= streamVariants.lastIndex) return false
+        streamVariantIndex++
+        bufferingRetryCount = 0
+        bufferingHandler.removeCallbacks(bufferingTimeoutRunnable)
+        android.util.Log.w(
+            "PlayerActivity",
+            "Cambio formato stream -> ${currentVariantUrl()} (variante ${streamVariantIndex + 1}/${streamVariants.size})"
+        )
+        forceReloadStream()
+        return true
     }
     
     // MediaSession for headphone/Bluetooth button controls
@@ -586,6 +643,10 @@ class PlayerActivity : ComponentActivity() {
                 
                 // Auto-retry on error for live channels
                 if (contentType == ContentType.CHANNEL) {
+                    // Prova prima il formato alternativo (.ts <-> .m3u8) invece di
+                    // ritentare all'infinito lo stesso URL che non parte.
+                    if (trySwitchStreamVariant()) return
+
                     bufferingRetryCount++
                     
                     if (bufferingRetryCount < MAX_BUFFERING_RETRIES) {
@@ -719,7 +780,9 @@ class PlayerActivity : ComponentActivity() {
     private fun startPlayback() {
         try {
             creditsDetected = false
-            val mediaItem = MediaItem.fromUri(Uri.parse(streamUrl))
+            streamVariants = buildStreamVariants(streamUrl)
+            streamVariantIndex = 0
+            val mediaItem = MediaItem.fromUri(Uri.parse(currentVariantUrl()))
             player.setMediaItem(mediaItem)
             player.prepare()
             player.play()

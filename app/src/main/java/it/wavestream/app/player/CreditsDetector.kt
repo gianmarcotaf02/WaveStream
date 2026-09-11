@@ -79,6 +79,12 @@ class CreditsDetector {
         isTriggered = false
     }
 
+    /** Azzera solo l'accumulo dei campioni, senza perdere la storia dei frame (debug). */
+    fun clearAccumulator() {
+        consecutiveHits = 0
+        sampleCount = 0
+    }
+
     /**
      * Analizza un frame di playback (bitmap a piena risoluzione).
      * Non lancia eccezioni: in caso di problema restituisce un risultato neutro.
