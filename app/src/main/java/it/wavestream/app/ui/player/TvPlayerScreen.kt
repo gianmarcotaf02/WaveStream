@@ -315,6 +315,7 @@ fun TvPlayerScreen(
                 title = next.title,
                 subtitle = next.subtitle,
                 countdown = next.countdown,
+                totalCountdown = next.totalCountdown,
                 autoPlay = next.autoPlay,
                 onPlayNext = onPlayNext,
                 onCancel = onCancelNext,
@@ -1766,6 +1767,7 @@ private fun ModernNextEpisodeOverlay(
     title: String,
     subtitle: String?,
     countdown: Int,
+    totalCountdown: Int = 10,
     autoPlay: Boolean,
     onPlayNext: () -> Unit,
     onCancel: () -> Unit,
@@ -1784,10 +1786,10 @@ private fun ModernNextEpisodeOverlay(
         label = "border"
     )
     
-    // Smooth progress animation - fills from 0 to 1 as countdown goes from 10 to 0
+    // Smooth progress animation - fills from 0 to 1 as countdown goes from totalCountdown to 0
     // This makes the ring fill up clockwise from 12 o'clock
     val animatedProgress by animateFloatAsState(
-        targetValue = 1f - (countdown / 10f),
+        targetValue = (1f - (countdown / totalCountdown.toFloat())).coerceIn(0f, 1f),
         animationSpec = tween(
             durationMillis = 1000,  // 1 second smooth transition
             easing = LinearEasing    // Constant speed
@@ -1884,6 +1886,7 @@ data class NextEpisodeInfo(
     val title: String,
     val subtitle: String? = null,
     val countdown: Int,
+    val totalCountdown: Int = 10,
     val autoPlay: Boolean = true
 )
 
