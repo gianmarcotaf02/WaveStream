@@ -117,9 +117,9 @@ class PlayerActivity : ComponentActivity() {
     private val _seekIndicatorVisible = mutableStateOf(false)
     private var seekAccumulationJob: kotlinx.coroutines.Job? = null
     
-    // Countdown overlay "Prossimo episodio": classico vs anticipato sui titoli di coda
+    // Countdown overlay "Prossimo episodio" (uniforme: 10s)
     private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 10
-    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 20
+    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 10
 
     private val progressHandler = Handler(Looper.getMainLooper())
     private val nextEpisodeHandler = Handler(Looper.getMainLooper())
@@ -1178,6 +1178,7 @@ class PlayerActivity : ComponentActivity() {
             title = next.title,
             subtitle = next.subtitle,
             countdown = nextEpisodeCountdown,
+            totalCountdown = countdownSeconds,
             autoPlay = _autoPlayNextEnabled.value
         )
         
@@ -1190,12 +1191,13 @@ class PlayerActivity : ComponentActivity() {
                         title = next.title,
                         subtitle = next.subtitle,
                         countdown = nextEpisodeCountdown,
+                        totalCountdown = countdownSeconds,
                         autoPlay = _autoPlayNextEnabled.value
                     )
                     nextEpisodeHandler.postDelayed(this, 1000)
                 } else {
                     if (_autoPlayNextEnabled.value) {
-                         playNextEpisode()
+                         playNextEpisode(isAutoPlay = true)
                     }
                 }
             }
