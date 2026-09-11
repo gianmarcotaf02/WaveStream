@@ -141,6 +141,17 @@ class PlayerActivity : ComponentActivity() {
     // streamVariantIndex, 0 = URL originale memorizzato in DB.
     private var streamVariants: List<String> = emptyList()
     private var streamVariantIndex = 0
+
+    // True dopo il primo STATE_READY del canale corrente: su un rebuffer a flusso già
+    // avviato il cambio di formato è rimandato, per non penalizzare la stabilità con
+    // uno switch inutile durante un singhiozzo transitorio.
+    private var hasReachedReady = false
+
+    // Memorizza per ogni canale quale formato (.m3u8/.ts) ha funzionato, così gli avvii
+    // successivi partono direttamente con quello giusto: nessun tentativo a vuoto.
+    private val streamFormatPrefs by lazy {
+        getSharedPreferences("stream_format_prefs", Context.MODE_PRIVATE)
+    }
     
     // Sotto questa soglia (ms) si considera il player "sul live"
     private val LIVE_EDGE_THRESHOLD_MS = 5_000L
@@ -228,23 +239,54 @@ class PlayerActivity : ComponentActivity() {
     /**
      * Costruisce le varianti di URL per un canale live. Per un URL Xtream/M3U .ts
      * aggiunge la variante .m3u8 (e viceversa), preservando l'eventuale query string.
-     * Per i contenuti VOD resta una sola variante (l'URL originale).
+     *
+     * Ordine: se per questo canale è già noto il formato che funziona, si parte da quello;
+     * altrimenti si preferisce HLS (.m3u8), più resiliente ai singhiozzi del provider.
+     * Il fallback automatico copre comunque i canali serviti solo in uno dei due formati.
      */
     private fun buildStreamVariants(url: String): List<String> {
         if (contentType != ContentType.CHANNEL || url.isBlank()) return listOf(url)
         val queryIndex = url.indexOf('?')
         val pathEnd = if (queryIndex >= 0) queryIndex else url.length
         val path = url.substring(0, pathEnd)
-        return when {
-            path.endsWith(".ts", ignoreCase = true) -> listOf(
-                url,
-                url.replaceRange(pathEnd - 3, pathEnd, ".m3u8")
-            )
-            path.endsWith(".m3u8", ignoreCase = true) -> listOf(
-                url,
-                url.replaceRange(pathEnd - 5, pathEnd, ".ts")
-            )
-            else -> listOf(url)
+        val ext = when {
+            path.endsWith(".ts", ignoreCase = true) -> ".ts"
+            path.endsWith(".m3u8", ignoreCase = true) -> ".m3u8"
+            else -> return listOf(url)
+        }
+        val hlsUrl = if (ext == ".m3u8") url else url.replaceRange(pathEnd - 3, pathEnd, ".m3u8")
+        val tsUrl = if (ext == ".ts") url else url.replaceRange(pathEnd - 5, pathEnd, ".ts")
+        return when (preferredFormatIsHls(url)) {
+            true -> listOf(hlsUrl, tsUrl)
+            false -> listOf(tsUrl, hlsUrl)
+            null -> listOf(hlsUrl, tsUrl)
+        }
+    }
+
+    /** Chiave stabile per canale: URL senza query string ed estensione. */
+    private fun streamFormatKey(url: String): String =
+        url.substringBefore('?').substringBeforeLast('.')
+
+    /** Formato preferito memorizzato per il canale: true=HLS, false=TS, null=mai provato. */
+    private fun preferredFormatIsHls(url: String): Boolean? {
+        val key = streamFormatKey(url)
+        if (key.isBlank()) return null
+        return when (streamFormatPrefs.getString(key, null)) {
+            "hls" -> true
+            "ts" -> false
+            else -> null
+        }
+    }
+
+    /** Salva il formato attualmente in riproduzione come preferito per il canale. */
+    private fun rememberCurrentStreamFormat() {
+        if (streamUrl.isBlank()) return
+        val key = streamFormatKey(streamUrl)
+        if (key.isBlank()) return
+        val activeIsHls = currentVariantUrl().substringBefore('?').endsWith(".m3u8", ignoreCase = true)
+        val value = if (activeIsHls) "hls" else "ts"
+        if (streamFormatPrefs.getString(key, null) != value) {
+            streamFormatPrefs.edit().putString(key, value).apply()
         }
     }
 
@@ -518,11 +560,13 @@ class PlayerActivity : ComponentActivity() {
         // Live TV keeps minimal buffers for low latency
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
+                // Live: avvio rapido (bufferForPlayback basso = parte subito) ma cuscinetto
+                // massimo alto per assorbire il jitter nei giorni di rete instabile.
                 // minBuffer deve essere >= bufferForPlaybackAfterRebuffer (vincolo ExoPlayer)
-                if (isLive) 1_500 else 15_000,      // minBuffer (1.5s: zapping rapido, >= afterRebuffer)
-                if (isLive) 8_000 else 30_000,      // maxBuffer (8s: latenza bassa senza stutter)
-                if (isLive) 800 else 2_500,         // bufferForPlayback (800ms: avvio rapido ma senza stutter su stream deboli)
-                if (isLive) 1_500 else 5_000        // bufferForPlaybackAfterRebuffer (più stabilità post-rebuffer)
+                if (isLive) 3_000 else 15_000,      // minBuffer
+                if (isLive) 20_000 else 30_000,     // maxBuffer (non incide sull'avvio, solo sul margine)
+                if (isLive) 1_000 else 2_500,       // bufferForPlayback (avvio rapido)
+                if (isLive) 3_000 else 5_000        // bufferForPlaybackAfterRebuffer (stabilità post-buco)
             )
             .setPrioritizeTimeOverSizeThresholds(true)
             .setBackBuffer(10_000, true) // Keep last 10s for back-skip without re-downloading
@@ -608,16 +652,22 @@ class PlayerActivity : ComponentActivity() {
                     Player.STATE_BUFFERING -> {
                         _isLoading.value = true
                         
-                        // Start buffering timeout for Live TV
+                        // Timeout per i canali live: corto all'avvio (zapping rapido, si
+                        // passa subito al formato alternativo se non parte), più lungo dopo
+                        // che il flusso era già partito (evita switch su singhiozzi brevi).
                         if (contentType == ContentType.CHANNEL) {
+                            val timeoutMs = if (hasReachedReady) 6_000L else 3_000L
                             bufferingHandler.removeCallbacks(bufferingTimeoutRunnable)
-                            bufferingHandler.postDelayed(bufferingTimeoutRunnable, 3000) // 3 seconds
+                            bufferingHandler.postDelayed(bufferingTimeoutRunnable, timeoutMs)
                         }
                     }
                     Player.STATE_READY -> {
                         _isLoading.value = false
                         bufferingHandler.removeCallbacks(bufferingTimeoutRunnable) // Cancel timeout
                         bufferingRetryCount = 0  // Reset retry counter on successful playback
+                        hasReachedReady = true
+                        // Il formato corrente funziona: memorizzalo per gli avvii successivi
+                        if (contentType == ContentType.CHANNEL) rememberCurrentStreamFormat()
                         updateAudioTracks()  // Populate audio tracks when ready
                         if (contentType == ContentType.CHANNEL) updateLiveState()
                     }
@@ -780,6 +830,7 @@ class PlayerActivity : ComponentActivity() {
     private fun startPlayback() {
         try {
             creditsDetected = false
+            hasReachedReady = false
             streamVariants = buildStreamVariants(streamUrl)
             streamVariantIndex = 0
             val mediaItem = MediaItem.fromUri(Uri.parse(currentVariantUrl()))
