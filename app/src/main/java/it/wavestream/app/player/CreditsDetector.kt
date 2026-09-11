@@ -41,6 +41,7 @@ class CreditsDetector {
         val score: Float,
         val darkness: Float,
         val textDensity: Float,
+        val textRowCount: Int,
         val peakRowDensity: Float,
         val staticScore: Float,
         val hit: Boolean,
@@ -64,7 +65,7 @@ class CreditsDetector {
     }
 
     private var previousGrid: FloatArray? = null
-    private var consecutiveHits = 0
+    private val hitHistory = ArrayDeque<Boolean>()
     private var sampleCount = 0
 
     /** Diventa true quando i titoli di coda sono stati confermati. */
@@ -74,14 +75,14 @@ class CreditsDetector {
     /** Da chiamare ad ogni nuovo episodio / seek verso l'inizio. */
     fun reset() {
         previousGrid = null
-        consecutiveHits = 0
+        hitHistory.clear()
         sampleCount = 0
         isTriggered = false
     }
 
     /** Azzera solo l'accumulo dei campioni, senza perdere la storia dei frame (debug). */
     fun clearAccumulator() {
-        consecutiveHits = 0
+        hitHistory.clear()
         sampleCount = 0
     }
 
@@ -106,32 +107,39 @@ class CreditsDetector {
         buildGrid(pix, w, h)
 
         // ---- metriche di luminanza / testo ----
+        // La luminanza media è globale; le metriche di testo si calcolano solo nella
+        // fascia centrale (esclude la zona sottotitoli in basso, che altrimenti
+        // produrrebbe falsi positivi su scene scure con sottotitoli attivi).
+        val yTop = (GRID_H * BAND_TOP).toInt().coerceAtLeast(0)
+        val yBottom = (GRID_H * BAND_BOTTOM).toInt().coerceAtMost(GRID_H)
+
         var lumaSum = 0f
         var textCells = 0
-        for (i in gridLuma.indices) {
-            val l = gridLuma[i]
-            lumaSum += l
-            if (l >= TEXT_LOW && l <= TEXT_HIGH) textCells++
-        }
-        val cellTotal = gridLuma.size
-        val meanLuma = lumaSum / cellTotal
-        val darkness = (1f - meanLuma / 255f).coerceIn(0f, 1f)
-        val textDensity = textCells.toFloat() / cellTotal
+        var bandCells = 0
+        for (i in gridLuma.indices) lumaSum += gridLuma[i]
 
-        // Riga più densa di celle "testuali": nei credits il testo è allineato orizzontalmente
         var peakRowDensity = 0f
-        val yStart = (GRID_H * 0.08f).toInt()
-        val yEnd = (GRID_H * 0.92f).toInt()
-        for (y in yStart until yEnd) {
+        var textRowCount = 0
+        for (y in yTop until yBottom) {
             val base = y * GRID_W
             var c = 0
             for (x in 0 until GRID_W) {
                 val l = gridLuma[base + x]
-                if (l >= TEXT_LOW && l <= TEXT_HIGH) c++
+                bandCells++
+                if (l >= TEXT_LOW && l <= TEXT_HIGH) {
+                    c++
+                    textCells++
+                }
             }
             val density = c.toFloat() / GRID_W
             if (density > peakRowDensity) peakRowDensity = density
+            if (density >= TEXT_ROW_THRESHOLD) textRowCount++
         }
+
+        val cellTotal = gridLuma.size
+        val meanLuma = lumaSum / cellTotal
+        val darkness = (1f - meanLuma / 255f).coerceIn(0f, 1f)
+        val textDensity = if (bandCells > 0) textCells.toFloat() / bandCells else 0f
 
         // ---- stabilità temporale (con compensazione dello scroll verticale) ----
         val previous = previousGrid
@@ -155,20 +163,27 @@ class CreditsDetector {
                         0.20f * staticScore
                 ).coerceIn(0f, 1f)
 
-        if (hit) consecutiveHits++ else consecutiveHits = 0
+        if (hit) {
+            hitHistory.addLast(true)
+        } else {
+            hitHistory.addLast(false)
+        }
+        while (hitHistory.size > HIT_WINDOW) hitHistory.removeFirst()
+        val windowHits = hitHistory.count { it }
 
         sampleCount++
         var triggered = false
-        if (!isTriggered && consecutiveHits >= MIN_CONSECUTIVE_HITS) {
+        if (!isTriggered && windowHits >= MIN_HITS_IN_WINDOW) {
             isTriggered = true
             triggered = true
-            Log.d(TAG, "Titoli di coda rilevati dopo $sampleCount campioni")
+            Log.d(TAG, "Titoli di coda rilevati dopo $sampleCount campioni ($windowHits/$HIT_WINDOW)")
         }
 
         return Result(
             score = score,
             darkness = darkness,
             textDensity = textDensity,
+            textRowCount = textRowCount,
             peakRowDensity = peakRowDensity,
             staticScore = staticScore,
             hit = hit,
@@ -178,15 +193,17 @@ class CreditsDetector {
 
     /** Righe di log+debug da mostrare a video quando il debug è attivo. */
     fun describe(result: Result): String {
-        return "d=%.2f t=%.3f p=%.2f s=%.2f | score=%.2f hits=%d/%d%s".format(
+        val windowHits = hitHistory.count { it }
+        return "d=%.2f t=%.3f p=%.2f rows=%d s=%.2f | score=%.2f hits=%d/%d%s".format(
             result.darkness,
             result.textDensity,
             result.peakRowDensity,
+            result.textRowCount,
             result.staticScore,
             result.score,
-            consecutiveHits,
-            MIN_CONSECUTIVE_HITS,
-            if (consecutiveHits > 0 || result.hit) "  HIT" else ""
+            windowHits,
+            MIN_HITS_IN_WINDOW,
+            if (result.hit) "  HIT" else ""
         )
     }
 
@@ -292,6 +309,7 @@ class CreditsDetector {
         score = 0f,
         darkness = 0f,
         textDensity = 0f,
+        textRowCount = 0,
         peakRowDensity = 0f,
         staticScore = NEUTRAL_STATIC,
         hit = false,
@@ -323,11 +341,20 @@ class CreditsDetector {
 
         // Soglie di classificazione
         private const val MIN_DARKNESS = 0.62f
-        private const val MIN_TEXT_DENSITY = 0.010f
+        private const val MIN_TEXT_DENSITY = 0.006f
         private const val MAX_TEXT_DENSITY = 0.32f
-        private const val MIN_PEAK_ROW_DENSITY = 0.20f
+        private const val MIN_PEAK_ROW_DENSITY = 0.16f
+        private const val TEXT_ROW_THRESHOLD = 0.12f
 
-        private const val MIN_CONSECUTIVE_HITS = 3
+        // Fascia di analisi verticale (esclude l'alto estremo e la zona sottotitoli)
+        private const val BAND_TOP = 0.05f
+        private const val BAND_BOTTOM = 0.85f
+
+        // Persistenza a finestra scorrevole: 4 campioni positivi su 6 (~8s su 12s).
+        // Più tollerante dei positivi consecutivi, perché i credits che cambiano
+        // schermata possono produrre campioni "vuoti" isolati.
+        private const val HIT_WINDOW = 6
+        private const val MIN_HITS_IN_WINDOW = 4
         private const val TEXT_DENSITY_REFERENCE = 0.08f
         private const val MAX_SHIFT = 8
         private const val STATIC_DIFF_SCALE = 60f
