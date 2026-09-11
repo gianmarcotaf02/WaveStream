@@ -1,7 +1,0 @@
-- Player: rilevamento automatico dei titoli di coda — l'overlay "Prossimo episodio" compare ora all'inizio dei titoli di coda invece che negli ultimi 10 secondi del file
-- Il rilevamento avviene on-device leggendo i fotogrammi del video in tempo reale (analisi immagini classica, nessuna IA, nessun dato inviato all'esterno)
-- Nuova impostazione in Player: "Rileva titoli di coda (prossimo episodio)" per attivare/disattivare la funzione
-- Rilevamento disattivato automaticamente su canali live e sui contenuti senza durata nota, con fallback al comportamento classico
-- Countdown "Prossimo episodio" fissato a 10 secondi con cerchio di progresso fluido
-- Fix: con countdown diverso da 10 secondi il cerchio di progresso restava vuoto o sbagliato
-- Fix: il limite "Stai ancora guardando?" (dopo 3 episodi in riproduzione automatica consecutiva) ora viene applicato correttamente
