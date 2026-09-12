@@ -99,7 +99,7 @@ class PlaylistRepository @Inject constructor(
         username: String,
         password: String
     ): Long = withContext(Dispatchers.IO) {
-        val baseUrl = server.trimEnd('/')
+        val baseUrl = normalizeXtreamBaseUrl(server)
         val playerApiUrl = "$baseUrl/player_api.php?username=$username&password=$password"
         val authResponse = downloadContent(playerApiUrl)
         if (authResponse.contains("\"auth\":0") || authResponse.contains("Unauthorized")) {
