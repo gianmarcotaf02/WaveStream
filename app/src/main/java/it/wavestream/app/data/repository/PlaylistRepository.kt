@@ -194,14 +194,34 @@ class PlaylistRepository @Inject constructor(
      */
     suspend fun updatePlaylistAndResync(updated: Playlist): Boolean = withContext(Dispatchers.IO) {
         val existing = playlistDao.getPlaylistById(updated.id)
+
+        // Normalizza l'URL Xtream: se l'utente ha incollato anche "/player_api.php"
+        // (o un endpoint con query), lo si rimuove per evitare doppi path.
+        val normalized = if (updated.type == "xtream") {
+            updated.copy(url = normalizeXtreamBaseUrl(updated.url))
+        } else {
+            updated
+        }
+
         val connectionChanged = existing != null && (
-            existing.url != updated.url ||
-            existing.username != updated.username ||
-            existing.password != updated.password ||
-            existing.type != updated.type
+            existing.url != normalized.url ||
+            existing.username != normalized.username ||
+            existing.password != normalized.password ||
+            existing.type != normalized.type
         )
 
-        playlistDao.update(updated)
+        // Pre-flight: verifica SUBITO che il nuovo server risponda e che le
+        // credenziali siano valide. Così un link sbagliato produce un errore
+        // chiaro invece del generico "API Xtream ha risposto vuota".
+        if (connectionChanged && normalized.type == "xtream") {
+            verifyXtreamCredentials(
+                normalized.url,
+                normalized.username ?: "",
+                normalized.password ?: ""
+            )
+        }
+
+        playlistDao.update(normalized)
 
         if (connectionChanged) {
             // Gli episodi salvano lo streamUrl completo al momento del caricamento:
@@ -212,10 +232,50 @@ class PlaylistRepository @Inject constructor(
                 .map { it.id }
             if (seriesIds.isNotEmpty()) episodeDao.deleteBySeriesIds(seriesIds)
 
-            refreshPlaylist(updated.id)
+            refreshPlaylist(normalized.id)
         }
 
         connectionChanged
+    }
+
+    /**
+     * Rimuove dall'URL Xtream tutto ciò che non è la base del server
+     * (es. "/player_api.php" incollato per errore, slash finali, query).
+     */
+    private fun normalizeXtreamBaseUrl(raw: String): String {
+        var url = raw.trim()
+        val apiIdx = url.indexOf("/player_api.php", ignoreCase = true)
+        if (apiIdx >= 0) url = url.substring(0, apiIdx)
+        // Rimuove eventuali query residue dopo la base (es. ?username=...)
+        val queryIdx = url.indexOf('?')
+        if (queryIdx >= 0) url = url.substring(0, queryIdx)
+        return url.trimEnd('/')
+    }
+
+    /**
+     * Verifica le credenziali Xtream con una chiamata di autenticazione.
+     * Lancia un'eccezione con messaggio esplicito se il server non risponde
+     * o le credenziali non sono valide.
+     */
+    private suspend fun verifyXtreamCredentials(baseUrl: String, username: String, password: String) {
+        if (username.isBlank() || password.isBlank()) {
+            throw Exception("Username o password mancanti")
+        }
+        val apiUrl = "${baseUrl.trimEnd('/')}/player_api.php?username=$username&password=$password"
+        val body = try {
+            downloadContent(apiUrl)
+        } catch (e: Exception) {
+            throw Exception("Impossibile raggiungere il nuovo server: ${e.message}")
+        }
+        if (body.isBlank()) {
+            throw Exception("Il nuovo server ha risposto vuoto: controlla il link")
+        }
+        val lower = body.lowercase()
+        if (lower.contains("\"auth\":0") || lower.contains("\"auth\": 0") ||
+            lower.contains("unauthorized") || lower.contains("\"status\":\"disabled\"")
+        ) {
+            throw Exception("Credenziali non valide sul nuovo server: controlla username e password")
+        }
     }
 
     /**
