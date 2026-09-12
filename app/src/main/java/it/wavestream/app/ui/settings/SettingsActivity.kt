@@ -684,12 +684,13 @@ private fun AccountSettings(
 
     LaunchedEffect(reloadKey) {
         withContext(Dispatchers.IO) {
+            authResponse = null
+            authError = null
             val playlists = playlistDao.getEnabledPlaylistsList()
             val playlist = playlists.find { it.type == "xtream" }
             xtreamPlaylist = playlist
             if (playlist?.username != null && playlist.password != null) {
                 isLoadingAuth = true
-                authError = null
                 try {
                     val baseUrl = playlist.url.trimEnd('/') + "/"
                     val client = OkHttpClient.Builder()
