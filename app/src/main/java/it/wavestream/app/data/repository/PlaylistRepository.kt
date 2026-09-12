@@ -182,6 +182,43 @@ class PlaylistRepository @Inject constructor(
     }
     
     /**
+     * Aggiorna i dati di connessione di una playlist (URL server, username, password)
+     * e risincronizza subito i contenuti, senza dover reinstallare l'app.
+     *
+     * Se i dati di connessione sono cambiati, gli streamUrl già memorizzati nel DB
+     * (film, serie, canali) e gli episodi puntano ancora al vecchio server: la
+     * risincronizzazione li rigenera a partire dalla nuova configurazione.
+     *
+     * @return true se i dati di connessione sono cambiati (quindi i contenuti sono
+     *         stati rigenerati), false se è cambiato solo il nome o l'EPG.
+     */
+    suspend fun updatePlaylistAndResync(updated: Playlist): Boolean = withContext(Dispatchers.IO) {
+        val existing = playlistDao.getPlaylistById(updated.id)
+        val connectionChanged = existing != null && (
+            existing.url != updated.url ||
+            existing.username != updated.username ||
+            existing.password != updated.password ||
+            existing.type != updated.type
+        )
+
+        playlistDao.update(updated)
+
+        if (connectionChanged) {
+            // Gli episodi salvano lo streamUrl completo al momento del caricamento:
+            // senza questo drop continuerebbero a puntare al vecchio server finché
+            // non vengono ricaricati on-demand (e loadSeriesEpisodes li salta se già presenti).
+            val seriesIds = seriesDao.getAllSeriesList()
+                .filter { it.playlistId == updated.id }
+                .map { it.id }
+            if (seriesIds.isNotEmpty()) episodeDao.deleteBySeriesIds(seriesIds)
+
+            refreshPlaylist(updated.id)
+        }
+
+        connectionChanged
+    }
+
+    /**
      * Delete playlist and all content
      */
     suspend fun deletePlaylist(playlistId: Long) = withContext(Dispatchers.IO) {

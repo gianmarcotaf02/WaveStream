@@ -181,7 +181,7 @@ class SettingsActivity : ComponentActivity() {
             ) {
                 when (selectedMenuId) {
                     "profile" -> ProfileSettings(profileDao, userPreferences, contentFocusRequester)
-                    "account" -> AccountSettings(playlistDao, contentFocusRequester)
+                    "account" -> AccountSettings(playlistDao, playlistRepository, contentFocusRequester)
                     "playlist" -> PlaylistSettings(playlistDao, playlistRepository, userPreferences, contentFocusRequester)
                     "preferences" -> PreferencesSettings(userPreferences, contentFocusRequester)
                     "player" -> PlayerSettings(userPreferences, contentFocusRequester)
@@ -665,14 +665,24 @@ private fun ProfileSettings(
 @Composable
 private fun AccountSettings(
     playlistDao: PlaylistDao,
+    playlistRepository: it.wavestream.app.data.repository.PlaylistRepository,
     contentFocusRequester: FocusRequester? = null
 ) {
+    val coroutineScope = rememberCoroutineScope()
     var xtreamPlaylist by remember { mutableStateOf<Playlist?>(null) }
     var authResponse by remember { mutableStateOf<it.wavestream.app.data.api.XtreamAuthResponse?>(null) }
     var authError by remember { mutableStateOf<String?>(null) }
     var isLoadingAuth by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
+    // Modifica dei dati della playlist del profilo corrente + resync
+    var showEditDialog by remember { mutableStateOf(false) }
+    var isSaving by remember { mutableStateOf(false) }
+    var saveError by remember { mutableStateOf<String?>(null) }
+    var showRestartDialog by remember { mutableStateOf(false) }
+    // Cambiandolo si forza la rilettura di playlist + verifica account dopo il salvataggio
+    var reloadKey by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(reloadKey) {
         withContext(Dispatchers.IO) {
             val playlists = playlistDao.getEnabledPlaylistsList()
             val playlist = playlists.find { it.type == "xtream" }
@@ -720,6 +730,38 @@ private fun AccountSettings(
                 AccountDetailRow(label = "Server", value = playlist.url)
                 AccountDetailRow(label = "Username", value = playlist.username ?: "")
                 AccountDetailRow(label = "Tipo playlist", value = "Xtream Codes")
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { saveError = null; showEditDialog = true },
+                    enabled = !isSaving,
+                    colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (isSaving) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = Color.White
+                        )
+                    } else {
+                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(if (isSaving) "Sincronizzazione in corso..." else "Modifica dati playlist")
+                }
+                Text(
+                    text = "Cambia link, username e password del server e risincronizza i contenuti senza reinstallare l'app.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WaveStreamColors.TextTertiary
+                )
+                saveError?.let { error ->
+                    Text(
+                        text = "Errore: $error",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = WaveStreamColors.Error
+                    )
+                }
 
                 if (playlist.channelCount > 0 || playlist.movieCount > 0 || playlist.seriesCount > 0) {
                     AccountDetailRow(
@@ -807,6 +849,38 @@ private fun AccountSettings(
         } else {
             SettingsInfo(text = "Nessun account Xtream configurato")
         }
+    }
+
+    // Dialog di modifica dei dati playlist (link/username/password + EPG)
+    if (showEditDialog && xtreamPlaylist != null) {
+        PlaylistEditDialog(
+            playlist = xtreamPlaylist,
+            onDismiss = { showEditDialog = false },
+            onSave = { updated ->
+                showEditDialog = false
+                isSaving = true
+                saveError = null
+                coroutineScope.launch {
+                    try {
+                        // Aggiorna i dati e risincronizza subito i contenuti dal nuovo server
+                        playlistRepository.updatePlaylistAndResync(updated)
+                        reloadKey++
+                        showRestartDialog = true
+                    } catch (e: Exception) {
+                        android.util.Log.e("AccountSettings", "Playlist update/resync failed", e)
+                        saveError = e.message ?: "Errore sconosciuto"
+                        // Ricarica comunque i dati aggiornati (il DB è stato scritto)
+                        reloadKey++
+                    } finally {
+                        isSaving = false
+                    }
+                }
+            }
+        )
+    }
+
+    if (showRestartDialog) {
+        AppRestartDialog(onDismiss = { showRestartDialog = false })
     }
 }
 
