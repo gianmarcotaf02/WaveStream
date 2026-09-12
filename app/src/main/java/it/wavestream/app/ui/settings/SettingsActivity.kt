@@ -919,7 +919,6 @@ private fun PlaylistSettings(
     userPreferences: UserPreferences,
     contentFocusRequester: FocusRequester? = null
 ) {
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val playlists by playlistDao.getAllPlaylists().collectAsState(initial = emptyList())
     var selectedPlaylist by remember { mutableStateOf<Playlist?>(null) }
@@ -1351,9 +1350,12 @@ private fun PlaylistEditDialog(
                             username = username.ifBlank { null },
                             password = password.ifBlank { null },
                             epgUrl = epgUrl.ifBlank { null },
+                            isEnabled = playlist?.isEnabled ?: true,
+                            lastUpdated = playlist?.lastUpdated ?: System.currentTimeMillis(),
                             channelCount = playlist?.channelCount ?: 0,
                             movieCount = playlist?.movieCount ?: 0,
-                            seriesCount = playlist?.seriesCount ?: 0
+                            seriesCount = playlist?.seriesCount ?: 0,
+                            createdAt = playlist?.createdAt ?: System.currentTimeMillis()
                         )
                         onSave(newPlaylist)
                     }
