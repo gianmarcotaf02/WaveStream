@@ -1097,76 +1097,7 @@ private fun PlaylistSettings(
     
     // Restart Dialog
     if (showRestartDialog) {
-        val restartButtonFocus = remember { FocusRequester() }
-        LaunchedEffect(Unit) {
-            restartButtonFocus.requestFocus()
-        }
-        AlertDialog(
-            onDismissRequest = { showRestartDialog = false },
-            containerColor = WaveStreamColors.BackgroundElevated,
-            title = {
-                Text("Aggiornamento completato", color = WaveStreamColors.TextPrimary)
-            },
-            text = {
-                Text(
-                    "La playlist è stata aggiornata. Riavvia l'app per visualizzare i nuovi contenuti.",
-                    color = WaveStreamColors.TextSecondary
-                )
-            },
-            confirmButton = {
-                val interactionSource = remember { MutableInteractionSource() }
-                val isFocused by interactionSource.collectIsFocusedAsState()
-                Button(
-                    onClick = {
-                        showRestartDialog = false
-                        // Restart the app
-                        val packageManager = context.packageManager
-                        val intent = packageManager.getLaunchIntentForPackage(context.packageName)
-                        intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(intent)
-                        (context as? android.app.Activity)?.finish()
-                        android.os.Process.killProcess(android.os.Process.myPid())
-                    },
-                    modifier = Modifier
-                        .focusRequester(restartButtonFocus)
-                        .graphicsLayer {
-                            scaleX = if (isFocused) 1.05f else 1f
-                            scaleY = if (isFocused) 1.05f else 1f
-                        }
-                        .border(
-                            width = if (isFocused) 2.dp else 0.dp,
-                            color = if (isFocused) Color.White else Color.Transparent,
-                            shape = RoundedCornerShape(20.dp)
-                        ),
-                    interactionSource = interactionSource,
-                    colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
-                ) {
-                    Text("Riavvia app")
-                }
-            },
-            dismissButton = {
-                val interactionSource = remember { MutableInteractionSource() }
-                val isFocused by interactionSource.collectIsFocusedAsState()
-                TextButton(
-                    onClick = { showRestartDialog = false },
-                    modifier = Modifier
-                        .graphicsLayer {
-                            scaleX = if (isFocused) 1.05f else 1f
-                            scaleY = if (isFocused) 1.05f else 1f
-                        }
-                        .border(
-                            width = if (isFocused) 2.dp else 0.dp,
-                            color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-                            shape = RoundedCornerShape(20.dp)
-                        ),
-                    interactionSource = interactionSource,
-                    colors = ButtonDefaults.textButtonColors(contentColor = WaveStreamColors.TextSecondary)
-                ) {
-                    Text("Dopo")
-                }
-            }
-        )
+        AppRestartDialog(onDismiss = { showRestartDialog = false })
     }
     
     // Edit Playlist Dialog
@@ -1176,9 +1107,17 @@ private fun PlaylistSettings(
             onDismiss = { showEditDialog = false; selectedPlaylist = null },
             onSave = { updated ->
                 coroutineScope.launch {
-                    playlistDao.update(updated)
-                    showEditDialog = false
-                    selectedPlaylist = null
+                    try {
+                        // Aggiorna i dati di connessione e risincronizza subito i contenuti
+                        playlistRepository.updatePlaylistAndResync(updated)
+                        showRestartDialog = true
+                    } catch (e: Exception) {
+                        android.util.Log.e("PlaylistSettings", "Update/resync failed", e)
+                        refreshError = e.message ?: "Errore sconosciuto"
+                    } finally {
+                        showEditDialog = false
+                        selectedPlaylist = null
+                    }
                 }
             }
         )
@@ -1197,6 +1136,81 @@ private fun PlaylistSettings(
             }
         )
     }
+}
+
+@Composable
+private fun AppRestartDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val restartButtonFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        restartButtonFocus.requestFocus()
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = WaveStreamColors.BackgroundElevated,
+        title = {
+            Text("Aggiornamento completato", color = WaveStreamColors.TextPrimary)
+        },
+        text = {
+            Text(
+                "La playlist è stata aggiornata e risincronizzata. Riavvia l'app per visualizzare i nuovi contenuti.",
+                color = WaveStreamColors.TextSecondary
+            )
+        },
+        confirmButton = {
+            val interactionSource = remember { MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+            Button(
+                onClick = {
+                    onDismiss()
+                    // Restart the app
+                    val packageManager = context.packageManager
+                    val intent = packageManager.getLaunchIntentForPackage(context.packageName)
+                    intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(intent)
+                    (context as? android.app.Activity)?.finish()
+                    android.os.Process.killProcess(android.os.Process.myPid())
+                },
+                modifier = Modifier
+                    .focusRequester(restartButtonFocus)
+                    .graphicsLayer {
+                        scaleX = if (isFocused) 1.05f else 1f
+                        scaleY = if (isFocused) 1.05f else 1f
+                    }
+                    .border(
+                        width = if (isFocused) 2.dp else 0.dp,
+                        color = if (isFocused) Color.White else Color.Transparent,
+                        shape = RoundedCornerShape(20.dp)
+                    ),
+                interactionSource = interactionSource,
+                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
+            ) {
+                Text("Riavvia app")
+            }
+        },
+        dismissButton = {
+            val interactionSource = remember { MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .graphicsLayer {
+                        scaleX = if (isFocused) 1.05f else 1f
+                        scaleY = if (isFocused) 1.05f else 1f
+                    }
+                    .border(
+                        width = if (isFocused) 2.dp else 0.dp,
+                        color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                        shape = RoundedCornerShape(20.dp)
+                    ),
+                interactionSource = interactionSource,
+                colors = ButtonDefaults.textButtonColors(contentColor = WaveStreamColors.TextSecondary)
+            ) {
+                Text("Dopo")
+            }
+        }
+    )
 }
 
 @Composable
