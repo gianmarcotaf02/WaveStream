@@ -43,6 +43,8 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.common.util.UnstableApi
 import it.wavestream.app.data.repository.DownloadContentManager
+import it.wavestream.app.data.repository.MediaSegmentRepository
+import it.wavestream.app.data.database.entity.SegmentType
 import it.wavestream.app.data.database.dao.DownloadedContentDao
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -66,6 +68,7 @@ class PlayerActivity : ComponentActivity() {
     @Inject lateinit var playlistRepository: it.wavestream.app.data.repository.PlaylistRepository
     @Inject lateinit var downloadContentManager: DownloadContentManager
     @Inject lateinit var downloadedContentDao: DownloadedContentDao
+    @Inject lateinit var mediaSegmentRepository: MediaSegmentRepository
     
     private lateinit var player: ExoPlayer
     
@@ -80,6 +83,14 @@ class PlayerActivity : ComponentActivity() {
     private var season: Int? = null
     private var episode: Int? = null
     private var groupId: Long? = null
+
+    // Fase 1 — marker esatti dei titoli di coda (Livello 0).
+    private var creditsMarkerStartMs: Long? = null
+    private var creditsMarkerEndMs: Long? = null
+    private var creditsMarkerLoaded = false
+    // Generazione di sessione: si incrementa ad ogni salto indietro e fa ripartire/re-armare
+    // il watchdog video, oltre a resettare lo stato del trigger.
+    private val _creditsSeekGeneration = mutableIntStateOf(0)
     
     // State for Compose
     private val _isLoading = mutableStateOf(true)
@@ -713,6 +724,20 @@ class PlayerActivity : ComponentActivity() {
                     startProgressUpdates()
                 } else {
                     stopProgressUpdates()
+                }
+            }
+
+            override fun onPositionDiscontinuity(
+                oldPosition: Player.PositionInfo,
+                newPosition: Player.PositionInfo,
+                reason: Int
+            ) {
+                // Salto indietro: annulla overlay/trigger e ri-arma la detection,
+                // così il meccanismo non resta "acceso" mentre si riavvolge.
+                if (reason == Player.DISCONTINUITY_REASON_SEEK &&
+                    newPosition.positionMs < oldPosition.positionMs - BACKWARD_SEEK_RESET_MS
+                ) {
+                    onBackwardSeek()
                 }
             }
             
