@@ -2028,6 +2028,13 @@ private fun getPlayerCurrentTime(): String {
 // ============================================================================
 
 private const val CREDITS_TAG = "CreditsWatchdog"
+
+/** Tag dedicato alla diagnostica Passo 0: log machine-readable da raccogliere via adb. */
+private const val CREDITS_DIAG_TAG = "CreditsDiag"
+
+/** Sotto questa luminanza media (0-255) un frame è considerato "nero". */
+private const val CREDITS_BLACK_FRAME_LUMA = 18f
+
 private const val CREDITS_MAX_CAPTURE_FAILURES = 6
 
 /**
@@ -2070,84 +2077,144 @@ private fun CreditsWatchdog(
         var frame: Bitmap? = null
         var failedCaptures = 0
 
-        while (isActive && !detector.isTriggered) {
-            delay(CreditsDetector.SAMPLE_INTERVAL_MS)
+        // ===== Diagnostica Passo 0 (nessun cambio di comportamento) =====
+        var sampleCount = 0
+        var pcFailCount = 0
+        var blackFrameCount = 0
+        var blackStreak = 0
+        var maxBlackStreak = 0
+        var hitCount = 0
 
-            val duration = latestDuration
-            if (duration <= 0L) {
-                debugText?.value = "credits: durata non disponibile"
-                continue
-            }
+        android.util.Log.i(
+            CREDITS_DIAG_TAG,
+            "start contentType=${if (isLiveChannel) "CHANNEL" else "VOD"} " +
+                "windowMs=${CreditsDetector.WINDOW_MS} minPosMs=${CreditsDetector.MIN_POSITION_MS} " +
+                "sampleIntervalMs=${CreditsDetector.SAMPLE_INTERVAL_MS} " +
+                "debug=${debugText != null} sdk=${Build.VERSION.SDK_INT}"
+        )
 
-            val position = latestPosition
-            val remaining = duration - position
+        try {
+            while (isActive && !detector.isTriggered) {
+                delay(CreditsDetector.SAMPLE_INTERVAL_MS)
 
-            // Finestra utile: ultimi minuti dell'episodio, esclusa l'intro.
-            val inWindow = position >= CreditsDetector.MIN_POSITION_MS &&
-                    remaining <= CreditsDetector.WINDOW_MS
+                val duration = latestDuration
+                if (duration <= 0L) {
+                    debugText?.value = "credits: durata non disponibile"
+                    continue
+                }
 
-            // Fuori finestra: senza debug non si campiona affatto (risparmio CPU)
-            if (!inWindow && debugText == null) {
-                detector.reset()
-                continue
-            }
-            if (inWindow && remaining < 1_000L) continue
+                val position = latestPosition
+                val remaining = duration - position
 
-            val surfaceView = playerView.videoSurfaceView as? SurfaceView
-            if (surfaceView == null) {
-                android.util.Log.w(
-                    CREDITS_TAG,
-                    "videoSurfaceView non è una SurfaceView (${playerView.videoSurfaceView?.javaClass?.name}): watchdog interrotto"
-                )
-                debugText?.value = "credits: view non supportata"
-                break
-            }
+                // Finestra utile: ultimi minuti dell'episodio, esclusa l'intro.
+                val inWindow = position >= CreditsDetector.MIN_POSITION_MS &&
+                        remaining <= CreditsDetector.WINDOW_MS
 
-            val width = surfaceView.width
-            val height = surfaceView.height
-            if (width <= 0 || height <= 0) {
-                debugText?.value = "credits: view ${width}x${height}"
-                continue
-            }
+                // Fuori finestra: senza debug non si campiona affatto (risparmio CPU)
+                if (!inWindow && debugText == null) {
+                    detector.reset()
+                    continue
+                }
+                if (inWindow && remaining < 1_000L) continue
 
-            var bitmap = frame
-            if (bitmap == null || bitmap.width != width || bitmap.height != height) {
-                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                frame = bitmap
-            }
-
-            if (!ScreenFrameCapture.capture(surfaceView, bitmap)) {
-                failedCaptures++
-                android.util.Log.w(CREDITS_TAG, "Cattura frame fallita ($failedCaptures/$CREDITS_MAX_CAPTURE_FAILURES)")
-                debugText?.value = "credits: cattura fallita x$failedCaptures"
-                if (failedCaptures >= CREDITS_MAX_CAPTURE_FAILURES) {
+                val surfaceView = playerView.videoSurfaceView as? SurfaceView
+                if (surfaceView == null) {
                     android.util.Log.w(
                         CREDITS_TAG,
-                        "Frame non leggibili: rilevamento credits disattivato per questo episodio"
+                        "videoSurfaceView non è una SurfaceView (${playerView.videoSurfaceView?.javaClass?.name}): watchdog interrotto"
                     )
+                    debugText?.value = "credits: view non supportata"
                     break
                 }
-                continue
-            }
-            failedCaptures = 0
 
-            if (!inWindow) {
-                // Debug fuori finestra: si mostrano i valori ma non si accumulano hit
-                detector.clearAccumulator()
-            }
-            val result = detector.analyze(bitmap)
-            val line = detector.describe(result)
-            android.util.Log.d(CREDITS_TAG, "rem=${formatRemainingTime(remaining)} ${if (inWindow) "" else "TEST"} $line")
-            debugText?.value = if (inWindow) {
-                "credits: $line  (mancano ${formatRemainingTime(remaining)})"
-            } else {
-                "credits TEST fuori finestra: $line  (mancano ${formatRemainingTime(remaining)})"
-            }
+                val width = surfaceView.width
+                val height = surfaceView.height
+                if (width <= 0 || height <= 0) {
+                    debugText?.value = "credits: view ${width}x${height}"
+                    continue
+                }
 
-            if (inWindow && result.triggered) {
-                android.util.Log.d(CREDITS_TAG, "Notifica titoli di coda al player")
-                latestCallback()
+                var bitmap = frame
+                if (bitmap == null || bitmap.width != width || bitmap.height != height) {
+                    bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                    frame = bitmap
+                }
+
+                val pcResult = ScreenFrameCapture.capture(surfaceView, bitmap)
+                if (pcResult != ScreenFrameCapture.SUCCESS) {
+                    failedCaptures++
+                    pcFailCount++
+                    android.util.Log.w(CREDITS_TAG, "Cattura frame fallita ($failedCaptures/$CREDITS_MAX_CAPTURE_FAILURES)")
+                    android.util.Log.w(
+                        CREDITS_DIAG_TAG,
+                        "pcFail pcResult=$pcResult failStreak=$failedCaptures totalFails=$pcFailCount"
+                    )
+                    debugText?.value = "credits: cattura fallita x$failedCaptures"
+                    if (failedCaptures >= CREDITS_MAX_CAPTURE_FAILURES) {
+                        android.util.Log.w(
+                            CREDITS_TAG,
+                            "Frame non leggibili: rilevamento credits disattivato per questo episodio"
+                        )
+                        break
+                    }
+                    continue
+                }
+                failedCaptures = 0
+
+                if (!inWindow) {
+                    // Debug fuori finestra: si mostrano i valori ma non si accumulano hit
+                    detector.clearAccumulator()
+                }
+                val result = detector.analyze(bitmap)
+                val line = detector.describe(result)
+
+                sampleCount++
+                val isBlack = result.meanLuma < CREDITS_BLACK_FRAME_LUMA
+                if (isBlack) {
+                    blackFrameCount++
+                    blackStreak++
+                    if (blackStreak > maxBlackStreak) maxBlackStreak = blackStreak
+                } else {
+                    blackStreak = 0
+                }
+                if (result.hit) hitCount++
+
+                android.util.Log.d(
+                    CREDITS_DIAG_TAG,
+                    ("sample n=%d inWindow=%s pos=%d rem=%d rel=%.3f pcResult=%d black=%s blackStreak=%d " +
+                        "luma=%.1f dark=%.3f text=%.4f peak=%.3f rows=%d static=%.3f hit=%s triggered=%s")
+                        .format(
+                            sampleCount, inWindow, position, remaining,
+                            if (duration > 0) position.toFloat() / duration else 0f,
+                            pcResult, isBlack, blackStreak,
+                            result.meanLuma, result.darkness, result.textDensity,
+                            result.peakRowDensity, result.textRowCount, result.staticScore,
+                            result.hit, result.triggered
+                        )
+                )
+
+                debugText?.value = if (inWindow) {
+                    "credits: $line pcFail=$pcFailCount  (mancano ${formatRemainingTime(remaining)})"
+                } else {
+                    "credits TEST fuori finestra: $line  (mancano ${formatRemainingTime(remaining)})"
+                }
+
+                if (inWindow && result.triggered) {
+                    android.util.Log.i(
+                        CREDITS_DIAG_TAG,
+                        "trigger pos=$position rem=$remaining rel=%.3f samples=$sampleCount blackStreak=$blackStreak".format(
+                            if (duration > 0) position.toFloat() / duration else 0f
+                        )
+                    )
+                    latestCallback()
+                }
             }
+        } finally {
+            android.util.Log.i(
+                CREDITS_DIAG_TAG,
+                "summary samples=$sampleCount pcFail=$pcFailCount blackFrames=$blackFrameCount " +
+                    "maxBlackStreak=$maxBlackStreak hits=$hitCount triggered=${detector.isTriggered}"
+            )
         }
     }
 }
