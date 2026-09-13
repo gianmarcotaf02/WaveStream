@@ -15,6 +15,9 @@ interface ChannelDao {
     
     @Query("SELECT * FROM channels WHERE playlistId = :playlistId AND isHidden = 0 ORDER BY displayOrder, name")
     fun getChannelsByPlaylist(playlistId: Long): Flow<List<Channel>>
+
+    @Query("SELECT * FROM channels WHERE playlistId = :playlistId ORDER BY displayOrder, name")
+    suspend fun getAllByPlaylistIncludingHidden(playlistId: Long): List<Channel>
     
     @Query("SELECT * FROM channels WHERE category = :category AND isHidden = 0 ORDER BY displayOrder, name")
     fun getChannelsByCategory(category: String): Flow<List<Channel>>
@@ -54,9 +57,15 @@ interface ChannelDao {
     
     @Update
     suspend fun update(channel: Channel)
-    
+
+    @Update
+    suspend fun updateList(channels: List<Channel>)
+
     @Delete
     suspend fun delete(channel: Channel)
+
+    @Delete
+    suspend fun deleteList(channels: List<Channel>)
     
     @Query("DELETE FROM channels WHERE playlistId = :playlistId")
     suspend fun deleteByPlaylist(playlistId: Long)
