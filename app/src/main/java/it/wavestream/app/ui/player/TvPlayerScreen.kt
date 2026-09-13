@@ -83,6 +83,8 @@ fun TvPlayerScreen(
     onSeek: (Int) -> Unit,
     onSeekConfirm: () -> Unit,
     onSeekCancel: () -> Unit,
+    onSeekBack: () -> Unit = {},
+    onSeekForward: () -> Unit = {},
     onSubtitles: () -> Unit,
     onBack: () -> Unit,
     isLiveChannel: Boolean = false,
@@ -301,6 +303,8 @@ fun TvPlayerScreen(
                 onSeek = onSeek,
                 onSeekConfirm = onSeekConfirm,
                 onSeekCancel = onSeekCancel,
+                onSeekBack = onSeekBack,
+                onSeekForward = onSeekForward,
                 playbackSpeed = playbackSpeed,
                 onSpeedChange = onSpeedChange,
                 audioTracks = audioTracks,
@@ -455,6 +459,8 @@ private fun ModernPlayerControls(
     onSeek: (Int) -> Unit,
     onSeekConfirm: () -> Unit,
     onSeekCancel: () -> Unit,
+    onSeekBack: () -> Unit,
+    onSeekForward: () -> Unit,
     playbackSpeed: Float,
     onSpeedChange: () -> Unit,
     audioTracks: List<AudioTrackInfo>,
@@ -545,16 +551,24 @@ private fun ModernPlayerControls(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Live button (solo canali live): badge LIVE sul diretto,
-                // bottone rosso "Torna al live" quando si è dietro al diretto
+                // Live: bottone "Torna al live" con icona LIVE lampeggiante.
+                // VOD: Restart Button (Bottom Left) - Expands on focus
                 if (isLiveChannel) {
                     LiveButton(
                         isAtLiveEdge = isAtLiveEdge,
                         onClick = onReturnToLive
                     )
                 } else {
-                    // Restart Button (Bottom Left) - Expands on focus
                     RestartButton(onClick = onRestart)
+                }
+
+                // Timeshift live: indietro di 10s
+                if (isLiveChannel) {
+                    LiveSkipButton(
+                        icon = Icons.Default.Replay10,
+                        contentDescription = "Indietro di 10 secondi",
+                        onClick = onSeekBack
+                    )
                 }
 
                 // Play/Pause button (LEFT - Netflix style)
@@ -563,6 +577,15 @@ private fun ModernPlayerControls(
                         isPlaying = isPlaying,
                         onClick = onPlayPause,
                         focusRequester = centerFocusRequester
+                    )
+                }
+
+                // Timeshift live: avanti di 10s (fino al bordo del diretto)
+                if (isLiveChannel) {
+                    LiveSkipButton(
+                        icon = Icons.Default.Forward10,
+                        contentDescription = "Avanti di 10 secondi",
+                        onClick = onSeekForward
                     )
                 }
                 
@@ -741,9 +764,10 @@ private fun RestartButton(onClick: () -> Unit) {
 private val LiveRed = Color(0xFFE8112D)
 
 /**
- * Live button:
- * - Sul diretto: badge non focusable con pallino rosso che pulsa
- * - Dietro al diretto: bottone attivo che su focus espande "Torna al live"
+ * Bottone "Torna al live" (solo canali live):
+ * - icona LIVE che lampeggia SEMPRE (anche sul diretto)
+ * - sempre focusabile: premuto riporta al bordo del diretto
+ * - dietro al diretto si accende in rosso ed espande "Torna al live"
  */
 @Composable
 private fun LiveButton(
@@ -756,6 +780,7 @@ private fun LiveButton(
     val backgroundColor by animateColorAsState(
         targetValue = when {
             isFocused && !isAtLiveEdge -> LiveRed
+            isFocused -> Color.White.copy(alpha = 0.25f)
             isAtLiveEdge -> Color.Transparent
             else -> Color.White.copy(alpha = 0.2f)
         },
@@ -776,19 +801,11 @@ private fun LiveButton(
             .height(48.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(backgroundColor)
-            .then(
-                if (isAtLiveEdge) {
-                    // Sul live: solo indicatore, non ruba il focus al D-pad
-                    Modifier
-                } else {
-                    Modifier
-                        .focusable(interactionSource = interactionSource)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = null,
-                            onClick = onClick
-                        )
-                }
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
             )
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .animateContentSize(),
@@ -797,20 +814,73 @@ private fun LiveButton(
     ) {
         LiveIcon(
             tint = LiveRed,
-            pulsing = isAtLiveEdge,
+            pulsing = true,
             modifier = Modifier.size(24.dp)
         )
 
-        if (!isAtLiveEdge && isFocused) {
+        val label = when {
+            !isAtLiveEdge -> "Torna al live"
+            isFocused -> "In diretta"
+            else -> null
+        }
+        if (label != null) {
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Torna al live",
+                text = label,
                 style = MaterialTheme.typography.labelLarge,
                 color = Color.White,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1
             )
         }
+    }
+}
+
+/**
+ * Bottone timeshift per i canali live (indietro/avanti).
+ * Stile circolare, si accende sull'accent quando è a fuoco.
+ */
+@Composable
+private fun LiveSkipButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.2f),
+        label = "skipBg"
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.1f else 1f,
+        label = "skipScale"
+    )
+
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(CircleShape)
+            .background(backgroundColor)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = Color.White,
+            modifier = Modifier.size(26.dp)
+        )
     }
 }
 

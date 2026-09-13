@@ -497,6 +497,8 @@ class PlayerActivity : ComponentActivity() {
                     onSeek = { updateSeekOffset(it) },
                     onSeekConfirm = { confirmSeek() },
                     onSeekCancel = { cancelSeek() },
+                    onSeekBack = { seekBy(-LIVE_TIMESHIFT_STEP_MS) },
+                    onSeekForward = { seekBy(LIVE_TIMESHIFT_STEP_MS) },
                     onRestart = { 
                         resetAutoPlayCounter()
                         player.seekTo(0) 
@@ -989,6 +991,8 @@ class PlayerActivity : ComponentActivity() {
                 returnToLive()
             } else {
                 player.seekTo(target.coerceAtLeast(0))
+                // Feedback immediato: siamo dietro al diretto (il tick da 1s riconferma)
+                _isAtLiveEdge.value = false
             }
             return
         }
