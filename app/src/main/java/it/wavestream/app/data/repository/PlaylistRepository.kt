@@ -224,13 +224,22 @@ class PlaylistRepository @Inject constructor(
         playlistDao.update(normalized)
 
         if (connectionChanged) {
-            // Gli episodi salvano lo streamUrl completo al momento del caricamento:
-            // senza questo drop continuerebbero a puntare al vecchio server finché
-            // non vengono ricaricati on-demand (e loadSeriesEpisodes li salta se già presenti).
+            // Gli episodi salvano lo streamUrl completo al momento del caricamento.
+            // NON li cancelliamo più: la cancellazione cambierebbe i loro id e
+            // orfanerebbe i watch_progress (continue watching/resume che tornava
+            // su "Riproduci S1E1"). Riscriviamo solo l'URL puntandolo al nuovo
+            // server, preservando id (e quindi progressi, preferiti, download).
             val seriesIds = seriesDao.getAllSeriesList()
                 .filter { it.playlistId == updated.id }
                 .map { it.id }
-            if (seriesIds.isNotEmpty()) episodeDao.deleteBySeriesIds(seriesIds)
+            if (seriesIds.isNotEmpty()) {
+                episodeDao.refreshStreamUrlsForSeries(
+                    seriesIds,
+                    normalized.url,
+                    normalized.username ?: "",
+                    normalized.password ?: ""
+                )
+            }
 
             refreshPlaylist(normalized.id)
         }

@@ -27,6 +27,14 @@ interface WatchProgressDao {
     
     @Query("SELECT * FROM watch_progress WHERE profileId = :profileId ORDER BY lastWatchedAt DESC LIMIT :limit")
     suspend fun getRecentlyWatched(profileId: Long, limit: Int = 50): List<WatchProgress>
+
+    /**
+     * Tutti i progressi episodio di una serie. Usato come fallback quando il
+     * contentId non corrisponde più agli episodi in DB (playlist/URL cambiato),
+     * così il resume può essere recuperato tramite stagione+episodio.
+     */
+    @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND contentType = 'EPISODE' AND seriesId = :seriesId")
+    suspend fun getEpisodeProgressForSeries(profileId: Long, seriesId: Long): List<WatchProgress>
     
     @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND seriesId = :seriesId ORDER BY lastWatchedAt DESC LIMIT 1")
     suspend fun getSeriesProgress(profileId: Long, seriesId: Long): WatchProgress?

@@ -58,6 +58,17 @@ interface EpisodeDao {
     
     @Query("SELECT COUNT(*) FROM episodes WHERE seriesId = :seriesId")
     suspend fun getCountBySeries(seriesId: Long): Int
+
+    /**
+     * Riscrive lo streamUrl degli episodi già in DB puntandoli al nuovo server,
+     * SENZA cancellarli: preserva gli id e quindi i progressi di visione
+     * (watch_progress.contentId) quando l'URL/credenziali della playlist cambiano.
+     */
+    @Query(
+        "UPDATE episodes SET streamUrl = :baseUrl || '/series/' || :username || '/' || :password || '/' || xtreamEpisodeId || '.' || COALESCE(containerExtension, 'mp4') " +
+        "WHERE seriesId IN (:seriesIds) AND xtreamEpisodeId IS NOT NULL"
+    )
+    suspend fun refreshStreamUrlsForSeries(seriesIds: List<Long>, baseUrl: String, username: String, password: String)
     
     // Get last episode of a specific season (for previous episode navigation)
     @Query("SELECT * FROM episodes WHERE seriesId = :seriesId AND seasonNumber = :season ORDER BY episodeNumber DESC LIMIT 1")
