@@ -132,6 +132,7 @@ class PlayerActivity : ComponentActivity() {
     private var nextEpisodeCountdown = DEFAULT_NEXT_COUNTDOWN_SECONDS
     private var nextEpisodeTriggered = false  // Prevent double trigger
     private var creditsDetected = false       // Titoli di coda rilevati dall'analisi frame
+    private var creditsTunnelLogged = false   // Diagnostica Passo 0: log tunneling una volta per playback
     
     // Auto-retry for live channel buffering
     private var bufferingRetryCount = 0
@@ -680,6 +681,23 @@ class PlayerActivity : ComponentActivity() {
                         if (contentType == ContentType.CHANNEL) rememberCurrentStreamFormat()
                         updateAudioTracks()  // Populate audio tracks when ready
                         if (contentType == ContentType.CHANNEL) updateLiveState()
+
+                        // ===== Diagnostica Passo 0: tunneling + formato video =====
+                        if (!creditsTunnelLogged) {
+                            creditsTunnelLogged = true
+                            val tunneling = try {
+                                if (::player.isInitialized) player.isTunnelingEnabled else false
+                            } catch (_: Exception) { false }
+                            val vFormat = player.videoFormat
+                            val aFormat = player.audioFormat
+                            android.util.Log.i(
+                                "CreditsDiag",
+                                "playback contentType=$contentType contentId=$contentId " +
+                                    "tunneling=$tunneling video=${vFormat?.sampleMimeType ?: "-"}@${vFormat?.width ?: 0}x${vFormat?.height ?: 0} " +
+                                    "audio=${aFormat?.sampleMimeType ?: "-"} durMs=${player.duration} " +
+                                    "streamIsHls=${currentVariantUrl().substringBefore('?').endsWith(".m3u8", true)}"
+                            )
+                        }
                     }
                     Player.STATE_ENDED, Player.STATE_IDLE -> {
                          bufferingHandler.removeCallbacks(bufferingTimeoutRunnable) // Cancel timeout
@@ -840,6 +858,7 @@ class PlayerActivity : ComponentActivity() {
     private fun startPlayback() {
         try {
             creditsDetected = false
+            creditsTunnelLogged = false
             hasReachedReady = false
             streamVariants = buildStreamVariants(streamUrl)
             streamVariantIndex = 0
