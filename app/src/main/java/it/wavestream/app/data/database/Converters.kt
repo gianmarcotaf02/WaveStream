@@ -4,6 +4,8 @@ import androidx.room.TypeConverter
 import it.wavestream.app.data.database.entity.CategoryType
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.FavoriteType
+import it.wavestream.app.data.database.entity.SegmentSource
+import it.wavestream.app.data.database.entity.SegmentType
 import it.wavestream.app.data.database.entity.StreamQuality
 import it.wavestream.app.data.database.entity.TasteStatus
 
@@ -51,6 +53,22 @@ class Converters {
     @TypeConverter
     fun toTasteStatus(value: String): TasteStatus = 
         TasteStatus.valueOf(value)
+    
+    // SegmentType
+    @TypeConverter
+    fun fromSegmentType(value: SegmentType): String = value.name
+    
+    @TypeConverter
+    fun toSegmentType(value: String): SegmentType =
+        SegmentType.valueOf(value)
+    
+    // SegmentSource
+    @TypeConverter
+    fun fromSegmentSource(value: SegmentSource): String = value.name
+    
+    @TypeConverter
+    fun toSegmentSource(value: String): SegmentSource =
+        SegmentSource.valueOf(value)
     
     // List<String>
     @TypeConverter

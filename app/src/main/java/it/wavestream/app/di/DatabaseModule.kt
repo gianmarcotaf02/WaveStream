@@ -450,6 +450,35 @@ object DatabaseModule {
         }
     }
 
+    private val MIGRATION_29_30 = object : Migration(29, 30) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS media_segments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    contentType TEXT NOT NULL,
+                    type TEXT NOT NULL,
+                    contentId INTEGER,
+                    seriesId INTEGER,
+                    seasonNumber INTEGER,
+                    episodeNumber INTEGER,
+                    tmdbId INTEGER,
+                    imdbId TEXT,
+                    startMs INTEGER NOT NULL,
+                    endMs INTEGER,
+                    durationMs INTEGER NOT NULL,
+                    source TEXT NOT NULL,
+                    confidence REAL NOT NULL,
+                    createdAt INTEGER NOT NULL,
+                    updatedAt INTEGER NOT NULL
+                )
+            """)
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_media_segments_contentType_contentId_type ON media_segments(contentType, contentId, type)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_media_segments_contentType_tmdbId_type ON media_segments(contentType, tmdbId, type)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_media_segments_imdbId_type ON media_segments(imdbId, type)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_media_segments_seriesId_seasonNumber_episodeNumber_type ON media_segments(seriesId, seasonNumber, episodeNumber, type)")
+        }
+    }
+
 
     @Provides
     @Singleton
@@ -461,7 +490,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -528,6 +557,10 @@ object DatabaseModule {
 
     @Provides
     fun provideSerieATeamChannelDao(db: AppDatabase): SerieATeamChannelDao = db.serieATeamChannelDao()
+
+    @Provides
+    fun provideMediaSegmentDao(db: AppDatabase): it.wavestream.app.data.database.dao.MediaSegmentDao =
+        db.mediaSegmentDao()
     
     @Provides
     @Singleton
