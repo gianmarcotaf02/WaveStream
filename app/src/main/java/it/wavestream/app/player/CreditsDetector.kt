@@ -39,6 +39,7 @@ class CreditsDetector {
 
     data class Result(
         val score: Float,
+        val meanLuma: Float,
         val darkness: Float,
         val textDensity: Float,
         val textRowCount: Int,
@@ -181,6 +182,7 @@ class CreditsDetector {
 
         return Result(
             score = score,
+            meanLuma = meanLuma,
             darkness = darkness,
             textDensity = textDensity,
             textRowCount = textRowCount,
@@ -194,7 +196,8 @@ class CreditsDetector {
     /** Righe di log+debug da mostrare a video quando il debug è attivo. */
     fun describe(result: Result): String {
         val windowHits = hitHistory.count { it }
-        return "d=%.2f t=%.3f p=%.2f rows=%d s=%.2f | score=%.2f hits=%d/%d%s".format(
+        return "luma=%.0f d=%.2f t=%.3f p=%.2f rows=%d s=%.2f | score=%.2f hits=%d/%d%s".format(
+            result.meanLuma,
             result.darkness,
             result.textDensity,
             result.peakRowDensity,
@@ -307,6 +310,7 @@ class CreditsDetector {
 
     private fun neutral() = Result(
         score = 0f,
+        meanLuma = 0f,
         darkness = 0f,
         textDensity = 0f,
         textRowCount = 0,
@@ -369,8 +373,22 @@ class CreditsDetector {
  */
 internal object ScreenFrameCapture {
 
-    suspend fun capture(surfaceView: SurfaceView, dest: Bitmap): Boolean {
-        if (!surfaceView.isAttachedToWindow) return false
+    /** Esito di [PixelCopy.request] quando tutto è andato bene. */
+    const val SUCCESS = PixelCopy.SUCCESS
+
+    /**
+     * Codice di esito restituito quando la cattura non è nemmeno partita
+     * (surface non attached o eccezione). Distinto dai codici negativi di PixelCopy.
+     */
+    const val RESULT_EXCEPTION = -100
+
+    /**
+     * Cattura un frame e restituisce il codice di esito di PixelCopy
+     * ([SUCCESS], [RESULT_EXCEPTION] oppure uno degli `ERROR_*` negativi).
+     * Il chiamante decide se è un successo confrontando con [SUCCESS].
+     */
+    suspend fun capture(surfaceView: SurfaceView, dest: Bitmap): Int {
+        if (!surfaceView.isAttachedToWindow) return RESULT_EXCEPTION
         return try {
             suspendCancellableCoroutine { continuation ->
                 try {
@@ -379,19 +397,19 @@ internal object ScreenFrameCapture {
                         dest,
                         { result ->
                             if (continuation.isActive) {
-                                continuation.resume(result == PixelCopy.SUCCESS)
+                                continuation.resume(result)
                             }
                         },
                         Handler(Looper.getMainLooper())
                     )
                 } catch (e: Exception) {
                     Log.w("CreditsDetector", "PixelCopy non disponibile: ${e.message}")
-                    if (continuation.isActive) continuation.resume(false)
+                    if (continuation.isActive) continuation.resume(RESULT_EXCEPTION)
                 }
             }
         } catch (e: Exception) {
             Log.w("CreditsDetector", "Capture fallita: ${e.message}")
-            false
+            RESULT_EXCEPTION
         }
     }
 }
