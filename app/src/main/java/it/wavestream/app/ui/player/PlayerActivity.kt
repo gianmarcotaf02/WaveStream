@@ -156,6 +156,9 @@ class PlayerActivity : ComponentActivity() {
     // Sotto questa soglia (ms) si considera il player "sul live"
     private val LIVE_EDGE_THRESHOLD_MS = 5_000L
 
+    // Passo del timeshift live (tasti indietro/avanti nel player)
+    private val LIVE_TIMESHIFT_STEP_MS = 10_000L
+
     private fun calculateRetryDelay(attempt: Int): Long {
         return (FIRST_RETRY_DELAY_MS + (attempt.toLong() * attempt * 500L))
             .coerceAtMost(MAX_RETRY_DELAY_MS)
