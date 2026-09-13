@@ -100,6 +100,10 @@ class PlayerActivity : ComponentActivity() {
     // Live/DVR state (solo canali live) - timeshift stile Sky/DAZN
     private val _isLive = mutableStateOf(false)
     private val _isAtLiveEdge = mutableStateOf(true)
+    // True solo se lo stream live espone una finestra DVR (HLS sliding window /
+    // playlist EVENT): il timeshift indietro è possibile solo in quel caso.
+    // Un MPEG-TS live progressivo non è seekable e non permette di tornare indietro.
+    private val _isLiveSeekable = mutableStateOf(false)
 
     // Mini player live: video ridotto + lista canali della categoria
     private val _isMiniPlayer = mutableStateOf(false)
@@ -500,8 +504,8 @@ class PlayerActivity : ComponentActivity() {
                     onSeek = { updateSeekOffset(it) },
                     onSeekConfirm = { confirmSeek() },
                     onSeekCancel = { cancelSeek() },
-                    onSeekBack = { seekBy(-LIVE_TIMESHIFT_STEP_MS) },
-                    onSeekForward = { seekBy(LIVE_TIMESHIFT_STEP_MS) },
+                    onSeekBack = { seekBy(-LIVE_TIMESHIFT_STEP_MS, fromLiveControls = true) },
+                    onSeekForward = { seekBy(LIVE_TIMESHIFT_STEP_MS, fromLiveControls = true) },
                     onRestart = { 
                         resetAutoPlayCounter()
                         player.seekTo(0) 
@@ -531,6 +535,7 @@ class PlayerActivity : ComponentActivity() {
                     creditsDetectionDebug = _creditsDebugEnabled.value,
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
+                    isLiveSeekable = _isLiveSeekable.value,
                     onReturnToLive = { returnToLive() },
                     isMiniPlayer = _isMiniPlayer.value,
                     onToggleMiniPlayer = { toggleMiniPlayer() },
@@ -861,6 +866,9 @@ class PlayerActivity : ComponentActivity() {
             player.currentLiveOffset
         }
         _isAtLiveEdge.value = behindLiveMs < LIVE_EDGE_THRESHOLD_MS
+        // Sui live il timeshift è possibile solo con una finestra DVR (HLS sliding
+        // window / EVENT). I .ts progressivi non sono seekable: niente indietro.
+        _isLiveSeekable.value = player.isCurrentMediaItemSeekable
     }
 
     /**
@@ -984,10 +992,20 @@ class PlayerActivity : ComponentActivity() {
     /**
      * Simple seek by milliseconds (for media keys)
      */
-    private fun seekBy(ms: Long) {
+    private fun seekBy(ms: Long, fromLiveControls: Boolean = false) {
         resetAutoPlayCounter()
         if (contentType == ContentType.CHANNEL) {
             updateLiveState()
+            // Indietro/avanti esplicito sui live: se lo stream non è seekable il
+            // telecomando non deve restare bloccato su un comando che non fa nulla.
+            if (fromLiveControls && !player.isCurrentMediaItemSeekable) {
+                android.widget.Toast.makeText(
+                    this,
+                    "Questo canale non supporta il timeshift",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
             val target = player.currentPosition + ms
             if (target >= liveSeekMaxMs() - 2_000) {
                 // Oltre il bordo del live: torna al diretto
