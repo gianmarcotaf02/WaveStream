@@ -89,6 +89,7 @@ fun TvPlayerScreen(
     onBack: () -> Unit,
     isLiveChannel: Boolean = false,
     isAtLiveEdge: Boolean = true,
+    isLiveSeekable: Boolean = false,
     onReturnToLive: () -> Unit = {},
     isMiniPlayer: Boolean = false,
     onToggleMiniPlayer: () -> Unit = {},
@@ -295,6 +296,7 @@ fun TvPlayerScreen(
                 onBack = onBack,
                 isLiveChannel = isLiveChannel,
                 isAtLiveEdge = isAtLiveEdge,
+                isLiveSeekable = isLiveSeekable,
                 onReturnToLive = onReturnToLive,
                 onToggleMiniPlayer = onToggleMiniPlayer,
                 onRestart = onRestart,
@@ -451,6 +453,7 @@ private fun ModernPlayerControls(
     onBack: () -> Unit,
     isLiveChannel: Boolean,
     isAtLiveEdge: Boolean,
+    isLiveSeekable: Boolean,
     onReturnToLive: () -> Unit,
     onToggleMiniPlayer: () -> Unit,
     onRestart: () -> Unit,
@@ -562,8 +565,9 @@ private fun ModernPlayerControls(
                     RestartButton(onClick = onRestart)
                 }
 
-                // Timeshift live: indietro di 10s
-                if (isLiveChannel) {
+                // Timeshift live: indietro di 10s (solo se lo stream ha una
+                // finestra DVR/seekable; i .ts progressivi non lo supportano).
+                if (isLiveChannel && isLiveSeekable) {
                     LiveSkipButton(
                         icon = Icons.Default.Replay10,
                         contentDescription = "Indietro di 10 secondi",
@@ -581,7 +585,7 @@ private fun ModernPlayerControls(
                 }
 
                 // Timeshift live: avanti di 10s (fino al bordo del diretto)
-                if (isLiveChannel) {
+                if (isLiveChannel && isLiveSeekable) {
                     LiveSkipButton(
                         icon = Icons.Default.Forward10,
                         contentDescription = "Avanti di 10 secondi",
