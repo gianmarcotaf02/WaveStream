@@ -702,25 +702,69 @@ class PlaylistRepository @Inject constructor(
                 }
             }
             
+            val currentChannels = channelDao.getAllByPlaylistIncludingHidden(playlistId)
+            val currentChannelMap = currentChannels.associateBy { it.xtreamStreamId }
+            // CATEGORY GUARD: se la risposta LIVE è vuota/corrotta ma il DB ha
+            // ancora canali, preservali invece di cancellarli.
+            val preserveChannels = liveStreams.isEmpty() && currentChannels.isNotEmpty()
+            if (preserveChannels) {
+                Log.w(TAG, "refreshXtreamContent: LIVE API empty but DB has ${currentChannels.size} channels — preserving existing channels")
+            }
             categoryDao.deleteByPlaylistAndType(playlistId, CategoryType.LIVE_TV)
-            channelDao.deleteByPlaylist(playlistId)
             val liveCategoryMap = liveCategories.associate { it.id to it.name }
             val liveCategoryEntities = liveCategories.map { Category(playlistId = playlistId, name = it.name, type = CategoryType.LIVE_TV, externalId = it.id) }
-            val channelEntities = liveStreams.map { stream ->
-                Channel(
-                    playlistId = playlistId,
-                    name = stream.name,
-                    streamUrl = "$baseUrl/live/$username/$password/${stream.id}.ts",
-                    logoUrl = stream.logo,
-                    category = liveCategoryMap[stream.categoryId] ?: "Uncategorized",
-                    categoryId = stream.categoryId,
-                    xtreamStreamId = stream.id,
-                    xtreamEpgChannelId = stream.epgId,
-                    hasCatchup = stream.hasArchive > 0
-                )
-            }
             categoryDao.insertAll(liveCategoryEntities)
-            channelDao.insertAll(channelEntities)
+
+            // Upsert per xtreamStreamId: preserva gli id dei canali esistenti, quindi
+            // preferiti, "visti di recente", ordine e stato nascosto non si perdono
+            // a ogni refresh/cambio server (prima venivano cancellati e ricreati).
+            val channelsToInsert = mutableListOf<Channel>()
+            val channelsToUpdate = mutableListOf<Channel>()
+            val channelsToDelete = mutableListOf<Channel>()
+            val seenChannelIds = mutableSetOf<Int>()
+            liveStreams.forEach { stream ->
+                val xtreamId = stream.id
+                val streamUrl = "$baseUrl/live/$username/$password/${stream.id}.ts"
+                val categoryName = liveCategoryMap[stream.categoryId] ?: "Uncategorized"
+                val existing = xtreamId?.let { currentChannelMap[it] }
+                if (existing != null) {
+                    seenChannelIds.add(xtreamId)
+                    if (existing.name != stream.name || existing.logoUrl != stream.logo ||
+                        existing.category != categoryName || existing.streamUrl != streamUrl ||
+                        existing.xtreamEpgChannelId != stream.epgId || existing.hasCatchup != (stream.hasArchive > 0)
+                    ) {
+                        channelsToUpdate.add(existing.copy(
+                            name = stream.name,
+                            streamUrl = streamUrl,
+                            logoUrl = stream.logo,
+                            category = categoryName,
+                            categoryId = stream.categoryId,
+                            xtreamEpgChannelId = stream.epgId,
+                            hasCatchup = stream.hasArchive > 0
+                        ))
+                    }
+                } else {
+                    channelsToInsert.add(Channel(
+                        playlistId = playlistId,
+                        name = stream.name,
+                        streamUrl = streamUrl,
+                        logoUrl = stream.logo,
+                        category = categoryName,
+                        categoryId = stream.categoryId,
+                        xtreamStreamId = stream.id,
+                        xtreamEpgChannelId = stream.epgId,
+                        hasCatchup = stream.hasArchive > 0
+                    ))
+                }
+            }
+            currentChannels.forEach {
+                if (!preserveChannels && it.xtreamStreamId != null && !seenChannelIds.contains(it.xtreamStreamId)) {
+                    channelsToDelete.add(it)
+                }
+            }
+            channelDao.deleteList(channelsToDelete)
+            channelDao.updateList(channelsToUpdate)
+            channelDao.insertAll(channelsToInsert)
 
             val currentMovies = movieDao.getAllMoviesList().filter { it.playlistId == playlistId }
             val currentMovieMap = currentMovies.associateBy { it.xtreamStreamId }
