@@ -719,8 +719,20 @@ class DetailsActivity : ComponentActivity() {
         var resumeMinutes: Int? = null
         var resumeProgress: Float? = null
 
+        // Fallback resiliente: se la playlist/URL è stata cambiata, gli episodi
+        // possono avere nuovi id e i progressi risultare orfani (contentId vecchio).
+        // Indicizziamo i progressi anche per (stagione, episodio) così il resume
+        // non si perde e il detail non torna su "Riproduci S1E1".
+        val progressBySeasonEpisode = runCatching {
+            watchProgressDao.getEpisodeProgressForSeries(profileId, seriesId)
+                .filter { (it.season ?: 0) > 0 && (it.episode ?: 0) > 0 }
+                .sortedByDescending { it.lastWatchedAt }
+                .associateBy { (it.season ?: 0) to (it.episode ?: 0) }
+        }.getOrDefault(emptyMap())
+
         allEpisodes.forEach { ep ->
             val progress = watchProgressDao.getProgress(profileId, ContentType.EPISODE, ep.id)
+                ?: progressBySeasonEpisode[ep.seasonNumber to ep.episodeNumber]
             if (progress != null && progress.duration > 0) {
                 val progressPercent = (progress.position.toFloat() / progress.duration.toFloat()).coerceIn(0f, 1f)
                 val remainingMs = progress.duration - progress.position

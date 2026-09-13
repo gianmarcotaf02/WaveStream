@@ -161,10 +161,14 @@ fun TvPlayerScreen(
         }
     }
     
-    // Focus on play/pause button when controls become visible
-    LaunchedEffect(controlsVisible) {
+    // Focus on play/pause button when controls become visible. La chiave include
+    // isLoading: all'avvio i controlli sono già visibili ma il player è in
+    // buffering, quindi il bottone Play non esiste ancora. Senza isLoading il
+    // focus non veniva mai richiesto al termine del caricamento e il telecomando
+    // partiva "nel vuoto" (poi cadeva sul tasto Indietro).
+    LaunchedEffect(controlsVisible, isLoading) {
         if (controlsVisible && !isLoading) {
-            delay(100) // Small delay to ensure composition is complete
+            delay(150) // Small delay to ensure composition is complete
             try {
                 centerFocusRequester.requestFocus()
             } catch (e: Exception) {
