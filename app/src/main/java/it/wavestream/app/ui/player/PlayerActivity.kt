@@ -893,7 +893,7 @@ class PlayerActivity : ComponentActivity() {
         try {
             creditsTunnelLogged = false
             hasReachedReady = false
-            onContentChanged()
+            onPlaybackContentChanged()
             streamVariants = buildStreamVariants(streamUrl)
             streamVariantIndex = 0
             val mediaItem = MediaItem.fromUri(Uri.parse(currentVariantUrl()))
@@ -1221,7 +1221,7 @@ class PlayerActivity : ComponentActivity() {
      * azzera lo stato del trigger e ricarica il marker del NUOVO contenuto.
      * Senza questo, il marker dell'episodio precedente resterebbe attivo (bug).
      */
-    private fun onContentChanged() {
+    private fun onPlaybackContentChanged() {
         creditsDetected = false
         nextEpisodeTriggered = false
         creditsMarkerStartMs = null
@@ -1514,7 +1514,7 @@ class PlayerActivity : ComponentActivity() {
                 episode = it.episode
                 android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
 
-                onContentChanged()
+                onPlaybackContentChanged()
 
                 // Play new content
                 val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
@@ -1551,7 +1551,7 @@ class PlayerActivity : ComponentActivity() {
                 episode = it.episode
                 android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
 
-                onContentChanged()
+                onPlaybackContentChanged()
 
                 // Play previous content
                 val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
