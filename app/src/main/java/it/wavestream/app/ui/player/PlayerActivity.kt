@@ -175,6 +175,10 @@ class PlayerActivity : ComponentActivity() {
     // Passo del timeshift live (tasti indietro/avanti nel player)
     private val LIVE_TIMESHIFT_STEP_MS = 10_000L
 
+    // Sotto questa differenza (ms) un seek non è considerato un "salto indietro"
+    // (evita reset inutili su micro-aggiustamenti del player).
+    private val BACKWARD_SEEK_RESET_MS = 10_000L
+
     private fun calculateRetryDelay(attempt: Int): Long {
         return (FIRST_RETRY_DELAY_MS + (attempt.toLong() * attempt * 500L))
             .coerceAtMost(MAX_RETRY_DELAY_MS)
@@ -884,6 +888,10 @@ class PlayerActivity : ComponentActivity() {
         try {
             creditsDetected = false
             creditsTunnelLogged = false
+            creditsMarkerStartMs = null
+            creditsMarkerEndMs = null
+            creditsMarkerLoaded = false
+            loadCreditsMarker()
             hasReachedReady = false
             streamVariants = buildStreamVariants(streamUrl)
             streamVariantIndex = 0
@@ -1158,10 +1166,21 @@ class PlayerActivity : ComponentActivity() {
                     }
                     
                     // Show next episode overlay: ultimi 10s del file, oppure appena
-                    // vengono rilevati i titoli di coda (analisi immagini, nessuna IA).
+                    // vengono rilevati i titoli di coda (marker esatto o analisi immagini).
                     // Il trigger anticipato è attivo solo con autoplay attivo: altrimenti
                     // l'overlay coprirebbe lo schermo per l'intera durata dei credits.
                     if (!nextEpisodeTriggered && contentType == ContentType.EPISODE) {
+                        // Livello 0: marker esatto dell'utente (o futuro EXTERNAL_DB).
+                        val markerStart = creditsMarkerStartMs
+                        if (markerStart != null && !creditsDetected &&
+                            player.currentPosition >= markerStart
+                        ) {
+                            android.util.Log.i(
+                                "CreditsDiag",
+                                "markerTrigger pos=${player.currentPosition} marker=$markerStart"
+                            )
+                            onCreditsDetected()
+                        }
                         val remainingMs = player.duration - player.currentPosition
                         val creditsTrigger = creditsDetected && _autoPlayNextEnabled.value
                         if (remainingMs in 1..10_000 || creditsTrigger) {
@@ -1182,6 +1201,143 @@ class PlayerActivity : ComponentActivity() {
         if (creditsDetected) return
         creditsDetected = true
         android.util.Log.d("PlayerActivity", "Titoli di coda rilevati: overlay prossimo episodio anticipato")
+    }
+
+    /**
+     * Token indietro rilevato: annulla overlay/countdown e ri-arma la detection.
+     */
+    private fun onBackwardSeek() {
+        android.util.Log.i(
+            "CreditsDiag",
+            "backwardSeek reset pos=${if (::player.isInitialized) player.currentPosition else 0} " +
+                "creditsDetected=$creditsDetected nextTriggered=$nextEpisodeTriggered overlay=${_nextEpisode.value != null}"
+        )
+        hideNextEpisodeOverlay() // resetta nextEpisodeTriggered e creditsDetected
+        _creditsSeekGeneration.intValue++
+    }
+
+    /**
+     * Risolve `tmdbId`/`imdbId` del contenuto corrente tramite gli enrichment già presenti
+     * nel DB, così i marker sopravvivono ai cambi di playlist (gli id locali cambiano).
+     */
+    private suspend fun resolveContentIdentity(): Pair<Int?, String?> = withContext(Dispatchers.IO) {
+        try {
+            when (contentType) {
+                ContentType.MOVIE -> {
+                    val m = movieDao.getMovieById(contentId)
+                    (m?.tmdbId) to (m?.tmdbImdbId)
+                }
+                ContentType.EPISODE, ContentType.SERIES -> {
+                    val sid = seriesId ?: contentId
+                    val s = seriesDao.getSeriesById(sid)
+                    (s?.tmdbId) to (s?.tmdbImdbId)
+                }
+                else -> null to null
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("CreditsDiag", "resolveContentIdentity failed: ${e.message}")
+            null to null
+        }
+    }
+
+    /**
+     * Livello 0: carica il marker esatto dei titoli di coda (se esiste) per il contenuto corrente.
+     */
+    private fun loadCreditsMarker() {
+        lifecycleScope.launch {
+            try {
+                val (tmdbId, imdbId) = resolveContentIdentity()
+                val seg = mediaSegmentRepository.getExact(
+                    contentType = contentType,
+                    contentId = contentId,
+                    seriesId = seriesId,
+                    season = season,
+                    episode = episode,
+                    tmdbId = tmdbId,
+                    imdbId = imdbId,
+                    type = SegmentType.CREDITS
+                )
+                creditsMarkerStartMs = seg?.startMs
+                creditsMarkerEndMs = seg?.endMs
+                creditsMarkerLoaded = true
+                if (seg != null) {
+                    android.util.Log.i(
+                        "CreditsDiag",
+                        "markerFound type=CREDITS startMs=${seg.startMs} endMs=${seg.endMs} " +
+                            "source=${seg.source} confidence=${seg.confidence} durationMs=${seg.durationMs}"
+                    )
+                } else {
+                    android.util.Log.i(
+                        "CreditsDiag",
+                        "markerMissing type=CREDITS contentId=$contentId contentType=$contentType " +
+                            "seriesId=$seriesId s=$season e=$episode tmdbId=$tmdbId imdbId=$imdbId"
+                    )
+                }
+            } catch (e: Exception) {
+                android.util.Log.w("CreditsDiag", "loadCreditsMarker failed: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Salva un segmento marcato manualmente dall'utente alla posizione corrente.
+     */
+    private fun markSegmentNow(type: SegmentType) {
+        if (!::player.isInitialized) return
+        val position = player.currentPosition
+        val duration = player.duration
+        if (duration <= 0L || position <= 0L) {
+            android.widget.Toast.makeText(
+                this,
+                "Impossibile registrare il marker qui",
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+        lifecycleScope.launch {
+            try {
+                val (tmdbId, imdbId) = resolveContentIdentity()
+                mediaSegmentRepository.setUserMarker(
+                    contentType = contentType,
+                    contentId = contentId,
+                    type = type,
+                    startMs = position,
+                    durationMs = duration,
+                    seriesId = seriesId,
+                    season = season,
+                    episode = episode,
+                    tmdbId = tmdbId,
+                    imdbId = imdbId
+                )
+                if (type == SegmentType.CREDITS) {
+                    creditsMarkerStartMs = position
+                    creditsMarkerLoaded = true
+                }
+                android.util.Log.i(
+                    "CreditsDiag",
+                    "markerSaved type=$type pos=$position duration=$duration " +
+                        "contentId=$contentId contentType=$contentType seriesId=$seriesId s=$season e=$episode"
+                )
+                val label = when (type) {
+                    SegmentType.CREDITS -> "Inizio titoli di coda"
+                    SegmentType.INTRO -> "Inizio sigla"
+                    SegmentType.RECAP -> "Inizio recap"
+                    SegmentType.PREVIEW -> "Inizio anteprima"
+                }
+                android.widget.Toast.makeText(
+                    this@PlayerActivity,
+                    "$label salvato",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            } catch (e: Exception) {
+                android.util.Log.e("CreditsDiag", "markSegmentNow failed: ${e.message}", e)
+                android.widget.Toast.makeText(
+                    this@PlayerActivity,
+                    "Errore nel salvataggio del marker",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
     }
 
     private fun triggerNextEpisodeOverlay(fromCredits: Boolean = false) {
