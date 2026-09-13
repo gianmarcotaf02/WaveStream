@@ -741,10 +741,12 @@ class PlayerActivity : ComponentActivity() {
             ) {
                 // Salto indietro: annulla overlay/trigger e ri-arma la detection,
                 // così il meccanismo non resta "acceso" mentre si riavvolge.
-                if (reason == Player.DISCONTINUITY_REASON_SEEK &&
-                    newPosition.positionMs < oldPosition.positionMs - BACKWARD_SEEK_RESET_MS
-                ) {
-                    onBackwardSeek()
+                if (reason == Player.DISCONTINUITY_REASON_SEEK) {
+                    // Qualsiasi seek rompe la continuità dei frame: ri-arma il watchdog.
+                    _creditsSeekGeneration.intValue++
+                    if (newPosition.positionMs < oldPosition.positionMs - BACKWARD_SEEK_RESET_MS) {
+                        onBackwardSeek()
+                    }
                 }
             }
             
@@ -889,13 +891,9 @@ class PlayerActivity : ComponentActivity() {
     @androidx.annotation.OptIn(UnstableApi::class)
     private fun startPlayback() {
         try {
-            creditsDetected = false
             creditsTunnelLogged = false
-            creditsMarkerStartMs = null
-            creditsMarkerEndMs = null
-            creditsMarkerLoaded = false
-            loadCreditsMarker()
             hasReachedReady = false
+            onContentChanged()
             streamVariants = buildStreamVariants(streamUrl)
             streamVariantIndex = 0
             val mediaItem = MediaItem.fromUri(Uri.parse(currentVariantUrl()))
@@ -1216,7 +1214,22 @@ class PlayerActivity : ComponentActivity() {
                 "creditsDetected=$creditsDetected nextTriggered=$nextEpisodeTriggered overlay=${_nextEpisode.value != null}"
         )
         hideNextEpisodeOverlay() // resetta nextEpisodeTriggered e creditsDetected
+    }
+
+    /**
+     * Cambio di contenuto nello stesso PlayerActivity (start, prossimo/precedente episodio):
+     * azzera lo stato del trigger e ricarica il marker del NUOVO contenuto.
+     * Senza questo, il marker dell'episodio precedente resterebbe attivo (bug).
+     */
+    private fun onContentChanged() {
+        creditsDetected = false
+        nextEpisodeTriggered = false
+        creditsMarkerStartMs = null
+        creditsMarkerEndMs = null
+        creditsMarkerLoaded = false
+        hideNextEpisodeOverlay()
         _creditsSeekGeneration.intValue++
+        loadCreditsMarker()
     }
 
     /**
@@ -1500,9 +1513,9 @@ class PlayerActivity : ComponentActivity() {
                 season = it.season
                 episode = it.episode
                 android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
-                
-                hideNextEpisodeOverlay()
-                
+
+                onContentChanged()
+
                 // Play new content
                 val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
                 player.setMediaItem(mediaItem)
@@ -1537,7 +1550,9 @@ class PlayerActivity : ComponentActivity() {
                 season = it.season
                 episode = it.episode
                 android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
-                
+
+                onContentChanged()
+
                 // Play previous content
                 val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
                 player.setMediaItem(mediaItem)
