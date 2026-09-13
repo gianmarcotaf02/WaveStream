@@ -116,6 +116,10 @@ fun TvPlayerScreen(
     creditsDetectionEnabled: Boolean = true,
     onCreditsDetected: () -> Unit = {},
     creditsDetectionDebug: Boolean = false,
+    /** Cambia ad ogni salto indietro: fa ripartire il watchdog e ri-armare la detection. */
+    creditsSessionKey: Int = 0,
+    onMarkCredits: () -> Unit = {},
+    onMarkIntro: () -> Unit = {},
     cumulativeSeekSeconds: Int = 0,
     seekIndicatorVisible: Boolean = false,
     showStillWatching: Boolean = false,
@@ -136,6 +140,7 @@ fun TvPlayerScreen(
         positionMs = currentPosition,
         durationMs = duration,
         debugText = if (creditsDetectionDebug) creditsDebugText else null,
+        sessionKey = creditsSessionKey,
         onCreditsDetected = onCreditsDetected
     )
     
@@ -316,6 +321,8 @@ fun TvPlayerScreen(
                 hasPreviousEpisode = hasPreviousEpisode,
                 onPlayNext = onPlayNext,
                 onPlayPrevious = onPlayPrevious,
+                onMarkCredits = onMarkCredits,
+                onMarkIntro = onMarkIntro,
                 centerFocusRequester = centerFocusRequester,
                 bottomFirstFocusRequester = bottomFirstFocusRequester
             )
@@ -473,6 +480,8 @@ private fun ModernPlayerControls(
     hasPreviousEpisode: Boolean,
     onPlayNext: () -> Unit,
     onPlayPrevious: () -> Unit,
+    onMarkCredits: () -> Unit,
+    onMarkIntro: () -> Unit,
     centerFocusRequester: FocusRequester,
     bottomFirstFocusRequester: FocusRequester
 ) {
@@ -677,6 +686,22 @@ private fun ModernPlayerControls(
                         onClick = onSubtitles,
                         size = 36.dp
                     )
+
+                    // Fase 1 — Marker manuali (solo VOD/serie): inizio titoli di coda e sigla
+                    if (!isLiveChannel) {
+                        ModernIconButton(
+                            icon = Icons.Default.BookmarkAdd,
+                            contentDescription = "Segna inizio titoli di coda",
+                            onClick = onMarkCredits,
+                            size = 36.dp
+                        )
+                        ModernIconButton(
+                            icon = Icons.Default.PlaylistAdd,
+                            contentDescription = "Segna inizio sigla",
+                            onClick = onMarkIntro,
+                            size = 36.dp
+                        )
+                    }
                     
                     // Mini player con lista canali (solo live)
                     if (isLiveChannel) {
@@ -2057,13 +2082,14 @@ private fun CreditsWatchdog(
     positionMs: Long,
     durationMs: Long,
     debugText: MutableState<String>?,
+    sessionKey: Int,
     onCreditsDetected: () -> Unit
 ) {
     val latestPosition by rememberUpdatedState(positionMs)
     val latestDuration by rememberUpdatedState(durationMs)
     val latestCallback by rememberUpdatedState(onCreditsDetected)
 
-    LaunchedEffect(enabled, isLiveChannel, playerView) {
+    LaunchedEffect(enabled, isLiveChannel, playerView, sessionKey) {
         debugText?.value = when {
             !enabled -> "credits: OFF (impostazione disattivata)"
             isLiveChannel -> "credits: OFF (canale live)"
