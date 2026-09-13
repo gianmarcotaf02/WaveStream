@@ -161,18 +161,30 @@ fun TvPlayerScreen(
         }
     }
     
-    // Focus on play/pause button when controls become visible. La chiave include
-    // isLoading: all'avvio i controlli sono già visibili ma il player è in
-    // buffering, quindi il bottone Play non esiste ancora. Senza isLoading il
-    // focus non veniva mai richiesto al termine del caricamento e il telecomando
-    // partiva "nel vuoto" (poi cadeva sul tasto Indietro).
-    LaunchedEffect(controlsVisible, isLoading) {
-        if (controlsVisible && !isLoading) {
-            delay(150) // Small delay to ensure composition is complete
-            try {
-                centerFocusRequester.requestFocus()
-            } catch (e: Exception) {
-                // Focus requester might not be attached yet
+    // Autofocus sul bottone Play/Pausa.
+    // Il focus va richiesto quando i controlli compaiono E quando il player ha
+    // finito il caricamento: all'avvio i controlli sono già visibili ma il player
+    // è in buffering, quindi il bottone Play non esiste ancora. Un semplice
+    // LaunchedEffect(controlsVisible) non bastava (isLoading non era una chiave)
+    // e il telecomando partiva "nel vuoto", cadendo poi sul tasto Indietro.
+    var focusPending by remember { mutableStateOf(true) }
+    LaunchedEffect(controlsVisible) {
+        // Nuova comparsa dei controlli (0->1): richiedi di nuovo il focus.
+        // Non lo facciamo a ogni cambio di isLoading, altrimenti un rebuffering
+        // durante la navigazione dei controlli riporterebbe il focus sul Play.
+        if (controlsVisible) focusPending = true
+    }
+    LaunchedEffect(controlsVisible, isLoading, focusPending) {
+        if (controlsVisible && !isLoading && focusPending) {
+            // Piccolo retry: al primo frame il bottone potrebbe non essere ancora
+            // agganciato al FocusRequester.
+            repeat(5) {
+                delay(80)
+                val focused = runCatching { centerFocusRequester.requestFocus() }.isSuccess
+                if (focused) {
+                    focusPending = false
+                    return@LaunchedEffect
+                }
             }
         }
     }
