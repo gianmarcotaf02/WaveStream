@@ -2335,7 +2335,7 @@ class HomeViewModel @Inject constructor(
                 contentType = ContentType.MOVIE.name,
                 year = rec.year,
                 rating = rec.voteAverage,
-                ratingText = rec.voteAverage?.let { "%.1f".format(it) }
+                ratingText = formatRating(rec.voteAverage)
             )
             rec.localSeries != null -> CarouselItem(
                 id = rec.localSeries.id,
@@ -2345,11 +2345,20 @@ class HomeViewModel @Inject constructor(
                 contentType = ContentType.SERIES.name,
                 year = rec.year,
                 rating = rec.voteAverage,
-                ratingText = rec.voteAverage?.let { "%.1f".format(it) }
+                ratingText = formatRating(rec.voteAverage)
             )
             else -> null
         }
     }
+
+    /**
+     * Formatta il voto per il badge in alto a destra della card.
+     * Un voto nullo o 0.0 significa "nessun voto disponibile" (es. TMDB non
+     * ancora popolato): in quel caso NON mostriamo il badge, altrimenti
+     * comparirebbe un falso "0,0" su tutte le copertine senza rating.
+     */
+    private fun formatRating(rating: Float?): String? =
+        rating?.takeIf { it > 0f }?.let { "%.1f".format(it) }
     
     /**
      * Map TMDB genre ID to Italian name
@@ -3912,7 +3921,7 @@ fun loadCategoryContentAutoDetect(category: String) {
         contentType = "MOVIE",
         year = year ?: tmdbReleaseDate?.take(4)?.toIntOrNull(),
         rating = rating,
-        ratingText = rating?.let { "%.1f".format(it) }
+        ratingText = formatRating(rating)
     )
     
     private fun Series.toCarouselItem() = CarouselItem(
@@ -3923,7 +3932,7 @@ fun loadCategoryContentAutoDetect(category: String) {
         contentType = "SERIES",
         year = year,
         rating = rating,
-        ratingText = rating?.let { "%.1f".format(it) }
+        ratingText = formatRating(rating)
     )
     
     private fun Channel.toCarouselItem() = CarouselItem(
@@ -3963,7 +3972,7 @@ fun loadCategoryContentAutoDetect(category: String) {
             contentType = contentType,
             year = year,
             rating = heroRating,
-            ratingText = heroRating?.let { "%.1f".format(it) },
+            ratingText = formatRating(heroRating),
             // Continue Watching fields
             progressPercent = progressPercent,
             remainingMinutes = resumeMinutes,
