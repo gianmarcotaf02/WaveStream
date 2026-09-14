@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,6 +31,7 @@ import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import it.wavestream.app.R
 import it.wavestream.app.ui.home.CarouselItem
+import it.wavestream.app.util.channelLogoRequest
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 
@@ -74,6 +76,13 @@ fun TvContentCard(
     val isChannel = item.contentType == "CHANNEL"
     val cardWidth = customWidth ?: if (isChannel) 90.dp else 122.dp
     val cardHeight = customHeight ?: if (isChannel) 70.dp else 183.dp
+
+    // Logo canali: richiesta dedicata (bitmap software + downscale) per la
+    // compatibilità sui TV stick (vedi channelLogoRequest).
+    val context = LocalContext.current
+    val imageModel = remember(item.posterUrl, isChannel) {
+        if (isChannel) channelLogoRequest(context, item.posterUrl) else item.posterUrl
+    }
 
     Column(
         modifier = modifier
@@ -147,7 +156,7 @@ fun TvContentCard(
                     }
                 } else {
                     AsyncImage(
-                        model = item.posterUrl,
+                        model = imageModel,
                         contentDescription = item.title,
                         contentScale = if (isChannel) ContentScale.Fit else ContentScale.Crop,
                         placeholder = placeholderPainter,
