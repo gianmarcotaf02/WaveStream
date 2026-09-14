@@ -69,6 +69,10 @@ class HomeViewModel @Inject constructor(
 
         /** DEBUG: mostra l'hero partita sempre (partita più vicina, anche fuori finestra). */
         private const val FORCE_SERIEA_HERO_DEBUG = false
+
+        /** Oltre questa età la cache squadra→canali del picker Serie A viene
+         *  ricostruita con una scansione completa della playlist. */
+        private const val SERIE_A_CHANNEL_CACHE_TTL_MS = 6 * 60 * 60 * 1000L
     }
 
     private val _uiState = MutableStateFlow(HomeScreenState())

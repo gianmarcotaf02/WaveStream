@@ -2009,13 +2009,13 @@ class PlayerActivity : ComponentActivity() {
             // D-pad handling removed to avoid accidental seeking
             // Seek is now only allowed when Progress Bar is focused and activated
             
-            // D-pad center/enter to toggle play/pause
-            // When controls are visible, let Compose handle button clicks
-            // Only intercept when controls are hidden to show them
+            // D-pad center/enter: quando i controlli sono nascosti li mostra
+            // senza toccare la riproduzione. Il focus va automaticamente sul
+            // pulsante Play/Pausa (TvPlayerScreen), così un secondo OK decide
+            // l'azione: mai mettere in pausa "di sorpresa" premendo OK.
+            // Quando i controlli sono visibili, gestisce Compose (click sui bottoni).
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
                 if (!_controlsVisible.value) {
-                    // Controls hidden: show controls and toggle play/pause
-                    togglePlayPause()
                     _controlsVisible.value = true
                     return true
                 }
