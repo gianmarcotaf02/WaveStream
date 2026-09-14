@@ -119,6 +119,7 @@ class PlayerActivity : ComponentActivity() {
     private val _hasNextEpisode = mutableStateOf(false)
     private val _hasPreviousEpisode = mutableStateOf(false)
     private val _creditsDetectionEnabled = mutableStateOf(true)
+    private val _creditsAudioEnabled = mutableStateOf(true)
     private val _creditsDebugEnabled = mutableStateOf(false)
     private val _controlsVisible = mutableStateOf(true)
 
@@ -483,6 +484,8 @@ class PlayerActivity : ComponentActivity() {
             _autoPlayNextEnabled.value = userPreferences.getAutoPlayNext()
             _creditsDetectionEnabled.value = userPreferences.getCreditsDetectionEnabled()
             _creditsDebugEnabled.value = userPreferences.getCreditsDebugEnabled()
+            _creditsAudioEnabled.value = userPreferences.getCreditsAudioEnabled()
+            creditsAudioMonitor.enabled = _creditsAudioEnabled.value
             
             // Check if next episode exists
             val next = playNextManager.getNext(
@@ -1197,6 +1200,7 @@ class PlayerActivity : ComponentActivity() {
                     // l'overlay coprirebbe lo schermo per l'intera durata dei credits.
                     // Fase 4: il monitor audio aggiorna la posizione e resta attivo nella
                     // parte iniziale dell'episodio per riconoscere la sigla.
+                    creditsAudioMonitor.enabled = _creditsAudioEnabled.value
                     creditsAudioMonitor.playerPositionMs = player.currentPosition
                     creditsAudioMonitor.introActive =
                         contentType == ContentType.EPISODE && player.currentPosition < INTRO_SCAN_MS
