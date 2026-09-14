@@ -68,6 +68,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import it.wavestream.app.data.database.entity.FavoriteCategory
+import it.wavestream.app.ui.components.CategoryFavoriteHeart
+import it.wavestream.app.ui.components.CATEGORY_FAVORITE_LONG_PRESS_MS
+import it.wavestream.app.ui.components.categoryLongPress
 import it.wavestream.app.data.database.dao.FavoriteCategoryDao
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
@@ -1246,11 +1249,11 @@ private fun LiveCategoryCard(
                 scaleX = scale
                 scaleY = scale
             }
-            .combinedClickable(
+            .categoryLongPress(onLongClick)
+            .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = onClick,
-                onLongClick = onLongClick
+                onClick = onClick
             ),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
@@ -1285,14 +1288,6 @@ private fun LiveCategoryCard(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    if (isFavorite) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Preferito",
-                            tint = Color(0xFFE91E63),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
                 }
 
                 Text(
@@ -1301,6 +1296,12 @@ private fun LiveCategoryCard(
                     color = WaveStreamColors.TextSecondary
                 )
             }
+
+            // Cuoricino rosso in basso a destra quando la categoria è tra i preferiti
+            CategoryFavoriteHeart(
+                isFavorite = isFavorite,
+                modifier = Modifier.align(Alignment.BottomEnd)
+            )
         }
     }
 }
@@ -1446,7 +1447,7 @@ private fun LiveCategoryItem(
                     if (event.type == androidx.compose.ui.input.key.KeyEventType.KeyDown && !isLongPressing) {
                         isLongPressing = true
                         longPressJob = coroutineScope.launch {
-                            delay(1000L) // 1 second
+                            delay(CATEGORY_FAVORITE_LONG_PRESS_MS)
                             onLongPress()
                         }
                     } else if (event.type == androidx.compose.ui.input.key.KeyEventType.KeyUp) {
