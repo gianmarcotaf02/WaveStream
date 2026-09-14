@@ -2724,10 +2724,6 @@ private fun VpnSettings(
         else -> VpnStrategy.RANDOM
     }
 
-    fun refreshConfigs() {
-        scope.launch { configs = userPreferences.getVpnConfigs() }
-    }
-
     suspend fun doStart(chosen: String, pool: List<String>, selStrategy: VpnStrategy) {
         val r = vpnManager.start(chosen)
         if (r.isSuccess && autoRotate) {
@@ -3037,7 +3033,6 @@ private fun VpnSettings(
 
 }
 
-}
 
 // ============ Assistente AI vocale ============
 
