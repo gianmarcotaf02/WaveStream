@@ -1886,10 +1886,6 @@ private fun ModernLoadingIndicator() {
 }
 
 /**
- * Modern next episode overlay
- */
-@Composable
-/**
  * Pulsante "Salta sigla", mostrato durante la sigla quando esiste un marker INTRO completo.
  * Si prende il focus automaticamente così è immediato da premere col telecomando.
  */
@@ -1928,6 +1924,9 @@ private fun SkipIntroOverlay(
     }
 }
 
+/**
+ * Modern next episode overlay
+ */
 @Composable
 private fun ModernNextEpisodeOverlay(
     title: String,
