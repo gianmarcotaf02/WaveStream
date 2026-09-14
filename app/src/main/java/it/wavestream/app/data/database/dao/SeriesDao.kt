@@ -1,6 +1,7 @@
 package it.wavestream.app.data.database.dao
 
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 import it.wavestream.app.data.database.entity.Series
 import kotlinx.coroutines.flow.Flow
 
@@ -19,6 +20,13 @@ interface SeriesDao {
     
     @Query("SELECT COUNT(*) FROM series WHERE isHidden = 0")
     suspend fun getAllSeriesCount(): Int
+
+    // ---- Query dinamiche per ordinamento/filtri (SeriesActivity) ----
+    @RawQuery(observedEntities = [Series::class])
+    suspend fun querySeriesRaw(query: SupportSQLiteQuery): List<Series>
+
+    @RawQuery(observedEntities = [Series::class])
+    suspend fun countSeriesRaw(query: SupportSQLiteQuery): Int
     
     @Query("SELECT * FROM series WHERE playlistId = :playlistId AND isHidden = 0 ORDER BY name")
     fun getSeriesByPlaylist(playlistId: Long): Flow<List<Series>>

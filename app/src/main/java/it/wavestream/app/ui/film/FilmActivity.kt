@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import androidx.sqlite.db.SimpleSQLiteQuery
 import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.cache.ContentCache
@@ -48,7 +49,10 @@ import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.ContinueWatchingItem
 import it.wavestream.app.data.database.entity.Movie
+import it.wavestream.app.ui.components.ContentQueryBuilder
+import it.wavestream.app.ui.components.ContentSortFilterBar
 import it.wavestream.app.ui.components.ContinueWatchingCarousel
+import it.wavestream.app.ui.components.SortFilterState
 import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
@@ -95,6 +99,34 @@ class FilmActivity : ComponentActivity() {
         var totalMoviesCount by remember { mutableIntStateOf(0) }
         var showingAllMovies by remember { mutableStateOf(initialCategory == null) }
         var continueWatchingItems by remember { mutableStateOf<List<ContinueWatchingItem>>(emptyList()) }
+        var sortFilter by remember { mutableStateOf(SortFilterState()) }
+        var reloadToken by remember { mutableIntStateOf(0) }
+
+        // Categoria corrente: null = "Tutti i film"
+        fun currentCategory(): String? = if (showingAllMovies) null else selectedCategory
+
+        fun buildMoviesQuery(offset: Int, limit: Int): SimpleSQLiteQuery {
+            val q = ContentQueryBuilder.movies(currentCategory(), sortFilter, limit, offset)
+            return SimpleSQLiteQuery(q.sql, q.args.toTypedArray())
+        }
+
+        // Ricarica da zero applicando ordinamento/filtri correnti.
+        fun reloadMovies() {
+            val token = ++reloadToken
+            lifecycleScope.launch {
+                isLoading = true
+                val countQ = ContentQueryBuilder.moviesCount(currentCategory(), sortFilter)
+                val total = movieDao.countMoviesRaw(
+                    SimpleSQLiteQuery(countQ.sql, countQ.args.toTypedArray())
+                )
+                val first = movieDao.queryMoviesRaw(buildMoviesQuery(0, PAGE_SIZE))
+                if (token != reloadToken) return@launch
+                totalMoviesCount = total
+                movies = first
+                hasMoreMovies = first.size < totalMoviesCount
+                isLoading = false
+            }
+        }
 
         // Load more: appends next page to current list
         fun loadMoreMovies() {
@@ -102,11 +134,7 @@ class FilmActivity : ComponentActivity() {
             lifecycleScope.launch {
                 isLoadingMore = true
                 val offset = movies.size
-                val more = if (showingAllMovies) {
-                    movieDao.getAllMoviesListPaged(PAGE_SIZE, offset)
-                } else {
-                    movieDao.getMoviesByCategoryListPaged(selectedCategory!!, PAGE_SIZE, offset)
-                }
+                val more = movieDao.queryMoviesRaw(buildMoviesQuery(offset, PAGE_SIZE))
                 movies = movies + more
                 hasMoreMovies = movies.size < totalMoviesCount
                 isLoadingMore = false
@@ -145,35 +173,11 @@ class FilmActivity : ComponentActivity() {
             if (initialCategory == null) {
                 showingAllMovies = true
                 selectedCategory = null
-                val total = movieDao.getAllMoviesCount()
-                totalMoviesCount = total
-                val first = movieDao.getAllMoviesListPaged(PAGE_SIZE, 0)
-                movies = first
-                hasMoreMovies = first.size < total
             } else {
                 showingAllMovies = false
                 selectedCategory = initialCategory
-                val total = movieDao.getMoviesCountByCategory(initialCategory)
-                totalMoviesCount = total
-                val first = movieDao.getMoviesByCategoryListPaged(initialCategory, PAGE_SIZE, 0)
-                movies = first
-                hasMoreMovies = first.size < total
             }
-            isLoading = false
-        }
-
-        // Load movies when category changes (user taps sidebar)
-        LaunchedEffect(selectedCategory) {
-            if (selectedCategory != null) {
-                isLoading = true
-                showingAllMovies = false
-                val total = movieDao.getMoviesCountByCategory(selectedCategory!!)
-                totalMoviesCount = total
-                val first = movieDao.getMoviesByCategoryListPaged(selectedCategory!!, PAGE_SIZE, 0)
-                movies = first
-                hasMoreMovies = first.size < total
-                isLoading = false
-            }
+            reloadMovies()
         }
 
         FilmScreen(
@@ -185,23 +189,23 @@ class FilmActivity : ComponentActivity() {
             hasMoreMovies = hasMoreMovies,
             showingAllMovies = showingAllMovies,
             totalMoviesCount = totalMoviesCount,
+            sortFilter = sortFilter,
             continueWatchingItems = continueWatchingItems,
+            onSortFilterChange = { newState ->
+                if (newState != sortFilter) {
+                    sortFilter = newState
+                    reloadMovies()
+                }
+            },
             onCategorySelect = { cat ->
                 showingAllMovies = false
                 selectedCategory = cat
+                reloadMovies()
             },
             onViewAllClick = {
-                lifecycleScope.launch {
-                    isLoading = true
-                    showingAllMovies = true
-                    selectedCategory = null
-                    val total = movieDao.getAllMoviesCount()
-                    totalMoviesCount = total
-                    val first = movieDao.getAllMoviesListPaged(PAGE_SIZE, 0)
-                    movies = first
-                    hasMoreMovies = first.size < total
-                    isLoading = false
-                }
+                showingAllMovies = true
+                selectedCategory = null
+                reloadMovies()
             },
             onLoadMore = { loadMoreMovies() },
             onMovieClick = { openMovieDetails(it) },
@@ -244,7 +248,9 @@ fun FilmScreen(
     hasMoreMovies: Boolean = false,
     showingAllMovies: Boolean,
     totalMoviesCount: Int,
+    sortFilter: SortFilterState = SortFilterState(),
     continueWatchingItems: List<ContinueWatchingItem> = emptyList(),
+    onSortFilterChange: (SortFilterState) -> Unit = {},
     onCategorySelect: (String) -> Unit,
     onViewAllClick: () -> Unit,
     onMovieClick: (Movie) -> Unit,
@@ -318,13 +324,20 @@ fun FilmScreen(
                             )
                             
                             Text(
-                                text = "${movies.size} film",
+                                text = "$totalMoviesCount film",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = WaveStreamColors.TextSecondary
                             )
                         }
                     }
                     
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ContentSortFilterBar(
+                        state = sortFilter,
+                        onStateChange = onSortFilterChange
+                    )
+
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     // Continue Watching Carousel (if items exist)

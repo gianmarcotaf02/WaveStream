@@ -1,6 +1,7 @@
 package it.wavestream.app.data.database.dao
 
 import androidx.room.*
+import androidx.sqlite.db.SupportSQLiteQuery
 import it.wavestream.app.data.database.entity.Movie
 import kotlinx.coroutines.flow.Flow
 
@@ -19,6 +20,13 @@ interface MovieDao {
     
     @Query("SELECT COUNT(*) FROM movies WHERE isHidden = 0")
     suspend fun getAllMoviesCount(): Int
+
+    // ---- Query dinamiche per ordinamento/filtri (FilmActivity) ----
+    @RawQuery(observedEntities = [Movie::class])
+    suspend fun queryMoviesRaw(query: SupportSQLiteQuery): List<Movie>
+
+    @RawQuery(observedEntities = [Movie::class])
+    suspend fun countMoviesRaw(query: SupportSQLiteQuery): Int
     
     @Query("SELECT * FROM movies WHERE playlistId = :playlistId AND isHidden = 0 ORDER BY name")
     fun getMoviesByPlaylist(playlistId: Long): Flow<List<Movie>>
