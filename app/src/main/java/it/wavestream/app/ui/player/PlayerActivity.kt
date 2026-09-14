@@ -1555,6 +1555,13 @@ class PlayerActivity : ComponentActivity() {
     }
     
     private fun onPlaybackEnded() {
+        // L'utente ha ignorato l'overlay: alla fine del file NON si passa all'episodio
+        // successivo, si chiude il player.
+        if (creditsDismissed) {
+            android.util.Log.i("CreditsDiag", "playbackEnded after dismiss -> finish")
+            finish()
+            return
+        }
         if (nextEpisodeTriggered && _nextEpisode.value != null) {
             // Overlay already showing from 10s-before-end trigger
             // If autoplay is on and countdown already reached 0, play next
