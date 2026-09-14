@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.FilterList
@@ -661,6 +662,13 @@ private fun TvHomeScreenContent(
                     }
                 }
                 
+                // History tab: punto di accesso per gestire/eliminare la cronologia
+                if (state.isHistoryTab) {
+                    item(key = "history_manage") {
+                        HistoryManageRow(onClick = onManageHistoryClick)
+                    }
+                }
+
                 // Carousel rows
                 itemsIndexed(
                     items = state.carouselRows,
@@ -753,6 +761,53 @@ private fun TvHomeScreenContent(
             
             // NOTE: Focus is NOT requested here - user starts with TopBar focused
             // so they can navigate between tabs (Film, Serie TV, Live) first
+        }
+    }
+}
+
+/**
+ * Riga "Gestisci cronologia": apre la schermata con selezione multipla ed eliminazione.
+ */
+@Composable
+private fun HistoryManageRow(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val background by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.25f) else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f),
+        label = "historyManageBg"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 40.dp, end = 40.dp, top = 18.dp, bottom = 6.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .border(2.dp, if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder, RoundedCornerShape(10.dp))
+            .background(background)
+            .focusable(interactionSource = interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .padding(horizontal = 18.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = null,
+            tint = WaveStreamColors.Accent,
+            modifier = Modifier.size(22.dp)
+        )
+        Column {
+            Text(
+                text = "Gestisci cronologia",
+                style = MaterialTheme.typography.titleMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Elimina tutti i contenuti o seleziona quelli da rimuovere",
+                style = MaterialTheme.typography.bodySmall,
+                color = WaveStreamColors.TextSecondary
+            )
         }
     }
 }
