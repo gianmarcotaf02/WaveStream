@@ -167,6 +167,13 @@
             android:screenOrientation="landscape"
             android:theme="@style/Theme.WaveStream.FullScreen" />
 
+        <!-- History Management Activity (eliminazione cronologia) -->
+        <activity
+            android:name=".ui.history.HistoryActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.WaveStream.FullScreen" />
+
         <!-- Setup Activity -->
         <activity
             android:name=".ui.setup.SetupActivity"

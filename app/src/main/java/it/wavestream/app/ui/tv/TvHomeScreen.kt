@@ -153,6 +153,7 @@ fun TvHomeScreen(
     onTrailerClick: (HeroItem) -> Unit = {},
     onMarkAsWatchedClick: (HeroItem) -> Unit = {},
     onRailFocusRequest: () -> Unit = {},  // Called when LEFT from first carousel item
+    onManageHistoryClick: () -> Unit = {},  // Apre la schermata di gestione cronologia
     modifier: Modifier = Modifier
 ) {
     // NOTA: niente key(heroKey) qui. La key forzava lo smontaggio completo del
@@ -180,6 +181,7 @@ fun TvHomeScreen(
         onTrailerClick = onTrailerClick,
         onMarkAsWatchedClick = onMarkAsWatchedClick,
         onRailFocusRequest = onRailFocusRequest,
+        onManageHistoryClick = onManageHistoryClick,
         modifier = modifier
     )
 }
@@ -206,6 +208,7 @@ private fun TvHomeScreenContent(
     onTrailerClick: (HeroItem) -> Unit = {},
     onMarkAsWatchedClick: (HeroItem) -> Unit = {},
     onRailFocusRequest: () -> Unit = {},
+    onManageHistoryClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val columnListState = rememberTvLazyListState()
