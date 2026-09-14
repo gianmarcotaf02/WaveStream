@@ -23,9 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -366,7 +366,7 @@ private fun FilterPanel(
                 )
                 SmallActionButton(
                     label = "Chiudi",
-                    icon = Icons.Default.SwapVert,
+                    icon = Icons.Default.Close,
                     enabled = true,
                     onClick = onClose
                 )
