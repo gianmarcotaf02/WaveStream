@@ -44,22 +44,13 @@ object AudioFingerprintCodec {
     private const val HEADER_BYTES = 3 * 4
 
     fun encode(fp: AudioFingerprint): ByteArray {
-        val from = fp.data.size - fp.frames * fp.bands
-        val start = if (from > 0) from else 0
         val count = fp.frames * fp.bands
-        val needsTrim = fp.data.size != count
         val bb = ByteBuffer.allocate(HEADER_BYTES + count * 4).order(ByteOrder.LITTLE_ENDIAN)
         bb.putInt(fp.bands)
         bb.putInt(fp.frames)
         bb.putInt(fp.intervalMs)
-        var i = start
-        val end = start + count
-        while (i < end) {
+        for (i in 0 until count) {
             bb.putFloat(fp.data[i])
-            i++
-        }
-        if (needsTrim) {
-            // Nessun caso previsto: il chiamante passa sempre data coerente.
         }
         return bb.array()
     }
