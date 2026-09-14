@@ -348,9 +348,20 @@ class HomeViewModel @Inject constructor(
                 }
             }
             // 2. Ricerca aggiornata (auto-aggiorna il mapping salvato: nuovi canali
-            //    col nome squadra entrano, quelli spariti con la playlist escono)
-            val fresh = runCatching { serieAMatchRepository.findChannelsForMatch(match) }
-                .getOrDefault(emptyList())
+            //    col nome squadra entrano, quelli spariti con la playlist escono).
+            //    La scansione completa dell'intera playlist (decine di migliaia di
+            //    canali + regex per alias) è costosa: si esegue solo quando la cache
+            //    per queste squadre non esiste o è vecchia (> 6h). Così una partita
+            //    successiva della stessa squadra si apre immediatamente.
+            val cacheAge = runCatching { serieAMatchRepository.savedChannelsAge(match) }
+                .getOrDefault(Long.MAX_VALUE)
+            val needsFullScan = cacheAge > SERIE_A_CHANNEL_CACHE_TTL_MS
+            val fresh = if (needsFullScan) {
+                runCatching { serieAMatchRepository.findChannelsForMatch(match) }
+                    .getOrDefault(emptyList())
+            } else {
+                emptyList()
+            }
             _uiState.update { s ->
                 val current = s.serieAChannelPicker ?: return@update s
                 val updated = when {

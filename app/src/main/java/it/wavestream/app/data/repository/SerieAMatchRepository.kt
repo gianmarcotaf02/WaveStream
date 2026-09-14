@@ -247,6 +247,19 @@ class SerieAMatchRepository @Inject constructor(
     }
 
     /**
+     * Età (ms) della cache squadra→canali per il match. Long.MAX_VALUE se non
+     * esiste alcun salvataggio. Serve a decidere se rifare la scansione completa
+     * della playlist: se la cache è fresca la si salta, così le partite
+     * successive della stessa squadra si aprono istantaneamente.
+     */
+    suspend fun savedChannelsAge(match: SerieAMatchEntity): Long = withContext(Dispatchers.IO) {
+        val tlas = listOf(match.homeTla, match.awayTla).filter { it.isNotBlank() }
+        if (tlas.isEmpty()) return@withContext Long.MAX_VALUE
+        val last = serieATeamChannelDao.lastSavedAt(tlas) ?: return@withContext Long.MAX_VALUE
+        System.currentTimeMillis() - last
+    }
+
+    /**
      * Canali salvati localmente per le due squadre (lettura istantanea dal DB).
      * Usata per mostrare subito i canali prima della ricerca di aggiornamento.
      */
