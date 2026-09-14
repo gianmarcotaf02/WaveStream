@@ -12,6 +12,10 @@
       ".read": true,
       ".write": false
     },
+    "vpn_configs": {
+      ".read": true,
+      ".write": false
+    },
     "$other": {
       ".read": false,
       ".write": false
