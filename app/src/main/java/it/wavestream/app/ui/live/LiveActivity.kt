@@ -45,6 +45,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -58,6 +59,7 @@ import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.RecentlyWatchedChannel
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.data.repository.EpgRepository
+import it.wavestream.app.util.channelLogoRequest
 import it.wavestream.app.ui.epg.EpgProgram
 import it.wavestream.app.ui.multiscreen.MultiscreenActivity
 import it.wavestream.app.ui.player.PlayerActivity
@@ -767,7 +769,9 @@ private fun EpgChannelRow(
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
-                    model = channel.logoUrl,
+                    // Richiesta dedicata ai loghi canale: bitmap software + downscale
+                    // (compatibilità TV stick; vedi channelLogoRequest)
+                    model = channelLogoRequest(LocalContext.current, channel.logoUrl),
                     contentDescription = channel.name,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
@@ -1547,7 +1551,7 @@ private fun LiveChannelCard(
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
-                model = channel.logoUrl,
+                model = channelLogoRequest(LocalContext.current, channel.logoUrl),
                 contentDescription = channel.name,
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
