@@ -153,9 +153,12 @@ class CreditsDetector {
         previousGrid = gridLuma.copyOf()
 
         // ---- classificazione: condizioni semplici e leggibili ----
+        // MIN_TEXT_ROWS evita il falso trigger sul nero di coda puro (poca/nessuna riga
+        // di testo reale) che dai log faceva scattare l'overlay solo alla fine dei credits.
         val hit = darkness >= MIN_DARKNESS &&
                 textDensity in MIN_TEXT_DENSITY..MAX_TEXT_DENSITY &&
-                peakRowDensity >= MIN_PEAK_ROW_DENSITY
+                peakRowDensity >= MIN_PEAK_ROW_DENSITY &&
+                textRowCount >= MIN_TEXT_ROWS
 
         // Punteggio solo informativo (log / debug overlay)
         val score = (
@@ -346,8 +349,12 @@ class CreditsDetector {
         // Soglie di classificazione
         private const val MIN_DARKNESS = 0.62f
         private const val MIN_TEXT_DENSITY = 0.006f
-        private const val MAX_TEXT_DENSITY = 0.32f
+        // Alzato da 0.32: i credits con testo fitto/media densità superavano il tetto
+        // e venivano scartati (falso negativo osservato nel log: textDensity 0.95-1.0).
+        private const val MAX_TEXT_DENSITY = 0.96f
         private const val MIN_PEAK_ROW_DENSITY = 0.16f
+        // Almeno N righe con testo allineato: distingue i credits veri dal nero di coda.
+        private const val MIN_TEXT_ROWS = 8
         private const val TEXT_ROW_THRESHOLD = 0.12f
 
         // Fascia di analisi verticale (esclude l'alto estremo e la zona sottotitoli)
