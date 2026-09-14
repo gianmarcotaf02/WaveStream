@@ -21,7 +21,7 @@ object VpnBuiltInConfigs {
     private const val TAG = "VpnBuiltInConfigs"
     private const val ASSET_DIR = "vpn"
 
-    /** Legge tutte le config valide dagli asset `assets/vpn/*.conf`. */
+    /** Legge tutte le config valide dagli asset nella cartella `vpn`. */
     fun load(context: Context): List<String> {
         return try {
             val files = context.assets.list(ASSET_DIR)?.filter { it.endsWith(".conf", ignoreCase = true) }?.sorted()
