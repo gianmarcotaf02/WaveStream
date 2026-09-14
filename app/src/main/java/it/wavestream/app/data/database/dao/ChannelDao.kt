@@ -36,6 +36,20 @@ interface ChannelDao {
     
     @Query("SELECT * FROM channels WHERE id IN (:ids) AND isHidden = 0")
     suspend fun getChannelsByIds(ids: List<Long>): List<Channel>
+
+    /** Canali per URL di stream: evita di caricare in memoria l'intera playlist
+     *  quando servono solo i canali già mappati a una squadra. */
+    @Query("SELECT * FROM channels WHERE streamUrl IN (:urls) AND isHidden = 0")
+    suspend fun getChannelsByStreamUrls(urls: List<String>): List<Channel>
+
+    /** Canali "DAZN 1" delle categorie evento (DAZN HERMES/KALI): il nome del
+     *  canale non contiene la squadra, quindi il matching per alias non li
+     *  troverebbe mai. Vanno sempre proposti per le partite di Serie A. */
+    @Query(
+        "SELECT * FROM channels WHERE isHidden = 0 AND LOWER(name) LIKE '%dazn 1%' " +
+            "AND (LOWER(category) LIKE '%dazn hermes%' OR LOWER(category) LIKE '%dazn kali%')"
+    )
+    suspend fun getDaznEventChannels(): List<Channel>
     
     @Query("SELECT * FROM channels WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")
     suspend fun searchChannels(query: String): List<Channel>

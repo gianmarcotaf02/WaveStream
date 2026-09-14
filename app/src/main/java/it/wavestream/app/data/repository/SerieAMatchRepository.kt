@@ -236,8 +236,12 @@ class SerieAMatchRepository @Inject constructor(
         val allChannels = channelDao.getAllChannelsList()
         val matchedHome = matchChannelsForTeam(allChannels, match.homeTla, match.homeShortName)
         val matchedAway = matchChannelsForTeam(allChannels, match.awayTla, match.awayShortName)
+        // Canali evento DAZN 1 (DAZN HERMES/KALI): non contengono il nome della
+        // squadra nel nome, quindi il matching per alias non li trova. Vanno
+        // aggiunti per forza, altrimenti la partita risulta "senza canali".
+        val daznEvent = channelDao.getDaznEventChannels()
 
-        return@withContext (matchedHome + matchedAway)
+        return@withContext (matchedHome + matchedAway + daznEvent)
             .distinctBy { it.streamUrl }
             .sortedBy { it.name.lowercase() }
     }
@@ -253,8 +257,15 @@ class SerieAMatchRepository @Inject constructor(
             .map { it.channelStreamUrl }
             .toSet()
         if (savedUrls.isEmpty()) return@withContext emptyList()
-        return@withContext channelDao.getAllChannelsList()
-            .filter { it.streamUrl in savedUrls && !it.isExcludedCategory() }
+        // Query mirata per streamUrl: NON si carica l'intera playlist (decine di
+        // migliaia di canali) solo per filtrare i pochi salvati. È il collo di
+        // bottiglia che rende lenta l'apertura del picker canali.
+        val saved = channelDao.getChannelsByStreamUrls(savedUrls.toList())
+        // I canali evento DAZN 1 non sono mappati a una squadra (il nome non la
+        // contiene): vengono sempre aggiunti per le partite di Serie A.
+        val daznEvent = channelDao.getDaznEventChannels()
+        return@withContext (saved + daznEvent)
+            .filter { !it.isExcludedCategory() }
             .distinctBy { it.streamUrl }
             .sortedBy { it.name.lowercase() }
     }

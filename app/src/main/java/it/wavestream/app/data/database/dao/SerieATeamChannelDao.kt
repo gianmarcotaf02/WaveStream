@@ -12,6 +12,12 @@ interface SerieATeamChannelDao {
     @Query("SELECT * FROM serie_a_team_channels WHERE teamTla IN (:teamTlas)")
     suspend fun getByTeams(teamTlas: List<String>): List<SerieATeamChannelEntity>
 
+    /** Timestamp dell'ultimo salvataggio per le squadre indicate: serve a capire
+     *  se la cache squadra→canali è ancora fresca e si può evitare la scansione
+     *  completa della playlist. */
+    @Query("SELECT MAX(savedAt) FROM serie_a_team_channels WHERE teamTla IN (:teamTlas)")
+    suspend fun lastSavedAt(teamTlas: List<String>): Long?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(links: List<SerieATeamChannelEntity>)
 
