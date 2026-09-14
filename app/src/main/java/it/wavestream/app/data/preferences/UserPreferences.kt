@@ -112,6 +112,7 @@ class UserPreferences @Inject constructor(
         private val VPN_AUTO_ROTATE = booleanPreferencesKey("vpn_auto_rotate")
         private val VPN_ROTATE_INTERVAL = stringPreferencesKey("vpn_rotate_interval")
         private val VPN_AUTO_START = booleanPreferencesKey("vpn_auto_start")
+        private val VPN_BUILTIN_FINGERPRINT = stringPreferencesKey("vpn_builtin_fingerprint")
         
         // TMDB Cache Update
         private val TMDB_LAST_UPDATE = longPreferencesKey("tmdb_last_update")
@@ -777,6 +778,15 @@ class UserPreferences @Inject constructor(
 
     suspend fun getVpnAutoStart(): Boolean {
         return dataStore.data.first()[VPN_AUTO_START] ?: false
+    }
+
+    /** Fingerprint delle config VPN integrate già importate nel pool. */
+    suspend fun getVpnBuiltinFingerprint(): String {
+        return dataStore.data.first()[VPN_BUILTIN_FINGERPRINT] ?: ""
+    }
+
+    suspend fun setVpnBuiltinFingerprint(value: String) {
+        dataStore.edit { it[VPN_BUILTIN_FINGERPRINT] = value }
     }
     
 } // end of UserPreferences
