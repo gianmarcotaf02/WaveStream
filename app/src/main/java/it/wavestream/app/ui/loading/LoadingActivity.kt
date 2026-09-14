@@ -29,6 +29,7 @@ import it.wavestream.app.ui.MainActivity
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.util.ContentFilters
 import it.wavestream.app.vpn.VpnManager
+import it.wavestream.app.vpn.VpnBuiltInConfigs
 import it.wavestream.app.vpn.VpnStrategy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -327,6 +328,8 @@ class LoadingActivity : ComponentActivity() {
         try {
             if (!userPreferences.getVpnAutoStart()) return
             if (vpnManager.isRunning()) return
+            // Assicura che le config integrate (Proton) siano nel pool anche al primo avvio.
+            VpnBuiltInConfigs.importIfNeeded(this, userPreferences)
             if (vpnManager.getConsentIntent() != null) {
                 Log.d("LoadingActivity", "VPN auto-start skipped: consent non ancora concesso")
                 return

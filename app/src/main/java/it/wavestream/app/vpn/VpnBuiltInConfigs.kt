@@ -77,9 +77,16 @@ object VpnBuiltInConfigs {
         if (builtIn.isEmpty()) return emptyList()
 
         val fingerprint = fingerprint(builtIn)
-        if (prefs.getVpnBuiltinFingerprint() != fingerprint) {
+        val previous = prefs.getVpnBuiltinFingerprint()
+        if (previous != fingerprint) {
             builtIn.forEach { prefs.addVpnConfig(it) }
             prefs.setVpnBuiltinFingerprint(fingerprint)
+            // Al primo import assoluto attiva l'avvio automatico: l'obiettivo è che
+            // ogni dispositivo abbia la VPN pronta senza configurazione manuale.
+            // L'utente può comunque disattivarla dalle impostazioni.
+            if (previous.isEmpty()) {
+                prefs.setVpnAutoStart(true)
+            }
         }
         return builtIn
     }

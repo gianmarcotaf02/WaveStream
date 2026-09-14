@@ -68,6 +68,7 @@ import it.wavestream.app.ui.theme.AccentColor
 import it.wavestream.app.ui.profile.getAvatarResource
 import it.wavestream.app.ui.profile.getAvatarIcon
 import it.wavestream.app.vpn.VpnManager
+import it.wavestream.app.vpn.VpnBuiltInConfigs
 import it.wavestream.app.vpn.VpnImportServer
 import it.wavestream.app.vpn.VpnConfigFinder
 import it.wavestream.app.vpn.VpnStrategy
@@ -2716,6 +2717,7 @@ private fun VpnSettings(
     var pendingStart by remember { mutableStateOf<String?>(null) }
     var isBusy by remember { mutableStateOf(false) }
     var feedback by remember { mutableStateOf<String?>(null) }
+    var builtInConfigs by remember { mutableStateOf<List<String>>(emptyList()) }
 
     fun strategyEnum(): VpnStrategy = when (strategy) {
         "round_robin" -> VpnStrategy.ROUND_ROBIN
@@ -2780,6 +2782,7 @@ private fun VpnSettings(
     }
 
     LaunchedEffect(Unit) {
+        builtInConfigs = VpnBuiltInConfigs.importIfNeeded(context, userPreferences)
         configs = userPreferences.getVpnConfigs()
         strategy = userPreferences.getVpnStrategy()
         autoRotate = userPreferences.getVpnAutoRotate()
@@ -2831,6 +2834,69 @@ private fun VpnSettings(
                 color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
                 thickness = 0.5.dp
             )
+
+            // ---- Proton VPN Plus (integrato) ----
+            if (builtInConfigs.isNotEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, WaveStreamColors.Accent.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .background(WaveStreamColors.Accent.copy(alpha = 0.10f))
+                        .padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = null,
+                            tint = WaveStreamColors.Accent,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = "Proton VPN Plus (integrato)",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WaveStreamColors.TextPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Text(
+                        text = "${builtInConfigs.size} server configurati automaticamente nell'app: " +
+                            "nessun file da importare, sempre gli stessi per tutti i dispositivi.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = WaveStreamColors.TextSecondary
+                    )
+                    VpnActionButton(
+                        onClick = {
+                            scope.launch {
+                                isBusy = true
+                                feedback = null
+                                val chosen = vpnManager.selectConfig(builtInConfigs, strategyEnum())
+                                if (chosen == null) {
+                                    feedback = "Nessuna configurazione Proton disponibile."
+                                    isBusy = false
+                                    return@launch
+                                }
+                                val consent = vpnManager.getConsentIntent()
+                                if (consent != null) {
+                                    pendingStart = chosen
+                                    isBusy = false
+                                    consentLauncher.launch(consent)
+                                    return@launch
+                                }
+                                doStart(chosen, builtInConfigs, strategyEnum())
+                                isBusy = false
+                            }
+                        },
+                        enabled = !isBusy && !vpnManager.isRunning(),
+                        icon = Icons.Default.PowerSettingsNew,
+                        label = if (vpnManager.isRunning()) "VPN già attiva" else "Connetti a Proton VPN Plus"
+                    )
+                }
+            }
 
             // ---- Pool di configurazioni ----
             Text(
