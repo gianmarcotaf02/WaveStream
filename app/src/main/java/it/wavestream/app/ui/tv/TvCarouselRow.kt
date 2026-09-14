@@ -161,6 +161,7 @@ fun TvCarouselRow(
                         item.contentType.startsWith("CATEGORY_") -> {
                             CategoryCard(
                                 item = item,
+                                isFavorite = item.isFavorite,
                                 onClick = { onItemClick(item) }
                             )
                         }

@@ -67,6 +67,13 @@ data class MediaSegment(
     val source: SegmentSource,
     val confidence: Float,            // 1.0 per USER_MARK / EXTERNAL_DB
 
+    /**
+     * Fingerprint audio del segmento (solo INTRO per ora). Formato codificato da
+     * AudioFingerprintCodec: header (bands, frames, intervalMs) + FloatArray delle bande
+     * spettrali normalizzate. Serve a riconoscere la sigla negli episodi successivi.
+     */
+    val fingerprint: ByteArray? = null,
+
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 ) {

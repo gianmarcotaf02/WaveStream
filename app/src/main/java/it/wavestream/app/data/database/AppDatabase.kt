@@ -34,7 +34,7 @@ import it.wavestream.app.data.database.entity.*
         SerieATeamChannelEntity::class,
         MediaSegment::class
     ],
-    version = 30,
+    version = 31,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

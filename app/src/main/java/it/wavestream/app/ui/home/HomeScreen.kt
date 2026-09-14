@@ -70,6 +70,7 @@ data class CarouselItem(
     val nextEpisodeLabel: String? = null,    // "S2 E5" next unwatched episode
     val seasonCount: Int? = null,           // Number of seasons (e.g. "3 stagioni")
     val newEpisodeBadge: Boolean = false,   // Badge "NUOVO" for recent episodes
+    val isFavorite: Boolean = false,        // Categoria preferita (per il cuoricino sulle card categoria)
     // Category card fields
     val contentCount: Int? = null  // Number of items in category (for category cards)
 )

@@ -41,6 +41,7 @@ import it.wavestream.app.ui.theme.AppAnimations
 fun CategoryCard(
     item: CarouselItem,
     onClick: () -> Unit,
+    isFavorite: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -143,6 +144,14 @@ fun CategoryCard(
                     )
             )
         }
+
+        // Cuoricino rosso in basso a destra per le categorie preferite
+        CategoryFavoriteHeart(
+            isFavorite = isFavorite,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(8.dp)
+        )
     }
 }
 

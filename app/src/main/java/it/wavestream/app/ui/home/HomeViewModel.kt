@@ -2634,6 +2634,7 @@ class HomeViewModel @Inject constructor(
                             posterUrl = null,
                             backdropUrl = null,
                             contentType = "CATEGORY_MOVIE",
+                            isFavorite = true,
                             contentCount = movieCount
                         ))
                     }
@@ -2650,6 +2651,7 @@ class HomeViewModel @Inject constructor(
                             posterUrl = null,
                             backdropUrl = null,
                             contentType = "CATEGORY_SERIES",
+                            isFavorite = true,
                             contentCount = seriesCount
                         ))
                     }
@@ -2666,6 +2668,7 @@ class HomeViewModel @Inject constructor(
                             posterUrl = null,
                             backdropUrl = null,
                             contentType = "CATEGORY_LIVE",
+                            isFavorite = true,
                             contentCount = channelCount
                         ))
                     }
