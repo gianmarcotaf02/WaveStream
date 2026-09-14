@@ -60,6 +60,7 @@ data class CarouselItem(
     val contentType: String, // "MOVIE", "SERIES", "CHANNEL", "CATEGORY_MOVIE", "CATEGORY_SERIES", "CATEGORY_LIVE"
     val year: Int? = null,
     val rating: Float? = null,
+    val tmdbRating: Float? = null,  // Voto TMDB puro (per ordinamento/filtri)
     val ratingText: String? = null,  // Pre-formatted rating to avoid String.format in composables
     // Continue Watching fields
     val progressPercent: Float? = null,  // 0.0 to 1.0
