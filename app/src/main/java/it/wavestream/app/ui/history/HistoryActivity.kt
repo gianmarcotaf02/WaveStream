@@ -511,7 +511,7 @@ private fun HistoryCard(
             ) {
                 Checkbox(
                     checked = isSelected,
-                    onCheckedChange = { onClick() },
+                    onCheckedChange = null,
                     colors = CheckboxDefaults.colors(
                         checkedColor = WaveStreamColors.Accent,
                         uncheckedColor = Color.White,
