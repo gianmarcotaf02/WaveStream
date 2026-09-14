@@ -72,6 +72,7 @@ class UserPreferences @Inject constructor(
         private val AUTO_PLAY_NEXT = booleanPreferencesKey("auto_play_next")
         private val CREDITS_DETECTION_ENABLED = booleanPreferencesKey("credits_detection_enabled")
         private val CREDITS_DETECTION_DEBUG = booleanPreferencesKey("credits_detection_debug")
+        private val CREDITS_AUDIO_ENABLED = booleanPreferencesKey("credits_audio_enabled")
         private val YOUTUBE_PLAYER_PACKAGE = stringPreferencesKey("youtube_player_package")
         
         // Playback
@@ -356,6 +357,23 @@ class UserPreferences @Inject constructor(
 
     fun getCreditsDebugEnabledFlow(): Flow<Boolean> {
         return dataStore.data.map { it[CREDITS_DETECTION_DEBUG] ?: false }
+    }
+
+    /**
+     * Fase 2/4: analisi audio (RMS/VAD/spettro e fingerprint delle sigle).
+     * Disattivabile perché su alcuni device l'audio tap può ridurre le ottimizzazioni
+     * audio di sistema: la detection video e i marker restano comunque attivi.
+     */
+    suspend fun setCreditsAudioEnabled(enabled: Boolean) {
+        dataStore.edit { it[CREDITS_AUDIO_ENABLED] = enabled }
+    }
+
+    suspend fun getCreditsAudioEnabled(): Boolean {
+        return dataStore.data.first()[CREDITS_AUDIO_ENABLED] ?: true
+    }
+
+    fun getCreditsAudioEnabledFlow(): Flow<Boolean> {
+        return dataStore.data.map { it[CREDITS_AUDIO_ENABLED] ?: true }
     }
     
     suspend fun setYoutubePlayerPackage(packageName: String?) {

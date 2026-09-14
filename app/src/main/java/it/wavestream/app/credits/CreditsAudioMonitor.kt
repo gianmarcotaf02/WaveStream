@@ -69,6 +69,9 @@ class CreditsAudioMonitor @Inject constructor() {
     /** True all'inizio dell'episodio: abilita la storia per il fingerprint della sigla. */
     @Volatile var introActive: Boolean = false
 
+    /** Interruttore utente: se false, il monitor non analizza nulla. */
+    @Volatile var enabled: Boolean = true
+
     /** Posizione corrente del player, fornita dal PlayerActivity ad ogni tick (~1s). */
     @Volatile var playerPositionMs: Long = 0L
 
@@ -90,7 +93,7 @@ class CreditsAudioMonitor @Inject constructor() {
 
     private data class Frame(val timeMs: Long, val bands: FloatArray)
 
-    private val isActive: Boolean get() = windowActive || introActive
+    private val isActive: Boolean get() = enabled && (windowActive || introActive)
 
     /** Sink passivo da agganciare al [TeeAudioProcessor]. */
     val sink: TeeAudioProcessor.AudioBufferSink = object : TeeAudioProcessor.AudioBufferSink {

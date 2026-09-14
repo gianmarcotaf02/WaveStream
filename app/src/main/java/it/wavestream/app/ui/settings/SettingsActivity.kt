@@ -1410,6 +1410,7 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
     val subtitlesEnabled by userPreferences.getSubtitlesEnabledFlow().collectAsState(initial = false)
     val creditsDetectionEnabled by userPreferences.getCreditsDetectionEnabledFlow().collectAsState(initial = true)
     val creditsDebugEnabled by userPreferences.getCreditsDebugEnabledFlow().collectAsState(initial = false)
+    val creditsAudioEnabled by userPreferences.getCreditsAudioEnabledFlow().collectAsState(initial = true)
     
     SettingsSection(title = "Player") {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -1443,6 +1444,12 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
                 label = "Debug rilevamento titoli di coda (mostra a video le metriche)",
                 checked = creditsDebugEnabled,
                 onCheckedChange = { coroutineScope.launch { userPreferences.setCreditsDebugEnabled(it) } }
+            )
+
+            SettingsSwitch(
+                label = "Rilevamento audio e sigle (sperimentale)",
+                checked = creditsAudioEnabled,
+                onCheckedChange = { coroutineScope.launch { userPreferences.setCreditsAudioEnabled(it) } }
             )
             
             // Seek settings
