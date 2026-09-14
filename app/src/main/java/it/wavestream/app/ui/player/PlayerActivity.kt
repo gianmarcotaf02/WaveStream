@@ -143,6 +143,7 @@ class PlayerActivity : ComponentActivity() {
     private var nextEpisodeCountdown = DEFAULT_NEXT_COUNTDOWN_SECONDS
     private var nextEpisodeTriggered = false  // Prevent double trigger
     private var creditsDetected = false       // Titoli di coda rilevati dall'analisi frame
+    private var creditsDismissed = false      // L'utente ha ignorato l'overlay: non riproporlo per questo contenuto
     private var creditsTunnelLogged = false   // Diagnostica Passo 0: log tunneling una volta per playback
     
     // Auto-retry for live channel buffering
@@ -530,7 +531,7 @@ class PlayerActivity : ComponentActivity() {
                     onBack = { finish() },
                     nextEpisode = nextEpisode,
                     onPlayNext = { playNextEpisode() },
-                    onCancelNext = { hideNextEpisodeOverlay() },
+                    onCancelNext = { cancelNextEpisodeOverlay() },
                     playbackSpeed = playbackSpeed,
                     onSpeedChange = { 
                         resetAutoPlayCounter()
@@ -1170,7 +1171,7 @@ class PlayerActivity : ComponentActivity() {
                     // vengono rilevati i titoli di coda (marker esatto o analisi immagini).
                     // Il trigger anticipato è attivo solo con autoplay attivo: altrimenti
                     // l'overlay coprirebbe lo schermo per l'intera durata dei credits.
-                    if (!nextEpisodeTriggered && contentType == ContentType.EPISODE) {
+                    if (!creditsDismissed && !nextEpisodeTriggered && contentType == ContentType.EPISODE) {
                         // Livello 0: marker esatto dell'utente (o futuro EXTERNAL_DB).
                         val markerStart = creditsMarkerStartMs
                         if (markerStart != null && !creditsDetected &&
@@ -1213,7 +1214,19 @@ class PlayerActivity : ComponentActivity() {
             "backwardSeek reset pos=${if (::player.isInitialized) player.currentPosition else 0} " +
                 "creditsDetected=$creditsDetected nextTriggered=$nextEpisodeTriggered overlay=${_nextEpisode.value != null}"
         )
+        // Tornando indietro il meccanismo si ri-arma: l'eventuale "ignora" decade.
+        creditsDismissed = false
         hideNextEpisodeOverlay() // resetta nextEpisodeTriggered e creditsDetected
+    }
+
+    /**
+     * L'utente ha ignorato l'overlay "Prossimo episodio": lo chiude e non lo ripropone
+     * per questo contenuto (così il timer scaduto non fa partire l'episodio successivo).
+     */
+    private fun cancelNextEpisodeOverlay() {
+        android.util.Log.i("CreditsDiag", "nextEpisodeOverlay dismissed by user")
+        creditsDismissed = true
+        hideNextEpisodeOverlay()
     }
 
     /**
@@ -1223,6 +1236,7 @@ class PlayerActivity : ComponentActivity() {
      */
     private fun onPlaybackContentChanged() {
         creditsDetected = false
+        creditsDismissed = false
         nextEpisodeTriggered = false
         creditsMarkerStartMs = null
         creditsMarkerEndMs = null
@@ -1780,8 +1794,12 @@ class PlayerActivity : ComponentActivity() {
                 _controlsVisible.value = true
                 return false  // Let Compose handle focus navigation
             }
-            // Back key - hide controls if visible, otherwise finish
+            // Back key - ignore next-episode overlay, else hide controls, else finish
             KeyEvent.KEYCODE_BACK -> {
+                if (_nextEpisode.value != null) {
+                    cancelNextEpisodeOverlay()
+                    return true
+                }
                 if (_isMiniPlayer.value) {
                     // Dal mini player: torna al player a schermo intero
                     toggleMiniPlayer()
