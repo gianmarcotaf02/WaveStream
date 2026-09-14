@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import androidx.sqlite.db.SimpleSQLiteQuery
 import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.cache.ContentCache
@@ -49,7 +50,10 @@ import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.ContinueWatchingItem
 import it.wavestream.app.data.database.entity.Series
+import it.wavestream.app.ui.components.ContentQueryBuilder
+import it.wavestream.app.ui.components.ContentSortFilterBar
 import it.wavestream.app.ui.components.ContinueWatchingCarousel
+import it.wavestream.app.ui.components.SortFilterState
 import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
@@ -97,6 +101,34 @@ class SeriesActivity : ComponentActivity() {
         var totalSeriesCount by remember { mutableIntStateOf(0) }
         var showingAllSeries by remember { mutableStateOf(initialCategory == null) }
         var continueWatchingItems by remember { mutableStateOf<List<ContinueWatchingItem>>(emptyList()) }
+        var sortFilter by remember { mutableStateOf(SortFilterState()) }
+        var reloadToken by remember { mutableIntStateOf(0) }
+
+        // Categoria corrente: null = "Tutte le serie TV"
+        fun currentCategory(): String? = if (showingAllSeries) null else selectedCategory
+
+        fun buildSeriesQuery(offset: Int, limit: Int): SimpleSQLiteQuery {
+            val q = ContentQueryBuilder.series(currentCategory(), sortFilter, limit, offset)
+            return SimpleSQLiteQuery(q.sql, q.args.toTypedArray())
+        }
+
+        // Ricarica da zero applicando ordinamento/filtri correnti.
+        fun reloadSeries() {
+            val token = ++reloadToken
+            lifecycleScope.launch {
+                isLoading = true
+                val countQ = ContentQueryBuilder.seriesCount(currentCategory(), sortFilter)
+                val total = seriesDao.countSeriesRaw(
+                    SimpleSQLiteQuery(countQ.sql, countQ.args.toTypedArray())
+                )
+                val first = seriesDao.querySeriesRaw(buildSeriesQuery(0, PAGE_SIZE))
+                if (token != reloadToken) return@launch
+                totalSeriesCount = total
+                seriesList = first
+                hasMoreSeries = first.size < totalSeriesCount
+                isLoading = false
+            }
+        }
 
         // Load more: appends next page to current list
         fun loadMoreSeries() {
@@ -104,11 +136,7 @@ class SeriesActivity : ComponentActivity() {
             lifecycleScope.launch {
                 isLoadingMore = true
                 val offset = seriesList.size
-                val more = if (showingAllSeries) {
-                    seriesDao.getAllSeriesListPaged(PAGE_SIZE, offset)
-                } else {
-                    seriesDao.getSeriesByCategoryListPaged(selectedCategory!!, PAGE_SIZE, offset)
-                }
+                val more = seriesDao.querySeriesRaw(buildSeriesQuery(offset, PAGE_SIZE))
                 seriesList = seriesList + more
                 hasMoreSeries = seriesList.size < totalSeriesCount
                 isLoadingMore = false
@@ -152,35 +180,11 @@ class SeriesActivity : ComponentActivity() {
             if (initialCategory == null) {
                 showingAllSeries = true
                 selectedCategory = null
-                val total = seriesDao.getAllSeriesCount()
-                totalSeriesCount = total
-                val first = seriesDao.getAllSeriesListPaged(PAGE_SIZE, 0)
-                seriesList = first
-                hasMoreSeries = first.size < total
             } else {
                 showingAllSeries = false
                 selectedCategory = initialCategory
-                val total = seriesDao.getSeriesCountByCategory(initialCategory)
-                totalSeriesCount = total
-                val first = seriesDao.getSeriesByCategoryListPaged(initialCategory, PAGE_SIZE, 0)
-                seriesList = first
-                hasMoreSeries = first.size < total
             }
-            isLoading = false
-        }
-
-        // Load series when category changes (user taps sidebar)
-        LaunchedEffect(selectedCategory) {
-            if (selectedCategory != null) {
-                isLoading = true
-                showingAllSeries = false
-                val total = seriesDao.getSeriesCountByCategory(selectedCategory!!)
-                totalSeriesCount = total
-                val first = seriesDao.getSeriesByCategoryListPaged(selectedCategory!!, PAGE_SIZE, 0)
-                seriesList = first
-                hasMoreSeries = first.size < total
-                isLoading = false
-            }
+            reloadSeries()
         }
 
         SeriesScreen(
@@ -192,23 +196,23 @@ class SeriesActivity : ComponentActivity() {
             hasMoreSeries = hasMoreSeries,
             showingAllSeries = showingAllSeries,
             totalSeriesCount = totalSeriesCount,
+            sortFilter = sortFilter,
             continueWatchingItems = continueWatchingItems,
+            onSortFilterChange = { newState ->
+                if (newState != sortFilter) {
+                    sortFilter = newState
+                    reloadSeries()
+                }
+            },
             onCategorySelect = { cat ->
                 showingAllSeries = false
                 selectedCategory = cat
+                reloadSeries()
             },
             onViewAllClick = {
-                lifecycleScope.launch {
-                    isLoading = true
-                    showingAllSeries = true
-                    selectedCategory = null
-                    val total = seriesDao.getAllSeriesCount()
-                    totalSeriesCount = total
-                    val first = seriesDao.getAllSeriesListPaged(PAGE_SIZE, 0)
-                    seriesList = first
-                    hasMoreSeries = first.size < total
-                    isLoading = false
-                }
+                showingAllSeries = true
+                selectedCategory = null
+                reloadSeries()
             },
             onLoadMore = { loadMoreSeries() },
             onSeriesClick = { openSeriesDetails(it) },
@@ -255,7 +259,9 @@ fun SeriesScreen(
     hasMoreSeries: Boolean = false,
     showingAllSeries: Boolean,
     totalSeriesCount: Int,
+    sortFilter: SortFilterState = SortFilterState(),
     continueWatchingItems: List<ContinueWatchingItem> = emptyList(),
+    onSortFilterChange: (SortFilterState) -> Unit = {},
     onCategorySelect: (String) -> Unit,
     onViewAllClick: () -> Unit,
     onSeriesClick: (Series) -> Unit,
@@ -329,13 +335,20 @@ fun SeriesScreen(
                             )
                             
                             Text(
-                                text = "${seriesList.size} serie",
+                                text = "$totalSeriesCount serie",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = WaveStreamColors.TextSecondary
                             )
                         }
                     }
                     
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ContentSortFilterBar(
+                        state = sortFilter,
+                        onStateChange = onSortFilterChange
+                    )
+
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     // Continue Watching Carousel (if items exist)
