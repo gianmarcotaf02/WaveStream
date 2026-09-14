@@ -2891,9 +2891,9 @@ private fun VpnSettings(
                                 isBusy = false
                             }
                         },
-                        enabled = !isBusy && !vpnManager.isRunning(),
+                        enabled = !isBusy && !isRunning,
                         icon = Icons.Default.PowerSettingsNew,
-                        label = if (vpnManager.isRunning()) "VPN già attiva" else "Connetti a Proton VPN Plus"
+                        label = if (isRunning) "VPN già attiva" else "Connetti a Proton VPN Plus"
                     )
                 }
             }
