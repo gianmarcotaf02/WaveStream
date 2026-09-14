@@ -45,6 +45,7 @@ import androidx.media3.common.util.UnstableApi
 import it.wavestream.app.data.repository.DownloadContentManager
 import it.wavestream.app.data.repository.MediaSegmentRepository
 import it.wavestream.app.data.database.entity.SegmentType
+import it.wavestream.app.data.database.entity.MediaSegment
 import it.wavestream.app.credits.CreditsAudioMonitor
 import it.wavestream.app.credits.CreditsRenderersFactory
 import it.wavestream.app.player.CreditsDetector
@@ -95,6 +96,7 @@ class PlayerActivity : ComponentActivity() {
     // Sigla (intro): marker manuale inizio/fine + visibilità del pulsante "Salta sigla"
     private var introStartMs: Long? = null
     private var introEndMs: Long? = null
+    private var seriesIntroReference: MediaSegment? = null
     private val _showSkipIntro = mutableStateOf(false)
     // Fase 2: esito del monitor audio, passato al watchdog come corroborazione.
     private val _audioCandidate = mutableStateOf(false)
@@ -1188,6 +1190,17 @@ class PlayerActivity : ComponentActivity() {
                     // vengono rilevati i titoli di coda (marker esatto o analisi immagini).
                     // Il trigger anticipato è attivo solo con autoplay attivo: altrimenti
                     // l'overlay coprirebbe lo schermo per l'intera durata dei credits.
+                    // Sigla: se manca il marker di questo episodio, stima dalla serie.
+                    if (introStartMs == null && introEndMs == null &&
+                        seriesIntroReference != null && player.duration > 0
+                    ) {
+                        mediaSegmentRepository.estimateIntro(seriesIntroReference!!, player.duration)?.let {
+                            introStartMs = it.first
+                            introEndMs = it.second
+                            android.util.Log.i("CreditsDiag", "introEstimated start=${it.first} end=${it.second}")
+                        }
+                    }
+
                     // Sigla: mostra "Salta sigla" se esiste un segmento INTRO completo.
                     val iStart = introStartMs
                     val iEnd = introEndMs
@@ -1278,6 +1291,7 @@ class PlayerActivity : ComponentActivity() {
         creditsMarkerLoaded = false
         introStartMs = null
         introEndMs = null
+        seriesIntroReference = null
         _showSkipIntro.value = false
         creditsAudioMonitor.reset()
         creditsAudioMonitor.windowActive = false
@@ -1344,10 +1358,18 @@ class PlayerActivity : ComponentActivity() {
                 )
                 introStartMs = intro?.startMs
                 introEndMs = intro?.endMs
+                seriesIntroReference = if (intro == null && seriesId != null && contentType == ContentType.EPISODE) {
+                    mediaSegmentRepository.getSeriesIntroReference(seriesId!!)
+                } else null
                 if (intro != null) {
                     android.util.Log.i(
                         "CreditsDiag",
                         "markerFound type=INTRO startMs=${intro.startMs} endMs=${intro.endMs} source=${intro.source}"
+                    )
+                } else if (seriesIntroReference != null) {
+                    android.util.Log.i(
+                        "CreditsDiag",
+                        "markerFound type=INTRO_SERIES_REF startMs=${seriesIntroReference?.startMs} endMs=${seriesIntroReference?.endMs}"
                     )
                 }
                 if (seg != null) {

@@ -115,4 +115,30 @@ class MediaSegmentRepository @Inject constructor(
         if (tail <= 0) return null
         return (currentDurationMs - tail).coerceAtLeast(0)
     }
+
+    /**
+     * Riferimento INTRO (con inizio E fine) di un episodio della stessa serie, usato per
+     * stimare la sigla nei prossimi episodi. Le sigle sono molto stabili all'interno di
+     * una stagione, quindi una stima per posizione relativa è affidabile e, in ogni caso,
+     * produce solo un pulsante "Salta sigla" opzionale (mai un seek forzato).
+     */
+    suspend fun getSeriesIntroReference(seriesId: Long): MediaSegment? {
+        val all = dao.getForSeries(seriesId, SegmentType.INTRO)
+        return all.firstOrNull {
+            it.endMs != null && (it.source == SegmentSource.USER_MARK || it.source == SegmentSource.EXTERNAL_DB)
+        } ?: all.firstOrNull { it.endMs != null }
+    }
+
+    /**
+     * Stima inizio/fine sigla per un episodio di durata [currentDurationMs] a partire da un
+     * riferimento della stessa serie, usando le posizioni relative.
+     */
+    fun estimateIntro(reference: MediaSegment, currentDurationMs: Long): Pair<Long, Long>? {
+        val endRef = reference.endMs ?: return null
+        if (reference.durationMs <= 0 || currentDurationMs <= 0) return null
+        val start = (reference.startMs.toDouble() / reference.durationMs * currentDurationMs).toLong()
+        val end = (endRef.toDouble() / reference.durationMs * currentDurationMs).toLong()
+        if (end <= start) return null
+        return start.coerceAtLeast(0) to end.coerceAtMost(currentDurationMs)
+    }
 }
