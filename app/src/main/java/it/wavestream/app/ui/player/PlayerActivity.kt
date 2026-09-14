@@ -45,6 +45,9 @@ import androidx.media3.common.util.UnstableApi
 import it.wavestream.app.data.repository.DownloadContentManager
 import it.wavestream.app.data.repository.MediaSegmentRepository
 import it.wavestream.app.data.database.entity.SegmentType
+import it.wavestream.app.credits.CreditsAudioMonitor
+import it.wavestream.app.credits.CreditsRenderersFactory
+import it.wavestream.app.player.CreditsDetector
 import it.wavestream.app.data.database.dao.DownloadedContentDao
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -69,6 +72,7 @@ class PlayerActivity : ComponentActivity() {
     @Inject lateinit var downloadContentManager: DownloadContentManager
     @Inject lateinit var downloadedContentDao: DownloadedContentDao
     @Inject lateinit var mediaSegmentRepository: MediaSegmentRepository
+    @Inject lateinit var creditsAudioMonitor: CreditsAudioMonitor
     
     private lateinit var player: ExoPlayer
     
@@ -92,6 +96,8 @@ class PlayerActivity : ComponentActivity() {
     private var introStartMs: Long? = null
     private var introEndMs: Long? = null
     private val _showSkipIntro = mutableStateOf(false)
+    // Fase 2: esito del monitor audio, passato al watchdog come corroborazione.
+    private val _audioCandidate = mutableStateOf(false)
     // Generazione di sessione: si incrementa ad ogni salto indietro e fa ripartire/re-armare
     // il watchdog video, oltre a resettare lo stato del trigger.
     private val _creditsSeekGeneration = mutableIntStateOf(0)
@@ -559,6 +565,7 @@ class PlayerActivity : ComponentActivity() {
                     onMarkIntro = { markIntroNow() },
                     showSkipIntro = _showSkipIntro.value,
                     onSkipIntro = { skipIntro() },
+                    audioCandidate = _audioCandidate.value,
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
                     isLiveSeekable = _isLiveSeekable.value,
@@ -589,6 +596,7 @@ class PlayerActivity : ComponentActivity() {
         overridePendingTransition(it.wavestream.app.R.anim.zoom_out_enter, it.wavestream.app.R.anim.zoom_out_exit)
     }
     
+    @androidx.annotation.OptIn(UnstableApi::class)
     private fun initPlayer() {
         val isLive = contentType == ContentType.CHANNEL
 
@@ -661,7 +669,10 @@ class PlayerActivity : ComponentActivity() {
         }
 
         // Explicit HW decoder configuration for better TV compatibility
-        val renderersFactory = DefaultRenderersFactory(this)
+        // Fase 2: factory che aggancia il tee audio al monitor (pass-through, nessun costo
+        // sul thread di playback). Se il dispositivo non supporta i custom AudioProcessor
+        // il sink resta silenzioso e il video detector continua a funzionare da solo.
+        val renderersFactory = CreditsRenderersFactory(this, creditsAudioMonitor.sink)
             .setEnableDecoderFallback(true)
             .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON)
 
@@ -1187,6 +1198,12 @@ class PlayerActivity : ComponentActivity() {
                         _showSkipIntro.value = false
                     }
 
+                    // Fase 2: arma il monitor audio solo nella finestra finale del VOD.
+                    val inCreditsWindow = contentType != ContentType.CHANNEL &&
+                        (player.duration - player.currentPosition) <= CreditsDetector.WINDOW_MS
+                    creditsAudioMonitor.windowActive = inCreditsWindow
+                    _audioCandidate.value = creditsAudioMonitor.candidate
+
                     if (!creditsDismissed && !nextEpisodeTriggered && contentType == ContentType.EPISODE) {
                         // Livello 0: marker esatto dell'utente (o futuro EXTERNAL_DB).
                         val markerStart = creditsMarkerStartMs
@@ -1232,6 +1249,8 @@ class PlayerActivity : ComponentActivity() {
         )
         // Tornando indietro il meccanismo si ri-arma: l'eventuale "ignora" decade.
         creditsDismissed = false
+        creditsAudioMonitor.reset()
+        _audioCandidate.value = false
         hideNextEpisodeOverlay() // resetta nextEpisodeTriggered e creditsDetected
     }
 
@@ -1260,6 +1279,9 @@ class PlayerActivity : ComponentActivity() {
         introStartMs = null
         introEndMs = null
         _showSkipIntro.value = false
+        creditsAudioMonitor.reset()
+        creditsAudioMonitor.windowActive = false
+        _audioCandidate.value = false
         hideNextEpisodeOverlay()
         _creditsSeekGeneration.intValue++
         loadCreditsMarker()
@@ -1975,6 +1997,8 @@ class PlayerActivity : ComponentActivity() {
         progressHandler.removeCallbacksAndMessages(null)
         nextEpisodeHandler.removeCallbacksAndMessages(null)
         bufferingHandler.removeCallbacksAndMessages(null)
+        creditsAudioMonitor.windowActive = false
+        creditsAudioMonitor.reset()
         if (::player.isInitialized) player.release()
     }
     

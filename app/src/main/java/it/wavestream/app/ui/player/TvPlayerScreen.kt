@@ -122,6 +122,8 @@ fun TvPlayerScreen(
     onMarkIntro: () -> Unit = {},
     showSkipIntro: Boolean = false,
     onSkipIntro: () -> Unit = {},
+    /** Segnale di corroborazione dal monitor audio (Fase 2). */
+    audioCandidate: Boolean = false,
     cumulativeSeekSeconds: Int = 0,
     seekIndicatorVisible: Boolean = false,
     showStillWatching: Boolean = false,
@@ -143,6 +145,7 @@ fun TvPlayerScreen(
         durationMs = duration,
         debugText = if (creditsDetectionDebug) creditsDebugText else null,
         sessionKey = creditsSessionKey,
+        audioCandidate = audioCandidate,
         onCreditsDetected = onCreditsDetected
     )
     
@@ -2174,11 +2177,13 @@ private fun CreditsWatchdog(
     durationMs: Long,
     debugText: MutableState<String>?,
     sessionKey: Int,
+    audioCandidate: Boolean,
     onCreditsDetected: () -> Unit
 ) {
     val latestPosition by rememberUpdatedState(positionMs)
     val latestDuration by rememberUpdatedState(durationMs)
     val latestCallback by rememberUpdatedState(onCreditsDetected)
+    val latestAudioCandidate by rememberUpdatedState(audioCandidate)
 
     LaunchedEffect(enabled, isLiveChannel, playerView, sessionKey) {
         debugText?.value = when {
@@ -2282,7 +2287,7 @@ private fun CreditsWatchdog(
                     // Debug fuori finestra: si mostrano i valori ma non si accumulano hit
                     detector.clearAccumulator()
                 }
-                val result = detector.analyze(bitmap)
+                val result = detector.analyze(bitmap, relaxed = latestAudioCandidate)
                 val line = detector.describe(result)
 
                 sampleCount++

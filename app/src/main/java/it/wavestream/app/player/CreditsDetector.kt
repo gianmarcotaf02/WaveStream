@@ -91,7 +91,11 @@ class CreditsDetector {
      * Analizza un frame di playback (bitmap a piena risoluzione).
      * Non lancia eccezioni: in caso di problema restituisce un risultato neutro.
      */
-    fun analyze(source: Bitmap): Result {
+    /**
+     * @param relaxed quando true (corroborazione audio attiva) richiede un hit in meno
+     * nella finestra: la fusione audio+video riduce i falsi negativi sui credits "difficili".
+     */
+    fun analyze(source: Bitmap, relaxed: Boolean = false): Result {
         if (source.width <= 0 || source.height <= 0) return neutral()
 
         val work = prepareWork(source) ?: return neutral()
@@ -176,8 +180,9 @@ class CreditsDetector {
         val windowHits = hitHistory.count { it }
 
         sampleCount++
+        val requiredHits = if (relaxed) (MIN_HITS_IN_WINDOW - 1).coerceAtLeast(1) else MIN_HITS_IN_WINDOW
         var triggered = false
-        if (!isTriggered && windowHits >= MIN_HITS_IN_WINDOW) {
+        if (!isTriggered && windowHits >= requiredHits) {
             isTriggered = true
             triggered = true
             Log.d(TAG, "Titoli di coda rilevati dopo $sampleCount campioni ($windowHits/$HIT_WINDOW)")
