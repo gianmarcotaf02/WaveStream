@@ -42,10 +42,16 @@ import androidx.tv.foundation.lazy.grid.items
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.SeriesDao
+import it.wavestream.app.data.database.dao.FavoriteCategoryDao
+import it.wavestream.app.data.database.entity.FavoriteCategory
+import it.wavestream.app.data.preferences.UserPreferences
+import it.wavestream.app.ui.components.CategoryFavoriteHeart
+import it.wavestream.app.ui.components.categoryLongPress
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.math.abs
@@ -67,6 +73,8 @@ class AllCategoriesActivity : ComponentActivity() {
     
     @Inject lateinit var movieDao: MovieDao
     @Inject lateinit var seriesDao: SeriesDao
+    @Inject lateinit var favoriteCategoryDao: FavoriteCategoryDao
+    @Inject lateinit var userPreferences: UserPreferences
     
     private var contentType: String = "" // "movies" or "series"
     
@@ -88,7 +96,21 @@ class AllCategoriesActivity : ComponentActivity() {
                         startActivity(intent)
                     },
                     onBack = { finish() },
-                    loadCategories = { loadCategories() }
+                    loadCategories = { loadCategories() },
+                    loadFavorites = {
+                        val pid = userPreferences.getCurrentProfileId() ?: 1L
+                        val type = if (contentType == "movies") "movies" else "series"
+                        favoriteCategoryDao.getFavoriteCategoriesByType(pid, type)
+                            .map { it.categoryName }
+                            .toSet()
+                    },
+                    onToggleFavorite = { name ->
+                        val pid = userPreferences.getCurrentProfileId() ?: 1L
+                        val type = if (contentType == "movies") "movies" else "series"
+                        favoriteCategoryDao.toggleFavoriteCategory(
+                            FavoriteCategory(profileId = pid, categoryType = type, categoryName = name)
+                        )
+                    }
                 )
             }
         }
@@ -123,14 +145,19 @@ private fun AllCategoriesScreen(
     contentType: String,
     onCategoryClick: (String) -> Unit,
     onBack: () -> Unit,
-    loadCategories: suspend () -> List<CategoryInfo>
+    loadCategories: suspend () -> List<CategoryInfo>,
+    loadFavorites: suspend () -> Set<String>,
+    onToggleFavorite: suspend (String) -> Unit
 ) {
     var categories by remember { mutableStateOf<List<CategoryInfo>>(emptyList()) }
+    var favoriteCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
     var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
     
     LaunchedEffect(Unit) {
         isLoading = true
         categories = loadCategories()
+        favoriteCategories = loadFavorites()
         isLoading = false
     }
     
@@ -201,11 +228,21 @@ private fun AllCategoriesScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(categories, key = { it.name }) { category ->
+                    val isFav = favoriteCategories.contains(category.name)
                     CategoryCard(
                         category = category,
                         itemLabel = itemLabel,
                         isSeries = contentType == "series",
-                        onClick = { onCategoryClick(category.name) }
+                        isFavorite = isFav,
+                        onClick = { onCategoryClick(category.name) },
+                        onLongPress = {
+                            favoriteCategories = if (isFav) {
+                                favoriteCategories - category.name
+                            } else {
+                                favoriteCategories + category.name
+                            }
+                            scope.launch { onToggleFavorite(category.name) }
+                        }
                     )
                 }
             }
@@ -221,7 +258,9 @@ private fun CategoryCard(
     category: CategoryInfo,
     itemLabel: String,
     isSeries: Boolean = false,
-    onClick: () -> Unit
+    isFavorite: Boolean = false,
+    onClick: () -> Unit,
+    onLongPress: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val interactionSource = remember { MutableInteractionSource() }
@@ -263,6 +302,7 @@ private fun CategoryCard(
             .clip(RoundedCornerShape(16.dp))
             .border(3.dp, borderColor, RoundedCornerShape(16.dp))
             .focusable(interactionSource = interactionSource)
+            .categoryLongPress(onLongPress)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -323,6 +363,14 @@ private fun CategoryCard(
                 color = Color.White.copy(alpha = 0.8f)
             )
         }
+
+        // Cuoricino rosso in basso a destra quando la categoria è tra i preferiti
+        CategoryFavoriteHeart(
+            isFavorite = isFavorite,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(12.dp)
+        )
     }
 }
 
