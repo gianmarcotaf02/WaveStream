@@ -48,6 +48,7 @@ import it.wavestream.app.data.database.entity.SegmentType
 import it.wavestream.app.data.database.entity.MediaSegment
 import it.wavestream.app.credits.CreditsAudioMonitor
 import it.wavestream.app.credits.CreditsRenderersFactory
+import it.wavestream.app.credits.AudioFingerprintCodec
 import it.wavestream.app.player.CreditsDetector
 import it.wavestream.app.data.database.dao.DownloadedContentDao
 import kotlinx.coroutines.withContext
@@ -97,6 +98,7 @@ class PlayerActivity : ComponentActivity() {
     private var introStartMs: Long? = null
     private var introEndMs: Long? = null
     private var seriesIntroReference: MediaSegment? = null
+    private var introFingerprintActive = false
     private val _showSkipIntro = mutableStateOf(false)
     // Fase 2: esito del monitor audio, passato al watchdog come corroborazione.
     private val _audioCandidate = mutableStateOf(false)
@@ -1190,8 +1192,29 @@ class PlayerActivity : ComponentActivity() {
                     // vengono rilevati i titoli di coda (marker esatto o analisi immagini).
                     // Il trigger anticipato è attivo solo con autoplay attivo: altrimenti
                     // l'overlay coprirebbe lo schermo per l'intera durata dei credits.
-                    // Sigla: se manca il marker di questo episodio, stima dalla serie.
-                    if (introStartMs == null && introEndMs == null &&
+                    // Fase 4: il monitor audio aggiorna la posizione e resta attivo nella
+                    // parte iniziale dell'episodio per riconoscere la sigla.
+                    creditsAudioMonitor.playerPositionMs = player.currentPosition
+                    creditsAudioMonitor.introActive =
+                        contentType == ContentType.EPISODE && player.currentPosition < INTRO_SCAN_MS
+
+                    // Riconoscimento della sigla via fingerprint: appena la testa della
+                    // sigla combacia, ricostruiamo inizio/fine e mostriamo "Salta sigla".
+                    if (introStartMs == null && creditsAudioMonitor.introMatch && player.duration > 0) {
+                        val refDur = creditsAudioMonitor.referenceDurationMs()
+                        if (refDur > 0) {
+                            val start = (player.currentPosition - creditsAudioMonitor.prefixDurationMs()).coerceAtLeast(0)
+                            introStartMs = start
+                            introEndMs = (start + refDur).coerceAtMost(player.duration)
+                            android.util.Log.i(
+                                "CreditsDiag",
+                                "introDetectedByFingerprint start=$introStartMs end=$introEndMs"
+                            )
+                        }
+                    }
+
+                    // Sigla: se non c'è fingerprint né marker, stima dalla serie.
+                    if (introStartMs == null && introEndMs == null && !introFingerprintActive &&
                         seriesIntroReference != null && player.duration > 0
                     ) {
                         mediaSegmentRepository.estimateIntro(seriesIntroReference!!, player.duration)?.let {
@@ -1292,6 +1315,8 @@ class PlayerActivity : ComponentActivity() {
         introStartMs = null
         introEndMs = null
         seriesIntroReference = null
+        introFingerprintActive = false
+        creditsAudioMonitor.setIntroReference(null)
         _showSkipIntro.value = false
         creditsAudioMonitor.reset()
         creditsAudioMonitor.windowActive = false
@@ -1358,7 +1383,16 @@ class PlayerActivity : ComponentActivity() {
                 )
                 introStartMs = intro?.startMs
                 introEndMs = intro?.endMs
-                seriesIntroReference = if (intro == null && seriesId != null && contentType == ContentType.EPISODE) {
+                // Fase 4: se esiste un fingerprint della sigla per la serie, ha la precedenza
+                // sull'eventuale stima per posizione relativa.
+                val fpSegment = if (seriesId != null && contentType == ContentType.EPISODE) {
+                    mediaSegmentRepository.getSeriesIntroFingerprint(seriesId!!)
+                } else null
+                val fp = AudioFingerprintCodec.decode(fpSegment?.fingerprint)
+                creditsAudioMonitor.setIntroReference(fp)
+                introFingerprintActive = fp != null
+
+                seriesIntroReference = if (intro == null && !introFingerprintActive && seriesId != null && contentType == ContentType.EPISODE) {
                     mediaSegmentRepository.getSeriesIntroReference(seriesId!!)
                 } else null
                 if (intro != null) {
@@ -2027,6 +2061,8 @@ class PlayerActivity : ComponentActivity() {
         nextEpisodeHandler.removeCallbacksAndMessages(null)
         bufferingHandler.removeCallbacksAndMessages(null)
         creditsAudioMonitor.windowActive = false
+        creditsAudioMonitor.introActive = false
+        creditsAudioMonitor.setIntroReference(null)
         creditsAudioMonitor.reset()
         if (::player.isInitialized) player.release()
     }

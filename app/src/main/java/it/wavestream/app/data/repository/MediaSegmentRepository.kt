@@ -122,6 +122,59 @@ class MediaSegmentRepository @Inject constructor(
      * una stagione, quindi una stima per posizione relativa è affidabile e, in ogni caso,
      * produce solo un pulsante "Salta sigla" opzionale (mai un seek forzato).
      */
+    /**
+     * Salva/aggiorna il fingerprint audio della sigla marcata, sul segmento INTRO del contenuto.
+     */
+    suspend fun saveIntroFingerprint(
+        contentType: ContentType,
+        contentId: Long,
+        seriesId: Long?,
+        season: Int?,
+        episode: Int?,
+        tmdbId: Int?,
+        imdbId: String?,
+        startMs: Long,
+        endMs: Long,
+        durationMs: Long,
+        fingerprint: ByteArray
+    ) {
+        val existing = getExact(
+            contentType = contentType,
+            contentId = contentId,
+            seriesId = seriesId,
+            season = season,
+            episode = episode,
+            tmdbId = tmdbId,
+            imdbId = imdbId,
+            type = SegmentType.INTRO
+        )
+        val now = System.currentTimeMillis()
+        val updated = MediaSegment(
+            id = existing?.id ?: 0,
+            contentType = contentType,
+            type = SegmentType.INTRO,
+            contentId = contentId,
+            seriesId = seriesId,
+            seasonNumber = season,
+            episodeNumber = episode,
+            tmdbId = tmdbId,
+            imdbId = imdbId,
+            startMs = startMs.coerceAtLeast(0),
+            endMs = endMs,
+            durationMs = durationMs.coerceAtLeast(0),
+            source = existing?.source ?: SegmentSource.USER_MARK,
+            confidence = existing?.confidence ?: 1f,
+            fingerprint = fingerprint,
+            createdAt = existing?.createdAt ?: now,
+            updatedAt = now
+        )
+        if (existing != null) dao.update(updated) else dao.insert(updated)
+    }
+
+    /** Primo segmento INTRO della serie che ha un fingerprint audio salvato. */
+    suspend fun getSeriesIntroFingerprint(seriesId: Long): MediaSegment? =
+        dao.getForSeries(seriesId, SegmentType.INTRO).firstOrNull { it.fingerprint != null }
+
     suspend fun getSeriesIntroReference(seriesId: Long): MediaSegment? {
         val all = dao.getForSeries(seriesId, SegmentType.INTRO)
         return all.firstOrNull {
