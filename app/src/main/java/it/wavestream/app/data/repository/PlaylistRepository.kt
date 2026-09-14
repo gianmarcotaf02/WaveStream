@@ -7,6 +7,7 @@ import it.wavestream.app.data.database.entity.*
 import it.wavestream.app.data.parser.ContentNameParser
 import it.wavestream.app.data.parser.M3UParser
 import it.wavestream.app.data.parser.XtreamParser
+import it.wavestream.app.data.tmdb.TMDBService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.async
@@ -39,7 +40,8 @@ class PlaylistRepository @Inject constructor(
     private val m3uParser: M3UParser,
     private val xtreamParser: XtreamParser,
     private val contentNameParser: ContentNameParser,
-    private val contentCache: ContentCache
+    private val contentCache: ContentCache,
+    private val tmdbService: TMDBService
 ) {
     companion object {
         private const val TAG = "PlaylistRepo"
@@ -372,6 +374,12 @@ class PlaylistRepository @Inject constructor(
             
             if (episodeEntities.isNotEmpty()) {
                 episodeDao.insertAll(episodeEntities)
+                // Trame episodi da TMDB (it-IT) subito dopo il sync dal provider:
+                // senza questo passaggio la trama comparirebbe solo dopo un
+                // "Aggiorna playlist" manuale o riaprendo la serie. Fallimento
+                // silenzioso: il provider resta comunque la fonte primaria.
+                runCatching { tmdbService.enrichEpisodesFromTMDB(series) }
+                    .onFailure { Log.w(TAG, "TMDB episode enrichment failed for ${series.name}", it) }
                 val latest = episodeEntities.maxByOrNull { it.episodeNumber * 100 + it.seasonNumber }
                 if (latest != null) {
                     // Timestamp di inserimento DEL SERVER per l'episodio più recente
