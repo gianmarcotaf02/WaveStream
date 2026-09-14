@@ -343,7 +343,6 @@ fun TvPlayerScreen(
             ModernNextEpisodeOverlay(
                 title = next.title,
                 subtitle = next.subtitle,
-                countdown = next.countdown,
                 totalCountdown = next.totalCountdown,
                 autoPlay = next.autoPlay,
                 onPlayNext = onPlayNext,
@@ -1881,113 +1880,154 @@ private fun ModernLoadingIndicator() {
 private fun ModernNextEpisodeOverlay(
     title: String,
     subtitle: String?,
-    countdown: Int,
     totalCountdown: Int = 10,
     autoPlay: Boolean,
     onPlayNext: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.02f else 1f,
-        label = "scale"
-    )
-    
+    val primaryFocus = remember { FocusRequester() }
+    val cancelFocus = remember { FocusRequester() }
+    val primaryInteraction = remember { MutableInteractionSource() }
+    val primaryFocused by primaryInteraction.collectIsFocusedAsState()
+    val cancelInteraction = remember { MutableInteractionSource() }
+    val cancelFocused by cancelInteraction.collectIsFocusedAsState()
+
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.2f),
+        targetValue = if (primaryFocused || cancelFocused) WaveStreamColors.Accent
+        else Color.White.copy(alpha = 0.2f),
         label = "border"
     )
-    
-    // Smooth progress animation - fills from 0 to 1 as countdown goes from totalCountdown to 0
-    // This makes the ring fill up clockwise from 12 o'clock
-    val animatedProgress by animateFloatAsState(
-        targetValue = (1f - (countdown / totalCountdown.toFloat())).coerceIn(0f, 1f),
-        animationSpec = tween(
-            durationMillis = 1000,  // 1 second smooth transition
-            easing = LinearEasing    // Constant speed
-        ),
-        label = "countdownProgress"
-    )
-    
+
+    // Timer fluido: UNA sola animazione 0 -> 1 per tutta la durata, invece di
+    // riavviare un tween da 1s ad ogni tick. La barra non "scatta" più ogni secondo.
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(title, totalCountdown, autoPlay) {
+        if (autoPlay && totalCountdown > 0) {
+            progress.snapTo(0f)
+            progress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = totalCountdown * 1000,
+                    easing = LinearEasing
+                )
+            )
+        } else {
+            progress.snapTo(0f)
+        }
+    }
+
+    // Autofocus sul pulsante principale quando compare l'overlay.
+    LaunchedEffect(title) {
+        delay(80)
+        runCatching { primaryFocus.requestFocus() }
+    }
+
+    val secondsLeft = if (autoPlay && totalCountdown > 0) {
+        kotlin.math.ceil(((1f - progress.value) * totalCountdown).toDouble()).toInt().coerceAtLeast(0)
+    } else 0
+
     GlassSurface(
         shape = RoundedCornerShape(16.dp),
         fill = GlassTokens.SurfaceFillStrong,
         stroke = SolidColor(borderColor),
         strokeWidth = 2.dp,
-        modifier = modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .width(340.dp)
-            .focusable(interactionSource = interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onPlayNext
-            )
+        modifier = modifier.width(360.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Countdown circle
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(56.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (autoPlay && countdown > 0) {
-                    CircularProgressIndicator(
-                        progress = { animatedProgress },  // Smooth animated progress
-                        modifier = Modifier.fillMaxSize(),
-                        color = WaveStreamColors.Accent,
-                        trackColor = Color.White.copy(alpha = 0.2f),
-                        strokeWidth = 3.dp
-                    )
-                    Text(
-                        text = "$countdown",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
+                // Countdown circle (anello fluido)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(56.dp)
+                ) {
+                    if (autoPlay && totalCountdown > 0) {
+                        CircularProgressIndicator(
+                            progress = { progress.value },
+                            modifier = Modifier.fillMaxSize(),
+                            color = WaveStreamColors.Accent,
+                            trackColor = Color.White.copy(alpha = 0.2f),
+                            strokeWidth = 3.dp
+                        )
+                        Text(
+                            text = "$secondsLeft",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
-            }
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "PROSSIMO EPISODIO",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = WaveStreamColors.Accent,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1
-                )
-                subtitle?.let {
+
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.6f),
+                        text = "PROSSIMO EPISODIO",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = WaveStreamColors.Accent,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
                         maxLines = 1
                     )
+                    subtitle?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.6f),
+                            maxLines = 1
+                        )
+                    }
+                }
+            }
+
+            // Pulsanti: azione primaria + "Ignora" (chiude e blocca l'autoplay).
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = onPlayNext,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (primaryFocused) WaveStreamColors.Accent else WaveStreamColors.Accent.copy(alpha = 0.85f),
+                        contentColor = Color.White
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .focusRequester(primaryFocus)
+                        .focusable(interactionSource = primaryInteraction)
+                ) {
+                    Text("Guarda ora", fontWeight = FontWeight.SemiBold)
+                }
+                OutlinedButton(
+                    onClick = onCancel,
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+                    border = BorderStroke(
+                        1.dp,
+                        if (cancelFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.5f)
+                    ),
+                    modifier = Modifier
+                        .focusRequester(cancelFocus)
+                        .focusable(interactionSource = cancelInteraction)
+                ) {
+                    Text("Ignora", fontWeight = FontWeight.SemiBold)
                 }
             }
         }
