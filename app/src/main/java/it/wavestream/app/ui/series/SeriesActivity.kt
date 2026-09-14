@@ -294,21 +294,8 @@ fun SeriesScreen(
                 .fillMaxHeight()
                 .padding(24.dp)
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = WaveStreamColors.Accent
-                )
-            } else if (seriesList.isEmpty()) {
-                Text(
-                    text = "Nessuna serie in questa categoria",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = WaveStreamColors.TextSecondary,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                Column {
-                    // Back button and title row
+            Column {
+                // Back button and title row
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -351,6 +338,30 @@ fun SeriesScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
                     
+                    // Loading / empty state: la barra Ordinamento resta montata per non perdere il focus D-pad
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = WaveStreamColors.Accent)
+                        }
+                    } else if (seriesList.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Nessuna serie in questa categoria",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = WaveStreamColors.TextSecondary
+                            )
+                        }
+                    } else {
                     // Continue Watching Carousel (if items exist)
                     if (continueWatchingItems.isNotEmpty()) {
                         ContinueWatchingCarousel(
