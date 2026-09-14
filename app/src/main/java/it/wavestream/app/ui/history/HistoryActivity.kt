@@ -269,7 +269,7 @@ class HistoryActivity : ComponentActivity() {
         if (showDeleteSelectedDialog) {
             AlertDialog(
                 onDismissRequest = { showDeleteSelectedDialog = false },
-                title = { Text("Sei un codardo! 🐔") },
+                title = { Text("Sei un codardo!") },
                 text = {
                     Text(
                         "Hai scelto di eliminare solo ${selectedKeys.size} contenuti. " +
