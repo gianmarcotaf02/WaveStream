@@ -72,6 +72,10 @@ interface WatchProgressDao {
     
     @Query("DELETE FROM watch_progress WHERE profileId = :profileId")
     suspend fun deleteAllForProfile(profileId: Long)
+
+    /** Elimina un sottoinsieme di voci per id (selezione multipla in cronologia). */
+    @Query("DELETE FROM watch_progress WHERE profileId = :profileId AND id IN (:ids)")
+    suspend fun deleteByIds(profileId: Long, ids: List<Long>)
     
     @Transaction
     suspend fun upsert(progress: WatchProgress) {

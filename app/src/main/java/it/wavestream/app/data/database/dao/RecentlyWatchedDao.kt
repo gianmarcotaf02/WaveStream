@@ -44,4 +44,8 @@ interface RecentlyWatchedDao {
      */
     @Query("DELETE FROM recently_watched_channels")
     suspend fun clearAll()
+
+    /** Elimina un sottoinsieme di canali per id (selezione multipla in cronologia). */
+    @Query("DELETE FROM recently_watched_channels WHERE channelId IN (:ids)")
+    suspend fun deleteByChannelIds(ids: List<Long>)
 }
