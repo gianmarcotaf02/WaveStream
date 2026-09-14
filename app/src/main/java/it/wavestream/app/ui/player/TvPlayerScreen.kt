@@ -51,6 +51,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
@@ -388,7 +390,12 @@ fun TvPlayerScreen(
 }
 
 /**
- * Overlay "Stai ancora guardando?"
+ * Overlay "Stai ancora guardando?".
+ *
+ * Implementato come Dialog (non un semplice Box): un Dialog ha una propria
+ * window che cattura TUTTI gli eventi del telecomando e il focus. Prima, con
+ * un Box dentro la schermata del player, il D-pad continuava a finire sui
+ * controlli sottostanti e i pulsanti non erano raggiungibili.
  */
 @Composable
 private fun StillWatchingOverlay(
@@ -396,17 +403,19 @@ private fun StillWatchingOverlay(
     onExit: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
-    
-    LaunchedEffect(Unit) {
-        delay(100)
-        focusRequester.requestFocus()
-    }
-    
+
+    Dialog(
+        onDismissRequest = { /* catch requests: si esce solo con i pulsanti */ },
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
+    ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.85f))
-            .clickable(enabled = false) {}, // Block clicks
+            .background(Color.Black.copy(alpha = 0.85f)),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -452,6 +461,17 @@ private fun StillWatchingOverlay(
                     Text("Esci")
                 }
             }
+        }
+    }
+    }
+
+    // Il focus va richiesto dopo che il Dialog è composto e agganciato:
+    // un singolo tentativo con delay fisso poteva fallire e lasciare il
+    // telecomando "nel vuoto". Retry brevi finché il bottone risponde.
+    LaunchedEffect(Unit) {
+        repeat(10) {
+            delay(50)
+            if (runCatching { focusRequester.requestFocus() }.isSuccess) return@LaunchedEffect
         }
     }
 }
