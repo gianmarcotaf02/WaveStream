@@ -2871,16 +2871,21 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Add hero item to default "Da guardare" list
+     * Toggle dell'hero nella lista "Da guardare" (creata on-demand).
+     *
+     * Vero toggle: se il contenuto è già presente viene rimosso, altrimenti
+     * aggiunto. [onResult] riceve `true` se è stato aggiunto, `false` se
+     * rimosso, così la UI può mostrare un messaggio coerente (prima il toast
+     * diceva sempre "Aggiunto a Da guardare" anche premendo due volte).
      */
-    fun addHeroToWatchLater(hero: HeroItem) {
+    fun toggleHeroInWatchLater(hero: HeroItem, onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
+            val added = withContext(Dispatchers.IO) {
                 try {
                     // Find or create "Da guardare" list
                     val groups = customGroupDao.getGroupsForProfileList(currentProfileId)
                     var watchLaterGroup = groups.find { it.name.equals("Da guardare", ignoreCase = true) || it.name.equals("Watch Later", ignoreCase = true) }
-                    
+
                     if (watchLaterGroup == null) {
                         val newGroup = CustomGroup(
                             profileId = currentProfileId,
@@ -2890,34 +2895,40 @@ class HomeViewModel @Inject constructor(
                         // Re-fetch to get the ID
                         watchLaterGroup = customGroupDao.getGroupsForProfileList(currentProfileId).find { it.name == "Da guardare" }
                     }
-                    
-                    if (watchLaterGroup != null) {
-                        val contentType = if (hero.contentType == "MOVIE") ContentType.MOVIE else ContentType.SERIES
-                        
-                        // Check if already exists
-                        val existing = customGroupDao.getItemsForGroupList(watchLaterGroup!!.id).find { 
-                            it.contentId == hero.id && it.contentType == contentType 
-                        }
-                        
-                        if (existing == null) {
-                            val item = GroupItem(
-                                groupId = watchLaterGroup!!.id,
-                                contentId = hero.id,
-                                contentType = contentType,
-                                title = hero.title,
-                                posterUrl = hero.posterUrl,
-                                addedAt = System.currentTimeMillis()
-                            )
-                            customGroupDao.insertItem(item)
-                            Log.d("HomeViewModel", "Added to Watch Later: ${hero.title}")
-                        } else {
-                            Log.d("HomeViewModel", "Item already in Watch Later: ${hero.title}")
-                        }
+
+                    val group = watchLaterGroup ?: return@withContext false
+                    val contentType = if (hero.contentType == "MOVIE") ContentType.MOVIE else ContentType.SERIES
+
+                    // Check if already exists
+                    val existing = customGroupDao.getItemsForGroupList(group.id).find {
+                        it.contentId == hero.id && it.contentType == contentType
+                    }
+
+                    if (existing != null) {
+                        customGroupDao.deleteItem(existing)
+                        Log.d("HomeViewModel", "Removed from Watch Later: ${hero.title}")
+                        false
+                    } else {
+                        val item = GroupItem(
+                            groupId = group.id,
+                            contentId = hero.id,
+                            contentType = contentType,
+                            title = hero.title,
+                            posterUrl = hero.posterUrl,
+                            addedAt = System.currentTimeMillis()
+                        )
+                        customGroupDao.insertItem(item)
+                        Log.d("HomeViewModel", "Added to Watch Later: ${hero.title}")
+                        true
                     }
                 } catch (e: Exception) {
-                    Log.e("HomeViewModel", "Error adding to watch later", e)
+                    Log.e("HomeViewModel", "Error toggling watch later", e)
+                    false
                 }
             }
+            // Il refresh del tab Liste non è necessario qui: il tab viene
+            // ricaricato quando lo si seleziona.
+            onResult(added)
         }
     }
     

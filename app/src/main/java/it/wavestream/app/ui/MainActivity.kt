@@ -577,9 +577,14 @@ private fun MainActivityScreen(
                         onNextHero = { homeViewModel.nextHero() },
                         onPrevHero = { homeViewModel.prevHero() },
                         onToggleHeroFavorite = { homeViewModel.toggleHeroFavorite(it) },
-                        onAddHeroToPlaylist = { 
-                            homeViewModel.addHeroToWatchLater(it)
-                            android.widget.Toast.makeText(context, "Aggiunto a Da guardare", android.widget.Toast.LENGTH_SHORT).show()
+                        onAddHeroToPlaylist = {
+                            homeViewModel.toggleHeroInWatchLater(it) { added ->
+                                android.widget.Toast.makeText(
+                                    context,
+                                    if (added) "Aggiunto a Da guardare" else "Rimosso da Da guardare",
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
                         },
                         onToggleCategoryFilter = { category -> homeViewModel.toggleCategoryFilter(category) },
                         onSelectAllCategories = { homeViewModel.selectAllCategories() },
