@@ -37,6 +37,10 @@ import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.epg.EPGScreen
 import it.wavestream.app.ui.epg.EpgProgram
 import it.wavestream.app.ui.home.CarouselItem
+import it.wavestream.app.ui.components.ContentSortFilterBar
+import it.wavestream.app.ui.components.ContentSortField
+import it.wavestream.app.ui.components.SortDirection
+import it.wavestream.app.ui.components.SortFilterState
 import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.WaveStreamTheme
@@ -120,7 +124,8 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = movie.backdropUrl,
                             contentType = "MOVIE",
                             year = movie.year,
-                            rating = movie.rating
+                            rating = movie.rating,
+                            tmdbRating = movie.tmdbVoteAverage
                         )
                     }
                 }
@@ -135,7 +140,8 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = series.backdropUrl,
                             contentType = "SERIES",
                             year = series.year,
-                            rating = series.rating
+                            rating = series.rating,
+                            tmdbRating = series.tmdbVoteAverage
                         )
                     }
                 }
@@ -149,7 +155,8 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = movie.backdropUrl,
                             contentType = "MOVIE",
                             year = movie.year,
-                            rating = movie.rating
+                            rating = movie.rating,
+                            tmdbRating = movie.tmdbVoteAverage
                         )
                     }
                 }
@@ -163,7 +170,8 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = series.backdropUrl,
                             contentType = "SERIES",
                             year = series.year,
-                            rating = series.rating
+                            rating = series.rating,
+                            tmdbRating = series.tmdbVoteAverage
                         )
                     }
                 }
@@ -216,7 +224,8 @@ class CategoryActivity : ComponentActivity() {
                         backdropUrl = movie.backdropUrl,
                         contentType = "MOVIE",
                         year = movie.year,
-                        rating = movie.rating
+                        rating = movie.rating,
+                        tmdbRating = movie.tmdbVoteAverage
                     )
                 }
                 "SERIES" -> seriesById[id]?.let { series ->
@@ -227,7 +236,8 @@ class CategoryActivity : ComponentActivity() {
                         backdropUrl = series.backdropUrl,
                         contentType = "SERIES",
                         year = series.year,
-                        rating = series.rating
+                        rating = series.rating,
+                        tmdbRating = series.tmdbVoteAverage
                     )
                 }
                 "CHANNEL" -> channelsById[id]?.let { channel ->
@@ -328,8 +338,14 @@ private fun CategoryScreen(
     var isLoading by remember { mutableStateOf(true) }
     var viewMode by remember { mutableStateOf("grid") } // "grid" or "epg" (for Live only)
     var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+    var sortFilter by remember { mutableStateOf(SortFilterState()) }
     
     val isLiveCategory = contentType == "CATEGORY_LIVE"
+
+    // Ordinamento/filtri applicati in-memory: CategoryActivity carica già l'intera lista.
+    val displayItems = remember(items, sortFilter, isLiveCategory) {
+        if (isLiveCategory) items else applyContentSortFilter(items, sortFilter)
+    }
     
     // Load items and channels
     LaunchedEffect(categoryName, contentType) {
@@ -417,6 +433,15 @@ private fun CategoryScreen(
                 }
             }
         }
+
+        // Ordinamento + filtri (solo per Film/Serie; Live usa griglia/EPG)
+        if (!isLiveCategory) {
+            ContentSortFilterBar(
+                state = sortFilter,
+                onStateChange = { sortFilter = it },
+                modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+            )
+        }
         
         // Content
         if (isLoading) {
@@ -436,7 +461,7 @@ private fun CategoryScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(items, key = { "${it.contentType}_${it.id}" }) { item ->
+                items(displayItems, key = { "${it.contentType}_${it.id}" }) { item ->
                     TvContentCard(
                         item = item,
                         onClick = { onItemClick(item) },
@@ -510,6 +535,36 @@ private fun getLabelForContentType(contentType: String): String {
         "CATEGORY_SERIES" -> "serie"
         "CATEGORY_LIVE" -> "canali"
         else -> "contenuti"
+    }
+}
+
+/** Applica ordinamento e filtri (anno da/a, voto TMDB minimo) a una lista di card. */
+private fun applyContentSortFilter(
+    items: List<CarouselItem>,
+    state: SortFilterState
+): List<CarouselItem> {
+    val from = state.filter.yearFrom
+    val to = state.filter.yearTo
+    val minRating = state.filter.minRating
+
+    val filtered = items.filter { item ->
+        val year = item.year
+        val rating = item.tmdbRating
+        (from == null || (year != null && year >= from)) &&
+            (to == null || (year != null && year <= to)) &&
+            (minRating == null || (rating != null && rating >= minRating))
+    }
+
+    val comparator: Comparator<CarouselItem> = when (state.sortField) {
+        ContentSortField.RELEASE_DATE -> compareBy { it.year ?: 0 }
+        ContentSortField.ALPHABETICAL -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.title }
+        ContentSortField.TMDB_RATING -> compareBy { it.tmdbRating ?: -1f }
+    }
+
+    return if (state.direction == SortDirection.ASC) {
+        filtered.sortedWith(comparator)
+    } else {
+        filtered.sortedWith(comparator.reversed())
     }
 }
 
