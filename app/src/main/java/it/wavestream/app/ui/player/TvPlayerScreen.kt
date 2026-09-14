@@ -120,6 +120,8 @@ fun TvPlayerScreen(
     creditsSessionKey: Int = 0,
     onMarkCredits: () -> Unit = {},
     onMarkIntro: () -> Unit = {},
+    showSkipIntro: Boolean = false,
+    onSkipIntro: () -> Unit = {},
     cumulativeSeekSeconds: Int = 0,
     seekIndicatorVisible: Boolean = false,
     showStillWatching: Boolean = false,
@@ -338,6 +340,16 @@ fun TvPlayerScreen(
             ModernSeekIndicator(seconds = cumulativeSeekSeconds)
         }
         
+        // Skip intro overlay (sigla)
+        if (showSkipIntro && !isMiniPlayer && !isLiveChannel) {
+            SkipIntroOverlay(
+                onClick = onSkipIntro,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(32.dp)
+            )
+        }
+
         // Next episode overlay
         nextEpisode?.let { next ->
             ModernNextEpisodeOverlay(
@@ -1876,6 +1888,46 @@ private fun ModernLoadingIndicator() {
 /**
  * Modern next episode overlay
  */
+@Composable
+/**
+ * Pulsante "Salta sigla", mostrato durante la sigla quando esiste un marker INTRO completo.
+ * Si prende il focus automaticamente così è immediato da premere col telecomando.
+ */
+@Composable
+private fun SkipIntroOverlay(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val focusRequester = remember { FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        runCatching { focusRequester.requestFocus() }
+    }
+
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.92f),
+            contentColor = if (isFocused) Color.White else Color.Black
+        ),
+        shape = RoundedCornerShape(24.dp),
+        modifier = modifier
+            .focusRequester(focusRequester)
+            .focusable(interactionSource = interactionSource)
+    ) {
+        Icon(
+            imageVector = Icons.Default.SkipNext,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text("Salta sigla", fontWeight = FontWeight.SemiBold)
+    }
+}
+
 @Composable
 private fun ModernNextEpisodeOverlay(
     title: String,
