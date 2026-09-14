@@ -2712,9 +2712,6 @@ private fun VpnSettings(
     var autoRotate by remember { mutableStateOf(false) }
     var autoStart by remember { mutableStateOf(false) }
     var rotateInterval by remember { mutableStateOf("60") }
-    var showConfigDialog by remember { mutableStateOf(false) }
-    var showQrImport by remember { mutableStateOf(false) }
-    var showFilePicker by remember { mutableStateOf(false) }
     var pendingStart by remember { mutableStateOf<String?>(null) }
     var isBusy by remember { mutableStateOf(false) }
     var feedback by remember { mutableStateOf<String?>(null) }
@@ -2737,31 +2734,6 @@ private fun VpnSettings(
             vpnManager.startAutoRotation(pool, selStrategy, rotateInterval.toLongOrNull() ?: 60L)
         }
         if (r.isFailure) feedback = vpnError
-    }
-
-    // Import da file (USB) tramite Storage Access Framework → aggiunge al pool
-    val usbFilePicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? ->
-        if (uri != null) {
-            scope.launch {
-                feedback = null
-                try {
-                    val text = context.contentResolver.openInputStream(uri)
-                        ?.bufferedReader()?.use { it.readText() }
-                    if (text.isNullOrBlank()) {
-                        feedback = "File vuoto."
-                    } else {
-                        vpnManager.validateConfig(text)
-                        userPreferences.addVpnConfig(text)
-                        refreshConfigs()
-                        feedback = "Configurazione aggiunta al pool."
-                    }
-                } catch (e: Exception) {
-                    feedback = "File non valido: ${e.message ?: "errore"}"
-                }
-            }
-        }
     }
 
     // Consent flow: la prima volta Android mostra il dialogo di autorizzazione VPN
@@ -2937,70 +2909,8 @@ private fun VpnSettings(
                 }
             }
 
-            // ---- Pool di configurazioni ----
-            Text(
-                text = "Configurazioni server (${configs.size})",
-                style = MaterialTheme.typography.titleMedium,
-                color = WaveStreamColors.TextPrimary,
-                fontWeight = FontWeight.Bold
-            )
-            if (configs.isEmpty()) {
-                Text(
-                    text = "Nessuna configurazione. Ogni configurazione = un server: " +
-                        "generane una per ogni server free di Proton (es. Paesi Bassi, Giappone, USA) " +
-                        "da account.protonvpn.com → Downloads → WireGuard configuration.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = WaveStreamColors.TextTertiary
-                )
-            } else {
-                configs.forEach { cfg ->
-                    VpnConfigPoolRow(
-                        label = vpnManager.endpointOf(cfg) ?: "Configurazione ${configs.indexOf(cfg) + 1}",
-                        isActive = cfg == currentConfig,
-                        onDelete = {
-                            scope.launch {
-                                if (cfg == currentConfig) {
-                                    feedback = "Disattiva la VPN prima di rimuovere il server attivo."
-                                } else {
-                                    userPreferences.removeVpnConfig(cfg)
-                                    configs = userPreferences.getVpnConfigs()
-                                    feedback = "Configurazione rimossa dal pool."
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-
-            // ---- Aggiungi configurazioni ----
-            VpnActionButton(
-                onClick = { showConfigDialog = true },
-                enabled = !isBusy,
-                icon = Icons.Default.ContentPaste,
-                label = "Aggiungi configurazione (incolla)"
-            )
-
-            VpnActionButton(
-                onClick = { showQrImport = true },
-                enabled = !isBusy,
-                icon = Icons.Default.QrCode,
-                label = "Aggiungi dal telefono (QR)"
-            )
-
-            VpnActionButton(
-                onClick = { showFilePicker = true },
-                enabled = !isBusy,
-                icon = Icons.Default.Search,
-                label = "Cerca file .conf sulla TV"
-            )
-
-            VpnActionButton(
-                onClick = { usbFilePicker.launch(arrayOf("*/*")) },
-                enabled = !isBusy,
-                icon = Icons.Default.FolderOpen,
-                label = "Importa da file (USB)"
-            )
-
+            // I server sono gestiti centralmente via Firebase: qui sotto restano solo
+            // strategia di scelta, rotazione automatica e attivazione.
             HorizontalDivider(
                 color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
                 thickness = 0.5.dp
