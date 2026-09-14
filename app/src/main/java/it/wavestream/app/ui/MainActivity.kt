@@ -592,6 +592,11 @@ private fun MainActivityScreen(
                             // Focus on rail when LEFT is pressed from content
                             railExpanded = true
                         },
+                        onManageHistoryClick = {
+                            startActivityWithTransition(
+                                Intent(context, it.wavestream.app.ui.history.HistoryActivity::class.java)
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxSize()
                             .focusRequester(contentFocusRequester)

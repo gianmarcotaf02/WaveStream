@@ -106,7 +106,7 @@ object ContentQueryBuilder {
         }
         state.filter.minRating?.let {
             sql.append(" AND COALESCE(tmdbVoteAverage, 0) >= ?")
-            args.add(it)
+            args.add(it.toDouble())
         }
 
         if (!count) {
