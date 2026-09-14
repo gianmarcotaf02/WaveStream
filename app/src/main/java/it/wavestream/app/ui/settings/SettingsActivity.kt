@@ -70,10 +70,7 @@ import it.wavestream.app.ui.profile.getAvatarIcon
 import it.wavestream.app.vpn.VpnManager
 import it.wavestream.app.vpn.VpnBuiltInConfigs
 import it.wavestream.app.vpn.ProtonServer
-import it.wavestream.app.vpn.VpnImportServer
-import it.wavestream.app.vpn.VpnConfigFinder
 import it.wavestream.app.vpn.VpnStrategy
-import it.wavestream.app.vpn.FoundConfig
 import com.wireguard.android.backend.Tunnel
 import android.net.Uri
 import androidx.compose.ui.graphics.asImageBitmap
