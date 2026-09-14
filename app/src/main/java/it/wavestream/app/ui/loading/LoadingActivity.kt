@@ -326,10 +326,12 @@ class LoadingActivity : ComponentActivity() {
      */
     private suspend fun startVpnIfNeeded() {
         try {
+            // Aggiorna sempre il pool con i server Proton remoti (Firebase), anche se
+            // l'avvio automatico è disattivato: così gli utenti ricevono i nuovi server
+            // senza reinstallare l'app.
+            VpnBuiltInConfigs.importIfNeeded(this, userPreferences)
             if (!userPreferences.getVpnAutoStart()) return
             if (vpnManager.isRunning()) return
-            // Assicura che le config integrate (Proton) siano nel pool anche al primo avvio.
-            VpnBuiltInConfigs.importIfNeeded(this, userPreferences)
             if (vpnManager.getConsentIntent() != null) {
                 Log.d("LoadingActivity", "VPN auto-start skipped: consent non ancora concesso")
                 return

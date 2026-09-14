@@ -69,6 +69,7 @@ import it.wavestream.app.ui.profile.getAvatarResource
 import it.wavestream.app.ui.profile.getAvatarIcon
 import it.wavestream.app.vpn.VpnManager
 import it.wavestream.app.vpn.VpnBuiltInConfigs
+import it.wavestream.app.vpn.ProtonServer
 import it.wavestream.app.vpn.VpnImportServer
 import it.wavestream.app.vpn.VpnConfigFinder
 import it.wavestream.app.vpn.VpnStrategy
@@ -2717,7 +2718,8 @@ private fun VpnSettings(
     var pendingStart by remember { mutableStateOf<String?>(null) }
     var isBusy by remember { mutableStateOf(false) }
     var feedback by remember { mutableStateOf<String?>(null) }
-    var builtInConfigs by remember { mutableStateOf<List<String>>(emptyList()) }
+    var protonServers by remember { mutableStateOf<List<ProtonServer>>(emptyList()) }
+    var selectedProtonId by remember { mutableStateOf("auto") }
 
     fun strategyEnum(): VpnStrategy = when (strategy) {
         "round_robin" -> VpnStrategy.ROUND_ROBIN
@@ -2782,7 +2784,7 @@ private fun VpnSettings(
     }
 
     LaunchedEffect(Unit) {
-        builtInConfigs = VpnBuiltInConfigs.importIfNeeded(context, userPreferences)
+        protonServers = VpnBuiltInConfigs.importIfNeeded(context, userPreferences)
         configs = userPreferences.getVpnConfigs()
         strategy = userPreferences.getVpnStrategy()
         autoRotate = userPreferences.getVpnAutoRotate()
@@ -2836,7 +2838,7 @@ private fun VpnSettings(
             )
 
             // ---- Proton VPN Plus (integrato) ----
-            if (builtInConfigs.isNotEmpty()) {
+            if (protonServers.isNotEmpty()) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -2857,29 +2859,46 @@ private fun VpnSettings(
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
-                            text = "Proton VPN Plus (integrato)",
+                            text = "Proton VPN Plus",
                             style = MaterialTheme.typography.titleMedium,
                             color = WaveStreamColors.TextPrimary,
                             fontWeight = FontWeight.Bold
                         )
                     }
                     Text(
-                        text = "${builtInConfigs.size} server configurati automaticamente nell'app: " +
-                            "nessun file da importare, sempre gli stessi per tutti i dispositivi.",
+                        text = "${protonServers.size} server disponibili, aggiornati automaticamente. " +
+                            "Scegli un server oppure lascia decidere all'app.",
                         style = MaterialTheme.typography.bodySmall,
                         color = WaveStreamColors.TextSecondary
                     )
+
+                    // Selettore server (manuale o automatico)
+                    SettingsDropdown(
+                        label = "Server Proton",
+                        value = selectedProtonId,
+                        options = listOf("auto" to "Automatico (consigliato)") +
+                            protonServers.map { it.id to it.displayName },
+                        onValueChange = { selectedProtonId = it }
+                    )
+
                     VpnActionButton(
                         onClick = {
                             scope.launch {
                                 isBusy = true
                                 feedback = null
-                                val chosen = vpnManager.selectConfig(builtInConfigs, strategyEnum())
+                                val protonConfigs = protonServers.map { it.config }
+                                val isAuto = selectedProtonId == "auto"
+                                val chosen = if (isAuto) {
+                                    vpnManager.selectConfig(protonConfigs, strategyEnum())
+                                } else {
+                                    protonServers.find { it.id == selectedProtonId }?.config
+                                }
                                 if (chosen == null) {
                                     feedback = "Nessuna configurazione Proton disponibile."
                                     isBusy = false
                                     return@launch
                                 }
+                                val pool = if (isAuto) protonConfigs else listOf(chosen)
                                 val consent = vpnManager.getConsentIntent()
                                 if (consent != null) {
                                     pendingStart = chosen
@@ -2887,13 +2906,33 @@ private fun VpnSettings(
                                     consentLauncher.launch(consent)
                                     return@launch
                                 }
-                                doStart(chosen, builtInConfigs, strategyEnum())
+                                doStart(chosen, pool, strategyEnum())
                                 isBusy = false
                             }
                         },
                         enabled = !isBusy && !isRunning,
                         icon = Icons.Default.PowerSettingsNew,
                         label = if (isRunning) "VPN già attiva" else "Connetti a Proton VPN Plus"
+                    )
+
+                    VpnActionButton(
+                        onClick = {
+                            scope.launch {
+                                isBusy = true
+                                feedback = null
+                                protonServers = VpnBuiltInConfigs.importIfNeeded(context, userPreferences)
+                                configs = userPreferences.getVpnConfigs()
+                                feedback = if (protonServers.isEmpty()) {
+                                    "Nessun server Proton disponibile (controlla la connessione)."
+                                } else {
+                                    "Server aggiornati: ${protonServers.size} disponibili."
+                                }
+                                isBusy = false
+                            }
+                        },
+                        enabled = !isBusy,
+                        icon = Icons.Default.Refresh,
+                        label = "Aggiorna lista server"
                     )
                 }
             }
