@@ -194,6 +194,9 @@ class PlayerActivity : ComponentActivity() {
     // (evita reset inutili su micro-aggiustamenti del player).
     private val BACKWARD_SEEK_RESET_MS = 10_000L
 
+    // Finestra iniziale in cui il monitor audio cerca la sigla (Fase 4).
+    private val INTRO_SCAN_MS = 15 * 60 * 1000L
+
     private fun calculateRetryDelay(attempt: Int): Long {
         return (FIRST_RETRY_DELAY_MS + (attempt.toLong() * attempt * 500L))
             .coerceAtMost(MAX_RETRY_DELAY_MS)
@@ -1482,6 +1485,34 @@ class PlayerActivity : ComponentActivity() {
                     )
                     introStartMs = existing.startMs
                     introEndMs = position
+                    // Fase 4: cattura il fingerprint audio della sigla per riconoscerla
+                    // negli episodi successivi della stessa serie.
+                    if (seriesId != null) {
+                        val fp = creditsAudioMonitor.buildFingerprint(existing.startMs, position)
+                        if (fp != null) {
+                            mediaSegmentRepository.saveIntroFingerprint(
+                                contentType = contentType,
+                                contentId = contentId,
+                                seriesId = seriesId,
+                                season = season,
+                                episode = episode,
+                                tmdbId = tmdbId,
+                                imdbId = imdbId,
+                                startMs = existing.startMs,
+                                endMs = position,
+                                durationMs = duration,
+                                fingerprint = AudioFingerprintCodec.encode(fp)
+                            )
+                            creditsAudioMonitor.setIntroReference(fp)
+                            introFingerprintActive = true
+                            android.util.Log.i(
+                                "CreditsDiag",
+                                "introFingerprintSaved frames=${fp.frames} bands=${fp.bands} durMs=${fp.durationMs}"
+                            )
+                        } else {
+                            android.util.Log.i("CreditsDiag", "introFingerprintUnavailable (history insufficient)")
+                        }
+                    }
                     android.widget.Toast.makeText(this@PlayerActivity, "Fine sigla salvata", android.widget.Toast.LENGTH_SHORT).show()
                 }
                 android.util.Log.i(
