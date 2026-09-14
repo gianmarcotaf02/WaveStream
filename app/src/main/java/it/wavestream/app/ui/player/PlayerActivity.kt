@@ -88,6 +88,10 @@ class PlayerActivity : ComponentActivity() {
     private var creditsMarkerStartMs: Long? = null
     private var creditsMarkerEndMs: Long? = null
     private var creditsMarkerLoaded = false
+    // Sigla (intro): marker manuale inizio/fine + visibilità del pulsante "Salta sigla"
+    private var introStartMs: Long? = null
+    private var introEndMs: Long? = null
+    private val _showSkipIntro = mutableStateOf(false)
     // Generazione di sessione: si incrementa ad ogni salto indietro e fa ripartire/re-armare
     // il watchdog video, oltre a resettare lo stato del trigger.
     private val _creditsSeekGeneration = mutableIntStateOf(0)
@@ -552,7 +556,9 @@ class PlayerActivity : ComponentActivity() {
                     creditsDetectionDebug = _creditsDebugEnabled.value,
                     creditsSessionKey = _creditsSeekGeneration.intValue,
                     onMarkCredits = { markSegmentNow(SegmentType.CREDITS) },
-                    onMarkIntro = { markSegmentNow(SegmentType.INTRO) },
+                    onMarkIntro = { markIntroNow() },
+                    showSkipIntro = _showSkipIntro.value,
+                    onSkipIntro = { skipIntro() },
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
                     isLiveSeekable = _isLiveSeekable.value,
@@ -1171,6 +1177,16 @@ class PlayerActivity : ComponentActivity() {
                     // vengono rilevati i titoli di coda (marker esatto o analisi immagini).
                     // Il trigger anticipato è attivo solo con autoplay attivo: altrimenti
                     // l'overlay coprirebbe lo schermo per l'intera durata dei credits.
+                    // Sigla: mostra "Salta sigla" se esiste un segmento INTRO completo.
+                    val iStart = introStartMs
+                    val iEnd = introEndMs
+                    if (iStart != null && iEnd != null && iEnd > iStart) {
+                        val p = player.currentPosition
+                        _showSkipIntro.value = p >= iStart && p < iEnd - 1_500
+                    } else if (_showSkipIntro.value) {
+                        _showSkipIntro.value = false
+                    }
+
                     if (!creditsDismissed && !nextEpisodeTriggered && contentType == ContentType.EPISODE) {
                         // Livello 0: marker esatto dell'utente (o futuro EXTERNAL_DB).
                         val markerStart = creditsMarkerStartMs
@@ -1241,6 +1257,9 @@ class PlayerActivity : ComponentActivity() {
         creditsMarkerStartMs = null
         creditsMarkerEndMs = null
         creditsMarkerLoaded = false
+        introStartMs = null
+        introEndMs = null
+        _showSkipIntro.value = false
         hideNextEpisodeOverlay()
         _creditsSeekGeneration.intValue++
         loadCreditsMarker()
@@ -1290,6 +1309,25 @@ class PlayerActivity : ComponentActivity() {
                 creditsMarkerStartMs = seg?.startMs
                 creditsMarkerEndMs = seg?.endMs
                 creditsMarkerLoaded = true
+
+                val intro = mediaSegmentRepository.getExact(
+                    contentType = contentType,
+                    contentId = contentId,
+                    seriesId = seriesId,
+                    season = season,
+                    episode = episode,
+                    tmdbId = tmdbId,
+                    imdbId = imdbId,
+                    type = SegmentType.INTRO
+                )
+                introStartMs = intro?.startMs
+                introEndMs = intro?.endMs
+                if (intro != null) {
+                    android.util.Log.i(
+                        "CreditsDiag",
+                        "markerFound type=INTRO startMs=${intro.startMs} endMs=${intro.endMs} source=${intro.source}"
+                    )
+                }
                 if (seg != null) {
                     android.util.Log.i(
                         "CreditsDiag",
@@ -1307,6 +1345,85 @@ class PlayerActivity : ComponentActivity() {
                 android.util.Log.w("CreditsDiag", "loadCreditsMarker failed: ${e.message}")
             }
         }
+    }
+
+    /**
+     * Marker sigla con toggle: primo tocco = inizio, secondo tocco = fine.
+     */
+    private fun markIntroNow() {
+        if (!::player.isInitialized) return
+        val position = player.currentPosition
+        val duration = player.duration
+        if (duration <= 0L || position <= 0L) {
+            android.widget.Toast.makeText(this, "Impossibile registrare il marker qui", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        lifecycleScope.launch {
+            try {
+                val (tmdbId, imdbId) = resolveContentIdentity()
+                val existing = mediaSegmentRepository.getExact(
+                    contentType = contentType,
+                    contentId = contentId,
+                    seriesId = seriesId,
+                    season = season,
+                    episode = episode,
+                    tmdbId = tmdbId,
+                    imdbId = imdbId,
+                    type = SegmentType.INTRO
+                )
+                if (existing == null || existing.endMs != null) {
+                    mediaSegmentRepository.setUserMarker(
+                        contentType = contentType,
+                        contentId = contentId,
+                        type = SegmentType.INTRO,
+                        startMs = position,
+                        endMs = null,
+                        durationMs = duration,
+                        seriesId = seriesId,
+                        season = season,
+                        episode = episode,
+                        tmdbId = tmdbId,
+                        imdbId = imdbId
+                    )
+                    introStartMs = position
+                    introEndMs = null
+                    android.widget.Toast.makeText(this@PlayerActivity, "Inizio sigla salvato", android.widget.Toast.LENGTH_SHORT).show()
+                } else {
+                    mediaSegmentRepository.setUserMarker(
+                        contentType = contentType,
+                        contentId = contentId,
+                        type = SegmentType.INTRO,
+                        startMs = existing.startMs,
+                        endMs = position,
+                        durationMs = duration,
+                        seriesId = seriesId,
+                        season = season,
+                        episode = episode,
+                        tmdbId = tmdbId,
+                        imdbId = imdbId
+                    )
+                    introStartMs = existing.startMs
+                    introEndMs = position
+                    android.widget.Toast.makeText(this@PlayerActivity, "Fine sigla salvata", android.widget.Toast.LENGTH_SHORT).show()
+                }
+                android.util.Log.i(
+                    "CreditsDiag",
+                    "markerSaved type=INTRO start=$introStartMs end=$introEndMs contentId=$contentId"
+                )
+            } catch (e: Exception) {
+                android.util.Log.e("CreditsDiag", "markIntroNow failed: ${e.message}", e)
+            }
+        }
+    }
+
+    private fun skipIntro() {
+        val end = introEndMs ?: return
+        resetAutoPlayCounter()
+        if (::player.isInitialized) {
+            android.util.Log.i("CreditsDiag", "skipIntro to=$end")
+            player.seekTo(end)
+        }
+        _showSkipIntro.value = false
     }
 
     /**
