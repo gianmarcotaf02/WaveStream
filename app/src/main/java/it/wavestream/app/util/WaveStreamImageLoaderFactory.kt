@@ -5,6 +5,7 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
+import coil.request.ImageRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
@@ -54,3 +55,22 @@ class WaveStreamImageLoaderFactory @Inject constructor(
             .build()
     }
 }
+
+/**
+ * Richiesta Coil dedicata ai loghi dei canali live.
+ *
+ * - `allowHardware(false)`: su alcuni TV stick / driver grafici le hardware
+ *   bitmap di Coil non vengono renderizzate e il logo resta invisibile,
+ *   nonostante il download sia riuscito. Forzando bitmap software il logo
+ *   compare su tutti i dispositivi.
+ * - `size(512)`: molti provider servono loghi enormi; il downscale evita
+ *   decodifiche pesanti e OOM sulle TV stick con heap ridotto (che si
+ *   manifestavano come copertine mancanti).
+ */
+fun channelLogoRequest(context: Context, url: String?): ImageRequest =
+    ImageRequest.Builder(context)
+        .data(url)
+        .allowHardware(false)
+        .size(512)
+        .crossfade(true)
+        .build()
