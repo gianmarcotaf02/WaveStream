@@ -399,13 +399,18 @@ class TMDBService @Inject constructor(
                     }
                     
                     val popularityScore = (1000 - index).toFloat()
-                    // Always update poster/backdrop from TMDB to fix mismatched covers from IPTV providers
+                    // Always update poster/backdrop from TMDB to fix mismatched covers from IPTV providers.
+                    // Aggiorna anche voto/overview/data: così la copertina TMDB e il voto mostrato
+                    // nella card restano coerenti con l'enrichment del dettaglio.
                     val updated = movie.copy(
                         trendingCategory = "Film Popolari",
                         tmdbPopularity = popularityScore,
                         tmdbId = tmdb.id,
                         tmdbPosterPath = tmdb.posterPath ?: movie.tmdbPosterPath,
-                        tmdbBackdropPath = tmdb.backdropPath ?: movie.tmdbBackdropPath
+                        tmdbBackdropPath = tmdb.backdropPath ?: movie.tmdbBackdropPath,
+                        tmdbVoteAverage = tmdb.voteAverage.takeIf { it > 0f } ?: movie.tmdbVoteAverage,
+                        tmdbOverview = tmdb.overview?.takeIf { it.isNotBlank() } ?: movie.tmdbOverview,
+                        tmdbReleaseDate = tmdb.releaseDate ?: movie.tmdbReleaseDate
                     )
                     movieDao.update(updated)
                     matchCount++
@@ -488,7 +493,10 @@ class TMDBService @Inject constructor(
                         tmdbPopularity = popularityScore,
                         tmdbId = tmdb.id,
                         tmdbPosterPath = tmdb.posterPath ?: series.tmdbPosterPath,
-                        tmdbBackdropPath = tmdb.backdropPath ?: series.tmdbBackdropPath
+                        tmdbBackdropPath = tmdb.backdropPath ?: series.tmdbBackdropPath,
+                        tmdbVoteAverage = tmdb.voteAverage.takeIf { it > 0f } ?: series.tmdbVoteAverage,
+                        tmdbOverview = tmdb.overview?.takeIf { it.isNotBlank() } ?: series.tmdbOverview,
+                        tmdbFirstAirDate = tmdb.releaseDate ?: series.tmdbFirstAirDate
                     )
                     seriesDao.update(updated)
                     matchCount++

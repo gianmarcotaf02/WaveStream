@@ -3939,27 +3939,40 @@ fun loadCategoryContentAutoDetect(category: String) {
     }
     
     // Extension functions to convert entities to CarouselItem
-    private fun Movie.toCarouselItem() = CarouselItem(
-        id = id,
-        title = title,
-        posterUrl = posterUrl,
-        backdropUrl = backdropUrl,
-        contentType = "MOVIE",
-        year = year ?: tmdbReleaseDate?.take(4)?.toIntOrNull(),
-        rating = rating,
-        ratingText = formatRating(rating)
-    )
-    
-    private fun Series.toCarouselItem() = CarouselItem(
-        id = id,
-        title = title,
-        posterUrl = posterUrl,
-        backdropUrl = backdropUrl,
-        contentType = "SERIES",
-        year = year,
-        rating = rating,
-        ratingText = formatRating(rating)
-    )
+    //
+    // La copertina mostrata è quella TMDB (posterUrl preferisce tmdbPosterPath). Per non
+    // avere un mismatch visivo "copertina TMDB + voto del provider", il badge usa il
+    // VOTO TMDB quando disponibile, con fallback al rating provider solo se il contenuto
+    // non è ancora stato arricchito da TMDB.
+    private fun Movie.toCarouselItem(): CarouselItem {
+        val effectiveRating = tmdbVoteAverage ?: rating
+        return CarouselItem(
+            id = id,
+            title = title,
+            posterUrl = posterUrl,
+            backdropUrl = backdropUrl,
+            contentType = "MOVIE",
+            year = year ?: tmdbReleaseDate?.take(4)?.toIntOrNull(),
+            rating = effectiveRating,
+            tmdbRating = tmdbVoteAverage,
+            ratingText = formatRating(effectiveRating)
+        )
+    }
+
+    private fun Series.toCarouselItem(): CarouselItem {
+        val effectiveRating = tmdbVoteAverage ?: rating
+        return CarouselItem(
+            id = id,
+            title = title,
+            posterUrl = posterUrl,
+            backdropUrl = backdropUrl,
+            contentType = "SERIES",
+            year = year,
+            rating = effectiveRating,
+            tmdbRating = tmdbVoteAverage,
+            ratingText = formatRating(effectiveRating)
+        )
+    }
     
     private fun Channel.toCarouselItem() = CarouselItem(
         id = id,
