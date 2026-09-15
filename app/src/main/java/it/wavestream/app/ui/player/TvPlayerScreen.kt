@@ -38,6 +38,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -1846,65 +1847,88 @@ private fun ModernSeekIndicator(seconds: Int) {
 }
 
 /**
- * Modern loading indicator
- */
-/**
- * Aurora: loading "a brand" — il logo WaveStream pulsa con alone accent al
- * posto dello spinner generico. Il buffering diventa un momento di branding.
+ * Aurora: loading "a brand" — un'onda fluida (tema WaveStream) al posto del
+ * logo che rimbalza. Tre sinusoidi sovrapposte scorrono con continuita' e
+ * l'ampiezza "respira": buffering elegante, senza scatti ne' rimbalzi.
  */
 @Composable
 private fun ModernLoadingIndicator() {
-    val infiniteTransition = rememberInfiniteTransition(label = "loading")
-    
-    val logoScale by infiniteTransition.animateFloat(
-        initialValue = 0.92f,
-        targetValue = 1.08f,
+    val transition = rememberInfiniteTransition(label = "loadingWave")
+
+    // Scorrimento continuo: fase 0 -> 2π con easing lineare (loop senza scatti).
+    val phase by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = (2f * kotlin.math.PI).toFloat(),
         animationSpec = infiniteRepeatable(
-            animation = tween(700, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
+            animation = tween(durationMillis = 1600, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
         ),
-        label = "logoScale"
+        label = "wavePhase"
     )
-    
-    val logoAlpha by infiniteTransition.animateFloat(
+
+    // "Respiro" dell'ampiezza: rende l'onda viva ma calma.
+    val amplitude by transition.animateFloat(
         initialValue = 0.55f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(700, easing = FastOutSlowInEasing),
+            animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "logoAlpha"
+        label = "waveAmplitude"
     )
-    
+
     Box(
         modifier = Modifier
-            .size(96.dp)
-            .graphicsLayer {
-                scaleX = logoScale
-                scaleY = logoScale
-                this.alpha = logoAlpha
-            },
+            .width(240.dp)
+            .height(84.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Alone accent dietro il logo (gradiente radiale, zero blur)
+        // Alone soffuso dietro l'onda (radiale, nessun blur).
         Box(
             modifier = Modifier
-                .size(96.dp)
+                .size(120.dp)
                 .background(
                     Brush.radialGradient(
                         listOf(
-                            WaveStreamColors.Accent.copy(alpha = 0.18f),
+                            WaveStreamColors.Accent.copy(alpha = 0.16f),
                             Color.Transparent
                         )
                     ),
                     CircleShape
                 )
         )
-        Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = null,
-            modifier = Modifier.size(52.dp)
-        )
+
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val w = size.width
+            val h = size.height
+            val centerY = h / 2f
+            val segments = 72
+
+            fun drawWave(phaseOffset: Double, ampFactor: Float, color: Color, strokeWidth: Float) {
+                val amp = h * 0.24f * ampFactor * amplitude
+                val path = Path()
+                var i = 0
+                while (i <= segments) {
+                    val t = i / segments.toDouble()
+                    val x = (t * w).toFloat()
+                    // Envelope: l'onda nasce e muore ai bordi, senza tagli netti.
+                    val envelope = kotlin.math.sin(t * kotlin.math.PI)
+                    val angle = t * 2.0 * kotlin.math.PI * 1.5 + phase.toDouble() + phaseOffset
+                    val y = centerY + (kotlin.math.sin(angle) * amp * envelope).toFloat()
+                    if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                    i++
+                }
+                drawPath(
+                    path = path,
+                    color = color,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
+            }
+
+            drawWave(0.0, 1.0f, WaveStreamColors.Accent.copy(alpha = 0.95f), 5.5f)
+            drawWave(0.9, 0.7f, WaveStreamColors.Accent.copy(alpha = 0.45f), 3.5f)
+            drawWave(1.8, 0.5f, Color.White.copy(alpha = 0.20f), 2.5f)
+        }
     }
 }
 
