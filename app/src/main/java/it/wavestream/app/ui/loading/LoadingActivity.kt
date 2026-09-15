@@ -325,6 +325,8 @@ class LoadingActivity : ComponentActivity() {
      * il dialogo di consenso durante il caricamento); altrimenti viene saltato.
      */
     private suspend fun startVpnIfNeeded() {
+        // VPN in-app momentaneamente disattivata: si usa una VPN esterna.
+        if (!it.wavestream.app.vpn.VpnFeature.ENABLED) return
         try {
             // Aggiorna sempre il pool con i server Proton remoti (Firebase), anche se
             // l'avvio automatico è disattivato: così gli utenti ricevono i nuovi server
