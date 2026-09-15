@@ -797,7 +797,11 @@ class LoadingActivity : ComponentActivity() {
                 // Populate new trending from TMDB
                 val movieCount = tmdbService.populateTrendingMovies()
                 val seriesCount = tmdbService.populateTrendingSeries()
-                
+
+                // Poster/voti TMDB sono cambiati: invalida la cache home serializzata,
+                // altrimenti i caroselli continuerebbero a mostrare le copertine vecchie.
+                contentCache.clearHomeSessionData()
+
                 android.util.Log.d("LoadingActivity", "Trending populated: $movieCount movies, $seriesCount series")
             }
             
