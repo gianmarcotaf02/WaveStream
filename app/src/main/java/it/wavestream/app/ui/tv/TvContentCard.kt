@@ -167,9 +167,12 @@ fun TvContentCard(
                     )
                 }
 
-                // Rating badge (if available and NOT continue watching) - using pre-formatted ratingText
+                // Rating badge (if available and NOT continue watching).
+                // Usa ratingText preformattato; se assente (es. griglie categoria) ripiega
+                // su item.rating, così il voto è sempre visibile e coerente con l'ordinamento.
                 if (item.progressPercent == null) {
                     val ratingText = item.ratingText
+                        ?: item.rating?.takeIf { it > 0f }?.let { "%.1f".format(it) }
                     if (!ratingText.isNullOrEmpty()) {
                         Box(
                             modifier = Modifier
