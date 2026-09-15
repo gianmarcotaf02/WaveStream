@@ -218,16 +218,55 @@ class VpnManager @Inject constructor(
     fun ensureAppOnly(configText: String): String {
         if (configText.isBlank()) return configText
         val lines = configText.lines().toMutableList()
+
+        // ===== Sanitizzazione compatibilità (in particolare config Proton) =====
+        // 1) Se l'interfaccia NON ha un indirizzo IPv6 ma AllowedIPs include ::/0,
+        //    tutto l'IPv6 finisce in un tunnel senza route -> connessioni AAAA in
+        //    black hole e timeout intermittenti. In quel caso si rimuove l'IPv6.
+        val addressValue = lines.firstOrNull { it.trimStart().startsWith("Address", true) }
+            ?.substringAfter('=', "")
+        val hasIpv6Address = addressValue?.contains(':') == true
+
+        if (!hasIpv6Address) {
+            for (i in lines.indices) {
+                val t = lines[i].trimStart()
+                if (t.startsWith("AllowedIPs", true)) {
+                    val cleaned = t.substringAfter('=')
+                        .split(',')
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() && !it.contains(':') }
+                    if (cleaned.isNotEmpty()) lines[i] = "AllowedIPs = ${cleaned.joinToString(", ")}"
+                }
+                if (t.startsWith("DNS", true)) {
+                    val cleaned = t.substringAfter('=')
+                        .split(',')
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() && !it.contains(':') }
+                    if (cleaned.isNotEmpty()) lines[i] = "DNS = ${cleaned.joinToString(", ")}"
+                }
+            }
+        }
+
+        // 2) MTU esplicito e conservativo: evita frammentazione/drop su reti con
+        //    MTU più basso del path (tipico su TV box e hotspot).
+        val hasMtu = lines.any { it.trimStart().startsWith("MTU", true) }
+        if (!hasMtu) {
+            val ifIdx = lines.indexOfFirst { it.trim() == "[Interface]" }
+            if (ifIdx >= 0) lines.add(ifIdx + 1, "MTU = 1280")
+        }
+
+        // ===== App-only: solo il traffico di WaveStream passa dalla VPN =====
         val alreadyFiltered = lines.any {
             it.trimStart().startsWith(ALLOWED_KEY, ignoreCase = true) ||
                 it.trimStart().startsWith(EXCLUDED_KEY, ignoreCase = true)
         }
-        if (alreadyFiltered) return configText
-        val interfaceIdx = lines.indexOfFirst { it.trim() == "[Interface]" }
-        if (interfaceIdx >= 0) {
-            lines.add(interfaceIdx + 1, "$ALLOWED_KEY = $APP_PACKAGE")
-        } else {
-            lines.add(0, "$ALLOWED_KEY = $APP_PACKAGE")
+        if (!alreadyFiltered) {
+            val interfaceIdx = lines.indexOfFirst { it.trim() == "[Interface]" }
+            if (interfaceIdx >= 0) {
+                lines.add(interfaceIdx + 1, "$ALLOWED_KEY = $APP_PACKAGE")
+            } else {
+                lines.add(0, "$ALLOWED_KEY = $APP_PACKAGE")
+            }
         }
         return lines.joinToString("\n")
     }
