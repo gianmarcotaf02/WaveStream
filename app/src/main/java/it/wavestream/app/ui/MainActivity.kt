@@ -295,6 +295,8 @@ private fun MainActivityScreen(
     // Refresh content on resume (e.g., after returning from player)
     val lifecycleOwner = LocalLifecycleOwner.current
     var isFirstResume by remember { mutableStateOf(true) }
+    // Contatore dei ritorni in foreground: usato per ripristinare il focus.
+    var resumeTick by remember { mutableIntStateOf(0) }
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             when (event) {
@@ -304,6 +306,7 @@ private fun MainActivityScreen(
                     } else {
                         // Force refresh to show updated "Continue Watching" and Hero buttons immediately
                         homeViewModel.forceRefresh()
+                        resumeTick++
                     }
                 }
                 else -> {}
@@ -312,6 +315,24 @@ private fun MainActivityScreen(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    // Al ritorno da un'altra Activity il contenuto viene ricomposto (forceRefresh):
+    // l'elemento che aveva il focus può non esistere più e, senza nessun target
+    // focusato, la finestra perde il focus e i tasti del telecomando vengono
+    // scartati (ANR "no focused window"). Se dopo qualche frame non c'è più
+    // nessun elemento focusato, riportiamo il focus sulla top bar.
+    LaunchedEffect(resumeTick) {
+        if (resumeTick == 0) return@LaunchedEffect
+        repeat(3) { withFrameNanos { } }
+        kotlinx.coroutines.delay(250)
+        if (rootView.findFocus() == null) {
+            try {
+                topBarFocusRequester.requestFocus()
+            } catch (e: Exception) {
+                // Requester non ancora collegato: nessun problema.
+            }
         }
     }
     
