@@ -626,7 +626,7 @@ class PlaylistRepository @Inject constructor(
                     categoryId = vod.categoryId,
                     xtreamStreamId = vod.id,
                     containerExtension = vod.extension,
-                    year = vod.year?.toIntOrNull(),
+                    year = vod.year?.toIntOrNull() ?: contentNameParser.extractReleaseYear(vod.name),
                     xtreamRating = vod.rating,
                     playlistOrder = (vod.added ?: index.toLong()).toInt()
                 )
@@ -806,14 +806,14 @@ class PlaylistRepository @Inject constructor(
                             moviesToUpdate.add(existing.copy(
                                 name = vod.name, streamUrl = streamUrl, logoUrl = vod.poster, xtreamBackdropUrl = vod.backdrop,
                                 category = categoryName, categoryId = vod.categoryId, containerExtension = vod.extension,
-                                year = vod.year?.toIntOrNull(), xtreamRating = vod.rating, playlistOrder = playlistOrder
+                                year = vod.year?.toIntOrNull() ?: contentNameParser.extractReleaseYear(vod.name), xtreamRating = vod.rating, playlistOrder = playlistOrder
                             ))
                         }
                     } else {
                         moviesToInsert.add(Movie(
                             playlistId = playlistId, name = vod.name, streamUrl = streamUrl, logoUrl = vod.poster, xtreamBackdropUrl = vod.backdrop,
                             category = categoryName, categoryId = vod.categoryId, xtreamStreamId = vod.id,
-                            containerExtension = vod.extension, year = vod.year?.toIntOrNull(), xtreamRating = vod.rating, playlistOrder = playlistOrder
+                            containerExtension = vod.extension, year = vod.year?.toIntOrNull() ?: contentNameParser.extractReleaseYear(vod.name), xtreamRating = vod.rating, playlistOrder = playlistOrder
                         ))
                     }
                 }
