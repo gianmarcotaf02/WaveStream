@@ -456,7 +456,7 @@ private fun CategoryScreen(
             TvLazyVerticalGrid(
                 columns = TvGridCells.Adaptive(minSize = gridMinSize),
                 state = gridState,
-                contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp, start = 4.dp, end = 4.dp),  // Reduced top padding
+                contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp, start = 4.dp, end = 4.dp),  // Reduced top padding
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxSize()
@@ -465,7 +465,7 @@ private fun CategoryScreen(
                     TvContentCard(
                         item = item,
                         onClick = { onItemClick(item) },
-                        customHeight = 220.dp // Increased height as requested
+                        customHeight = 200.dp // leggermente pi\u00f9 bassa: lascia spazio a 2 righe di titolo
                     )
                 }
             }

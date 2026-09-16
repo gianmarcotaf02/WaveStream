@@ -487,6 +487,45 @@ private fun CategoryCard(
 }
 
 /**
+ * Barra di ricerca interna alla sezione categorie (filtra solo i nomi delle categorie).
+ */
+@Composable
+private fun CategorySearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClear: () -> Unit
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        placeholder = { Text("Cerca categoria...", color = WaveStreamColors.TextTertiary) },
+        leadingIcon = {
+            Icon(Icons.Default.Search, contentDescription = null, tint = WaveStreamColors.TextSecondary)
+        },
+        trailingIcon = if (query.isNotEmpty()) {
+            {
+                IconButton(onClick = onClear) {
+                    Icon(Icons.Default.Close, contentDescription = "Cancella", tint = WaveStreamColors.TextSecondary)
+                }
+            }
+        } else null,
+        singleLine = true,
+        shape = RoundedCornerShape(10.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = WaveStreamColors.Accent,
+            unfocusedBorderColor = WaveStreamColors.BackgroundTertiary,
+            focusedContainerColor = WaveStreamColors.BackgroundSecondary,
+            unfocusedContainerColor = WaveStreamColors.BackgroundSecondary,
+            cursorColor = WaveStreamColors.Accent
+        ),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(color = WaveStreamColors.TextPrimary)
+    )
+}
+
+/**
  * Bottone indietro con focus accent (bordo accent + alone quando selezionato)
  */
 @Composable

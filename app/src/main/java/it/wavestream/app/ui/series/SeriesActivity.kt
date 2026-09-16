@@ -395,6 +395,7 @@ fun SeriesScreen(
                     TvLazyVerticalGrid(
                         columns = TvGridCells.Adaptive(minSize = 150.dp),
                         state = gridState,
+                        contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         modifier = Modifier.weight(1f).fillMaxWidth()
@@ -497,7 +498,7 @@ private fun SeriesGridCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(225.dp)
+                .height(205.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .border(2.dp, borderColor, RoundedCornerShape(8.dp))
                 .background(WaveStreamColors.CardBackground)
