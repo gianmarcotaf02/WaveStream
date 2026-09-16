@@ -393,15 +393,16 @@ class AppUpdateManager @Inject constructor(
                 session.fsync(output)
             }
 
-            val resultIntent = Intent(context, UpdateInstallReceiver::class.java).apply {
-                action = UpdateInstallReceiver.ACTION_INSTALL_RESULT
-            }
+            // Destinazione del risultato: un'ACTIVITY, non un BroadcastReceiver. Il popup
+            // di conferma dell'installer deve essere aperto in foreground; da un receiver
+            // in background Android 10+ lo blocca (e la schermata non compariva mai).
+            val resultIntent = Intent(context, UpdateInstallActivity::class.java)
             val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             } else {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
-            val pendingIntent = PendingIntent.getBroadcast(
+            val pendingIntent = PendingIntent.getActivity(
                 context,
                 sessionId,
                 resultIntent,

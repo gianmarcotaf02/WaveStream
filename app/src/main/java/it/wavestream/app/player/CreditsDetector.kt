@@ -162,7 +162,8 @@ class CreditsDetector {
         val hit = darkness >= MIN_DARKNESS &&
                 textDensity in MIN_TEXT_DENSITY..MAX_TEXT_DENSITY &&
                 peakRowDensity >= MIN_PEAK_ROW_DENSITY &&
-                textRowCount >= MIN_TEXT_ROWS
+                textRowCount >= MIN_TEXT_ROWS &&
+                staticScore >= MIN_STATIC_SCORE
 
         // Punteggio solo informativo (log / debug overlay)
         val score = (
@@ -339,7 +340,7 @@ class CreditsDetector {
         const val SAMPLE_INTERVAL_MS = 2_000L
 
         /** Finestra di analisi: si campiona solo negli ultimi minuti dell'episodio. */
-        const val WINDOW_MS = 8 * 60 * 1000L
+        const val WINDOW_MS = 5 * 60 * 1000L
 
         /** Non si analizza prima di questo punto (esclude intro/recap). */
         const val MIN_POSITION_MS = 90_000L
@@ -352,14 +353,20 @@ class CreditsDetector {
         private const val TEXT_HIGH = 185f
 
         // Soglie di classificazione
-        private const val MIN_DARKNESS = 0.62f
+        // Soglie pi\u00f9 severe dopo i falsi positivi osservati su serie scure (Silo):
+        // meglio un trigger un po' pi\u00f9 tardi che saltare un episodio mentre lo guardi.
+        private const val MIN_DARKNESS = 0.72f
         private const val MIN_TEXT_DENSITY = 0.006f
-        // Alzato da 0.32: i credits con testo fitto/media densità superavano il tetto
+        // Alzato da 0.32: i credits con testo fitto/media densit\u00e0 superavano il tetto
         // e venivano scartati (falso negativo osservato nel log: textDensity 0.95-1.0).
         private const val MAX_TEXT_DENSITY = 0.96f
         private const val MIN_PEAK_ROW_DENSITY = 0.16f
-        // Almeno N righe con testo allineato: distingue i credits veri dal nero di coda.
-        private const val MIN_TEXT_ROWS = 8
+        // Almeno N righe con testo allineato: distingue i credits veri dal nero di coda
+        // e dalle scene scure con un filo di testo.
+        private const val MIN_TEXT_ROWS = 12
+        // I credits sono statici (o con scroll compensato): una scena in movimento
+        // non deve far scattare il trigger.
+        private const val MIN_STATIC_SCORE = 0.55f
         private const val TEXT_ROW_THRESHOLD = 0.12f
 
         // Fascia di analisi verticale (esclude l'alto estremo e la zona sottotitoli)
@@ -369,8 +376,8 @@ class CreditsDetector {
         // Persistenza a finestra scorrevole: 4 campioni positivi su 6 (~8s su 12s).
         // Più tollerante dei positivi consecutivi, perché i credits che cambiano
         // schermata possono produrre campioni "vuoti" isolati.
-        private const val HIT_WINDOW = 6
-        private const val MIN_HITS_IN_WINDOW = 4
+        private const val HIT_WINDOW = 8
+        private const val MIN_HITS_IN_WINDOW = 5
         private const val TEXT_DENSITY_REFERENCE = 0.08f
         private const val MAX_SHIFT = 8
         private const val STATIC_DIFF_SCALE = 60f
