@@ -650,6 +650,7 @@ class PlaylistRepository @Inject constructor(
                     xtreamCast = ser.cast,
                     xtreamDirector = ser.director,
                     xtreamGenre = ser.genre,
+                    year = contentNameParser.extractReleaseYear(ser.name),
                     playlistOrder = (ser.added ?: index.toLong()).toInt(),
                     tmdbId = ser.tmdbId
                 )
@@ -854,6 +855,7 @@ class PlaylistRepository @Inject constructor(
                     if (existing != null) {
                         if (existing.name != ser.name || existing.logoUrl != ser.poster || existing.category != categoryName) {
                             seriesToUpdate.add(existing.copy(
+                                year = contentNameParser.extractReleaseYear(ser.name),
                                 name = ser.name, logoUrl = ser.poster, xtreamBackdropUrl = ser.backdrop,
                                 category = categoryName, categoryId = ser.categoryId, xtreamRating = ser.rating, 
                                 xtreamPlot = ser.plot, xtreamCast = ser.cast, xtreamDirector = ser.director, xtreamGenre = ser.genre,
@@ -861,6 +863,7 @@ class PlaylistRepository @Inject constructor(
                             ))
                         } else {
                             seriesToUpdate.add(existing.copy(
+                                year = contentNameParser.extractReleaseYear(ser.name),
                                 xtreamRating = ser.rating, xtreamPlot = ser.plot, xtreamCast = ser.cast, 
                                 xtreamDirector = ser.director, xtreamGenre = ser.genre, playlistOrder = playlistOrder,
                                 tmdbId = ser.tmdbId ?: existing.tmdbId
@@ -868,6 +871,7 @@ class PlaylistRepository @Inject constructor(
                         }
                     } else {
                         seriesToInsert.add(Series(
+                            year = contentNameParser.extractReleaseYear(ser.name),
                             playlistId = playlistId, name = ser.name, logoUrl = ser.poster, xtreamBackdropUrl = ser.backdrop,
                             category = categoryName, categoryId = ser.categoryId, xtreamSeriesId = ser.id, 
                             xtreamRating = ser.rating, xtreamPlot = ser.plot, xtreamCast = ser.cast, 
