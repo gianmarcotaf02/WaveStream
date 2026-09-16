@@ -208,6 +208,21 @@ interface MovieDao {
     """)
     suspend fun getCategoriesWithCount(): List<CategoryWithCount>
 
+    /**
+     * Backfill dell'anno di uscita dal nome per i contenuti importati prima che
+     * l'anno venisse estratto (es. "2012 (2009) FHD" -> 2009).
+     * Aggiorna solo le righe senza anno che contengono "(YYYY)" nel nome.
+     */
+    @Query("""
+        UPDATE movies SET year = CAST(substr(name, instr(name, '(') + 1, 4) AS INTEGER)
+        WHERE year IS NULL
+          AND instr(name, '(') > 0
+          AND substr(name, instr(name, '(') + 5, 1) = ')'
+          AND (substr(name, instr(name, '(') + 1, 4) GLOB '19[0-9][0-9]'
+            OR substr(name, instr(name, '(') + 1, 4) GLOB '20[0-9][0-9]')
+    """)
+    suspend fun backfillYearsFromName(): Int
+
     @Query("""
         SELECT * FROM movies 
         WHERE (tmdbCast LIKE '%' || :name || '%' OR tmdbDirector = :name) 
