@@ -4,7 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -342,6 +346,17 @@ private fun CategoryScreen(
     
     val isLiveCategory = contentType == "CATEGORY_LIVE"
 
+    // Stato della griglia: quando cambiano ordinamento/filtri torniamo in cima
+    // (prima lo scroll restava dov'era, sembrando che il filtro non fosse applicato).
+    val gridState = androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
+    LaunchedEffect(sortFilter) {
+        try {
+            gridState.scrollToItem(0)
+        } catch (_: Exception) {
+            // La griglia potrebbe non essere ancora pronta: nessun problema.
+        }
+    }
+
     // Ordinamento/filtri applicati in-memory: CategoryActivity carica già l'intera lista.
     val displayItems = remember(items, sortFilter, isLiveCategory) {
         if (isLiveCategory) items else applyContentSortFilter(items, sortFilter)
@@ -387,24 +402,8 @@ private fun CategoryScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Compact back button
-                androidx.tv.material3.Button(
-                    onClick = onBack,
-                    modifier = Modifier.size(40.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    colors = androidx.tv.material3.ButtonDefaults.colors(
-                        containerColor = Color.Transparent,
-                        contentColor = Color.White,
-                        focusedContainerColor = Color.White.copy(alpha = 0.2f),
-                        focusedContentColor = Color.White
-                    )
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Indietro",
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
+                // Compact back button (bianco con focus accent)
+                CategoryBackButton(onClick = onBack)
                 
                 // Title
                 Text(
@@ -456,6 +455,7 @@ private fun CategoryScreen(
             val gridMinSize = if (isLiveCategory) 100.dp else 150.dp
             TvLazyVerticalGrid(
                 columns = TvGridCells.Adaptive(minSize = gridMinSize),
+                state = gridState,
                 contentPadding = PaddingValues(top = 8.dp, bottom = 8.dp, start = 4.dp, end = 4.dp),  // Reduced top padding
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -480,6 +480,47 @@ private fun CategoryScreen(
                 onProgramClick = { channel, _ -> onChannelClick(channel) }
             )
         }
+    }
+}
+
+@Composable
+private fun CategoryBackButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.1f else 1f,
+        label = "catBackScale"
+    )
+    val border by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        label = "catBackBorder"
+    )
+
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(50))
+            .background(Color.White)
+            .border(2.dp, border, RoundedCornerShape(50))
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Indietro",
+            tint = Color.Black,
+            modifier = Modifier.size(24.dp)
+        )
     }
 }
 
@@ -549,16 +590,20 @@ private fun applyContentSortFilter(
 
     val filtered = items.filter { item ->
         val year = item.year
-        val rating = item.tmdbRating
+        val rating = item.tmdbRating ?: item.rating
         (from == null || (year != null && year >= from)) &&
             (to == null || (year != null && year <= to)) &&
             (minRating == null || (rating != null && rating >= minRating))
     }
 
     val comparator: Comparator<CarouselItem> = when (state.sortField) {
-        ContentSortField.RELEASE_DATE -> compareBy { it.year ?: 0 }
+        ContentSortField.RELEASE_DATE -> compareBy({ it.year ?: 0 }, { it.title.lowercase() })
         ContentSortField.ALPHABETICAL -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.title }
-        ContentSortField.TMDB_RATING -> compareBy { it.tmdbRating ?: -1f }
+        // Fallback su rating generico: molti titoli non hanno ancora il voto TMDB.
+        ContentSortField.TMDB_RATING -> compareBy(
+            { it.tmdbRating ?: it.rating ?: -1f },
+            { it.title.lowercase() }
+        )
     }
 
     return if (state.direction == SortDirection.ASC) {

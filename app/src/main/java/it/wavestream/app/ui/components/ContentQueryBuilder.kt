@@ -13,6 +13,12 @@ object ContentQueryBuilder {
     /** Query SQL + argomenti posizionali. */
     data class Sql(val sql: String, val args: List<Any?>)
 
+    /** Espressione voto per l'ordinamento: TMDB, con fallback su Xtream/IMDB. */
+    private const val RATING_EXPR =
+        "COALESCE(NULLIF(tmdbVoteAverage, 0), " +
+            "CAST(NULLIF(xtreamRating, '') AS REAL), " +
+            "CAST(NULLIF(omdbImdbRating, '') AS REAL), 0)"
+
     fun movies(
         category: String?,
         state: SortFilterState,
@@ -23,7 +29,7 @@ object ContentQueryBuilder {
         titleExpr = "COALESCE(NULLIF(tmdbTitle, ''), name)",
         releaseExpr = "COALESCE(NULLIF(tmdbReleaseDate, ''), " +
             "CASE WHEN year IS NULL THEN '0000-00-00' ELSE printf('%04d-01-01', year) END)",
-        ratingExpr = "COALESCE(tmdbVoteAverage, 0)",
+        ratingExpr = RATING_EXPR,
         category = category,
         state = state,
         limit = limit,
@@ -53,7 +59,7 @@ object ContentQueryBuilder {
         titleExpr = "COALESCE(NULLIF(tmdbName, ''), name)",
         releaseExpr = "COALESCE(NULLIF(tmdbFirstAirDate, ''), " +
             "CASE WHEN year IS NULL THEN '0000-00-00' ELSE printf('%04d-01-01', year) END)",
-        ratingExpr = "COALESCE(tmdbVoteAverage, 0)",
+        ratingExpr = RATING_EXPR,
         category = category,
         state = state,
         limit = limit,
@@ -120,7 +126,7 @@ object ContentQueryBuilder {
             args.add(it)
         }
         state.filter.minRating?.let {
-            sql.append(" AND COALESCE(tmdbVoteAverage, 0) >= ?")
+            sql.append(" AND ").append(RATING_EXPR).append(" >= ?")
             args.add(it.toDouble())
         }
 
