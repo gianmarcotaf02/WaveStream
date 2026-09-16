@@ -895,6 +895,23 @@ class PlaylistRepository @Inject constructor(
         }
     }
     
+    /**
+     * Backfill dell'anno di uscita dal nome per i contenuti già in DB senza anno
+     * (playlist Xtream: il campo `year` dell'API è spesso vuoto). Idempotente: la
+     * query aggiorna solo le righe con "(YYYY)" nel nome, quindi è economica.
+     */
+    suspend fun backfillReleaseYears() {
+        try {
+            val movies = movieDao.backfillYearsFromName()
+            val series = seriesDao.backfillYearsFromName()
+            if (movies > 0 || series > 0) {
+                Log.d(TAG, "backfillReleaseYears: movies=$movies, series=$series")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "backfillReleaseYears failed", e)
+        }
+    }
+
     private suspend fun saveCategories(playlistId: Long, result: M3UParser.ParseResult) {
         val categories = mutableListOf<Category>()
         result.channels.map { it.category }.distinct().forEach { name ->

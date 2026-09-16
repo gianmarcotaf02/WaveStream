@@ -202,6 +202,20 @@ interface SeriesDao {
     """)
     suspend fun getCategoriesWithCount(): List<SeriesCategoryWithCount>
 
+    /**
+     * Backfill dell'anno di uscita dal nome per le serie importate prima che
+     * l'anno venisse estratto (es. "Hot Skull (2022)" -> 2022).
+     */
+    @Query("""
+        UPDATE series SET year = CAST(substr(name, instr(name, '(') + 1, 4) AS INTEGER)
+        WHERE year IS NULL
+          AND instr(name, '(') > 0
+          AND substr(name, instr(name, '(') + 5, 1) = ')'
+          AND (substr(name, instr(name, '(') + 1, 4) GLOB '19[0-9][0-9]'
+            OR substr(name, instr(name, '(') + 1, 4) GLOB '20[0-9][0-9]')
+    """)
+    suspend fun backfillYearsFromName(): Int
+
     @Query("""
         SELECT * FROM series 
         WHERE (tmdbCast LIKE '%' || :name || '%' OR name LIKE '%' || :name || '%') 
