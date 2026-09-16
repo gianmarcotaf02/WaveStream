@@ -354,8 +354,9 @@ fun SeriesScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Loading / empty state: la barra Ordinamento resta montata per non perdere il focus D-pad
-                    if (isLoading) {
+                    // Loading NON distruttivo: se ci sono gi\u00e0 contenuti la griglia resta
+                    // montata (nessuno sfarfallio/reset dello scroll) e mostriamo un overlay.
+                    if (seriesList.isEmpty() && isLoading) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -378,6 +379,8 @@ fun SeriesScreen(
                             )
                         }
                     } else {
+                    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                     // Continue Watching Carousel (if items exist)
                     if (continueWatchingItems.isNotEmpty()) {
                         ContinueWatchingCarousel(
@@ -393,7 +396,7 @@ fun SeriesScreen(
                         columns = TvGridCells.Adaptive(minSize = 150.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.weight(1f).fillMaxWidth()
                     ) {
                         tvGridItems(seriesList, key = { it.id }) { series ->
                             SeriesGridCard(
@@ -434,6 +437,18 @@ fun SeriesScreen(
                                     }
                                 }
                             }
+                        }
+                    }
+                    }
+                    }
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.35f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = WaveStreamColors.Accent)
                         }
                     }
                 }
