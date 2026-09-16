@@ -16,15 +16,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
@@ -372,32 +376,17 @@ private fun FilterPanel(
             }
 
             if (showCategoryFilter && availableCategories.isNotEmpty()) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = "Categorie" + if (state.filter.categories.isNotEmpty())
-                            " (${state.filter.categories.size} selezionate)" else "",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = WaveStreamColors.TextTertiary
-                    )
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        contentPadding = PaddingValues(vertical = 2.dp)
-                    ) {
-                        items(availableCategories) { cat ->
-                            CategoryCheckboxChip(
-                                label = cat,
-                                checked = cat in state.filter.categories,
-                                onToggle = {
-                                    val next = state.filter.categories.toMutableSet()
-                                    if (!next.add(cat)) next.remove(cat)
-                                    onStateChange(
-                                        state.copy(filter = state.filter.copy(categories = next))
-                                    )
-                                }
-                            )
-                        }
+                CategoryFilterDropdown(
+                    availableCategories = availableCategories,
+                    selected = state.filter.categories,
+                    onToggle = { cat ->
+                        val next = state.filter.categories.toMutableSet()
+                        if (!next.add(cat)) next.remove(cat)
+                        onStateChange(
+                            state.copy(filter = state.filter.copy(categories = next))
+                        )
                     }
-                }
+                )
             }
 
             Row(
@@ -421,9 +410,99 @@ private fun FilterPanel(
     }
 }
 
-/** Chip categoria con checkbox per il filtro multi-scelta (D-pad friendly). */
+/**
+ * Menu a tendina per selezionare le categorie tramite checkbox.
+ * Il pulsante mostra quante categorie sono attive; la lista si espande sotto.
+ */
 @Composable
-private fun CategoryCheckboxChip(
+private fun CategoryFilterDropdown(
+    availableCategories: List<String>,
+    selected: Set<String>,
+    onToggle: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val background by animateColorAsState(
+        targetValue = when {
+            expanded -> WaveStreamColors.Accent.copy(alpha = 0.30f)
+            isFocused -> WaveStreamColors.BackgroundTertiary
+            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f)
+        },
+        label = "catDropdownBg"
+    )
+    val border by animateColorAsState(
+        targetValue = if (isFocused || expanded) WaveStreamColors.Accent else Color.Transparent,
+        label = "catDropdownBorder"
+    )
+
+    Column {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .border(2.dp, border, RoundedCornerShape(8.dp))
+                .background(background)
+                .focusable(interactionSource = interactionSource)
+                .clickable(interactionSource = interactionSource, indication = null) {
+                    expanded = !expanded
+                }
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.FilterList,
+                contentDescription = null,
+                tint = if (selected.isNotEmpty() || isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = if (selected.isEmpty()) "Categorie" else "Categorie (${selected.size})",
+                style = MaterialTheme.typography.labelLarge,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Medium
+            )
+            Icon(
+                imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                contentDescription = null,
+                tint = WaveStreamColors.TextSecondary,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+
+        AnimatedVisibility(visible = expanded) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, WaveStreamColors.SurfaceBorder, RoundedCornerShape(12.dp))
+                    .background(WaveStreamColors.BackgroundElevated.copy(alpha = 0.98f))
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 260.dp),
+                    contentPadding = PaddingValues(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(availableCategories) { cat ->
+                        CategoryCheckboxRow(
+                            label = cat,
+                            checked = cat in selected,
+                            onToggle = { onToggle(cat) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Riga categoria con checkbox, a tutta larghezza (menu a tendina). */
+@Composable
+private fun CategoryCheckboxRow(
     label: String,
     checked: Boolean,
     onToggle: () -> Unit
@@ -432,44 +511,42 @@ private fun CategoryCheckboxChip(
     val isFocused by interactionSource.collectIsFocusedAsState()
     val background by animateColorAsState(
         targetValue = when {
-            checked -> WaveStreamColors.Accent.copy(alpha = 0.28f)
             isFocused -> WaveStreamColors.BackgroundTertiary
-            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f)
-        },
-        label = "catChipBg"
-    )
-    val border by animateColorAsState(
-        targetValue = when {
-            isFocused -> WaveStreamColors.Accent
-            checked -> WaveStreamColors.Accent.copy(alpha = 0.6f)
+            checked -> WaveStreamColors.Accent.copy(alpha = 0.18f)
             else -> Color.Transparent
         },
-        label = "catChipBorder"
+        label = "catRowBg"
+    )
+    val border by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        label = "catRowBorder"
     )
 
     Row(
         modifier = Modifier
+            .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .border(2.dp, border, RoundedCornerShape(8.dp))
             .background(background)
             .focusable(interactionSource = interactionSource)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onToggle)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Icon(
             imageVector = if (checked) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank,
             contentDescription = null,
             tint = if (checked || isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(20.dp)
         )
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = WaveStreamColors.TextPrimary,
             fontWeight = if (checked) FontWeight.Bold else FontWeight.Medium,
-            maxLines = 1
+            maxLines = 1,
+            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
         )
     }
 }
