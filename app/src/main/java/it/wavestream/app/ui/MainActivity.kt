@@ -59,8 +59,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -102,6 +104,7 @@ import androidx.tv.foundation.lazy.list.rememberTvLazyListState
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.focus.focusRestorer
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 
 
@@ -257,9 +260,12 @@ private fun MainActivityScreen(
         homeViewModel.exitGridMode()
     }
     
-    // Focus requester for content area (carousels)
-    val contentFocusRequester = remember { FocusRequester() }
-    
+    // Focus manager: usato per spostare il focus sul contenuto in modo
+    // deterministico (prima si chiamava requestFocus() su un FocusRequester
+    // applicato a un nodo NON focusable: lanciava sempre e il focus non si
+    // spostava mai, dando l'impressione che la UI fosse bloccata).
+    val focusManager = LocalFocusManager.current
+
     // Coroutine scope for async operations
     val coroutineScope = rememberCoroutineScope()
     
@@ -309,6 +315,19 @@ private fun MainActivityScreen(
         }
     }
     
+    // Sposta il focus sul contenuto aspettando un frame, così la ricerca
+    // spaziale del D-pad lavora sul layout già aggiornato (es. rail appena chiuso).
+    fun moveFocusToContent(direction: FocusDirection) {
+        coroutineScope.launch {
+            withFrameNanos { }
+            try {
+                focusManager.moveFocus(direction)
+            } catch (_: Exception) {
+                // Nessun candidato nella direzione: il focus resta dov'è
+            }
+        }
+    }
+
     // Helper for animated activity navigation
     fun startActivityWithTransition(intent: Intent) {
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -463,13 +482,7 @@ private fun MainActivityScreen(
                 startActivityWithTransition(Intent(context, it.wavestream.app.ui.assistant.AssistantActivity::class.java))
             },
             onCollapseRequest = { railExpanded = false },
-            onContentFocusRequest = {
-                try {
-                    contentFocusRequester.requestFocus()
-                } catch (e: Exception) {
-                    // Ignore focus errors
-                }
-            },
+            onContentFocusRequest = { moveFocusToContent(FocusDirection.Right) },
             onExploreCategoriesClick = { isMovies ->
                 val contentType = if (isMovies) "movies" else "series"
                 startActivityWithTransition(Intent(context, it.wavestream.app.ui.category.AllCategoriesActivity::class.java).apply {
@@ -506,13 +519,7 @@ private fun MainActivityScreen(
                 onDownloadsClick = {
                     startActivityWithTransition(Intent(context, DownloadsActivity::class.java))
                 },
-                onContentFocusRequest = {
-                    try {
-                        contentFocusRequester.requestFocus()
-                    } catch (e: Exception) {
-                        // Ignore focus errors
-                    }
-                },
+                onContentFocusRequest = { moveFocusToContent(FocusDirection.Down) },
                 searchButtonFocusRequester = searchButtonFocusRequester,
                 firstButtonFocusRequester = topBarFocusRequester,
                 modifier = Modifier.fillMaxWidth()
@@ -602,9 +609,7 @@ private fun MainActivityScreen(
                                 Intent(context, it.wavestream.app.ui.history.HistoryActivity::class.java)
                             )
                         },
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .focusRequester(contentFocusRequester)
+                        modifier = Modifier.fillMaxSize()
                     )
             }
         }
