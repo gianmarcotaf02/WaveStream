@@ -24,6 +24,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.foundation.lazy.grid.itemsIndexed
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.SeriesDao
@@ -184,12 +187,28 @@ private fun AllCategoriesScreen(
     var favoriteCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
     var isLoading by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
+
+    // Focus iniziale sulla prima categoria (non sul bottone indietro)
+    val firstCategoryFocusRequester = remember { FocusRequester() }
     
     LaunchedEffect(Unit) {
         isLoading = true
         categories = loadCategories()
         favoriteCategories = loadFavorites()
         isLoading = false
+    }
+
+    // Dopo il caricamento porta il focus sulla prima card (attende un paio di
+    // frame per essere sicuri che la griglia sia composta/focusable).
+    LaunchedEffect(categories, isLoading) {
+        if (!isLoading && categories.isNotEmpty()) {
+            kotlinx.coroutines.delay(100)
+            try {
+                firstCategoryFocusRequester.requestFocus()
+            } catch (_: Exception) {
+                // Requester non ancora collegato: nessun problema.
+            }
+        }
     }
     
     val title = if (contentType == "movies") "Categorie Film" else "Categorie Serie TV"
@@ -251,7 +270,7 @@ private fun AllCategoriesScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(categories, key = { it.name }) { category ->
+                itemsIndexed(categories, key = { _, it -> it.name }) { index, category ->
                     val isFav = favoriteCategories.contains(category.name)
                     CategoryCard(
                         category = category,
@@ -259,6 +278,7 @@ private fun AllCategoriesScreen(
                         isSeries = contentType == "series",
                         isFavorite = isFav,
                         isViewAll = category.isViewAll,
+                        focusRequester = if (index == 0) firstCategoryFocusRequester else null,
                         onClick = {
                             if (category.isViewAll) onViewAllClick()
                             else onCategoryClick(category.name)
@@ -291,6 +311,7 @@ private fun CategoryCard(
     isSeries: Boolean = false,
     isFavorite: Boolean = false,
     isViewAll: Boolean = false,
+    focusRequester: FocusRequester? = null,
     onClick: () -> Unit,
     onLongPress: () -> Unit = {}
 ) {
@@ -333,6 +354,9 @@ private fun CategoryCard(
             .height(150.dp)  // Increased from 120dp
             .clip(RoundedCornerShape(16.dp))
             .border(3.dp, borderColor, RoundedCornerShape(16.dp))
+            .then(
+                if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier
+            )
             .focusable(interactionSource = interactionSource)
             .categoryLongPress(onLongPress)
             .clickable(
