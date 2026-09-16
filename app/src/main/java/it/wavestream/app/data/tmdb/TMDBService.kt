@@ -940,7 +940,7 @@ class TMDBService @Inject constructor(
             Log.d(TAG, "Cleaned title: '$cleanedTitle' (original: '${movie.name}')")
             
             // Try to extract year from original title if not already set
-            val yearFromTitle = Regex("""\\((\\d{4})\\)""").find(movie.name)?.groupValues?.get(1)?.toIntOrNull()
+            val yearFromTitle = Regex("""\((\d{4})\)""").find(movie.name)?.groupValues?.get(1)?.toIntOrNull()
             val year = movie.year ?: yearFromTitle
             
             // Try multiple search strategies (reuse the known TMDB id to fetch the missing vote directly)

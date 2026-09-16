@@ -39,7 +39,10 @@ class ContentNameParser @Inject constructor() {
     }
     
     // Patterns for cleaning
-    private val yearPattern = """[\(\[]?(19|20)\d{2}[\)\]]?""".toRegex()
+    // Anno tra parentesi/quadre — convenzione standard delle playlist: "Titolo (2019)".
+    private val parenthesizedYearPattern = """[\(\[](19|20)\d{2}[\)\]]""".toRegex()
+    // Anno "nudo" (senza parentesi), es. "Il Gladiatore 2000".
+    private val bareYearPattern = """(?<!\d)(19|20)\d{2}(?!\d)""".toRegex()
     private val seasonEpisodePatterns = listOf(
         """[Ss](\d{1,2})[Ee](\d{1,2})""".toRegex(),           // S01E01
         """[Ss](\d{1,2})\s*-?\s*[Ee][Pp]?\.?\s*(\d{1,2})""".toRegex(), // S01 E01, S01 Ep01
@@ -109,9 +112,10 @@ class ContentNameParser @Inject constructor() {
         // Detect content type from category first
         val contentType = detectContentType(category, originalName, tvgType, duration)
         
-        // Extract year
+        // Extract year (preferendo quello tra parentesi, così un titolo numerico
+        // tipo "1917" / "2012" non viene scambiato per l'anno di uscita).
         val year = extractYear(workingName)
-        workingName = yearPattern.replace(workingName, "")
+        workingName = removeYearMarker(workingName)
         
         // Extract season/episode for series
         var season: Int? = null
@@ -216,10 +220,36 @@ class ContentNameParser @Inject constructor() {
     }
     
     private fun extractYear(name: String): Int? {
-        val match = yearPattern.find(name)
-        return match?.value?.replace(Regex("[^0-9]"), "")?.toIntOrNull()?.takeIf { 
-            it in 1900..2030 
+        // 1) Preferisci l'anno tra parentesi: evita di interpretare come anno un
+        //    titolo numerico tipo "1917", "2012", "2046".
+        parenthesizedYearPattern.find(name)?.value
+            ?.filter { it.isDigit() }?.toIntOrNull()
+            ?.takeIf { it in 1900..2030 }
+            ?.let { return it }
+
+        // 2) Fallback su anno "nudo" solo se resta del testo alfabetico, cioè il
+        //    numero non È il titolo (es. "Il Gladiatore 2000").
+        val bare = bareYearPattern.find(name) ?: return null
+        val remaining = name.removeRange(bare.range)
+        if (remaining.none { it.isLetter() }) return null
+        return bare.value.toIntOrNull()?.takeIf { it in 1900..2030 }
+    }
+
+    /**
+     * Estrae solo l'anno di uscita dal nome grezzo della playlist.
+     * Utile per contenuti Xtream, dove il campo `year` dell'API è spesso vuoto
+     * e l'anno va ricavato dal nome (es. "2012 (2009) FHD" -> 2009).
+     */
+    fun extractReleaseYear(name: String): Int? = extractYear(name)
+
+    /** Rimuove dal titolo il marcatore dell'anno senza toccare un titolo numerico. */
+    private fun removeYearMarker(name: String): String {
+        var result = parenthesizedYearPattern.replace(name, " ")
+        val bare = bareYearPattern.find(result)
+        if (bare != null && result.removeRange(bare.range).any { it.isLetter() }) {
+            result = result.removeRange(bare.range)
         }
+        return result
     }
     
     private fun extractSeasonEpisode(name: String): Pair<Int?, Int?> {
