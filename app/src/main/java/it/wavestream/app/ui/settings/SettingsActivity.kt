@@ -69,6 +69,7 @@ import it.wavestream.app.ui.profile.getAvatarResource
 import it.wavestream.app.ui.profile.getAvatarIcon
 import it.wavestream.app.vpn.VpnManager
 import it.wavestream.app.vpn.VpnFeature
+import it.wavestream.app.assistant.NovaFeature
 import it.wavestream.app.vpn.VpnBuiltInConfigs
 import it.wavestream.app.vpn.ProtonServer
 import it.wavestream.app.vpn.VpnStrategy
@@ -150,7 +151,10 @@ class SettingsActivity : ComponentActivity() {
             SettingsMenuItem("updates", "Aggiornamenti", "Controlla nuove versioni", Icons.Default.SystemUpdate),
             SettingsMenuItem("about", "Informazioni", "Info sull'app", Icons.Default.Info),
             SettingsMenuItem("logout", "Disconnetti", "Esci dall'account", Icons.AutoMirrored.Filled.ExitToApp, isDestructive = true)
-        ).filter { VpnFeature.ENABLED || it.id != "vpn" }
+        ).filter {
+            (VpnFeature.ENABLED || it.id != "vpn") &&
+            (NovaFeature.ENABLED || it.id != "assistant")
+        }
         
         Row(
             modifier = Modifier
