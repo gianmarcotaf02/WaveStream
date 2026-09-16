@@ -1362,7 +1362,7 @@ class TMDBService @Inject constructor(
 
             // Otherwise search by title with fallback strategies
             val cleanedTitle = cleanTitleForSearch(series.name)
-            val yearFromName = Regex("""\\((\\d{4})\\)""").find(series.name)?.groupValues?.get(1)?.toIntOrNull()
+            val yearFromName = Regex("""\((\d{4})\)""").find(series.name)?.groupValues?.get(1)?.toIntOrNull()
             val year = series.year ?: yearFromName
 
             tmdbId = searchSeriesOnTMDB(cleanedTitle, year, "it-IT")
