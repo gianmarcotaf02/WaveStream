@@ -3176,7 +3176,7 @@ class HomeViewModel @Inject constructor(
                                     contentType = ContentType.MOVIE.name,
                                     progressPercent = progressPercent.coerceIn(0f, 1f),
                                     remainingMinutes = remaining,
-                                    rating = movie.rating
+                                    rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating
                                 )
                             }
                             ContentType.SERIES, ContentType.EPISODE -> {
@@ -3196,7 +3196,7 @@ class HomeViewModel @Inject constructor(
                                     progressPercent = progressPercent.coerceIn(0f, 1f),
                                     remainingMinutes = remaining,
                                     episodeLabel = episodeLabel,
-                                    rating = series.rating
+                                    rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating
                                 )
                             }
                             else -> null
@@ -3251,7 +3251,7 @@ class HomeViewModel @Inject constructor(
                         contentType = ContentType.SERIES.name,
                         nextEpisodeLabel = label,
                         seasonCount = series.tmdbNumberOfSeasons ?: series.seasonCount.takeIf { it > 0 },
-                        rating = series.rating
+                        rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating
                     ))
                 }
                 items.ifEmpty { null }
@@ -3292,7 +3292,7 @@ class HomeViewModel @Inject constructor(
                         nextEpisodeLabel = epLabel,
                         newEpisodeBadge = true,
                         seasonCount = s.tmdbNumberOfSeasons ?: s.seasonCount.takeIf { it > 0 },
-                        rating = s.rating
+                        rating = s.tmdbVoteAverage?.takeIf { it > 0f } ?: s.rating
                     )
                 }.ifEmpty { null }
             } catch (e: Exception) {
