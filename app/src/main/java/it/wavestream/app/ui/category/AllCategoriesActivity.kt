@@ -227,9 +227,9 @@ private fun AllCategoriesScreen(
             
             Spacer(modifier = Modifier.weight(1f))
             
-            // Count
+            // Count (esclude la card "Tutti i film"/"Tutte le serie TV")
             Text(
-                text = "${categories.size} categorie",
+                text = "${categories.count { !it.isViewAll }} categorie",
                 style = MaterialTheme.typography.bodyMedium,
                 color = WaveStreamColors.TextSecondary
             )
