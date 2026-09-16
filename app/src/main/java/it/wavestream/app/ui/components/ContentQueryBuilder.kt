@@ -91,9 +91,24 @@ object ContentQueryBuilder {
         sql.append(table)
         sql.append(" WHERE isHidden = 0")
 
-        if (category != null) {
-            sql.append(" AND category = ?")
-            args.add(category)
+        // Filtro categorie: se l'utente ha selezionato una o più categorie (checkbox)
+        // hanno la precedenza; altrimenti si usa la categoria singola della sidebar.
+        val selectedCategories = state.filter.categories.toList()
+        when {
+            selectedCategories.size == 1 -> {
+                sql.append(" AND category = ?")
+                args.add(selectedCategories[0])
+            }
+            selectedCategories.size > 1 -> {
+                sql.append(" AND category IN (")
+                sql.append(selectedCategories.joinToString(",") { "?" })
+                sql.append(")")
+                selectedCategories.forEach { args.add(it) }
+            }
+            category != null -> {
+                sql.append(" AND category = ?")
+                args.add(category)
+            }
         }
 
         state.filter.yearFrom?.let {
