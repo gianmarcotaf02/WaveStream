@@ -19,10 +19,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Refresh
@@ -57,16 +62,20 @@ enum class SortDirection(val label: String) {
     DESC("Decrescente")
 }
 
-/** Filtri applicabili su anni e voto TMDB. `null` = nessun filtro. */
+/** Filtri applicabili su anni, voto TMDB e categorie. `null`/vuoto = nessun filtro. */
 data class ContentFilterState(
     val yearFrom: Int? = null,
     val yearTo: Int? = null,
-    val minRating: Float? = null
+    val minRating: Float? = null,
+    /** Categorie selezionate (multi-scelta con checkbox). Vuoto = tutte. */
+    val categories: Set<String> = emptySet()
 ) {
-    val isActive: Boolean get() = yearFrom != null || yearTo != null || minRating != null
+    val isActive: Boolean
+        get() = yearFrom != null || yearTo != null || minRating != null || categories.isNotEmpty()
     val activeCount: Int get() = (if (yearFrom != null) 1 else 0) +
         (if (yearTo != null) 1 else 0) +
-        (if (minRating != null) 1 else 0)
+        (if (minRating != null) 1 else 0) +
+        (if (categories.isNotEmpty()) 1 else 0)
 
     fun normalized(): ContentFilterState {
         // Evita intervalli invertiti che darebbero risultati vuoti.
@@ -95,7 +104,11 @@ data class SortFilterState(
 fun ContentSortFilterBar(
     state: SortFilterState,
     onStateChange: (SortFilterState) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Categorie disponibili per il filtro multi-scelta (vuoto = nasconde la sezione). */
+    availableCategories: List<String> = emptyList(),
+    /** Mostra la sezione categorie (tipicamente solo su "Tutti i film/serie"). */
+    showCategoryFilter: Boolean = false
 ) {
     var showFilters by remember { mutableStateOf(false) }
 
@@ -144,7 +157,9 @@ fun ContentSortFilterBar(
             FilterPanel(
                 state = state,
                 onStateChange = { onStateChange(it) },
-                onClose = { showFilters = false }
+                onClose = { showFilters = false },
+                availableCategories = availableCategories,
+                showCategoryFilter = showCategoryFilter
             )
         }
     }
@@ -289,7 +304,9 @@ private fun FilterToggleButton(
 private fun FilterPanel(
     state: SortFilterState,
     onStateChange: (SortFilterState) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    availableCategories: List<String>,
+    showCategoryFilter: Boolean
 ) {
     val currentYear = remember { Calendar.getInstance().get(Calendar.YEAR) }
 
@@ -354,6 +371,35 @@ private fun FilterPanel(
                 )
             }
 
+            if (showCategoryFilter && availableCategories.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "Categorie" + if (state.filter.categories.isNotEmpty())
+                            " (${state.filter.categories.size} selezionate)" else "",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = WaveStreamColors.TextTertiary
+                    )
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(vertical = 2.dp)
+                    ) {
+                        items(availableCategories) { cat ->
+                            CategoryCheckboxChip(
+                                label = cat,
+                                checked = cat in state.filter.categories,
+                                onToggle = {
+                                    val next = state.filter.categories.toMutableSet()
+                                    if (!next.add(cat)) next.remove(cat)
+                                    onStateChange(
+                                        state.copy(filter = state.filter.copy(categories = next))
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -372,6 +418,59 @@ private fun FilterPanel(
                 )
             }
         }
+    }
+}
+
+/** Chip categoria con checkbox per il filtro multi-scelta (D-pad friendly). */
+@Composable
+private fun CategoryCheckboxChip(
+    label: String,
+    checked: Boolean,
+    onToggle: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val background by animateColorAsState(
+        targetValue = when {
+            checked -> WaveStreamColors.Accent.copy(alpha = 0.28f)
+            isFocused -> WaveStreamColors.BackgroundTertiary
+            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f)
+        },
+        label = "catChipBg"
+    )
+    val border by animateColorAsState(
+        targetValue = when {
+            isFocused -> WaveStreamColors.Accent
+            checked -> WaveStreamColors.Accent.copy(alpha = 0.6f)
+            else -> Color.Transparent
+        },
+        label = "catChipBorder"
+    )
+
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .border(2.dp, border, RoundedCornerShape(8.dp))
+            .background(background)
+            .focusable(interactionSource = interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onToggle)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Icon(
+            imageVector = if (checked) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank,
+            contentDescription = null,
+            tint = if (checked || isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
+            modifier = Modifier.size(18.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = WaveStreamColors.TextPrimary,
+            fontWeight = if (checked) FontWeight.Bold else FontWeight.Medium,
+            maxLines = 1
+        )
     }
 }
 
