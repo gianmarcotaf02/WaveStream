@@ -142,12 +142,13 @@ fun ExpandableNavRail(
         // focus (percepito come "freeze"). 2 tentativi su frame consecutivi.
         repeat(2) {
             withFrameNanos { }
-            val focused = try {
+            val requested = try {
                 target.requestFocus()
+                true
             } catch (_: IllegalStateException) {
                 false
             }
-            if (focused) return@LaunchedEffect
+            if (requested) return@LaunchedEffect
         }
     }
 
