@@ -213,7 +213,11 @@ class LoadingActivity : ComponentActivity() {
                         onStateUpdate(LoadingState(status = getString(R.string.loading_using_cache), detail = "${playlist.name}", progress = phaseProgress, showProgress = true))
                     }
                 }
-                
+
+                // Backfill dell'anno di uscita dai nomi (playlist Xtream senza campo year):
+                // mantiene corretto l'ordinamento "Data di uscita" anche senza risincronizzare.
+                runCatching { playlistRepository.backfillReleaseYears() }
+
                 loadEpgIfNeeded(playlists, forceRefresh, onStateUpdate)
                 refreshTrendingCategoriesIfNeeded(onStateUpdate)
                 enrichHeroContent(onStateUpdate)
