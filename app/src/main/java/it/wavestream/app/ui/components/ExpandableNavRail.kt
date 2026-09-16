@@ -94,6 +94,7 @@ fun ExpandableNavRail(
     onContentFocusRequest: () -> Unit,
     onCollapseRequest: () -> Unit = {},
     onExploreCategoriesClick: (Boolean) -> Unit,
+    onViewAllClick: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     // Unica sorgente dell'animazione. Vale 0..1 e viene letta SOLO in fase di
@@ -279,6 +280,12 @@ fun ExpandableNavRail(
                         contentAlpha = labelAlpha,
                         onClick = { onExploreCategoriesClick(true) }
                     )
+                    ViewAllRailItem(
+                        label = "Tutti i film",
+                        icon = Icons.Default.Movie,
+                        contentAlpha = labelAlpha,
+                        onClick = { onViewAllClick(true) }
+                    )
                 }
 
                 NavRailItem(
@@ -296,6 +303,12 @@ fun ExpandableNavRail(
                         isMovies = false,
                         contentAlpha = labelAlpha,
                         onClick = { onExploreCategoriesClick(false) }
+                    )
+                    ViewAllRailItem(
+                        label = "Tutte le serie TV",
+                        icon = Icons.Default.Tv,
+                        contentAlpha = labelAlpha,
+                        onClick = { onViewAllClick(false) }
                     )
                 }
 
@@ -406,6 +419,60 @@ private fun ExploreCategoriesItem(
         )
         Text(
             text = "Categorie",
+            style = MaterialTheme.typography.bodySmall,
+            color = textColor,
+            fontWeight = FontWeight.Normal,
+            fontSize = 11.sp,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun ViewAllRailItem(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentAlpha: () -> Float = { 1f },
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else Color.Transparent,
+        label = "viewAllRailBg"
+    )
+
+    val textColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextTertiary,
+        label = "viewAllRailText"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .graphicsLayer { alpha = contentAlpha() }
+            .clip(RoundedCornerShape(8.dp))
+            .background(color = backgroundColor)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .focusable(interactionSource = interactionSource)
+            .padding(start = 20.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = textColor,
+            modifier = Modifier.size(16.dp)
+        )
+        Text(
+            text = label,
             style = MaterialTheme.typography.bodySmall,
             color = textColor,
             fontWeight = FontWeight.Normal,
