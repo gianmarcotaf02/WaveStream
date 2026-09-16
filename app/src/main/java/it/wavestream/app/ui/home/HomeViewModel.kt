@@ -3945,7 +3945,7 @@ fun loadCategoryContentAutoDetect(category: String) {
     // VOTO TMDB quando disponibile, con fallback al rating provider solo se il contenuto
     // non è ancora stato arricchito da TMDB.
     private fun Movie.toCarouselItem(): CarouselItem {
-        val effectiveRating = tmdbVoteAverage ?: rating
+        val effectiveRating = tmdbVoteAverage?.takeIf { it > 0f } ?: rating
         return CarouselItem(
             id = id,
             title = title,
@@ -3960,7 +3960,7 @@ fun loadCategoryContentAutoDetect(category: String) {
     }
 
     private fun Series.toCarouselItem(): CarouselItem {
-        val effectiveRating = tmdbVoteAverage ?: rating
+        val effectiveRating = tmdbVoteAverage?.takeIf { it > 0f } ?: rating
         return CarouselItem(
             id = id,
             title = title,
