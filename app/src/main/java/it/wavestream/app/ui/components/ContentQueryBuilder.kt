@@ -27,8 +27,10 @@ object ContentQueryBuilder {
     ): Sql = build(
         table = "movies",
         titleExpr = "COALESCE(NULLIF(tmdbTitle, ''), name)",
-        releaseExpr = "COALESCE(NULLIF(tmdbReleaseDate, ''), " +
-            "CASE WHEN year IS NULL THEN '0000-00-00' ELSE printf('%04d-01-01', year) END)",
+        // L'anno della playlist (estratto dal nome) ha la precedenza: è il dato atteso
+        // dall'utente per "Data di uscita". Fallback sulla data TMDB, poi 0000.
+        releaseExpr = "COALESCE(CASE WHEN year IS NULL THEN NULL ELSE printf('%04d-01-01', year) END, " +
+            "NULLIF(tmdbReleaseDate, ''), '0000-00-00')",
         ratingExpr = RATING_EXPR,
         category = category,
         state = state,
@@ -57,8 +59,9 @@ object ContentQueryBuilder {
     ): Sql = build(
         table = "series",
         titleExpr = "COALESCE(NULLIF(tmdbName, ''), name)",
-        releaseExpr = "COALESCE(NULLIF(tmdbFirstAirDate, ''), " +
-            "CASE WHEN year IS NULL THEN '0000-00-00' ELSE printf('%04d-01-01', year) END)",
+        // Vedi movies(): precedenza all'anno della playlist.
+        releaseExpr = "COALESCE(CASE WHEN year IS NULL THEN NULL ELSE printf('%04d-01-01', year) END, " +
+            "NULLIF(tmdbFirstAirDate, ''), '0000-00-00')",
         ratingExpr = RATING_EXPR,
         category = category,
         state = state,
