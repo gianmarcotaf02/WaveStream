@@ -138,11 +138,9 @@ class AllCategoriesActivity : ComponentActivity() {
     private suspend fun loadCategories(): List<CategoryInfo> {
         return withContext(Dispatchers.IO) {
             if (contentType == "movies") {
-                val list = movieDao.getCategoriesList().map { categoryName ->
-                    CategoryInfo(
-                        name = categoryName,
-                        itemCount = movieDao.getMovieCountByCategory(categoryName)
-                    )
+                // UNA query GROUP BY invece di N+1 COUNT (era la causa del "caricamento").
+                val list = movieDao.getCategoriesWithCount().map { c ->
+                    CategoryInfo(name = c.name, itemCount = c.count)
                 }
                 // Fuori ordine alfabetico: "Tutti i film" sempre in prima posizione.
                 listOf(
@@ -153,11 +151,8 @@ class AllCategoriesActivity : ComponentActivity() {
                     )
                 ) + list
             } else {
-                val list = seriesDao.getCategoriesList().map { categoryName ->
-                    CategoryInfo(
-                        name = categoryName,
-                        itemCount = seriesDao.getSeriesCountByCategory(categoryName)
-                    )
+                val list = seriesDao.getCategoriesWithCount().map { c ->
+                    CategoryInfo(name = c.name, itemCount = c.count)
                 }
                 // Fuori ordine alfabetico: "Tutte le serie TV" sempre in prima posizione.
                 listOf(
