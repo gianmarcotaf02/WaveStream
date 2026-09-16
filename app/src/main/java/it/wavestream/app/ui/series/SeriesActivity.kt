@@ -103,6 +103,8 @@ class SeriesActivity : ComponentActivity() {
         var continueWatchingItems by remember { mutableStateOf<List<ContinueWatchingItem>>(emptyList()) }
         var sortFilter by remember { mutableStateOf(SortFilterState()) }
         var reloadToken by remember { mutableIntStateOf(0) }
+        // Debounce dei cambi filtri: un'unica query anche premendo pi\u00f9 volte lo stepper.
+        var pendingFilterReload by remember { mutableIntStateOf(0) }
 
         // Categoria corrente: null = "Tutte le serie TV"
         fun currentCategory(): String? = if (showingAllSeries) null else selectedCategory
@@ -187,6 +189,13 @@ class SeriesActivity : ComponentActivity() {
             reloadSeries()
         }
 
+        LaunchedEffect(pendingFilterReload) {
+            if (pendingFilterReload > 0) {
+                delay(250)
+                reloadSeries()
+            }
+        }
+
         SeriesScreen(
             categories = categories,
             selectedCategory = selectedCategory,
@@ -197,16 +206,19 @@ class SeriesActivity : ComponentActivity() {
             showingAllSeries = showingAllSeries,
             totalSeriesCount = totalSeriesCount,
             sortFilter = sortFilter,
+            availableCategories = categories.map { it.name },
+            showCategoryFilter = showingAllSeries,
             continueWatchingItems = continueWatchingItems,
             onSortFilterChange = { newState ->
                 if (newState != sortFilter) {
                     sortFilter = newState
-                    reloadSeries()
+                    pendingFilterReload++
                 }
             },
             onCategorySelect = { cat ->
                 showingAllSeries = false
                 selectedCategory = cat
+                sortFilter = sortFilter.copy(filter = sortFilter.filter.copy(categories = emptySet()))
                 reloadSeries()
             },
             onViewAllClick = {
@@ -260,6 +272,8 @@ fun SeriesScreen(
     showingAllSeries: Boolean,
     totalSeriesCount: Int,
     sortFilter: SortFilterState = SortFilterState(),
+    availableCategories: List<String> = emptyList(),
+    showCategoryFilter: Boolean = false,
     continueWatchingItems: List<ContinueWatchingItem> = emptyList(),
     onSortFilterChange: (SortFilterState) -> Unit = {},
     onCategorySelect: (String) -> Unit,
@@ -333,7 +347,9 @@ fun SeriesScreen(
 
                     ContentSortFilterBar(
                         state = sortFilter,
-                        onStateChange = onSortFilterChange
+                        onStateChange = onSortFilterChange,
+                        availableCategories = availableCategories,
+                        showCategoryFilter = showCategoryFilter
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
