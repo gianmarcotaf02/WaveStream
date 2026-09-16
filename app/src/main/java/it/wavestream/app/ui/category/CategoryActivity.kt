@@ -594,7 +594,7 @@ private fun applyContentSortFilter(
 
     val filtered = items.filter { item ->
         val year = item.year
-        val rating = item.tmdbRating ?: item.rating
+        val rating = item.tmdbRating?.takeIf { it > 0f } ?: item.rating
         (from == null || (year != null && year >= from)) &&
             (to == null || (year != null && year <= to)) &&
             (minRating == null || (rating != null && rating >= minRating))
@@ -605,7 +605,7 @@ private fun applyContentSortFilter(
         ContentSortField.ALPHABETICAL -> compareBy(String.CASE_INSENSITIVE_ORDER) { sortTitleKey(it.title) }
         // Fallback su rating generico: molti titoli non hanno ancora il voto TMDB.
         ContentSortField.TMDB_RATING -> compareBy(
-            { it.tmdbRating ?: it.rating ?: -1f },
+            { it.tmdbRating?.takeIf { r -> r > 0f } ?: it.rating ?: -1f },
             { it.title.lowercase() }
         )
     }
