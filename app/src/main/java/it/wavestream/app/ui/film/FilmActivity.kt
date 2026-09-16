@@ -294,20 +294,7 @@ fun FilmScreen(
             .fillMaxSize()
             .background(WaveStreamColors.BackgroundDark)
     ) {
-        // Left sidebar - categories
-        CategorySidebar(
-            categories = categories,
-            selectedCategory = selectedCategory,
-            showingAllMovies = showingAllMovies,
-            totalMoviesCount = totalMoviesCount,
-            onCategorySelect = onCategorySelect,
-            onViewAllClick = onViewAllClick,
-            modifier = Modifier
-                .width(280.dp)
-                .fillMaxHeight()
-        )
-        
-        // Right content - movie grid
+        // Content - movie grid (sidebar rimossa: le categorie si scelgono dal menu Filtri)
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -335,7 +322,7 @@ fun FilmScreen(
                         
                         Column {
                             Text(
-                                text = if (showingAllMovies) "🎬 Tutti i film" else (selectedCategory ?: ""),
+                                text = if (showingAllMovies) "Tutti i film" else (selectedCategory ?: ""),
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = WaveStreamColors.TextPrimary,
                                 fontWeight = FontWeight.Bold
@@ -355,7 +342,7 @@ fun FilmScreen(
                         state = sortFilter,
                         onStateChange = onSortFilterChange,
                         availableCategories = availableCategories,
-                        showCategoryFilter = showCategoryFilter
+                        showCategoryFilter = true
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))

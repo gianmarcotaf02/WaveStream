@@ -301,20 +301,7 @@ fun SeriesScreen(
             .fillMaxSize()
             .background(WaveStreamColors.BackgroundDark)
     ) {
-        // Left sidebar - categories
-        SeriesCategorySidebar(
-            categories = categories,
-            selectedCategory = selectedCategory,
-            showingAllSeries = showingAllSeries,
-            totalSeriesCount = totalSeriesCount,
-            onCategorySelect = onCategorySelect,
-            onViewAllClick = onViewAllClick,
-            modifier = Modifier
-                .width(280.dp)
-                .fillMaxHeight()
-        )
-        
-        // Right content - series grid
+        // Content - series grid (sidebar rimossa: le categorie si scelgono dal menu Filtri)
         Box(
             modifier = Modifier
                 .weight(1f)
@@ -342,7 +329,7 @@ fun SeriesScreen(
                         
                         Column {
                             Text(
-                                text = if (showingAllSeries) "📺 Tutte le serie TV" else (selectedCategory ?: ""),
+                                text = if (showingAllSeries) "Tutte le serie TV" else (selectedCategory ?: ""),
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = WaveStreamColors.TextPrimary,
                                 fontWeight = FontWeight.Bold
@@ -362,7 +349,7 @@ fun SeriesScreen(
                         state = sortFilter,
                         onStateChange = onSortFilterChange,
                         availableCategories = availableCategories,
-                        showCategoryFilter = showCategoryFilter
+                        showCategoryFilter = true
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
