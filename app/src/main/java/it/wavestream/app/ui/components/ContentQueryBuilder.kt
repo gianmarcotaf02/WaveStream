@@ -142,9 +142,9 @@ object ContentQueryBuilder {
             val direction = if (state.direction == SortDirection.ASC) "ASC" else "DESC"
             sql.append(" ORDER BY ")
             if (state.sortField == ContentSortField.ALPHABETICAL) {
-                // I nomi vuoti (provider che non manda il titolo) vanno in fondo,
-                // prima dell'ordinamento alfabetico che ignora i prefissi tipo " - ".
-                sql.append("(CASE WHEN TRIM(name) = '' THEN 1 ELSE 0 END) ASC, ")
+                // I nomi vuoti / ridotti a soli prefissi (" - ", ecc.) vanno in fondo,
+                // prima dell'ordinamento alfabetico che ignora i prefissi.
+                sql.append("(CASE WHEN TRIM(").append(orderExpr).append(") = '' THEN 1 ELSE 0 END) ASC, ")
                     .append(orderExpr).append(' ').append(direction)
             } else {
                 sql.append(orderExpr).append(' ').append(direction)
