@@ -95,7 +95,7 @@ class CreditsDetector {
      * @param relaxed quando true (corroborazione audio attiva) richiede un hit in meno
      * nella finestra: la fusione audio+video riduce i falsi negativi sui credits "difficili".
      */
-    fun analyze(source: Bitmap, relaxed: Boolean = false): Result {
+    fun analyze(source: Bitmap, @Suppress("UNUSED_PARAMETER") relaxed: Boolean = false): Result {
         if (source.width <= 0 || source.height <= 0) return neutral()
 
         val work = prepareWork(source) ?: return neutral()
@@ -181,7 +181,9 @@ class CreditsDetector {
         val windowHits = hitHistory.count { it }
 
         sampleCount++
-        val requiredHits = if (relaxed) (MIN_HITS_IN_WINDOW - 1).coerceAtLeast(1) else MIN_HITS_IN_WINDOW
+        // Persistenza NON rilassata: con i falsi positivi visti su serie scure, l'audio
+        // non deve abbassare la soglia. Meglio un trigger pi\u00f9 tardi che uno sbagliato.
+        val requiredHits = MIN_HITS_IN_WINDOW
         var triggered = false
         if (!isTriggered && windowHits >= requiredHits) {
             isTriggered = true

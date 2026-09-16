@@ -249,6 +249,14 @@
             </intent-filter>
         </receiver>
 
+        <!-- Riceve l'esito di PackageInstaller e apre la conferma di installazione in foreground -->
+        <activity
+            android:name="it.wavestream.app.update.UpdateInstallActivity"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <!-- FileProvider for APK installation -->
         <provider
             android:name="androidx.core.content.FileProvider"
