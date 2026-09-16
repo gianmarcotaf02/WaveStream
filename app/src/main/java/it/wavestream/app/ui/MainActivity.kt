@@ -489,6 +489,14 @@ private fun MainActivityScreen(
                     putExtra("contentType", contentType)
                 })
             },
+            onViewAllClick = { isMovies ->
+                val intent = if (isMovies) {
+                    Intent(context, it.wavestream.app.ui.film.FilmActivity::class.java)
+                } else {
+                    Intent(context, it.wavestream.app.ui.series.SeriesActivity::class.java)
+                }
+                startActivityWithTransition(intent)
+            },
             modifier = Modifier.fillMaxHeight()
         )
         
