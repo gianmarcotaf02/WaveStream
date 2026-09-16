@@ -107,6 +107,15 @@ class SeriesActivity : ComponentActivity() {
         // Debounce dei cambi filtri: un'unica query anche premendo pi\u00f9 volte lo stepper.
         var pendingFilterReload by remember { mutableIntStateOf(0) }
 
+        // Stato griglia: quando cambiano categoria o filtri si riparte dall'alto.
+        val gridState = androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
+        LaunchedEffect(sortFilter, selectedCategory, showingAllSeries) {
+            try {
+                gridState.scrollToItem(0)
+            } catch (_: Exception) {
+            }
+        }
+
         // Categoria corrente: null = "Tutte le serie TV"
         fun currentCategory(): String? = if (showingAllSeries) null else selectedCategory
 
@@ -243,7 +252,8 @@ class SeriesActivity : ComponentActivity() {
                     startActivity(intent)
                 }
             },
-            onBackClick = { finish() }
+            onBackClick = { finish() },
+            gridState = gridState
         )
     }
     
@@ -282,7 +292,9 @@ fun SeriesScreen(
     onSeriesClick: (Series) -> Unit,
     onLoadMore: () -> Unit = {},
     onContinueWatchingClick: (ContinueWatchingItem) -> Unit = {},
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    gridState: androidx.tv.foundation.lazy.grid.TvLazyGridState =
+        androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
 ) {
     Row(
         modifier = Modifier
@@ -395,6 +407,7 @@ fun SeriesScreen(
                     // Series grid using TV Compose for proper D-pad navigation
                     TvLazyVerticalGrid(
                         columns = TvGridCells.Adaptive(minSize = 150.dp),
+                        state = gridState,
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         modifier = Modifier.weight(1f).fillMaxWidth()
