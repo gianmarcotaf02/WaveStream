@@ -579,6 +579,10 @@ private fun getLabelForContentType(contentType: String): String {
     }
 }
 
+/** Chiave alfabetica che ignora prefissi tipo " - ", spazi e punteggiatura iniziali. */
+private fun sortTitleKey(title: String): String =
+    title.trimStart(' ', '-', '.', ':', '|', '_', '#', '*', '[', ']', '(', ')')
+
 /** Applica ordinamento e filtri (anno da/a, voto TMDB minimo) a una lista di card. */
 private fun applyContentSortFilter(
     items: List<CarouselItem>,
@@ -598,7 +602,7 @@ private fun applyContentSortFilter(
 
     val comparator: Comparator<CarouselItem> = when (state.sortField) {
         ContentSortField.RELEASE_DATE -> compareBy({ it.year ?: 0 }, { it.title.lowercase() })
-        ContentSortField.ALPHABETICAL -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.title }
+        ContentSortField.ALPHABETICAL -> compareBy(String.CASE_INSENSITIVE_ORDER) { sortTitleKey(it.title) }
         // Fallback su rating generico: molti titoli non hanno ancora il voto TMDB.
         ContentSortField.TMDB_RATING -> compareBy(
             { it.tmdbRating ?: it.rating ?: -1f },

@@ -26,7 +26,7 @@ object ContentQueryBuilder {
         offset: Int? = null
     ): Sql = build(
         table = "movies",
-        titleExpr = "COALESCE(NULLIF(tmdbTitle, ''), name)",
+        titleExpr = "LTRIM(COALESCE(NULLIF(tmdbTitle, ''), name), ' -.:|_#*[]()')",
         // L'anno della playlist (estratto dal nome) ha la precedenza: è il dato atteso
         // dall'utente per "Data di uscita". Fallback sulla data TMDB, poi 0000.
         releaseExpr = "COALESCE(CASE WHEN year IS NULL THEN NULL ELSE printf('%04d-01-01', year) END, " +
@@ -58,7 +58,7 @@ object ContentQueryBuilder {
         offset: Int? = null
     ): Sql = build(
         table = "series",
-        titleExpr = "COALESCE(NULLIF(tmdbName, ''), name)",
+        titleExpr = "LTRIM(COALESCE(NULLIF(tmdbName, ''), name), ' -.:|_#*[]()')",
         // Vedi movies(): precedenza all'anno della playlist.
         releaseExpr = "COALESCE(CASE WHEN year IS NULL THEN NULL ELSE printf('%04d-01-01', year) END, " +
             "NULLIF(tmdbFirstAirDate, ''), '0000-00-00')",
@@ -140,7 +140,15 @@ object ContentQueryBuilder {
                 ContentSortField.TMDB_RATING -> ratingExpr
             }
             val direction = if (state.direction == SortDirection.ASC) "ASC" else "DESC"
-            sql.append(" ORDER BY ").append(orderExpr).append(' ').append(direction)
+            sql.append(" ORDER BY ")
+            if (state.sortField == ContentSortField.ALPHABETICAL) {
+                // I nomi vuoti (provider che non manda il titolo) vanno in fondo,
+                // prima dell'ordinamento alfabetico che ignora i prefissi tipo " - ".
+                sql.append("(CASE WHEN TRIM(name) = '' THEN 1 ELSE 0 END) ASC, ")
+                    .append(orderExpr).append(' ').append(direction)
+            } else {
+                sql.append(orderExpr).append(' ').append(direction)
+            }
             // Tie-breaker stabile per paginazione coerente.
             sql.append(", name COLLATE NOCASE ASC")
 

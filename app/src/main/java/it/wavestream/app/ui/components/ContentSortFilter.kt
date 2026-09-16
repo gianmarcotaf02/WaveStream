@@ -131,7 +131,15 @@ fun ContentSortFilterBar(
                 SortChip(
                     label = field.label,
                     selected = state.sortField == field,
-                    onClick = { onStateChange(state.copy(sortField = field)) }
+                    onClick = {
+                        // Direzione naturale del criterio: A-Z crescente, gli altri decrescenti.
+                        // Senza questo, selezionando "A-Z" restava la direzione Decrescente (Z-A).
+                        val naturalDirection = when (field) {
+                            ContentSortField.ALPHABETICAL -> SortDirection.ASC
+                            else -> SortDirection.DESC
+                        }
+                        onStateChange(state.copy(sortField = field, direction = naturalDirection))
+                    }
                 )
             }
 
