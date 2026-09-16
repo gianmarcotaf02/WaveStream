@@ -271,7 +271,7 @@ fun ExpandableNavRail(
                     labelAlpha = labelAlpha,
                     onClick = {
                         onTabSelected(MainTab.MOVIES)
-                        if (isExpanded) onCollapseRequest()
+                        // La sidebar resta aperta quando si seleziona Film (niente auto-collapse)
                     },
                     modifier = Modifier.focusRequester(moviesFocusRequester)
                 )
