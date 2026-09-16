@@ -159,9 +159,13 @@ fun TvPlayerScreen(
         }
     }
     
-    // Auto-hide controls after 3 seconds (only at start or when paused)
-    // Don't hide while user is actively seeking
-    LaunchedEffect(controlsVisible, isPlaying, seekIndicatorVisible, cumulativeSeekSeconds) {
+    // Timestamp dell'ultima pressione di tasto: usato per resettare l'auto-hide.
+    // Cos\u00ec, finch\u00e9 l'utente naviga i controlli, la barra NON scompare.
+    var lastKeyInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
+
+    // Auto-hide controls after 3 seconds di INATTIVIT\u00c0 (nessun tasto premuto).
+    // Non nasconde mentre si cerca o mentre si sta navigando i controlli.
+    LaunchedEffect(controlsVisible, isPlaying, seekIndicatorVisible, cumulativeSeekSeconds, lastKeyInteraction) {
         if (controlsVisible) {
             delay(3000)
             if (isPlaying && !seekIndicatorVisible && cumulativeSeekSeconds == 0) {
@@ -212,6 +216,13 @@ fun TvPlayerScreen(
             // Removed global OK/ENTER handler - each button handles its own click
             // This prevents play/pause when focus is on other buttons like Subtitles
             .focusable()
+            // Qualsiasi tasto premuto resetta il timer di auto-hide: la barra resta
+            // visibile finch\u00e9 l'utente sta navigando. Ritorna false per non
+            // intercettare l'evento (i controlli lo ricevono normalmente).
+            .onPreviewKeyEvent {
+                lastKeyInteraction = System.currentTimeMillis()
+                false
+            }
     ) {
         // Larghezza video animata: full screen oppure mini player (a sinistra)
         val videoWidth by animateDpAsState(
