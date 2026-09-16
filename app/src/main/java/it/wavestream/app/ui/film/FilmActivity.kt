@@ -106,6 +106,15 @@ class FilmActivity : ComponentActivity() {
         // (era la causa di sfarfallii e reset dello scroll).
         var pendingFilterReload by remember { mutableIntStateOf(0) }
 
+        // Stato griglia: quando cambiano categoria o filtri si riparte dall'alto.
+        val gridState = androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
+        LaunchedEffect(sortFilter, selectedCategory, showingAllMovies) {
+            try {
+                gridState.scrollToItem(0)
+            } catch (_: Exception) {
+            }
+        }
+
         // Categoria corrente: null = "Tutti i film"
         fun currentCategory(): String? = if (showingAllMovies) null else selectedCategory
 
@@ -236,7 +245,8 @@ class FilmActivity : ComponentActivity() {
                 }
                 startActivity(intent)
             },
-            onBackClick = { finish() }
+            onBackClick = { finish() },
+            gridState = gridState
         )
     }
     
@@ -275,7 +285,9 @@ fun FilmScreen(
     onMovieClick: (Movie) -> Unit,
     onLoadMore: () -> Unit = {},
     onContinueWatchingClick: (ContinueWatchingItem) -> Unit = {},
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    gridState: androidx.tv.foundation.lazy.grid.TvLazyGridState =
+        androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
 ) {
     Row(
         modifier = Modifier
@@ -389,6 +401,7 @@ fun FilmScreen(
                     // Movie grid using TV Compose for proper D-pad navigation
                     TvLazyVerticalGrid(
                         columns = TvGridCells.Adaptive(minSize = 150.dp),
+                        state = gridState,
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         modifier = Modifier.weight(1f).fillMaxWidth()
