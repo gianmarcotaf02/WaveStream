@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -372,6 +373,7 @@ fun TvPlayerScreen(
             ModernNextEpisodeOverlay(
                 title = next.title,
                 subtitle = next.subtitle,
+                countdown = next.countdown,
                 totalCountdown = next.totalCountdown,
                 autoPlay = next.autoPlay,
                 onPlayNext = onPlayNext,
@@ -1837,15 +1839,16 @@ private fun ModernSeekIndicator(seconds: Int) {
             .padding(horizontal = 28.dp, vertical = 18.dp),
         contentAlignment = Alignment.Center
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+        // Freccia ad arco SOPRA il numero: verso destra in avanti, verso sinistra indietro.
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Icon(
-                imageVector = if (isForward) Icons.Default.FastForward else Icons.Default.FastRewind,
-                contentDescription = null,
+                imageVector = if (isForward) Icons.Default.Forward else Icons.AutoMirrored.Filled.Reply,
+                contentDescription = if (isForward) "Avanti" else "Indietro",
                 tint = WaveStreamColors.Accent,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(46.dp)
             )
             Text(
                 text = text,
@@ -1989,6 +1992,7 @@ private fun SkipIntroOverlay(
 private fun ModernNextEpisodeOverlay(
     title: String,
     subtitle: String?,
+    countdown: Int,
     totalCountdown: Int = 10,
     autoPlay: Boolean,
     onPlayNext: () -> Unit,
@@ -2032,9 +2036,9 @@ private fun ModernNextEpisodeOverlay(
         runCatching { primaryFocus.requestFocus() }
     }
 
-    val secondsLeft = if (autoPlay && totalCountdown > 0) {
-        kotlin.math.ceil(((1f - progress.value) * totalCountdown).toDouble()).toInt().coerceAtLeast(0)
-    } else 0
+    // Il numero segue il countdown reale del player (garantisce i 10 s), mentre l'anello
+    // `progress` resta fluido e continuo.
+    val secondsLeft = countdown.coerceAtLeast(0)
 
     GlassSurface(
         shape = RoundedCornerShape(16.dp),
