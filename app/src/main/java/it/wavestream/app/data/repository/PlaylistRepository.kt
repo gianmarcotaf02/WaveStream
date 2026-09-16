@@ -854,11 +854,12 @@ class PlaylistRepository @Inject constructor(
                     val existing = currentSeriesMap[xtreamId]
                     val categoryName = seriesCategoryMap[ser.categoryId] ?: "Uncategorized"
                     val playlistOrder = (ser.added ?: index.toLong()).toInt()
+                    val derivedYear = contentNameParser.extractReleaseYear(ser.name) ?: existing?.year
                     
                     if (existing != null) {
-                        if (existing.name != ser.name || existing.logoUrl != ser.poster || existing.category != categoryName) {
+                        if (existing.name != ser.name || existing.logoUrl != ser.poster || existing.category != categoryName || existing.year != derivedYear) {
                             seriesToUpdate.add(existing.copy(
-                                year = contentNameParser.extractReleaseYear(ser.name),
+                                year = derivedYear,
                                 name = ser.name, logoUrl = ser.poster, xtreamBackdropUrl = ser.backdrop,
                                 category = categoryName, categoryId = ser.categoryId, xtreamRating = ser.rating, 
                                 xtreamPlot = ser.plot, xtreamCast = ser.cast, xtreamDirector = ser.director, xtreamGenre = ser.genre,
