@@ -510,8 +510,9 @@ private fun SeriesGridCard(
                 modifier = Modifier.fillMaxSize()
             )
             
-            // Rating badge
-            series.rating?.takeIf { it > 0 }?.let { rating ->
+            // Rating badge — TMDB (coerente con l'ordinamento "Voto TMDB" e col detail view);
+            // fallback sul voto del provider/IMDB solo se TMDB non è disponibile.
+            (series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating)?.takeIf { it > 0 }?.let { rating ->
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)

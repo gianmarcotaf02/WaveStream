@@ -128,7 +128,7 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = movie.backdropUrl,
                             contentType = "MOVIE",
                             year = movie.year,
-                            rating = movie.tmdbVoteAverage ?: movie.rating,
+                            rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating,
                             tmdbRating = movie.tmdbVoteAverage
                         )
                     }
@@ -144,7 +144,7 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = series.backdropUrl,
                             contentType = "SERIES",
                             year = series.year,
-                            rating = series.tmdbVoteAverage ?: series.rating,
+                            rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating,
                             tmdbRating = series.tmdbVoteAverage
                         )
                     }
@@ -159,7 +159,7 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = movie.backdropUrl,
                             contentType = "MOVIE",
                             year = movie.year,
-                            rating = movie.tmdbVoteAverage ?: movie.rating,
+                            rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating,
                             tmdbRating = movie.tmdbVoteAverage
                         )
                     }
@@ -174,7 +174,7 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = series.backdropUrl,
                             contentType = "SERIES",
                             year = series.year,
-                            rating = series.tmdbVoteAverage ?: series.rating,
+                            rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating,
                             tmdbRating = series.tmdbVoteAverage
                         )
                     }
@@ -228,7 +228,7 @@ class CategoryActivity : ComponentActivity() {
                         backdropUrl = movie.backdropUrl,
                         contentType = "MOVIE",
                         year = movie.year,
-                        rating = movie.tmdbVoteAverage ?: movie.rating,
+                        rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating,
                         tmdbRating = movie.tmdbVoteAverage
                     )
                 }
@@ -240,7 +240,7 @@ class CategoryActivity : ComponentActivity() {
                         backdropUrl = series.backdropUrl,
                         contentType = "SERIES",
                         year = series.year,
-                        rating = series.tmdbVoteAverage ?: series.rating,
+                        rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating,
                         tmdbRating = series.tmdbVoteAverage
                     )
                 }
