@@ -101,6 +101,9 @@ class FilmActivity : ComponentActivity() {
         var continueWatchingItems by remember { mutableStateOf<List<ContinueWatchingItem>>(emptyList()) }
         var sortFilter by remember { mutableStateOf(SortFilterState()) }
         var reloadToken by remember { mutableIntStateOf(0) }
+        // Debounce dei cambi filtri: evita un reload ad ogni click sullo stepper
+        // (era la causa di sfarfallii e reset dello scroll).
+        var pendingFilterReload by remember { mutableIntStateOf(0) }
 
         // Categoria corrente: null = "Tutti i film"
         fun currentCategory(): String? = if (showingAllMovies) null else selectedCategory
@@ -180,6 +183,15 @@ class FilmActivity : ComponentActivity() {
             reloadMovies()
         }
 
+        // Applica i filtri dopo una breve pausa: un'unica query anche se l'utente
+        // preme pi\u00f9 volte di fila le frecce degli stepper.
+        LaunchedEffect(pendingFilterReload) {
+            if (pendingFilterReload > 0) {
+                delay(250)
+                reloadMovies()
+            }
+        }
+
         FilmScreen(
             categories = categories,
             selectedCategory = selectedCategory,
@@ -190,16 +202,20 @@ class FilmActivity : ComponentActivity() {
             showingAllMovies = showingAllMovies,
             totalMoviesCount = totalMoviesCount,
             sortFilter = sortFilter,
+            availableCategories = categories.map { it.name },
+            showCategoryFilter = showingAllMovies,
             continueWatchingItems = continueWatchingItems,
             onSortFilterChange = { newState ->
                 if (newState != sortFilter) {
                     sortFilter = newState
-                    reloadMovies()
+                    pendingFilterReload++
                 }
             },
             onCategorySelect = { cat ->
                 showingAllMovies = false
                 selectedCategory = cat
+                // La categoria della sidebar sostituisce il filtro multi-categoria.
+                sortFilter = sortFilter.copy(filter = sortFilter.filter.copy(categories = emptySet()))
                 reloadMovies()
             },
             onViewAllClick = {
@@ -249,6 +265,8 @@ fun FilmScreen(
     showingAllMovies: Boolean,
     totalMoviesCount: Int,
     sortFilter: SortFilterState = SortFilterState(),
+    availableCategories: List<String> = emptyList(),
+    showCategoryFilter: Boolean = false,
     continueWatchingItems: List<ContinueWatchingItem> = emptyList(),
     onSortFilterChange: (SortFilterState) -> Unit = {},
     onCategorySelect: (String) -> Unit,
@@ -322,13 +340,17 @@ fun FilmScreen(
 
                     ContentSortFilterBar(
                         state = sortFilter,
-                        onStateChange = onSortFilterChange
+                        onStateChange = onSortFilterChange,
+                        availableCategories = availableCategories,
+                        showCategoryFilter = showCategoryFilter
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Loading / empty state: la barra Ordinamento resta montata per non perdere il focus D-pad
-                    if (isLoading) {
+                    // Loading NON distruttivo: se ci sono gi\u00e0 contenuti la griglia resta
+                    // montata (nessuno sfarfallio/reset dello scroll) e mostriamo solo un
+                    // overlay; lo spinner pieno compare solo al primo caricamento.
+                    if (movies.isEmpty() && isLoading) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -351,6 +373,8 @@ fun FilmScreen(
                             )
                         }
                     } else {
+                    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                     // Continue Watching Carousel (if items exist)
                     if (continueWatchingItems.isNotEmpty()) {
                         ContinueWatchingCarousel(
@@ -366,7 +390,7 @@ fun FilmScreen(
                         columns = TvGridCells.Adaptive(minSize = 150.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.weight(1f).fillMaxWidth()
                     ) {
                         tvGridItems(movies, key = { it.id }) { movie ->
                             MovieGridCard(
@@ -408,6 +432,19 @@ fun FilmScreen(
                                 }
                             }
                         }
+                    }
+                    }
+                    }
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.35f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(color = WaveStreamColors.Accent)
+                        }
+                    }
                     }
                 }
             }
