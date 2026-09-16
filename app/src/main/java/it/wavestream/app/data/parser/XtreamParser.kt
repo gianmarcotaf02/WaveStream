@@ -11,7 +11,9 @@ import javax.inject.Singleton
  * Uses Android's built-in JSON parsing to avoid KAPT conflicts
  */
 @Singleton
-class XtreamParser @Inject constructor() {
+class XtreamParser @Inject constructor(
+    private val contentNameParser: ContentNameParser
+) {
     
     companion object {
         private const val TAG = "XtreamParser"
@@ -171,7 +173,7 @@ class XtreamParser @Inject constructor() {
                     categoryId = obj.optString("category_id", "").takeIf { it.isNotEmpty() },
                     extension = obj.optString("container_extension", "").takeIf { it.isNotEmpty() },
                     rating = obj.optString("rating", "").takeIf { it.isNotEmpty() },
-                    year = obj.optString("year", "").takeIf { it.isNotEmpty() },
+                    year = resolveYear(name, obj.optString("year", "").takeIf { it.isNotEmpty() }),
                     added = addedTimestamp
                 )
             }
@@ -236,7 +238,7 @@ class XtreamParser @Inject constructor() {
                     backdrop = backdropUrl,
                     categoryId = obj.optString("category_id", "").takeIf { it.isNotEmpty() },
                     rating = obj.optString("rating", "").takeIf { it.isNotEmpty() },
-                    year = obj.optString("year", "").takeIf { it.isNotEmpty() },
+                    year = resolveYear(name, obj.optString("year", "").takeIf { it.isNotEmpty() }),
                     plot = obj.optString("plot", "").takeIf { it.isNotEmpty() },
                     cast = obj.optString("cast", "").takeIf { it.isNotEmpty() },
                     director = obj.optString("director", "").takeIf { it.isNotEmpty() },
@@ -421,6 +423,37 @@ data class XtreamStream(
     val categoryId: String?,
     val hasArchive: Int = 0
 )
+
+    /**
+     * Risolve l'anno di uscita di un contenuto Xtream.
+     *
+     * Priorità:
+     * 1. anno tra parentesi nel nome ("1917 (2019)" -> 2019, "2012 (2009) FHD" -> 2009);
+     * 2. se il nome È esso stesso un anno (titolo "1917"), il campo `year` dell'API
+     *    è probabilmente il titolo travisato: viene scartato (null) così il match
+     *    TMDB avviene solo sul titolo;
+     * 3. fallback sul campo `year` dell'API, validato nell'intervallo 1900..2030.
+     */
+    private fun resolveYear(name: String, apiYear: String?): String? {
+        contentNameParser.extractReleaseYear(name)?.let { return it.toString() }
+
+        val api = apiYear?.toIntOrNull()
+        val nameAsNumber = name.trim().trim('(', ')', '[', ']', ' ').toIntOrNull()
+        if (api != null && nameAsNumber == api && nameAsNumber in 1900..2030) {
+            return null
+        }
+        return api?.takeIf { it in 1900..2030 }?.toString()
+    }
+
+    private fun isCategoryDelimiter(name: String): Boolean {
+        val trimmed = name.trim()
+        return trimmed.isEmpty() ||
+            trimmed.all { !it.isLetterOrDigit() } ||
+            trimmed.equals("#", ignoreCase = true) ||
+            trimmed.equals("##", ignoreCase = true)
+    }
+
+}
 
 data class XtreamVod(
     val id: Int,
