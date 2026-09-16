@@ -36,7 +36,13 @@ fun NavRailItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     iconTint: Color? = null,
-    iconPainter: Painter? = null
+    iconPainter: Painter? = null,
+    /**
+     * Alpha dei label letta in fase di DRAW (deferred read).
+     * Prima era un animateFloatAsState(tween(150)) separato: animazione doppia
+     * rispetto alla larghezza del rail e ricomposizione a ogni frame.
+     */
+    labelAlpha: () -> Float = { 1f }
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -72,12 +78,6 @@ fun NavRailItem(
             else -> WaveStreamColors.TextSecondary
         },
         label = "navRailItemText"
-    )
-    
-    val textAlpha by animateFloatAsState(
-        targetValue = if (isExpanded) 1f else 0f,
-        animationSpec = androidx.compose.animation.core.tween(150),
-        label = "navRailItemTextAlpha"
     )
     
     Box(
@@ -144,7 +144,7 @@ fun NavRailItem(
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
                     fontSize = 13.sp,
-                    modifier = Modifier.alpha(textAlpha)
+                    modifier = Modifier.graphicsLayer { alpha = labelAlpha() }
                 )
             }
         } else {
