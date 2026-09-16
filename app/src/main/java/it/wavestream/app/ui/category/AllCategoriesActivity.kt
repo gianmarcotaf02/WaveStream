@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -186,7 +188,15 @@ private fun AllCategoriesScreen(
     var categories by remember { mutableStateOf<List<CategoryInfo>>(emptyList()) }
     var favoriteCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
     var isLoading by remember { mutableStateOf(true) }
+    var searchQuery by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
+
+    // Ricerca interna alla sezione categorie: filtra solo per nome categoria.
+    val filteredCategories = remember(categories, searchQuery) {
+        val q = searchQuery.trim()
+        if (q.isEmpty()) categories
+        else categories.filter { it.name.contains(q, ignoreCase = true) }
+    }
 
     // Focus iniziale sulla prima categoria (non sul bottone indietro)
     val firstCategoryFocusRequester = remember { FocusRequester() }
@@ -248,11 +258,18 @@ private fun AllCategoriesScreen(
             
             // Count (esclude la card "Tutti i film"/"Tutte le serie TV")
             Text(
-                text = "${categories.count { !it.isViewAll }} categorie",
+                text = "${filteredCategories.count { !it.isViewAll }} categorie",
                 style = MaterialTheme.typography.bodyMedium,
                 color = WaveStreamColors.TextSecondary
             )
         }
+
+        // Barra di ricerca interna (solo sezione categorie)
+        CategorySearchBar(
+            query = searchQuery,
+            onQueryChange = { searchQuery = it },
+            onClear = { searchQuery = "" }
+        )
         
         // Content
         if (isLoading) {
@@ -262,15 +279,26 @@ private fun AllCategoriesScreen(
             ) {
                 CircularProgressIndicator(color = WaveStreamColors.Accent)
             }
+        } else if (filteredCategories.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = if (searchQuery.isBlank()) "Nessuna categoria" else "Nessuna categoria trovata per \"$searchQuery\"",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = WaveStreamColors.TextSecondary
+                )
+            }
         } else {
             TvLazyVerticalGrid(
                 columns = TvGridCells.Adaptive(minSize = 200.dp),
-                contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                itemsIndexed(categories, key = { _, it -> it.name }) { index, category ->
+                itemsIndexed(filteredCategories, key = { _, it -> it.name }) { index, category ->
                     val isFav = favoriteCategories.contains(category.name)
                     CategoryCard(
                         category = category,
