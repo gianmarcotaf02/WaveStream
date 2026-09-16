@@ -445,14 +445,6 @@ data class XtreamStream(
         return api?.takeIf { it in 1900..2030 }?.toString()
     }
 
-    private fun isCategoryDelimiter(name: String): Boolean {
-        val trimmed = name.trim()
-        return trimmed.isEmpty() ||
-            trimmed.all { !it.isLetterOrDigit() } ||
-            trimmed.equals("#", ignoreCase = true) ||
-            trimmed.equals("##", ignoreCase = true)
-    }
-
 }
 
 data class XtreamVod(
