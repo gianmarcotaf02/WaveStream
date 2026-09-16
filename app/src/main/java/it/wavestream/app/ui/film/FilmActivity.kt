@@ -504,9 +504,10 @@ private fun MovieGridCard(
                 modifier = Modifier.fillMaxSize()
             )
             
-            // Rating badge — TMDB (coerente con l'ordinamento "Voto TMDB" e col detail view);
-            // fallback sul voto del provider/IMDB solo se TMDB non è disponibile.
-            (movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating)?.takeIf { it > 0 }?.let { rating ->
+            // Rating badge — SOLO voto TMDB (coerente con l'ordinamento "Voto TMDB"
+            // e col detail view). Senza voto TMDB non mostriamo nulla: i voti della
+            // playlist non vanno usati perché falserebbero lettura e ordinamento.
+            movie.tmdbVoteAverage?.takeIf { it > 0f }?.let { rating ->
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)

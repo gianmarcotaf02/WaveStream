@@ -806,7 +806,7 @@ class PlaylistRepository @Inject constructor(
                         ?: existing?.year
                     
                     if (existing != null) {
-                        if (existing.name != vod.name || existing.logoUrl != vod.poster || existing.category != categoryName || existing.streamUrl != streamUrl || existing.year != derivedYear) {
+                        if (existing.name != vod.name || existing.logoUrl != vod.poster || existing.category != categoryName || existing.streamUrl != streamUrl || existing.year != derivedYear || existing.xtreamRating != vod.rating) {
                             moviesToUpdate.add(existing.copy(
                                 name = vod.name, streamUrl = streamUrl, logoUrl = vod.poster, xtreamBackdropUrl = vod.backdrop,
                                 category = categoryName, categoryId = vod.categoryId, containerExtension = vod.extension,
@@ -867,7 +867,7 @@ class PlaylistRepository @Inject constructor(
                             ))
                         } else {
                             seriesToUpdate.add(existing.copy(
-                                year = contentNameParser.extractReleaseYear(ser.name),
+                                year = derivedYear,
                                 xtreamRating = ser.rating, xtreamPlot = ser.plot, xtreamCast = ser.cast, 
                                 xtreamDirector = ser.director, xtreamGenre = ser.genre, playlistOrder = playlistOrder,
                                 tmdbId = ser.tmdbId ?: existing.tmdbId
