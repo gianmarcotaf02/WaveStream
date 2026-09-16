@@ -406,23 +406,6 @@ class XtreamParser @Inject constructor(
             null
         }
     }
-}
-
-// Simple data classes without annotations
-data class XtreamCategory(
-    val id: String,
-    val name: String,
-    val parentId: Int? = null
-)
-
-data class XtreamStream(
-    val id: Int,
-    val name: String,
-    val logo: String?,
-    val epgId: String?,
-    val categoryId: String?,
-    val hasArchive: Int = 0
-)
 
     /**
      * Risolve l'anno di uscita di un contenuto Xtream.
@@ -444,8 +427,23 @@ data class XtreamStream(
         }
         return api?.takeIf { it in 1900..2030 }?.toString()
     }
-
 }
+
+// Simple data classes without annotations
+data class XtreamCategory(
+    val id: String,
+    val name: String,
+    val parentId: Int? = null
+)
+
+data class XtreamStream(
+    val id: Int,
+    val name: String,
+    val logo: String?,
+    val epgId: String?,
+    val categoryId: String?,
+    val hasArchive: Int = 0
+)
 
 data class XtreamVod(
     val id: Int,
