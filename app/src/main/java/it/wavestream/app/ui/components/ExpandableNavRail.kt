@@ -358,14 +358,17 @@ fun ExpandableNavRail(
             // restano realmente ancorati in basso).
             Spacer(modifier = Modifier.height(4.dp))
 
-            NavRailItem(
-                icon = Icons.Default.AutoAwesome,
-                label = "Nova",
-                isSelected = false,
-                isExpanded = isExpanded,
-                labelAlpha = labelAlpha,
-                onClick = onAssistantClick
-            )
+            // Nova momentaneamente in pausa (vedi NovaFeature): voce nascosta.
+            if (it.wavestream.app.assistant.NovaFeature.ENABLED) {
+                NavRailItem(
+                    icon = Icons.Default.AutoAwesome,
+                    label = "Nova",
+                    isSelected = false,
+                    isExpanded = isExpanded,
+                    labelAlpha = labelAlpha,
+                    onClick = onAssistantClick
+                )
+            }
 
             NavRailItem(
                 icon = Icons.Default.Settings,
