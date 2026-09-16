@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -62,7 +64,9 @@ import kotlin.math.abs
 @Immutable
 data class CategoryInfo(
     val name: String,
-    val itemCount: Int
+    val itemCount: Int,
+    /** Prima card "Tutti i film" / "Tutte le serie TV": contiene l'intera playlist. */
+    val isViewAll: Boolean = false
 )
 
 /**
@@ -95,6 +99,16 @@ class AllCategoriesActivity : ComponentActivity() {
                         }
                         startActivity(intent)
                     },
+                    onViewAllClick = {
+                        // "Tutti i film" / "Tutte le serie TV" → griglia completa con
+                        // sidebar categorie (FilmActivity / SeriesActivity).
+                        val intent = if (contentType == "movies") {
+                            Intent(this, it.wavestream.app.ui.film.FilmActivity::class.java)
+                        } else {
+                            Intent(this, it.wavestream.app.ui.series.SeriesActivity::class.java)
+                        }
+                        startActivity(intent)
+                    },
                     onBack = { finish() },
                     loadCategories = { loadCategories() },
                     loadFavorites = {
@@ -119,19 +133,35 @@ class AllCategoriesActivity : ComponentActivity() {
     private suspend fun loadCategories(): List<CategoryInfo> {
         return withContext(Dispatchers.IO) {
             if (contentType == "movies") {
-                movieDao.getCategoriesList().map { categoryName ->
+                val list = movieDao.getCategoriesList().map { categoryName ->
                     CategoryInfo(
                         name = categoryName,
                         itemCount = movieDao.getMovieCountByCategory(categoryName)
                     )
                 }
+                // Fuori ordine alfabetico: "Tutti i film" sempre in prima posizione.
+                listOf(
+                    CategoryInfo(
+                        name = "Tutti i film",
+                        itemCount = movieDao.getAllMoviesCount(),
+                        isViewAll = true
+                    )
+                ) + list
             } else {
-                seriesDao.getCategoriesList().map { categoryName ->
+                val list = seriesDao.getCategoriesList().map { categoryName ->
                     CategoryInfo(
                         name = categoryName,
                         itemCount = seriesDao.getSeriesCountByCategory(categoryName)
                     )
                 }
+                // Fuori ordine alfabetico: "Tutte le serie TV" sempre in prima posizione.
+                listOf(
+                    CategoryInfo(
+                        name = "Tutte le serie TV",
+                        itemCount = seriesDao.getAllSeriesCount(),
+                        isViewAll = true
+                    )
+                ) + list
             }
         }
     }
@@ -144,6 +174,7 @@ class AllCategoriesActivity : ComponentActivity() {
 private fun AllCategoriesScreen(
     contentType: String,
     onCategoryClick: (String) -> Unit,
+    onViewAllClick: () -> Unit,
     onBack: () -> Unit,
     loadCategories: suspend () -> List<CategoryInfo>,
     loadFavorites: suspend () -> Set<String>,
@@ -178,15 +209,8 @@ private fun AllCategoriesScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Back button
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Indietro",
-                tint = WaveStreamColors.TextPrimary,
-                modifier = Modifier
-                    .size(28.dp)
-                    .clickable { onBack() }
-            )
+            // Back button con focus accent (bordo + alone quando selezionato)
+            FocusedBackButton(onClick = onBack)
             
             // Icon (4 squares)
             FourSquaresIcon(
@@ -234,14 +258,21 @@ private fun AllCategoriesScreen(
                         itemLabel = itemLabel,
                         isSeries = contentType == "series",
                         isFavorite = isFav,
-                        onClick = { onCategoryClick(category.name) },
+                        isViewAll = category.isViewAll,
+                        onClick = {
+                            if (category.isViewAll) onViewAllClick()
+                            else onCategoryClick(category.name)
+                        },
                         onLongPress = {
-                            favoriteCategories = if (isFav) {
-                                favoriteCategories - category.name
-                            } else {
-                                favoriteCategories + category.name
+                            // La card "Tutti i film"/"Tutte le serie TV" non è un preferito
+                            if (!category.isViewAll) {
+                                favoriteCategories = if (isFav) {
+                                    favoriteCategories - category.name
+                                } else {
+                                    favoriteCategories + category.name
+                                }
+                                scope.launch { onToggleFavorite(category.name) }
                             }
-                            scope.launch { onToggleFavorite(category.name) }
                         }
                     )
                 }
@@ -259,6 +290,7 @@ private fun CategoryCard(
     itemLabel: String,
     isSeries: Boolean = false,
     isFavorite: Boolean = false,
+    isViewAll: Boolean = false,
     onClick: () -> Unit,
     onLongPress: () -> Unit = {}
 ) {
@@ -281,9 +313,9 @@ private fun CategoryCard(
         generateGradientColors(category.name)
     }
 
-    // Try to get background image resource ID
-    val backgroundImageRes = remember(category.name, isSeries) {
-        getCategoryBackgroundImage(context, category.name, isSeries)
+    // Try to get background image resource ID (mai per la card "Tutti i film")
+    val backgroundImageRes = remember(category.name, isSeries, isViewAll) {
+        if (isViewAll) null else getCategoryBackgroundImage(context, category.name, isSeries)
     }
 
     // Dark gradient overlay for text readability (increased opacity)
@@ -311,7 +343,32 @@ private fun CategoryCard(
         contentAlignment = Alignment.BottomStart
     ) {
         // Background: Image or gradient fallback
-        if (backgroundImageRes != null) {
+        if (isViewAll) {
+            // Card "Tutti i film"/"Tutte le serie TV": gradiente accent dedicato
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                WaveStreamColors.Accent,
+                                WaveStreamColors.Accent.copy(alpha = 0.35f)
+                            ),
+                            start = Offset.Zero,
+                            end = Offset.Infinite
+                        )
+                    )
+            )
+            Icon(
+                imageVector = if (isSeries) Icons.Default.Tv else Icons.Default.Movie,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.35f),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+                    .size(48.dp)
+            )
+        } else if (backgroundImageRes != null) {
             // Background image - fills entire card with rounded corners
             AsyncImage(
                 model = backgroundImageRes,
@@ -365,11 +422,62 @@ private fun CategoryCard(
         }
 
         // Cuoricino rosso in basso a destra quando la categoria è tra i preferiti
-        CategoryFavoriteHeart(
-            isFavorite = isFavorite,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(12.dp)
+        // (mai sulla card "Tutti i film"/"Tutte le serie TV")
+        if (!isViewAll) {
+            CategoryFavoriteHeart(
+                isFavorite = isFavorite,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(12.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Bottone indietro con focus accent (bordo accent + alone quando selezionato)
+ */
+@Composable
+private fun FocusedBackButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.1f else 1f,
+        label = "backScale"
+    )
+    val background by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.25f) else Color.Transparent,
+        label = "backBg"
+    )
+    val border by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        label = "backBorder"
+    )
+
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(10.dp))
+            .background(background)
+            .border(2.dp, border, RoundedCornerShape(10.dp))
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Indietro",
+            tint = WaveStreamColors.TextPrimary,
+            modifier = Modifier.size(26.dp)
         )
     }
 }
