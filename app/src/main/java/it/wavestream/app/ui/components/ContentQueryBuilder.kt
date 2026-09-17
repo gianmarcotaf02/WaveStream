@@ -14,12 +14,13 @@ object ContentQueryBuilder {
     data class Sql(val sql: String, val args: List<Any?>)
 
     /**
-     * Voto per l'ordinamento/filtro "Voto TMDB": **solo** il voto TMDB.
-     * Niente fallback sul voto della playlist/IMDB: quei valori dominerebbero
-     * l'ordinamento per i titoli non ancora arricchiti, falsandolo.
-     * I titoli senza voto TMDB valgono 0 e finiscono in fondo.
+     * Voto per l'ordinamento/filtro "Voto TMDB": TMDB quando disponibile,
+     * con fallback sul voto della playlist/IMDB per i titoli non ancora arricchiti.
      */
-    private const val RATING_EXPR = "COALESCE(NULLIF(tmdbVoteAverage, 0), 0)"
+    private const val RATING_EXPR =
+        "COALESCE(NULLIF(tmdbVoteAverage, 0), " +
+            "CAST(NULLIF(xtreamRating, '') AS REAL), " +
+            "CAST(NULLIF(omdbImdbRating, '') AS REAL), 0)"
 
     fun movies(
         category: String?,

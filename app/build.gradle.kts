@@ -233,3 +233,14 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
+
+// ---------------------------------------------------------------------------
+// Verifica rapida di ENTRAMBE le varianti, senza produrre APK.
+// Uso: gradlew verifyFlavors
+// Obbligatoria prima di chiudere qualsiasi modifica (vedi AGENTS.md).
+// ---------------------------------------------------------------------------
+tasks.register("verifyFlavors") {
+    group = "verification"
+    description = "Compila le varianti modern e android7 (nessun APK prodotto)"
+    dependsOn("compileModernDebugSources", "compileAndroid7DebugSources")
+}
