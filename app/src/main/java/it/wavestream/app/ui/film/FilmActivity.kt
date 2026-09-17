@@ -34,10 +34,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
 import androidx.sqlite.db.SimpleSQLiteQuery
 import coil.compose.AsyncImage
@@ -49,6 +52,7 @@ import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.ContinueWatchingItem
 import it.wavestream.app.data.database.entity.Movie
+import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.components.ContentQueryBuilder
 import it.wavestream.app.ui.components.ContentSortFilterBar
 import it.wavestream.app.ui.components.ContinueWatchingCarousel
@@ -75,6 +79,7 @@ class FilmActivity : ComponentActivity() {
     @Inject lateinit var movieDao: MovieDao
     @Inject lateinit var watchProgressDao: WatchProgressDao
     @Inject lateinit var contentCache: ContentCache
+    @Inject lateinit var userPreferences: UserPreferences
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -154,31 +159,50 @@ class FilmActivity : ComponentActivity() {
             }
         }
 
-        // Initial load
-        LaunchedEffect(Unit) {
-            // Continue watching — batch query (N+1 fix)
-            val progressList = watchProgressDao.getContinueWatchingMovies(1L)
-            if (progressList.isNotEmpty()) {
-                val ids = progressList.map { it.contentId }
-                val moviesById = movieDao.getMoviesByIds(ids).associateBy { it.id }
-                continueWatchingItems = progressList.mapNotNull { progress ->
-                    val movie = moviesById[progress.contentId] ?: return@mapNotNull null
-                    val remaining = ((progress.duration - progress.position) / 60000).toInt()
-                    ContinueWatchingItem(
-                        watchProgressId = progress.id,
-                        contentType = ContentType.MOVIE,
-                        contentId = progress.contentId,
-                        title = movie.tmdbTitle ?: movie.name,
-                        posterUrl = movie.posterUrl,
-                        backdropUrl = movie.backdropUrl,
-                        position = progress.position,
-                        duration = progress.duration,
-                        progressPercent = progress.progressPercent,
-                        remainingMinutes = remaining.coerceAtLeast(1),
-                        lastWatchedAt = progress.lastWatchedAt
-                    )
+        // "Continua a guardare": sempre allineato all'ultimo film visto, profilo corrente.
+        suspend fun loadContinueWatchingItems() {
+            val profileId = userPreferences.getCurrentProfileId() ?: 1L
+            val progressList = watchProgressDao.getContinueWatchingMovies(profileId)
+            if (progressList.isEmpty()) {
+                continueWatchingItems = emptyList()
+                return
+            }
+            val ids = progressList.map { it.contentId }
+            val moviesById = movieDao.getMoviesByIds(ids).associateBy { it.id }
+            continueWatchingItems = progressList.mapNotNull { progress ->
+                val movie = moviesById[progress.contentId] ?: return@mapNotNull null
+                val remaining = ((progress.duration - progress.position) / 60000).toInt()
+                ContinueWatchingItem(
+                    watchProgressId = progress.id,
+                    contentType = ContentType.MOVIE,
+                    contentId = progress.contentId,
+                    title = movie.tmdbTitle ?: movie.name,
+                    posterUrl = movie.posterUrl,
+                    backdropUrl = movie.backdropUrl,
+                    position = progress.position,
+                    duration = progress.duration,
+                    progressPercent = progress.progressPercent,
+                    remainingMinutes = remaining.coerceAtLeast(1),
+                    lastWatchedAt = progress.lastWatchedAt
+                )
+            }
+        }
+
+        // Ricarica il carosello ad ogni ritorno sull'Activity (es. dal player).
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    lifecycleScope.launch { loadContinueWatchingItems() }
                 }
             }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
+
+        // Initial load
+        LaunchedEffect(Unit) {
+            loadContinueWatchingItems()
 
             val cats = movieDao.getCategoriesWithCount()
             categories = cats

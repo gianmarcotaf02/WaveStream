@@ -34,10 +34,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
 import androidx.sqlite.db.SimpleSQLiteQuery
 import coil.compose.AsyncImage
@@ -50,6 +53,7 @@ import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.ContinueWatchingItem
 import it.wavestream.app.data.database.entity.Series
+import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.components.ContentQueryBuilder
 import it.wavestream.app.ui.components.ContentSortFilterBar
 import it.wavestream.app.ui.components.ContinueWatchingCarousel
@@ -77,6 +81,7 @@ class SeriesActivity : ComponentActivity() {
     @Inject lateinit var episodeDao: EpisodeDao
     @Inject lateinit var watchProgressDao: WatchProgressDao
     @Inject lateinit var contentCache: ContentCache
+    @Inject lateinit var userPreferences: UserPreferences
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,36 +160,60 @@ class SeriesActivity : ComponentActivity() {
             }
         }
 
-        // Initial load
-        LaunchedEffect(Unit) {
-            // Load continue watching — batch query (fixes N+1)
-            val progressList = watchProgressDao.getContinueWatchingSeries(1L)
-            if (progressList.isNotEmpty()) {
-                val seriesIds = progressList.mapNotNull { it.seriesId }
-                val seriesById = if (seriesIds.isNotEmpty()) {
-                    seriesDao.getSeriesByIds(seriesIds).associateBy { it.id }
-                } else emptyMap()
-                continueWatchingItems = progressList.mapNotNull { progress ->
-                    val seriesInfo = progress.seriesId?.let { seriesById[it] } ?: return@mapNotNull null
-                    val remaining = ((progress.duration - progress.position) / 60000).toInt()
-                    ContinueWatchingItem(
-                        watchProgressId = progress.id,
-                        contentType = progress.contentType,
-                        contentId = progress.contentId,
-                        title = seriesInfo.tmdbName ?: seriesInfo.name,
-                        posterUrl = seriesInfo.posterUrl,
-                        backdropUrl = seriesInfo.backdropUrl,
-                        position = progress.position,
-                        duration = progress.duration,
-                        progressPercent = progress.progressPercent,
-                        remainingMinutes = remaining.coerceAtLeast(1),
-                        seriesId = progress.seriesId,
-                        seasonNumber = progress.season,
-                        episodeNumber = progress.episode,
-                        lastWatchedAt = progress.lastWatchedAt
-                    )
+        // "Continua a guardare": una card per serie, sempre allineata all'episodio
+        // guardato più di recente. Il profilo è quello corrente (non più hardcoded 1L).
+        suspend fun loadContinueWatchingItems() {
+            val profileId = userPreferences.getCurrentProfileId() ?: 1L
+            val progressList = watchProgressDao.getContinueWatchingSeries(profileId)
+            if (progressList.isEmpty()) {
+                continueWatchingItems = emptyList()
+                return
+            }
+            // La query è già ordinata per lastWatchedAt DESC: distinctBy tiene quindi
+            // l'episodio più recente ed evita card duplicate per la stessa serie.
+            val deduped = progressList.distinctBy { it.seriesId ?: it.contentId }
+            val seriesIds = deduped.mapNotNull { it.seriesId }
+            val seriesById = if (seriesIds.isNotEmpty()) {
+                seriesDao.getSeriesByIds(seriesIds).associateBy { it.id }
+            } else emptyMap()
+            continueWatchingItems = deduped.mapNotNull { progress ->
+                val seriesInfo = progress.seriesId?.let { seriesById[it] } ?: return@mapNotNull null
+                val remaining = ((progress.duration - progress.position) / 60000).toInt()
+                ContinueWatchingItem(
+                    watchProgressId = progress.id,
+                    contentType = progress.contentType,
+                    contentId = progress.contentId,
+                    title = seriesInfo.tmdbName ?: seriesInfo.name,
+                    posterUrl = seriesInfo.posterUrl,
+                    backdropUrl = seriesInfo.backdropUrl,
+                    position = progress.position,
+                    duration = progress.duration,
+                    progressPercent = progress.progressPercent,
+                    remainingMinutes = remaining.coerceAtLeast(1),
+                    seriesId = progress.seriesId,
+                    seasonNumber = progress.season,
+                    episodeNumber = progress.episode,
+                    lastWatchedAt = progress.lastWatchedAt
+                )
+            }
+        }
+
+        // Ricarica il carosello ad ogni ritorno sull'Activity (es. dal player):
+        // senza questo il badge restava bloccato sull'episodio precedente.
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    lifecycleScope.launch { loadContinueWatchingItems() }
                 }
             }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
+
+        // Initial load
+        LaunchedEffect(Unit) {
+            loadContinueWatchingItems()
 
             val cats = seriesDao.getCategoriesWithCount()
             categories = cats
