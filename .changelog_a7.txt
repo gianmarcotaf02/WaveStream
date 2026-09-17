@@ -1,0 +1,6 @@
+Variante per Smart TV con Android 7.0/7.1 (API 24), senza Google Play Services.
+
+- Utilizzabile anche su TV AOSP non certificate: avviabile dal launcher standard (non solo Android TV)
+- Include tutte le novità della 1.0.21 (menu Filtri, categorie, film/serie, fix focus telecomando)
+- Aggiornamento in-app: risolto il blocco e i lag durante l'installazione
+- Riapertura automatica dell'app dopo l'aggiornamento resa più affidabile
