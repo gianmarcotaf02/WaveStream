@@ -100,3 +100,6 @@ xtream_checker.py
 
 # Signing credentials (do not commit)
 keystore.properties
+
+# google-services.json della variante android7 (chiavi) — non deve MAI finire in git
+app/src/android7/google-services.json
