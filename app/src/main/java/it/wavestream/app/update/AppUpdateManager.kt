@@ -42,7 +42,6 @@ class AppUpdateManager @Inject constructor(
 ) {
     companion object {
         private const val TAG = "AppUpdateManager"
-        private const val UPDATE_NODE = "app_update"
         private const val APK_FILENAME = "wavestream_update.apk"
 
         /**
@@ -53,8 +52,13 @@ class AppUpdateManager @Inject constructor(
         private const val MIN_FREE_BYTES_FOR_UPDATE = 500L * 1024L * 1024L
     }
     
+    /**
+     * Canale di aggiornamento: URL e nodo arrivano da BuildConfig, così ogni variante
+     * (modern / android7) legge il PROPRIO nodo e scarica il PROPRIO APK.
+     * Vedi wavestream_android7_plan.md, Fase D.
+     */
     private val database by lazy {
-        FirebaseDatabase.getInstance("https://wavestream-d3972-default-rtdb.europe-west1.firebasedatabase.app")
+        FirebaseDatabase.getInstance(BuildConfig.RTDB_URL)
     }
     
     private val _downloadState = MutableStateFlow<DownloadState>(DownloadState.Idle)
@@ -78,10 +82,10 @@ class AppUpdateManager @Inject constructor(
      */
     suspend fun checkForUpdate(): UpdateCheckResult = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "Checking for updates...")
+            Log.d(TAG, "Checking for updates... [${BuildConfig.UPDATE_NODE}]")
             
             val updateInfo = suspendCancellableCoroutine<Pair<UpdateInfo?, String?>?> { continuation ->
-                database.reference.child(UPDATE_NODE).get()
+                database.reference.child(BuildConfig.UPDATE_NODE).get()
                     .addOnSuccessListener { snapshot ->
                         try {
                             if (snapshot.exists()) {
@@ -331,26 +335,58 @@ class AppUpdateManager @Inject constructor(
             return
         }
 
-        // Verifica permesso "installa app sconosciute"
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
-            !context.packageManager.canRequestPackageInstalls()
-        ) {
-            Log.d(TAG, "Richiesta permesso installazione pacchetti")
-            try {
-                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                    data = Uri.parse("package:${context.packageName}")
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        // Permesso di installazione.
+        //  - API >= 26: permesso per-app, schermata dedicata.
+        //  - API < 26: impostazione globale "Origini sconosciute" (nessuna schermata per-app).
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!context.packageManager.canRequestPackageInstalls()) {
+                Log.d(TAG, "Richiesta permesso installazione pacchetti")
+                try {
+                    val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Impossibile aprire le impostazioni installazione", e)
+                    Toast.makeText(
+                        context,
+                        "Abilita \"Origini sconosciute\" per WaveStream e riprova",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
-                context.startActivity(intent)
+                return
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            val unknownSourcesEnabled = try {
+                Settings.Secure.getInt(
+                    context.contentResolver,
+                    Settings.Secure.INSTALL_NON_MARKET_APPS,
+                    0
+                ) == 1
             } catch (e: Exception) {
-                Log.e(TAG, "Impossibile aprire le impostazioni installazione", e)
+                // Impostazione non disponibile su questo firmware: procediamo e
+                // lasciamo che sia l'installer a segnalare l'eventuale errore.
+                Log.w(TAG, "Impossibile leggere INSTALL_NON_MARKET_APPS: ${e.message}")
+                true
+            }
+            if (!unknownSourcesEnabled) {
+                Log.d(TAG, "Origini sconosciute disabilitate (API < 26)")
+                try {
+                    val intent = Intent(Settings.ACTION_SECURITY_SETTINGS)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Impossibile aprire le impostazioni di sicurezza", e)
+                }
                 Toast.makeText(
                     context,
-                    "Abilita \"Origini sconosciute\" per WaveStream e riprova",
+                    "Abilita \"Origini sconosciute\" in Impostazioni \u2192 Sicurezza e riprova",
                     Toast.LENGTH_LONG
                 ).show()
+                return
             }
-            return
         }
 
         // Avviso preventivo sullo spazio (causa più comune di fallimento su Fire TV)

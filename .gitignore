@@ -100,3 +100,6 @@ xtream_checker.py
 
 # Signing credentials (do not commit)
 keystore.properties
+
+# google-services.json per la variante android7 (contiene chiavi)
+app/src/android7/google-services.json

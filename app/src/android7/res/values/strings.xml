@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Override del nome app per la variante android7, così sul launcher TV
+  la variante si distingue dall'app principale installata sullo stesso device.
+-->
+<resources>
+    <string name="app_name">WaveStream TV (A7)</string>
+</resources>
