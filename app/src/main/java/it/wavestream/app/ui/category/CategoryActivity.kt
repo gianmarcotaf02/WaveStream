@@ -128,7 +128,7 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = movie.backdropUrl,
                             contentType = "MOVIE",
                             year = movie.year,
-                            rating = movie.tmdbVoteAverage?.takeIf { it > 0f },
+                            rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating,
                             tmdbRating = movie.tmdbVoteAverage
                         )
                     }
@@ -144,7 +144,7 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = series.backdropUrl,
                             contentType = "SERIES",
                             year = series.year,
-                            rating = series.tmdbVoteAverage?.takeIf { it > 0f },
+                            rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating,
                             tmdbRating = series.tmdbVoteAverage
                         )
                     }
@@ -159,7 +159,7 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = movie.backdropUrl,
                             contentType = "MOVIE",
                             year = movie.year,
-                            rating = movie.tmdbVoteAverage?.takeIf { it > 0f },
+                            rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating,
                             tmdbRating = movie.tmdbVoteAverage
                         )
                     }
@@ -174,7 +174,7 @@ class CategoryActivity : ComponentActivity() {
                             backdropUrl = series.backdropUrl,
                             contentType = "SERIES",
                             year = series.year,
-                            rating = series.tmdbVoteAverage?.takeIf { it > 0f },
+                            rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating,
                             tmdbRating = series.tmdbVoteAverage
                         )
                     }
@@ -228,7 +228,7 @@ class CategoryActivity : ComponentActivity() {
                         backdropUrl = movie.backdropUrl,
                         contentType = "MOVIE",
                         year = movie.year,
-                        rating = movie.tmdbVoteAverage?.takeIf { it > 0f },
+                        rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating,
                         tmdbRating = movie.tmdbVoteAverage
                     )
                 }
@@ -240,7 +240,7 @@ class CategoryActivity : ComponentActivity() {
                         backdropUrl = series.backdropUrl,
                         contentType = "SERIES",
                         year = series.year,
-                        rating = series.tmdbVoteAverage?.takeIf { it > 0f },
+                        rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating,
                         tmdbRating = series.tmdbVoteAverage
                     )
                 }
@@ -594,7 +594,7 @@ private fun applyContentSortFilter(
 
     val filtered = items.filter { item ->
         val year = item.year
-        val rating = item.tmdbRating?.takeIf { it > 0f }
+        val rating = item.tmdbRating?.takeIf { it > 0f } ?: item.rating
         (from == null || (year != null && year >= from)) &&
             (to == null || (year != null && year <= to)) &&
             (minRating == null || (rating != null && rating >= minRating))
@@ -606,7 +606,7 @@ private fun applyContentSortFilter(
         // Fallback su rating generico: molti titoli non hanno ancora il voto TMDB.
         // Solo voto TMDB: i titoli senza TMDB valgono -1 e finiscono in fondo.
         ContentSortField.TMDB_RATING -> compareBy(
-            { it.tmdbRating?.takeIf { r -> r > 0f } ?: -1f },
+            { it.tmdbRating?.takeIf { r -> r > 0f } ?: it.rating ?: -1f },
             { it.title.lowercase() }
         )
     }
