@@ -370,7 +370,7 @@ class AppUpdateManager @Inject constructor(
      * senza esporre il motivo. Con PackageInstaller l'installer copia lui stesso l'APK e
      * [UpdateInstallReceiver] riceve il codice di errore reale.
      */
-    fun installUpdate() {
+    suspend fun installUpdate() {
         if (downloadedApkFile == null) {
             val updatesDir = File(context.getExternalFilesDir(null), "updates")
             val apkFile = File(updatesDir, APK_FILENAME)
@@ -456,7 +456,12 @@ class AppUpdateManager @Inject constructor(
         }
 
         try {
-            installWithPackageInstaller(apkFile)
+            // La copia dell'APK nella sessione del PackageInstaller è pesante (~200 MB):
+            // va eseguita FUORI dal main thread, altrimenti la UI resta bloccata per
+            // diversi secondi (freeze/lag evidente sulle TV, storage lento).
+            withContext(Dispatchers.IO) {
+                installWithPackageInstaller(apkFile)
+            }
         } catch (e: Exception) {
             Log.e(TAG, "PackageInstaller fallito, provo con ACTION_VIEW", e)
             try {

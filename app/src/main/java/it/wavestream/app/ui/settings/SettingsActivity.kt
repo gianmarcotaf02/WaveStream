@@ -2413,7 +2413,7 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
                         }
                         is it.wavestream.app.update.DownloadState.Downloaded -> {
                             Button(
-                                onClick = { updateManager.installUpdate() },
+                                onClick = { coroutineScope.launch { updateManager.installUpdate() } },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981)),
                                 modifier = Modifier
                                     .fillMaxWidth()
