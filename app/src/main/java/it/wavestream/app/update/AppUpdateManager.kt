@@ -138,9 +138,24 @@ class AppUpdateManager @Inject constructor(
             if (updateInfo == null) {
                 return@withContext UpdateCheckResult.Error("Errore generico verifica aggiornamenti")
             }
-            
-            val (info, data) = updateInfo
-            
+
+            // Se l'SDK Firebase non riesce (tipico sui dispositivi senza Google Play
+            // Services, es. molte smart TV AOSP) si ripiega su una GET HTTPS diretta
+            // all'endpoint RTDB: le security rules rendono il nodo pubblico in lettura.
+            val resolved: Pair<UpdateInfo?, String?> =
+                if (updateInfo.first != null) updateInfo
+                else {
+                    Log.w(TAG, "Check via SDK non riuscito (${updateInfo.second ?: "n/d"}); fallback REST")
+                    fetchUpdateInfoViaRest()
+                }
+
+            val (info, data) = resolved
+
+            // (null, null) = nodo assente o vuoto -> nessun aggiornamento disponibile
+            if (info == null && data == null) {
+                return@withContext UpdateCheckResult.NoUpdateAvailable
+            }
+
             // If info is null, data might contain error message string (hacky reuse of Pair)
             if (info == null) {
                  val errorMessage = data ?: "Dati aggiornamento non disponibili"
@@ -169,6 +184,46 @@ class AppUpdateManager @Inject constructor(
         }
     }
     
+    /**
+     * Lettura di fallback via REST (HTTPS GET) del nodo di aggiornamento.
+     * Funziona senza SDK Firebase e senza Google Play Services.
+     *
+     * @return (UpdateInfo, downloadUrl) in caso di successo;
+     *         (null, null) se il nodo non esiste o è vuoto;
+     *         (null, messaggio) in caso di errore.
+     */
+    private fun fetchUpdateInfoViaRest(): Pair<UpdateInfo?, String?> {
+        return try {
+            val url = "${BuildConfig.RTDB_URL}/${BuildConfig.UPDATE_NODE}.json"
+            val request = Request.Builder()
+                .url(url)
+                .header("Accept", "application/json")
+                .build()
+            okHttpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    return Pair(null, "HTTP ${response.code}")
+                }
+                val body = response.body?.string().orEmpty()
+                if (body.isBlank() || body.trim() == "null") {
+                    return Pair(null, null)
+                }
+                val json = org.json.JSONObject(body)
+                val info = UpdateInfo(
+                    versionCode = json.optInt("version_code", 0),
+                    versionName = json.optString("version_name", ""),
+                    changelog = json.optString("changelog", ""),
+                    forceUpdate = json.optBoolean("force_update", false)
+                )
+                val downloadUrl = json.optString("download_url", "").ifBlank { null }
+                Log.d(TAG, "Fallback REST OK: versionCode=${info.versionCode}")
+                Pair(info, downloadUrl)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Fallback REST fallito: ${e.message}")
+            Pair(null, e.message)
+        }
+    }
+
     /**
      * Download the APK from GitHub Releases (or any URL)
      */
