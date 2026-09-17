@@ -26,23 +26,36 @@ class PackageReplacedReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
-        Log.i("PackageReplacedReceiver", "App aggiornata: riavvio automatico")
+        Log.i(TAG, "App aggiornata: riavvio automatico")
 
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.Main).launch {
             try {
-                delay(1500)
-                context.startActivity(
-                    Intent(context, ProfileSelectionActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                // Sulle TV lente il PackageManager può impiegare qualche secondo a
+                // finalizzare l'installazione: un solo tentativo non basta sempre,
+                // quindi si ritenta invece di lasciare l'utente a riaprire a mano.
+                val launch = context.packageManager
+                    .getLaunchIntentForPackage(context.packageName)
+                    ?: Intent(context, ProfileSelectionActivity::class.java)
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+
+                for (attempt in 1..4) {
+                    delay(if (attempt == 1) 2000L else 2500L)
+                    try {
+                        context.startActivity(launch)
+                        Log.i(TAG, "App riaperta automaticamente (tentativo $attempt)")
+                        return@launch
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Tentativo $attempt di riapertura fallito: ${e.message}")
                     }
-                )
-            } catch (e: Exception) {
-                // Best-effort: se il sistema blocca l'avvio in background, l'utente riapre a mano.
-                Log.w("PackageReplacedReceiver", "Impossibile riaprire l'app: ${e.message}")
+                }
             } finally {
                 pendingResult.finish()
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "PackageReplacedReceiver"
     }
 }
