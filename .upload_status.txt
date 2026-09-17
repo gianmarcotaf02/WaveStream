@@ -1,0 +1,12 @@
+REL_ID=391008897 APK=release/WaveStream-android7.apk ASSET=WaveStream-android7.apk
+=== attempt 1 / 19:56:41 ===
+{"message":"Error saving asset","request_id":"AB54:ACD56:1450ED9:1633B2E:6AAC45FD"}
+  HTTP=500 up=60767919 time=55.580443s
+  state=starter
+=== attempt 2 / 19:57:49 ===
+  rimosso asset 570985632
+{"message":"Error saving asset","request_id":"AB5A:ACD56:1455B1E:1638E19:6AAC4642"}
+  HTTP=500 up=65207983 time=76.600310s
+  state=starter
+=== attempt 3 / 19:59:19 ===
+  rimosso asset 570987230
