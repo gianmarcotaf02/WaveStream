@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.sqlite.db.SimpleSQLiteQuery
 import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
@@ -203,6 +204,23 @@ class SeriesActivity : ComponentActivity() {
             if (pendingFilterReload > 0) {
                 delay(250)
                 reloadSeries()
+            }
+        }
+
+        // Al ritorno dal detail view (che può aver arricchito TMDB), rilegge dal DB
+        // le serie già caricate e aggiorna i badge con il voto TMDB, senza ricaricare
+        // tutta la lista (mantiene scroll e ordine).
+        var resumeTick by remember { mutableIntStateOf(0) }
+        LifecycleResumeEffect(Unit) {
+            resumeTick++
+            onPauseOrDispose { }
+        }
+        LaunchedEffect(resumeTick) {
+            if (resumeTick <= 1) return@LaunchedEffect
+            val ids = seriesList.map { it.id }
+            if (ids.isNotEmpty()) {
+                val fresh = seriesDao.getSeriesByIds(ids).associateBy { it.id }
+                seriesList = seriesList.map { s -> fresh[s.id] ?: s }
             }
         }
 
