@@ -103,3 +103,10 @@ keystore.properties
 
 # google-services.json per la variante android7 (contiene chiavi)
 app/src/android7/google-services.json
+
+# File temporanei di release (upload GitHub, payload RTDB, changelog)
+.upload_*
+.release_*
+.rtdb_payload.json
+.changelog.txt
+.changelog_a7.txt
