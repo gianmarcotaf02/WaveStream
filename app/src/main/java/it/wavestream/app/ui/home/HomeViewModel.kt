@@ -731,6 +731,21 @@ class HomeViewModel @Inject constructor(
                 }
                 // Warm Coil caches with visible posters + hero backdrops (non-blocking)
                 preloadContentImages(cachedRows, freshHeroes)
+                // Le righe arrivano da cache (fino a 10 giorni): la riga "Continua a guardare"
+                // va rigenerata dal DB, altrimenti il badge episodio resta quello vecchio.
+                launch(Dispatchers.IO) {
+                    try {
+                        val patched = patchContinueWatchingRow(cachedRows, contentType)
+                        cachedCarouselRows[contentType] = patched
+                        if (currentContentType == contentType) {
+                            withContext(Dispatchers.Main) {
+                                _uiState.update { it.copy(carouselRows = patched) }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error patching continue watching row", e)
+                    }
+                }
                 // If heroes not cached yet, load them in background
                 if (cachedHero == null || cachedHero.heroes.isEmpty()) {
                     launch(Dispatchers.IO) {
@@ -940,6 +955,13 @@ class HomeViewModel @Inject constructor(
             val existingRows = cachedCarouselRows[contentType]
             val existingHeroes = cachedHeroItems[contentType]
             if (existingRows != null && existingRows.isNotEmpty() && existingHeroes != null && existingHeroes.heroes.isNotEmpty()) {
+                // Righe e hero già in cache: aggiorna comunque la riga "Continua a guardare"
+                // (badge episodio) prima di saltare il resto del preload.
+                try {
+                    cachedCarouselRows[contentType] = patchContinueWatchingRow(existingRows, contentType)
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "preloadTabIntoCache: CW patch failed", e)
+                }
                 Log.d("HomeViewModel", "preloadTabIntoCache: $contentType already cached, skipping")
                 return
             }
@@ -3124,6 +3146,41 @@ class HomeViewModel @Inject constructor(
                 null
             }
         }
+    }
+
+    /**
+     * Ricostruisce la riga "Continua a guardare" per il tab indicato leggendo le
+     * watch_progress correnti. Necessario perché le CarouselRow sono persistite su
+     * disco fino a 10 giorni: senza questo il badge "SxEy" poteva restare fermo
+     * sull'episodio visto in una sessione precedente.
+     */
+    private suspend fun buildFreshContinueWatchingRow(contentType: HomeContentType): CarouselRow? {
+        val items = when (contentType) {
+            HomeContentType.MOVIES -> loadContinueWatchingForTab(ContentType.MOVIE)
+            HomeContentType.SERIES -> loadContinueWatchingForTab(ContentType.SERIES)
+            else -> loadContinueWatching()?.mapNotNull { it.toCarouselItem() }
+        }.orEmpty()
+        if (items.isEmpty()) return null
+        return CarouselRow(title = context.getString(R.string.continue_watching), items = items)
+    }
+
+    /**
+     * Sostituisce (o rimuove/aggiunge) la riga "Continua a guardare" in [rows] con
+     * quella appena rigenerata dal DB.
+     */
+    private suspend fun patchContinueWatchingRow(
+        rows: List<CarouselRow>,
+        contentType: HomeContentType
+    ): List<CarouselRow> {
+        val updated = rows.toMutableList()
+        val idx = updated.indexOfFirst { it.title.contains("Continua a guardare", ignoreCase = true) }
+        val fresh = buildFreshContinueWatchingRow(contentType)
+        when {
+            idx >= 0 && fresh != null -> updated[idx] = fresh
+            idx >= 0 && fresh == null -> updated.removeAt(idx)
+            idx < 0 && fresh != null -> updated.add(0, fresh)
+        }
+        return updated
     }
 
     /**
