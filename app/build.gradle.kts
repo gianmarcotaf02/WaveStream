@@ -25,8 +25,8 @@ android {
         applicationId = "it.wavestream.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 21
-        versionName = "1.0.20"
+        versionCode = 23
+        versionName = "1.0.22"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -50,7 +50,7 @@ android {
             dimension = "platform"
             minSdk = 24
             applicationId = "it.wavestream.app.android7"
-            versionCode = 1
+            versionCode = 2
             versionNameSuffix = "-a7"
             // Canale di aggiornamento dedicato: nodo separato nello stesso progetto RTDB.
             // Stesso progetto Firebase (quota progetti raggiunta), canale update isolato.
