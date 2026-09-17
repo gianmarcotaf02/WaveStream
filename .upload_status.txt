@@ -1,12 +1,43 @@
 REL_ID=391008897 APK=release/WaveStream-android7.apk ASSET=WaveStream-android7.apk
-=== attempt 1 / 19:56:41 ===
-{"message":"Error saving asset","request_id":"AB54:ACD56:1450ED9:1633B2E:6AAC45FD"}
-  HTTP=500 up=60767919 time=55.580443s
+=== attempt 1 / 20:16:27 ===
+  rimosso asset 570989248
+{"message":"Error creating asset temp dir","request_id":"ABD4:166432:1474ECB:165F5B7:6AAC4AA0"}
+  HTTP=500 up=327343 time=0.971416s
   state=starter
-=== attempt 2 / 19:57:49 ===
-  rimosso asset 570985632
-{"message":"Error saving asset","request_id":"AB5A:ACD56:1455B1E:1638E19:6AAC4642"}
-  HTTP=500 up=65207983 time=76.600310s
+=== attempt 2 / 20:16:41 ===
+  rimosso asset 571022327
+{"message":"Error creating asset temp dir","request_id":"ABDC:32CA98:14A4CCB:1690040:6AAC4AAE"}
+  HTTP=500 up=343727 time=0.440926s
   state=starter
-=== attempt 3 / 19:59:19 ===
-  rimosso asset 570987230
+=== attempt 3 / 20:16:54 ===
+  rimosso asset 571023310
+=== attempt 4 / 20:28:06 ===
+  rimosso asset 571023776
+{"message":"Not Found","request_id":"ABE3:16F0C4:13B13B7:159F191:6AAC4ABB","documentation_url":"https://docs.github.com/rest/releases/assets#update-a-release-asset"}
+  HTTP=404 up=203814485 time=1008.775449s
+  state=starter
+=== attempt 4 / 20:33:56 ===
+  rimosso asset 571053183
+
+  HTTP=504 up=203814485 time=470.073981s
+  state=starter
+=== attempt 5 / 20:36:09 ===
+  rimosso asset 571067682
+{"message":"Error saving asset","request_id":"A9B5:166432:14C8FFB:16BACB7:6AAC4F3D"}
+  HTTP=500 up=360111 time=0.494856s
+  state=starter
+=== attempt 6 / 20:36:22 ===
+  rimosso asset 571072732
+{"message":"Error saving asset","request_id":"A9C2:ACD56:14FC431:16EDE47:6AAC4F4A"}
+  HTTP=500 up=360111 time=0.471425s
+  state=starter
+=== attempt 7 / 20:36:35 ===
+  rimosso asset 571073188
+{"url":"https://api.github.com/repos/gianmarcotaf02/WaveStream/releases/assets/571073721","id":571073721,"node_id":"RA_kwDOSlDL8c4iCeS5","name":"WaveStream-android7.apk","label":"","uploader":{"login":"gianmarcotaf02","id":233798693,"node_id":"U_kgDODe98JQ","avatar_url":"https://avatars.githubusercontent.com/u/233798693?v=4","gravatar_id":"","url":"https://api.github.com/users/gianmarcotaf02","html_url":"https://github.com/gianmarcotaf02","followers_url":"https://api.github.com/users/gianmarcotaf02/followers","following_url":"https://api.github.com/users/gianmarcotaf02/following{/other_user}","gists_url":"https://api.github.com/users/gianmarcotaf02/gists{/gist_id}","starred_url":"https://api.github.com/users/gianmarcotaf02/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/gianmarcotaf02/subscriptions","organizations_url":"https://api.github.com/users/gianmarcotaf02/orgs","repos_url":"https://api.github.com/users/gianmarcotaf02/repos","events_url":"https://api.github.com/users/gianmarcotaf02/events{/privacy}","received_events_url":"https://api.github.com/users/gianmarcotaf02/received_events","type":"User","user_view_type":"public","site_admin":false},"content_type":"application/vnd.android.package-archive","state":"uploaded","size":203814485,"digest":"sha256:64b9032a491dde5370dbd8c5c18fa138262a84dafd0484c2a956f58ddc1f9bd6","download_count":0,"created_at":"2026-09-17T20:36:40Z","updated_at":"2026-09-17T20:38:25Z","browser_download_url":"https://github.com/gianmarcotaf02/WaveStream/releases/download/1.0.22-a7/WaveStream-android7.apk"}
+  HTTP=201 up=203814485 time=105.878624s
+  state=uploaded
+RISULTATO=UPLOADED attempt=7
+
+  HTTP=000 up=144834223 time=696.895069s
+  state=uploaded
+RISULTATO=UPLOADED attempt=4
