@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
@@ -374,6 +375,19 @@ private fun CategoryScreen(
         }
         
         isLoading = false
+    }
+
+    // Al ritorno dal detail view (che può aver arricchito TMDB), ricarica gli item
+    // così i badge usano il voto TMDB aggiornato.
+    var resumeTick by remember { mutableIntStateOf(0) }
+    LifecycleResumeEffect(Unit) {
+        resumeTick++
+        onPauseOrDispose { }
+    }
+    LaunchedEffect(resumeTick) {
+        if (resumeTick <= 1) return@LaunchedEffect
+        items = loadItems()
+        if (isLiveCategory) channels = loadChannels()
     }
     
     // Update time every minute for EPG
