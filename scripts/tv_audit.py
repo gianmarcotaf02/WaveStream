@@ -9,10 +9,20 @@ can actually be recovered by removing it.
 This script NEVER modifies the device. It only runs read-only commands
 (getprop, df, du, ls, pm list, dumpsys).
 
+Design notes
+------------
+* Some vendor ROMs (Technicolor TIMVISION box, AOSP TV boxes) ship a shell
+  WITHOUT `awk`. All parsing therefore happens on the PC: the device emits raw
+  `ls -l` / `du` / `pm list` output and Python does the rest.
+* `pm list packages -f` uses different separators across Android versions:
+    Android 7/8 : package:/path/to/base.apk=com.example
+    Android 9+  : package:/data/app/~~xx==/com.example-yy==/base.apk=com.example
+  Both are handled.
+
 Usage
 -----
     python scripts/tv_audit.py                    # auto-pick the only device
-    python scripts/tv_audit.py -s 192.168.1.42:5555
+    python scripts/tv_audit.py -s 192.168.1.27:5555
     python scripts/tv_audit.py --try-root         # also attempt `adb root`
     python scripts/tv_audit.py --out scripts/tv-audit-out
 
@@ -23,7 +33,7 @@ Output
     <out>/raw/*.txt     raw command output, for debugging
 
 Connect first, e.g.:
-    adb connect 192.168.1.42:5555
+    adb connect 192.168.1.27:5555
 """
 
 from __future__ import annotations
@@ -77,20 +87,15 @@ class Adb:
 
     def run(self, args: list[str], timeout: int = 60) -> tuple[int, str]:
         try:
-            proc = subprocess.run(
-                self._base() + args,
-                capture_output=True,
-                timeout=timeout,
-            )
+            proc = subprocess.run(self._base() + args, capture_output=True, timeout=timeout)
         except subprocess.TimeoutExpired:
             return 124, ""
-        out = (proc.stdout + proc.stderr).decode("utf-8", errors="replace")
-        return proc.returncode, out
+        return proc.returncode, (proc.stdout + proc.stderr).decode("utf-8", errors="replace")
 
-    def shell(self, script: str, timeout: int = 180) -> str:
+    def shell(self, script: str, timeout: int = 300) -> str:
         """Run a shell script ON the device.
 
-        The script is piped to `sh` over stdin so we can do loops and pipes
+        The script is piped to `sh` over stdin so we can do loops and pipelines
         with a single round trip instead of hundreds of adb invocations.
         """
         try:
@@ -117,9 +122,9 @@ class Adb:
 # --------------------------------------------------------------------------- #
 # classification
 # --------------------------------------------------------------------------- #
-# KEEP  = removing it can brick the device, kill the remote or break input
-# CAUTION = legitimate app you may or may not want, decide case by case
-# BLOAT = preinstalled filler, normally safe to remove
+# KEEP    = removing it can brick the device, kill the remote or break input
+# CAUTION = legitimate app or vendor service, decide case by case
+# BLOAT   = preinstalled filler, normally safe to remove
 # UNKNOWN = not recognised, ask before touching
 # --------------------------------------------------------------------------- #
 
@@ -139,16 +144,31 @@ KEEP_EXACT = {
     "com.android.certinstaller",
     "com.android.externalstorage",
     "com.android.documentsui",
-    "com.android.downloads",  # packageinstaller provider on some ROMs
     "com.android.mediaprovider",
     "com.android.webview",
-    "com.android.hotspot2.osulogin",
+    "com.google.android.webview",
     "com.google.android.gms",
     "com.google.android.gsf",
     "com.google.android.packageinstaller",
     "com.google.android.permissioncontroller",
     "com.google.android.ext.services",
     "com.google.android.ext.shared",
+    "com.google.android.tv.frameworkpackagestubs",
+    "com.android.defcontainer",
+    "com.android.inputdevices",
+    "com.android.location.fused",
+    "com.android.vpndialogs",
+    "com.android.statementservice",
+    "com.android.providers.tv",
+    "com.android.providers.downloads",
+    "com.android.providers.media",
+    "com.android.providers.settings",
+    "com.android.proxyhandler",
+    "com.android.captiveportallogin",
+    "com.android.backupconfirm",
+    "com.android.sharedstoragebackup",
+    "com.android.pacprocessor",
+    "com.android.printspooler",
 }
 
 KEEP_PREFIX = (
@@ -156,40 +176,60 @@ KEEP_PREFIX = (
     "com.android.internal.",
     "com.android.server",
     "com.android.tv.settings",
+    "com.android.cts.",
 )
 
-# Pattern -> why it must stay. Matching is by substring on the package name.
+# Pattern -> why. Matched against the package name. Keep these PRECISE:
+# a loose substring like "telecom" would wrongly protect "it.telecomitalia.*".
 KEEP_PATTERNS: list[tuple[str, str]] = [
-    ("remote", "IR/Bluetooth remote key mapping - remove it and the remote dies"),
-    ("keyboard", "on-screen/virtual keyboard - blocks all text input"),
-    ("inputmethod", "input method service"),
-    ("launcher", "home screen - remove it and you land on a black screen"),
-    ("setupwizard", "first boot wizard"),
-    ("provision", "device provisioning"),
-    ("keyguard", "lock screen"),
-    ("settings", "settings app"),
+    (".telecom", "telephony / call handling"),
+    ("com.android.settings", "settings app"),
     ("systemui", "system UI"),
-    ("telecom", "telephony/HDMI-CEC call handling"),
-    ("bluetooth", "bluetooth stack"),
-    ("wifi", "wifi service"),
-    ("network", "connectivity service"),
-    ("vending", "Play Store"),
-    ("gms", "Google Play Services (works without it, but many apps break)"),
-    ("syncadapter", "account sync adapter"),
-    ("mediacenter", "vendor media shell used by the home screen"),
+    ("keyguard", "lock screen"),
+    ("com.android.bluetooth", "bluetooth stack"),
+    ("com.android.shell", "adb shell"),
+    (".remotecontrolservice", "IR/Bluetooth remote key mapping - remote would die"),
+    (".remotepairing", "remote pairing service - remote would die"),
+    ("com.google.android.tv.remote.service", "Android TV remote service"),
+    (".inputmethod.", "input method - blocks all text input"),
+    ("keyboard", "on-screen keyboard - blocks text input"),
+    ("launcher", "home screen - remove it and you land on a black screen"),
+    ("leanbacklauncher", "Android TV home screen"),
+    ("setupwizard", "first boot wizard"),
+    ("setup_wizard", "first boot wizard"),
+    ("provision", "device provisioning"),
+    ("com.android.vending", "Play Store"),
+    ("com.google.android.gms", "Play Services (many apps break without it)"),
+    ("com.google.android.gsf", "Google Services Framework"),
+    (".syncadapters.", "account sync adapter"),
+    ("gatekeeper", "credential storage"),
+    ("com.android.wifi", "wifi service"),
+    ("com.android.se", "secure element service"),
+    ("com.android.nfc", "NFC service"),
+    ("com.android.ons", "opportunistic network service"),
+    ("com.android.dynsystem", "dynamic system updates"),
+    ("com.android.localtransport", "backup transport"),
+    ("com.android.traceur", "system tracing - toggling it off breaks dev options"),
+    ("com.android.mtp", "MTP file transfer"),
+    ("com.android.mms.service", "MMS service"),
+    ("com.android.storagemanager", "storage manager"),
+    ("com.android.wallpaper", "wallpaper services"),
+    ("com.android.tv.frameworkpackagestubs", "required TV framework stubs"),
 ]
 
-# Well known preinstalled filler. Label is shown to the user.
+# Well known preinstalled filler: package -> human label
 BLOAT: dict[str, str] = {
-    # Google media / apps frequently preinstalled on TV boxes
+    # ---- Google media / apps often preinstalled on TV devices ----
     "com.google.android.videos": "Google TV / Play Movies",
     "com.google.android.music": "Play Music",
     "com.google.android.apps.maps": "Google Maps",
     "com.google.android.apps.photos": "Google Photos",
     "com.google.android.apps.docs": "Google Drive",
     "com.google.android.gm": "Gmail",
-    "com.google.android.gm.lite": "Gmail Go",
     "com.google.android.apps.tachyon": "Google Meet / Duo",
+    "com.google.android.youtube.tv": "YouTube (TV)",
+    "com.google.android.youtube.tvmusic": "YouTube Music (TV)",
+    "com.google.android.youtube.tvkids": "YouTube Kids (TV)",
     "com.google.android.youtube": "YouTube",
     "com.google.android.apps.youtube.music": "YouTube Music",
     "com.google.android.apps.youtube.kids": "YouTube Kids",
@@ -206,15 +246,26 @@ BLOAT: dict[str, str] = {
     "com.google.android.apps.podcasts": "Podcasts",
     "com.google.android.apps.books": "Play Books",
     "com.google.android.apps.magazines": "News",
-    "com.google.android.feedback": "Market feedback agent",
+    "com.google.android.feedback": "Google market feedback",
     "com.google.android.printservice.recommendation": "Cloud Print",
     "com.google.android.apps.restore": "Restore",
     "com.google.android.apps.mediashell": "Media shell",
-    "com.google.android.tts": "Google TTS engine",
     "com.google.android.marvin.talkback": "TalkBack",
     "com.google.android.projection.gearhead": "Android Auto",
+    "com.google.android.backdrop": "Daydream Backdrop",
+    "com.google.android.tvtutorials": "Android TV tutorials",
+    "com.google.android.tv.remote.service": "Google TV remote service",
+    "com.google.android.sss": "Second Screen Setup",
+    "com.google.android.sss.authbridge": "Second Screen Setup auth bridge",
+    "com.google.android.gsf.notouch": "NoTouch auth delegate",
+    "com.google.android.syncadapters.contacts": "Contacts sync",
+    "com.google.android.syncadapters.calendar": "Calendar sync",
+    "com.google.android.apps.wellbeing": "Digital Wellbeing",
+    "com.google.android.googlequicksearchbox": "Google app / search",
+    "com.google.android.apps.turbo": "Device Health Services",
+    "com.google.android.as": "Android System Intelligence",
+    # ---- AOSP extras ----
     "com.android.chrome": "Chrome",
-    "com.android.bookmarkprovider": "Bookmark provider",
     "com.android.browser": "AOSP Browser",
     "com.android.email": "AOSP Email",
     "com.android.calendar": "AOSP Calendar",
@@ -227,12 +278,15 @@ BLOAT: dict[str, str] = {
     "com.android.dreams.phototable": "PhotoTable screensaver",
     "com.android.dreams.basic": "Basic screensaver",
     "com.android.egg": "Easter egg",
-    # Streaming / VOD apps OEMs preload on cheap TVs
-    "com.netflix.ninja": "Netflix",
-    "com.netflix.mediaclient": "Netflix (phone)",
+    "com.android.bookmarkprovider": "Bookmark provider",
+    "com.android.wallpapercropper": "Wallpaper cropper",
+    # ---- Third party VOD / streaming typically bundled by OEMs ----
+    "com.netflix.ninja": "Netflix (TV)",
+    "com.netflix.mediaclient": "Netflix",
     "com.amazon.amazonvideo.livingroom": "Prime Video",
     "com.amazon.avod": "Prime Video",
     "com.disney.disneyplus": "Disney+",
+    "com.disney.disneyplus.ph": "Disney+",
     "com.spotify.tv.android": "Spotify TV",
     "com.spotify.music": "Spotify",
     "org.xbmc.kodi": "Kodi",
@@ -259,82 +313,94 @@ BLOAT: dict[str, str] = {
     "com.microsoft.office.excel": "Excel",
     "com.microsoft.office.powerpoint": "PowerPoint",
     "com.microsoft.skydrive": "OneDrive",
-    # Cheap box vendor junk / demos
-    "com.android.demo.notepad3": "AOSP demo app",
-    "com.android.inputmethod.pinyin": "Pinyin keyboard",
-    "com.android.inputmethod.latin": "AOSP keyboard",
-    "com.mediatek.thermalmanager": "MTK thermal manager",
+    # ---- Italian / TIMVISION box specific ----
+    "it.telecomitalia.timmusic_tv": "TIM Music (TV)",
+    "it.telecomitalia.thefilmclub": "The Film Club (TIM)",
+    "it.telecomitalia.calcio": "TIM Calcio / Serie A",
+    "it.telecomitalia.games": "TIM Games",
+    "it.telecomitalia.timppapp": "TIM Personal / promo app",
+    "it.telecomitalia.iotim": "TIM promo app",
+    "it.telecomitalia.digitalsupport": "TIM Digital Support",
+    "timvision.telemetry": "TIMVISION telemetry/analytics",
+    "android.autoinstalls.config.technicolor": "auto-installer that re-adds OEM bloat",
+    "com.estrongs.android.pop": "ES File Explorer (known adware)",
+    "com.dazn": "DAZN",
+    "com.sky.ott.client.androidtv.SkyIT": "Sky (TV)",
+    "com.sky.ott.client.androidtv": "Sky (TV)",
+    "tv.pluto.android": "Pluto TV",
+    "com.upst.hayu": "Hayu",
+    "com.vativision.vativisionapp": "Vativision",
+    "com.fifa.plus.android": "FIFA+",
+    "it.mediaset.infinitytv": "Mediaset Infinity",
+    "it.rds.androidtv.rdssocialtv": "RDS Social TV",
+    "com.cbs.ca": "CBS (demo/vendor app)",
 }
 
 BLOAT_PATTERNS: list[tuple[str, str]] = [
     (".demo", "vendor demo app"),
     (".sample", "vendor sample app"),
-    ("ott.", "OTT streaming stub"),
     ("bloatware", "vendor bloatware"),
+    ("telemetry", "telemetry / analytics agent"),
+    ("analytics", "analytics agent"),
+]
+
+# Vendor namespaces: preinstalled, purpose unknown. Ask before touching.
+VENDOR_PREFIXES: list[tuple[str, str]] = [
+    ("com.technicolor.", "Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI"),
+    ("com.marvell.", "Marvell SoC vendor component - may control audio/HDMI/wake-on-cast"),
+    ("com.movenda.", "OMA-DM device management client - TIM uses it to configure the box remotely"),
+    ("timvision.", "TIMVISION service - check what it does before removing"),
+    ("tv.broadpeak.", "Broadpeak CDN wrapper used by TIM streaming"),
 ]
 
 
 def classify(pkg: str) -> tuple[str, str]:
-    """Return (risk, reason)."""
+    """Return (risk, reason). Order matters: KEEP wins over everything."""
     if pkg in KEEP_EXACT or pkg.startswith(KEEP_PREFIX):
         return "KEEP", "core system component"
 
     low = pkg.lower()
-    for pat, why in KEEP_PATTERNS:
-        if pat in low:
-            return "KEEP", why
 
     if pkg in BLOAT:
         return "BLOAT", BLOAT[pkg]
+
+    for pat, why in KEEP_PATTERNS:
+        if pat in low:
+            return "KEEP", why
 
     for pat, why in BLOAT_PATTERNS:
         if pat in low:
             return "BLOAT", why
 
-    # Vendor / OEM namespaces on cheap boxes are usually preinstalled apps,
-    # but we cannot know what they do: ask before removing.
-    if re.match(r"^com\.(oem|vendor|amlogic|rockchip|allwinner|mediatek|hisilicon|realtek|mstar|sunxi)\.", pkg):
-        return "UNKNOWN", "OEM vendor app - verify before removing"
+    for pref, why in VENDOR_PREFIXES:
+        if pkg.startswith(pref):
+            return "CAUTION", why
+
     if re.match(r"^com\.(android|google)\.", pkg):
         return "CAUTION", "AOSP/Google preinstall, not in the known-bloat list"
-    if re.match(r"^com\.(amazon|netflix|google)\.", pkg):
-        return "CAUTION", "preinstalled media app"
 
     return "UNKNOWN", "not recognised - needs manual check"
 
 
-RISK_ORDER = {"BLOAT": 0, "UNKNOWN": 1, "CAUTION": 2, "KEEP": 3}
-
-
 # --------------------------------------------------------------------------- #
-# helpers
+# device commands (raw output only - no awk, some ROMs lack it)
 # --------------------------------------------------------------------------- #
 
-REMOTE_APK_SIZES = r"""
-pm list packages -f 2>/dev/null | while read line; do
-  rest=${line#package:}
-  pkg=${rest%%:*}
-  apk=${rest#*:}
-  if [ -z "$apk" ] || [ "$apk" = "$rest" ]; then
-    apk=""
-    sz=0
-  else
-    sz=$(ls -l "$apk" 2>/dev/null | awk '{print $5}')
-    [ -z "$sz" ] && sz=0
-  fi
-  echo "$pkg|$sz|$apk"
-done
+REMOTE_APK_LIST = "pm list packages -f\n"
+
+# One `ls -l` over every APK location, so we get sizes for all of them.
+REMOTE_LS_APKS = r"""
+ls -l /data/app/*/*.apk /data/app/*.apk 2>/dev/null
+ls -l /system/app/*/*.apk /system/priv-app/*/*.apk 2>/dev/null
+ls -l /system/vendor/app/*/*.apk /vendor/app/*/*.apk 2>/dev/null
+ls -l /product/app/*/*.apk /product/priv-app/*/*.apk 2>/dev/null
+ls -l /system/framework/*.apk 2>/dev/null
 """
 
-REMOTE_DATA_SIZES = r"""
-du -sk /data/user/0/* 2>/dev/null | awk '{print $2"|"$1}'
-du -sk /data/data/* 2>/dev/null | awk '{print $2"|"$1}'
-"""
-
-REMOTE_SDCARD_SIZES = r"""
-du -sk /sdcard/* 2>/dev/null | awk '{print $2"|"$1}'
-du -sk /sdcard/Android/data/* 2>/dev/null | awk '{print $2"|"$1}'
-du -sk /sdcard/Android/obb/* 2>/dev/null | awk '{print $2"|"$1}'
+REMOTE_DU = r"""
+du -sk /data/user/0/* 2>/dev/null
+du -sk /sdcard/* 2>/dev/null
+du -sk /sdcard/Android/data/* 2>/dev/null
 """
 
 
@@ -352,42 +418,70 @@ def human(num_bytes: float) -> str:
     return f"{val:.1f}{units[i]}"
 
 
-def parse_props(text: str) -> dict[str, str]:
-    props: dict[str, str] = {}
-    for line in text.splitlines():
-        if ": " in line:
-            k, v = line.split(": ", 1)
-            props[k.strip()] = v.strip()
-    return props
+def parse_package_list(text: str) -> dict[str, str]:
+    """`pm list packages -f` -> {package: apk_path}.
 
-
-def parse_pkg_list(text: str) -> set[str]:
-    out = set()
+    Handles both `package:<pkg>:<path>` and `package:<path>=<pkg>`.
+    """
+    out: dict[str, str] = {}
     for line in text.splitlines():
         line = line.strip()
-        if line.startswith("package:"):
-            out.add(line[len("package:"):])
+        if not line.startswith("package:"):
+            continue
+        rest = line[len("package:"):]
+        if "=" in rest:
+            apk, _, pkg = rest.rpartition("=")
+        elif ":" in rest:
+            pkg, _, apk = rest.partition(":")
+        else:
+            pkg, apk = rest, ""
+        pkg = pkg.strip()
+        if pkg:
+            out[pkg] = apk.strip()
     return out
 
 
-def parse_du(text: str) -> dict[str, int]:
-    """`path|kilobytes` -> {basename: kb}"""
+def parse_ls_sizes(text: str) -> dict[str, int]:
+    """Raw `ls -l` output -> {apk_path: size_in_bytes}."""
     out: dict[str, int] = {}
     for line in text.splitlines():
-        line = line.rstrip()
-        if "|" not in line:
+        if not line.startswith("-"):
             continue
-        path, _, kb = line.rpartition("|")
+        parts = line.split()
+        if len(parts) < 8:
+            continue
         try:
-            size = int(kb)
+            size = int(parts[4])
         except ValueError:
             continue
-        name = path.rstrip("/").rsplit("/", 1)[-1]
-        if not name:
+        path = " ".join(parts[7:]).strip()
+        if path:
+            out[path] = size
+    return out
+
+
+def parse_pkg_names(text: str) -> set[str]:
+    return {
+        ln.strip()[len("package:"):]
+        for ln in text.splitlines()
+        if ln.strip().startswith("package:")
+    }
+
+
+def parse_du(text: str) -> dict[str, int]:
+    """`size<TAB>path` -> {basename: bytes}."""
+    out: dict[str, int] = {}
+    for line in text.splitlines():
+        parts = line.split(None, 1)
+        if len(parts) != 2:
             continue
-        # keep the largest reading when the same package shows up twice
-        if size > out.get(name, -1):
-            out[name] = size
+        try:
+            kb = int(parts[0])
+        except ValueError:
+            continue
+        name = parts[1].strip().rstrip("/").rsplit("/", 1)[-1]
+        if name and kb * 1024 > out.get(name, -1):
+            out[name] = kb * 1024
     return out
 
 
@@ -397,9 +491,9 @@ def parse_du(text: str) -> dict[str, int]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Read-only Android TV audit over ADB")
-    ap.add_argument("-s", "--serial", help="adb serial (e.g. 192.168.1.42:5555)")
+    ap.add_argument("-s", "--serial", help="adb serial (e.g. 192.168.1.27:5555)")
     ap.add_argument("--out", default="scripts/tv-audit-out", help="output directory")
-    ap.add_argument("--top", type=int, default=40, help="rows in the 'top space users' table")
+    ap.add_argument("--top", type=int, default=40, help="rows in the biggest-use table")
     ap.add_argument("--try-root", action="store_true",
                     help="attempt `adb root` so per-app data sizes become readable")
     args = ap.parse_args()
@@ -420,242 +514,210 @@ def main() -> int:
     print(f"device : {adb.serial}")
     print(f"adb    : {adb.exe}")
 
-    def dump(name: str, script: str, timeout: int = 180) -> str:
+    def dump(name: str, script: str, timeout: int = 300) -> str:
         text = adb.shell(script, timeout=timeout)
         (raw_dir / f"{name}.txt").write_text(text, encoding="utf-8", errors="replace")
-        print(f"  collected {name:24s} ({len(text.splitlines())} lines)")
+        print(f"  collected {name:22s} ({len(text.splitlines())} lines)")
         return text
 
-    print("\n[1/5] device info")
-    props = parse_props(dump("props", "getprop\n"))
+    print("\n[1/6] device info")
+    props_txt = dump("props", "getprop\n")
+    props = {}
+    for line in props_txt.splitlines():
+        if ": " in line:
+            k, v = line.split(": ", 1)
+            props[k.strip()] = v.strip()
     root_uid = dump("root", "id -u\n").strip()
-    is_root = root_uid.strip() == "0"
+    is_root = root_uid == "0"
 
-    print("[2/5] storage")
-    df_data = dump("df_data", "df -k /data /cache /storage/emulated 2>/dev/null\n")
-    diskstats = dump("diskstats", "dumpsys diskstats 2>/dev/null | head -30\n")
-    sdcard_sizes = parse_du(dump("du_sdcard", REMOTE_SDCARD_SIZES, timeout=300))
+    print("[2/6] storage")
+    df_txt = dump("df", "df -k /data /cache 2>/dev/null\n")
+    diskstats = dump("diskstats", "dumpsys diskstats 2>/dev/null | head -25\n")
 
     root_note = ""
     if args.try_root and not is_root:
-        print("[2b ] attempting adb root (adbd will restart, this is safe)")
-        code, out = adb.run(["root"], timeout=30)
-        out = out.strip() or "(no output)"
+        print("[2b ] attempting `adb root` (adbd restarts, safe to try)")
+        _, out = adb.run(["root"], timeout=30)
+        out = (out or "").strip() or "(no output)"
         root_note = f"adb root -> {out}"
         print(f"      {out}")
         import time
         time.sleep(3)
         adb.run(["wait-for-device"], timeout=60)
-        root_uid = adb.shell("id -u\n").strip()
-        is_root = root_uid.strip() == "0"
-        if is_root:
-            print("      root OK: per-app data sizes will be readable")
-        else:
-            print("      root denied: falling back to non-root mode")
+        is_root = adb.shell("id -u\n").strip() == "0"
+        print("      root OK" if is_root else "      root denied, non-root mode")
 
-    print("[3/5] package list")
-    pkgs_raw = dump("packages_f", REMOTE_APK_SIZES, timeout=300)
-    third = parse_pkg_list(dump("third_party", "pm list packages -3\n"))
-    third_dis = parse_pkg_list(dump("third_party_disabled", "pm list packages -3 -d\n"))
-    sys_dis = parse_pkg_list(dump("system_disabled", "pm list packages -s -d\n"))
-    enabled = parse_pkg_list(dump("enabled", "pm list packages -e\n"))
+    print("[3/6] package list")
+    pkg_map = parse_package_list(dump("packages_f", REMOTE_APK_LIST))
+    third = parse_pkg_names(dump("third_party", "pm list packages -3\n"))
+    third_dis = parse_pkg_names(dump("third_party_disabled", "pm list packages -3 -d\n"))
+    sys_dis = parse_pkg_names(dump("system_disabled", "pm list packages -s -d\n"))
+    enabled = parse_pkg_names(dump("enabled", "pm list packages -e\n"))
 
-    print("[4/5] per-app data sizes")
-    data_sizes = parse_du(dump("du_data", REMOTE_DATA_SIZES, timeout=600))
-    if not data_sizes:
-        print("      WARNING: data sizes unavailable (needs root). Space freed by")
-        print("               `pm uninstall --user 0` cannot be estimated precisely.")
+    print("[4/6] apk sizes")
+    apk_sizes = parse_ls_sizes(dump("ls_apks", REMOTE_LS_APKS))
+    matched = sum(1 for p in pkg_map.values() if p in apk_sizes)
+    print(f"      matched {matched}/{len(pkg_map)} apk paths")
 
-    print("[5/5] building report")
+    print("[5/6] data sizes")
+    data_sizes = parse_du(dump("du", REMOTE_DU, timeout=900))
+
+    print("[6/6] building report")
 
     packages: dict[str, dict] = {}
-    for line in pkgs_raw.splitlines():
-        parts = line.rstrip().split("|")
-        if len(parts) != 3:
-            continue
-        pkg, size, apk = parts
-        pkg = pkg.strip()
-        if not pkg:
-            continue
-        try:
-            apk_size = int(size)
-        except ValueError:
-            apk_size = 0
-        is_system = apk.startswith("/system") or apk.startswith("/product") or apk.startswith("/vendor")
+    for pkg, apk in pkg_map.items():
+        apk_size = apk_sizes.get(apk, 0)
         packages[pkg] = {
             "pkg": pkg,
             "apk": apk,
             "apk_size": apk_size,
-            "system": is_system,
-            "data_size": data_sizes.get(pkg, 0) * 1024,
+            "in_system": not apk.startswith("/data/"),
+            "data_size": data_sizes.get(pkg, 0),
             "third_party": pkg in third or pkg in third_dis,
             "enabled": pkg in enabled,
             "disabled": pkg in third_dis or pkg in sys_dis,
         }
 
-    # packages listed but missing from the -f dump (should not happen, but be safe)
-    for pkg in third | third_dis:
-        packages.setdefault(pkg, {
-            "pkg": pkg, "apk": "", "apk_size": 0, "system": False,
-            "data_size": data_sizes.get(pkg, 0) * 1024, "third_party": True,
-            "enabled": pkg in enabled, "disabled": pkg in third_dis or pkg in sys_dis,
-        })
-
     for info in packages.values():
         risk, reason = classify(info["pkg"])
         info["risk"] = risk
         info["reason"] = reason
-        # Recoverable space: /system APKs live on a different partition, so
-        # removing them for user 0 frees only their data directory.
-        info["recoverable"] = info["data_size"] if info["system"] else info["apk_size"] + info["data_size"]
+        # Third-party apps are uninstalled outright -> APK + data are freed.
+        # Preinstalled apps in /system are only removable for user 0: the APK
+        # sits on another partition, but the /data copy and data dir go away.
+        if info["third_party"]:
+            info["mode"] = "uninstall"
+            info["recoverable"] = info["apk_size"] + info["data_size"]
+        elif info["in_system"]:
+            info["mode"] = "user0"
+            info["recoverable"] = info["data_size"]
+        else:
+            # preinstalled-looking app living in /data: removing for user 0
+            # drops the update copy too
+            info["mode"] = "user0"
+            info["recoverable"] = info["apk_size"] + info["data_size"]
 
-    # ---- storage numbers ------------------------------------------------- #
-    data_line = ""
-    for line in df_data.splitlines():
-        if line.startswith("/dev") and "/data" in line:
-            data_line = line
-            break
+    # ---- storage --------------------------------------------------------- #
     data_total_kb = data_used_kb = data_free_kb = 0
-    if data_line:
-        cols = data_line.split()
-        try:
-            data_total_kb = int(cols[1])
-            data_used_kb = int(cols[2])
-            data_free_kb = int(cols[3])
-        except (ValueError, IndexError):
-            pass
+    for line in df_txt.splitlines():
+        cols = line.split()
+        if len(cols) >= 4 and cols[5] == "/data":
+            data_total_kb, data_used_kb, data_free_kb = int(cols[1]), int(cols[2]), int(cols[3])
+            break
 
     # ---- render ---------------------------------------------------------- #
-    lines: list[str] = []
-    w = lines.append
-
+    L: list[str] = []
+    w = L.append
     model = props.get("ro.product.model", "?")
     android = props.get("ro.build.version.release", "?")
     sdk = props.get("ro.build.version.sdk", "?")
     abi = props.get("ro.product.cpu.abi", "?")
     abi2 = props.get("ro.product.cpu.abi2", "")
 
-    w("=" * 100)
+    w("=" * 104)
     w("  WaveStream - Android device audit")
-    w("=" * 100)
+    w("=" * 104)
     w(f"  serial      : {adb.serial}")
     w(f"  model       : {props.get('ro.product.manufacturer','?')} {model}")
     w(f"  android     : {android} (sdk {sdk})")
     w(f"  abi         : {abi}{(' / ' + abi2) if abi2 else ''}")
     w(f"  build       : {props.get('ro.build.display.id','?')}")
-    w(f"  fingerprint : {props.get('ro.build.fingerprint','?')}")
-    w(f"  shell uid   : {root_uid} {'(ROOT - full data sizes available)' if is_root else '(unprivileged)'}")
+    w(f"  shell uid   : {root_uid} {'(ROOT)' if is_root else '(unprivileged)'}")
     if root_note:
         w(f"  {root_note}")
     w("")
 
-    w("-" * 100)
-    w("  STORAGE (/data is where apps are installed)")
-    w("-" * 100)
-    for line in df_data.splitlines():
-        if line.startswith("Filesystem"):
-            w(f"  {line}")
-        elif line.startswith("/dev"):
+    w("-" * 104)
+    w("  STORAGE")
+    w("-" * 104)
+    for line in df_txt.splitlines():
+        if line.startswith("Filesystem") or line.startswith("/dev"):
             w(f"  {line}")
     if data_total_kb:
-        pct = 100.0 * data_used_kb / data_total_kb if data_total_kb else 0
+        free_mb = data_free_kb / 1024
         w("")
-        w(f"  /data total {human(data_total_kb * 1024)}, used {human(data_used_kb * 1024)}, "
-          f"FREE {human(data_free_kb * 1024)} ({pct:.0f}% full)")
-        if data_free_kb * 1024 < 400 * 1024 * 1024:
-            w("  >>> /data is critically full. Free at least ~400 MB before installing an APK.")
-    if diskstats.strip():
-        w("")
-        w("  dumpsys diskstats:")
-        for line in diskstats.splitlines()[:12]:
-            w(f"    {line}")
+        w(f"  /data: {human(data_total_kb*1024)} total, {human(data_used_kb*1024)} used, "
+          f"FREE {human(data_free_kb*1024)}")
+        if free_mb < 400:
+            w(f"  >>> CRITICAL: only {free_mb:.0f} MB free. An APK of that size cannot install.")
+            w("      Free at least 400 MB before installing anything.")
     w("")
-
-    if sdcard_sizes:
-        w("-" * 100)
-        w("  SHARED STORAGE (/sdcard - same partition as /data!)")
-        w("-" * 100)
-        for name, kb in sorted(sdcard_sizes.items(), key=lambda kv: -kv[1])[:20]:
-            if kb >= 1024:
-                w(f"  {human(kb * 1024):>10}  /sdcard/{name}")
-        w("")
 
     all_pkgs = sorted(packages.values(), key=lambda p: -p["recoverable"])
     tp = [p for p in all_pkgs if p["third_party"]]
     sp = [p for p in all_pkgs if not p["third_party"]]
 
-    w("-" * 100)
+    w("-" * 104)
     w("  SUMMARY")
-    w("-" * 100)
-    w(f"  packages total      : {len(all_pkgs)}")
-    w(f"  third-party (normal uninstall)  : {len(tp):4d}   "
+    w("-" * 104)
+    w(f"  packages total                   : {len(all_pkgs)}")
+    w(f"  third-party (normal uninstall)   : {len(tp):4d}   "
       f"APK {human(sum(p['apk_size'] for p in tp)):>8}  DATA {human(sum(p['data_size'] for p in tp)):>8}")
-    w(f"  preinstalled (/system, --user 0) : {len(sp):4d}   "
+    w(f"  preinstalled (--user 0)          : {len(sp):4d}   "
       f"APK {human(sum(p['apk_size'] for p in sp)):>8}  DATA {human(sum(p['data_size'] for p in sp)):>8}")
-    w(f"  disabled packages   : {sum(1 for p in all_pkgs if p['disabled'])}")
-    w("")
-    w("  NOTE: APKs inside /system live on a different partition. Removing a")
-    w("        preinstalled app for user 0 frees only its data directory.")
+    w(f"  disabled                         : {sum(1 for p in all_pkgs if p['disabled'])}")
+    if not is_root:
+        w("")
+        w("  NOTE: data sizes need root. Without it, `recoverable` for preinstalled")
+        w("        apps is understated - the APK is on /system, only data is freed.")
     w("")
 
-    w("-" * 100)
-    w(f"  {len(all_pkgs)} PACKAGES (sorted by recoverable space)")
-    w("-" * 100)
-    w(f"  {'RECOVER':>9} {'APK':>8} {'DATA':>8}  {'RISK':<8} {'STATE':<9} PACKAGE")
-    w(f"  {'-'*9} {'-'*8} {'-'*8}  {'-'*8} {'-'*9} {'-'*46}")
+    w("-" * 104)
+    w("  UNINSTALLABLE WITHOUT ROOT, sorted by recoverable space")
+    w("-" * 104)
+    w(f"  {'RECOVER':>9} {'APK':>8} {'DATA':>8}  {'RISK':<8} {'MODE':<9} PACKAGE")
+    w(f"  {'-'*9} {'-'*8} {'-'*8}  {'-'*8} {'-'*9} {'-'*52}")
     for p in all_pkgs:
-        state = "disabled" if p["disabled"] else ("enabled" if p["enabled"] else "?")
-        origin = "3rd" if p["third_party"] else "sys"
         w(f"  {human(p['recoverable']):>9} {human(p['apk_size']):>8} {human(p['data_size']):>8}  "
-          f"{p['risk']:<8} {state:<9} {p['pkg']}  [{origin}]")
+          f"{p['risk']:<8} {p['mode']:<9} {p['pkg']}")
 
     w("")
-    w("-" * 100)
-    w("  RECOGNISED PACKAGES - what they are")
-    w("-" * 100)
-    for risk in ("BLOAT", "CAUTION", "UNKNOWN", "KEEP"):
+    w("-" * 104)
+    w("  WHAT EACH PACKAGE IS")
+    w("-" * 104)
+    for risk in ("BLOAT", "UNKNOWN", "CAUTION", "KEEP"):
         rows = [p for p in all_pkgs if p["risk"] == risk]
         if not rows:
             continue
         w("")
         w(f"  === {risk} ({len(rows)}) ===")
         for p in sorted(rows, key=lambda x: (x["reason"], -x["recoverable"])):
-            w(f"    {p['pkg']:<52} {human(p['recoverable']):>8}  {p['reason']}")
+            w(f"    {p['pkg']:<54} {human(p['recoverable']):>8}  {p['reason']}")
 
     w("")
-    w("-" * 100)
-    w("  QUICK WINS - BLOAT you can remove for user 0")
-    w("-" * 100)
+    w("-" * 104)
+    w("  CANDIDATES TO REMOVE (BLOAT only)")
+    w("-" * 104)
     bloat = [p for p in all_pkgs if p["risk"] == "BLOAT"]
-    total = sum(p["recoverable"] for p in bloat)
-    for p in sorted(bloat, key=lambda x: -x["recoverable"])[:25]:
-        w(f"    {human(p['recoverable']):>8}  {p['pkg']:<50} {p['reason']}")
+    for p in sorted(bloat, key=lambda x: -x["recoverable"]):
+        w(f"    {human(p['recoverable']):>8}  {p['mode']:<9} {p['pkg']:<52} {p['reason']}")
     w("")
-    w(f"    TOTAL recoverable from BLOAT (estimated): {human(total)}")
-    if not is_root:
-        w("    (data sizes are estimates: re-run with --try-root for exact figures)")
+    w(f"    BLOAT count: {len(bloat)}   "
+      f"total APK size: {human(sum(p['apk_size'] for p in bloat))}")
     w("")
 
-    report = "\n".join(lines)
+    report = "\n".join(L)
     (out_dir / "report.txt").write_text(report, encoding="utf-8")
 
     with (out_dir / "report.csv").open("w", newline="", encoding="utf-8") as fh:
         wr = csv.writer(fh)
-        wr.writerow(["package", "risk", "reason", "origin", "enabled", "disabled",
-                     "apk_bytes", "data_bytes", "recoverable_bytes", "apk_path"])
+        wr.writerow(["package", "risk", "reason", "mode", "third_party", "in_system",
+                     "enabled", "disabled", "apk_bytes", "data_bytes",
+                     "recoverable_bytes", "apk_path"])
         for p in all_pkgs:
-            wr.writerow([p["pkg"], p["risk"], p["reason"],
-                         "3rd" if p["third_party"] else "sys",
+            wr.writerow([p["pkg"], p["risk"], p["reason"], p["mode"],
+                         int(p["third_party"]), int(p["in_system"]),
                          int(p["enabled"]), int(p["disabled"]),
                          p["apk_size"], p["data_size"], p["recoverable"], p["apk"]])
 
+    print()
     print(report)
     print()
-    print("=" * 100)
+    print("=" * 104)
     print(f"  report : {out_dir / 'report.txt'}")
     print(f"  csv    : {out_dir / 'report.csv'}")
     print(f"  raw    : {raw_dir}")
-    print("=" * 100)
+    print("=" * 104)
     return 0
 
 

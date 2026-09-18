@@ -13,7 +13,6 @@ package:com.google.android.onetimeinitializer
 package:com.google.android.ext.shared
 package:com.movenda.p4mcore
 package:it.telecomitalia.timmusic_tv
-package:com.upst.hayu
 package:com.marvell.power.shutdownreceiver
 package:com.android.externalstorage
 package:it.telecomitalia.thefilmclub
@@ -60,7 +59,6 @@ package:com.android.inputdevices
 package:com.estrongs.android.pop
 package:com.google.android.tvrecommendations
 package:com.google.android.leanbacklauncher.recommendations
-package:com.fifa.plus.android
 package:com.technicolor.android.cas.provider
 package:it.telecomitalia.calcio
 package:com.google.android.webview
