@@ -360,7 +360,7 @@ fun TvPlayerScreen(
             ModernSeekIndicator(seconds = cumulativeSeekSeconds)
         }
 
-        // Seek rapido a BARRA NASCOTTA (D-pad sinistra/destra): stesso indicatore
+        // Seek rapido a barra nascosta (D-pad sinistra/destra): stesso indicatore
         // ma transitorio, mostrato solo mentre la barra dei controlli è chiusa.
         AnimatedVisibility(
             visible = hiddenSeekSeconds != 0 && !controlsVisible && !isMiniPlayer,
