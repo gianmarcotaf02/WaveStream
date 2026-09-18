@@ -146,6 +146,12 @@ class PlayerActivity : ComponentActivity() {
     private val _cumulativeSeekSeconds = mutableIntStateOf(0)
     private val _seekIndicatorVisible = mutableStateOf(false)
     private var seekAccumulationJob: kotlinx.coroutines.Job? = null
+
+    // Feedback del seek "a barra nascosta" (D-pad sinistra/destra con controlli
+    // chiusi): mostra per ~1s l'indicatore +N s / -N s senza riaprire la barra.
+    private val _hiddenSeekSeconds = mutableIntStateOf(0)
+    private val hiddenSeekHandler = Handler(Looper.getMainLooper())
+    private val hiddenSeekClearRunnable = Runnable { _hiddenSeekSeconds.intValue = 0 }
     
     // Countdown overlay "Prossimo episodio" (uniforme: 10s)
     private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 10
@@ -190,6 +196,9 @@ class PlayerActivity : ComponentActivity() {
 
     // Passo del timeshift live (tasti indietro/avanti nel player)
     private val LIVE_TIMESHIFT_STEP_MS = 10_000L
+
+    // Passo del seek rapido con la barra dei controlli nascosta (D-pad L/R)
+    private val HIDDEN_SEEK_STEP_SECONDS = 10
 
     // Sotto questa differenza (ms) un seek non è considerato un "salto indietro"
     // (evita reset inutili su micro-aggiustamenti del player).
@@ -524,6 +533,7 @@ class PlayerActivity : ComponentActivity() {
                 val hasPreviousEpisode by remember { _hasPreviousEpisode }
                 val cumulativeSeekSeconds by remember { _cumulativeSeekSeconds }
                 val seekIndicatorVisible by remember { _seekIndicatorVisible }
+                val hiddenSeekSeconds by remember { _hiddenSeekSeconds }
                 
                 val controlsVisible by remember { _controlsVisible }
                 
@@ -590,6 +600,7 @@ class PlayerActivity : ComponentActivity() {
                     onChannelSelect = { onMiniChannelSelected(it) },
                     cumulativeSeekSeconds = cumulativeSeekSeconds,
                     seekIndicatorVisible = seekIndicatorVisible,
+                    hiddenSeekSeconds = hiddenSeekSeconds,
                     showStillWatching = remember { _showStillWatching }.value,
                     onStillWatchingContinue = { 
                         resetAutoPlayCounter()
@@ -1073,6 +1084,32 @@ class PlayerActivity : ComponentActivity() {
     /**
      * Simple seek by milliseconds (for media keys)
      */
+    /**
+     * Seek rapido con la barra dei controlli nascosta: D-pad sinistra/destra.
+     * Applica subito lo spostamento e mostra per ~1s l'indicatore "+N s / -N s",
+     * senza riaprire la barra (modalità di visione pulita).
+     */
+    private fun hiddenBarSeek(seconds: Int) {
+        if (!::player.isInitialized) return
+        if (contentType == ContentType.CHANNEL) {
+            updateLiveState()
+            if (!player.isCurrentMediaItemSeekable) {
+                android.widget.Toast.makeText(
+                    this,
+                    "Questo canale non supporta il timeshift",
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return
+            }
+        }
+        seekBy(seconds * 1000L, fromLiveControls = true)
+
+        // Feedback visivo transitorio (l'overlay appare solo a barra chiusa)
+        _hiddenSeekSeconds.intValue = seconds
+        hiddenSeekHandler.removeCallbacks(hiddenSeekClearRunnable)
+        hiddenSeekHandler.postDelayed(hiddenSeekClearRunnable, 1_000L)
+    }
+
     private fun seekBy(ms: Long, fromLiveControls: Boolean = false) {
         resetAutoPlayCounter()
         if (contentType == ContentType.CHANNEL) {
@@ -2010,9 +2047,24 @@ class PlayerActivity : ComponentActivity() {
                 seekBy(-10_000)
                 return true
             }
-            // D-pad handling removed to avoid accidental seeking
-            // Seek is now only allowed when Progress Bar is focused and activated
-            
+            // D-pad sinistra/destra con la barra dei controlli NASCosta: seek
+            // rapido avanti/indietro senza dover aprire la barra. Con i controlli
+            // visibili l'evento non arriva qui (il focus Compose naviga i pulsanti).
+            KeyEvent.KEYCODE_DPAD_LEFT -> {
+                if (!_controlsVisible.value && !_isMiniPlayer.value) {
+                    hiddenBarSeek(-HIDDEN_SEEK_STEP_SECONDS)
+                    return true
+                }
+                return false
+            }
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                if (!_controlsVisible.value && !_isMiniPlayer.value) {
+                    hiddenBarSeek(HIDDEN_SEEK_STEP_SECONDS)
+                    return true
+                }
+                return false
+            }
+
             // D-pad center/enter: quando i controlli sono nascosti li mostra
             // senza toccare la riproduzione. Il focus va automaticamente sul
             // pulsante Play/Pausa (TvPlayerScreen), così un secondo OK decide
