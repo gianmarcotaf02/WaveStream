@@ -14,7 +14,7 @@
     },
     "app_update_android7": {
       ".read": true,
-      ".write": true
+      ".write": false
     },
     "vpn_configs": {
       ".read": true,
