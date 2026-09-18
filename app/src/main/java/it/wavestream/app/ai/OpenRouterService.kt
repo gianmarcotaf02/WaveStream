@@ -40,6 +40,8 @@ interface OpenRouterService {
          * Ordine = priorità. Anche questi `:free` (costo zero).
          */
         val FALLBACK_MODELS = listOf(
+            "deepseek/deepseek-v4-flash-0731:free",
+            "nvidia/nemotron-3-super-120b-a12b:free",
             "google/gemma-4-26b-a4b-it:free"
         )
     }
