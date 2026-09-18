@@ -902,6 +902,8 @@ fun HeroBanner(
     onTrailerClick: (HeroItem) -> Unit,
     onFavoriteClick: (HeroItem) -> Unit = {},
     onAddToPlaylistClick: (HeroItem) -> Unit = {},
+    /** Stato del contenuto nella lista "Da guardare" (per il pulsante + ↔ spunta). */
+    isInList: Boolean = false,
     onMarkAsWatchedClick: (HeroItem) -> Unit = {},
     playButtonFocusRequester: FocusRequester? = null,
     onFocusChanged: (Boolean) -> Unit = {},
@@ -1507,9 +1509,9 @@ fun HeroBanner(
                             
                             // List button (nascosto per l'hero partita)
                             if (hero.contentType != "SERIEA_MATCH") {
-                                HeroIconButton(
-                                    icon = Icons.AutoMirrored.Filled.PlaylistAdd,
-                                    contentDescription = "Aggiungi alla lista",
+                                HeroToggleListButton(
+                                    isInList = isInList,
+                                    contentDescription = if (isInList) "Rimuovi dalla lista" else "Aggiungi alla lista",
                                     onClick = { onAddToPlaylistClick(hero) },
                                     onFocusChange = { if (it) isPaused = true }
                                 )
