@@ -924,7 +924,8 @@ fun HeroBanner(
     // Skipped 30-70 frames" every 7 s), which makes the whole UI feel frozen while
     // navigating. There we keep the hero static; the user still changes it with
     // the arrows/buttons.
-    val autoRotateEnabled = remember { !isLowRamDevice(LocalContext.current) }
+    val context = LocalContext.current
+    val autoRotateEnabled = remember(context) { !isLowRamDevice(context) }
     var isPaused by remember { mutableStateOf(false) }
     // Track slide direction
     var slideDirection by remember { mutableIntStateOf(1) }
