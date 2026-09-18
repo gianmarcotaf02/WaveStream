@@ -1,5 +1,6 @@
 package it.wavestream.app.util
 
+import android.app.ActivityManager
 import android.content.Context
 import coil.ImageLoader
 import coil.ImageLoaderFactory
@@ -19,8 +20,18 @@ class WaveStreamImageLoaderFactory @Inject constructor(
 ) : ImageLoaderFactory {
 
     override fun newImageLoader(): ImageLoader {
-        // 30% memory — TV has more RAM than phone, and hero backdrops are large
-        val memoryPercent = 0.30
+        // The bitmap cache is sized as a percentage of the *app heap*, not of the
+        // device RAM, and this app declares android:largeHeap="true". On a 1 GB TV
+        // box that makes the heap far larger than the memory actually available,
+        // so 30% became ~150 MB of decoded bitmaps while only ~100 MB were free:
+        // the low-memory killer killed the process while the Home was loading its
+        // first images. The cache is now scaled to what the device can really
+        // hold - images still stay cached on disk (300 MB below).
+        val activityManager =
+            context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val isLowRamDevice = activityManager.isLowRamDevice ||
+            activityManager.memoryClass < LOW_RAM_MEMORY_CLASS_MB
+        val memoryPercent = if (isLowRamDevice) 0.08 else 0.25
         // 300MB disk cache — enough for ~1000 HD poster images
         val diskCacheSize = 300L * 1024 * 1024
 
@@ -53,6 +64,15 @@ class WaveStreamImageLoaderFactory @Inject constructor(
             }
             .crossfade(true)
             .build()
+    }
+
+    private companion object {
+        /**
+         * Heap size below which the device is treated as low-RAM (TV sticks,
+         * 1 GB set-top boxes). Their heap is small even with largeHeap=true, and
+         * a large bitmap cache there is exactly what triggers the OOM killer.
+         */
+        const val LOW_RAM_MEMORY_CLASS_MB = 256
     }
 }
 
