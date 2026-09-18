@@ -5,7 +5,11 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -190,6 +194,27 @@ fun TvContentCard(
                                 fontWeight = FontWeight.Bold
                             )
                         }
+                    }
+                }
+
+                // Badge "VISTO" (film/serie completati) — cerchio bianco con spunta nera,
+                // coerente con il pulsante lista dell'hero. In alto a sinistra.
+                if (item.isWatched && item.episodeLabel == null) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp)
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(Color.White),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Visto",
+                            tint = Color.Black,
+                            modifier = Modifier.size(15.dp)
+                        )
                     }
                 }
 

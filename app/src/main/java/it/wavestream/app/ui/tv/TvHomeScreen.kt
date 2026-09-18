@@ -650,6 +650,9 @@ private fun TvHomeScreenContent(
                                     onAutoNext = onNextHero,
                                     onFavoriteClick = { onToggleHeroFavorite(hero) },
                                     onAddToPlaylistClick = { onAddHeroToPlaylist(hero) },
+                                    isInList = state.watchLaterKeys.contains(
+                                        "${if (hero.contentType == "MOVIE") "MOVIE" else "SERIES"}:${hero.id}"
+                                    ),
                                     onTrailerClick = { onTrailerClick(hero) },
                                     onMarkAsWatchedClick = { onMarkAsWatchedClick(hero) },
                                     playButtonFocusRequester = heroPlayButtonFocusRequester,
@@ -1874,6 +1877,128 @@ private fun HeroIconButton(
                     scaleY = animatedBounce
                 }
         )
+    }
+}
+
+/**
+ * Pulsante "lista" dell'hero: toggle con feedback di stato.
+ * Non in lista → "+"; in lista → cerchio bianco pieno con spunta nera.
+ * Il passaggio è animato (riempimento colore + morph + ↔ spunta) così si capisce
+ * subito che la pressione ha avuto effetto.
+ */
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun HeroToggleListButton(
+    isInList: Boolean,
+    contentDescription: String,
+    onClick: () -> Unit,
+    onFocusChange: (Boolean) -> Unit,
+    onLeftPress: (() -> Unit)? = null,
+    onRightPress: (() -> Unit)? = null
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    LaunchedEffect(isFocused) { onFocusChange(isFocused) }
+
+    val focusProgress by animateFloatAsState(
+        targetValue = if (isFocused) 1f else 0f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "heroListButtonProgress"
+    )
+
+    val unfocusedBg = WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f)
+    val unfocusedBorder = WaveStreamColors.TextSecondary.copy(alpha = 0.7f)
+
+    // Riempimento bianco pieno quando la voce è nella lista "Da guardare".
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            isInList -> Color.White
+            isFocused -> WaveStreamColors.Accent
+            else -> unfocusedBg
+        },
+        label = "heroListButtonBg"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = when {
+            isInList -> Color.White
+            isFocused -> WaveStreamColors.Accent
+            else -> unfocusedBorder
+        },
+        label = "heroListButtonBorder"
+    )
+
+    // Bounce quando lo stato cambia (+ → spunta e viceversa).
+    var bounceScale by remember { mutableFloatStateOf(1f) }
+    LaunchedEffect(isInList) {
+        bounceScale = 1.35f
+        kotlinx.coroutines.delay(50)
+        bounceScale = 1f
+    }
+    val animatedBounce by animateFloatAsState(
+        targetValue = bounceScale,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "heroListButtonBounce"
+    )
+
+    val scale = 1f + (AppAnimations.IconButtonFocusScale - 1f) * focusProgress
+
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .requiredSize(48.dp)
+            .clip(CircleShape)
+            .background(backgroundColor)
+            .border(1.dp, borderColor, CircleShape)
+            .onPreviewKeyEvent { keyEvent ->
+                if (keyEvent.type == KeyEventType.KeyDown) {
+                    when (keyEvent.key) {
+                        Key.DirectionLeft -> {
+                            onLeftPress?.let { it(); true } ?: false
+                        }
+                        Key.DirectionRight -> {
+                            onRightPress?.let { it(); true } ?: false
+                        }
+                        else -> false
+                    }
+                } else false
+            }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .focusable(interactionSource = interactionSource),
+        contentAlignment = Alignment.Center
+    ) {
+        AnimatedContent(
+            targetState = isInList,
+            transitionSpec = {
+                (scaleIn(
+                    initialScale = 0.4f,
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                ) + fadeIn()) togetherWith (scaleOut(targetScale = 0.4f) + fadeOut())
+            },
+            label = "heroListIcon"
+        ) { checked ->
+            Icon(
+                imageVector = if (checked) Icons.Default.Check else Icons.Default.Add,
+                contentDescription = contentDescription,
+                tint = if (checked) Color.Black else WaveStreamColors.TextPrimary,
+                modifier = Modifier
+                    .size(24.dp)
+                    .graphicsLayer {
+                        scaleX = animatedBounce
+                        scaleY = animatedBounce
+                    }
+            )
+        }
     }
 }
 
