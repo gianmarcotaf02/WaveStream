@@ -690,6 +690,9 @@ class HomeViewModel @Inject constructor(
                     currentProfileId = userPreferences.getCurrentProfileId() ?: 1L
                     val profile = profileDao.getProfileById(currentProfileId)
                     _profileName.value = profile?.name ?: ""
+                    // Stato della lista "Da guardare" per il pulsante lista dell'hero
+                    val keys = loadWatchLaterKeys()
+                    _uiState.update { it.copy(watchLaterKeys = keys) }
                 }
 
             // Check if we have cached data for this content type
@@ -2958,7 +2961,42 @@ class HomeViewModel @Inject constructor(
             }
             // Il refresh del tab Liste non è necessario qui: il tab viene
             // ricaricato quando lo si seleziona.
+            // Aggiorna subito lo stato del pulsante lista nell'hero (senza attendere
+            // un reload completo delle righe).
+            val key = watchLaterKey(hero.contentType, hero.id)
+            _uiState.update { state ->
+                state.copy(
+                    watchLaterKeys = if (added) state.watchLaterKeys + key else state.watchLaterKeys - key
+                )
+            }
             onResult(added)
+        }
+    }
+
+    /**
+     * Chiave univoca per la lista "Da guardare": `CONTENTTYPE:id`.
+     * Allinea film e serie allo stesso formato usato dalle GroupItem.
+     */
+    private fun watchLaterKey(contentType: String, id: Long): String =
+        "${if (contentType == "MOVIE") ContentType.MOVIE.name else ContentType.SERIES.name}:$id"
+
+    /**
+     * Carica l'insieme delle chiavi dei contenuti presenti nella lista "Da guardare"
+     * del profilo corrente. Usato dall'hero per mostrare + / spunta in modo coerente
+     * anche dopo un riavvio dell'app.
+     */
+    private suspend fun loadWatchLaterKeys(): Set<String> = withContext(Dispatchers.IO) {
+        try {
+            val groups = customGroupDao.getGroupsForProfileList(currentProfileId)
+            val group = groups.firstOrNull {
+                it.name.equals("Da guardare", ignoreCase = true) || it.name.equals("Watch Later", ignoreCase = true)
+            } ?: return@withContext emptySet()
+            customGroupDao.getItemsForGroupList(group.id)
+                .map { "${it.contentType.name}:${it.contentId}" }
+                .toSet()
+        } catch (e: Exception) {
+            Log.e("HomeViewModel", "Error loading watch later keys", e)
+            emptySet()
         }
     }
     
