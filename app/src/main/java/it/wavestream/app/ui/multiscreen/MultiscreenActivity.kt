@@ -31,6 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import it.wavestream.app.ui.util.requestFocusSafely
+import it.wavestream.app.ui.util.requestFocusWhenReady
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
@@ -506,7 +508,7 @@ fun EmptyMultiscreenState(onAddChannel: () -> Unit) {
     val focusRequester = remember { FocusRequester() }
     
     LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+        focusRequester.requestFocusWhenReady()
     }
     
     Box(
@@ -1029,7 +1031,7 @@ fun ChannelPickerOverlay(
                     query = searchQuery,
                     onQueryChange = { searchQuery = it },
                     onClear = { searchQuery = "" },
-                    onSearch = { gridFocusRequester.requestFocus() }
+                    onSearch = { gridFocusRequester.requestFocusSafely() }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

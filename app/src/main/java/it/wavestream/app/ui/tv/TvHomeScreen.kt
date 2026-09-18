@@ -63,6 +63,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
+import it.wavestream.app.ui.util.requestFocusSafely
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.drawWithContent
@@ -329,7 +330,7 @@ private fun TvHomeScreenContent(
                             if (keyEvent.type == KeyEventType.KeyDown && 
                                 keyEvent.key == Key.DirectionUp) {
                                 // For TV grid, just focus back button when UP is pressed
-                                backButtonFocusRequester.requestFocus()
+                                backButtonFocusRequester.requestFocusSafely()
                                 true
                             } else if (keyEvent.type == KeyEventType.KeyDown && 
                                 keyEvent.key == Key.Back) {

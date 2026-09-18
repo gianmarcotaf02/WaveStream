@@ -42,6 +42,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import it.wavestream.app.ui.util.requestFocusSafely
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -303,7 +304,7 @@ fun ProfileConfigScreen(
                                 imeAction = ImeAction.Done
                             ),
                             keyboardActions = KeyboardActions(
-                                onDone = { continueFocusRequester.requestFocus() }
+                                onDone = { continueFocusRequester.requestFocusSafely() }
                             )
                         )
                     }
