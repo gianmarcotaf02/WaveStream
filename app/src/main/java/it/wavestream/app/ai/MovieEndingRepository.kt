@@ -365,7 +365,8 @@ class MovieEndingRepository @Inject constructor(
                     temperature = 0.2,
                     topP = 0.9,
                     maxTokens = MAX_TOKENS,
-                    responseFormat = OpenRouterResponseFormat(type = "json_object")
+                    responseFormat = OpenRouterResponseFormat(type = "json_object"),
+                    reasoning = OpenRouterReasoning(enabled = false)
                 )
             )
         } catch (e: retrofit2.HttpException) {

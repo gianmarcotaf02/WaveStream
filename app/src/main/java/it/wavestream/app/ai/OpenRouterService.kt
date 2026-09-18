@@ -47,7 +47,15 @@ data class OpenRouterRequest(
     @Json(name = "top_p") val topP: Double? = null,
     @Json(name = "max_tokens") val maxTokens: Int? = null,
     @Json(name = "response_format") val responseFormat: OpenRouterResponseFormat? = null,
+    /** Disattiva il "thinking" dei modelli reasoning (es. qwen3.8): senza questo
+     *  i token finiscono nel campo `reasoning` e `content` può restare null. */
+    val reasoning: OpenRouterReasoning? = null,
     val stream: Boolean = false
+)
+
+@JsonClass(generateAdapter = true)
+data class OpenRouterReasoning(
+    val enabled: Boolean
 )
 
 @JsonClass(generateAdapter = true)
