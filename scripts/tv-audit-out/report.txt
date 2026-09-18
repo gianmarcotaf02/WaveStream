@@ -1,0 +1,354 @@
+====================================================================================================
+  WaveStream - Android device audit
+====================================================================================================
+  serial      : 192.168.1.27:5555
+  model       : ? ?
+  android     : ? (sdk ?)
+  abi         : ?
+  build       : ?
+  fingerprint : ?
+  shell uid   : 2000 (unprivileged)
+
+----------------------------------------------------------------------------------------------------
+  STORAGE (/data is where apps are installed)
+----------------------------------------------------------------------------------------------------
+  Filesystem            1K-blocks    Used Available Use% Mounted on
+  /dev/block/mmcblk0p17   5094368 4945976    132008  98% /data
+  /dev/block/mmcblk0p14    793488    1276    775828   1% /cache
+
+  /data total 4.9G, used 4.7G, FREE 128.9M (97% full)
+  >>> /data is critically full. Free at least ~400 MB before installing an APK.
+
+  dumpsys diskstats:
+    Latency: 0ms [512B Data Write]
+    Data-Free: 132008K / 5094368K total = 2% free
+    Cache-Free: 132008K / 5094368K total = 2% free
+    System-Free: 31144K / 999560K total = 3% free
+    App Size: 5008375808
+    App Cache Size: 193904640
+    Photos Size: 1499136
+    Videos Size: 0
+    Audio Size: 0
+    Downloads Size: 0
+    System Size: 2783367168
+    Other Size: 8331264
+
+----------------------------------------------------------------------------------------------------
+  SUMMARY
+----------------------------------------------------------------------------------------------------
+  packages total      : 142
+  third-party (normal uninstall)  :   15   APK        -  DATA        -
+  preinstalled (/system, --user 0) :  127   APK        -  DATA        -
+  disabled packages   : 0
+
+  NOTE: APKs inside /system live on a different partition. Removing a
+        preinstalled app for user 0 frees only its data directory.
+
+----------------------------------------------------------------------------------------------------
+  142 PACKAGES (sorted by recoverable space)
+----------------------------------------------------------------------------------------------------
+    RECOVER      APK     DATA  RISK     STATE     PACKAGE
+  --------- -------- --------  -------- --------- ----------------------------------------------
+          -        -        -  UNKNOWN  ?         /system/priv-app/CtsShimPrivPrebuilt/CtsShimPrivPrebuilt.apk=com.android.cts.priv.ctsshim  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/SystemCustomization/SystemCustomization.apk=com.technicolor.tim.customization  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/GoogleExtServices/GoogleExtServices.apk=com.google.android.ext.services  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/MrvlOverscan/MrvlOverscan.apk=com.marvell.tv.overscan  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.apps.mediashell-Mmx4CcQZeWlYPnvQQfKoNw==/base.apk=com.google.android.apps.mediashell  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.accountmanager-uTnmnc9mFYWD0ikH6tSAMw==/base.apk=it.telecomitalia.accountmanager  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.katniss-nJCsvHBGekAuLwGmORTMkw==/base.apk=com.google.android.katniss  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/AutoPeriodicReboot/AutoPeriodicReboot.apk=com.technicolor.autoperiodicreboot  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/CalendarProvider/CalendarProvider.apk=com.android.providers.calendar  [sys]
+          -        -        -  KEEP     ?         /system/priv-app/TvSettings/TvSettings.apk=com.android.tv.settings  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/MediaProvider/MediaProvider.apk=com.android.providers.media  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/GoogleOneTimeInitializer/GoogleOneTimeInitializer.apk=com.google.android.onetimeinitializer  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/GoogleExtShared/GoogleExtShared.apk=com.google.android.ext.shared  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/movenda-core/movenda-core.apk=com.movenda.p4mcore  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.timmusic_tv-IGgdO9EhrF8UAtfTPn8yYg==/base.apk=it.telecomitalia.timmusic_tv  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.upst.hayu-CizKsbV0YIyfjVkpURMdLA==/base.apk=com.upst.hayu  [sys]
+          -        -        -  UNKNOWN  ?         /system/vendor/app/ShutdownReceiver/ShutdownReceiver.apk=com.marvell.power.shutdownreceiver  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/ExternalStorageProvider/ExternalStorageProvider.apk=com.android.externalstorage  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.thefilmclub-JzmP2_QIr7ShNDsOY0sCBQ==/base.apk=it.telecomitalia.thefilmclub  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/HTMLViewer/HTMLViewer.apk=com.android.htmlviewer  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/CompanionDeviceManager/CompanionDeviceManager.apk=com.android.companiondevicemanager  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/ApplicationOta/ApplicationOta.apk=com.technicolor.app.ota  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/FactoryCert/FactoryCert.apk=com.technicolor.factorycert  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/DownloadProvider/DownloadProvider.apk=com.android.providers.downloads  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/TvProvider/TvProvider.apk=com.android.providers.tv  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.backdrop-sPxcnkpyBUtrvGgqRLDUqg==/base.apk=com.google.android.backdrop  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/timvision.telemetry-MUwljQl2aYcJnMdn2uIntg==/base.apk=timvision.telemetry  [sys]
+          -        -        -  KEEP     ?         /system/priv-app/RemoteVoiceInput/RemoteVoiceInput.apk=com.technicolor.android.remotecontrolservice  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/DefaultLedController/DefaultLedController.apk=com.technicolor.defaultledcontroller  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/PlayAutoInstallConfig/PlayAutoInstallConfig.apk=android.autoinstalls.config.technicolor  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/SetupWraith/SetupWraith.apk=com.google.android.tungsten.setupwraith  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/ProjectReleaseNote/ProjectReleaseNote.apk=com.technicolor.project.releasenote  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/HdmiResolution/HdmiResolution.apk=com.technicolor.hdmiresolution  [sys]
+          -        -        -  KEEP     ?         /system/app/MrvlTvSettings/MrvlTvSettings.apk=com.marvell.tv.settings  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/DefaultContainerService/DefaultContainerService.apk=com.android.defcontainer  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/GlobalKey/GlobalKey.apk=com.technicolor.globalkey  [sys]
+          -        -        -  KEEP     ?         /data/app/com.android.vending-w0sRO5zNSZ71rXH6rJ93bg==/base.apk=com.android.vending  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/PacProcessor/PacProcessor.apk=com.android.pacprocessor  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.iptuner-gzf1mjHcc9QPbVJo_Rr8NQ==/base.apk=it.telecomitalia.iptuner  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/CertInstaller/CertInstaller.apk=com.android.certinstaller  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.marvin.talkback-MJRi8D3700FWIeDeHN5NLw==/base.apk=com.google.android.marvin.talkback  [sys]
+          -        -        -  KEEP     ?         /data/app/timvision.tvappsettings-QhIAUZRKzISeYYgDsGDlpA==/base.apk=timvision.tvappsettings  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.technicolor.android.dtvscan.project-dhmpTXsB_lD5K12gH76-mg==/base.apk=com.technicolor.android.dtvscan.project  [sys]
+          -        -        -  UNKNOWN  ?         /system/framework/framework-res.apk=android  [sys]
+          -        -        -  KEEP     ?         /system/priv-app/AndroidPlatformServicesTV/AndroidPlatformServicesTV.apk=com.google.android.gms.policy_sidecar_o  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/Pumpkin/Pumpkin.apk=com.google.android.speech.pumpkin  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/BackupRestoreConfirmation/BackupRestoreConfirmation.apk=com.android.backupconfirm  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.dazn-xLaus-BQn1CV-uEGmyIKJw==/base.apk=com.dazn  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/StatementService/StatementService.apk=com.android.statementservice  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/tv.broadpeak.nanocdnwrapper-yYmFZX11WwXp855POJMynA==/base.apk=tv.broadpeak.nanocdnwrapper  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/NoTouchAuthDelegate/NoTouchAuthDelegate.apk=com.google.android.gsf.notouch  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.amazon.amazonvideo.livingroom-dYtnqR6QFBhaohmpmON03A==/base.apk=com.amazon.amazonvideo.livingroom  [sys]
+          -        -        -  KEEP     ?         /system/priv-app/SettingsProvider/SettingsProvider.apk=com.android.providers.settings  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/SharedStorageBackup/SharedStorageBackup.apk=com.android.sharedstoragebackup  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/PrintSpooler/PrintSpooler.apk=com.android.printspooler  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/it.rds.androidtv.rdssocialtv-Zg6ui373hCY_p1Fe3XUpGg==/base.apk=it.rds.androidtv.rdssocialtv  [sys]
+          -        -        -  KEEP     ?         /system/priv-app/TchSetupWizard/TchSetupWizard.apk=com.technicolor.android.skipper.setupwizard  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/BasicDreams/BasicDreams.apk=com.android.dreams.basic  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/InputDevices/InputDevices.apk=com.android.inputdevices  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.estrongs.android.pop-2/base.apk=com.estrongs.android.pop  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.tvrecommendations-q3gQOARMuchiYUwf8DNduw==/base.apk=com.google.android.tvrecommendations  [sys]
+          -        -        -  KEEP     ?         /system/priv-app/RecommendationsService/RecommendationsService.apk=com.google.android.leanbacklauncher.recommendations  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.fifa.plus.android-1fFyiZlQ6smH8v5Ip-xKnw==/base.apk=com.fifa.plus.android  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/tch_cas_provider_service/tch_cas_provider_service.apk=com.technicolor.android.cas.provider  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.calcio-2/base.apk=it.telecomitalia.calcio  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.webview-eRJ7eFpOQHDjuwK1G0w5kQ==/base.apk=com.google.android.webview  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/upgrade-produzione/upgrade-produzione.apk=timvision.upgrade  [sys]
+          -        -        -  BLOAT    ?         /data/app/com.sky.ott.client.androidtv.SkyIT-e1GCGhqK4BU7zPzluMtIZA==/base.apk=com.sky.ott.client.androidtv.SkyIT  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.digitalsupport-HS8aa0x0mNqG5HTNGjtkuQ==/base.apk=it.telecomitalia.digitalsupport  [sys]
+          -        -        -  KEEP     ?         /system/app/GoogleContactsSyncAdapter/GoogleContactsSyncAdapter.apk=com.google.android.syncadapters.contacts  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/KeyChain/KeyChain.apk=com.android.keychain  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.youtube.tvmusic-FqfAgqHBLLIbm835oeYJtA==/base.apk=com.google.android.youtube.tvmusic  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.movenda.omadm.tv-ZJ_dbl-4yoQ3wnejuTY_sw==/base.apk=com.movenda.omadm.tv  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/tch_dtvinput_service/tch_dtvinput_service.apk=com.technicolor.android.dtvinput  [sys]
+          -        -        -  KEEP     ?         /data/app/com.google.android.gms-7s78l-EgA-5WDGNe8bagxg==/base.apk=com.google.android.gms  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/GoogleServicesFramework/GoogleServicesFramework.apk=com.google.android.gsf  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/SecondScreenSetup/SecondScreenSetup.apk=com.google.android.sss  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.tts-eWBl8DNL2vfroQCk05YNtw==/base.apk=com.google.android.tts  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/GooglePartnerSetup/GooglePartnerSetup.apk=com.google.android.partnersetup  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/GooglePackageInstaller/GooglePackageInstaller.apk=com.android.packageinstaller  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.videos-D_HDw-Fm4IoELA3dNQd1_Q==/base.apk=com.google.android.videos  [sys]
+          -        -        -  UNKNOWN  ?         /system/vendor/app/WoWLAN/WoWLAN.apk=com.marvell.wol  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/cputemperature/cputemperature.apk=com.technicolor.cputemperature  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/ProxyHandler/ProxyHandler.apk=com.android.proxyhandler  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/GoogleFeedback/GoogleFeedback.apk=com.google.android.feedback  [sys]
+          -        -        -  KEEP     ?         /system/app/GoogleCalendarSyncAdapter/GoogleCalendarSyncAdapter.apk=com.google.android.syncadapters.calendar  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.cbs.ca-BwsCFfif7V5uc7q4govOSg==/base.apk=com.cbs.ca  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.timppapp-vp1LOiq0ZXJ5cYxELRQFLg==/base.apk=it.telecomitalia.timppapp  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/CheckOTA/CheckOTA.apk=com.technicolor.checkota  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/timvision.leanbackcustomization-2/base.apk=timvision.leanbackcustomization  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/HardwareProperties/HardwareProperties.apk=com.technicolor.hardwareproperties  [sys]
+          -        -        -  KEEP     ?         /system/app/Daydream/Daydream.apk=com.android.tv.settings.device.display.daydream  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.games-o5SPK9AsuFuNYqw0m07E0Q==/base.apk=it.telecomitalia.games  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.iotim-1/base.apk=it.telecomitalia.iotim  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/GoogleBackupTransport/GoogleBackupTransport.apk=com.google.android.backuptransport  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/it.mediaset.infinitytv-adECuv--CZ-G3dCaLsGRGA==/base.apk=it.mediaset.infinitytv  [sys]
+          -        -        -  UNKNOWN  ?         /system/vendor/app/OneTouchPlay/OneTouchPlay.apk=com.marvell.onetouchplay  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/tv.pluto.android-YNEOWzcjTWrH7rISgMLlag==/base.apk=tv.pluto.android  [sys]
+          -        -        -  UNKNOWN  ?         /system/vendor/app/AmpAudioLoopback/AmpAudioLoopback.apk=com.marvell.audio.loopback  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/SecondScreenSetupAuthBridge/SecondScreenSetupAuthBridge.apk=com.google.android.sss.authbridge  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/CtsShimPrebuilt/CtsShimPrebuilt.apk=com.android.cts.ctsshim  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.youtube.tv-aatfpVxIJ2gPTcunlFXPrg==/base.apk=com.google.android.youtube.tv  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/PersistDate/PersistDate.apk=com.technicolor.persistdate  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/VpnDialogs/VpnDialogs.apk=com.android.vpndialogs  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/timvision.setup_wizard-HaoO3pz0VA--oE3GcZSMIQ==/base.apk=timvision.setup_wizard  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/FrameworkPackageStubs/FrameworkPackageStubs.apk=com.google.android.tv.frameworkpackagestubs  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/Shell/Shell.apk=com.android.shell  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/WallpaperBackup/WallpaperBackup.apk=com.android.wallpaperbackup  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/UserDictionaryProvider/UserDictionaryProvider.apk=com.android.providers.userdictionary  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.vativision.vativisionapp-V_zrXXszYsZQlBdXPFSBTg==/base.apk=com.vativision.vativisionapp  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/tch_user_service/tch_user_service.apk=com.technicolor.android.user.provider  [sys]
+          -        -        -  KEEP     ?         /data/app/com.google.android.tv.remote.service-MhI6H1_iwVRJCVDgIVqfwA==/base.apk=com.google.android.tv.remote.service  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/FusedLocation/FusedLocation.apk=com.android.location.fused  [sys]
+          -        -        -  KEEP     ?         /system/priv-app/SystemUI/SystemUI.apk=com.android.systemui  [sys]
+          -        -        -  KEEP     ?         /data/app/timvision.launcher-056qMLe-CMDFMcEGDA_mBQ==/base.apk=timvision.launcher  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/BootupTraceQR/BootupTraceQR.apk=com.technicolor.android.BootupTraceQR  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.google.android.play.games-zfUW7M0xsC9OZb5thyjHpQ==/base.apk=com.google.android.play.games  [sys]
+          -        -        -  UNKNOWN  ?         /data/app/com.netflix.ninja-FpKmuwmDxu9wfwJiPMwDHg==/base.apk=com.netflix.ninja  [sys]
+          -        -        -  KEEP     ?         /system/app/Bluetooth/Bluetooth.apk=com.android.bluetooth  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/ContactsProvider/ContactsProvider.apk=com.android.providers.contacts  [sys]
+          -        -        -  UNKNOWN  ?         /system/app/CaptivePortalLogin/CaptivePortalLogin.apk=com.android.captiveportallogin  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/WakeoncastEnabler/WakeoncastEnabler.apk=com.technicolor.ota  [sys]
+          -        -        -  KEEP     ?         /system/priv-app/RemotePairing/RemotePairing.apk=com.technicolor.tv.remotepairing  [sys]
+          -        -        -  UNKNOWN  ?         /system/vendor/app/TchProvider/TchProvider.apk=com.technicolor.android.provider  [sys]
+          -        -        -  KEEP     ?         /data/app/com.google.android.inputmethod.latin-t9jjTA34pM_wtP0a4K6mXA==/base.apk=com.google.android.inputmethod.latin  [sys]
+          -        -        -  KEEP     ?         /data/app/it.telecomitalia.linemanager-EgtcU4DP59w2W2ESS2wHgA==/base.apk=it.telecomitalia.linemanager  [sys]
+          -        -        -  UNKNOWN  ?         /system/priv-app/TvTutorials/TvTutorials.apk=com.google.android.tvtutorials  [sys]
+          -        -        -  UNKNOWN  enabled   com.cbs.ca  [3rd]
+          -        -        -  UNKNOWN  enabled   timvision.leanbackcustomization  [3rd]
+          -        -        -  UNKNOWN  enabled   it.mediaset.infinitytv  [3rd]
+          -        -        -  KEEP     enabled   it.telecomitalia.iotim  [3rd]
+          -        -        -  UNKNOWN  enabled   tv.pluto.android  [3rd]
+          -        -        -  KEEP     enabled   it.telecomitalia.iptuner  [3rd]
+          -        -        -  KEEP     enabled   timvision.tvappsettings  [3rd]
+          -        -        -  BLOAT    enabled   com.sky.ott.client.androidtv.SkyIT  [3rd]
+          -        -        -  UNKNOWN  enabled   com.fifa.plus.android  [3rd]
+          -        -        -  UNKNOWN  enabled   com.vativision.vativisionapp  [3rd]
+          -        -        -  UNKNOWN  enabled   com.estrongs.android.pop  [3rd]
+          -        -        -  UNKNOWN  enabled   it.rds.androidtv.rdssocialtv  [3rd]
+          -        -        -  KEEP     enabled   it.telecomitalia.calcio  [3rd]
+          -        -        -  KEEP     enabled   it.telecomitalia.thefilmclub  [3rd]
+          -        -        -  UNKNOWN  enabled   com.upst.hayu  [3rd]
+
+----------------------------------------------------------------------------------------------------
+  RECOGNISED PACKAGES - what they are
+----------------------------------------------------------------------------------------------------
+
+  === BLOAT (2) ===
+    /data/app/com.sky.ott.client.androidtv.SkyIT-e1GCGhqK4BU7zPzluMtIZA==/base.apk=com.sky.ott.client.androidtv.SkyIT        -  OTT streaming stub
+    com.sky.ott.client.androidtv.SkyIT                          -  OTT streaming stub
+
+  === UNKNOWN (106) ===
+    /system/priv-app/CtsShimPrivPrebuilt/CtsShimPrivPrebuilt.apk=com.android.cts.priv.ctsshim        -  not recognised - needs manual check
+    /system/priv-app/SystemCustomization/SystemCustomization.apk=com.technicolor.tim.customization        -  not recognised - needs manual check
+    /system/priv-app/GoogleExtServices/GoogleExtServices.apk=com.google.android.ext.services        -  not recognised - needs manual check
+    /system/app/MrvlOverscan/MrvlOverscan.apk=com.marvell.tv.overscan        -  not recognised - needs manual check
+    /data/app/com.google.android.apps.mediashell-Mmx4CcQZeWlYPnvQQfKoNw==/base.apk=com.google.android.apps.mediashell        -  not recognised - needs manual check
+    /data/app/com.google.android.katniss-nJCsvHBGekAuLwGmORTMkw==/base.apk=com.google.android.katniss        -  not recognised - needs manual check
+    /system/app/AutoPeriodicReboot/AutoPeriodicReboot.apk=com.technicolor.autoperiodicreboot        -  not recognised - needs manual check
+    /system/priv-app/CalendarProvider/CalendarProvider.apk=com.android.providers.calendar        -  not recognised - needs manual check
+    /system/priv-app/MediaProvider/MediaProvider.apk=com.android.providers.media        -  not recognised - needs manual check
+    /system/priv-app/GoogleOneTimeInitializer/GoogleOneTimeInitializer.apk=com.google.android.onetimeinitializer        -  not recognised - needs manual check
+    /system/app/GoogleExtShared/GoogleExtShared.apk=com.google.android.ext.shared        -  not recognised - needs manual check
+    /system/priv-app/movenda-core/movenda-core.apk=com.movenda.p4mcore        -  not recognised - needs manual check
+    /data/app/com.upst.hayu-CizKsbV0YIyfjVkpURMdLA==/base.apk=com.upst.hayu        -  not recognised - needs manual check
+    /system/vendor/app/ShutdownReceiver/ShutdownReceiver.apk=com.marvell.power.shutdownreceiver        -  not recognised - needs manual check
+    /system/priv-app/ExternalStorageProvider/ExternalStorageProvider.apk=com.android.externalstorage        -  not recognised - needs manual check
+    /system/app/HTMLViewer/HTMLViewer.apk=com.android.htmlviewer        -  not recognised - needs manual check
+    /system/app/CompanionDeviceManager/CompanionDeviceManager.apk=com.android.companiondevicemanager        -  not recognised - needs manual check
+    /system/priv-app/ApplicationOta/ApplicationOta.apk=com.technicolor.app.ota        -  not recognised - needs manual check
+    /system/priv-app/FactoryCert/FactoryCert.apk=com.technicolor.factorycert        -  not recognised - needs manual check
+    /system/priv-app/DownloadProvider/DownloadProvider.apk=com.android.providers.downloads        -  not recognised - needs manual check
+    /system/priv-app/TvProvider/TvProvider.apk=com.android.providers.tv        -  not recognised - needs manual check
+    /data/app/com.google.android.backdrop-sPxcnkpyBUtrvGgqRLDUqg==/base.apk=com.google.android.backdrop        -  not recognised - needs manual check
+    /data/app/timvision.telemetry-MUwljQl2aYcJnMdn2uIntg==/base.apk=timvision.telemetry        -  not recognised - needs manual check
+    /system/app/DefaultLedController/DefaultLedController.apk=com.technicolor.defaultledcontroller        -  not recognised - needs manual check
+    /system/app/PlayAutoInstallConfig/PlayAutoInstallConfig.apk=android.autoinstalls.config.technicolor        -  not recognised - needs manual check
+    /system/priv-app/SetupWraith/SetupWraith.apk=com.google.android.tungsten.setupwraith        -  not recognised - needs manual check
+    /system/app/ProjectReleaseNote/ProjectReleaseNote.apk=com.technicolor.project.releasenote        -  not recognised - needs manual check
+    /system/priv-app/HdmiResolution/HdmiResolution.apk=com.technicolor.hdmiresolution        -  not recognised - needs manual check
+    /system/priv-app/DefaultContainerService/DefaultContainerService.apk=com.android.defcontainer        -  not recognised - needs manual check
+    /system/priv-app/GlobalKey/GlobalKey.apk=com.technicolor.globalkey        -  not recognised - needs manual check
+    /system/app/PacProcessor/PacProcessor.apk=com.android.pacprocessor        -  not recognised - needs manual check
+    /system/app/CertInstaller/CertInstaller.apk=com.android.certinstaller        -  not recognised - needs manual check
+    /data/app/com.google.android.marvin.talkback-MJRi8D3700FWIeDeHN5NLw==/base.apk=com.google.android.marvin.talkback        -  not recognised - needs manual check
+    /data/app/com.technicolor.android.dtvscan.project-dhmpTXsB_lD5K12gH76-mg==/base.apk=com.technicolor.android.dtvscan.project        -  not recognised - needs manual check
+    /system/framework/framework-res.apk=android                 -  not recognised - needs manual check
+    /system/app/Pumpkin/Pumpkin.apk=com.google.android.speech.pumpkin        -  not recognised - needs manual check
+    /system/priv-app/BackupRestoreConfirmation/BackupRestoreConfirmation.apk=com.android.backupconfirm        -  not recognised - needs manual check
+    /data/app/com.dazn-xLaus-BQn1CV-uEGmyIKJw==/base.apk=com.dazn        -  not recognised - needs manual check
+    /system/priv-app/StatementService/StatementService.apk=com.android.statementservice        -  not recognised - needs manual check
+    /data/app/tv.broadpeak.nanocdnwrapper-yYmFZX11WwXp855POJMynA==/base.apk=tv.broadpeak.nanocdnwrapper        -  not recognised - needs manual check
+    /system/app/NoTouchAuthDelegate/NoTouchAuthDelegate.apk=com.google.android.gsf.notouch        -  not recognised - needs manual check
+    /data/app/com.amazon.amazonvideo.livingroom-dYtnqR6QFBhaohmpmON03A==/base.apk=com.amazon.amazonvideo.livingroom        -  not recognised - needs manual check
+    /system/priv-app/SharedStorageBackup/SharedStorageBackup.apk=com.android.sharedstoragebackup        -  not recognised - needs manual check
+    /system/app/PrintSpooler/PrintSpooler.apk=com.android.printspooler        -  not recognised - needs manual check
+    /data/app/it.rds.androidtv.rdssocialtv-Zg6ui373hCY_p1Fe3XUpGg==/base.apk=it.rds.androidtv.rdssocialtv        -  not recognised - needs manual check
+    /system/app/BasicDreams/BasicDreams.apk=com.android.dreams.basic        -  not recognised - needs manual check
+    /system/priv-app/InputDevices/InputDevices.apk=com.android.inputdevices        -  not recognised - needs manual check
+    /data/app/com.estrongs.android.pop-2/base.apk=com.estrongs.android.pop        -  not recognised - needs manual check
+    /data/app/com.google.android.tvrecommendations-q3gQOARMuchiYUwf8DNduw==/base.apk=com.google.android.tvrecommendations        -  not recognised - needs manual check
+    /data/app/com.fifa.plus.android-1fFyiZlQ6smH8v5Ip-xKnw==/base.apk=com.fifa.plus.android        -  not recognised - needs manual check
+    /system/priv-app/tch_cas_provider_service/tch_cas_provider_service.apk=com.technicolor.android.cas.provider        -  not recognised - needs manual check
+    /data/app/com.google.android.webview-eRJ7eFpOQHDjuwK1G0w5kQ==/base.apk=com.google.android.webview        -  not recognised - needs manual check
+    /system/priv-app/upgrade-produzione/upgrade-produzione.apk=timvision.upgrade        -  not recognised - needs manual check
+    /system/app/KeyChain/KeyChain.apk=com.android.keychain        -  not recognised - needs manual check
+    /data/app/com.google.android.youtube.tvmusic-FqfAgqHBLLIbm835oeYJtA==/base.apk=com.google.android.youtube.tvmusic        -  not recognised - needs manual check
+    /data/app/com.movenda.omadm.tv-ZJ_dbl-4yoQ3wnejuTY_sw==/base.apk=com.movenda.omadm.tv        -  not recognised - needs manual check
+    /system/priv-app/tch_dtvinput_service/tch_dtvinput_service.apk=com.technicolor.android.dtvinput        -  not recognised - needs manual check
+    /system/priv-app/GoogleServicesFramework/GoogleServicesFramework.apk=com.google.android.gsf        -  not recognised - needs manual check
+    /system/app/SecondScreenSetup/SecondScreenSetup.apk=com.google.android.sss        -  not recognised - needs manual check
+    /data/app/com.google.android.tts-eWBl8DNL2vfroQCk05YNtw==/base.apk=com.google.android.tts        -  not recognised - needs manual check
+    /system/priv-app/GooglePartnerSetup/GooglePartnerSetup.apk=com.google.android.partnersetup        -  not recognised - needs manual check
+    /system/priv-app/GooglePackageInstaller/GooglePackageInstaller.apk=com.android.packageinstaller        -  not recognised - needs manual check
+    /data/app/com.google.android.videos-D_HDw-Fm4IoELA3dNQd1_Q==/base.apk=com.google.android.videos        -  not recognised - needs manual check
+    /system/vendor/app/WoWLAN/WoWLAN.apk=com.marvell.wol        -  not recognised - needs manual check
+    /system/priv-app/cputemperature/cputemperature.apk=com.technicolor.cputemperature        -  not recognised - needs manual check
+    /system/priv-app/ProxyHandler/ProxyHandler.apk=com.android.proxyhandler        -  not recognised - needs manual check
+    /system/priv-app/GoogleFeedback/GoogleFeedback.apk=com.google.android.feedback        -  not recognised - needs manual check
+    /data/app/com.cbs.ca-BwsCFfif7V5uc7q4govOSg==/base.apk=com.cbs.ca        -  not recognised - needs manual check
+    /system/priv-app/CheckOTA/CheckOTA.apk=com.technicolor.checkota        -  not recognised - needs manual check
+    /data/app/timvision.leanbackcustomization-2/base.apk=timvision.leanbackcustomization        -  not recognised - needs manual check
+    /system/priv-app/HardwareProperties/HardwareProperties.apk=com.technicolor.hardwareproperties        -  not recognised - needs manual check
+    /system/priv-app/GoogleBackupTransport/GoogleBackupTransport.apk=com.google.android.backuptransport        -  not recognised - needs manual check
+    /data/app/it.mediaset.infinitytv-adECuv--CZ-G3dCaLsGRGA==/base.apk=it.mediaset.infinitytv        -  not recognised - needs manual check
+    /system/vendor/app/OneTouchPlay/OneTouchPlay.apk=com.marvell.onetouchplay        -  not recognised - needs manual check
+    /data/app/tv.pluto.android-YNEOWzcjTWrH7rISgMLlag==/base.apk=tv.pluto.android        -  not recognised - needs manual check
+    /system/vendor/app/AmpAudioLoopback/AmpAudioLoopback.apk=com.marvell.audio.loopback        -  not recognised - needs manual check
+    /system/app/SecondScreenSetupAuthBridge/SecondScreenSetupAuthBridge.apk=com.google.android.sss.authbridge        -  not recognised - needs manual check
+    /system/app/CtsShimPrebuilt/CtsShimPrebuilt.apk=com.android.cts.ctsshim        -  not recognised - needs manual check
+    /data/app/com.google.android.youtube.tv-aatfpVxIJ2gPTcunlFXPrg==/base.apk=com.google.android.youtube.tv        -  not recognised - needs manual check
+    /system/priv-app/PersistDate/PersistDate.apk=com.technicolor.persistdate        -  not recognised - needs manual check
+    /system/priv-app/VpnDialogs/VpnDialogs.apk=com.android.vpndialogs        -  not recognised - needs manual check
+    /data/app/timvision.setup_wizard-HaoO3pz0VA--oE3GcZSMIQ==/base.apk=timvision.setup_wizard        -  not recognised - needs manual check
+    /system/app/FrameworkPackageStubs/FrameworkPackageStubs.apk=com.google.android.tv.frameworkpackagestubs        -  not recognised - needs manual check
+    /system/priv-app/Shell/Shell.apk=com.android.shell          -  not recognised - needs manual check
+    /system/app/WallpaperBackup/WallpaperBackup.apk=com.android.wallpaperbackup        -  not recognised - needs manual check
+    /system/app/UserDictionaryProvider/UserDictionaryProvider.apk=com.android.providers.userdictionary        -  not recognised - needs manual check
+    /data/app/com.vativision.vativisionapp-V_zrXXszYsZQlBdXPFSBTg==/base.apk=com.vativision.vativisionapp        -  not recognised - needs manual check
+    /system/priv-app/tch_user_service/tch_user_service.apk=com.technicolor.android.user.provider        -  not recognised - needs manual check
+    /system/priv-app/FusedLocation/FusedLocation.apk=com.android.location.fused        -  not recognised - needs manual check
+    /system/priv-app/BootupTraceQR/BootupTraceQR.apk=com.technicolor.android.BootupTraceQR        -  not recognised - needs manual check
+    /data/app/com.google.android.play.games-zfUW7M0xsC9OZb5thyjHpQ==/base.apk=com.google.android.play.games        -  not recognised - needs manual check
+    /data/app/com.netflix.ninja-FpKmuwmDxu9wfwJiPMwDHg==/base.apk=com.netflix.ninja        -  not recognised - needs manual check
+    /system/priv-app/ContactsProvider/ContactsProvider.apk=com.android.providers.contacts        -  not recognised - needs manual check
+    /system/app/CaptivePortalLogin/CaptivePortalLogin.apk=com.android.captiveportallogin        -  not recognised - needs manual check
+    /system/priv-app/WakeoncastEnabler/WakeoncastEnabler.apk=com.technicolor.ota        -  not recognised - needs manual check
+    /system/vendor/app/TchProvider/TchProvider.apk=com.technicolor.android.provider        -  not recognised - needs manual check
+    /system/priv-app/TvTutorials/TvTutorials.apk=com.google.android.tvtutorials        -  not recognised - needs manual check
+    com.cbs.ca                                                  -  not recognised - needs manual check
+    timvision.leanbackcustomization                             -  not recognised - needs manual check
+    it.mediaset.infinitytv                                      -  not recognised - needs manual check
+    tv.pluto.android                                            -  not recognised - needs manual check
+    com.fifa.plus.android                                       -  not recognised - needs manual check
+    com.vativision.vativisionapp                                -  not recognised - needs manual check
+    com.estrongs.android.pop                                    -  not recognised - needs manual check
+    it.rds.androidtv.rdssocialtv                                -  not recognised - needs manual check
+    com.upst.hayu                                               -  not recognised - needs manual check
+
+  === KEEP (34) ===
+    /system/priv-app/AndroidPlatformServicesTV/AndroidPlatformServicesTV.apk=com.google.android.gms.policy_sidecar_o        -  Google Play Services (works without it, but many apps break)
+    /data/app/com.google.android.gms-7s78l-EgA-5WDGNe8bagxg==/base.apk=com.google.android.gms        -  Google Play Services (works without it, but many apps break)
+    /system/priv-app/RemoteVoiceInput/RemoteVoiceInput.apk=com.technicolor.android.remotecontrolservice        -  IR/Bluetooth remote key mapping - remove it and the remote dies
+    /data/app/com.google.android.tv.remote.service-MhI6H1_iwVRJCVDgIVqfwA==/base.apk=com.google.android.tv.remote.service        -  IR/Bluetooth remote key mapping - remove it and the remote dies
+    /system/priv-app/RemotePairing/RemotePairing.apk=com.technicolor.tv.remotepairing        -  IR/Bluetooth remote key mapping - remove it and the remote dies
+    /data/app/com.android.vending-w0sRO5zNSZ71rXH6rJ93bg==/base.apk=com.android.vending        -  Play Store
+    /system/app/GoogleContactsSyncAdapter/GoogleContactsSyncAdapter.apk=com.google.android.syncadapters.contacts        -  account sync adapter
+    /system/app/GoogleCalendarSyncAdapter/GoogleCalendarSyncAdapter.apk=com.google.android.syncadapters.calendar        -  account sync adapter
+    /system/app/Bluetooth/Bluetooth.apk=com.android.bluetooth        -  bluetooth stack
+    /system/priv-app/TchSetupWizard/TchSetupWizard.apk=com.technicolor.android.skipper.setupwizard        -  first boot wizard
+    /system/priv-app/RecommendationsService/RecommendationsService.apk=com.google.android.leanbacklauncher.recommendations        -  home screen - remove it and you land on a black screen
+    /data/app/timvision.launcher-056qMLe-CMDFMcEGDA_mBQ==/base.apk=timvision.launcher        -  home screen - remove it and you land on a black screen
+    /data/app/com.google.android.inputmethod.latin-t9jjTA34pM_wtP0a4K6mXA==/base.apk=com.google.android.inputmethod.latin        -  input method service
+    /system/priv-app/TvSettings/TvSettings.apk=com.android.tv.settings        -  settings app
+    /system/app/MrvlTvSettings/MrvlTvSettings.apk=com.marvell.tv.settings        -  settings app
+    /data/app/timvision.tvappsettings-QhIAUZRKzISeYYgDsGDlpA==/base.apk=timvision.tvappsettings        -  settings app
+    /system/priv-app/SettingsProvider/SettingsProvider.apk=com.android.providers.settings        -  settings app
+    /system/app/Daydream/Daydream.apk=com.android.tv.settings.device.display.daydream        -  settings app
+    timvision.tvappsettings                                     -  settings app
+    /system/priv-app/SystemUI/SystemUI.apk=com.android.systemui        -  system UI
+    /data/app/it.telecomitalia.accountmanager-uTnmnc9mFYWD0ikH6tSAMw==/base.apk=it.telecomitalia.accountmanager        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.timmusic_tv-IGgdO9EhrF8UAtfTPn8yYg==/base.apk=it.telecomitalia.timmusic_tv        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.thefilmclub-JzmP2_QIr7ShNDsOY0sCBQ==/base.apk=it.telecomitalia.thefilmclub        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.iptuner-gzf1mjHcc9QPbVJo_Rr8NQ==/base.apk=it.telecomitalia.iptuner        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.calcio-2/base.apk=it.telecomitalia.calcio        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.digitalsupport-HS8aa0x0mNqG5HTNGjtkuQ==/base.apk=it.telecomitalia.digitalsupport        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.timppapp-vp1LOiq0ZXJ5cYxELRQFLg==/base.apk=it.telecomitalia.timppapp        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.games-o5SPK9AsuFuNYqw0m07E0Q==/base.apk=it.telecomitalia.games        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.iotim-1/base.apk=it.telecomitalia.iotim        -  telephony/HDMI-CEC call handling
+    /data/app/it.telecomitalia.linemanager-EgtcU4DP59w2W2ESS2wHgA==/base.apk=it.telecomitalia.linemanager        -  telephony/HDMI-CEC call handling
+    it.telecomitalia.iotim                                      -  telephony/HDMI-CEC call handling
+    it.telecomitalia.iptuner                                    -  telephony/HDMI-CEC call handling
+    it.telecomitalia.calcio                                     -  telephony/HDMI-CEC call handling
+    it.telecomitalia.thefilmclub                                -  telephony/HDMI-CEC call handling
+
+----------------------------------------------------------------------------------------------------
+  QUICK WINS - BLOAT you can remove for user 0
+----------------------------------------------------------------------------------------------------
+           -  /data/app/com.sky.ott.client.androidtv.SkyIT-e1GCGhqK4BU7zPzluMtIZA==/base.apk=com.sky.ott.client.androidtv.SkyIT OTT streaming stub
+           -  com.sky.ott.client.androidtv.SkyIT                 OTT streaming stub
+
+    TOTAL recoverable from BLOAT (estimated): -
+    (data sizes are estimates: re-run with --try-root for exact figures)

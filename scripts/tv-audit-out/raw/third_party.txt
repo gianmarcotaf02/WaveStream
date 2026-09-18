@@ -1,0 +1,15 @@
+package:com.upst.hayu
+package:it.telecomitalia.thefilmclub
+package:it.telecomitalia.iptuner
+package:timvision.tvappsettings
+package:it.rds.androidtv.rdssocialtv
+package:com.estrongs.android.pop
+package:com.fifa.plus.android
+package:it.telecomitalia.calcio
+package:com.sky.ott.client.androidtv.SkyIT
+package:com.cbs.ca
+package:timvision.leanbackcustomization
+package:it.telecomitalia.iotim
+package:it.mediaset.infinitytv
+package:tv.pluto.android
+package:com.vativision.vativisionapp

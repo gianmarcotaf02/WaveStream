@@ -1,0 +1,2 @@
+sh: <stdin>[2]: awk: not found
+sh: <stdin>[3]: awk: not found

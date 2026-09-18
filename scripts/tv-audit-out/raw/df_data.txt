@@ -1,0 +1,4 @@
+Filesystem            1K-blocks    Used Available Use% Mounted on
+/dev/block/mmcblk0p17   5094368 4945976    132008  98% /data
+/dev/block/mmcblk0p14    793488    1276    775828   1% /cache
+/data/media             5094368 4945976    132008  98% /storage/emulated
