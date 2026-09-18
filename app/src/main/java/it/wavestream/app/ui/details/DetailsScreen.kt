@@ -58,6 +58,14 @@ import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.util.TitleCleaner
+import it.wavestream.app.ai.EndingSource
+import it.wavestream.app.ai.MovieEnding
+import it.wavestream.app.ai.MovieEndingRequest
+import it.wavestream.app.ai.MovieEndingUiState
+import it.wavestream.app.ai.MovieEndingUnavailableException
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.launch
 import androidx.compose.ui.input.key.*
 
 
@@ -159,6 +167,8 @@ fun DetailsScreen(
     onDeleteDownloadClick: () -> Unit = {},
     onDownloadEpisode: (Episode) -> Unit = {},
     onDownloadSeason: (Int) -> Unit = {},  // Season number
+    // AI: spiega il finale (solo film). L'attività inietta MovieEndingRepository.
+    onExplainEnding: (suspend (MovieEndingRequest) -> MovieEnding)? = null,
     modifier: Modifier = Modifier
 ) {
     // FocusRequester for automatic focus on Play button
@@ -168,6 +178,10 @@ fun DetailsScreen(
     
     // Dialog state for mark as watched confirmation
     var showMarkAsWatchedDialog by remember { mutableStateOf(false) }
+
+    // Stato del popup "finale del film" (AI)
+    var endingState by remember { mutableStateOf<MovieEndingUiState>(MovieEndingUiState.Idle) }
+    val endingScope = rememberCoroutineScope()
     
     // Lazy list state for auto-scroll to current/next episode
     val listState = remember { androidx.tv.foundation.lazy.list.TvLazyListState() }
@@ -474,6 +488,39 @@ fun DetailsScreen(
                             onRenameList = onRenameList
                         )
                         
+                        // AI: spiega il finale (solo film)
+                        if (state.contentType == ContentType.MOVIE && onExplainEnding != null) {
+                            ExplainEndingButton(
+                                onClick = {
+                                    onExplainEnding?.let { fetch ->
+                                        endingState = MovieEndingUiState.Loading
+                                        endingScope.launch {
+                                            val request = MovieEndingRequest(
+                                                title = state.title,
+                                                year = state.year,
+                                                director = state.director,
+                                                cast = state.cast,
+                                                genres = state.genres,
+                                                overview = state.overview
+                                            )
+                                            endingState = try {
+                                                MovieEndingUiState.Success(fetch(request))
+                                            } catch (e: MovieEndingUnavailableException) {
+                                                MovieEndingUiState.Error(
+                                                    e.message ?: "Informazioni non disponibili."
+                                                )
+                                            } catch (e: Exception) {
+                                                MovieEndingUiState.Error(
+                                                    "Impossibile recuperare la spiegazione. " +
+                                                        "Controlla la connessione e la chiave OpenRouter nelle impostazioni."
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        
                         // Mark as watched button (only for content with progress)
                         if (state.resumeMinutes != null) {
                             MarkAsWatchedButton(
@@ -517,6 +564,14 @@ fun DetailsScreen(
                             containerColor = WaveStreamColors.BackgroundSecondary,
                             titleContentColor = WaveStreamColors.TextPrimary,
                             textContentColor = WaveStreamColors.TextSecondary
+                        )
+                    }
+
+                    // Popup "finale del film" (AI)
+                    if (endingState != MovieEndingUiState.Idle) {
+                        EndingDialog(
+                            state = endingState,
+                            onDismiss = { endingState = MovieEndingUiState.Idle }
                         )
                     }
                     
@@ -1127,6 +1182,227 @@ private fun PlayButton(
                 }
             }
         }
+    }
+}
+
+/**
+ * Pulsante AI per farsi spiegare il finale del film.
+ * Usa l'icona di Nova ma è indipendente dalla feature Nova (che resta in pausa).
+ */
+@Composable
+private fun ExplainEndingButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.1f else 1f,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        label = "endingScale"
+    )
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f),
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        label = "endingBg"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary.copy(alpha = 0.7f),
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        label = "endingBorder"
+    )
+    val iconColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
+        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        label = "endingIcon"
+    )
+
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .size(52.dp)
+            .clip(CircleShape)
+            .background(backgroundColor)
+            .border(1.dp, borderColor, CircleShape)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.AutoAwesome,
+            contentDescription = "Spiega il finale con l'AI",
+            tint = iconColor,
+            modifier = Modifier.size(26.dp)
+        )
+    }
+}
+
+/**
+ * Popup che mostra la spiegazione del finale (Wikipedia + AI oppure solo AI).
+ */
+@Composable
+private fun EndingDialog(
+    state: MovieEndingUiState,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val closeFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(150)
+        runCatching { closeFocusRequester.requestFocus() }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            color = WaveStreamColors.BackgroundSecondary,
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, WaveStreamColors.TextSecondary.copy(alpha = 0.3f)),
+            modifier = Modifier.width(760.dp)
+        ) {
+            Column(modifier = Modifier.padding(28.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        tint = WaveStreamColors.Accent,
+                        modifier = Modifier.size(26.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Come finisce il film",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = WaveStreamColors.TextPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                when (state) {
+                    MovieEndingUiState.Idle -> Unit
+                    MovieEndingUiState.Loading -> {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(
+                                color = WaveStreamColors.Accent,
+                                strokeWidth = 3.dp,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(14.dp))
+                            Text(
+                                text = "Cerco la trama su Wikipedia e preparo la spiegazione…",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = WaveStreamColors.TextSecondary
+                            )
+                        }
+                    }
+                    is MovieEndingUiState.Error -> {
+                        Text(
+                            text = state.message,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color(0xFFFFB74D)
+                        )
+                    }
+                    is MovieEndingUiState.Success -> {
+                        val ending = state.ending
+                        Column(
+                            modifier = Modifier
+                                .heightIn(max = 420.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            Text(
+                                text = ending.explanation,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = WaveStreamColors.TextPrimary,
+                                lineHeight = 26.sp
+                            )
+                            ending.warning?.let { warning ->
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "⚠ $warning",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color(0xFFFFB74D)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(18.dp))
+                        EndingSourceBadge(ending)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val url = (state as? MovieEndingUiState.Success)?.ending?.wikipediaUrl
+                    if (url != null) {
+                        TextButton(onClick = {
+                            runCatching {
+                                context.startActivity(
+                                    android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW,
+                                        android.net.Uri.parse(url)
+                                    )
+                                )
+                            }
+                        }) {
+                            Text("Fonte su Wikipedia", color = WaveStreamColors.Accent)
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp))
+                    }
+
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.focusRequester(closeFocusRequester)
+                    ) {
+                        Text("Chiudi", color = WaveStreamColors.TextPrimary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EndingSourceBadge(ending: MovieEnding) {
+    val label: String
+    val color: Color
+    when (ending.source) {
+        EndingSource.WIKIPEDIA_AND_AI -> {
+            label = "Fonti: Wikipedia + AI"
+            color = Color(0xFF81C784)
+        }
+        EndingSource.WIKIPEDIA -> {
+            label = "Fonte: Wikipedia"
+            color = Color(0xFF81C784)
+        }
+        EndingSource.AI -> {
+            label = "Solo AI · nessuna fonte verificata"
+            color = Color(0xFFFFB74D)
+        }
+    }
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(color.copy(alpha = 0.12f))
+            .border(1.dp, color.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = color,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 

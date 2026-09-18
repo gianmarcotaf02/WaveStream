@@ -22,11 +22,11 @@ interface WikipediaService {
     @GET
     suspend fun search(
         @Url url: String,
-        @Query("action") action: String = "query",
-        @Query("format") format: String = "json",
-        @Query("list") list: String = "search",
-        @Query("srnamespace") srNamespace: Int = 0,
-        @Query("srlimit") srLimit: Int = 5,
+        @Query("action") action: String,
+        @Query("format") format: String,
+        @Query("list") list: String,
+        @Query("srnamespace") srNamespace: Int,
+        @Query("srlimit") srLimit: Int,
         @Query("srsearch") srSearch: String
     ): WikipediaQueryResponse
 
@@ -34,12 +34,12 @@ interface WikipediaService {
     @GET
     suspend fun extract(
         @Url url: String,
-        @Query("action") action: String = "query",
-        @Query("format") format: String = "json",
-        @Query("prop") prop: String = "extracts",
-        @Query("explaintext") explainText: Int = 1,
-        @Query("exsectionformat") exSectionFormat: String = "wiki",
-        @Query("redirects") redirects: Int = 1,
+        @Query("action") action: String,
+        @Query("format") format: String,
+        @Query("prop") prop: String,
+        @Query("explaintext") explainText: Int,
+        @Query("exsectionformat") exSectionFormat: String,
+        @Query("redirects") redirects: Int,
         @Query("titles") titles: String
     ): WikipediaQueryResponse
 

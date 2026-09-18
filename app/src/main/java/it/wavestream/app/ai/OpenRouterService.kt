@@ -21,8 +21,8 @@ interface OpenRouterService {
     @POST("v1/chat/completions")
     suspend fun chatCompletions(
         @Header("Authorization") authorization: String,
-        @Header("HTTP-Referer") referer: String? = null,
-        @Header("X-Title") title: String? = null,
+        @Header("HTTP-Referer") referer: String?,
+        @Header("X-Title") title: String?,
         @Body body: OpenRouterRequest
     ): OpenRouterResponse
 

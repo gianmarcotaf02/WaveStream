@@ -28,6 +28,7 @@ import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.util.TitleCleaner
 import it.wavestream.app.data.repository.DownloadContentManager
+import it.wavestream.app.ai.MovieEndingRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -60,6 +61,7 @@ class DetailsActivity : ComponentActivity() {
     @Inject lateinit var userPreferences: UserPreferences
     @androidx.media3.common.util.UnstableApi
     @Inject lateinit var downloadManager: DownloadContentManager
+    @Inject lateinit var movieEndingRepository: MovieEndingRepository
     
     private var contentId: Long = 0
     private var contentType: ContentType = ContentType.MOVIE
@@ -242,6 +244,8 @@ class DetailsActivity : ComponentActivity() {
             onTrailerClick = {
                 state.trailerKey?.let { key -> playTrailer(key) }
             },
+            // AI: spiegazione del finale (solo film)
+            onExplainEnding = { request -> movieEndingRepository.getEnding(request) },
             // Custom lists callbacks
             onAddToList = { listId ->
                 addToList(listId, state) { newListIds ->
