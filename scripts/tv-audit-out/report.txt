@@ -2,337 +2,339 @@
   WaveStream - Android device audit
 ========================================================================================================
   serial      : 192.168.1.27:5555
-  model       : ? ?
-  android     : ? (sdk ?)
-  abi         : ?
-  build       : ?
+  model       : Technicolor skipper
+  android     : 8.0.0 (sdk 26)
+  abi         : armeabi-v7a / armeabi
+  build       : OTT1.201231.001
   shell uid   : 2000 (unprivileged)
 
 --------------------------------------------------------------------------------------------------------
   STORAGE
 --------------------------------------------------------------------------------------------------------
   Filesystem            1K-blocks    Used Available Use% Mounted on
-  /dev/block/mmcblk0p17   5094368 4891148    186836  97% /data
+  /dev/block/mmcblk0p17   5094368 4895640    182344  97% /data
   /dev/block/mmcblk0p14    793488    1276    775828   1% /cache
 
-  /data: 4.9G total, 4.7G used, FREE 182.5M
-  >>> CRITICAL: only 182 MB free. An APK of that size cannot install.
+  /data: 4.9G total, 4.7G used, FREE 178.1M
+  >>> CRITICAL: only 178 MB free. An APK of that size cannot install.
       Free at least 400 MB before installing anything.
 
 --------------------------------------------------------------------------------------------------------
   SUMMARY
 --------------------------------------------------------------------------------------------------------
   packages total                   : 125
-  third-party (normal uninstall)   :   13   APK        -  DATA      44K
-  preinstalled (--user 0)          :  112   APK   127.5M  DATA     816K
+  third-party (normal uninstall)   :   13   APK   156.3M  DATA        -
+  preinstalled (--user 0)          :  112   APK   731.7M  DATA        -
   disabled                         : 0
 
-  NOTE: data sizes need root. Without it, `recoverable` for preinstalled
-        apps is understated - the APK is on /system, only data is freed.
+  NOTE: 'EXT' is shared storage (/sdcard, same partition as /data).
+        Internal app data under /data/user/0/<pkg> is NOT readable
+        without root, so `recoverable` is a LOWER BOUND for apps that
+        have real caches. Use Settings > Storage to cross-check.
 
 --------------------------------------------------------------------------------------------------------
   UNINSTALLABLE WITHOUT ROOT, sorted by recoverable space
 --------------------------------------------------------------------------------------------------------
-    RECOVER      APK     DATA  RISK     MODE      PACKAGE
-  --------- -------- --------  -------- --------- ----------------------------------------------------
-       704K        -     704K  BLOAT    user0     it.telecomitalia.digitalsupport
-        32K        -      32K  BLOAT    uninstall com.estrongs.android.pop
-        24K        -      24K  KEEP     user0     com.android.vending
-        16K        -      16K  KEEP     user0     timvision.launcher
-        12K      40K      12K  CAUTION  user0     com.technicolor.app.ota
-        12K        -      12K  KEEP     uninstall it.telecomitalia.iptuner
-        12K        -      12K  KEEP     user0     com.google.android.gms
-        12K        -      12K  CAUTION  user0     com.google.android.tts
-        12K        -      12K  BLOAT    user0     com.google.android.videos
-         8K        -       8K  CAUTION  user0     com.google.android.katniss
-         8K        -       8K  BLOAT    user0     com.dazn
-         8K        -       8K  BLOAT    user0     com.google.android.youtube.tv
-          -      22K        -  KEEP     user0     com.android.cts.priv.ctsshim
-          -       9K        -  CAUTION  user0     com.technicolor.tim.customization
-          -      16K        -  KEEP     user0     com.google.android.ext.services
-          -     182K        -  CAUTION  user0     com.marvell.tv.overscan
-          -        -        -  BLOAT    user0     com.google.android.apps.mediashell
-          -        -        -  KEEP     user0     it.telecomitalia.accountmanager
-          -      11K        -  CAUTION  user0     com.technicolor.autoperiodicreboot
-          -     331K        -  KEEP     user0     com.android.providers.calendar
-          -     8.4M        -  KEEP     user0     com.android.tv.settings
-          -     193K        -  KEEP     user0     com.android.providers.media
-          -      68K        -  CAUTION  user0     com.google.android.onetimeinitializer
-          -      12K        -  KEEP     user0     com.google.android.ext.shared
-          -     576K        -  CAUTION  user0     com.movenda.p4mcore
-          -        -        -  BLOAT    user0     it.telecomitalia.timmusic_tv
-          -       8K        -  CAUTION  user0     com.marvell.power.shutdownreceiver
-          -      38K        -  KEEP     user0     com.android.externalstorage
-          -        -        -  BLOAT    uninstall it.telecomitalia.thefilmclub
-          -      17K        -  CAUTION  user0     com.android.htmlviewer
-          -      20K        -  CAUTION  user0     com.android.companiondevicemanager
-          -       8K        -  CAUTION  user0     com.technicolor.factorycert
-          -     570K        -  KEEP     user0     com.android.providers.downloads
-          -      76K        -  KEEP     user0     com.android.providers.tv
-          -        -        -  BLOAT    user0     com.google.android.backdrop
-          -        -        -  BLOAT    user0     timvision.telemetry
-          -     1.5M        -  KEEP     user0     com.technicolor.android.remotecontrolservice
-          -       5K        -  CAUTION  user0     com.technicolor.defaultledcontroller
-          -       6K        -  BLOAT    user0     android.autoinstalls.config.technicolor
-          -    14.7M        -  CAUTION  user0     com.google.android.tungsten.setupwraith
-          -       8K        -  CAUTION  user0     com.technicolor.project.releasenote
-          -      61K        -  CAUTION  user0     com.technicolor.hdmiresolution
-          -     1.3M        -  CAUTION  user0     com.marvell.tv.settings
-          -      21K        -  KEEP     user0     com.android.defcontainer
-          -      17K        -  CAUTION  user0     com.technicolor.globalkey
-          -       7K        -  KEEP     user0     com.android.pacprocessor
-          -     352K        -  KEEP     user0     com.android.certinstaller
-          -        -        -  BLOAT    user0     com.google.android.marvin.talkback
-          -        -        -  CAUTION  uninstall timvision.tvappsettings
-          -        -        -  CAUTION  user0     com.technicolor.android.dtvscan.project
-          -    24.3M        -  KEEP     user0     android
-          -     9.0M        -  KEEP     user0     com.google.android.gms.policy_sidecar_o
-          -     1.7M        -  CAUTION  user0     com.google.android.speech.pumpkin
-          -     219K        -  KEEP     user0     com.android.backupconfirm
-          -      36K        -  KEEP     user0     com.android.statementservice
-          -        -        -  CAUTION  user0     tv.broadpeak.nanocdnwrapper
-          -     7.0M        -  BLOAT    user0     com.google.android.gsf.notouch
-          -        -        -  BLOAT    user0     com.amazon.amazonvideo.livingroom
-          -     177K        -  KEEP     user0     com.android.providers.settings
-          -       8K        -  KEEP     user0     com.android.sharedstoragebackup
-          -     683K        -  KEEP     user0     com.android.printspooler
-          -        -        -  BLOAT    uninstall it.rds.androidtv.rdssocialtv
-          -     2.9M        -  KEEP     user0     com.technicolor.android.skipper.setupwizard
-          -      38K        -  BLOAT    user0     com.android.dreams.basic
-          -     209K        -  KEEP     user0     com.android.inputdevices
-          -        -        -  CAUTION  user0     com.google.android.tvrecommendations
-          -       8K        -  KEEP     user0     com.google.android.leanbacklauncher.recommendations
-          -      71K        -  CAUTION  user0     com.technicolor.android.cas.provider
-          -        -        -  BLOAT    uninstall it.telecomitalia.calcio
-          -        -        -  KEEP     user0     com.google.android.webview
-          -     7.6M        -  CAUTION  user0     timvision.upgrade
-          -        -        -  BLOAT    uninstall com.sky.ott.client.androidtv.SkyIT
-          -     1.4M        -  BLOAT    user0     com.google.android.syncadapters.contacts
-          -     106K        -  KEEP     user0     com.android.keychain
-          -        -        -  BLOAT    user0     com.google.android.youtube.tvmusic
-          -        -        -  CAUTION  user0     com.movenda.omadm.tv
-          -     1.3M        -  CAUTION  user0     com.technicolor.android.dtvinput
-          -     3.8M        -  KEEP     user0     com.google.android.gsf
-          -     2.2M        -  BLOAT    user0     com.google.android.sss
-          -     1.0M        -  CAUTION  user0     com.google.android.partnersetup
-          -     5.5M        -  KEEP     user0     com.android.packageinstaller
-          -      16K        -  CAUTION  user0     com.marvell.wol
-          -       7K        -  CAUTION  user0     com.technicolor.cputemperature
-          -      11K        -  KEEP     user0     com.android.proxyhandler
-          -     499K        -  BLOAT    user0     com.google.android.feedback
-          -     1.8M        -  BLOAT    user0     com.google.android.syncadapters.calendar
-          -        -        -  BLOAT    uninstall com.cbs.ca
-          -        -        -  BLOAT    user0     it.telecomitalia.timppapp
-          -     1.1M        -  CAUTION  user0     com.technicolor.checkota
-          -        -        -  CAUTION  uninstall timvision.leanbackcustomization
-          -       6K        -  CAUTION  user0     com.technicolor.hardwareproperties
-          -     3.6M        -  KEEP     user0     com.android.tv.settings.device.display.daydream
-          -        -        -  BLOAT    user0     it.telecomitalia.games
-          -        -        -  BLOAT    uninstall it.telecomitalia.iotim
-          -      28K        -  CAUTION  user0     com.google.android.backuptransport
-          -        -        -  BLOAT    uninstall it.mediaset.infinitytv
-          -       9K        -  CAUTION  user0     com.marvell.onetouchplay
-          -        -        -  BLOAT    uninstall tv.pluto.android
-          -     1.1M        -  CAUTION  user0     com.marvell.audio.loopback
-          -     1.4M        -  BLOAT    user0     com.google.android.sss.authbridge
-          -       4K        -  KEEP     user0     com.android.cts.ctsshim
-          -       7K        -  CAUTION  user0     com.technicolor.persistdate
-          -      78K        -  KEEP     user0     com.android.vpndialogs
-          -        -        -  KEEP     user0     timvision.setup_wizard
-          -      39K        -  KEEP     user0     com.google.android.tv.frameworkpackagestubs
-          -     241K        -  KEEP     user0     com.android.shell
-          -       9K        -  KEEP     user0     com.android.wallpaperbackup
-          -      23K        -  KEEP     user0     com.android.providers.userdictionary
-          -        -        -  BLOAT    uninstall com.vativision.vativisionapp
-          -      19K        -  CAUTION  user0     com.technicolor.android.user.provider
-          -        -        -  BLOAT    user0     com.google.android.tv.remote.service
-          -      20K        -  KEEP     user0     com.android.location.fused
-          -    13.2M        -  KEEP     user0     com.android.systemui
-          -      80K        -  CAUTION  user0     com.technicolor.android.BootupTraceQR
-          -        -        -  BLOAT    user0     com.google.android.play.games
-          -        -        -  BLOAT    user0     com.netflix.ninja
-          -     1.9M        -  KEEP     user0     com.android.bluetooth
-          -     536K        -  KEEP     user0     com.android.providers.contacts
-          -      68K        -  KEEP     user0     com.android.captiveportallogin
-          -       6K        -  CAUTION  user0     com.technicolor.ota
-          -     762K        -  KEEP     user0     com.technicolor.tv.remotepairing
-          -      12K        -  CAUTION  user0     com.technicolor.android.provider
-          -        -        -  KEEP     user0     com.google.android.inputmethod.latin
-          -        -        -  KEEP     user0     it.telecomitalia.linemanager
-          -     3.6M        -  BLOAT    user0     com.google.android.tvtutorials
+    RECOVER      APK     EXT  RISK     MODE      ORIGIN  PACKAGE
+  --------- -------- -------  -------- --------- ------- --------------------------------------------
+      96.6M    96.6M       -  BLOAT    user0     /data   com.google.android.apps.mediashell
+      91.9M    91.9M       -  BLOAT    user0     /data   com.netflix.ninja
+      82.6M    82.6M       -  KEEP     user0     /data   com.google.android.webview
+      45.0M    45.0M       -  KEEP     user0     /data   com.google.android.gms
+      39.4M    39.4M       -  BLOAT    user0     /data   com.amazon.amazonvideo.livingroom
+      38.2M    38.2M       -  BLOAT    uninstall /data   com.cbs.ca
+      35.1M    35.1M       -  KEEP     user0     /data   timvision.launcher
+      28.7M    28.7M       -  CAUTION  user0     /data   com.google.android.tts
+      28.2M    28.2M       -  BLOAT    user0     /data   it.telecomitalia.games
+      28.0M    28.0M       -  BLOAT    uninstall /data   tv.pluto.android
+      24.5M    24.5M       -  BLOAT    uninstall /data   it.telecomitalia.iotim
+      24.3M    24.3M       -  KEEP     user0     system  android
+      21.2M    21.2M       -  KEEP     user0     /data   com.google.android.inputmethod.latin
+      17.1M    17.1M       -  KEEP     user0     /data   com.android.vending
+      15.1M    15.1M       -  BLOAT    user0     /data   com.dazn
+      14.7M    14.7M       -  CAUTION  user0     system  com.google.android.tungsten.setupwraith
+      13.4M    13.4M       -  BLOAT    uninstall /data   com.estrongs.android.pop
+      13.2M    13.2M       -  KEEP     user0     system  com.android.systemui
+      12.1M    12.1M       -  BLOAT    uninstall /data   it.rds.androidtv.rdssocialtv
+      11.3M    11.3M       -  BLOAT    user0     /data   com.google.android.videos
+      11.1M    11.1M       -  CAUTION  user0     /data   com.google.android.katniss
+      10.8M    10.8M       -  BLOAT    user0     /data   com.google.android.play.games
+      10.2M    10.2M       -  CAUTION  user0     /data   tv.broadpeak.nanocdnwrapper
+      10.1M    10.1M       -  CAUTION  uninstall /data   timvision.tvappsettings
+       9.2M     9.2M       -  BLOAT    uninstall /data   it.mediaset.infinitytv
+       9.0M     9.0M       -  KEEP     user0     system  com.google.android.gms.policy_sidecar_o
+       8.4M     8.4M       -  KEEP     user0     system  com.android.tv.settings
+       8.0M     8.0M       -  BLOAT    uninstall /data   it.telecomitalia.thefilmclub
+       7.6M     7.6M       -  CAUTION  user0     system  timvision.upgrade
+       7.1M     7.1M       -  BLOAT    user0     /data   it.telecomitalia.timppapp
+       7.0M     7.0M       -  BLOAT    user0     system  com.google.android.gsf.notouch
+       6.7M     6.7M       -  KEEP     uninstall /data   it.telecomitalia.iptuner
+       6.1M     6.1M       -  KEEP     user0     /data   it.telecomitalia.accountmanager
+       5.8M     5.8M       -  BLOAT    user0     /data   com.google.android.marvin.talkback
+       5.5M     5.5M       -  KEEP     user0     system  com.android.packageinstaller
+       5.4M     5.4M       -  BLOAT    user0     /data   com.google.android.backdrop
+       4.5M     4.5M       -  KEEP     user0     /data   timvision.setup_wizard
+       4.2M     4.2M       -  CAUTION  user0     /data   com.google.android.tvrecommendations
+       4.0M     4.0M       -  BLOAT    user0     /data   com.google.android.youtube.tv
+       4.0M     4.0M       -  BLOAT    user0     /data   com.google.android.tv.remote.service
+       3.9M     3.9M       -  BLOAT    user0     /data   it.telecomitalia.digitalsupport
+       3.8M     3.8M       -  KEEP     user0     system  com.google.android.gsf
+       3.6M     3.6M       -  BLOAT    user0     /data   timvision.telemetry
+       3.6M     3.6M       -  KEEP     user0     system  com.android.tv.settings.device.display.daydream
+       3.6M     3.6M       -  BLOAT    user0     system  com.google.android.tvtutorials
+       3.6M     3.6M       -  CAUTION  user0     /data   com.technicolor.android.dtvscan.project
+       2.9M     2.9M       -  BLOAT    uninstall /data   com.sky.ott.client.androidtv.SkyIT
+       2.9M     2.9M       -  KEEP     user0     system  com.technicolor.android.skipper.setupwizard
+       2.2M     2.2M       -  BLOAT    user0     /data   com.google.android.youtube.tvmusic
+       2.2M     2.2M       -  BLOAT    user0     system  com.google.android.sss
+       2.1M     2.1M       -  BLOAT    uninstall /data   com.vativision.vativisionapp
+       2.1M     2.1M       -  BLOAT    user0     /data   it.telecomitalia.timmusic_tv
+       1.9M     1.9M       -  KEEP     user0     system  com.android.bluetooth
+       1.8M     1.8M       -  BLOAT    user0     system  com.google.android.syncadapters.calendar
+       1.8M     1.8M       -  CAUTION  user0     /data   com.movenda.omadm.tv
+       1.7M     1.7M       -  KEEP     user0     /data   it.telecomitalia.linemanager
+       1.7M     1.7M       -  CAUTION  user0     system  com.google.android.speech.pumpkin
+       1.5M     1.5M       -  KEEP     user0     system  com.technicolor.android.remotecontrolservice
+       1.4M     1.4M       -  BLOAT    user0     system  com.google.android.sss.authbridge
+       1.4M     1.4M       -  BLOAT    user0     system  com.google.android.syncadapters.contacts
+       1.3M     1.3M       -  CAUTION  user0     system  com.technicolor.android.dtvinput
+       1.3M     1.3M       -  CAUTION  user0     system  com.marvell.tv.settings
+       1.1M     1.1M       -  CAUTION  user0     system  com.marvell.audio.loopback
+       1.1M     1.1M       -  CAUTION  user0     system  com.technicolor.checkota
+       1.0M     1.0M       -  CAUTION  user0     system  com.google.android.partnersetup
+       762K     762K       -  KEEP     user0     system  com.technicolor.tv.remotepairing
+       683K     683K       -  KEEP     user0     system  com.android.printspooler
+       668K     668K       -  BLOAT    uninstall /data   it.telecomitalia.calcio
+       576K     576K       -  CAUTION  user0     system  com.movenda.p4mcore
+       570K     570K       -  KEEP     user0     system  com.android.providers.downloads
+       536K     536K       -  KEEP     user0     system  com.android.providers.contacts
+       499K     499K       -  BLOAT    user0     system  com.google.android.feedback
+       412K     412K       -  CAUTION  uninstall /data   timvision.leanbackcustomization
+       352K     352K       -  KEEP     user0     system  com.android.certinstaller
+       331K     331K       -  KEEP     user0     system  com.android.providers.calendar
+       241K     241K       -  KEEP     user0     system  com.android.shell
+       219K     219K       -  KEEP     user0     system  com.android.backupconfirm
+       209K     209K       -  KEEP     user0     system  com.android.inputdevices
+       193K     193K       -  KEEP     user0     system  com.android.providers.media
+       182K     182K       -  CAUTION  user0     system  com.marvell.tv.overscan
+       177K     177K       -  KEEP     user0     system  com.android.providers.settings
+       106K     106K       -  KEEP     user0     system  com.android.keychain
+        80K      80K       -  CAUTION  user0     system  com.technicolor.android.BootupTraceQR
+        78K      78K       -  KEEP     user0     system  com.android.vpndialogs
+        76K      76K       -  KEEP     user0     system  com.android.providers.tv
+        71K      71K       -  CAUTION  user0     system  com.technicolor.android.cas.provider
+        68K      68K       -  KEEP     user0     system  com.android.captiveportallogin
+        68K      68K       -  CAUTION  user0     system  com.google.android.onetimeinitializer
+        61K      61K       -  CAUTION  user0     system  com.technicolor.hdmiresolution
+        40K      40K       -  CAUTION  user0     system  com.technicolor.app.ota
+        39K      39K       -  KEEP     user0     system  com.google.android.tv.frameworkpackagestubs
+        38K      38K       -  KEEP     user0     system  com.android.externalstorage
+        38K      38K       -  BLOAT    user0     system  com.android.dreams.basic
+        36K      36K       -  KEEP     user0     system  com.android.statementservice
+        28K      28K       -  CAUTION  user0     system  com.google.android.backuptransport
+        23K      23K       -  KEEP     user0     system  com.android.providers.userdictionary
+        22K      22K       -  KEEP     user0     system  com.android.cts.priv.ctsshim
+        21K      21K       -  KEEP     user0     system  com.android.defcontainer
+        20K      20K       -  CAUTION  user0     system  com.android.companiondevicemanager
+        20K      20K       -  KEEP     user0     system  com.android.location.fused
+        19K      19K       -  CAUTION  user0     system  com.technicolor.android.user.provider
+        17K      17K       -  CAUTION  user0     system  com.android.htmlviewer
+        17K      17K       -  CAUTION  user0     system  com.technicolor.globalkey
+        16K      16K       -  KEEP     user0     system  com.google.android.ext.services
+        16K      16K       -  CAUTION  user0     system  com.marvell.wol
+        12K      12K       -  KEEP     user0     system  com.google.android.ext.shared
+        12K      12K       -  CAUTION  user0     system  com.technicolor.android.provider
+        11K      11K       -  CAUTION  user0     system  com.technicolor.autoperiodicreboot
+        11K      11K       -  KEEP     user0     system  com.android.proxyhandler
+         9K       9K       -  CAUTION  user0     system  com.technicolor.tim.customization
+         9K       9K       -  KEEP     user0     system  com.android.wallpaperbackup
+         9K       9K       -  CAUTION  user0     system  com.marvell.onetouchplay
+         8K       8K       -  CAUTION  user0     system  com.technicolor.project.releasenote
+         8K       8K       -  KEEP     user0     system  com.android.sharedstoragebackup
+         8K       8K       -  CAUTION  user0     system  com.technicolor.factorycert
+         8K       8K       -  KEEP     user0     system  com.google.android.leanbacklauncher.recommendations
+         8K       8K       -  CAUTION  user0     system  com.marvell.power.shutdownreceiver
+         7K       7K       -  CAUTION  user0     system  com.technicolor.persistdate
+         7K       7K       -  KEEP     user0     system  com.android.pacprocessor
+         7K       7K       -  CAUTION  user0     system  com.technicolor.cputemperature
+         6K       6K       -  CAUTION  user0     system  com.technicolor.ota
+         6K       6K       -  BLOAT    user0     system  android.autoinstalls.config.technicolor
+         6K       6K       -  CAUTION  user0     system  com.technicolor.hardwareproperties
+         5K       5K       -  CAUTION  user0     system  com.technicolor.defaultledcontroller
+         4K       4K       -  KEEP     user0     system  com.android.cts.ctsshim
 
 --------------------------------------------------------------------------------------------------------
   WHAT EACH PACKAGE IS
 --------------------------------------------------------------------------------------------------------
 
   === BLOAT (35) ===
-    com.google.android.tvtutorials                                -  Android TV tutorials
-    com.android.dreams.basic                                      -  Basic screensaver
-    com.cbs.ca                                                    -  CBS (demo/vendor app)
-    com.google.android.syncadapters.calendar                      -  Calendar sync
-    com.google.android.syncadapters.contacts                      -  Contacts sync
-    com.dazn                                                     8K  DAZN
-    com.google.android.backdrop                                   -  Daydream Backdrop
-    com.estrongs.android.pop                                    32K  ES File Explorer (known adware)
-    com.google.android.videos                                   12K  Google TV / Play Movies
-    com.google.android.tv.remote.service                          -  Google TV remote service
-    com.google.android.feedback                                   -  Google market feedback
-    com.google.android.apps.mediashell                            -  Media shell
-    it.mediaset.infinitytv                                        -  Mediaset Infinity
-    com.netflix.ninja                                             -  Netflix (TV)
-    com.google.android.gsf.notouch                                -  NoTouch auth delegate
-    com.google.android.play.games                                 -  Play Games
-    tv.pluto.android                                              -  Pluto TV
-    com.amazon.amazonvideo.livingroom                             -  Prime Video
-    it.rds.androidtv.rdssocialtv                                  -  RDS Social TV
-    com.google.android.sss                                        -  Second Screen Setup
-    com.google.android.sss.authbridge                             -  Second Screen Setup auth bridge
-    com.sky.ott.client.androidtv.SkyIT                            -  Sky (TV)
-    it.telecomitalia.calcio                                       -  TIM Calcio / Serie A
-    it.telecomitalia.digitalsupport                            704K  TIM Digital Support
-    it.telecomitalia.games                                        -  TIM Games
-    it.telecomitalia.timmusic_tv                                  -  TIM Music (TV)
-    it.telecomitalia.timppapp                                     -  TIM Personal / promo app
-    it.telecomitalia.iotim                                        -  TIM promo app
-    timvision.telemetry                                           -  TIMVISION telemetry/analytics
-    com.google.android.marvin.talkback                            -  TalkBack
-    it.telecomitalia.thefilmclub                                  -  The Film Club (TIM)
-    com.vativision.vativisionapp                                  -  Vativision
-    com.google.android.youtube.tv                                8K  YouTube (TV)
-    com.google.android.youtube.tvmusic                            -  YouTube Music (TV)
-    android.autoinstalls.config.technicolor                       -  auto-installer that re-adds OEM bloat
+    com.google.android.tvtutorials                             3.6M  Android TV tutorials
+    com.android.dreams.basic                                    38K  Basic screensaver
+    com.cbs.ca                                                38.2M  CBS (demo/vendor app)
+    com.google.android.syncadapters.calendar                   1.8M  Calendar sync
+    com.google.android.syncadapters.contacts                   1.4M  Contacts sync
+    com.dazn                                                  15.1M  DAZN
+    com.google.android.backdrop                                5.4M  Daydream Backdrop
+    com.estrongs.android.pop                                  13.4M  ES File Explorer (known adware)
+    com.google.android.videos                                 11.3M  Google TV / Play Movies
+    com.google.android.tv.remote.service                       4.0M  Google TV remote service
+    com.google.android.feedback                                499K  Google market feedback
+    com.google.android.apps.mediashell                        96.6M  Media shell
+    it.mediaset.infinitytv                                     9.2M  Mediaset Infinity
+    com.netflix.ninja                                         91.9M  Netflix (TV)
+    com.google.android.gsf.notouch                             7.0M  NoTouch auth delegate
+    com.google.android.play.games                             10.8M  Play Games
+    tv.pluto.android                                          28.0M  Pluto TV
+    com.amazon.amazonvideo.livingroom                         39.4M  Prime Video
+    it.rds.androidtv.rdssocialtv                              12.1M  RDS Social TV
+    com.google.android.sss                                     2.2M  Second Screen Setup
+    com.google.android.sss.authbridge                          1.4M  Second Screen Setup auth bridge
+    com.sky.ott.client.androidtv.SkyIT                         2.9M  Sky (TV)
+    it.telecomitalia.calcio                                    668K  TIM Calcio / Serie A
+    it.telecomitalia.digitalsupport                            3.9M  TIM Digital Support
+    it.telecomitalia.games                                    28.2M  TIM Games
+    it.telecomitalia.timmusic_tv                               2.1M  TIM Music (TV)
+    it.telecomitalia.timppapp                                  7.1M  TIM Personal / promo app
+    it.telecomitalia.iotim                                    24.5M  TIM promo app
+    timvision.telemetry                                        3.6M  TIMVISION telemetry/analytics
+    com.google.android.marvin.talkback                         5.8M  TalkBack
+    it.telecomitalia.thefilmclub                               8.0M  The Film Club (TIM)
+    com.vativision.vativisionapp                               2.1M  Vativision
+    com.google.android.youtube.tv                              4.0M  YouTube (TV)
+    com.google.android.youtube.tvmusic                         2.2M  YouTube Music (TV)
+    android.autoinstalls.config.technicolor                      6K  auto-installer that re-adds OEM bloat
 
   === CAUTION (41) ===
-    com.google.android.tts                                      12K  AOSP/Google preinstall, not in the known-bloat list
-    com.google.android.katniss                                   8K  AOSP/Google preinstall, not in the known-bloat list
-    com.google.android.onetimeinitializer                         -  AOSP/Google preinstall, not in the known-bloat list
-    com.android.htmlviewer                                        -  AOSP/Google preinstall, not in the known-bloat list
-    com.android.companiondevicemanager                            -  AOSP/Google preinstall, not in the known-bloat list
-    com.google.android.tungsten.setupwraith                       -  AOSP/Google preinstall, not in the known-bloat list
-    com.google.android.speech.pumpkin                             -  AOSP/Google preinstall, not in the known-bloat list
-    com.google.android.tvrecommendations                          -  AOSP/Google preinstall, not in the known-bloat list
-    com.google.android.partnersetup                               -  AOSP/Google preinstall, not in the known-bloat list
-    com.google.android.backuptransport                            -  AOSP/Google preinstall, not in the known-bloat list
-    tv.broadpeak.nanocdnwrapper                                   -  Broadpeak CDN wrapper used by TIM streaming
-    com.marvell.tv.overscan                                       -  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
-    com.marvell.power.shutdownreceiver                            -  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
-    com.marvell.tv.settings                                       -  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
-    com.marvell.wol                                               -  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
-    com.marvell.onetouchplay                                      -  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
-    com.marvell.audio.loopback                                    -  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
-    com.movenda.p4mcore                                           -  OMA-DM device management client - TIM uses it to configure the box remotely
-    com.movenda.omadm.tv                                          -  OMA-DM device management client - TIM uses it to configure the box remotely
-    timvision.tvappsettings                                       -  TIMVISION service - check what it does before removing
-    timvision.upgrade                                             -  TIMVISION service - check what it does before removing
-    timvision.leanbackcustomization                               -  TIMVISION service - check what it does before removing
-    com.technicolor.app.ota                                     12K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.tim.customization                             -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.autoperiodicreboot                            -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.factorycert                                   -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.defaultledcontroller                          -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.project.releasenote                           -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.hdmiresolution                                -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.globalkey                                     -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.android.dtvscan.project                       -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.android.cas.provider                          -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.android.dtvinput                              -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.cputemperature                                -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.checkota                                      -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.hardwareproperties                            -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.persistdate                                   -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.android.user.provider                         -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.android.BootupTraceQR                         -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.ota                                           -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
-    com.technicolor.android.provider                              -  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.google.android.tts                                    28.7M  AOSP/Google preinstall, not in the known-bloat list
+    com.google.android.tungsten.setupwraith                   14.7M  AOSP/Google preinstall, not in the known-bloat list
+    com.google.android.katniss                                11.1M  AOSP/Google preinstall, not in the known-bloat list
+    com.google.android.tvrecommendations                       4.2M  AOSP/Google preinstall, not in the known-bloat list
+    com.google.android.speech.pumpkin                          1.7M  AOSP/Google preinstall, not in the known-bloat list
+    com.google.android.partnersetup                            1.0M  AOSP/Google preinstall, not in the known-bloat list
+    com.google.android.onetimeinitializer                       68K  AOSP/Google preinstall, not in the known-bloat list
+    com.google.android.backuptransport                          28K  AOSP/Google preinstall, not in the known-bloat list
+    com.android.companiondevicemanager                          20K  AOSP/Google preinstall, not in the known-bloat list
+    com.android.htmlviewer                                      17K  AOSP/Google preinstall, not in the known-bloat list
+    tv.broadpeak.nanocdnwrapper                               10.2M  Broadpeak CDN wrapper used by TIM streaming
+    com.marvell.tv.settings                                    1.3M  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
+    com.marvell.audio.loopback                                 1.1M  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
+    com.marvell.tv.overscan                                    182K  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
+    com.marvell.wol                                             16K  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
+    com.marvell.onetouchplay                                     9K  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
+    com.marvell.power.shutdownreceiver                           8K  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
+    com.movenda.omadm.tv                                       1.8M  OMA-DM device management client - TIM uses it to configure the box remotely
+    com.movenda.p4mcore                                        576K  OMA-DM device management client - TIM uses it to configure the box remotely
+    timvision.tvappsettings                                   10.1M  TIMVISION service - check what it does before removing
+    timvision.upgrade                                          7.6M  TIMVISION service - check what it does before removing
+    timvision.leanbackcustomization                            412K  TIMVISION service - check what it does before removing
+    com.technicolor.android.dtvscan.project                    3.6M  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.android.dtvinput                           1.3M  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.checkota                                   1.1M  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.android.BootupTraceQR                       80K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.android.cas.provider                        71K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.hdmiresolution                              61K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.app.ota                                     40K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.android.user.provider                       19K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.globalkey                                   17K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.android.provider                            12K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.autoperiodicreboot                          11K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.tim.customization                            9K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.project.releasenote                          8K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.factorycert                                  8K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.persistdate                                  7K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.cputemperature                               7K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.ota                                          6K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.hardwareproperties                           6K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
+    com.technicolor.defaultledcontroller                         5K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
 
   === KEEP (49) ===
-    com.technicolor.android.remotecontrolservice                  -  IR/Bluetooth remote key mapping - remote would die
-    com.google.android.gms.policy_sidecar_o                       -  Play Services (many apps break without it)
-    com.android.vending                                         24K  Play Store
-    com.android.bluetooth                                         -  bluetooth stack
-    com.google.android.gms                                      12K  core system component
-    com.android.cts.priv.ctsshim                                  -  core system component
-    com.google.android.ext.services                               -  core system component
-    com.android.providers.calendar                                -  core system component
-    com.android.tv.settings                                       -  core system component
-    com.android.providers.media                                   -  core system component
-    com.google.android.ext.shared                                 -  core system component
-    com.android.externalstorage                                   -  core system component
-    com.android.providers.downloads                               -  core system component
-    com.android.providers.tv                                      -  core system component
-    com.android.defcontainer                                      -  core system component
-    com.android.pacprocessor                                      -  core system component
-    com.android.certinstaller                                     -  core system component
-    android                                                       -  core system component
-    com.android.backupconfirm                                     -  core system component
-    com.android.statementservice                                  -  core system component
-    com.android.providers.settings                                -  core system component
-    com.android.sharedstoragebackup                               -  core system component
-    com.android.printspooler                                      -  core system component
-    com.android.inputdevices                                      -  core system component
-    com.google.android.webview                                    -  core system component
-    com.android.keychain                                          -  core system component
-    com.google.android.gsf                                        -  core system component
-    com.android.packageinstaller                                  -  core system component
-    com.android.proxyhandler                                      -  core system component
-    com.android.tv.settings.device.display.daydream               -  core system component
-    com.android.cts.ctsshim                                       -  core system component
-    com.android.vpndialogs                                        -  core system component
-    com.google.android.tv.frameworkpackagestubs                   -  core system component
-    com.android.shell                                             -  core system component
-    com.android.wallpaperbackup                                   -  core system component
-    com.android.providers.userdictionary                          -  core system component
-    com.android.location.fused                                    -  core system component
-    com.android.systemui                                          -  core system component
-    com.android.providers.contacts                                -  core system component
-    com.android.captiveportallogin                                -  core system component
-    com.technicolor.android.skipper.setupwizard                   -  first boot wizard
-    timvision.setup_wizard                                        -  first boot wizard
-    timvision.launcher                                          16K  home screen - remove it and you land on a black screen
-    com.google.android.leanbacklauncher.recommendations           -  home screen - remove it and you land on a black screen
-    com.google.android.inputmethod.latin                          -  input method - blocks all text input
-    com.technicolor.tv.remotepairing                              -  remote pairing service - remote would die
-    it.telecomitalia.iptuner                                    12K  telephony / call handling
-    it.telecomitalia.accountmanager                               -  telephony / call handling
-    it.telecomitalia.linemanager                                  -  telephony / call handling
+    com.technicolor.android.remotecontrolservice               1.5M  IR/Bluetooth remote key mapping - remote would die
+    com.google.android.gms.policy_sidecar_o                    9.0M  Play Services (many apps break without it)
+    com.android.vending                                       17.1M  Play Store
+    com.android.bluetooth                                      1.9M  bluetooth stack
+    com.google.android.webview                                82.6M  core system component
+    com.google.android.gms                                    45.0M  core system component
+    android                                                   24.3M  core system component
+    com.android.systemui                                      13.2M  core system component
+    com.android.tv.settings                                    8.4M  core system component
+    com.android.packageinstaller                               5.5M  core system component
+    com.google.android.gsf                                     3.8M  core system component
+    com.android.tv.settings.device.display.daydream            3.6M  core system component
+    com.android.printspooler                                   683K  core system component
+    com.android.providers.downloads                            570K  core system component
+    com.android.providers.contacts                             536K  core system component
+    com.android.certinstaller                                  352K  core system component
+    com.android.providers.calendar                             331K  core system component
+    com.android.shell                                          241K  core system component
+    com.android.backupconfirm                                  219K  core system component
+    com.android.inputdevices                                   209K  core system component
+    com.android.providers.media                                193K  core system component
+    com.android.providers.settings                             177K  core system component
+    com.android.keychain                                       106K  core system component
+    com.android.vpndialogs                                      78K  core system component
+    com.android.providers.tv                                    76K  core system component
+    com.android.captiveportallogin                              68K  core system component
+    com.google.android.tv.frameworkpackagestubs                 39K  core system component
+    com.android.externalstorage                                 38K  core system component
+    com.android.statementservice                                36K  core system component
+    com.android.providers.userdictionary                        23K  core system component
+    com.android.cts.priv.ctsshim                                22K  core system component
+    com.android.defcontainer                                    21K  core system component
+    com.android.location.fused                                  20K  core system component
+    com.google.android.ext.services                             16K  core system component
+    com.google.android.ext.shared                               12K  core system component
+    com.android.proxyhandler                                    11K  core system component
+    com.android.wallpaperbackup                                  9K  core system component
+    com.android.sharedstoragebackup                              8K  core system component
+    com.android.pacprocessor                                     7K  core system component
+    com.android.cts.ctsshim                                      4K  core system component
+    timvision.setup_wizard                                     4.5M  first boot wizard
+    com.technicolor.android.skipper.setupwizard                2.9M  first boot wizard
+    timvision.launcher                                        35.1M  home screen - remove it and you land on a black screen
+    com.google.android.leanbacklauncher.recommendations          8K  home screen - remove it and you land on a black screen
+    com.google.android.inputmethod.latin                      21.2M  input method - blocks all text input
+    com.technicolor.tv.remotepairing                           762K  remote pairing service - remote would die
+    it.telecomitalia.iptuner                                   6.7M  telephony / call handling
+    it.telecomitalia.accountmanager                            6.1M  telephony / call handling
+    it.telecomitalia.linemanager                               1.7M  telephony / call handling
 
 --------------------------------------------------------------------------------------------------------
   CANDIDATES TO REMOVE (BLOAT only)
 --------------------------------------------------------------------------------------------------------
-        704K  user0     it.telecomitalia.digitalsupport                      TIM Digital Support
-         32K  uninstall com.estrongs.android.pop                             ES File Explorer (known adware)
-         12K  user0     com.google.android.videos                            Google TV / Play Movies
-          8K  user0     com.dazn                                             DAZN
-          8K  user0     com.google.android.youtube.tv                        YouTube (TV)
-           -  user0     com.google.android.apps.mediashell                   Media shell
-           -  user0     it.telecomitalia.timmusic_tv                         TIM Music (TV)
-           -  uninstall it.telecomitalia.thefilmclub                         The Film Club (TIM)
-           -  user0     com.google.android.backdrop                          Daydream Backdrop
-           -  user0     timvision.telemetry                                  TIMVISION telemetry/analytics
-           -  user0     android.autoinstalls.config.technicolor              auto-installer that re-adds OEM bloat
-           -  user0     com.google.android.marvin.talkback                   TalkBack
-           -  user0     com.google.android.gsf.notouch                       NoTouch auth delegate
-           -  user0     com.amazon.amazonvideo.livingroom                    Prime Video
-           -  uninstall it.rds.androidtv.rdssocialtv                         RDS Social TV
-           -  user0     com.android.dreams.basic                             Basic screensaver
-           -  uninstall it.telecomitalia.calcio                              TIM Calcio / Serie A
-           -  uninstall com.sky.ott.client.androidtv.SkyIT                   Sky (TV)
-           -  user0     com.google.android.syncadapters.contacts             Contacts sync
-           -  user0     com.google.android.youtube.tvmusic                   YouTube Music (TV)
-           -  user0     com.google.android.sss                               Second Screen Setup
-           -  user0     com.google.android.feedback                          Google market feedback
-           -  user0     com.google.android.syncadapters.calendar             Calendar sync
-           -  uninstall com.cbs.ca                                           CBS (demo/vendor app)
-           -  user0     it.telecomitalia.timppapp                            TIM Personal / promo app
-           -  user0     it.telecomitalia.games                               TIM Games
-           -  uninstall it.telecomitalia.iotim                               TIM promo app
-           -  uninstall it.mediaset.infinitytv                               Mediaset Infinity
-           -  uninstall tv.pluto.android                                     Pluto TV
-           -  user0     com.google.android.sss.authbridge                    Second Screen Setup auth bridge
-           -  uninstall com.vativision.vativisionapp                         Vativision
-           -  user0     com.google.android.tv.remote.service                 Google TV remote service
-           -  user0     com.google.android.play.games                        Play Games
-           -  user0     com.netflix.ninja                                    Netflix (TV)
-           -  user0     com.google.android.tvtutorials                       Android TV tutorials
+       96.6M  user0     com.google.android.apps.mediashell                   Media shell
+       91.9M  user0     com.netflix.ninja                                    Netflix (TV)
+       39.4M  user0     com.amazon.amazonvideo.livingroom                    Prime Video
+       38.2M  uninstall com.cbs.ca                                           CBS (demo/vendor app)
+       28.2M  user0     it.telecomitalia.games                               TIM Games
+       28.0M  uninstall tv.pluto.android                                     Pluto TV
+       24.5M  uninstall it.telecomitalia.iotim                               TIM promo app
+       15.1M  user0     com.dazn                                             DAZN
+       13.4M  uninstall com.estrongs.android.pop                             ES File Explorer (known adware)
+       12.1M  uninstall it.rds.androidtv.rdssocialtv                         RDS Social TV
+       11.3M  user0     com.google.android.videos                            Google TV / Play Movies
+       10.8M  user0     com.google.android.play.games                        Play Games
+        9.2M  uninstall it.mediaset.infinitytv                               Mediaset Infinity
+        8.0M  uninstall it.telecomitalia.thefilmclub                         The Film Club (TIM)
+        7.1M  user0     it.telecomitalia.timppapp                            TIM Personal / promo app
+        7.0M  user0     com.google.android.gsf.notouch                       NoTouch auth delegate
+        5.8M  user0     com.google.android.marvin.talkback                   TalkBack
+        5.4M  user0     com.google.android.backdrop                          Daydream Backdrop
+        4.0M  user0     com.google.android.youtube.tv                        YouTube (TV)
+        4.0M  user0     com.google.android.tv.remote.service                 Google TV remote service
+        3.9M  user0     it.telecomitalia.digitalsupport                      TIM Digital Support
+        3.6M  user0     timvision.telemetry                                  TIMVISION telemetry/analytics
+        3.6M  user0     com.google.android.tvtutorials                       Android TV tutorials
+        2.9M  uninstall com.sky.ott.client.androidtv.SkyIT                   Sky (TV)
+        2.2M  user0     com.google.android.youtube.tvmusic                   YouTube Music (TV)
+        2.2M  user0     com.google.android.sss                               Second Screen Setup
+        2.1M  uninstall com.vativision.vativisionapp                         Vativision
+        2.1M  user0     it.telecomitalia.timmusic_tv                         TIM Music (TV)
+        1.8M  user0     com.google.android.syncadapters.calendar             Calendar sync
+        1.4M  user0     com.google.android.sss.authbridge                    Second Screen Setup auth bridge
+        1.4M  user0     com.google.android.syncadapters.contacts             Contacts sync
+        668K  uninstall it.telecomitalia.calcio                              TIM Calcio / Serie A
+        499K  user0     com.google.android.feedback                          Google market feedback
+         38K  user0     com.android.dreams.basic                             Basic screensaver
+          6K  user0     android.autoinstalls.config.technicolor              auto-installer that re-adds OEM bloat
 
-    BLOAT count: 35   total APK size: 17.8M
+    BLOAT count: 35   total APK size: 488.0M

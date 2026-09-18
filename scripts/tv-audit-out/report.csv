@@ -1,126 +1,126 @@
 package,risk,reason,mode,third_party,in_system,enabled,disabled,apk_bytes,data_bytes,recoverable_bytes,apk_path
-it.telecomitalia.digitalsupport,BLOAT,TIM Digital Support,user0,0,0,1,0,0,720896,720896,/data/app/it.telecomitalia.digitalsupport-HS8aa0x0mNqG5HTNGjtkuQ==/base.apk
-com.estrongs.android.pop,BLOAT,ES File Explorer (known adware),uninstall,1,0,1,0,0,32768,32768,/data/app/com.estrongs.android.pop-2/base.apk
-com.android.vending,KEEP,Play Store,user0,0,0,1,0,0,24576,24576,/data/app/com.android.vending-w0sRO5zNSZ71rXH6rJ93bg==/base.apk
-timvision.launcher,KEEP,home screen - remove it and you land on a black screen,user0,0,0,1,0,0,16384,16384,/data/app/timvision.launcher-056qMLe-CMDFMcEGDA_mBQ==/base.apk
-com.technicolor.app.ota,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,41282,12288,12288,/system/priv-app/ApplicationOta/ApplicationOta.apk
-it.telecomitalia.iptuner,KEEP,telephony / call handling,uninstall,1,0,1,0,0,12288,12288,/data/app/it.telecomitalia.iptuner-gzf1mjHcc9QPbVJo_Rr8NQ==/base.apk
-com.google.android.gms,KEEP,core system component,user0,0,0,1,0,0,12288,12288,/data/app/com.google.android.gms-7s78l-EgA-5WDGNe8bagxg==/base.apk
-com.google.android.tts,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,0,1,0,0,12288,12288,/data/app/com.google.android.tts-eWBl8DNL2vfroQCk05YNtw==/base.apk
-com.google.android.videos,BLOAT,Google TV / Play Movies,user0,0,0,1,0,0,12288,12288,/data/app/com.google.android.videos-D_HDw-Fm4IoELA3dNQd1_Q==/base.apk
-com.google.android.katniss,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,0,1,0,0,8192,8192,/data/app/com.google.android.katniss-nJCsvHBGekAuLwGmORTMkw==/base.apk
-com.dazn,BLOAT,DAZN,user0,0,0,1,0,0,8192,8192,/data/app/com.dazn-xLaus-BQn1CV-uEGmyIKJw==/base.apk
-com.google.android.youtube.tv,BLOAT,YouTube (TV),user0,0,0,1,0,0,8192,8192,/data/app/com.google.android.youtube.tv-aatfpVxIJ2gPTcunlFXPrg==/base.apk
-com.android.cts.priv.ctsshim,KEEP,core system component,user0,0,1,1,0,22744,0,0,/system/priv-app/CtsShimPrivPrebuilt/CtsShimPrivPrebuilt.apk
-com.technicolor.tim.customization,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,9867,0,0,/system/priv-app/SystemCustomization/SystemCustomization.apk
-com.google.android.ext.services,KEEP,core system component,user0,0,1,1,0,16791,0,0,/system/priv-app/GoogleExtServices/GoogleExtServices.apk
-com.marvell.tv.overscan,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,186465,0,0,/system/app/MrvlOverscan/MrvlOverscan.apk
-com.google.android.apps.mediashell,BLOAT,Media shell,user0,0,0,1,0,0,0,0,/data/app/com.google.android.apps.mediashell-Mmx4CcQZeWlYPnvQQfKoNw==/base.apk
-it.telecomitalia.accountmanager,KEEP,telephony / call handling,user0,0,0,1,0,0,0,0,/data/app/it.telecomitalia.accountmanager-uTnmnc9mFYWD0ikH6tSAMw==/base.apk
-com.technicolor.autoperiodicreboot,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,11798,0,0,/system/app/AutoPeriodicReboot/AutoPeriodicReboot.apk
-com.android.providers.calendar,KEEP,core system component,user0,0,1,1,0,339268,0,0,/system/priv-app/CalendarProvider/CalendarProvider.apk
-com.android.tv.settings,KEEP,core system component,user0,0,1,1,0,8843557,0,0,/system/priv-app/TvSettings/TvSettings.apk
-com.android.providers.media,KEEP,core system component,user0,0,1,1,0,198442,0,0,/system/priv-app/MediaProvider/MediaProvider.apk
-com.google.android.onetimeinitializer,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,70039,0,0,/system/priv-app/GoogleOneTimeInitializer/GoogleOneTimeInitializer.apk
-com.google.android.ext.shared,KEEP,core system component,user0,0,1,1,0,12695,0,0,/system/app/GoogleExtShared/GoogleExtShared.apk
-com.movenda.p4mcore,CAUTION,OMA-DM device management client - TIM uses it to configure the box remotely,user0,0,1,1,0,590187,0,0,/system/priv-app/movenda-core/movenda-core.apk
-it.telecomitalia.timmusic_tv,BLOAT,TIM Music (TV),user0,0,0,1,0,0,0,0,/data/app/it.telecomitalia.timmusic_tv-IGgdO9EhrF8UAtfTPn8yYg==/base.apk
-com.marvell.power.shutdownreceiver,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,8416,0,0,/system/vendor/app/ShutdownReceiver/ShutdownReceiver.apk
-com.android.externalstorage,KEEP,core system component,user0,0,1,1,0,39894,0,0,/system/priv-app/ExternalStorageProvider/ExternalStorageProvider.apk
-it.telecomitalia.thefilmclub,BLOAT,The Film Club (TIM),uninstall,1,0,1,0,0,0,0,/data/app/it.telecomitalia.thefilmclub-JzmP2_QIr7ShNDsOY0sCBQ==/base.apk
-com.android.htmlviewer,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,17717,0,0,/system/app/HTMLViewer/HTMLViewer.apk
-com.android.companiondevicemanager,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,20918,0,0,/system/app/CompanionDeviceManager/CompanionDeviceManager.apk
-com.technicolor.factorycert,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,8727,0,0,/system/priv-app/FactoryCert/FactoryCert.apk
-com.android.providers.downloads,KEEP,core system component,user0,0,1,1,0,584152,0,0,/system/priv-app/DownloadProvider/DownloadProvider.apk
-com.android.providers.tv,KEEP,core system component,user0,0,1,1,0,78637,0,0,/system/priv-app/TvProvider/TvProvider.apk
-com.google.android.backdrop,BLOAT,Daydream Backdrop,user0,0,0,1,0,0,0,0,/data/app/com.google.android.backdrop-sPxcnkpyBUtrvGgqRLDUqg==/base.apk
-timvision.telemetry,BLOAT,TIMVISION telemetry/analytics,user0,0,0,1,0,0,0,0,/data/app/timvision.telemetry-MUwljQl2aYcJnMdn2uIntg==/base.apk
-com.technicolor.android.remotecontrolservice,KEEP,IR/Bluetooth remote key mapping - remote would die,user0,0,1,1,0,1587018,0,0,/system/priv-app/RemoteVoiceInput/RemoteVoiceInput.apk
-com.technicolor.defaultledcontroller,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,5598,0,0,/system/app/DefaultLedController/DefaultLedController.apk
-android.autoinstalls.config.technicolor,BLOAT,auto-installer that re-adds OEM bloat,user0,0,1,1,0,6233,0,0,/system/app/PlayAutoInstallConfig/PlayAutoInstallConfig.apk
-com.google.android.tungsten.setupwraith,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,15385444,0,0,/system/priv-app/SetupWraith/SetupWraith.apk
-com.technicolor.project.releasenote,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,9184,0,0,/system/app/ProjectReleaseNote/ProjectReleaseNote.apk
-com.technicolor.hdmiresolution,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,63208,0,0,/system/priv-app/HdmiResolution/HdmiResolution.apk
-com.marvell.tv.settings,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,1333106,0,0,/system/app/MrvlTvSettings/MrvlTvSettings.apk
-com.android.defcontainer,KEEP,core system component,user0,0,1,1,0,22381,0,0,/system/priv-app/DefaultContainerService/DefaultContainerService.apk
-com.technicolor.globalkey,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,17618,0,0,/system/priv-app/GlobalKey/GlobalKey.apk
-com.android.pacprocessor,KEEP,core system component,user0,0,1,1,0,7820,0,0,/system/app/PacProcessor/PacProcessor.apk
-com.android.certinstaller,KEEP,core system component,user0,0,1,1,0,361064,0,0,/system/app/CertInstaller/CertInstaller.apk
-com.google.android.marvin.talkback,BLOAT,TalkBack,user0,0,0,1,0,0,0,0,/data/app/com.google.android.marvin.talkback-MJRi8D3700FWIeDeHN5NLw==/base.apk
-timvision.tvappsettings,CAUTION,TIMVISION service - check what it does before removing,uninstall,1,0,1,0,0,0,0,/data/app/timvision.tvappsettings-QhIAUZRKzISeYYgDsGDlpA==/base.apk
-com.technicolor.android.dtvscan.project,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,0,1,0,0,0,0,/data/app/com.technicolor.android.dtvscan.project-dhmpTXsB_lD5K12gH76-mg==/base.apk
-android,KEEP,core system component,user0,0,1,1,0,25488128,0,0,/system/framework/framework-res.apk
-com.google.android.gms.policy_sidecar_o,KEEP,Play Services (many apps break without it),user0,0,1,1,0,9401134,0,0,/system/priv-app/AndroidPlatformServicesTV/AndroidPlatformServicesTV.apk
-com.google.android.speech.pumpkin,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,1812327,0,0,/system/app/Pumpkin/Pumpkin.apk
-com.android.backupconfirm,KEEP,core system component,user0,0,1,1,0,224764,0,0,/system/priv-app/BackupRestoreConfirmation/BackupRestoreConfirmation.apk
-com.android.statementservice,KEEP,core system component,user0,0,1,1,0,37098,0,0,/system/priv-app/StatementService/StatementService.apk
-tv.broadpeak.nanocdnwrapper,CAUTION,Broadpeak CDN wrapper used by TIM streaming,user0,0,0,1,0,0,0,0,/data/app/tv.broadpeak.nanocdnwrapper-yYmFZX11WwXp855POJMynA==/base.apk
-com.google.android.gsf.notouch,BLOAT,NoTouch auth delegate,user0,0,1,1,0,7332348,0,0,/system/app/NoTouchAuthDelegate/NoTouchAuthDelegate.apk
-com.amazon.amazonvideo.livingroom,BLOAT,Prime Video,user0,0,0,1,0,0,0,0,/data/app/com.amazon.amazonvideo.livingroom-dYtnqR6QFBhaohmpmON03A==/base.apk
-com.android.providers.settings,KEEP,core system component,user0,0,1,1,0,181695,0,0,/system/priv-app/SettingsProvider/SettingsProvider.apk
-com.android.sharedstoragebackup,KEEP,core system component,user0,0,1,1,0,8828,0,0,/system/priv-app/SharedStorageBackup/SharedStorageBackup.apk
-com.android.printspooler,KEEP,core system component,user0,0,1,1,0,700059,0,0,/system/app/PrintSpooler/PrintSpooler.apk
-it.rds.androidtv.rdssocialtv,BLOAT,RDS Social TV,uninstall,1,0,1,0,0,0,0,/data/app/it.rds.androidtv.rdssocialtv-Zg6ui373hCY_p1Fe3XUpGg==/base.apk
-com.technicolor.android.skipper.setupwizard,KEEP,first boot wizard,user0,0,1,1,0,2991068,0,0,/system/priv-app/TchSetupWizard/TchSetupWizard.apk
-com.android.dreams.basic,BLOAT,Basic screensaver,user0,0,1,1,0,39758,0,0,/system/app/BasicDreams/BasicDreams.apk
-com.android.inputdevices,KEEP,core system component,user0,0,1,1,0,215026,0,0,/system/priv-app/InputDevices/InputDevices.apk
-com.google.android.tvrecommendations,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,0,1,0,0,0,0,/data/app/com.google.android.tvrecommendations-q3gQOARMuchiYUwf8DNduw==/base.apk
-com.google.android.leanbacklauncher.recommendations,KEEP,home screen - remove it and you land on a black screen,user0,0,1,1,0,8531,0,0,/system/priv-app/RecommendationsService/RecommendationsService.apk
-com.technicolor.android.cas.provider,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,73212,0,0,/system/priv-app/tch_cas_provider_service/tch_cas_provider_service.apk
-it.telecomitalia.calcio,BLOAT,TIM Calcio / Serie A,uninstall,1,0,1,0,0,0,0,/data/app/it.telecomitalia.calcio-2/base.apk
-com.google.android.webview,KEEP,core system component,user0,0,0,1,0,0,0,0,/data/app/com.google.android.webview-eRJ7eFpOQHDjuwK1G0w5kQ==/base.apk
-timvision.upgrade,CAUTION,TIMVISION service - check what it does before removing,user0,0,1,1,0,7952527,0,0,/system/priv-app/upgrade-produzione/upgrade-produzione.apk
-com.sky.ott.client.androidtv.SkyIT,BLOAT,Sky (TV),uninstall,1,0,1,0,0,0,0,/data/app/com.sky.ott.client.androidtv.SkyIT-e1GCGhqK4BU7zPzluMtIZA==/base.apk
-com.google.android.syncadapters.contacts,BLOAT,Contacts sync,user0,0,1,1,0,1416065,0,0,/system/app/GoogleContactsSyncAdapter/GoogleContactsSyncAdapter.apk
-com.android.keychain,KEEP,core system component,user0,0,1,1,0,108916,0,0,/system/app/KeyChain/KeyChain.apk
-com.google.android.youtube.tvmusic,BLOAT,YouTube Music (TV),user0,0,0,1,0,0,0,0,/data/app/com.google.android.youtube.tvmusic-FqfAgqHBLLIbm835oeYJtA==/base.apk
-com.movenda.omadm.tv,CAUTION,OMA-DM device management client - TIM uses it to configure the box remotely,user0,0,0,1,0,0,0,0,/data/app/com.movenda.omadm.tv-ZJ_dbl-4yoQ3wnejuTY_sw==/base.apk
-com.technicolor.android.dtvinput,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,1381012,0,0,/system/priv-app/tch_dtvinput_service/tch_dtvinput_service.apk
-com.google.android.gsf,KEEP,core system component,user0,0,1,1,0,3966300,0,0,/system/priv-app/GoogleServicesFramework/GoogleServicesFramework.apk
-com.google.android.sss,BLOAT,Second Screen Setup,user0,0,1,1,0,2281852,0,0,/system/app/SecondScreenSetup/SecondScreenSetup.apk
-com.google.android.partnersetup,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,1063831,0,0,/system/priv-app/GooglePartnerSetup/GooglePartnerSetup.apk
-com.android.packageinstaller,KEEP,core system component,user0,0,1,1,0,5759795,0,0,/system/priv-app/GooglePackageInstaller/GooglePackageInstaller.apk
-com.marvell.wol,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,16497,0,0,/system/vendor/app/WoWLAN/WoWLAN.apk
-com.technicolor.cputemperature,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,7219,0,0,/system/priv-app/cputemperature/cputemperature.apk
-com.android.proxyhandler,KEEP,core system component,user0,0,1,1,0,11525,0,0,/system/priv-app/ProxyHandler/ProxyHandler.apk
-com.google.android.feedback,BLOAT,Google market feedback,user0,0,1,1,0,511083,0,0,/system/priv-app/GoogleFeedback/GoogleFeedback.apk
-com.google.android.syncadapters.calendar,BLOAT,Calendar sync,user0,0,1,1,0,1851104,0,0,/system/app/GoogleCalendarSyncAdapter/GoogleCalendarSyncAdapter.apk
-com.cbs.ca,BLOAT,CBS (demo/vendor app),uninstall,1,0,1,0,0,0,0,/data/app/com.cbs.ca-BwsCFfif7V5uc7q4govOSg==/base.apk
-it.telecomitalia.timppapp,BLOAT,TIM Personal / promo app,user0,0,0,1,0,0,0,0,/data/app/it.telecomitalia.timppapp-vp1LOiq0ZXJ5cYxELRQFLg==/base.apk
-com.technicolor.checkota,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,1117399,0,0,/system/priv-app/CheckOTA/CheckOTA.apk
-timvision.leanbackcustomization,CAUTION,TIMVISION service - check what it does before removing,uninstall,1,0,1,0,0,0,0,/data/app/timvision.leanbackcustomization-2/base.apk
-com.technicolor.hardwareproperties,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,6213,0,0,/system/priv-app/HardwareProperties/HardwareProperties.apk
-com.android.tv.settings.device.display.daydream,KEEP,core system component,user0,0,1,1,0,3761612,0,0,/system/app/Daydream/Daydream.apk
-it.telecomitalia.games,BLOAT,TIM Games,user0,0,0,1,0,0,0,0,/data/app/it.telecomitalia.games-o5SPK9AsuFuNYqw0m07E0Q==/base.apk
-it.telecomitalia.iotim,BLOAT,TIM promo app,uninstall,1,0,1,0,0,0,0,/data/app/it.telecomitalia.iotim-1/base.apk
-com.google.android.backuptransport,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,29079,0,0,/system/priv-app/GoogleBackupTransport/GoogleBackupTransport.apk
-it.mediaset.infinitytv,BLOAT,Mediaset Infinity,uninstall,1,0,1,0,0,0,0,/data/app/it.mediaset.infinitytv-adECuv--CZ-G3dCaLsGRGA==/base.apk
-com.marvell.onetouchplay,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,9289,0,0,/system/vendor/app/OneTouchPlay/OneTouchPlay.apk
-tv.pluto.android,BLOAT,Pluto TV,uninstall,1,0,1,0,0,0,0,/data/app/tv.pluto.android-YNEOWzcjTWrH7rISgMLlag==/base.apk
-com.marvell.audio.loopback,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,1120097,0,0,/system/vendor/app/AmpAudioLoopback/AmpAudioLoopback.apk
-com.google.android.sss.authbridge,BLOAT,Second Screen Setup auth bridge,user0,0,1,1,0,1431417,0,0,/system/app/SecondScreenSetupAuthBridge/SecondScreenSetupAuthBridge.apk
-com.android.cts.ctsshim,KEEP,core system component,user0,0,1,1,0,4817,0,0,/system/app/CtsShimPrebuilt/CtsShimPrebuilt.apk
-com.technicolor.persistdate,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,7886,0,0,/system/priv-app/PersistDate/PersistDate.apk
-com.android.vpndialogs,KEEP,core system component,user0,0,1,1,0,80003,0,0,/system/priv-app/VpnDialogs/VpnDialogs.apk
-timvision.setup_wizard,KEEP,first boot wizard,user0,0,0,1,0,0,0,0,/data/app/timvision.setup_wizard-HaoO3pz0VA--oE3GcZSMIQ==/base.apk
-com.google.android.tv.frameworkpackagestubs,KEEP,core system component,user0,0,1,1,0,40686,0,0,/system/app/FrameworkPackageStubs/FrameworkPackageStubs.apk
-com.android.shell,KEEP,core system component,user0,0,1,1,0,247706,0,0,/system/priv-app/Shell/Shell.apk
-com.android.wallpaperbackup,KEEP,core system component,user0,0,1,1,0,9832,0,0,/system/app/WallpaperBackup/WallpaperBackup.apk
-com.android.providers.userdictionary,KEEP,core system component,user0,0,1,1,0,24118,0,0,/system/app/UserDictionaryProvider/UserDictionaryProvider.apk
-com.vativision.vativisionapp,BLOAT,Vativision,uninstall,1,0,1,0,0,0,0,/data/app/com.vativision.vativisionapp-V_zrXXszYsZQlBdXPFSBTg==/base.apk
-com.technicolor.android.user.provider,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,19542,0,0,/system/priv-app/tch_user_service/tch_user_service.apk
-com.google.android.tv.remote.service,BLOAT,Google TV remote service,user0,0,0,1,0,0,0,0,/data/app/com.google.android.tv.remote.service-MhI6H1_iwVRJCVDgIVqfwA==/base.apk
-com.android.location.fused,KEEP,core system component,user0,0,1,1,0,20689,0,0,/system/priv-app/FusedLocation/FusedLocation.apk
-com.android.systemui,KEEP,core system component,user0,0,1,1,0,13793996,0,0,/system/priv-app/SystemUI/SystemUI.apk
-com.technicolor.android.BootupTraceQR,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,82167,0,0,/system/priv-app/BootupTraceQR/BootupTraceQR.apk
-com.google.android.play.games,BLOAT,Play Games,user0,0,0,1,0,0,0,0,/data/app/com.google.android.play.games-zfUW7M0xsC9OZb5thyjHpQ==/base.apk
-com.netflix.ninja,BLOAT,Netflix (TV),user0,0,0,1,0,0,0,0,/data/app/com.netflix.ninja-FpKmuwmDxu9wfwJiPMwDHg==/base.apk
-com.android.bluetooth,KEEP,bluetooth stack,user0,0,1,1,0,2021796,0,0,/system/app/Bluetooth/Bluetooth.apk
-com.android.providers.contacts,KEEP,core system component,user0,0,1,1,0,549022,0,0,/system/priv-app/ContactsProvider/ContactsProvider.apk
-com.android.captiveportallogin,KEEP,core system component,user0,0,1,1,0,70065,0,0,/system/app/CaptivePortalLogin/CaptivePortalLogin.apk
-com.technicolor.ota,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,6439,0,0,/system/priv-app/WakeoncastEnabler/WakeoncastEnabler.apk
-com.technicolor.tv.remotepairing,KEEP,remote pairing service - remote would die,user0,0,1,1,0,780593,0,0,/system/priv-app/RemotePairing/RemotePairing.apk
-com.technicolor.android.provider,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,12441,0,0,/system/vendor/app/TchProvider/TchProvider.apk
-com.google.android.inputmethod.latin,KEEP,input method - blocks all text input,user0,0,0,1,0,0,0,0,/data/app/com.google.android.inputmethod.latin-t9jjTA34pM_wtP0a4K6mXA==/base.apk
-it.telecomitalia.linemanager,KEEP,telephony / call handling,user0,0,0,1,0,0,0,0,/data/app/it.telecomitalia.linemanager-EgtcU4DP59w2W2ESS2wHgA==/base.apk
-com.google.android.tvtutorials,BLOAT,Android TV tutorials,user0,0,1,1,0,3755631,0,0,/system/priv-app/TvTutorials/TvTutorials.apk
+com.google.android.apps.mediashell,BLOAT,Media shell,user0,0,0,1,0,101314724,0,101314724,/data/app/com.google.android.apps.mediashell-Mmx4CcQZeWlYPnvQQfKoNw==/base.apk
+com.netflix.ninja,BLOAT,Netflix (TV),user0,0,0,1,0,96346062,0,96346062,/data/app/com.netflix.ninja-FpKmuwmDxu9wfwJiPMwDHg==/base.apk
+com.google.android.webview,KEEP,core system component,user0,0,0,1,0,86609640,0,86609640,/data/app/com.google.android.webview-eRJ7eFpOQHDjuwK1G0w5kQ==/base.apk
+com.google.android.gms,KEEP,core system component,user0,0,0,1,0,47214699,0,47214699,/data/app/com.google.android.gms-7s78l-EgA-5WDGNe8bagxg==/base.apk
+com.amazon.amazonvideo.livingroom,BLOAT,Prime Video,user0,0,0,1,0,41297798,0,41297798,/data/app/com.amazon.amazonvideo.livingroom-dYtnqR6QFBhaohmpmON03A==/base.apk
+com.cbs.ca,BLOAT,CBS (demo/vendor app),uninstall,1,0,1,0,40023630,0,40023630,/data/app/com.cbs.ca-BwsCFfif7V5uc7q4govOSg==/base.apk
+timvision.launcher,KEEP,home screen - remove it and you land on a black screen,user0,0,0,1,0,36759751,0,36759751,/data/app/timvision.launcher-056qMLe-CMDFMcEGDA_mBQ==/base.apk
+com.google.android.tts,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,0,1,0,30105941,0,30105941,/data/app/com.google.android.tts-eWBl8DNL2vfroQCk05YNtw==/base.apk
+it.telecomitalia.games,BLOAT,TIM Games,user0,0,0,1,0,29556500,0,29556500,/data/app/it.telecomitalia.games-o5SPK9AsuFuNYqw0m07E0Q==/base.apk
+tv.pluto.android,BLOAT,Pluto TV,uninstall,1,0,1,0,29342843,0,29342843,/data/app/tv.pluto.android-YNEOWzcjTWrH7rISgMLlag==/base.apk
+it.telecomitalia.iotim,BLOAT,TIM promo app,uninstall,1,0,1,0,25668719,0,25668719,/data/app/it.telecomitalia.iotim-1/base.apk
+android,KEEP,core system component,user0,0,1,1,0,25488128,0,25488128,/system/framework/framework-res.apk
+com.google.android.inputmethod.latin,KEEP,input method - blocks all text input,user0,0,0,1,0,22267912,0,22267912,/data/app/com.google.android.inputmethod.latin-t9jjTA34pM_wtP0a4K6mXA==/base.apk
+com.android.vending,KEEP,Play Store,user0,0,0,1,0,17938425,0,17938425,/data/app/com.android.vending-w0sRO5zNSZ71rXH6rJ93bg==/base.apk
+com.dazn,BLOAT,DAZN,user0,0,0,1,0,15850912,0,15850912,/data/app/com.dazn-xLaus-BQn1CV-uEGmyIKJw==/base.apk
+com.google.android.tungsten.setupwraith,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,15385444,0,15385444,/system/priv-app/SetupWraith/SetupWraith.apk
+com.estrongs.android.pop,BLOAT,ES File Explorer (known adware),uninstall,1,0,1,0,14000262,0,14000262,/data/app/com.estrongs.android.pop-2/base.apk
+com.android.systemui,KEEP,core system component,user0,0,1,1,0,13793996,0,13793996,/system/priv-app/SystemUI/SystemUI.apk
+it.rds.androidtv.rdssocialtv,BLOAT,RDS Social TV,uninstall,1,0,1,0,12722760,0,12722760,/data/app/it.rds.androidtv.rdssocialtv-Zg6ui373hCY_p1Fe3XUpGg==/base.apk
+com.google.android.videos,BLOAT,Google TV / Play Movies,user0,0,0,1,0,11803606,0,11803606,/data/app/com.google.android.videos-D_HDw-Fm4IoELA3dNQd1_Q==/base.apk
+com.google.android.katniss,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,0,1,0,11630770,0,11630770,/data/app/com.google.android.katniss-nJCsvHBGekAuLwGmORTMkw==/base.apk
+com.google.android.play.games,BLOAT,Play Games,user0,0,0,1,0,11277192,0,11277192,/data/app/com.google.android.play.games-zfUW7M0xsC9OZb5thyjHpQ==/base.apk
+tv.broadpeak.nanocdnwrapper,CAUTION,Broadpeak CDN wrapper used by TIM streaming,user0,0,0,1,0,10735723,0,10735723,/data/app/tv.broadpeak.nanocdnwrapper-yYmFZX11WwXp855POJMynA==/base.apk
+timvision.tvappsettings,CAUTION,TIMVISION service - check what it does before removing,uninstall,1,0,1,0,10608356,0,10608356,/data/app/timvision.tvappsettings-QhIAUZRKzISeYYgDsGDlpA==/base.apk
+it.mediaset.infinitytv,BLOAT,Mediaset Infinity,uninstall,1,0,1,0,9676704,0,9676704,/data/app/it.mediaset.infinitytv-adECuv--CZ-G3dCaLsGRGA==/base.apk
+com.google.android.gms.policy_sidecar_o,KEEP,Play Services (many apps break without it),user0,0,1,1,0,9401134,0,9401134,/system/priv-app/AndroidPlatformServicesTV/AndroidPlatformServicesTV.apk
+com.android.tv.settings,KEEP,core system component,user0,0,1,1,0,8843557,0,8843557,/system/priv-app/TvSettings/TvSettings.apk
+it.telecomitalia.thefilmclub,BLOAT,The Film Club (TIM),uninstall,1,0,1,0,8420825,0,8420825,/data/app/it.telecomitalia.thefilmclub-JzmP2_QIr7ShNDsOY0sCBQ==/base.apk
+timvision.upgrade,CAUTION,TIMVISION service - check what it does before removing,user0,0,1,1,0,7952527,0,7952527,/system/priv-app/upgrade-produzione/upgrade-produzione.apk
+it.telecomitalia.timppapp,BLOAT,TIM Personal / promo app,user0,0,0,1,0,7473551,0,7473551,/data/app/it.telecomitalia.timppapp-vp1LOiq0ZXJ5cYxELRQFLg==/base.apk
+com.google.android.gsf.notouch,BLOAT,NoTouch auth delegate,user0,0,1,1,0,7332348,0,7332348,/system/app/NoTouchAuthDelegate/NoTouchAuthDelegate.apk
+it.telecomitalia.iptuner,KEEP,telephony / call handling,uninstall,1,0,1,0,7077384,0,7077384,/data/app/it.telecomitalia.iptuner-gzf1mjHcc9QPbVJo_Rr8NQ==/base.apk
+it.telecomitalia.accountmanager,KEEP,telephony / call handling,user0,0,0,1,0,6387038,0,6387038,/data/app/it.telecomitalia.accountmanager-uTnmnc9mFYWD0ikH6tSAMw==/base.apk
+com.google.android.marvin.talkback,BLOAT,TalkBack,user0,0,0,1,0,6035082,0,6035082,/data/app/com.google.android.marvin.talkback-MJRi8D3700FWIeDeHN5NLw==/base.apk
+com.android.packageinstaller,KEEP,core system component,user0,0,1,1,0,5759795,0,5759795,/system/priv-app/GooglePackageInstaller/GooglePackageInstaller.apk
+com.google.android.backdrop,BLOAT,Daydream Backdrop,user0,0,0,1,0,5614895,0,5614895,/data/app/com.google.android.backdrop-sPxcnkpyBUtrvGgqRLDUqg==/base.apk
+timvision.setup_wizard,KEEP,first boot wizard,user0,0,0,1,0,4688821,0,4688821,/data/app/timvision.setup_wizard-HaoO3pz0VA--oE3GcZSMIQ==/base.apk
+com.google.android.tvrecommendations,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,0,1,0,4444359,0,4444359,/data/app/com.google.android.tvrecommendations-q3gQOARMuchiYUwf8DNduw==/base.apk
+com.google.android.youtube.tv,BLOAT,YouTube (TV),user0,0,0,1,0,4225437,0,4225437,/data/app/com.google.android.youtube.tv-aatfpVxIJ2gPTcunlFXPrg==/base.apk
+com.google.android.tv.remote.service,BLOAT,Google TV remote service,user0,0,0,1,0,4188260,0,4188260,/data/app/com.google.android.tv.remote.service-MhI6H1_iwVRJCVDgIVqfwA==/base.apk
+it.telecomitalia.digitalsupport,BLOAT,TIM Digital Support,user0,0,0,1,0,4076379,0,4076379,/data/app/it.telecomitalia.digitalsupport-HS8aa0x0mNqG5HTNGjtkuQ==/base.apk
+com.google.android.gsf,KEEP,core system component,user0,0,1,1,0,3966300,0,3966300,/system/priv-app/GoogleServicesFramework/GoogleServicesFramework.apk
+timvision.telemetry,BLOAT,TIMVISION telemetry/analytics,user0,0,0,1,0,3798801,0,3798801,/data/app/timvision.telemetry-MUwljQl2aYcJnMdn2uIntg==/base.apk
+com.android.tv.settings.device.display.daydream,KEEP,core system component,user0,0,1,1,0,3761612,0,3761612,/system/app/Daydream/Daydream.apk
+com.google.android.tvtutorials,BLOAT,Android TV tutorials,user0,0,1,1,0,3755631,0,3755631,/system/priv-app/TvTutorials/TvTutorials.apk
+com.technicolor.android.dtvscan.project,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,0,1,0,3725062,0,3725062,/data/app/com.technicolor.android.dtvscan.project-dhmpTXsB_lD5K12gH76-mg==/base.apk
+com.sky.ott.client.androidtv.SkyIT,BLOAT,Sky (TV),uninstall,1,0,1,0,3047650,0,3047650,/data/app/com.sky.ott.client.androidtv.SkyIT-e1GCGhqK4BU7zPzluMtIZA==/base.apk
+com.technicolor.android.skipper.setupwizard,KEEP,first boot wizard,user0,0,1,1,0,2991068,0,2991068,/system/priv-app/TchSetupWizard/TchSetupWizard.apk
+com.google.android.youtube.tvmusic,BLOAT,YouTube Music (TV),user0,0,0,1,0,2348767,0,2348767,/data/app/com.google.android.youtube.tvmusic-FqfAgqHBLLIbm835oeYJtA==/base.apk
+com.google.android.sss,BLOAT,Second Screen Setup,user0,0,1,1,0,2281852,0,2281852,/system/app/SecondScreenSetup/SecondScreenSetup.apk
+com.vativision.vativisionapp,BLOAT,Vativision,uninstall,1,0,1,0,2169307,0,2169307,/data/app/com.vativision.vativisionapp-V_zrXXszYsZQlBdXPFSBTg==/base.apk
+it.telecomitalia.timmusic_tv,BLOAT,TIM Music (TV),user0,0,0,1,0,2158607,0,2158607,/data/app/it.telecomitalia.timmusic_tv-IGgdO9EhrF8UAtfTPn8yYg==/base.apk
+com.android.bluetooth,KEEP,bluetooth stack,user0,0,1,1,0,2021796,0,2021796,/system/app/Bluetooth/Bluetooth.apk
+com.google.android.syncadapters.calendar,BLOAT,Calendar sync,user0,0,1,1,0,1851104,0,1851104,/system/app/GoogleCalendarSyncAdapter/GoogleCalendarSyncAdapter.apk
+com.movenda.omadm.tv,CAUTION,OMA-DM device management client - TIM uses it to configure the box remotely,user0,0,0,1,0,1846602,0,1846602,/data/app/com.movenda.omadm.tv-ZJ_dbl-4yoQ3wnejuTY_sw==/base.apk
+it.telecomitalia.linemanager,KEEP,telephony / call handling,user0,0,0,1,0,1826107,0,1826107,/data/app/it.telecomitalia.linemanager-EgtcU4DP59w2W2ESS2wHgA==/base.apk
+com.google.android.speech.pumpkin,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,1812327,0,1812327,/system/app/Pumpkin/Pumpkin.apk
+com.technicolor.android.remotecontrolservice,KEEP,IR/Bluetooth remote key mapping - remote would die,user0,0,1,1,0,1587018,0,1587018,/system/priv-app/RemoteVoiceInput/RemoteVoiceInput.apk
+com.google.android.sss.authbridge,BLOAT,Second Screen Setup auth bridge,user0,0,1,1,0,1431417,0,1431417,/system/app/SecondScreenSetupAuthBridge/SecondScreenSetupAuthBridge.apk
+com.google.android.syncadapters.contacts,BLOAT,Contacts sync,user0,0,1,1,0,1416065,0,1416065,/system/app/GoogleContactsSyncAdapter/GoogleContactsSyncAdapter.apk
+com.technicolor.android.dtvinput,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,1381012,0,1381012,/system/priv-app/tch_dtvinput_service/tch_dtvinput_service.apk
+com.marvell.tv.settings,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,1333106,0,1333106,/system/app/MrvlTvSettings/MrvlTvSettings.apk
+com.marvell.audio.loopback,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,1120097,0,1120097,/system/vendor/app/AmpAudioLoopback/AmpAudioLoopback.apk
+com.technicolor.checkota,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,1117399,0,1117399,/system/priv-app/CheckOTA/CheckOTA.apk
+com.google.android.partnersetup,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,1063831,0,1063831,/system/priv-app/GooglePartnerSetup/GooglePartnerSetup.apk
+com.technicolor.tv.remotepairing,KEEP,remote pairing service - remote would die,user0,0,1,1,0,780593,0,780593,/system/priv-app/RemotePairing/RemotePairing.apk
+com.android.printspooler,KEEP,core system component,user0,0,1,1,0,700059,0,700059,/system/app/PrintSpooler/PrintSpooler.apk
+it.telecomitalia.calcio,BLOAT,TIM Calcio / Serie A,uninstall,1,0,1,0,684152,0,684152,/data/app/it.telecomitalia.calcio-2/base.apk
+com.movenda.p4mcore,CAUTION,OMA-DM device management client - TIM uses it to configure the box remotely,user0,0,1,1,0,590187,0,590187,/system/priv-app/movenda-core/movenda-core.apk
+com.android.providers.downloads,KEEP,core system component,user0,0,1,1,0,584152,0,584152,/system/priv-app/DownloadProvider/DownloadProvider.apk
+com.android.providers.contacts,KEEP,core system component,user0,0,1,1,0,549022,0,549022,/system/priv-app/ContactsProvider/ContactsProvider.apk
+com.google.android.feedback,BLOAT,Google market feedback,user0,0,1,1,0,511083,0,511083,/system/priv-app/GoogleFeedback/GoogleFeedback.apk
+timvision.leanbackcustomization,CAUTION,TIMVISION service - check what it does before removing,uninstall,1,0,1,0,421977,0,421977,/data/app/timvision.leanbackcustomization-2/base.apk
+com.android.certinstaller,KEEP,core system component,user0,0,1,1,0,361064,0,361064,/system/app/CertInstaller/CertInstaller.apk
+com.android.providers.calendar,KEEP,core system component,user0,0,1,1,0,339268,0,339268,/system/priv-app/CalendarProvider/CalendarProvider.apk
+com.android.shell,KEEP,core system component,user0,0,1,1,0,247706,0,247706,/system/priv-app/Shell/Shell.apk
+com.android.backupconfirm,KEEP,core system component,user0,0,1,1,0,224764,0,224764,/system/priv-app/BackupRestoreConfirmation/BackupRestoreConfirmation.apk
+com.android.inputdevices,KEEP,core system component,user0,0,1,1,0,215026,0,215026,/system/priv-app/InputDevices/InputDevices.apk
+com.android.providers.media,KEEP,core system component,user0,0,1,1,0,198442,0,198442,/system/priv-app/MediaProvider/MediaProvider.apk
+com.marvell.tv.overscan,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,186465,0,186465,/system/app/MrvlOverscan/MrvlOverscan.apk
+com.android.providers.settings,KEEP,core system component,user0,0,1,1,0,181695,0,181695,/system/priv-app/SettingsProvider/SettingsProvider.apk
+com.android.keychain,KEEP,core system component,user0,0,1,1,0,108916,0,108916,/system/app/KeyChain/KeyChain.apk
+com.technicolor.android.BootupTraceQR,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,82167,0,82167,/system/priv-app/BootupTraceQR/BootupTraceQR.apk
+com.android.vpndialogs,KEEP,core system component,user0,0,1,1,0,80003,0,80003,/system/priv-app/VpnDialogs/VpnDialogs.apk
+com.android.providers.tv,KEEP,core system component,user0,0,1,1,0,78637,0,78637,/system/priv-app/TvProvider/TvProvider.apk
+com.technicolor.android.cas.provider,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,73212,0,73212,/system/priv-app/tch_cas_provider_service/tch_cas_provider_service.apk
+com.android.captiveportallogin,KEEP,core system component,user0,0,1,1,0,70065,0,70065,/system/app/CaptivePortalLogin/CaptivePortalLogin.apk
+com.google.android.onetimeinitializer,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,70039,0,70039,/system/priv-app/GoogleOneTimeInitializer/GoogleOneTimeInitializer.apk
+com.technicolor.hdmiresolution,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,63208,0,63208,/system/priv-app/HdmiResolution/HdmiResolution.apk
+com.technicolor.app.ota,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,41282,0,41282,/system/priv-app/ApplicationOta/ApplicationOta.apk
+com.google.android.tv.frameworkpackagestubs,KEEP,core system component,user0,0,1,1,0,40686,0,40686,/system/app/FrameworkPackageStubs/FrameworkPackageStubs.apk
+com.android.externalstorage,KEEP,core system component,user0,0,1,1,0,39894,0,39894,/system/priv-app/ExternalStorageProvider/ExternalStorageProvider.apk
+com.android.dreams.basic,BLOAT,Basic screensaver,user0,0,1,1,0,39758,0,39758,/system/app/BasicDreams/BasicDreams.apk
+com.android.statementservice,KEEP,core system component,user0,0,1,1,0,37098,0,37098,/system/priv-app/StatementService/StatementService.apk
+com.google.android.backuptransport,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,29079,0,29079,/system/priv-app/GoogleBackupTransport/GoogleBackupTransport.apk
+com.android.providers.userdictionary,KEEP,core system component,user0,0,1,1,0,24118,0,24118,/system/app/UserDictionaryProvider/UserDictionaryProvider.apk
+com.android.cts.priv.ctsshim,KEEP,core system component,user0,0,1,1,0,22744,0,22744,/system/priv-app/CtsShimPrivPrebuilt/CtsShimPrivPrebuilt.apk
+com.android.defcontainer,KEEP,core system component,user0,0,1,1,0,22381,0,22381,/system/priv-app/DefaultContainerService/DefaultContainerService.apk
+com.android.companiondevicemanager,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,20918,0,20918,/system/app/CompanionDeviceManager/CompanionDeviceManager.apk
+com.android.location.fused,KEEP,core system component,user0,0,1,1,0,20689,0,20689,/system/priv-app/FusedLocation/FusedLocation.apk
+com.technicolor.android.user.provider,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,19542,0,19542,/system/priv-app/tch_user_service/tch_user_service.apk
+com.android.htmlviewer,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,17717,0,17717,/system/app/HTMLViewer/HTMLViewer.apk
+com.technicolor.globalkey,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,17618,0,17618,/system/priv-app/GlobalKey/GlobalKey.apk
+com.google.android.ext.services,KEEP,core system component,user0,0,1,1,0,16791,0,16791,/system/priv-app/GoogleExtServices/GoogleExtServices.apk
+com.marvell.wol,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,16497,0,16497,/system/vendor/app/WoWLAN/WoWLAN.apk
+com.google.android.ext.shared,KEEP,core system component,user0,0,1,1,0,12695,0,12695,/system/app/GoogleExtShared/GoogleExtShared.apk
+com.technicolor.android.provider,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,12441,0,12441,/system/vendor/app/TchProvider/TchProvider.apk
+com.technicolor.autoperiodicreboot,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,11798,0,11798,/system/app/AutoPeriodicReboot/AutoPeriodicReboot.apk
+com.android.proxyhandler,KEEP,core system component,user0,0,1,1,0,11525,0,11525,/system/priv-app/ProxyHandler/ProxyHandler.apk
+com.technicolor.tim.customization,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,9867,0,9867,/system/priv-app/SystemCustomization/SystemCustomization.apk
+com.android.wallpaperbackup,KEEP,core system component,user0,0,1,1,0,9832,0,9832,/system/app/WallpaperBackup/WallpaperBackup.apk
+com.marvell.onetouchplay,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,9289,0,9289,/system/vendor/app/OneTouchPlay/OneTouchPlay.apk
+com.technicolor.project.releasenote,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,9184,0,9184,/system/app/ProjectReleaseNote/ProjectReleaseNote.apk
+com.android.sharedstoragebackup,KEEP,core system component,user0,0,1,1,0,8828,0,8828,/system/priv-app/SharedStorageBackup/SharedStorageBackup.apk
+com.technicolor.factorycert,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,8727,0,8727,/system/priv-app/FactoryCert/FactoryCert.apk
+com.google.android.leanbacklauncher.recommendations,KEEP,home screen - remove it and you land on a black screen,user0,0,1,1,0,8531,0,8531,/system/priv-app/RecommendationsService/RecommendationsService.apk
+com.marvell.power.shutdownreceiver,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,8416,0,8416,/system/vendor/app/ShutdownReceiver/ShutdownReceiver.apk
+com.technicolor.persistdate,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,7886,0,7886,/system/priv-app/PersistDate/PersistDate.apk
+com.android.pacprocessor,KEEP,core system component,user0,0,1,1,0,7820,0,7820,/system/app/PacProcessor/PacProcessor.apk
+com.technicolor.cputemperature,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,7219,0,7219,/system/priv-app/cputemperature/cputemperature.apk
+com.technicolor.ota,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,6439,0,6439,/system/priv-app/WakeoncastEnabler/WakeoncastEnabler.apk
+android.autoinstalls.config.technicolor,BLOAT,auto-installer that re-adds OEM bloat,user0,0,1,1,0,6233,0,6233,/system/app/PlayAutoInstallConfig/PlayAutoInstallConfig.apk
+com.technicolor.hardwareproperties,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,6213,0,6213,/system/priv-app/HardwareProperties/HardwareProperties.apk
+com.technicolor.defaultledcontroller,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,5598,0,5598,/system/app/DefaultLedController/DefaultLedController.apk
+com.android.cts.ctsshim,KEEP,core system component,user0,0,1,1,0,4817,0,4817,/system/app/CtsShimPrebuilt/CtsShimPrebuilt.apk

@@ -388,19 +388,32 @@ def classify(pkg: str) -> tuple[str, str]:
 
 REMOTE_APK_LIST = "pm list packages -f\n"
 
-# One `ls -l` over every APK location, so we get sizes for all of them.
+# Size every APK.
+#
+# We cannot glob `/data/app/*/*.apk`: on some ROMs (Android 8 TIMVISION box)
+# the directory itself is not listable by the shell user, even though the
+# individual APK paths ARE readable. So we take the exact path of every
+# package and `ls -l` it one by one. No awk: some vendor shells do not have it.
 REMOTE_LS_APKS = r"""
-ls -l /data/app/*/*.apk /data/app/*.apk 2>/dev/null
-ls -l /system/app/*/*.apk /system/priv-app/*/*.apk 2>/dev/null
-ls -l /system/vendor/app/*/*.apk /vendor/app/*/*.apk 2>/dev/null
-ls -l /product/app/*/*.apk /product/priv-app/*/*.apk 2>/dev/null
-ls -l /system/framework/*.apk 2>/dev/null
+pm list packages -f 2>/dev/null | while read line; do
+  rest=${line#package:}
+  if [ "${rest#*=}" != "$rest" ]; then
+    apk=${rest%=*}
+  else
+    apk=${rest#*:}
+  fi
+  case "$apk" in
+    /*) ls -l "$apk" 2>/dev/null ;;
+  esac
+done
 """
 
+# Shared storage. /sdcard lives on the same partition as /data, so anything
+# found here is real, reclaimable space. Internal app data under
+# /data/user/0/<pkg> is NOT readable without root: the shell user cannot
+# traverse other apps' directories and SELinux blocks it.
 REMOTE_DU = r"""
-du -sk /data/user/0/* 2>/dev/null
 du -sk /sdcard/* 2>/dev/null
-du -sk /sdcard/Android/data/* 2>/dev/null
 """
 
 
@@ -524,9 +537,10 @@ def main() -> int:
     props_txt = dump("props", "getprop\n")
     props = {}
     for line in props_txt.splitlines():
-        if ": " in line:
-            k, v = line.split(": ", 1)
-            props[k.strip()] = v.strip()
+        # getprop prints `[key]: [value]`
+        m = re.match(r"^\[(.+?)\]:\s*\[(.*)\]\s*$", line.strip())
+        if m:
+            props[m.group(1)] = m.group(2).strip()
     root_uid = dump("root", "id -u\n").strip()
     is_root = root_uid == "0"
 
@@ -559,7 +573,7 @@ def main() -> int:
     matched = sum(1 for p in pkg_map.values() if p in apk_sizes)
     print(f"      matched {matched}/{len(pkg_map)} apk paths")
 
-    print("[5/6] data sizes")
+    print("[5/6] shared storage sizes")
     data_sizes = parse_du(dump("du", REMOTE_DU, timeout=900))
 
     print("[6/6] building report")
@@ -587,15 +601,14 @@ def main() -> int:
         # sits on another partition, but the /data copy and data dir go away.
         if info["third_party"]:
             info["mode"] = "uninstall"
-            info["recoverable"] = info["apk_size"] + info["data_size"]
-        elif info["in_system"]:
-            info["mode"] = "user0"
-            info["recoverable"] = info["data_size"]
         else:
-            # preinstalled-looking app living in /data: removing for user 0
-            # drops the update copy too
             info["mode"] = "user0"
-            info["recoverable"] = info["apk_size"] + info["data_size"]
+        # An app whose APK lives in /data/app is taking real, reclaimable space
+        # on the data partition even when the package is flagged as a system
+        # app (preinstalled by the OEM, then updated). That is where the space
+        # actually is on boxes like the TIMVISION.
+        info["in_data"] = info["apk"].startswith("/data/")
+        info["recoverable"] = info["apk_size"] + info["data_size"]
 
     # ---- storage --------------------------------------------------------- #
     data_total_kb = data_used_kb = data_free_kb = 0
@@ -658,18 +671,21 @@ def main() -> int:
     w(f"  disabled                         : {sum(1 for p in all_pkgs if p['disabled'])}")
     if not is_root:
         w("")
-        w("  NOTE: data sizes need root. Without it, `recoverable` for preinstalled")
-        w("        apps is understated - the APK is on /system, only data is freed.")
+        w("  NOTE: 'EXT' is shared storage (/sdcard, same partition as /data).")
+        w("        Internal app data under /data/user/0/<pkg> is NOT readable")
+        w("        without root, so `recoverable` is a LOWER BOUND for apps that")
+        w("        have real caches. Use Settings > Storage to cross-check.")
     w("")
 
     w("-" * 104)
     w("  UNINSTALLABLE WITHOUT ROOT, sorted by recoverable space")
     w("-" * 104)
-    w(f"  {'RECOVER':>9} {'APK':>8} {'DATA':>8}  {'RISK':<8} {'MODE':<9} PACKAGE")
-    w(f"  {'-'*9} {'-'*8} {'-'*8}  {'-'*8} {'-'*9} {'-'*52}")
+    w(f"  {'RECOVER':>9} {'APK':>8} {'EXT':>7}  {'RISK':<8} {'MODE':<9} {'ORIGIN':<7} PACKAGE")
+    w(f"  {'-'*9} {'-'*8} {'-'*7}  {'-'*8} {'-'*9} {'-'*7} {'-'*44}")
     for p in all_pkgs:
-        w(f"  {human(p['recoverable']):>9} {human(p['apk_size']):>8} {human(p['data_size']):>8}  "
-          f"{p['risk']:<8} {p['mode']:<9} {p['pkg']}")
+        origin = "/data" if p["in_data"] else "system"
+        w(f"  {human(p['recoverable']):>9} {human(p['apk_size']):>8} {human(p['data_size']):>7}  "
+          f"{p['risk']:<8} {p['mode']:<9} {origin:<7} {p['pkg']}")
 
     w("")
     w("-" * 104)
