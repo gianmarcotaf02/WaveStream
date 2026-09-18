@@ -351,33 +351,61 @@ class MovieEndingRepository @Inject constructor(
     }
 
     private suspend fun callModel(systemPrompt: String, userPrompt: String, apiKey: String): String {
-        val response = try {
-            openRouterService.chatCompletions(
-                authorization = "Bearer ${apiKey.trim()}",
-                referer = "https://wavestream.app",
-                title = "WaveStream",
-                body = OpenRouterRequest(
-                    model = OpenRouterService.DEFAULT_MODEL,
-                    messages = listOf(
-                        OpenRouterMessage(role = "system", content = systemPrompt),
-                        OpenRouterMessage(role = "user", content = userPrompt)
-                    ),
-                    temperature = 0.2,
-                    topP = 0.9,
-                    maxTokens = MAX_TOKENS,
-                    responseFormat = OpenRouterResponseFormat(type = "json_object"),
-                    reasoning = OpenRouterReasoning(enabled = false)
-                )
-            )
-        } catch (e: retrofit2.HttpException) {
-            val message = when (e.code()) {
-                401, 403 -> "Chiave OpenRouter non valida o non autorizzata. Controlla la chiave nelle impostazioni."
-                404 -> "Modello OpenRouter non disponibile. Riprova più tardi."
-                429 -> "Troppe richieste al modello gratuito. Riprova tra qualche minuto."
-                else -> "Servizio AI non disponibile (HTTP ${e.code()}). Riprova più tardi."
-            }
-            throw MovieEndingUnavailableException(message)
+        val models = buildList {
+            add(OpenRouterService.DEFAULT_MODEL)
+            addAll(OpenRouterService.FALLBACK_MODELS)
         }
+        var lastMessage = "Servizio AI non disponibile. Riprova più tardi."
+
+        models.forEach { model ->
+            try {
+                return callModelOnce(model, systemPrompt, userPrompt, apiKey)
+            } catch (e: retrofit2.HttpException) {
+                // Chiave non valida: inutile provare altri modelli con la stessa chiave.
+                if (e.code() == 401 || e.code() == 403) {
+                    throw MovieEndingUnavailableException(
+                        "Chiave OpenRouter non valida o non autorizzata. Controlla la chiave nelle impostazioni."
+                    )
+                }
+                lastMessage = when (e.code()) {
+                    404 -> "Modello OpenRouter non disponibile. Riprova più tardi."
+                    429 -> "Troppe richieste al modello gratuito (pool condiviso). Riprova tra qualche minuto."
+                    else -> "Servizio AI non disponibile (HTTP ${e.code()}). Riprova più tardi."
+                }
+                Log.w(TAG, "Modello $model fallito (HTTP ${e.code()}), provo il successivo")
+            } catch (e: MovieEndingUnavailableException) {
+                lastMessage = e.message ?: lastMessage
+                Log.w(TAG, "Modello $model fallito (${e.message}), provo il successivo")
+            }
+        }
+        throw MovieEndingUnavailableException(lastMessage)
+    }
+
+    private suspend fun callModelOnce(
+        model: String,
+        systemPrompt: String,
+        userPrompt: String,
+        apiKey: String
+    ): String {
+        val response = openRouterService.chatCompletions(
+            authorization = "Bearer ${apiKey.trim()}",
+            referer = "https://wavestream.app",
+            title = "WaveStream",
+            body = OpenRouterRequest(
+                model = model,
+                messages = listOf(
+                    OpenRouterMessage(role = "system", content = systemPrompt),
+                    OpenRouterMessage(role = "user", content = userPrompt)
+                ),
+                temperature = 0.2,
+                topP = 0.9,
+                maxTokens = MAX_TOKENS,
+                responseFormat = OpenRouterResponseFormat(type = "json_object"),
+                // Disattiva il "thinking": i modelli reasoning altrimenti consumano
+                // i token nel campo `reasoning` e lasciano `content` null.
+                reasoning = OpenRouterReasoning(enabled = false)
+            )
+        )
 
         response.error?.message?.let { message ->
             throw MovieEndingUnavailableException("Errore OpenRouter: $message")
@@ -386,7 +414,7 @@ class MovieEndingRepository @Inject constructor(
         val content = response.choices?.firstOrNull()?.message?.content
         if (content.isNullOrBlank()) {
             throw MovieEndingUnavailableException(
-                "Il modello non ha restituito alcuna risposta. Riprova più tardi."
+                "Il modello non ha restituito alcuna risposta."
             )
         }
         return content

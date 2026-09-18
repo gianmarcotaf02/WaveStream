@@ -34,6 +34,14 @@ interface OpenRouterService {
          * `:free` = costo zero. Se cambia l'id, aggiornare solo questa costante.
          */
         const val DEFAULT_MODEL = "qwen/qwen3.8-27b:free"
+
+        /**
+         * Modelli usati se il primario fallisce (429 pool condiviso, 5xx, risposta vuota).
+         * Ordine = priorità. Anche questi `:free` (costo zero).
+         */
+        val FALLBACK_MODELS = listOf(
+            "google/gemma-4-26b-a4b-it:free"
+        )
     }
 }
 
