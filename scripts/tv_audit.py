@@ -183,8 +183,6 @@ KEEP_PREFIX = (
 # a loose substring like "telecom" would wrongly protect "it.telecomitalia.*".
 KEEP_PATTERNS: list[tuple[str, str]] = [
     (".telecom", "telephony / call handling"),
-    ("com.android.settings", "settings app"),
-    ("systemui", "system UI"),
     ("keyguard", "lock screen"),
     ("com.android.bluetooth", "bluetooth stack"),
     ("com.android.shell", "adb shell"),
@@ -201,7 +199,6 @@ KEEP_PATTERNS: list[tuple[str, str]] = [
     ("com.android.vending", "Play Store"),
     ("com.google.android.gms", "Play Services (many apps break without it)"),
     ("com.google.android.gsf", "Google Services Framework"),
-    (".syncadapters.", "account sync adapter"),
     ("gatekeeper", "credential storage"),
     ("com.android.wifi", "wifi service"),
     ("com.android.se", "secure element service"),
