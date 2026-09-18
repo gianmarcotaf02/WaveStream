@@ -64,6 +64,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import it.wavestream.app.ui.util.requestFocusSafely
+import it.wavestream.app.util.isLowRamDevice
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.drawWithContent
@@ -78,6 +79,7 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -914,7 +916,15 @@ fun HeroBanner(
     onRailFocusRequest: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    // Auto-rotate every 7 seconds (only when not focused)
+    // Auto-rotate every 7 seconds (only when not focused).
+    //
+    // The transition below animates the ENTIRE hero block - backdrop, metadata,
+    // buttons - so two full copies are composed and rendered at once. Measured on
+    // a 1 GB TV box: ~1 s of blocked main thread per cycle ("Choreographer:
+    // Skipped 30-70 frames" every 7 s), which makes the whole UI feel frozen while
+    // navigating. There we keep the hero static; the user still changes it with
+    // the arrows/buttons.
+    val autoRotateEnabled = remember { !isLowRamDevice(LocalContext.current) }
     var isPaused by remember { mutableStateOf(false) }
     // Track slide direction
     var slideDirection by remember { mutableIntStateOf(1) }
@@ -926,8 +936,8 @@ fun HeroBanner(
         onFocusChanged(isPaused)
     }
     
-    LaunchedEffect(currentIndex, isPaused) {
-        if (!isPaused && totalCount > 1) {
+    LaunchedEffect(currentIndex, isPaused, autoRotateEnabled) {
+        if (autoRotateEnabled && !isPaused && totalCount > 1) {
             delay(7000)
             slideDirection = 1
             onAutoNext()
