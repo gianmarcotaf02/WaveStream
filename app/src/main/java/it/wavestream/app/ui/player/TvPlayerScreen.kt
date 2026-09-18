@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -1857,11 +1856,9 @@ private fun ModernSeekIndicator(seconds: Int) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Icon(
-                imageVector = if (isForward) Icons.Default.Forward else Icons.AutoMirrored.Filled.Reply,
-                contentDescription = if (isForward) "Avanti" else "Indietro",
-                tint = WaveStreamColors.Accent,
-                modifier = Modifier.size(46.dp)
+            WaveSeekArrow(
+                isForward = isForward,
+                modifier = Modifier.size(50.dp)
             )
             Text(
                 text = text,
@@ -1870,6 +1867,107 @@ private fun ModernSeekIndicator(seconds: Int) {
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+/**
+ * Freccia del seek a tema "onda" (coerente con il loading del player):
+ * un arco curvo e sottile con la punta discreta, un secondo arco piu' tenue
+ * come eco (le sinusoidi del loader) e un alone soffuso accent.
+ *
+ * @param isForward true = arco orario con punta a destra, false = speculare a sinistra.
+ */
+@Composable
+private fun WaveSeekArrow(
+    isForward: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val cx = w / 2f
+        val cy = h / 2f
+
+        // Arco: orario in avanti, antiorario indietro. La punta cade a destra/sinistra,
+        // in basso, cosi' la lettura direzionale e' immediata.
+        val startAngle = if (isForward) 80f else 100f
+        val sweep = if (isForward) 250f else -250f
+
+        // Alone soffuso dietro la freccia (stessa idea del loader: nessun blur).
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    WaveStreamColors.Accent.copy(alpha = 0.18f),
+                    Color.Transparent
+                ),
+                center = Offset(cx, cy),
+                radius = w * 0.55f
+            ),
+            radius = w * 0.55f,
+            center = Offset(cx, cy)
+        )
+
+        // Gradiente "a onda": tenue in coda, pieno sulla punta.
+        val mainBrush = Brush.linearGradient(
+            colors = listOf(
+                WaveStreamColors.Accent.copy(alpha = 0.30f),
+                WaveStreamColors.Accent
+            ),
+            start = Offset(0f, h),
+            end = Offset(w, 0f)
+        )
+
+        val baseRadius = size.minDimension / 2f
+        val mainStroke = size.minDimension * 0.055f // arco sottile
+        val mainRadius = baseRadius - mainStroke
+        val echoRadius = mainRadius - mainStroke * 0.9f
+
+        // Eco: arco piu' interno, piu' corto e tenue (una delle sinusoidi del loader).
+        drawArc(
+            color = WaveStreamColors.Accent.copy(alpha = 0.22f),
+            startAngle = startAngle + 8f,
+            sweepAngle = sweep * 0.84f,
+            useCenter = false,
+            topLeft = Offset(cx - echoRadius, cy - echoRadius),
+            size = Size(echoRadius * 2f, echoRadius * 2f),
+            style = Stroke(width = mainStroke * 0.6f, cap = StrokeCap.Round)
+        )
+
+        // Arco principale
+        drawArc(
+            brush = mainBrush,
+            startAngle = startAngle,
+            sweepAngle = sweep,
+            useCenter = false,
+            topLeft = Offset(cx - mainRadius, cy - mainRadius),
+            size = Size(mainRadius * 2f, mainRadius * 2f),
+            style = Stroke(width = mainStroke, cap = StrokeCap.Round)
+        )
+
+        // Punta della freccia: triangolo orientato lungo la tangente dell'arco.
+        val endRad = Math.toRadians((startAngle + sweep).toDouble())
+        val endPoint = Offset(
+            cx + (mainRadius * kotlin.math.cos(endRad)).toFloat(),
+            cy + (mainRadius * kotlin.math.sin(endRad)).toFloat()
+        )
+        val sign = if (sweep >= 0f) 1f else -1f
+        val dir = Offset(
+            (-kotlin.math.sin(endRad)).toFloat() * sign,
+            (kotlin.math.cos(endRad)).toFloat() * sign
+        )
+        val perp = Offset(-dir.y, dir.x)
+        val headLen = mainStroke * 3.4f
+        val headW = mainStroke * 2.0f
+        val tip = endPoint + dir * headLen
+        val b1 = endPoint + perp * headW
+        val b2 = endPoint - perp * headW
+        val head = Path().apply {
+            moveTo(tip.x, tip.y)
+            lineTo(b1.x, b1.y)
+            lineTo(b2.x, b2.y)
+            close()
+        }
+        drawPath(path = head, brush = mainBrush)
     }
 }
 
