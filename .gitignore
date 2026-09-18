@@ -110,3 +110,8 @@ app/src/android7/google-services.json
 .rtdb_payload.json
 .changelog.txt
 .changelog_a7.txt
+
+# Altri file temporanei / diagnostica (non versionare)
+build_out.txt
+credits_diag.txt
+image.png

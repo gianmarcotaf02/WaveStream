@@ -1,2 +1,0 @@
-- Aggiornamento in-app: risolto il blocco e i lag durante l'installazione (la copia del pacchetto non blocca più l'interfaccia, resta reattiva)
-- Riapertura automatica dell'app dopo l'aggiornamento resa più affidabile, anche sulle TV lente
