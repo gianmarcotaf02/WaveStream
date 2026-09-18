@@ -143,6 +143,7 @@ class SettingsActivity : ComponentActivity() {
             SettingsMenuItem("preferences", "Preferenze", "Impostazioni generali", Icons.Default.Settings),
             SettingsMenuItem("player", "Player", "Impostazioni riproduzione", Icons.Default.PlayArrow),
             SettingsMenuItem("subtitles", "Sottotitoli", "OpenSubtitles e lingua", Icons.Default.Subtitles),
+            SettingsMenuItem("movieending", "Finale dei film (AI)", "Chiave OpenRouter e fonti", Icons.Default.AutoAwesome),
             SettingsMenuItem("assistant", "Nova · Assistente AI", "Voce, microfono e Gemini", Icons.Default.AutoAwesome),
             SettingsMenuItem("epg", "Guida TV (EPG)", "Aggiornamento guida programmi", Icons.Default.Tv),
             SettingsMenuItem("appearance", "Aspetto", "Tema e visualizzazione", Icons.Default.Palette),
@@ -190,6 +191,7 @@ class SettingsActivity : ComponentActivity() {
                     "preferences" -> PreferencesSettings(userPreferences, contentFocusRequester)
                     "player" -> PlayerSettings(userPreferences, contentFocusRequester)
                     "subtitles" -> SubtitlesSettings(openSubtitlesRepository, userPreferences, contentFocusRequester)
+                    "movieending" -> MovieEndingSettings(userPreferences, contentFocusRequester)
                     "assistant" -> AssistantSettings(userPreferences, ttsManager, sherpaTts, contentFocusRequester)
                     "epg" -> EpgSettings(userPreferences, epgRepository, playlistDao, contentFocusRequester)
                     "appearance" -> AppearanceSettings(userPreferences)
@@ -3046,6 +3048,100 @@ private fun VpnSettings(
 
 }
 
+
+// ============ Finale dei film (AI) ============
+
+/**
+ * Impostazioni della feature "Finale del film":
+ * - API key OpenRouter (cifrata in EncryptedSharedPreferences)
+ * - la fonte primaria è Wikipedia (verificabile); l'LLM si occupa solo di riassumerla
+ */
+@Composable
+private fun MovieEndingSettings(
+    userPreferences: UserPreferences,
+    contentFocusRequester: FocusRequester? = null
+) {
+    val scope = rememberCoroutineScope()
+
+    var apiKeyInput by remember { mutableStateOf("") }
+    var existingKey by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        existingKey = userPreferences.getOpenRouterApiKey()
+    }
+
+    SettingsSection(title = "Finale dei film") {
+        var firstModifier: Modifier = Modifier
+        if (contentFocusRequester != null) firstModifier = firstModifier.focusRequester(contentFocusRequester)
+
+        SettingsInfo(
+            text = "Nel dettaglio di un film trovi il pulsante AI che spiega il finale. " +
+                "La spiegazione si basa sul testo di Wikipedia (fonte verificabile) riassunto da un modello " +
+                "linguistico via OpenRouter. Se il film non ha una voce Wikipedia, il modello risponde a memoria " +
+                "e dichiara quando non lo conosce: nessun finale viene inventato."
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = if (existingKey.isNullOrBlank()) "API key OpenRouter non configurata"
+            else "API key OpenRouter configurata (••••${existingKey!!.takeLast(4)})",
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (existingKey.isNullOrBlank()) Color(0xFFFFB74D) else Color(0xFF81C784)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(
+                value = apiKeyInput,
+                onValueChange = { apiKeyInput = it },
+                placeholder = { Text("Inserisci API key OpenRouter (sk-or-…)", color = WaveStreamColors.TextHint) },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = WaveStreamColors.Accent,
+                    unfocusedBorderColor = WaveStreamColors.TextTertiary.copy(alpha = 0.4f),
+                    focusedTextColor = WaveStreamColors.TextPrimary,
+                    unfocusedTextColor = WaveStreamColors.TextPrimary
+                ),
+                modifier = Modifier.weight(1f).then(firstModifier)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Button(
+                onClick = {
+                    if (apiKeyInput.isNotBlank()) {
+                        scope.launch {
+                            userPreferences.setOpenRouterApiKey(apiKeyInput.trim())
+                            existingKey = apiKeyInput.trim()
+                            apiKeyInput = ""
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent)
+            ) {
+                Text("Salva")
+            }
+            if (!existingKey.isNullOrBlank()) {
+                Spacer(modifier = Modifier.width(8.dp))
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            userPreferences.setOpenRouterApiKey("")
+                            existingKey = ""
+                            apiKeyInput = ""
+                        }
+                    }
+                ) {
+                    Text("Rimuovi", color = WaveStreamColors.TextSecondary)
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+        SettingsInfo(
+            text = "Genera una chiave gratuita su openrouter.ai/keys. " +
+                "Modello usato: \"${it.wavestream.app.ai.OpenRouterService.DEFAULT_MODEL}\" (gratuito). " +
+                "Le spiegazioni vengono salvate in cache locale per non consumare il limite di richieste."
+        )
+    }
+}
 
 // ============ Assistente AI vocale ============
 
