@@ -2047,7 +2047,7 @@ class PlayerActivity : ComponentActivity() {
                 seekBy(-10_000)
                 return true
             }
-            // D-pad sinistra/destra con la barra dei controlli NASCosta: seek
+            // D-pad sinistra/destra con la barra dei controlli nascosta: seek
             // rapido avanti/indietro senza dover aprire la barra. Con i controlli
             // visibili l'evento non arriva qui (il focus Compose naviga i pulsanti).
             KeyEvent.KEYCODE_DPAD_LEFT -> {
