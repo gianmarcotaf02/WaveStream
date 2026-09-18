@@ -53,9 +53,8 @@ class AppUpdateManager @Inject constructor(
     }
     
     /**
-     * Canale di aggiornamento: URL e nodo arrivano da BuildConfig, così ogni variante
-     * (modern / android7) legge il PROPRIO nodo e scarica il PROPRIO APK.
-     * Vedi wavestream_android7_plan.md, Fase D.
+     * Canale di aggiornamento: URL e nodo arrivano da BuildConfig
+     * (RTDB_URL / UPDATE_NODE, definiti in app/build.gradle.kts).
      */
     private val database by lazy {
         FirebaseDatabase.getInstance(BuildConfig.RTDB_URL)
@@ -390,58 +389,25 @@ class AppUpdateManager @Inject constructor(
             return
         }
 
-        // Permesso di installazione.
-        //  - API >= 26: permesso per-app, schermata dedicata.
-        //  - API < 26: impostazione globale "Origini sconosciute" (nessuna schermata per-app).
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!context.packageManager.canRequestPackageInstalls()) {
-                Log.d(TAG, "Richiesta permesso installazione pacchetti")
-                try {
-                    val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
-                        data = Uri.parse("package:${context.packageName}")
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Impossibile aprire le impostazioni installazione", e)
-                    Toast.makeText(
-                        context,
-                        "Abilita \"Origini sconosciute\" per WaveStream e riprova",
-                        Toast.LENGTH_LONG
-                    ).show()
+        // Permesso di installazione: permesso per-app (API >= 26, minSdk del progetto),
+        // schermata dedicata "Installa app sconosciute".
+        if (!context.packageManager.canRequestPackageInstalls()) {
+            Log.d(TAG, "Richiesta permesso installazione pacchetti")
+            try {
+                val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-                return
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            val unknownSourcesEnabled = try {
-                Settings.Secure.getInt(
-                    context.contentResolver,
-                    Settings.Secure.INSTALL_NON_MARKET_APPS,
-                    0
-                ) == 1
+                context.startActivity(intent)
             } catch (e: Exception) {
-                // Impostazione non disponibile su questo firmware: procediamo e
-                // lasciamo che sia l'installer a segnalare l'eventuale errore.
-                Log.w(TAG, "Impossibile leggere INSTALL_NON_MARKET_APPS: ${e.message}")
-                true
-            }
-            if (!unknownSourcesEnabled) {
-                Log.d(TAG, "Origini sconosciute disabilitate (API < 26)")
-                try {
-                    val intent = Intent(Settings.ACTION_SECURITY_SETTINGS)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Impossibile aprire le impostazioni di sicurezza", e)
-                }
+                Log.e(TAG, "Impossibile aprire le impostazioni installazione", e)
                 Toast.makeText(
                     context,
-                    "Abilita \"Origini sconosciute\" in Impostazioni \u2192 Sicurezza e riprova",
+                    "Abilita \"Origini sconosciute\" per WaveStream e riprova",
                     Toast.LENGTH_LONG
                 ).show()
-                return
             }
+            return
         }
 
         // Avviso preventivo sullo spazio (causa più comune di fallimento su Fire TV)
