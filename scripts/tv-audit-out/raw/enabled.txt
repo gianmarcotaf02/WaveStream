@@ -15,7 +15,6 @@ package:com.movenda.p4mcore
 package:it.telecomitalia.timmusic_tv
 package:com.marvell.power.shutdownreceiver
 package:com.android.externalstorage
-package:it.telecomitalia.thefilmclub
 package:com.android.htmlviewer
 package:com.android.companiondevicemanager
 package:com.technicolor.app.ota
@@ -82,18 +81,16 @@ package:com.technicolor.cputemperature
 package:com.android.proxyhandler
 package:com.google.android.feedback
 package:com.google.android.syncadapters.calendar
-package:com.cbs.ca
 package:it.telecomitalia.timppapp
 package:com.technicolor.checkota
 package:timvision.leanbackcustomization
+package:com.yablio.sendfilestotv
 package:com.technicolor.hardwareproperties
 package:com.android.tv.settings.device.display.daydream
 package:it.telecomitalia.games
 package:it.telecomitalia.iotim
 package:com.google.android.backuptransport
-package:it.mediaset.infinitytv
 package:com.marvell.onetouchplay
-package:tv.pluto.android
 package:com.marvell.audio.loopback
 package:com.google.android.sss.authbridge
 package:com.android.cts.ctsshim

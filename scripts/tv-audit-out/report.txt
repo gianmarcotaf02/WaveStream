@@ -12,19 +12,19 @@
   STORAGE
 --------------------------------------------------------------------------------------------------------
   Filesystem            1K-blocks    Used Available Use% Mounted on
-  /dev/block/mmcblk0p17   5094368 4895112    182872  97% /data
+  /dev/block/mmcblk0p17   5094368 5069176      8808 100% /data
   /dev/block/mmcblk0p14    793488    1276    775828   1% /cache
 
-  /data: 4.9G total, 4.7G used, FREE 178.6M
-  >>> CRITICAL: only 179 MB free. An APK of that size cannot install.
+  /data: 4.9G total, 4.8G used, FREE 8.6M
+  >>> CRITICAL: only 9 MB free. An APK of that size cannot install.
       Free at least 400 MB before installing anything.
 
 --------------------------------------------------------------------------------------------------------
   SUMMARY
 --------------------------------------------------------------------------------------------------------
-  packages total                   : 125
-  third-party (normal uninstall)   :   13   APK   156.3M  DATA        -
-  preinstalled (--user 0)          :  112   APK   731.7M  DATA        -
+  packages total                   : 122
+  third-party (normal uninstall)   :   10   APK    80.4M  DATA        -
+  preinstalled (--user 0)          :  112   APK   768.8M  DATA        -
   disabled                         : 0
 
   NOTE: 'EXT' is shared storage (/sdcard, same partition as /data).
@@ -38,20 +38,18 @@
     RECOVER      APK     EXT  RISK     MODE      ORIGIN  PACKAGE
   --------- -------- -------  -------- --------- ------- --------------------------------------------
       96.6M    96.6M       -  BLOAT    user0     /data   com.google.android.apps.mediashell
-      91.9M    91.9M       -  BLOAT    user0     /data   com.netflix.ninja
       82.6M    82.6M       -  KEEP     user0     /data   com.google.android.webview
+      80.0M    80.0M       -  BLOAT    user0     system  com.netflix.ninja
+      74.3M    74.3M       -  BLOAT    user0     system  com.amazon.amazonvideo.livingroom
       45.0M    45.0M       -  KEEP     user0     /data   com.google.android.gms
-      39.4M    39.4M       -  BLOAT    user0     /data   com.amazon.amazonvideo.livingroom
-      38.2M    38.2M       -  BLOAT    uninstall /data   com.cbs.ca
       35.1M    35.1M       -  KEEP     user0     /data   timvision.launcher
+      30.8M    30.8M       -  BLOAT    user0     system  com.dazn
       28.7M    28.7M       -  CAUTION  user0     /data   com.google.android.tts
       28.2M    28.2M       -  BLOAT    user0     /data   it.telecomitalia.games
-      28.0M    28.0M       -  BLOAT    uninstall /data   tv.pluto.android
       24.5M    24.5M       -  BLOAT    uninstall /data   it.telecomitalia.iotim
       24.3M    24.3M       -  KEEP     user0     system  android
       21.2M    21.2M       -  KEEP     user0     /data   com.google.android.inputmethod.latin
       17.1M    17.1M       -  KEEP     user0     /data   com.android.vending
-      15.1M    15.1M       -  BLOAT    user0     /data   com.dazn
       14.7M    14.7M       -  CAUTION  user0     system  com.google.android.tungsten.setupwraith
       13.4M    13.4M       -  BLOAT    uninstall /data   com.estrongs.android.pop
       13.2M    13.2M       -  KEEP     user0     system  com.android.systemui
@@ -61,11 +59,10 @@
       10.8M    10.8M       -  BLOAT    user0     /data   com.google.android.play.games
       10.2M    10.2M       -  CAUTION  user0     /data   tv.broadpeak.nanocdnwrapper
       10.1M    10.1M       -  CAUTION  uninstall /data   timvision.tvappsettings
-       9.2M     9.2M       -  BLOAT    uninstall /data   it.mediaset.infinitytv
        9.0M     9.0M       -  KEEP     user0     system  com.google.android.gms.policy_sidecar_o
        8.4M     8.4M       -  KEEP     user0     system  com.android.tv.settings
-       8.0M     8.0M       -  BLOAT    uninstall /data   it.telecomitalia.thefilmclub
        7.6M     7.6M       -  CAUTION  user0     system  timvision.upgrade
+       7.5M     7.5M       -  UNKNOWN  uninstall /data   com.yablio.sendfilestotv
        7.1M     7.1M       -  BLOAT    user0     /data   it.telecomitalia.timppapp
        7.0M     7.0M       -  BLOAT    user0     system  com.google.android.gsf.notouch
        6.7M     6.7M       -  CAUTION  uninstall /data   it.telecomitalia.iptuner
@@ -85,7 +82,6 @@
        3.6M     3.6M       -  CAUTION  user0     /data   com.technicolor.android.dtvscan.project
        2.9M     2.9M       -  BLOAT    uninstall /data   com.sky.ott.client.androidtv.SkyIT
        2.9M     2.9M       -  KEEP     user0     system  com.technicolor.android.skipper.setupwizard
-       2.2M     2.2M       -  BLOAT    user0     /data   com.google.android.youtube.tvmusic
        2.2M     2.2M       -  BLOAT    user0     system  com.google.android.sss
        2.1M     2.1M       -  BLOAT    uninstall /data   com.vativision.vativisionapp
        2.1M     2.1M       -  BLOAT    user0     /data   it.telecomitalia.timmusic_tv
@@ -103,6 +99,7 @@
        1.1M     1.1M       -  CAUTION  user0     system  com.technicolor.checkota
        1.0M     1.0M       -  CAUTION  user0     system  com.google.android.partnersetup
        762K     762K       -  KEEP     user0     system  com.technicolor.tv.remotepairing
+       692K     692K       -  BLOAT    user0     system  com.google.android.youtube.tvmusic
        683K     683K       -  KEEP     user0     system  com.android.printspooler
        668K     668K       -  BLOAT    uninstall /data   it.telecomitalia.calcio
        576K     576K       -  CAUTION  user0     system  com.movenda.p4mcore
@@ -167,25 +164,22 @@
   WHAT EACH PACKAGE IS
 --------------------------------------------------------------------------------------------------------
 
-  === BLOAT (35) ===
+  === BLOAT (31) ===
     com.google.android.tvtutorials                             3.6M  Android TV tutorials
     com.android.dreams.basic                                    38K  Basic screensaver
-    com.cbs.ca                                                38.2M  CBS (demo/vendor app)
     com.google.android.syncadapters.calendar                   1.8M  Calendar sync
     com.google.android.syncadapters.contacts                   1.4M  Contacts sync
-    com.dazn                                                  15.1M  DAZN
+    com.dazn                                                  30.8M  DAZN
     com.google.android.backdrop                                5.4M  Daydream Backdrop
     com.estrongs.android.pop                                  13.4M  ES File Explorer (known adware)
     com.google.android.videos                                 11.3M  Google TV / Play Movies
     com.google.android.tv.remote.service                       4.0M  Google TV remote service
     com.google.android.feedback                                499K  Google market feedback
     com.google.android.apps.mediashell                        96.6M  Media shell (Google playback UI)
-    it.mediaset.infinitytv                                     9.2M  Mediaset Infinity
-    com.netflix.ninja                                         91.9M  Netflix (TV)
+    com.netflix.ninja                                         80.0M  Netflix (TV)
     com.google.android.gsf.notouch                             7.0M  NoTouch auth delegate
     com.google.android.play.games                             10.8M  Play Games
-    tv.pluto.android                                          28.0M  Pluto TV
-    com.amazon.amazonvideo.livingroom                         39.4M  Prime Video
+    com.amazon.amazonvideo.livingroom                         74.3M  Prime Video
     it.rds.androidtv.rdssocialtv                              12.1M  RDS Social TV
     com.google.android.sss                                     2.2M  Second Screen Setup
     com.google.android.sss.authbridge                          1.4M  Second Screen Setup auth bridge
@@ -198,11 +192,13 @@
     it.telecomitalia.iotim                                    24.5M  TIM promo app
     timvision.telemetry                                        3.6M  TIMVISION telemetry/analytics
     com.google.android.marvin.talkback                         5.8M  TalkBack
-    it.telecomitalia.thefilmclub                               8.0M  The Film Club (TIM)
     com.vativision.vativisionapp                               2.1M  Vativision
     com.google.android.youtube.tv                              4.0M  YouTube (TV)
-    com.google.android.youtube.tvmusic                         2.2M  YouTube Music (TV)
+    com.google.android.youtube.tvmusic                         692K  YouTube Music (TV)
     android.autoinstalls.config.technicolor                      6K  auto-installer that re-adds OEM bloat
+
+  === UNKNOWN (1) ===
+    com.yablio.sendfilestotv                                   7.5M  not recognised - needs manual check
 
   === CAUTION (43) ===
     com.google.android.tts                                    28.7M  AOSP/Google preinstall, not in the known-bloat list
@@ -302,19 +298,15 @@
   CANDIDATES TO REMOVE (BLOAT only)
 --------------------------------------------------------------------------------------------------------
        96.6M  user0     com.google.android.apps.mediashell                   Media shell (Google playback UI)
-       91.9M  user0     com.netflix.ninja                                    Netflix (TV)
-       39.4M  user0     com.amazon.amazonvideo.livingroom                    Prime Video
-       38.2M  uninstall com.cbs.ca                                           CBS (demo/vendor app)
+       80.0M  user0     com.netflix.ninja                                    Netflix (TV)
+       74.3M  user0     com.amazon.amazonvideo.livingroom                    Prime Video
+       30.8M  user0     com.dazn                                             DAZN
        28.2M  user0     it.telecomitalia.games                               TIM Games
-       28.0M  uninstall tv.pluto.android                                     Pluto TV
        24.5M  uninstall it.telecomitalia.iotim                               TIM promo app
-       15.1M  user0     com.dazn                                             DAZN
        13.4M  uninstall com.estrongs.android.pop                             ES File Explorer (known adware)
        12.1M  uninstall it.rds.androidtv.rdssocialtv                         RDS Social TV
        11.3M  user0     com.google.android.videos                            Google TV / Play Movies
        10.8M  user0     com.google.android.play.games                        Play Games
-        9.2M  uninstall it.mediaset.infinitytv                               Mediaset Infinity
-        8.0M  uninstall it.telecomitalia.thefilmclub                         The Film Club (TIM)
         7.1M  user0     it.telecomitalia.timppapp                            TIM Personal / promo app
         7.0M  user0     com.google.android.gsf.notouch                       NoTouch auth delegate
         5.8M  user0     com.google.android.marvin.talkback                   TalkBack
@@ -325,16 +317,16 @@
         3.6M  user0     timvision.telemetry                                  TIMVISION telemetry/analytics
         3.6M  user0     com.google.android.tvtutorials                       Android TV tutorials
         2.9M  uninstall com.sky.ott.client.androidtv.SkyIT                   Sky (TV)
-        2.2M  user0     com.google.android.youtube.tvmusic                   YouTube Music (TV)
         2.2M  user0     com.google.android.sss                               Second Screen Setup
         2.1M  uninstall com.vativision.vativisionapp                         Vativision
         2.1M  user0     it.telecomitalia.timmusic_tv                         TIM Music (TV)
         1.8M  user0     com.google.android.syncadapters.calendar             Calendar sync
         1.4M  user0     com.google.android.sss.authbridge                    Second Screen Setup auth bridge
         1.4M  user0     com.google.android.syncadapters.contacts             Contacts sync
+        692K  user0     com.google.android.youtube.tvmusic                   YouTube Music (TV)
         668K  uninstall it.telecomitalia.calcio                              TIM Calcio / Serie A
         499K  user0     com.google.android.feedback                          Google market feedback
          38K  user0     com.android.dreams.basic                             Basic screensaver
           6K  user0     android.autoinstalls.config.technicolor              auto-installer that re-adds OEM bloat
 
-    BLOAT count: 35   total APK size: 488.0M
+    BLOAT count: 31   total APK size: 441.7M

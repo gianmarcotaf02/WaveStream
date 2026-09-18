@@ -1,6 +1,6 @@
-Latency: 4ms [512B Data Write]
-Data-Free: 182872K / 5094368K total = 3% free
-Cache-Free: 182872K / 5094368K total = 3% free
+Latency: 5ms [512B Data Write]
+Data-Free: 8808K / 5094368K total = 0% free
+Cache-Free: 8808K / 5094368K total = 0% free
 System-Free: 31144K / 999560K total = 3% free
 App Size: 5008375808
 App Cache Size: 193904640

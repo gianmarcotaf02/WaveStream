@@ -1,19 +1,17 @@
 package,risk,reason,mode,third_party,in_system,enabled,disabled,apk_bytes,data_bytes,recoverable_bytes,apk_path
 com.google.android.apps.mediashell,BLOAT,Media shell (Google playback UI),user0,0,0,1,0,101314724,0,101314724,/data/app/com.google.android.apps.mediashell-Mmx4CcQZeWlYPnvQQfKoNw==/base.apk
-com.netflix.ninja,BLOAT,Netflix (TV),user0,0,0,1,0,96346062,0,96346062,/data/app/com.netflix.ninja-FpKmuwmDxu9wfwJiPMwDHg==/base.apk
 com.google.android.webview,KEEP,core system component,user0,0,0,1,0,86609640,0,86609640,/data/app/com.google.android.webview-eRJ7eFpOQHDjuwK1G0w5kQ==/base.apk
+com.netflix.ninja,BLOAT,Netflix (TV),user0,0,1,1,0,83876155,0,83876155,/oem/app/netflix-ninja-release/netflix-ninja-release.apk
+com.amazon.amazonvideo.livingroom,BLOAT,Prime Video,user0,0,1,1,0,77866592,0,77866592,/oem/app/com.amazon.amazonvideo.livingroom/com.amazon.amazonvideo.livingroom.apk
 com.google.android.gms,KEEP,core system component,user0,0,0,1,0,47214699,0,47214699,/data/app/com.google.android.gms-7s78l-EgA-5WDGNe8bagxg==/base.apk
-com.amazon.amazonvideo.livingroom,BLOAT,Prime Video,user0,0,0,1,0,41297798,0,41297798,/data/app/com.amazon.amazonvideo.livingroom-dYtnqR6QFBhaohmpmON03A==/base.apk
-com.cbs.ca,BLOAT,CBS (demo/vendor app),uninstall,1,0,1,0,40023630,0,40023630,/data/app/com.cbs.ca-BwsCFfif7V5uc7q4govOSg==/base.apk
 timvision.launcher,KEEP,home screen - remove it and you land on a black screen,user0,0,0,1,0,36759751,0,36759751,/data/app/timvision.launcher-056qMLe-CMDFMcEGDA_mBQ==/base.apk
+com.dazn,BLOAT,DAZN,user0,0,1,1,0,32257050,0,32257050,/system/priv-app/androidtv-release-production/androidtv-release-production.apk
 com.google.android.tts,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,0,1,0,30105941,0,30105941,/data/app/com.google.android.tts-eWBl8DNL2vfroQCk05YNtw==/base.apk
 it.telecomitalia.games,BLOAT,TIM Games,user0,0,0,1,0,29556500,0,29556500,/data/app/it.telecomitalia.games-o5SPK9AsuFuNYqw0m07E0Q==/base.apk
-tv.pluto.android,BLOAT,Pluto TV,uninstall,1,0,1,0,29342843,0,29342843,/data/app/tv.pluto.android-YNEOWzcjTWrH7rISgMLlag==/base.apk
 it.telecomitalia.iotim,BLOAT,TIM promo app,uninstall,1,0,1,0,25668719,0,25668719,/data/app/it.telecomitalia.iotim-1/base.apk
 android,KEEP,core system component,user0,0,1,1,0,25488128,0,25488128,/system/framework/framework-res.apk
 com.google.android.inputmethod.latin,KEEP,input method - blocks all text input,user0,0,0,1,0,22267912,0,22267912,/data/app/com.google.android.inputmethod.latin-t9jjTA34pM_wtP0a4K6mXA==/base.apk
 com.android.vending,KEEP,Play Store,user0,0,0,1,0,17938425,0,17938425,/data/app/com.android.vending-w0sRO5zNSZ71rXH6rJ93bg==/base.apk
-com.dazn,BLOAT,DAZN,user0,0,0,1,0,15850912,0,15850912,/data/app/com.dazn-xLaus-BQn1CV-uEGmyIKJw==/base.apk
 com.google.android.tungsten.setupwraith,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,15385444,0,15385444,/system/priv-app/SetupWraith/SetupWraith.apk
 com.estrongs.android.pop,BLOAT,ES File Explorer (known adware),uninstall,1,0,1,0,14000262,0,14000262,/data/app/com.estrongs.android.pop-2/base.apk
 com.android.systemui,KEEP,core system component,user0,0,1,1,0,13793996,0,13793996,/system/priv-app/SystemUI/SystemUI.apk
@@ -23,11 +21,10 @@ com.google.android.katniss,CAUTION,"AOSP/Google preinstall, not in the known-blo
 com.google.android.play.games,BLOAT,Play Games,user0,0,0,1,0,11277192,0,11277192,/data/app/com.google.android.play.games-zfUW7M0xsC9OZb5thyjHpQ==/base.apk
 tv.broadpeak.nanocdnwrapper,CAUTION,Broadpeak CDN wrapper used by TIM streaming,user0,0,0,1,0,10735723,0,10735723,/data/app/tv.broadpeak.nanocdnwrapper-yYmFZX11WwXp855POJMynA==/base.apk
 timvision.tvappsettings,CAUTION,TIMVISION service - check what it does before removing,uninstall,1,0,1,0,10608356,0,10608356,/data/app/timvision.tvappsettings-QhIAUZRKzISeYYgDsGDlpA==/base.apk
-it.mediaset.infinitytv,BLOAT,Mediaset Infinity,uninstall,1,0,1,0,9676704,0,9676704,/data/app/it.mediaset.infinitytv-adECuv--CZ-G3dCaLsGRGA==/base.apk
 com.google.android.gms.policy_sidecar_o,KEEP,Play Services (many apps break without it),user0,0,1,1,0,9401134,0,9401134,/system/priv-app/AndroidPlatformServicesTV/AndroidPlatformServicesTV.apk
 com.android.tv.settings,KEEP,core system component,user0,0,1,1,0,8843557,0,8843557,/system/priv-app/TvSettings/TvSettings.apk
-it.telecomitalia.thefilmclub,BLOAT,The Film Club (TIM),uninstall,1,0,1,0,8420825,0,8420825,/data/app/it.telecomitalia.thefilmclub-JzmP2_QIr7ShNDsOY0sCBQ==/base.apk
 timvision.upgrade,CAUTION,TIMVISION service - check what it does before removing,user0,0,1,1,0,7952527,0,7952527,/system/priv-app/upgrade-produzione/upgrade-produzione.apk
+com.yablio.sendfilestotv,UNKNOWN,not recognised - needs manual check,uninstall,1,0,1,0,7901426,0,7901426,/data/app/com.yablio.sendfilestotv-rWASy4jo9j3vWZ1Z5u6c2Q==/base.apk
 it.telecomitalia.timppapp,BLOAT,TIM Personal / promo app,user0,0,0,1,0,7473551,0,7473551,/data/app/it.telecomitalia.timppapp-vp1LOiq0ZXJ5cYxELRQFLg==/base.apk
 com.google.android.gsf.notouch,BLOAT,NoTouch auth delegate,user0,0,1,1,0,7332348,0,7332348,/system/app/NoTouchAuthDelegate/NoTouchAuthDelegate.apk
 it.telecomitalia.iptuner,CAUTION,TIM service - check what it does before removing,uninstall,1,0,1,0,7077384,0,7077384,/data/app/it.telecomitalia.iptuner-gzf1mjHcc9QPbVJo_Rr8NQ==/base.apk
@@ -47,7 +44,6 @@ com.google.android.tvtutorials,BLOAT,Android TV tutorials,user0,0,1,1,0,3755631,
 com.technicolor.android.dtvscan.project,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,0,1,0,3725062,0,3725062,/data/app/com.technicolor.android.dtvscan.project-dhmpTXsB_lD5K12gH76-mg==/base.apk
 com.sky.ott.client.androidtv.SkyIT,BLOAT,Sky (TV),uninstall,1,0,1,0,3047650,0,3047650,/data/app/com.sky.ott.client.androidtv.SkyIT-e1GCGhqK4BU7zPzluMtIZA==/base.apk
 com.technicolor.android.skipper.setupwizard,KEEP,first boot wizard,user0,0,1,1,0,2991068,0,2991068,/system/priv-app/TchSetupWizard/TchSetupWizard.apk
-com.google.android.youtube.tvmusic,BLOAT,YouTube Music (TV),user0,0,0,1,0,2348767,0,2348767,/data/app/com.google.android.youtube.tvmusic-FqfAgqHBLLIbm835oeYJtA==/base.apk
 com.google.android.sss,BLOAT,Second Screen Setup,user0,0,1,1,0,2281852,0,2281852,/system/app/SecondScreenSetup/SecondScreenSetup.apk
 com.vativision.vativisionapp,BLOAT,Vativision,uninstall,1,0,1,0,2169307,0,2169307,/data/app/com.vativision.vativisionapp-V_zrXXszYsZQlBdXPFSBTg==/base.apk
 it.telecomitalia.timmusic_tv,BLOAT,TIM Music (TV),user0,0,0,1,0,2158607,0,2158607,/data/app/it.telecomitalia.timmusic_tv-IGgdO9EhrF8UAtfTPn8yYg==/base.apk
@@ -65,6 +61,7 @@ com.marvell.audio.loopback,CAUTION,Marvell SoC vendor component - may control au
 com.technicolor.checkota,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,1117399,0,1117399,/system/priv-app/CheckOTA/CheckOTA.apk
 com.google.android.partnersetup,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,1063831,0,1063831,/system/priv-app/GooglePartnerSetup/GooglePartnerSetup.apk
 com.technicolor.tv.remotepairing,KEEP,remote pairing service - remote would die,user0,0,1,1,0,780593,0,780593,/system/priv-app/RemotePairing/RemotePairing.apk
+com.google.android.youtube.tvmusic,BLOAT,YouTube Music (TV),user0,0,1,1,0,709164,0,709164,/system/app/YouTubeMusicTVPrebuilt/YouTubeMusicTVPrebuilt.apk
 com.android.printspooler,KEEP,core system component,user0,0,1,1,0,700059,0,700059,/system/app/PrintSpooler/PrintSpooler.apk
 it.telecomitalia.calcio,BLOAT,TIM Calcio / Serie A,uninstall,1,0,1,0,684152,0,684152,/data/app/it.telecomitalia.calcio-2/base.apk
 com.movenda.p4mcore,CAUTION,OMA-DM device management client - TIM uses it to configure the box remotely,user0,0,1,1,0,590187,0,590187,/system/priv-app/movenda-core/movenda-core.apk

@@ -1,7 +1,7 @@
 4	/sdcard/Alarms
-1028	/sdcard/Android
+363656	/sdcard/Android
 4	/sdcard/DCIM
-8	/sdcard/Download
+198944	/sdcard/Download
 4	/sdcard/Movies
 4	/sdcard/Music
 4	/sdcard/Notifications
@@ -11,6 +11,5 @@
 4	/sdcard/apk_preinstalls
 8	/sdcard/backups
 4	/sdcard/bluetooth
-64	/sdcard/btsnoop_hci.log
 12	/sdcard/btsnoop_hci.log.last
 8	/sdcard/primes
