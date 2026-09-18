@@ -33,8 +33,13 @@ class CoilImagePreloader @Inject constructor(
      * Preload a list of image URLs into Coil's cache.
      * enqueue() returns immediately — OkHttp (max 5 concurrent requests per host)
      * already throttles the network, so no manual batching is needed here.
+     *
+     * [targetSize] is REQUIRED on purpose. It used to default to [Size.ORIGINAL],
+     * which decodes at the source resolution: a 1920x1080 backdrop costs 8 MB of
+     * heap instead of the <1 MB needed for a card. On a low-RAM TV box that alone
+     * is enough to get the process killed by the low memory killer.
      */
-    fun preloadImages(urls: List<String?>, targetSize: Size = Size.ORIGINAL) {
+    fun preloadImages(urls: List<String?>, targetSize: Size) {
         val filtered = urls.filterNotNull().filter { it.isNotBlank() }
         filtered.forEach { url ->
             val request = ImageRequest.Builder(context)
@@ -51,7 +56,7 @@ class CoilImagePreloader @Inject constructor(
     /**
      * Preload poster images from a carousel (first N items)
      */
-    fun preloadCarouselPosters(posterUrls: List<String?>, count: Int = 20) {
+    fun preloadCarouselPosters(posterUrls: List<String?>, count: Int = 8) {
         preloadImages(
             urls = posterUrls.take(count),
             targetSize = Size(390, 585)  // 3x of 130x195 card size for sharp rendering

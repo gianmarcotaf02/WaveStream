@@ -1,6 +1,7 @@
 package it.wavestream.app.ui.loading
 
 import android.content.Intent
+import android.app.ActivityManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -101,11 +102,9 @@ class LoadingActivity : ComponentActivity() {
             // Preload all 3 tabs into ContentCache using applicationScope.
             // These coroutines survive Activity transitions (unlike ViewModel-scoped ones).
             // ContentCache is a @Singleton, so data persists to MainActivity's ViewModel.
-            preloadJobs = listOf(
-                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) },
-                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) },
-                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
-            )
+            preloadJobs = tabsToPreload().map { type ->
+                applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(type) }
+            }
         }
         
         setContent {
@@ -246,11 +245,9 @@ class LoadingActivity : ComponentActivity() {
                 // Preload all 3 tabs into ContentCache (idempotent — skips cached tabs):
                 // dopo un refresh la session cache è invalidata, senza questo la home
                 // si ricostruirebbe lazy (enrichment TMDB inline) mostrando a lungo lo skeleton.
-                preloadJobs = listOf(
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.HOME) },
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.MOVIES) },
-                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(HomeContentType.SERIES) }
-                )
+                preloadJobs = tabsToPreload().map { type ->
+                    applicationScope.launch(Dispatchers.IO) { homeViewModel.preloadTabIntoCache(type) }
+                }
                 
                 // Phase 2: Wait for HomeViewModel tabs to be ready
                 onStateUpdate(LoadingState(
@@ -294,31 +291,53 @@ class LoadingActivity : ComponentActivity() {
      * The HomeViewModel init {} triggers loadContent(HOME) which starts loading.
      * We poll isReadyForTab() until all are ready or timeout.
      */
+    /**
+     * Tabs to prepare before showing the Home.
+     *
+     * On low-RAM devices (TV sticks, 1 GB set-top boxes) preloading all three
+     * tabs at once enqueues tens of MB of decoded bitmaps before the Home is even
+     * visible - enough for the low memory killer to kill the process while it is
+     * still loading (observed: +165 MB in 2s on a 1 GB TIM box). There we prepare
+     * only HOME and let the other tabs load when the user switches to them.
+     */
+    private fun tabsToPreload(): List<HomeContentType> {
+        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        // 256 MB is the usual memoryClass of devices with > 1 GB of RAM; anything
+        // below that is a low-RAM TV box.
+        val lowRam = am.isLowRamDevice || am.memoryClass < 256
+        return if (lowRam) {
+            Log.d("LoadingActivity", "Low-RAM device (memoryClass=${am.memoryClass}MB): preloading HOME only")
+            listOf(HomeContentType.HOME)
+        } else {
+            listOf(HomeContentType.HOME, HomeContentType.MOVIES, HomeContentType.SERIES)
+        }
+    }
+
     private suspend fun waitForAllTabsReady(timeoutMs: Long = 120_000): Boolean {
-        val tabs = listOf(HomeContentType.HOME, HomeContentType.MOVIES, HomeContentType.SERIES)
+        val tabs = tabsToPreload()
         val start = System.currentTimeMillis()
         
         while (System.currentTimeMillis() - start < timeoutMs) {
             val readyCount = tabs.count { homeViewModel.isReadyForTab(it) }
             val elapsed = System.currentTimeMillis() - start
             if (readyCount == tabs.size) {
-                Log.d("LoadingActivity", "All 3 tabs ready in ${elapsed}ms")
+                Log.d("LoadingActivity", "All ${tabs.size} tabs ready in ${elapsed}ms")
                 return true
             }
             // Se i preload sono terminati ma qualche tab resta "non pronta" (es. hero vuoti
             // per catalogo piccolo o errore), non bloccare fino al timeout di 120s: procedi.
             if (preloadJobs.isNotEmpty() && preloadJobs.all { it.isCompleted }) {
-                Log.d("LoadingActivity", "Preload completati ma solo $readyCount/3 tabs pronte dopo ${elapsed}ms — procedo comunque")
+                Log.d("LoadingActivity", "Preload completati ma solo $readyCount/${tabs.size} tabs pronte dopo ${elapsed}ms — procedo comunque")
                 return true
             }
             if (elapsed % 3000 < 300) {
-                Log.d("LoadingActivity", "waitForAllTabsReady: $readyCount/3 tabs ready after ${elapsed}ms")
+                Log.d("LoadingActivity", "waitForAllTabsReady: $readyCount/${tabs.size} tabs ready after ${elapsed}ms")
             }
             kotlinx.coroutines.delay(300)
         }
         
         val readyCount = tabs.count { homeViewModel.isReadyForTab(it) }
-        Log.w("LoadingActivity", "waitForAllTabsReady timed out: $readyCount/3 tabs ready after ${timeoutMs}ms")
+        Log.w("LoadingActivity", "waitForAllTabsReady timed out: $readyCount/${tabs.size} tabs ready after ${timeoutMs}ms")
         return false
     }
     

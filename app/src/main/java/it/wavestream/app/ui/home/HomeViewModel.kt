@@ -1053,8 +1053,10 @@ class HomeViewModel @Inject constructor(
             heroes.take(2).forEach { hero ->
                 imagePreloader.preloadBackdrop(hero.backdropUrl ?: hero.posterUrl)
             }
-            // Posters of the first items of each visible row
-            val posters = rows.take(8).flatMap { row -> row.items.take(12).map { it.posterUrl } }
+            // Posters of the first items of each visible row. Kept deliberately
+            // small: every enqueued poster is a decoded bitmap in RAM, and on a
+            // 1 GB TV box a large batch here is what triggered the OOM killer.
+            val posters = rows.take(4).flatMap { row -> row.items.take(8).map { it.posterUrl } }
             imagePreloader.preloadCarouselPosters(posters)
         } catch (e: Exception) {
             // Preloading is best-effort — never let it break the UI
