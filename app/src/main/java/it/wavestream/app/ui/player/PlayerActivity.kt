@@ -2147,6 +2147,7 @@ class PlayerActivity : ComponentActivity() {
         progressHandler.removeCallbacksAndMessages(null)
         nextEpisodeHandler.removeCallbacksAndMessages(null)
         bufferingHandler.removeCallbacksAndMessages(null)
+        hiddenSeekHandler.removeCallbacksAndMessages(null)
         creditsAudioMonitor.windowActive = false
         creditsAudioMonitor.introActive = false
         creditsAudioMonitor.setIntroReference(null)

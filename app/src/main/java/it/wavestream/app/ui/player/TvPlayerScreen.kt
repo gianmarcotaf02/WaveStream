@@ -130,6 +130,8 @@ fun TvPlayerScreen(
     audioCandidate: Boolean = false,
     cumulativeSeekSeconds: Int = 0,
     seekIndicatorVisible: Boolean = false,
+    /** Feedback del seek rapido a barra nascosta (D-pad L/R): secondi +N / -N. */
+    hiddenSeekSeconds: Int = 0,
     showStillWatching: Boolean = false,
     onStillWatchingContinue: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -356,6 +358,17 @@ fun TvPlayerScreen(
             modifier = Modifier.align(Alignment.Center)
         ) {
             ModernSeekIndicator(seconds = cumulativeSeekSeconds)
+        }
+
+        // Seek rapido a BARRA NASCOTTA (D-pad sinistra/destra): stesso indicatore
+        // ma transitorio, mostrato solo mentre la barra dei controlli è chiusa.
+        AnimatedVisibility(
+            visible = hiddenSeekSeconds != 0 && !controlsVisible && !isMiniPlayer,
+            enter = fadeIn(tween(100)) + scaleIn(initialScale = 0.9f),
+            exit = fadeOut(tween(200)),
+            modifier = Modifier.align(Alignment.Center)
+        ) {
+            ModernSeekIndicator(seconds = hiddenSeekSeconds)
         }
         
         // Skip intro overlay (sigla)
