@@ -392,6 +392,10 @@ class MovieEndingRepository @Inject constructor(
             } catch (e: MovieEndingUnavailableException) {
                 lastMessage = e.message ?: lastMessage
                 Log.w(TAG, "Modello $model fallito (${e.message}), provo il successivo")
+            } catch (e: Exception) {
+                // Timeout, IOException, errori di rete: prova comunque il modello successivo.
+                lastMessage = "Servizio AI non disponibile (${e.javaClass.simpleName}). Riprova più tardi."
+                Log.w(TAG, "Modello $model fallito (${e.javaClass.simpleName}: ${e.message}), provo il successivo")
             }
         }
         throw MovieEndingUnavailableException(lastMessage)

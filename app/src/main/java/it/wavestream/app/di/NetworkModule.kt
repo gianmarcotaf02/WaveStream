@@ -134,13 +134,26 @@ object NetworkModule {
             .create(SofascoreService::class.java)
     }
 
-    /** OpenRouter: spiegazione del finale tramite LLM (qwen free). */
+    /**
+     * OpenRouter: client dedicato con timeout lunghi. I modelli free (pool condiviso)
+     * possono rispondere in 30-90s: col timeout condiviso di 30s la sintesi falliva
+     * e l'app ripiegava sul testo Wikipedia grezzo (spesso in inglese).
+     */
     @Provides
     @Singleton
-    fun provideOpenRouterService(okHttpClient: OkHttpClient, moshi: Moshi): OpenRouterService {
+    fun provideOpenRouterService(moshi: Moshi): OpenRouterService {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BASIC
+        }
+        val client = OkHttpClient.Builder()
+            .addInterceptor(loggingInterceptor)
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .writeTimeout(120, TimeUnit.SECONDS)
+            .build()
         return Retrofit.Builder()
             .baseUrl(OpenRouterService.BASE_URL)
-            .client(okHttpClient)
+            .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(OpenRouterService::class.java)
