@@ -280,7 +280,7 @@ class MovieEndingRepository @Inject constructor(
         if (plot.length <= MAX_PLOT_CHARS) return plot
         val head = plot.take(PLOT_HEAD_CHARS)
         val tail = plot.takeLast(MAX_PLOT_CHARS - PLOT_HEAD_CHARS)
-        return "$head\n\n[…] parte centrale della trama omessa per brevità [… ]\n\n$tail"
+        return "$head\n\n[…] parte centrale della trama omessa per brevità […]\n\n$tail"
     }
 
     /** Per la visualizzazione grezza di Wikipedia mostra la parte finale (il finale). */
