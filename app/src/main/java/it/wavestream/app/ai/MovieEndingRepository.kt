@@ -351,22 +351,32 @@ class MovieEndingRepository @Inject constructor(
     }
 
     private suspend fun callModel(systemPrompt: String, userPrompt: String, apiKey: String): String {
-        val response = openRouterService.chatCompletions(
-            authorization = "Bearer ${apiKey.trim()}",
-            referer = "https://wavestream.app",
-            title = "WaveStream",
-            body = OpenRouterRequest(
-                model = OpenRouterService.DEFAULT_MODEL,
-                messages = listOf(
-                    OpenRouterMessage(role = "system", content = systemPrompt),
-                    OpenRouterMessage(role = "user", content = userPrompt)
-                ),
-                temperature = 0.2,
-                topP = 0.9,
-                maxTokens = MAX_TOKENS,
-                responseFormat = OpenRouterResponseFormat(type = "json_object")
+        val response = try {
+            openRouterService.chatCompletions(
+                authorization = "Bearer ${apiKey.trim()}",
+                referer = "https://wavestream.app",
+                title = "WaveStream",
+                body = OpenRouterRequest(
+                    model = OpenRouterService.DEFAULT_MODEL,
+                    messages = listOf(
+                        OpenRouterMessage(role = "system", content = systemPrompt),
+                        OpenRouterMessage(role = "user", content = userPrompt)
+                    ),
+                    temperature = 0.2,
+                    topP = 0.9,
+                    maxTokens = MAX_TOKENS,
+                    responseFormat = OpenRouterResponseFormat(type = "json_object")
+                )
             )
-        )
+        } catch (e: retrofit2.HttpException) {
+            val message = when (e.code()) {
+                401, 403 -> "Chiave OpenRouter non valida o non autorizzata. Controlla la chiave nelle impostazioni."
+                404 -> "Modello OpenRouter non disponibile. Riprova più tardi."
+                429 -> "Troppe richieste al modello gratuito. Riprova tra qualche minuto."
+                else -> "Servizio AI non disponibile (HTTP ${e.code()}). Riprova più tardi."
+            }
+            throw MovieEndingUnavailableException(message)
+        }
 
         response.error?.message?.let { message ->
             throw MovieEndingUnavailableException("Errore OpenRouter: $message")
@@ -420,6 +430,9 @@ class MovieEndingRepository @Inject constructor(
             .replace("\\\"", "\"")
             .replace("\\'", "'")
             .replace("\\", "")
+
+        // Slash/barre usate come separatori o formattazione
+        text = text.replace("/", " ")
 
         // Spazi e righe multiple anomali
         text = text.replace(Regex("[ \\t]{2,}"), " ")
