@@ -71,6 +71,7 @@ data class CarouselItem(
     val seasonCount: Int? = null,           // Number of seasons (e.g. "3 stagioni")
     val newEpisodeBadge: Boolean = false,   // Badge "NUOVO" for recent episodes
     val isFavorite: Boolean = false,        // Categoria preferita (per il cuoricino sulle card categoria)
+    val isWatched: Boolean = false,         // Contenuto completato (film/serie finito) → badge spunta
     // Category card fields
     val contentCount: Int? = null  // Number of items in category (for category cards)
 )
@@ -144,6 +145,9 @@ data class HomeScreenState(
     val isFavoritesTab: Boolean = false,  // True when viewing the Favorites tab (for empty state)
     val isHistoryTab: Boolean = false,    // True when viewing the History tab (for empty state)
     val isHomeTab: Boolean = false,       // True when viewing the Home tab
+    // Chiavi "CONTENTTYPE:id" dei contenuti presenti nella lista "Da guardare" del profilo.
+    // Usate dall'hero per mostrare lo stato del pulsante lista (+ ↔ spunta).
+    val watchLaterKeys: Set<String> = emptySet(),
     // Hero banner fields
     val heroItems: List<HeroItem> = emptyList(),
     val currentHeroIndex: Int = 0,
