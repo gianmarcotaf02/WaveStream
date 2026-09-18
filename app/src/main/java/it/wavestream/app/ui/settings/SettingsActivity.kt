@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import it.wavestream.app.ui.util.requestFocusWhenReady
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -1153,7 +1154,7 @@ private fun AppRestartDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
     val restartButtonFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
-        restartButtonFocus.requestFocus()
+        restartButtonFocus.requestFocusWhenReady()
     }
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -2155,20 +2156,16 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
     // Smart focus: move focus to appropriate button when state changes
     LaunchedEffect(downloadState, updateInfo) {
         kotlinx.coroutines.delay(100) // Small delay to let UI update
-        try {
-            when {
-                downloadState is it.wavestream.app.update.DownloadState.Downloaded -> {
-                    installButtonFocusRequester.requestFocus()
-                }
-                downloadState is it.wavestream.app.update.DownloadState.Failed -> {
-                    retryButtonFocusRequester.requestFocus()
-                }
-                downloadState is it.wavestream.app.update.DownloadState.Idle && updateInfo != null -> {
-                    downloadButtonFocusRequester.requestFocus()
-                }
+        when {
+            downloadState is it.wavestream.app.update.DownloadState.Downloaded -> {
+                installButtonFocusRequester.requestFocusWhenReady()
             }
-        } catch (e: Exception) {
-            // Ignore focus errors
+            downloadState is it.wavestream.app.update.DownloadState.Failed -> {
+                retryButtonFocusRequester.requestFocusWhenReady()
+            }
+            downloadState is it.wavestream.app.update.DownloadState.Idle && updateInfo != null -> {
+                downloadButtonFocusRequester.requestFocusWhenReady()
+            }
         }
     }
     
@@ -2176,11 +2173,7 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
     LaunchedEffect(updateInfo) {
         if (updateInfo != null) {
             kotlinx.coroutines.delay(200)
-            try {
-                downloadButtonFocusRequester.requestFocus()
-            } catch (e: Exception) {
-                // Ignore
-            }
+            downloadButtonFocusRequester.requestFocusWhenReady()
         }
     }
     

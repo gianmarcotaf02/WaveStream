@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import it.wavestream.app.ui.util.requestFocusWhenReady
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,9 +48,8 @@ fun OnScreenKeyboard(
 
     LaunchedEffect(sectionToggleCount) {
         if (sectionToggleCount > 0) {
-            // Attende il frame in cui la nuova sezione è già composta
-            withFrameNanos { }
-            toggleFocusRequester.requestFocus()
+            // Riprova sui frame finché la nuova sezione non è composta
+            toggleFocusRequester.requestFocusWhenReady()
         }
     }
 
