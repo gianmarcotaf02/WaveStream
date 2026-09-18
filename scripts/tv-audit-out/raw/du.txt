@@ -11,6 +11,6 @@
 4	/sdcard/apk_preinstalls
 8	/sdcard/backups
 4	/sdcard/bluetooth
-60	/sdcard/btsnoop_hci.log
+64	/sdcard/btsnoop_hci.log
 12	/sdcard/btsnoop_hci.log.last
 8	/sdcard/primes

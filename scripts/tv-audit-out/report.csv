@@ -1,5 +1,5 @@
 package,risk,reason,mode,third_party,in_system,enabled,disabled,apk_bytes,data_bytes,recoverable_bytes,apk_path
-com.google.android.apps.mediashell,BLOAT,Media shell,user0,0,0,1,0,101314724,0,101314724,/data/app/com.google.android.apps.mediashell-Mmx4CcQZeWlYPnvQQfKoNw==/base.apk
+com.google.android.apps.mediashell,BLOAT,Media shell (Google playback UI),user0,0,0,1,0,101314724,0,101314724,/data/app/com.google.android.apps.mediashell-Mmx4CcQZeWlYPnvQQfKoNw==/base.apk
 com.netflix.ninja,BLOAT,Netflix (TV),user0,0,0,1,0,96346062,0,96346062,/data/app/com.netflix.ninja-FpKmuwmDxu9wfwJiPMwDHg==/base.apk
 com.google.android.webview,KEEP,core system component,user0,0,0,1,0,86609640,0,86609640,/data/app/com.google.android.webview-eRJ7eFpOQHDjuwK1G0w5kQ==/base.apk
 com.google.android.gms,KEEP,core system component,user0,0,0,1,0,47214699,0,47214699,/data/app/com.google.android.gms-7s78l-EgA-5WDGNe8bagxg==/base.apk
@@ -30,8 +30,8 @@ it.telecomitalia.thefilmclub,BLOAT,The Film Club (TIM),uninstall,1,0,1,0,8420825
 timvision.upgrade,CAUTION,TIMVISION service - check what it does before removing,user0,0,1,1,0,7952527,0,7952527,/system/priv-app/upgrade-produzione/upgrade-produzione.apk
 it.telecomitalia.timppapp,BLOAT,TIM Personal / promo app,user0,0,0,1,0,7473551,0,7473551,/data/app/it.telecomitalia.timppapp-vp1LOiq0ZXJ5cYxELRQFLg==/base.apk
 com.google.android.gsf.notouch,BLOAT,NoTouch auth delegate,user0,0,1,1,0,7332348,0,7332348,/system/app/NoTouchAuthDelegate/NoTouchAuthDelegate.apk
-it.telecomitalia.iptuner,KEEP,telephony / call handling,uninstall,1,0,1,0,7077384,0,7077384,/data/app/it.telecomitalia.iptuner-gzf1mjHcc9QPbVJo_Rr8NQ==/base.apk
-it.telecomitalia.accountmanager,KEEP,telephony / call handling,user0,0,0,1,0,6387038,0,6387038,/data/app/it.telecomitalia.accountmanager-uTnmnc9mFYWD0ikH6tSAMw==/base.apk
+it.telecomitalia.iptuner,CAUTION,TIM service - check what it does before removing,uninstall,1,0,1,0,7077384,0,7077384,/data/app/it.telecomitalia.iptuner-gzf1mjHcc9QPbVJo_Rr8NQ==/base.apk
+it.telecomitalia.accountmanager,CAUTION,TIM service - check what it does before removing,user0,0,0,1,0,6387038,0,6387038,/data/app/it.telecomitalia.accountmanager-uTnmnc9mFYWD0ikH6tSAMw==/base.apk
 com.google.android.marvin.talkback,BLOAT,TalkBack,user0,0,0,1,0,6035082,0,6035082,/data/app/com.google.android.marvin.talkback-MJRi8D3700FWIeDeHN5NLw==/base.apk
 com.android.packageinstaller,KEEP,core system component,user0,0,1,1,0,5759795,0,5759795,/system/priv-app/GooglePackageInstaller/GooglePackageInstaller.apk
 com.google.android.backdrop,BLOAT,Daydream Backdrop,user0,0,0,1,0,5614895,0,5614895,/data/app/com.google.android.backdrop-sPxcnkpyBUtrvGgqRLDUqg==/base.apk
@@ -54,13 +54,13 @@ it.telecomitalia.timmusic_tv,BLOAT,TIM Music (TV),user0,0,0,1,0,2158607,0,215860
 com.android.bluetooth,KEEP,bluetooth stack,user0,0,1,1,0,2021796,0,2021796,/system/app/Bluetooth/Bluetooth.apk
 com.google.android.syncadapters.calendar,BLOAT,Calendar sync,user0,0,1,1,0,1851104,0,1851104,/system/app/GoogleCalendarSyncAdapter/GoogleCalendarSyncAdapter.apk
 com.movenda.omadm.tv,CAUTION,OMA-DM device management client - TIM uses it to configure the box remotely,user0,0,0,1,0,1846602,0,1846602,/data/app/com.movenda.omadm.tv-ZJ_dbl-4yoQ3wnejuTY_sw==/base.apk
-it.telecomitalia.linemanager,KEEP,telephony / call handling,user0,0,0,1,0,1826107,0,1826107,/data/app/it.telecomitalia.linemanager-EgtcU4DP59w2W2ESS2wHgA==/base.apk
+it.telecomitalia.linemanager,CAUTION,TIM service - check what it does before removing,user0,0,0,1,0,1826107,0,1826107,/data/app/it.telecomitalia.linemanager-EgtcU4DP59w2W2ESS2wHgA==/base.apk
 com.google.android.speech.pumpkin,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,1812327,0,1812327,/system/app/Pumpkin/Pumpkin.apk
 com.technicolor.android.remotecontrolservice,KEEP,IR/Bluetooth remote key mapping - remote would die,user0,0,1,1,0,1587018,0,1587018,/system/priv-app/RemoteVoiceInput/RemoteVoiceInput.apk
 com.google.android.sss.authbridge,BLOAT,Second Screen Setup auth bridge,user0,0,1,1,0,1431417,0,1431417,/system/app/SecondScreenSetupAuthBridge/SecondScreenSetupAuthBridge.apk
 com.google.android.syncadapters.contacts,BLOAT,Contacts sync,user0,0,1,1,0,1416065,0,1416065,/system/app/GoogleContactsSyncAdapter/GoogleContactsSyncAdapter.apk
 com.technicolor.android.dtvinput,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,1381012,0,1381012,/system/priv-app/tch_dtvinput_service/tch_dtvinput_service.apk
-com.marvell.tv.settings,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,1333106,0,1333106,/system/app/MrvlTvSettings/MrvlTvSettings.apk
+com.marvell.tv.settings,KEEP,core system component,user0,0,1,1,0,1333106,0,1333106,/system/app/MrvlTvSettings/MrvlTvSettings.apk
 com.marvell.audio.loopback,CAUTION,Marvell SoC vendor component - may control audio/HDMI/wake-on-cast,user0,0,1,1,0,1120097,0,1120097,/system/vendor/app/AmpAudioLoopback/AmpAudioLoopback.apk
 com.technicolor.checkota,CAUTION,"Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI",user0,0,1,1,0,1117399,0,1117399,/system/priv-app/CheckOTA/CheckOTA.apk
 com.google.android.partnersetup,CAUTION,"AOSP/Google preinstall, not in the known-bloat list",user0,0,1,1,0,1063831,0,1063831,/system/priv-app/GooglePartnerSetup/GooglePartnerSetup.apk

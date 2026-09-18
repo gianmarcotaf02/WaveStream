@@ -12,11 +12,11 @@
   STORAGE
 --------------------------------------------------------------------------------------------------------
   Filesystem            1K-blocks    Used Available Use% Mounted on
-  /dev/block/mmcblk0p17   5094368 4895640    182344  97% /data
+  /dev/block/mmcblk0p17   5094368 4895112    182872  97% /data
   /dev/block/mmcblk0p14    793488    1276    775828   1% /cache
 
-  /data: 4.9G total, 4.7G used, FREE 178.1M
-  >>> CRITICAL: only 178 MB free. An APK of that size cannot install.
+  /data: 4.9G total, 4.7G used, FREE 178.6M
+  >>> CRITICAL: only 179 MB free. An APK of that size cannot install.
       Free at least 400 MB before installing anything.
 
 --------------------------------------------------------------------------------------------------------
@@ -68,8 +68,8 @@
        7.6M     7.6M       -  CAUTION  user0     system  timvision.upgrade
        7.1M     7.1M       -  BLOAT    user0     /data   it.telecomitalia.timppapp
        7.0M     7.0M       -  BLOAT    user0     system  com.google.android.gsf.notouch
-       6.7M     6.7M       -  KEEP     uninstall /data   it.telecomitalia.iptuner
-       6.1M     6.1M       -  KEEP     user0     /data   it.telecomitalia.accountmanager
+       6.7M     6.7M       -  CAUTION  uninstall /data   it.telecomitalia.iptuner
+       6.1M     6.1M       -  CAUTION  user0     /data   it.telecomitalia.accountmanager
        5.8M     5.8M       -  BLOAT    user0     /data   com.google.android.marvin.talkback
        5.5M     5.5M       -  KEEP     user0     system  com.android.packageinstaller
        5.4M     5.4M       -  BLOAT    user0     /data   com.google.android.backdrop
@@ -92,13 +92,13 @@
        1.9M     1.9M       -  KEEP     user0     system  com.android.bluetooth
        1.8M     1.8M       -  BLOAT    user0     system  com.google.android.syncadapters.calendar
        1.8M     1.8M       -  CAUTION  user0     /data   com.movenda.omadm.tv
-       1.7M     1.7M       -  KEEP     user0     /data   it.telecomitalia.linemanager
+       1.7M     1.7M       -  CAUTION  user0     /data   it.telecomitalia.linemanager
        1.7M     1.7M       -  CAUTION  user0     system  com.google.android.speech.pumpkin
        1.5M     1.5M       -  KEEP     user0     system  com.technicolor.android.remotecontrolservice
        1.4M     1.4M       -  BLOAT    user0     system  com.google.android.sss.authbridge
        1.4M     1.4M       -  BLOAT    user0     system  com.google.android.syncadapters.contacts
        1.3M     1.3M       -  CAUTION  user0     system  com.technicolor.android.dtvinput
-       1.3M     1.3M       -  CAUTION  user0     system  com.marvell.tv.settings
+       1.3M     1.3M       -  KEEP     user0     system  com.marvell.tv.settings
        1.1M     1.1M       -  CAUTION  user0     system  com.marvell.audio.loopback
        1.1M     1.1M       -  CAUTION  user0     system  com.technicolor.checkota
        1.0M     1.0M       -  CAUTION  user0     system  com.google.android.partnersetup
@@ -179,7 +179,7 @@
     com.google.android.videos                                 11.3M  Google TV / Play Movies
     com.google.android.tv.remote.service                       4.0M  Google TV remote service
     com.google.android.feedback                                499K  Google market feedback
-    com.google.android.apps.mediashell                        96.6M  Media shell
+    com.google.android.apps.mediashell                        96.6M  Media shell (Google playback UI)
     it.mediaset.infinitytv                                     9.2M  Mediaset Infinity
     com.netflix.ninja                                         91.9M  Netflix (TV)
     com.google.android.gsf.notouch                             7.0M  NoTouch auth delegate
@@ -204,7 +204,7 @@
     com.google.android.youtube.tvmusic                         2.2M  YouTube Music (TV)
     android.autoinstalls.config.technicolor                      6K  auto-installer that re-adds OEM bloat
 
-  === CAUTION (41) ===
+  === CAUTION (43) ===
     com.google.android.tts                                    28.7M  AOSP/Google preinstall, not in the known-bloat list
     com.google.android.tungsten.setupwraith                   14.7M  AOSP/Google preinstall, not in the known-bloat list
     com.google.android.katniss                                11.1M  AOSP/Google preinstall, not in the known-bloat list
@@ -216,7 +216,6 @@
     com.android.companiondevicemanager                          20K  AOSP/Google preinstall, not in the known-bloat list
     com.android.htmlviewer                                      17K  AOSP/Google preinstall, not in the known-bloat list
     tv.broadpeak.nanocdnwrapper                               10.2M  Broadpeak CDN wrapper used by TIM streaming
-    com.marvell.tv.settings                                    1.3M  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
     com.marvell.audio.loopback                                 1.1M  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
     com.marvell.tv.overscan                                    182K  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
     com.marvell.wol                                             16K  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
@@ -224,6 +223,9 @@
     com.marvell.power.shutdownreceiver                           8K  Marvell SoC vendor component - may control audio/HDMI/wake-on-cast
     com.movenda.omadm.tv                                       1.8M  OMA-DM device management client - TIM uses it to configure the box remotely
     com.movenda.p4mcore                                        576K  OMA-DM device management client - TIM uses it to configure the box remotely
+    it.telecomitalia.iptuner                                   6.7M  TIM service - check what it does before removing
+    it.telecomitalia.accountmanager                            6.1M  TIM service - check what it does before removing
+    it.telecomitalia.linemanager                               1.7M  TIM service - check what it does before removing
     timvision.tvappsettings                                   10.1M  TIMVISION service - check what it does before removing
     timvision.upgrade                                          7.6M  TIMVISION service - check what it does before removing
     timvision.leanbackcustomization                            412K  TIMVISION service - check what it does before removing
@@ -247,7 +249,7 @@
     com.technicolor.hardwareproperties                           6K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
     com.technicolor.defaultledcontroller                         5K  Technicolor/Arris vendor component - may control TV hardware, tuner or HDMI
 
-  === KEEP (49) ===
+  === KEEP (47) ===
     com.technicolor.android.remotecontrolservice               1.5M  IR/Bluetooth remote key mapping - remote would die
     com.google.android.gms.policy_sidecar_o                    9.0M  Play Services (many apps break without it)
     com.android.vending                                       17.1M  Play Store
@@ -260,6 +262,7 @@
     com.android.packageinstaller                               5.5M  core system component
     com.google.android.gsf                                     3.8M  core system component
     com.android.tv.settings.device.display.daydream            3.6M  core system component
+    com.marvell.tv.settings                                    1.3M  core system component
     com.android.printspooler                                   683K  core system component
     com.android.providers.downloads                            570K  core system component
     com.android.providers.contacts                             536K  core system component
@@ -294,14 +297,11 @@
     com.google.android.leanbacklauncher.recommendations          8K  home screen - remove it and you land on a black screen
     com.google.android.inputmethod.latin                      21.2M  input method - blocks all text input
     com.technicolor.tv.remotepairing                           762K  remote pairing service - remote would die
-    it.telecomitalia.iptuner                                   6.7M  telephony / call handling
-    it.telecomitalia.accountmanager                            6.1M  telephony / call handling
-    it.telecomitalia.linemanager                               1.7M  telephony / call handling
 
 --------------------------------------------------------------------------------------------------------
   CANDIDATES TO REMOVE (BLOAT only)
 --------------------------------------------------------------------------------------------------------
-       96.6M  user0     com.google.android.apps.mediashell                   Media shell
+       96.6M  user0     com.google.android.apps.mediashell                   Media shell (Google playback UI)
        91.9M  user0     com.netflix.ninja                                    Netflix (TV)
        39.4M  user0     com.amazon.amazonvideo.livingroom                    Prime Video
        38.2M  uninstall com.cbs.ca                                           CBS (demo/vendor app)

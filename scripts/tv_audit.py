@@ -250,7 +250,7 @@ BLOAT: dict[str, str] = {
     "com.google.android.feedback": "Google market feedback",
     "com.google.android.printservice.recommendation": "Cloud Print",
     "com.google.android.apps.restore": "Restore",
-    "com.google.android.apps.mediashell": "Media shell",
+    "com.google.android.apps.mediashell": "Media shell (Google playback UI)",
     "com.google.android.marvin.talkback": "TalkBack",
     "com.google.android.projection.gearhead": "Android Auto",
     "com.google.android.backdrop": "Daydream Backdrop",
@@ -351,6 +351,7 @@ VENDOR_PREFIXES: list[tuple[str, str]] = [
     ("com.marvell.", "Marvell SoC vendor component - may control audio/HDMI/wake-on-cast"),
     ("com.movenda.", "OMA-DM device management client - TIM uses it to configure the box remotely"),
     ("timvision.", "TIMVISION service - check what it does before removing"),
+    ("it.telecomitalia.", "TIM service - check what it does before removing"),
     ("tv.broadpeak.", "Broadpeak CDN wrapper used by TIM streaming"),
 ]
 
