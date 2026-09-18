@@ -27,6 +27,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import it.wavestream.app.ui.util.requestFocusSafely
+import it.wavestream.app.ui.util.requestFocusWhenReady
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -67,7 +69,7 @@ fun ProfileSelectionScreen(
     LaunchedEffect(profiles, preSelectedProfileId) {
         if (profiles.isNotEmpty()) {
             val targetId = preSelectedProfileId ?: profiles.first().id
-            focusRequesters[targetId]?.requestFocus()
+            focusRequesters[targetId]?.requestFocusWhenReady()
         }
     }
     
@@ -429,7 +431,7 @@ fun AddProfileDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
-                        onDone = { confirmFocusRequester.requestFocus() }
+                        onDone = { confirmFocusRequester.requestFocusSafely() }
                     ),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = WaveStreamColors.Accent,
@@ -641,7 +643,7 @@ fun EditProfileDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
-                        onDone = { editConfirmFocusRequester.requestFocus() }
+                        onDone = { editConfirmFocusRequester.requestFocusSafely() }
                     ),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = WaveStreamColors.Accent,

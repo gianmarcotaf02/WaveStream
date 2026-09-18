@@ -23,6 +23,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import it.wavestream.app.ui.util.requestFocusSafely
+import it.wavestream.app.ui.util.requestFocusWhenReady
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
@@ -61,7 +63,7 @@ fun AddProfileDialog(
     val createButtonFocusRequester = remember { FocusRequester() }
     
     LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
+        focusRequester.requestFocusWhenReady()
     }
     
     Dialog(onDismissRequest = onDismiss) {
@@ -114,7 +116,7 @@ fun AddProfileDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(
-                        onDone = { createButtonFocusRequester.requestFocus() }
+                        onDone = { createButtonFocusRequester.requestFocusSafely() }
                     ),
                     decorationBox = { innerTextField ->
                         Box(
