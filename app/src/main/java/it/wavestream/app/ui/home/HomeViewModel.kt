@@ -2292,6 +2292,7 @@ class HomeViewModel @Inject constructor(
         val popularMoviesDeferred = async(Dispatchers.IO) { loadPopularMovies() }
         val popularSeriesDeferred = async(Dispatchers.IO) { loadPopularSeries() }
         val continueWatchingDeferred = async(Dispatchers.IO) { loadContinueWatching() }
+        val recentlyWatchedDeferred = async(Dispatchers.IO) { loadRecentlyWatched() }
         // Slow parts (TMDB network): skipped in the fast pass so the home shows the
         // DB/cached rows immediately and the skeleton disappears; they fill in later.
         val recommendationsDeferred = if (fastOnly) null else async(Dispatchers.IO) { loadRecommendations() }
@@ -2306,6 +2307,13 @@ class HomeViewModel @Inject constructor(
                     title = context.getString(R.string.continue_watching),
                     items = watchStates.mapNotNull { it.toCarouselItem() }
                 ))
+            }
+        }
+
+        // 1b. Visti di recente (contenuti completati) — subito dopo "Continua a guardare"
+        recentlyWatchedDeferred.await()?.let { recent ->
+            if (recent.isNotEmpty()) {
+                rows.add(CarouselRow(title = "Visti di recente", items = recent))
             }
         }
         
@@ -3451,7 +3459,8 @@ class HomeViewModel @Inject constructor(
                                         id = it.id,
                                         title = it.title,
                                         posterUrl = it.posterUrl,
-                                        contentType = ContentType.MOVIE.name
+                                        contentType = ContentType.MOVIE.name,
+                                        isWatched = true
                                     )
                                 }
                             }
@@ -3464,7 +3473,8 @@ class HomeViewModel @Inject constructor(
                                         id = it.id,
                                         title = it.title,
                                         posterUrl = it.posterUrl,
-                                        contentType = ContentType.SERIES.name
+                                        contentType = ContentType.SERIES.name,
+                                        isWatched = true
                                     )
                                 }
                             }
