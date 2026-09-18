@@ -3,6 +3,7 @@ package it.wavestream.app.ai
 import android.util.Log
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
+import it.wavestream.app.BuildConfig
 import it.wavestream.app.data.cache.DiskCache
 import it.wavestream.app.data.preferences.UserPreferences
 import kotlinx.coroutines.Dispatchers
@@ -101,7 +102,7 @@ class MovieEndingRepository @Inject constructor(
         val wiki = fetchWikipediaPlot(request)
         val result: MovieEnding = if (wiki != null) {
             Log.d(TAG, "Wikipedia trovata: ${wiki.url}")
-            val apiKey = userPreferences.getOpenRouterApiKey()
+            val apiKey = resolveOpenRouterApiKey()
             val summary = if (!apiKey.isNullOrBlank()) {
                 runCatching { summarizeFromWikipedia(request, wiki.plot, apiKey) }
                     .onFailure { Log.w(TAG, "Sintesi Wikipedia+AI fallita", it) }
@@ -133,7 +134,7 @@ class MovieEndingRepository @Inject constructor(
             }
         } else {
             Log.d(TAG, "Nessuna voce Wikipedia per: ${request.title} (${request.year})")
-            val apiKey = userPreferences.getOpenRouterApiKey()
+            val apiKey = resolveOpenRouterApiKey()
             if (apiKey.isNullOrBlank()) {
                 throw MovieEndingUnavailableException(
                     "Nessuna voce Wikipedia trovata e chiave OpenRouter non configurata. " +
@@ -154,6 +155,21 @@ class MovieEndingRepository @Inject constructor(
 
         diskCache.put(cacheKey, result, MovieEnding::class.java, CACHE_TTL)
         result
+    }
+
+    // ------------------------------------------------------------------
+    // API key
+    // ------------------------------------------------------------------
+
+    /**
+     * Chiave OpenRouter effettiva: prima quella impostata dall'utente nelle
+     * impostazioni, poi quella preconfigurata nel build (`BuildConfig.OPENROUTER_API_KEY`,
+     * letta da `.env` a build time).
+     */
+    private suspend fun resolveOpenRouterApiKey(): String? {
+        val userKey = userPreferences.getOpenRouterApiKey()
+        if (!userKey.isNullOrBlank()) return userKey
+        return BuildConfig.OPENROUTER_API_KEY.takeIf { it.isNotBlank() }
     }
 
     // ------------------------------------------------------------------

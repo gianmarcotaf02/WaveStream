@@ -3065,6 +3065,7 @@ private fun MovieEndingSettings(
 
     var apiKeyInput by remember { mutableStateOf("") }
     var existingKey by remember { mutableStateOf<String?>(null) }
+    val builtInKey = it.wavestream.app.BuildConfig.OPENROUTER_API_KEY
     LaunchedEffect(Unit) {
         existingKey = userPreferences.getOpenRouterApiKey()
     }
@@ -3081,11 +3082,16 @@ private fun MovieEndingSettings(
         )
         Spacer(modifier = Modifier.height(20.dp))
 
+        val hasUserKey = !existingKey.isNullOrBlank()
+        val hasBuiltInKey = builtInKey.isNotBlank()
         Text(
-            text = if (existingKey.isNullOrBlank()) "API key OpenRouter non configurata"
-            else "API key OpenRouter configurata (••••${existingKey!!.takeLast(4)})",
+            text = when {
+                hasUserKey -> "API key OpenRouter personale configurata (••••${existingKey!!.takeLast(4)})"
+                hasBuiltInKey -> "API key OpenRouter preconfigurata nell'app (••••${builtInKey.takeLast(4)})"
+                else -> "API key OpenRouter non configurata"
+            },
             style = MaterialTheme.typography.bodyMedium,
-            color = if (existingKey.isNullOrBlank()) Color(0xFFFFB74D) else Color(0xFF81C784)
+            color = if (hasUserKey || hasBuiltInKey) Color(0xFF81C784) else Color(0xFFFFB74D)
         )
         Spacer(modifier = Modifier.height(8.dp))
 

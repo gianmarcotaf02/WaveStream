@@ -17,6 +17,19 @@ val keystoreProperties = Properties().apply {
     }
 }
 
+// Chiave OpenRouter preconfigurata (file .env GITIGNORED, oppure variabile d'ambiente).
+// Iniettata come BuildConfig.OPENROUTER_API_KEY: l'app è già pronta per gli amici,
+// ma chiunque può impostarne una propria dalle impostazioni (ha la precedenza).
+val envFile = rootProject.file(".env")
+val envProperties = Properties().apply {
+    if (envFile.exists()) envFile.inputStream().use { load(it) }
+}
+val openRouterApiKey: String = (
+    envProperties.getProperty("OPENROUTER_API_KEY")
+        ?: System.getenv("OPENROUTER_API_KEY")
+        ?: ""
+).trim().replace("\\", "\\\\").replace("\"", "\\\"")
+
 android {
     namespace = "it.wavestream.app"
     compileSdk = 34
@@ -33,6 +46,9 @@ android {
         // Canale di aggiornamento: default = app moderna (valori attuali, invariati)
         buildConfigField("String", "RTDB_URL", "\"https://wavestream-d3972-default-rtdb.europe-west1.firebasedatabase.app\"")
         buildConfigField("String", "UPDATE_NODE", "\"app_update\"")
+
+        // Chiave OpenRouter preconfigurata da .env (vuota se il file non esiste).
+        buildConfigField("String", "OPENROUTER_API_KEY", "\"$openRouterApiKey\"")
     }
 
     // ------------------------------------------------------------------

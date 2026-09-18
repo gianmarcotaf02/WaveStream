@@ -2,6 +2,7 @@ package it.wavestream.app.data.cache
 
 import android.content.Context
 import android.util.Log
+import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -214,9 +215,19 @@ class DiskCache @Inject constructor(
         Log.d(TAG, "Evicted ${freedBytes / 1024} KB from cache")
     }
     
-    private data class CacheEntry(
-        val data: String,
-        val timestamp: Long,
-        val ttlMs: Long
-    )
 }
+
+/**
+ * Wrapper serializzato nella cache su disco.
+ *
+ * ⚠️ DEVE avere `@JsonClass`: Moshi è configurato con la sola codegen KSP (niente
+ * `KotlinJsonAdapterFactory` riflessivo), quindi una data class senza adapter
+ * generato fa fallire `put`/`get` con "No JsonAdapter for class CacheEntry".
+ * Era il motivo per cui la cache su disco non salvava nulla.
+ */
+@JsonClass(generateAdapter = true)
+internal data class CacheEntry(
+    val data: String,
+    val timestamp: Long,
+    val ttlMs: Long
+)

@@ -3,6 +3,7 @@ package it.wavestream.app.ai
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import retrofit2.http.GET
+import retrofit2.http.Headers
 import retrofit2.http.Query
 import retrofit2.http.Url
 
@@ -18,7 +19,13 @@ import retrofit2.http.Url
  */
 interface WikipediaService {
 
-    /** Ricerca full-text limitata alle voci (namespace 0). */
+    /**
+     * Ricerca full-text limitata alle voci (namespace 0).
+     *
+     * ⚠️ `User-Agent` descrittivo OBBLIGATORIO: Wikimedia risponde 403 sia senza
+     * header sia con quello di default di OkHttp (`okhttp/x`).
+     */
+    @Headers("User-Agent: WaveStream/1.0 (https://wavestream.app)")
     @GET
     suspend fun search(
         @Url url: String,
@@ -31,6 +38,7 @@ interface WikipediaService {
     ): WikipediaQueryResponse
 
     /** Testo in chiaro dell'intera voce, con intestazioni di sezione `== Trama ==`. */
+    @Headers("User-Agent: WaveStream/1.0 (https://wavestream.app)")
     @GET
     suspend fun extract(
         @Url url: String,
