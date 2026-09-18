@@ -169,6 +169,7 @@ KEEP_EXACT = {
     "com.android.sharedstoragebackup",
     "com.android.pacprocessor",
     "com.android.printspooler",
+    "com.marvell.tv.settings",
 }
 
 KEEP_PREFIX = (
@@ -182,26 +183,22 @@ KEEP_PREFIX = (
 # Pattern -> why. Matched against the package name. Keep these PRECISE:
 # a loose substring like "telecom" would wrongly protect "it.telecomitalia.*".
 KEEP_PATTERNS: list[tuple[str, str]] = [
-    (".telecom", "telephony / call handling"),
     ("keyguard", "lock screen"),
     ("com.android.bluetooth", "bluetooth stack"),
     ("com.android.shell", "adb shell"),
     (".remotecontrolservice", "IR/Bluetooth remote key mapping - remote would die"),
     (".remotepairing", "remote pairing service - remote would die"),
-    ("com.google.android.tv.remote.service", "Android TV remote service"),
     (".inputmethod.", "input method - blocks all text input"),
     ("keyboard", "on-screen keyboard - blocks text input"),
     ("launcher", "home screen - remove it and you land on a black screen"),
-    ("leanbacklauncher", "Android TV home screen"),
     ("setupwizard", "first boot wizard"),
     ("setup_wizard", "first boot wizard"),
     ("provision", "device provisioning"),
     ("com.android.vending", "Play Store"),
     ("com.google.android.gms", "Play Services (many apps break without it)"),
     ("com.google.android.gsf", "Google Services Framework"),
+    (".syncadapters.", "account sync adapter"),
     ("gatekeeper", "credential storage"),
-    ("com.android.wifi", "wifi service"),
-    ("com.android.se", "secure element service"),
     ("com.android.nfc", "NFC service"),
     ("com.android.ons", "opportunistic network service"),
     ("com.android.dynsystem", "dynamic system updates"),
@@ -212,6 +209,13 @@ KEEP_PATTERNS: list[tuple[str, str]] = [
     ("com.android.storagemanager", "storage manager"),
     ("com.android.wallpaper", "wallpaper services"),
     ("com.android.tv.frameworkpackagestubs", "required TV framework stubs"),
+    (".tv.settings", "TV settings app"),
+]
+
+# Regex patterns for cases where a plain substring is too loose.
+# `it.telecomitalia.*` must NOT match the telephony package `com.android.server.telecom`.
+KEEP_REGEX: list[tuple[str, str]] = [
+    (r"(^|\.)telecom($|\.)", "telephony / call handling"),
 ]
 
 # Well known preinstalled filler: package -> human label
@@ -363,6 +367,10 @@ def classify(pkg: str) -> tuple[str, str]:
 
     for pat, why in KEEP_PATTERNS:
         if pat in low:
+            return "KEEP", why
+
+    for pat, why in KEEP_REGEX:
+        if re.search(pat, low):
             return "KEEP", why
 
     for pat, why in BLOAT_PATTERNS:
