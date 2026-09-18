@@ -29,6 +29,33 @@ android {
         versionName = "1.0.22"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Canale di aggiornamento: default = app moderna (valori attuali, invariati)
+        buildConfigField("String", "RTDB_URL", "\"https://wavestream-d3972-default-rtdb.europe-west1.firebasedatabase.app\"")
+        buildConfigField("String", "UPDATE_NODE", "\"app_update\"")
+    }
+
+    // ------------------------------------------------------------------
+    // Varianti
+    //   modern   -> API 26+, identica all'app attuale (nessun cambiamento runtime)
+    //   android7 -> API 24+, dedicata alle Android TV 7.0/7.1
+    // ------------------------------------------------------------------
+    flavorDimensions += "platform"
+    productFlavors {
+        create("modern") {
+            dimension = "platform"
+            minSdk = 26
+        }
+        create("android7") {
+            dimension = "platform"
+            minSdk = 24
+            applicationId = "it.wavestream.app.android7"
+            versionCode = 2
+            versionNameSuffix = "-a7"
+            // Canale di aggiornamento dedicato: nodo separato nello stesso progetto RTDB.
+            // Stesso progetto Firebase (quota progetti raggiunta), canale update isolato.
+            buildConfigField("String", "UPDATE_NODE", "\"app_update_android7\"")
+        }
     }
 
     signingConfigs {
@@ -62,6 +89,11 @@ android {
         }
     }
     compileOptions {
+        // Richiesto dalla variante android7 (API 24): java.time esiste solo da API 26.
+        // Il backport OpenJDK è incluso in entrambe le varianti; sulla variante modern
+        // l'unico effetto è un piccolo aumento di dimensione dell'APK, nessuna differenza
+        // di comportamento (vedi wavestream_android7_plan.md).
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -74,17 +106,22 @@ android {
     }
 
     applicationVariants.all {
-        val variantName = name
+        val isModernRelease = name == "modernRelease"
+        val isAndroid7Release = name == "android7Release"
         outputs.all {
-            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            if (output != null && variantName == "release") {
-                output.outputFileName = "WaveStream.apk"
+            val output = this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl ?: return@all
+            when {
+                isModernRelease -> output.outputFileName = "WaveStream.apk"
+                isAndroid7Release -> output.outputFileName = "WaveStream-android7.apk"
             }
         }
     }
 }
 
 dependencies {
+    // Core library desugaring (java.time su API 24/25)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+
     // Core
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -195,4 +232,15 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+// ---------------------------------------------------------------------------
+// Verifica rapida di ENTRAMBE le varianti, senza produrre APK.
+// Uso: gradlew verifyFlavors
+// Obbligatoria prima di chiudere qualsiasi modifica (vedi AGENTS.md).
+// ---------------------------------------------------------------------------
+tasks.register("verifyFlavors") {
+    group = "verification"
+    description = "Compila le varianti modern e android7 (nessun APK prodotto)"
+    dependsOn("compileModernDebugSources", "compileAndroid7DebugSources")
 }

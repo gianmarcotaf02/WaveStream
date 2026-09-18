@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.sqlite.db.SimpleSQLiteQuery
 import coil.compose.AsyncImage
 import dagger.hilt.android.AndroidEntryPoint
@@ -223,6 +224,23 @@ class FilmActivity : ComponentActivity() {
             if (pendingFilterReload > 0) {
                 delay(250)
                 reloadMovies()
+            }
+        }
+
+        // Al ritorno dal detail view (che può aver arricchito TMDB), rilegge dal DB
+        // i film già caricati e aggiorna i badge con il voto TMDB, senza ricaricare
+        // tutta la lista (mantiene scroll e ordine).
+        var resumeTick by remember { mutableIntStateOf(0) }
+        LifecycleResumeEffect(Unit) {
+            resumeTick++
+            onPauseOrDispose { }
+        }
+        LaunchedEffect(resumeTick) {
+            if (resumeTick <= 1) return@LaunchedEffect
+            val ids = movies.map { it.id }
+            if (ids.isNotEmpty()) {
+                val fresh = movieDao.getMoviesByIds(ids).associateBy { it.id }
+                movies = movies.map { m -> fresh[m.id] ?: m }
             }
         }
 
@@ -528,10 +546,8 @@ private fun MovieGridCard(
                 modifier = Modifier.fillMaxSize()
             )
             
-            // Rating badge — SOLO voto TMDB (coerente con l'ordinamento "Voto TMDB"
-            // e col detail view). Senza voto TMDB non mostriamo nulla: i voti della
-            // playlist non vanno usati perché falserebbero lettura e ordinamento.
-            movie.tmdbVoteAverage?.takeIf { it > 0f }?.let { rating ->
+            // Rating badge — TMDB quando disponibile, altrimenti voto playlist/IMDB.
+            (movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating)?.takeIf { it > 0 }?.let { rating ->
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
