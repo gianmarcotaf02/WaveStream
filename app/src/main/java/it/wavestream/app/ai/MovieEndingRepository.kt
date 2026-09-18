@@ -172,11 +172,28 @@ class MovieEndingRepository @Inject constructor(
             append(" film")
         }
 
-        val searchResponse = wikipediaService.search(url = apiUrl, srSearch = query)
+        val searchResponse = wikipediaService.search(
+            url = apiUrl,
+            action = "query",
+            format = "json",
+            list = "search",
+            srNamespace = 0,
+            srLimit = 5,
+            srSearch = query
+        )
         val results = searchResponse.query?.search.orEmpty()
         val best = pickBest(results, request) ?: return null
 
-        val extractResponse = wikipediaService.extract(url = apiUrl, titles = best.title ?: return null)
+        val extractResponse = wikipediaService.extract(
+            url = apiUrl,
+            action = "query",
+            format = "json",
+            prop = "extracts",
+            explainText = 1,
+            exSectionFormat = "wiki",
+            redirects = 1,
+            titles = best.title ?: return null
+        )
         val page = extractResponse.query?.pages?.values
             ?.firstOrNull { !it.extract.isNullOrBlank() }
             ?: return null
