@@ -7,6 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import it.wavestream.app.ai.OpenRouterService
+import it.wavestream.app.ai.WikipediaService
 import it.wavestream.app.data.api.FootballDataService
 import it.wavestream.app.data.api.SofascoreService
 import it.wavestream.app.data.api.TMDBApiService
@@ -130,5 +132,29 @@ object NetworkModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(SofascoreService::class.java)
+    }
+
+    /** OpenRouter: spiegazione del finale tramite LLM (qwen free). */
+    @Provides
+    @Singleton
+    fun provideOpenRouterService(okHttpClient: OkHttpClient, moshi: Moshi): OpenRouterService {
+        return Retrofit.Builder()
+            .baseUrl(OpenRouterService.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(OpenRouterService::class.java)
+    }
+
+    /** Wikipedia (MediaWiki Action API): fonte verificabile per il finale dei film. */
+    @Provides
+    @Singleton
+    fun provideWikipediaService(okHttpClient: OkHttpClient, moshi: Moshi): WikipediaService {
+        return Retrofit.Builder()
+            .baseUrl(WikipediaService.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(WikipediaService::class.java)
     }
 }

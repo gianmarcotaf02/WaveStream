@@ -51,7 +51,7 @@ class MovieEndingRepository @Inject constructor(
         private val HEADING_REGEX = Regex("^={2,}\\s*(.+?)\\s*={2,}$")
         private val PLOT_HEADINGS = listOf("trama", "sinossi", "plot", "synopsis", "story")
         private val HTML_TAG_REGEX = Regex("<[^>]+>")
-        private val THINK_REGEX = Regex("(?s) thinking.*?<｜end▁of▁thinking｜>")
+        private val THINK_REGEX = Regex("(?s)(?:<think.*?</think>|<｜.*?｜>)")
 
         private val SYSTEM_GROUNDED = """
             Sei un assistente di WaveStream che spiega agli utenti COME FINISCE un film.

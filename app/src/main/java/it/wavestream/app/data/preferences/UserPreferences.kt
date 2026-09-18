@@ -24,6 +24,7 @@ private const val ENCRYPTED_PREFS_NAME = "wavestream_encrypted_prefs"
 private const val ENCRYPTED_TMDB_KEY = "tmdb_api_key"
 private const val ENCRYPTED_OMDB_KEY = "omdb_api_key"
 private const val ENCRYPTED_GEMINI_KEY = "gemini_api_key"
+private const val ENCRYPTED_OPENROUTER_KEY = "openrouter_api_key"
 
 /**
  * User preferences manager using DataStore
@@ -170,6 +171,15 @@ class UserPreferences @Inject constructor(
 
     suspend fun getGeminiApiKey(): String? = withContext(Dispatchers.IO) {
         encryptedPrefs.getString(ENCRYPTED_GEMINI_KEY, null)
+    }
+
+    // OpenRouter API Key (cifrata, per la spiegazione del finale dei film)
+    suspend fun setOpenRouterApiKey(apiKey: String) = withContext(Dispatchers.IO) {
+        encryptedPrefs.edit().putString(ENCRYPTED_OPENROUTER_KEY, apiKey).apply()
+    }
+
+    suspend fun getOpenRouterApiKey(): String? = withContext(Dispatchers.IO) {
+        encryptedPrefs.getString(ENCRYPTED_OPENROUTER_KEY, null)
     }
 
     // Assistente AI — voce TTS
