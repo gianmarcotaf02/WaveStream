@@ -61,8 +61,9 @@ class MovieEndingRepository @Inject constructor(
             1. Usa esclusivamente le informazioni presenti nel testo fornito. Non aggiungere nulla che non ci sia.
             2. Non inventare scene, dialoghi o dettagli. Non usare la tua memoria su questo film.
             3. Se il testo non descrive chiaramente il finale, imposta "trovato" a false e "testo" a stringa vuota.
-            4. Rispondi in ITALIANO, in modo diretto, massimo 170 parole, spiegando il finale vero.
-            5. Restituisci SOLO un oggetto JSON valido, senza markdown e senza testo fuori dal JSON, con questa forma:
+            4. Rispondi in ITALIANO, in prosa continua, massimo 170 parole, spiegando il finale vero.
+            5. Il campo "testo" deve essere TESTO SEMPLICE: niente markdown, niente asterischi, cancelletti, trattini di elenco, slash, backslash o emoji.
+            6. Restituisci SOLO un oggetto JSON valido, senza markdown e senza testo fuori dal JSON, con questa forma:
             {"trovato": true, "testo": "spiegazione del finale", "confidenza": "alta|media|bassa"}
         """.trimIndent()
 
@@ -74,8 +75,9 @@ class MovieEndingRepository @Inject constructor(
             1. NON INVENTARE MAI. Se non conosci il film con certezza, o se è uscito dopo la tua data di addestramento, imposta "trovato" a false e "testo" a stringa vuota.
             2. Non dedurre il finale dalla trama: se non lo ricordi con sicurezza, dì che non lo sai.
             3. Non confondere il film con remake, omonimi o adattamenti: se hai dubbi su quale film sia, imposta "trovato" a false.
-            4. Rispondi in ITALIANO, massimo 170 parole.
-            5. Restituisci SOLO un oggetto JSON valido, senza markdown e senza testo fuori dal JSON, con questa forma:
+            4. Rispondi in ITALIANO, in prosa continua, massimo 170 parole.
+            5. Il campo "testo" deve essere TESTO SEMPLICE: niente markdown, niente asterischi, cancelletti, trattini di elenco, slash, backslash o emoji.
+            6. Restituisci SOLO un oggetto JSON valido, senza markdown e senza testo fuori dal JSON, con questa forma:
             {"trovato": true|false, "testo": "spiegazione del finale oppure stringa vuota", "confidenza": "alta|media|bassa", "motivo": "breve motivo se non lo conosci"}
         """.trimIndent()
 
@@ -102,9 +104,10 @@ class MovieEndingRepository @Inject constructor(
                     .getOrNull()
             } else null
 
-            if (!summary.isNullOrBlank()) {
+            val cleanedSummary = summary?.let { sanitizeForDisplay(it) }?.takeIf { it.isNotBlank() }
+            if (cleanedSummary != null) {
                 MovieEnding(
-                    explanation = summary,
+                    explanation = cleanedSummary,
                     source = EndingSource.WIKIPEDIA_AND_AI,
                     wikipediaUrl = wiki.url,
                     wikipediaTitle = wiki.title,
@@ -113,7 +116,7 @@ class MovieEndingRepository @Inject constructor(
                 )
             } else {
                 MovieEnding(
-                    explanation = wiki.plot.take(MAX_DISPLAY_CHARS),
+                    explanation = sanitizeForDisplay(wiki.plot.take(MAX_DISPLAY_CHARS)),
                     source = EndingSource.WIKIPEDIA,
                     wikipediaUrl = wiki.url,
                     wikipediaTitle = wiki.title,
@@ -135,7 +138,7 @@ class MovieEndingRepository @Inject constructor(
             }
             val memory = askModelFromMemory(request, apiKey)
             MovieEnding(
-                explanation = memory.explanation,
+                explanation = sanitizeForDisplay(memory.explanation),
                 source = EndingSource.AI,
                 wikipediaUrl = null,
                 wikipediaTitle = null,
@@ -364,6 +367,47 @@ class MovieEndingRepository @Inject constructor(
             .replace("```json", "")
             .replace("```", "")
             .trim()
+    }
+
+    /**
+     * Normalizza la spiegazione per una visualizzazione pulita:
+     * converte il markdown in testo semplice e rimuove simboli di formattazione
+     * (asterischi, cancelletti, backtick, backslash, elenchi) e spazi anomali.
+     */
+    private fun sanitizeForDisplay(raw: String): String {
+        var text = raw.trim()
+
+        // Fence e backtick
+        text = text.replace("```", "").replace("`", "")
+
+        // Grassetto/corsivo markdown
+        text = text.replace(Regex("\\*\\*(.+?)\\*\\*"), "$1")
+        text = text.replace(Regex("__(.+?)__"), "$1")
+        text = text.replace(Regex("(?<![\\w*])\\*(?![\\s*])(.+?)(?<![\\s*])\\*(?![\\w*])"), "$1")
+        text = text.replace(Regex("(?<![\\w_])_(?![\\s_])(.+?)(?<![\\s_])_(?![\\w_])"), "$1")
+
+        // Titoli e citazioni markdown a inizio riga
+        text = text.replace(Regex("(?m)^\\s{0,3}#{1,6}\\s*"), "")
+        text = text.replace(Regex("(?m)^\\s{0,3}>\\s?"), "")
+
+        // Marker di elenco a inizio riga ("- ", "* ", "+ ", "1. ")
+        text = text.replace(Regex("(?m)^\\s*(?:[-*+]|\\d+\\.)\\s+"), "")
+
+        // Escape letterali e backslash residui
+        text = text.replace("\\n", "\n")
+            .replace("\\r", "")
+            .replace("\\t", " ")
+            .replace("\\\"", "\"")
+            .replace("\\'", "'")
+            .replace("\\", "")
+
+        // Spazi e righe multiple anomali
+        text = text.replace(Regex("[ \\t]{2,}"), " ")
+        text = text.replace(Regex(" *\\n *"), "\n")
+        text = text.replace(Regex("\n{3,}"), "\n\n")
+
+        // Virgolette/asterischi/parentesi spuri ai bordi
+        return text.trim().trim('"', '\'').trim().trim('*').trim()
     }
 
     /** Estrae e parsa il primo oggetto JSON presente nella risposta. */
