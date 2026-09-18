@@ -42,8 +42,12 @@ class MovieEndingRepository @Inject constructor(
         private const val CACHE_PREFIX = "movie_ending_v2_"
         private const val CACHE_TTL: Long = 60L * 24 * 60 * 60 * 1000 // 60 giorni
 
-        /** Testo massimo passato all'LLM (il finale sta sempre in fondo alla Trama). */
+        /** Lunghezza massima dell'estratto di trama passato all'LLM. */
         private const val MAX_PLOT_CHARS = 9_000
+        /** Se la trama è più lunga, si tengono inizio e (soprattutto) fine. */
+        private const val PLOT_HEAD_CHARS = 2_500
+        /** Limite di sicurezza sulla sezione Trama letta dalla pagina. */
+        private const val MAX_SECTION_CHARS = 40_000
         /** Testo massimo mostrato all'utente quando la fonte è Wikipedia grezza. */
         private const val MAX_DISPLAY_CHARS = 6_000
         private const val MAX_TOKENS = 1_200
@@ -116,7 +120,7 @@ class MovieEndingRepository @Inject constructor(
                 )
             } else {
                 MovieEnding(
-                    explanation = sanitizeForDisplay(wiki.plot.take(MAX_DISPLAY_CHARS)),
+                    explanation = sanitizeForDisplay(truncateForDisplay(wiki.plot)),
                     source = EndingSource.WIKIPEDIA,
                     wikipediaUrl = wiki.url,
                     wikipediaTitle = wiki.title,
@@ -202,7 +206,7 @@ class MovieEndingRepository @Inject constructor(
             ?: return null
 
         val fullText = page.extract ?: return null
-        val plot = extractPlotSection(fullText) ?: fullText.take(MAX_PLOT_CHARS)
+        val plot = (extractPlotSection(fullText) ?: fullText).take(MAX_SECTION_CHARS)
         if (plot.isBlank()) return null
 
         val pageTitle = page.title ?: best.title ?: return null
@@ -211,7 +215,7 @@ class MovieEndingRepository @Inject constructor(
 
         return WikiSource(
             title = pageTitle,
-            plot = plot.take(MAX_PLOT_CHARS),
+            plot = plot,
             url = pageUrl
         )
     }
@@ -260,13 +264,29 @@ class MovieEndingRepository @Inject constructor(
         val builder = StringBuilder()
         for (i in start until lines.size) {
             if (HEADING_REGEX.matches(lines[i].trim())) break
-            if (builder.length + lines[i].length > MAX_PLOT_CHARS) break
+            if (builder.length + lines[i].length > MAX_SECTION_CHARS) break
             if (lines[i].isNotBlank() || builder.isNotEmpty()) {
                 builder.append(lines[i]).append('\n')
             }
         }
         return builder.toString().trim().ifBlank { null }
     }
+
+    /**
+     * Costruisce il testo passato all'LLM: se la trama è lunga si conservano
+     * l'inizio (contesto) e soprattutto la parte finale (dove sta il finale).
+     */
+    private fun buildGroundedExcerpt(plot: String): String {
+        if (plot.length <= MAX_PLOT_CHARS) return plot
+        val head = plot.take(PLOT_HEAD_CHARS)
+        val tail = plot.takeLast(MAX_PLOT_CHARS - PLOT_HEAD_CHARS)
+        return "$head\n\n[…] parte centrale della trama omessa per brevità [… ]\n\n$tail"
+    }
+
+    /** Per la visualizzazione grezza di Wikipedia mostra la parte finale (il finale). */
+    private fun truncateForDisplay(text: String): String =
+        if (text.length <= MAX_DISPLAY_CHARS) text
+        else "… " + text.takeLast(MAX_DISPLAY_CHARS)
 
     // ------------------------------------------------------------------
     // LLM
@@ -286,7 +306,7 @@ class MovieEndingRepository @Inject constructor(
             request.director?.takeIf { it.isNotBlank() }?.let { append("REGISTA: ").append(it).append('\n') }
             request.cast?.takeIf { it.isNotBlank() }?.let { append("CAST: ").append(it).append('\n') }
             append("\nTESTO DI WIKIPEDIA (unica fonte consentita):\n\"\"\"\n")
-            append(plot)
+            append(buildGroundedExcerpt(plot))
             append("\n\"\"\"")
         }
 
