@@ -5,6 +5,8 @@
 -keep class com.squareup.moshi.** { *; }
 -keep @com.squareup.moshi.JsonQualifier interface *
 -keepclassmembers @com.squareup.moshi.JsonClass class * { <fields>; <init>(...); }
+# Adapter generati da KSP: Moshi li risolve per nome via reflection
+-keep class **JsonAdapter { *; }
 
 # Keep Room entities
 -keep class it.wavestream.app.data.database.entity.** { *; }
