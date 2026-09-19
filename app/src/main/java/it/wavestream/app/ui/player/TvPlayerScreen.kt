@@ -1838,8 +1838,6 @@ private fun SleepTimerDialog(
     }
 
     // 1) porta il focus sulla finestra del dialog, poi 2) sulla voce selezionata.
-    // Retry reale: requestFocus() ritorna false (senza eccezione) finché il nodo
-    // non è agganciato, quindi va controllato il valore di ritorno.
     LaunchedEffect(Unit) {
         // requestFocus() non ritorna un Boolean in questa versione di Compose:
         // lancia se il nodo non è ancora agganciato. Quindi si ritenta finché
