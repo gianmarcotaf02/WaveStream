@@ -1654,6 +1654,221 @@ private fun ModernIconButton(
 }
 
 /**
+ * Bottone "timer dormire" (icona mezzaluna).
+ *
+ * Quando il timer è attivo mostra il tempo residuo (es. "42m" / "1h 05m") e
+ * si accende sull'accent; al focus si espande con l'etichetta. Premendolo si
+ * apre il menu di scelta della durata.
+ */
+@Composable
+private fun ModernSleepTimerButton(
+    activeMinutes: Int,
+    remainingSeconds: Long,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val isActive = activeMinutes > 0
+
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            isFocused -> WaveStreamColors.Accent
+            isActive -> Color.White.copy(alpha = 0.25f)
+            else -> Color.Transparent
+        },
+        label = "sleepBg"
+    )
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.05f else 1f,
+        label = "sleepScale"
+    )
+
+    // Secondi -> testo compatto: 42m, 1h 05m
+    val remainingLabel = remember(remainingSeconds) {
+        val totalMinutes = (remainingSeconds.coerceAtLeast(0L) + 59L) / 60L
+        val hours = totalMinutes / 60L
+        val minutes = totalMinutes % 60L
+        if (hours > 0L) String.format(java.util.Locale.ITALY, "%dh %02dm", hours, minutes)
+        else String.format(java.util.Locale.ITALY, "%dm", minutes)
+    }
+
+    Row(
+        modifier = Modifier
+            .height(36.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(18.dp))
+            .background(backgroundColor)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Bedtime,
+            contentDescription = "Timer spegnimento",
+            tint = Color.White,
+            modifier = Modifier.size(20.dp)
+        )
+
+        if (isActive) {
+            Text(
+                text = remainingLabel,
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
+            )
+        } else if (isFocused) {
+            Text(
+                text = "Timer",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/**
+ * Menu del timer "dormire": durate 10/30/45 min, 1h, 1h 30, 2h + disattivazione.
+ */
+@Composable
+private fun SleepTimerDialog(
+    currentMinutes: Int,
+    onSelect: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val options = listOf(
+        0 to "Disattivato",
+        10 to "10 minuti",
+        30 to "30 minuti",
+        45 to "45 minuti",
+        60 to "1 ora",
+        90 to "1 ora e 30 minuti",
+        120 to "2 ore"
+    )
+
+    val selectedFocusRequester = remember { FocusRequester() }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Column(
+            modifier = Modifier
+                .width(380.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color(0xF20D0D0D))
+                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Bedtime,
+                    contentDescription = null,
+                    tint = WaveStreamColors.Accent,
+                    modifier = Modifier.size(22.dp)
+                )
+                Text(
+                    text = "Timer spegnimento",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            options.forEach { (minutes, label) ->
+                val selected = minutes == currentMinutes
+                SleepTimerOptionRow(
+                    label = label,
+                    selected = selected,
+                    onClick = { onSelect(minutes) },
+                    modifier = if (selected) {
+                        Modifier.focusRequester(selectedFocusRequester)
+                    } else {
+                        Modifier
+                    }
+                )
+            }
+        }
+    }
+
+    // Focus sulla voce selezionata (retry: il Dialog va prima agganciato)
+    LaunchedEffect(currentMinutes) {
+        repeat(10) {
+            delay(50)
+            if (runCatching { selectedFocusRequester.requestFocus() }.isSuccess) return@LaunchedEffect
+        }
+    }
+}
+
+/**
+ * Riga selezionabile del menu timer
+ */
+@Composable
+private fun SleepTimerOptionRow(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.06f),
+        label = "sleepOptionBg"
+    )
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(backgroundColor)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color.White,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            modifier = Modifier.weight(1f)
+        )
+        if (selected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+/**
  * Modern pill button for speed etc.
  */
 @Composable
