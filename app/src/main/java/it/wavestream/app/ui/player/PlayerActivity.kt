@@ -137,6 +137,10 @@ class PlayerActivity : ComponentActivity() {
     private val _liveCategoryIndex = mutableIntStateOf(0)
     private val _liveChannels = mutableStateOf<List<MiniChannelInfo>>(emptyList())
     private val _currentChannelId = mutableLongStateOf(0L)
+
+    // Categoria del canale live corrente: mostrata come sottotitolo sotto il
+    // titolo nel player dei canali (testo più chiaro).
+    private val _liveCategory = mutableStateOf<String?>(null)
     
     // Seek state management - prevents reset during hold-to-seek
     private var isSeekingForward = false
@@ -435,6 +439,13 @@ class PlayerActivity : ComponentActivity() {
             seekForwardSeconds = userPreferences.getSeekForwardSeconds()
             seekBackwardSeconds = userPreferences.getSeekBackwardSeconds()
             android.util.Log.d("PlayerActivity", "Seek settings loaded: forward=${seekForwardSeconds}s, backward=${seekBackwardSeconds}s")
+
+            // Canali live: carica la categoria da mostrare come sottotitolo sotto il titolo
+            if (contentType == ContentType.CHANNEL && contentId > 0) {
+                withContext(Dispatchers.IO) { channelDao.getChannelById(contentId)?.category }
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { _liveCategory.value = it }
+            }
             
             if (streamUrl.isEmpty() && contentId > 0) {
                 android.util.Log.d("PlayerActivity", "Stream URL empty, fetching from database...")
@@ -540,7 +551,7 @@ class PlayerActivity : ComponentActivity() {
                 TvPlayerScreen(
                     player = player,
                     title = title,
-                    subtitle = subtitle,
+                    subtitle = if (contentType == ContentType.CHANNEL) _liveCategory.value else subtitle,
                     isLoading = isLoading,
                     currentPosition = currentPosition,
                     duration = duration,
@@ -605,6 +616,13 @@ class PlayerActivity : ComponentActivity() {
                     onStillWatchingContinue = { 
                         resetAutoPlayCounter()
                         player.play()
+                    },
+                    onSleepTimerExpired = {
+                        // Timer "dormire" scaduto: pausa immediata + uscita dal player,
+                        // così la riproduzione non continua a vuoto.
+                        resetAutoPlayCounter()
+                        if (::player.isInitialized) player.pause()
+                        finish()
                     }
                 )
             }
@@ -1061,6 +1079,7 @@ class PlayerActivity : ComponentActivity() {
                 streamUrl = channel.streamUrl
                 title = channel.name
                 subtitle = channel.category
+                _liveCategory.value = channel.category
                 _currentChannelId.longValue = channel.id
                 _isAtLiveEdge.value = true
                 bufferingRetryCount = 0
