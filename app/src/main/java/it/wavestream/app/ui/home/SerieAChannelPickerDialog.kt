@@ -103,9 +103,11 @@ private fun isAllowedCategory(category: String): Boolean {
     return COUNTRY_WORDS.none { c.contains(it) }
 }
 
-/** true se il canale si chiama "DAZN 1" (es. "DAZN 1", "DAZN 1 HD", "IT: DAZN 1"). */
+/** true se il canale si chiama "DAZN 1" (es. "DAZN 1", "DAZN 1 HD", "IT: DAZN 1").
+ *  Esclude i canali numerati diversamente (es. "DAZN 10", "DAZN 11"). */
+private val DAZN1_REGEX = Regex("""dazn\s*1(?!\d)""")
 private fun isDazn1Channel(channel: Channel): Boolean =
-    channel.name.lowercase().contains("dazn 1")
+    DAZN1_REGEX.containsMatchIn(channel.name.lowercase())
 
 private enum class SerieAMatchTab(val label: String) {
     CANALI("Canali"),

@@ -44,9 +44,12 @@ interface ChannelDao {
 
     /** Canali "DAZN 1" delle categorie evento (DAZN HERMES/KALI): il nome del
      *  canale non contiene la squadra, quindi il matching per alias non li
-     *  troverebbe mai. Vanno sempre proposti per le partite di Serie A. */
+     *  troverebbe mai. Vanno sempre proposti per le partite di Serie A.
+     *  Il pattern esclude i canali con un numero diverso dietro (es. DAZN 10/11),
+     *  perché non sono il canale evento. */
     @Query(
-        "SELECT * FROM channels WHERE isHidden = 0 AND LOWER(name) LIKE '%dazn 1%' " +
+        "SELECT * FROM channels WHERE isHidden = 0 " +
+            "AND LOWER(name) LIKE '%dazn 1%' AND LOWER(name) NOT GLOB '*dazn 1[0-9]*' " +
             "AND (LOWER(category) LIKE '%dazn hermes%' OR LOWER(category) LIKE '%dazn kali%')"
     )
     suspend fun getDaznEventChannels(): List<Channel>
