@@ -1841,11 +1841,17 @@ private fun SleepTimerDialog(
     // Retry reale: requestFocus() ritorna false (senza eccezione) finché il nodo
     // non è agganciato, quindi va controllato il valore di ritorno.
     LaunchedEffect(Unit) {
-        runCatching { rootFocusRequester.requestFocus() }
+        // requestFocus() non ritorna un Boolean in questa versione di Compose:
+        // lancia se il nodo non è ancora agganciato. Quindi si ritenta finché
+        // il FocusRequester del contenitore non è pronto, poi si passa alla voce.
         repeat(15) {
             delay(50)
-            val focused = runCatching { selectedFocusRequester.requestFocus() }.getOrDefault(false)
-            if (focused) return@LaunchedEffect
+            val attached = runCatching { rootFocusRequester.requestFocus() }.isSuccess
+            if (attached) {
+                delay(30)
+                runCatching { selectedFocusRequester.requestFocus() }
+                return@LaunchedEffect
+            }
         }
     }
 }
