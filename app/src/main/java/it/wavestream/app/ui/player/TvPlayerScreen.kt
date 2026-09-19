@@ -1759,60 +1759,93 @@ private fun SleepTimerDialog(
     )
 
     val selectedFocusRequester = remember { FocusRequester() }
+    val rootFocusRequester = remember { FocusRequester() }
 
     Dialog(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true
+        )
     ) {
-        Column(
+        // Il contenuto DEVE riempire la finestra del dialog: con
+        // usePlatformDefaultWidth=false una Column "stretta" lascia la finestra
+        // senza un nodo focusabile e i tasti restano al player sottostante
+        // (dialog bloccato, back ignorato). Stesso pattern di StillWatchingOverlay.
+        Box(
             modifier = Modifier
-                .width(380.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xF20D0D0D))
-                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Bedtime,
-                    contentDescription = null,
-                    tint = WaveStreamColors.Accent,
-                    modifier = Modifier.size(22.dp)
-                )
-                Text(
-                    text = "Timer spegnimento",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            options.forEach { (minutes, label) ->
-                val selected = minutes == currentMinutes
-                SleepTimerOptionRow(
-                    label = label,
-                    selected = selected,
-                    onClick = { onSelect(minutes) },
-                    modifier = if (selected) {
-                        Modifier.focusRequester(selectedFocusRequester)
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.7f))
+                .focusRequester(rootFocusRequester)
+                .focusable()
+                // Back / Esc: annulla il menu anche se il focus e' sul contenitore
+                .onPreviewKeyEvent { event ->
+                    if (event.type == KeyEventType.KeyDown &&
+                        (event.key == Key.Back || event.key == Key.Escape)
+                    ) {
+                        onDismiss()
+                        true
                     } else {
-                        Modifier
+                        false
                     }
-                )
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier
+                    .width(380.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xF20D0D0D))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Bedtime,
+                        contentDescription = null,
+                        tint = WaveStreamColors.Accent,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Text(
+                        text = "Timer spegnimento",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                options.forEach { (minutes, label) ->
+                    val selected = minutes == currentMinutes
+                    SleepTimerOptionRow(
+                        label = label,
+                        selected = selected,
+                        onClick = { onSelect(minutes) },
+                        modifier = if (selected) {
+                            Modifier.focusRequester(selectedFocusRequester)
+                        } else {
+                            Modifier
+                        }
+                    )
+                }
             }
         }
     }
 
-    // Focus sulla voce selezionata (retry: il Dialog va prima agganciato)
-    LaunchedEffect(currentMinutes) {
-        repeat(10) {
+    // 1) porta il focus sulla finestra del dialog, poi 2) sulla voce selezionata.
+    // Retry reale: requestFocus() ritorna false (senza eccezione) finché il nodo
+    // non è agganciato, quindi va controllato il valore di ritorno.
+    LaunchedEffect(Unit) {
+        runCatching { rootFocusRequester.requestFocus() }
+        repeat(15) {
             delay(50)
-            if (runCatching { selectedFocusRequester.requestFocus() }.isSuccess) return@LaunchedEffect
+            val focused = runCatching { selectedFocusRequester.requestFocus() }.getOrDefault(false)
+            if (focused) return@LaunchedEffect
         }
     }
 }
