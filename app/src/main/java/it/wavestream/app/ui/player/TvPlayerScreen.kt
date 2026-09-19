@@ -133,6 +133,8 @@ fun TvPlayerScreen(
     hiddenSeekSeconds: Int = 0,
     showStillWatching: Boolean = false,
     onStillWatchingContinue: () -> Unit = {},
+    /** Timer "dormire" (mezzaluna) scaduto: il player va in pausa ed esce. */
+    onSleepTimerExpired: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val centerFocusRequester = remember { FocusRequester() }
@@ -165,10 +167,28 @@ fun TvPlayerScreen(
     // Cos\u00ec, finch\u00e9 l'utente naviga i controlli, la barra NON scompare.
     var lastKeyInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
+    // Timer "dormire" (mezzaluna): minuti impostati (0 = disattivo) e secondi residui.
+    var sleepTimerMinutes by remember { mutableIntStateOf(0) }
+    var sleepRemainingSeconds by remember { mutableLongStateOf(0L) }
+    var sleepMenuOpen by remember { mutableStateOf(false) }
+
+    // Conto alla rovescia: a 0 mette in pausa il player ed esce automaticamente,
+    // così il flusso non continua a vuoto se ci si addormenta.
+    LaunchedEffect(sleepRemainingSeconds) {
+        if (sleepRemainingSeconds > 0L) {
+            delay(1000L)
+            sleepRemainingSeconds -= 1L
+            if (sleepRemainingSeconds <= 0L) {
+                sleepTimerMinutes = 0
+                onSleepTimerExpired()
+            }
+        }
+    }
+
     // Auto-hide controls after 3 seconds di INATTIVIT\u00c0 (nessun tasto premuto).
-    // Non nasconde mentre si cerca o mentre si sta navigando i controlli.
-    LaunchedEffect(controlsVisible, isPlaying, seekIndicatorVisible, cumulativeSeekSeconds, lastKeyInteraction) {
-        if (controlsVisible) {
+    // Non nasconde mentre si cerca, si naviga i controlli o \u00e8 aperto il menu del timer.
+    LaunchedEffect(controlsVisible, isPlaying, seekIndicatorVisible, cumulativeSeekSeconds, lastKeyInteraction, sleepMenuOpen) {
+        if (controlsVisible && !sleepMenuOpen) {
             delay(3000)
             if (isPlaying && !seekIndicatorVisible && cumulativeSeekSeconds == 0) {
                 onControlsVisibilityChanged(false)
@@ -344,8 +364,24 @@ fun TvPlayerScreen(
                 onPlayPrevious = onPlayPrevious,
                 onMarkCredits = onMarkCredits,
                 onMarkIntro = onMarkIntro,
+                sleepTimerMinutes = sleepTimerMinutes,
+                sleepRemainingSeconds = sleepRemainingSeconds,
+                onSleepTimerClick = { sleepMenuOpen = true },
                 centerFocusRequester = centerFocusRequester,
                 bottomFirstFocusRequester = bottomFirstFocusRequester
+            )
+        }
+
+        // Dialog impostazione timer "dormire" (mezzaluna)
+        if (sleepMenuOpen) {
+            SleepTimerDialog(
+                currentMinutes = sleepTimerMinutes,
+                onSelect = { minutes ->
+                    sleepTimerMinutes = minutes
+                    sleepRemainingSeconds = minutes * 60L
+                    sleepMenuOpen = false
+                },
+                onDismiss = { sleepMenuOpen = false }
             )
         }
         
@@ -542,6 +578,9 @@ private fun ModernPlayerControls(
     onPlayPrevious: () -> Unit,
     onMarkCredits: () -> Unit,
     onMarkIntro: () -> Unit,
+    sleepTimerMinutes: Int,
+    sleepRemainingSeconds: Long,
+    onSleepTimerClick: () -> Unit,
     centerFocusRequester: FocusRequester,
     bottomFirstFocusRequester: FocusRequester
 ) {
@@ -745,6 +784,13 @@ private fun ModernPlayerControls(
                         contentDescription = "Sottotitoli",
                         onClick = onSubtitles,
                         size = 36.dp
+                    )
+
+                    // Timer "dormire" (mezzaluna): pausa + uscita automatica
+                    ModernSleepTimerButton(
+                        activeMinutes = sleepTimerMinutes,
+                        remainingSeconds = sleepRemainingSeconds,
+                        onClick = onSleepTimerClick
                     )
 
                     // Fase 1 — Marker manuali (solo VOD/serie): inizio titoli di coda e sigla
