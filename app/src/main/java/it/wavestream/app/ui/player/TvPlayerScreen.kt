@@ -76,6 +76,8 @@ fun TvPlayerScreen(
     player: ExoPlayer,
     title: String,
     subtitle: String? = null,
+    /** Qualità video reale del flusso (es. "1080p"); mostrata accanto al titolo. */
+    videoQuality: String? = null,
     isLoading: Boolean,
     currentPosition: Long,
     duration: Long,
@@ -334,6 +336,7 @@ fun TvPlayerScreen(
             ModernPlayerControls(
                 title = title,
                 subtitle = subtitle,
+                videoQuality = videoQuality,
                 currentPosition = currentPosition,
                 duration = duration,
                 isPlaying = isPlaying,
@@ -548,6 +551,7 @@ private fun StillWatchingOverlay(
 private fun ModernPlayerControls(
     title: String,
     subtitle: String?,
+    videoQuality: String? = null,
     currentPosition: Long,
     duration: Long,
     isPlaying: Boolean,
@@ -637,6 +641,24 @@ private fun ModernPlayerControls(
                         color = Color.White.copy(alpha = 0.7f)
                     )
                 }
+            }
+
+            // Qualità video reale, allineata a destra (lato opposto del titolo).
+            // Fa parte dell'overlay dei controlli: sparisce con barra e titolo.
+            if (videoQuality != null) {
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = videoQuality,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        shadow = androidx.compose.ui.graphics.Shadow(
+                            color = Color.Black.copy(alpha = 0.8f),
+                            offset = androidx.compose.ui.geometry.Offset(1f, 1f),
+                            blurRadius = 4f
+                        )
+                    ),
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
         
