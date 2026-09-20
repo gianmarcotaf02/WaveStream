@@ -107,7 +107,11 @@ data class HeroItem(
     val newEpisodeSeason: Int? = null,     // Season number for new episode (series only)
     val newEpisodeNumber: Int? = null,      // Episode number for new episode (series only)
     val newEpisodeCaughtUp: Boolean = false, // True solo se l'utente ha visto tutti gli episodi precedenti al nuovo
-    val serieAMatchId: Long? = null           // Se contentType == "SERIEA_MATCH", id del match associato
+    val serieAMatchId: Long? = null,          // Se contentType == "SERIEA_MATCH", id del match associato
+    // True se l'hero è nato da "Continua a guardare" (non da raccomandazioni/popolari).
+    // Serve a rimuoverlo dagli hero quando l'utente lo toglie da "Continua a guardare"
+    // senza rischiare di eliminare raccomandazioni che non hanno progresso.
+    val isCwDerived: Boolean = false
 )
 
 /**

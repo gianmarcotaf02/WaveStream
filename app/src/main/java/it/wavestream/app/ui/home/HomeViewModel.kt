@@ -1323,7 +1323,7 @@ class HomeViewModel @Inject constructor(
                             progressPercent = null,
                             resumeEpisodeSeason = nextEpisode.seasonNumber,
                             resumeEpisodeNumber = nextEpisode.episodeNumber
-                        )
+                        ).copy(isCwDerived = true)
                         addHero(heroItem)
                         Log.d("HomeViewModel", "loadHeroItems: next-episode hero added for seriesId=$seriesId")
                     }
@@ -1481,7 +1481,7 @@ class HomeViewModel @Inject constructor(
         
         Log.d("HomeViewModel", "buildHeroItem: contentType=${progress.contentType}, contentId=${progress.contentId}, seriesId=${progress.seriesId}")
         
-        return when (progress.contentType) {
+        return (when (progress.contentType) {
             ContentType.MOVIE -> {
                 var movie = movieDao.getMovieById(progress.contentId)
                 Log.d("HomeViewModel", "buildHeroItem: movie lookup for id=${progress.contentId}, found=${movie != null}")
@@ -1523,7 +1523,7 @@ class HomeViewModel @Inject constructor(
                 )
             }
             else -> null
-        }
+        })?.copy(isCwDerived = true)
     }
     
     /**
