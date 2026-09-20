@@ -529,13 +529,28 @@ class HomeViewModel @Inject constructor(
                     if (currentHeroes.isEmpty()) {
                         currentHeroes = cachedHeroItems[contentType]?.heroes ?: emptyList()
                     }
-                    val freshHeroes = refreshHeroItemsRatings(currentHeroes).let { refreshHeroItemsWatchProgress(it) }
+                    val refreshedHeroes = refreshHeroItemsRatings(currentHeroes).let { refreshHeroItemsWatchProgress(it) }
+                    // Gli hero nati da "Continua a guardare" che non hanno più progresso
+                    // (contenuto rimosso dall'utente) vanno eliminati. Ricostruiamo gli
+                    // hero per riempire lo slot con una nuova raccomandazione: senza
+                    // rebuild il contenuto resterebbe "fermo" anche dopo il riavvio.
+                    val freshHeroes = if (refreshedHeroes.any { it.isStaleCwDerivedHero() }) {
+                        try {
+                            loadFreshHeroesFor(contentType)?.heroes
+                                ?: refreshedHeroes.filterNot { it.isStaleCwDerivedHero() }
+                        } catch (e: Exception) {
+                            Log.e("HomeViewModel", "Error rebuilding heroes after CW removal", e)
+                            refreshedHeroes.filterNot { it.isStaleCwDerivedHero() }
+                        }
+                    } else {
+                        refreshedHeroes
+                    }
                     val hasAnyCW = freshHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                     
                     // Update cachedHeroItems with the fresh progress so the cache stays synced
                     val cachedHero = cachedHeroItems[contentType]
-                    if (cachedHero != null) {
-                        cachedHeroItems[contentType] = cachedHero.copy(heroes = freshHeroes, isContinueWatching = hasAnyCW)
+                    if (cachedHero != null || freshHeroes.isNotEmpty()) {
+                        cachedHeroItems[contentType] = HeroPairData(freshHeroes, hasAnyCW)
                     }
                     
                     // Only update UI if tab hasn't changed
@@ -598,7 +613,10 @@ class HomeViewModel @Inject constructor(
                                 !(h.id == hero.id && h.contentType == hero.contentType)
                             }
                             if (filtered.size != cached.heroes.size) {
-                                cachedHeroItems[tab] = HeroPairData(filtered, cached.isContinueWatching)
+                                cachedHeroItems[tab] = HeroPairData(
+                                    filtered,
+                                    filtered.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
+                                )
                             }
                         }
                         // Riga "Continua a guardare" nelle righe carosello persistite
@@ -631,6 +649,27 @@ class HomeViewModel @Inject constructor(
         }
     }
     
+    /**
+     * True se l'hero è stato generato da "Continua a guardare" e ora non ha più
+     * progresso (l'utente lo ha rimosso). Un hero di questo tipo non deve restare
+     * né in cache né in UI: va sostituito da una nuova raccomandazione.
+     */
+    private fun HeroItem.isStaleCwDerivedHero(): Boolean =
+        isCwDerived && resumeMinutes == null && resumeEpisodeSeason == null
+
+    /**
+     * Ricostruisce da zero gli hero del tab indicato (Continua a guardare + taste
+     * recommendations + popolari). Usato quando un contenuto viene rimosso da
+     * "Continua a guardare" per riempire lo slot lasciato libero.
+     */
+    private suspend fun loadFreshHeroesFor(contentType: HomeContentType): HeroPairData? =
+        when (contentType) {
+            HomeContentType.HOME -> loadHomeHeroItems()
+            HomeContentType.MOVIES -> loadHeroItems(ContentType.MOVIE)
+            HomeContentType.SERIES -> loadHeroItems(ContentType.SERIES)
+            else -> null
+        }
+
     /**
      * Load all categories for sidebar (filtered) with counts
      */
@@ -705,15 +744,41 @@ class HomeViewModel @Inject constructor(
                 if (currentContentType != contentType) return@launch
                 
                 // Refresh ratings + watch progress for cached heroes on load
-                val freshHeroes = cachedHero?.heroes
+                val refreshedHeroes = cachedHero?.heroes
                     ?.let { refreshHeroItemsRatings(it) }
                     ?.let { refreshHeroItemsWatchProgress(it) }
                     ?: emptyList()
+                // Rimuovi subito gli hero nati da "Continua a guardare" che non hanno
+                // più progresso (contenuto rimosso dall'utente).
+                val freshHeroes = refreshedHeroes.filterNot { it.isStaleCwDerivedHero() }
                 val hasAnyCW = freshHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                 
                 // Update cachedHeroItems with the fresh progress so the cache stays synced
                 if (cachedHero != null) {
                     cachedHeroItems[contentType] = cachedHero.copy(heroes = freshHeroes, isContinueWatching = hasAnyCW)
+                }
+                // Se abbiamo eliminato degli hero, ricostruiscili in background per
+                // riempire lo slot liberato (senza bloccare la visualizzazione dei dati in cache).
+                if (freshHeroes.size < refreshedHeroes.size) {
+                    launch(Dispatchers.IO) {
+                        try {
+                            val rebuilt = loadFreshHeroesFor(contentType) ?: return@launch
+                            cachedHeroItems[contentType] = rebuilt
+                            if (currentContentType == contentType) {
+                                withContext(Dispatchers.Main) {
+                                    _uiState.update {
+                                        it.copy(
+                                            heroItems = rebuilt.heroes,
+                                            currentHeroIndex = 0,
+                                            isContinueWatchingHero = rebuilt.isContinueWatching
+                                        )
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) {
+                            Log.e("HomeViewModel", "Error rebuilding heroes after CW removal (cache load)", e)
+                        }
+                    }
                 }
                 
                 _uiState.update { 
