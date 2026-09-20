@@ -270,7 +270,13 @@ class DetailsActivity : ComponentActivity() {
             onMarkAsWatchedClick = {
                 // Remove from Continue Watching
                 lifecycleScope.launch {
-                    watchProgressDao.deleteProgress(profileId, contentType, contentId)
+                    // Per le serie il progresso è salvato con contentType=EPISODE e
+                    // seriesId: deleteProgress(SERIES, id) non cancellerebbe nulla.
+                    if (contentType == ContentType.SERIES) {
+                        watchProgressDao.deleteProgressBySeriesId(profileId, contentId)
+                    } else {
+                        watchProgressDao.deleteProgress(profileId, contentType, contentId)
+                    }
                     android.widget.Toast.makeText(
                         this@DetailsActivity, 
                         "Rimosso da Continua a guardare", 
