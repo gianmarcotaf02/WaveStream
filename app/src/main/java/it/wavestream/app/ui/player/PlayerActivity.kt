@@ -141,6 +141,11 @@ class PlayerActivity : ComponentActivity() {
     // Categoria del canale live corrente: mostrata come sottotitolo sotto il
     // titolo nel player dei canali (testo più chiaro).
     private val _liveCategory = mutableStateOf<String?>(null)
+
+    // Qualità video reale del flusso in riproduzione (es. "1080p"). Mostrata
+    // nell'overlay dei controlli, a destra del titolo. Null finché la traccia
+    // video non è nota; segue automaticamente i cambi di risoluzione (HLS adattivo).
+    private val _videoQuality = mutableStateOf<String?>(null)
     
     // Seek state management - prevents reset during hold-to-seek
     private var isSeekingForward = false
@@ -210,6 +215,19 @@ class PlayerActivity : ComponentActivity() {
 
     // Finestra iniziale in cui il monitor audio cerca la sigla (Fase 4).
     private val INTRO_SCAN_MS = 15 * 60 * 1000L
+
+    /** Etichetta della qualità a partire dall'altezza della traccia video (0 = ignota). */
+    private fun videoQualityLabel(height: Int): String? = when {
+        height >= 2160 -> "4K"
+        height >= 1440 -> "1440p"
+        height >= 1080 -> "1080p"
+        height >= 720 -> "720p"
+        height >= 576 -> "576p"
+        height >= 480 -> "480p"
+        height >= 360 -> "360p"
+        height > 0 -> "${height}p"
+        else -> null
+    }
 
     private fun calculateRetryDelay(attempt: Int): Long {
         return (FIRST_RETRY_DELAY_MS + (attempt.toLong() * attempt * 500L))
@@ -540,6 +558,7 @@ class PlayerActivity : ComponentActivity() {
                 val playbackSpeed by remember { _playbackSpeed }
                 val audioTracks by remember { _audioTracks }
                 val currentAudioTrack by remember { _currentAudioTrack }
+                val videoQuality by remember { _videoQuality }
                 val hasNextEpisode by remember { _hasNextEpisode }
                 val hasPreviousEpisode by remember { _hasPreviousEpisode }
                 val cumulativeSeekSeconds by remember { _cumulativeSeekSeconds }
@@ -552,6 +571,7 @@ class PlayerActivity : ComponentActivity() {
                     player = player,
                     title = title,
                     subtitle = if (contentType == ContentType.CHANNEL) _liveCategory.value else subtitle,
+                    videoQuality = videoQuality,
                     isLoading = isLoading,
                     currentPosition = currentPosition,
                     duration = duration,
@@ -782,6 +802,10 @@ class PlayerActivity : ComponentActivity() {
                 }
             }
             
+            override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
+                _videoQuality.value = videoQualityLabel(videoSize.height)
+            }
+
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 _isPlaying.value = isPlaying
                 if (isPlaying) {
