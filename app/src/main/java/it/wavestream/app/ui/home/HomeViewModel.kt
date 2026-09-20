@@ -760,8 +760,27 @@ class HomeViewModel @Inject constructor(
                 if (cachedHero != null) {
                     cachedHeroItems[contentType] = cachedHero.copy(heroes = freshHeroes, isContinueWatching = hasAnyCW)
                 }
-                // Se abbiamo eliminato degli hero, ricostruiscili in background per
-                // riempire lo slot liberato (senza bloccare la visualizzazione dei dati in cache).
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        carouselRows = cachedRows,
+                        heroItem = cachedRows.flatMap { r -> r.items }.firstOrNull(),
+                        isGridMode = false,
+                        selectedCategory = null,
+                        isListsTab = false,
+                        isFavoritesTab = false,
+                        isHistoryTab = false,
+                        isHomeTab = contentType == HomeContentType.HOME,
+                        heroItems = freshHeroes,
+                        currentHeroIndex = 0,
+                        isContinueWatchingHero = hasAnyCW
+                    )
+                }
+                // Warm Coil caches with visible posters + hero backdrops (non-blocking)
+                preloadContentImages(cachedRows, freshHeroes)
+                // Se abbiamo eliminato degli hero (contenuto tolto da "Continua a guardare"),
+                // ricostruiscili in background per riempire lo slot liberato, senza bloccare
+                // la visualizzazione dei dati in cache.
                 if (freshHeroes.size < refreshedHeroes.size) {
                     launch(Dispatchers.IO) {
                         try {
@@ -783,25 +802,6 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                 }
-                
-                _uiState.update { 
-                    it.copy(
-                        isLoading = false,
-                        carouselRows = cachedRows,
-                        heroItem = cachedRows.flatMap { r -> r.items }.firstOrNull(),
-                        isGridMode = false,
-                        selectedCategory = null,
-                        isListsTab = false,
-                        isFavoritesTab = false,
-                        isHistoryTab = false,
-                        isHomeTab = contentType == HomeContentType.HOME,
-                        heroItems = freshHeroes,
-                        currentHeroIndex = 0,
-                        isContinueWatchingHero = hasAnyCW
-                    )
-                }
-                // Warm Coil caches with visible posters + hero backdrops (non-blocking)
-                preloadContentImages(cachedRows, freshHeroes)
                 // Le righe arrivano da cache (fino a 10 giorni): la riga "Continua a guardare"
                 // va rigenerata dal DB, altrimenti il badge episodio resta quello vecchio.
                 launch(Dispatchers.IO) {
