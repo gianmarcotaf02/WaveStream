@@ -115,3 +115,6 @@ app/src/android7/google-services.json
 build_out.txt
 credits_diag.txt
 image.png
+
+# Artefatti di reverse engineering / analisi (APK, jadx, fonti decompilate) — MAI versionare
+.re/

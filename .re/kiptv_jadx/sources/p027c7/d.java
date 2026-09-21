@@ -1,5 +1,0 @@
-package p027c7;
-
-/* JADX INFO: loaded from: classes4.dex */
-public interface d extends p027c7.b {
-}
