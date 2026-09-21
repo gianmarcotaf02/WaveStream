@@ -94,6 +94,9 @@ class PlayerActivity : ComponentActivity() {
     private var creditsMarkerStartMs: Long? = null
     private var creditsMarkerEndMs: Long? = null
     private var creditsMarkerLoaded = false
+    // Riferimento CREDITS di un episodio della stessa serie: usato per stimare la coda
+    // quando IntroDB/marker non hanno il dato (evita di ripartire da zero ogni puntata).
+    private var seriesCreditsReference: MediaSegment? = null
     // Sigla (intro): marker manuale inizio/fine + visibilità del pulsante "Salta sigla"
     private var introStartMs: Long? = null
     private var introEndMs: Long? = null
@@ -1401,6 +1404,7 @@ class PlayerActivity : ComponentActivity() {
         creditsMarkerStartMs = null
         creditsMarkerEndMs = null
         creditsMarkerLoaded = false
+        seriesCreditsReference = null
         introStartMs = null
         introEndMs = null
         seriesIntroReference = null
@@ -1446,6 +1450,7 @@ class PlayerActivity : ComponentActivity() {
         lifecycleScope.launch {
             try {
                 val (tmdbId, imdbId) = resolveContentIdentity()
+                val duration = if (::player.isInitialized) player.duration else 0L
                 val seg = mediaSegmentRepository.getExact(
                     contentType = contentType,
                     contentId = contentId,
@@ -1454,11 +1459,28 @@ class PlayerActivity : ComponentActivity() {
                     episode = episode,
                     tmdbId = tmdbId,
                     imdbId = imdbId,
-                    type = SegmentType.CREDITS
+                    type = SegmentType.CREDITS,
+                    allowRemote = _introDbEnabled.value,
+                    durationMs = duration
                 )
-                creditsMarkerStartMs = seg?.startMs
-                creditsMarkerEndMs = seg?.endMs
+                if (seg != null) {
+                    creditsMarkerStartMs = seg.startMs
+                    creditsMarkerEndMs = seg.endMs
+                }
                 creditsMarkerLoaded = true
+                // Fallback: riferimento della stessa serie per stimare la coda nei prossimi
+                // episodi (la stima vera e propria richiede la durata, che spesso non è
+                // ancora nota qui: viene calcolata nel progress handler).
+                if (seg == null && contentType == ContentType.EPISODE && seriesId != null) {
+                    seriesCreditsReference = mediaSegmentRepository.getSeriesCreditsReference(seriesId!!)
+                    seriesCreditsReference?.let {
+                        android.util.Log.i(
+                            "CreditsDiag",
+                            "creditsSeriesRef id=${it.id} startMs=${it.startMs} endMs=${it.endMs} " +
+                                "durationMs=${it.durationMs} source=${it.source}"
+                        )
+                    }
+                }
 
                 val intro = mediaSegmentRepository.getExact(
                     contentType = contentType,
@@ -1468,7 +1490,9 @@ class PlayerActivity : ComponentActivity() {
                     episode = episode,
                     tmdbId = tmdbId,
                     imdbId = imdbId,
-                    type = SegmentType.INTRO
+                    type = SegmentType.INTRO,
+                    allowRemote = _introDbEnabled.value,
+                    durationMs = duration
                 )
                 introStartMs = intro?.startMs
                 introEndMs = intro?.endMs
