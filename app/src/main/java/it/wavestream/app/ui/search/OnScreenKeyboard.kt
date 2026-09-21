@@ -2,6 +2,7 @@ package it.wavestream.app.ui.search
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -20,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 /**
@@ -144,19 +147,27 @@ private fun KeyboardButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    // Solo cambio colore al focus, senza ingrandimento
+    // Fase S4 — tasto in vetro: focus ad alone chiaro, non fondo accent pieno.
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "keyFill"
+    )
+    val stroke by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.08f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "keyStroke"
+    )
+
     Box(
         modifier = modifier
             .height(28.dp)
-            .clip(RoundedCornerShape(4.dp))
-            .background(
-                if (isFocused) WaveStreamColors.Accent
-                else Color.Black  // OLED black
-            )
+            .clip(RoundedCornerShape(6.dp))
+            .background(fill)
             .border(
                 width = 1.dp,
-                color = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.7f), // white border, accent on focus
-                shape = RoundedCornerShape(4.dp)
+                color = stroke,
+                shape = RoundedCornerShape(6.dp)
             )
             .focusable(interactionSource = interactionSource)
             .clickable(onClick = onClick),
