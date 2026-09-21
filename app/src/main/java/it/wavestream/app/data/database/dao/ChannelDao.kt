@@ -54,7 +54,9 @@ interface ChannelDao {
     )
     suspend fun getDaznEventChannels(): List<Channel>
     
-    @Query("SELECT * FROM channels WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")
+    // LIMIT 200 — vedi la nota in MovieDao.searchMovies. I canali sono spesso
+    // decine di migliaia: senza limite la query corta trascinava tutto il catalogo.
+    @Query("SELECT * FROM channels WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name LIMIT 200")
     suspend fun searchChannels(query: String): List<Channel>
     
     @Query("SELECT * FROM channels WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")

@@ -64,7 +64,10 @@ interface MovieDao {
     @Query("SELECT * FROM movies WHERE tmdbId = :tmdbId LIMIT 1")
     suspend fun getMovieByTmdbId(tmdbId: Int): Movie?
     
-    @Query("SELECT * FROM movies WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")
+    // LIMIT: senza, una query corta (es. "a") restituiva decine di migliaia di righe
+    // da trasferire e poi riordinare in Kotlin. Con ORDER BY name SQLite può
+    // percorrere l'indice di `name` e fermarsi dopo N match: molto più veloce.
+    @Query("SELECT * FROM movies WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name LIMIT 200")
     suspend fun searchMovies(query: String): List<Movie>
     
     @Query("SELECT * FROM movies WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")

@@ -61,7 +61,9 @@ interface SeriesDao {
     @Query("SELECT * FROM series WHERE tmdbId = :tmdbId LIMIT 1")
     suspend fun getSeriesByTmdbId(tmdbId: Int): Series?
     
-    @Query("SELECT * FROM series WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")
+    // LIMIT 200 — vedi la nota in MovieDao.searchMovies: evita di restituire decine
+    // di migliaia di righe sulle query corte.
+    @Query("SELECT * FROM series WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name LIMIT 200")
     suspend fun searchSeries(query: String): List<Series>
     
     @Query("SELECT * FROM series WHERE name LIKE '%' || :query || '%' AND isHidden = 0 ORDER BY name")

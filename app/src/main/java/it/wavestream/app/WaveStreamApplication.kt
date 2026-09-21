@@ -107,15 +107,46 @@ class WaveStreamApplication : Application() {
         // TV power-off, not only onTrimMemory/onLowMemory callbacks
         checkpointManager.startPeriodicCheckpoint()
 
-        // FASE 4 — Rebuild FTS5 search index in background (covers data present
-        // before the 25→26 migration, since triggers only fire on new writes).
-        // Only runs if FTS5 is actually available (not compiled on all devices).
+        // FASE 4 — Backfill FTS5. Gira UNA VOLTA SOLA (vedi rebuildFtsIndexIfNeeded):
+        // prima rifaceva l'indice completo a ogni avvio, e su cataloghi grandi era
+        // la causa principale della lentezza della ricerca.
         applicationScope.launch {
             try {
-                if (ftsSearchRepository.isFts5Available()) rebuildFtsIndex()
+                if (ftsSearchRepository.isFts5Available()) rebuildFtsIndexIfNeeded()
             } catch (_: Exception) { }
         }
     }
+
+    /**
+     * Backfill dell'indice FTS5 — eseguito SOLO se l'indice è disallineato.
+     *
+     * Prima [rebuildFtsIndex] veniva chiamato a ogni cold start: DELETE + INSERT
+     * completi su canali, film e serie. Su cataloghi grandi (decine di migliaia di
+     * righe) significa ri-indicizzare tutto il catalogo mentre l'utente sta già
+     * cercando: la ricerca risultava lenta e l'avvio peggiorava. Serviva invece solo
+     * come backfill una tantum dopo la migration 25→26 e dopo un import massivo di
+     * playlist.
+     *
+     * Ora si confrontano solo i conteggi: se l'indice è allineato alle sorgenti non
+     * si tocca nulla. È robusto sia se i trigger di sincronizzazione esistono, sia se
+     * l'indice è rimasto indietro.
+     */
+    private fun rebuildFtsIndexIfNeeded() {
+        val misaligned = listOf(
+            "fts_channel" to "channels",
+            "fts_movie" to "movies",
+            "fts_series" to "series"
+        ).any { (fts, source) -> countRows(fts) != countRows(source) }
+
+        if (misaligned) rebuildFtsIndex()
+    }
+
+    /** Conteggio rapido di una tabella (background thread: chiamato da applicationScope). */
+    private fun countRows(table: String): Int = runCatching {
+        ftsSearchDao.reindexAll(
+            androidx.sqlite.db.SimpleSQLiteQuery("SELECT count(*) FROM $table")
+        )
+    }.getOrDefault(0)
 
     /**
      * Ripopola l'indice FTS5 dalle tabelle sorgente.
