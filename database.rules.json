@@ -1,11 +1,13 @@
 {
   "rules": {
     "sessions": {
-      ".read": true,
-      ".write": true,
       "$session": {
         ".read": true,
-        ".write": true
+        ".write": true,
+        ".validate": "newData.hasChild('type') && newData.child('type').isString()",
+        "$field": {
+          ".validate": "newData.isString() && newData.val().length < 1024"
+        }
       }
     },
     "app_update": {
