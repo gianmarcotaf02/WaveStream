@@ -315,6 +315,9 @@ class LiveActivity : ComponentActivity() {
             onMultiscreenClick = {
                 startActivity(Intent(this@LiveActivity, MultiscreenActivity::class.java))
             },
+            onOpenEpg = {
+                startActivity(Intent(this@LiveActivity, it.wavestream.app.ui.epg.EPGActivity::class.java))
+            },
             favoriteCategories = favoriteCategories,
             onToggleFavorite = onToggleFavorite,
             channelCounts = channelCounts
@@ -642,7 +645,7 @@ private fun EpgTimeHeader(
         modifier = Modifier
             .fillMaxWidth()
             .height(40.dp)
-            .background(WaveStreamColors.BackgroundSecondary)
+            .background(Color.White.copy(alpha = 0.04f))
             .padding(start = 180.dp) // Offset for channel column
             .horizontalScroll(rememberScrollState())
     ) {
@@ -741,12 +744,14 @@ private fun EpgChannelRow(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "rowBg"
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.06f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "rowBorder"
     )
     
@@ -850,18 +855,18 @@ private fun EpgProgramBlock(
 ) {
     val widthDp = (durationMinutes * PIXELS_PER_MINUTE).coerceIn(60, 400)
     
-    // Aurora: gerarchia EPG — in onda = tinta accent piena, futuro = outline
-    // discreto, vuoto = fantasma. La riga focalizzata aggiunge il ring.
+    // Fase L6 — blocco in vetro: in onda = accent SOFT (non tinta piena),
+    // futuro = velatura minima, vuoto = fantasma.
     val backgroundColor = when {
-        isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.28f)
-        isEmpty -> WaveStreamColors.BackgroundTertiary.copy(alpha = 0.4f)
-        else -> WaveStreamColors.CardBackground
+        isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.22f)
+        isEmpty -> Color.White.copy(alpha = 0.03f)
+        else -> Color.White.copy(alpha = 0.07f)
     }
     
     val borderColor = when {
-        isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.8f)
+        isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.7f)
         isEmpty -> Color.Transparent
-        else -> WaveStreamColors.SurfaceBorder
+        else -> Color.White.copy(alpha = 0.06f)
     }
     
     Box(
@@ -1125,37 +1130,44 @@ private fun LiveSearchBar(
                 }
             } else null,
             singleLine = true,
-            shape = RoundedCornerShape(10.dp),
+            // Capsula in vetro (Fase L4)
+            shape = RoundedCornerShape(50),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = WaveStreamColors.Accent,
-                unfocusedBorderColor = WaveStreamColors.BackgroundTertiary,
-                focusedContainerColor = WaveStreamColors.BackgroundSecondary,
-                unfocusedContainerColor = WaveStreamColors.BackgroundSecondary,
+                focusedBorderColor = Color.White.copy(alpha = 0.22f),
+                unfocusedBorderColor = Color.White.copy(alpha = 0.10f),
+                focusedContainerColor = GlassTokens.SurfaceFill,
+                unfocusedContainerColor = GlassTokens.SurfaceFill,
                 cursorColor = WaveStreamColors.Accent
             ),
             textStyle = MaterialTheme.typography.bodyMedium.copy(color = WaveStreamColors.TextPrimary)
         )
 
         // Close button (hides the search bar and clears the filter)
-        Box(
+        var isCloseFocusedLocal by remember { mutableStateOf(false) }
+        val closeFill by animateColorAsState(
+            targetValue = if (isCloseFocusedLocal) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+            label = "closeFill"
+        )
+        GlassSurface(
+            shape = CircleShape,
+            fill = closeFill,
             modifier = Modifier
                 .size(40.dp)
-                .clip(CircleShape)
-                .border(2.dp, if (isCloseFocused) WaveStreamColors.Accent else Color.Transparent, CircleShape)
-                .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f))
+                .onFocusChanged { isCloseFocusedLocal = it.isFocused }
                 .focusable(interactionSource = closeInteractionSource)
                 .clickable(
                     interactionSource = closeInteractionSource,
                     indication = null,
                     onClick = onClose
-                ),
-            contentAlignment = Alignment.Center
+                )
         ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Chiudi ricerca",
-                tint = if (isCloseFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary
-            )
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Chiudi ricerca",
+                    tint = WaveStreamColors.TextPrimary
+                )
+            }
         }
     }
 }
@@ -1198,44 +1210,58 @@ private fun LiveCategoryGrid(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        WaveStreamColors.Accent.copy(alpha = 0.045f),
+                        WaveStreamColors.GradientMiddle,
+                        WaveStreamColors.GradientBottom
+                    )
+                )
+            )
     ) {
-        // Top bar with back + title
+        // Top bar flottante in vetro (Fase L1/L0)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(WaveStreamColors.BackgroundPrimary.copy(alpha = 0.9f))
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Box(
+            var isBackFocusedLocal by remember { mutableStateOf(false) }
+            val backFillLocal by animateColorAsState(
+                targetValue = if (isBackFocusedLocal) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+                label = "gridBackFill"
+            )
+            GlassSurface(
+                shape = CircleShape,
+                fill = backFillLocal,
                 modifier = Modifier
                     .focusRequester(backFocusRequester)
                     .size(40.dp)
-                    .clip(CircleShape)
-                    .border(2.dp, backBorderColor, CircleShape)
-                    .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f))
+                    .onFocusChanged { isBackFocusedLocal = it.isFocused }
                     .focusable(interactionSource = backInteractionSource)
                     .clickable(
                         interactionSource = backInteractionSource,
                         indication = null,
                         onClick = onBackClick
-                    ),
-                contentAlignment = Alignment.Center
+                    )
             ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Indietro",
-                    tint = if (isBackFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary
-                )
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Indietro",
+                        tint = WaveStreamColors.TextPrimary
+                    )
+                }
             }
 
             Text(
                 text = "Live TV",
                 style = MaterialTheme.typography.headlineSmall,
                 color = WaveStreamColors.TextPrimary,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
             )
         }
 
@@ -1243,7 +1269,7 @@ private fun LiveCategoryGrid(
         androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid(
             columns = androidx.tv.foundation.lazy.grid.TvGridCells.Adaptive(minSize = 160.dp),
             state = gridState,
-            contentPadding = PaddingValues(24.dp),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, bottom = 32.dp, top = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
@@ -1285,7 +1311,7 @@ private fun LiveCategoryCard(
     var isFocused by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.05f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
         animationSpec = AppAnimations.SpringCardFocus,
         label = "catCardScale"
     )
@@ -1324,19 +1350,19 @@ private fun LiveCategoryCard(
                 indication = null,
                 onClick = onClick
             ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = WaveStreamColors.BackgroundSecondary
+            containerColor = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill
         ),
         border = BorderStroke(
-            width = if (isFocused) 2.dp else 1.dp,
-            color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder
+            width = 1.dp,
+            color = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.08f)
         )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(categoryColor.copy(alpha = if (isFocused) 0.25f else 0.1f))
+                .background(categoryColor.copy(alpha = if (isFocused) 0.18f else 0.08f))
                 .padding(16.dp)
         ) {
             Column(
@@ -1548,13 +1574,21 @@ private fun LiveChannelCard(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.08f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "channelScale"
     )
     
+    // Fase L2 — card canale in vetro, focus ad alone (niente bordo accent).
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.06f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "channelBorder"
+    )
+    val logoFill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Black.copy(alpha = 0.35f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "channelLogoFill"
     )
     
     // Calculate EPG progress for current program
@@ -1595,7 +1629,7 @@ private fun LiveChannelCard(
                 .height(90.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-                .background(WaveStreamColors.CardBackground),
+                .background(logoFill),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
