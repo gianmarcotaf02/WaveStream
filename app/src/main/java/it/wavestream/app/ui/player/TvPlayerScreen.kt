@@ -1488,13 +1488,13 @@ private fun ModernProgressBar(
     }
     
     val barHeight by animateDpAsState(
-        targetValue = if (isFocused) 12.dp else 4.dp, // Thicker when focused
+        targetValue = if (isFocused) 14.dp else 6.dp, // Traccia più spessa e leggibile
         animationSpec = tween(150),
         label = "barHeight"
     )
     
     val thumbScale by animateFloatAsState(
-        targetValue = if (isSeekModeActive) 1.5f else if (isFocused) 1.2f else 0.7f,
+        targetValue = if (isSeekModeActive) 1.4f else if (isFocused) 1.15f else 0.8f,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
         label = "thumbScale"
     )
@@ -1556,8 +1556,8 @@ private fun ModernProgressBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(barHeight)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.White.copy(alpha = 0.16f))
+                .clip(RoundedCornerShape(3.dp))
+                .background(Color.White.copy(alpha = 0.18f))
         )
         
         // Progress fill with gradient
@@ -1565,7 +1565,7 @@ private fun ModernProgressBar(
             modifier = Modifier
                 .fillMaxWidth(progress.coerceIn(0f, 1f))
                 .height(barHeight)
-                .clip(RoundedCornerShape(4.dp))
+                .clip(RoundedCornerShape(3.dp))
                 .background(
                     Brush.horizontalGradient(
                         colors = listOf(
@@ -1577,11 +1577,11 @@ private fun ModernProgressBar(
         )
         
     // Thumb indicator (Pallino) - centered exactly at progress point
-    val thumbOffset = (maxWidth * progress.coerceIn(0f, 1f) - 10.dp).coerceAtLeast(0.dp)
+    val thumbOffset = (maxWidth * progress.coerceIn(0f, 1f) - 12.dp).coerceAtLeast(0.dp)
     Box(
         modifier = Modifier
             .offset(x = thumbOffset)
-            .size(20.dp)
+            .size(24.dp)
             .align(Alignment.CenterStart)
             .graphicsLayer {
                 scaleX = thumbScale
@@ -2205,12 +2205,12 @@ private fun ModernSeekIndicator(seconds: Int) {
     }
     val text = if (isForward) "+$timeText" else "-$timeText"
     
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.Black.copy(alpha = 0.75f))
-            .padding(horizontal = 28.dp, vertical = 18.dp),
-        contentAlignment = Alignment.Center
+    GlassSurface(
+        shape = RoundedCornerShape(20.dp),
+        fill = GlassTokens.SurfaceFillDark,
+        stroke = GlassTokens.StrokeGradient,
+        strokeWidth = 1.dp,
+        modifier = Modifier.padding(horizontal = 28.dp, vertical = 18.dp)
     ) {
         // Freccia ad arco SOPRA il numero: verso destra in avanti, verso sinistra indietro.
         Column(
