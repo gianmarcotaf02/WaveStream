@@ -95,7 +95,7 @@ import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.CarouselRow
 import it.wavestream.app.ui.home.HeroItem
 import it.wavestream.app.ui.home.HomeScreenState
-import it.wavestream.app.ui.home.SerieAMatchHeroBackdrop
+import it.wavestream.app.ui.home.resolveHeroes
 import it.wavestream.app.ui.home.SerieAMatchLiveBadge
 import it.wavestream.app.ui.home.serieAKickoffLabel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
@@ -216,10 +216,18 @@ private fun TvHomeScreenContent(
         List(state.carouselRows.size) { FocusRequester() }
     }
     
+    // Su Home il backdrop è disegnato a TUTTO schermo da MainActivity, dietro la
+    // rail e la top bar: qui lo sfondo deve restare trasparente per lasciarlo
+    // vedere. Sugli altri tab (e in griglia) resta il nero pieno di prima.
+    val screenBackground = if (state.isHomeTab && !state.isGridMode && !state.isLoading) {
+        Color.Transparent
+    } else {
+        Color.Black
+    }
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black)  // l'hero sfuma nel nero: qui va tenuto nero puro
+            .background(screenBackground)
     ) {
         if (state.isLoading) {
             // Loading state
@@ -620,13 +628,15 @@ private fun TvHomeScreenContent(
                 // Hero Banner as first item
                 if (hasHero) {
                     item(key = "hero_banner") {
-                        // Rotazione: slide Serie A (una per match, solo su Home) + hero del contenuto.
-                        val allHeroes = remember(serieAHeroes, state.heroItems) {
-                            serieAHeroes + state.heroItems
+                        // Rotazione: slide Serie A (una per match, solo su Home) + hero del
+                        // contenuto. Stessa fonte di verità del backdrop full-bleed di
+                        // MainActivity, così le due superfici non possono divergere.
+                        val allHeroes = remember(state) { resolveHeroes(state) }
+                        val currentHero = remember(allHeroes, state.currentHeroIndex) {
+                            allHeroes.getOrNull(
+                                ((state.currentHeroIndex % allHeroes.size) + allHeroes.size) % allHeroes.size
+                            )
                         }
-                        val currentHero = allHeroes.getOrNull(
-                            ((state.currentHeroIndex % allHeroes.size) + allHeroes.size) % allHeroes.size
-                        )
                         currentHero?.let { hero ->
                             // Per una slide Serie A risolve il match esatto che sta mostrando.
                             val currentMatch = state.serieAMatches.firstOrNull { it.id == hero.serieAMatchId }
@@ -1028,7 +1038,11 @@ fun HeroBanner(
             }
         }
 
-        // ---- Layer 2: scrim statiche (SrcOver, nessun blend mode) --------------
+        // ---- Scrim statiche (SrcOver, nessun blend mode) -----------------------
+        // Il backdrop NON è più disegnato qui: è a TUTTO schermo in MainActivity,
+        // dietro rail e top bar (Fase 1b). Così l'immagine è una sola, immersiva e
+        // non più ritagliata in una fascia. Qui restano solo le scrim che danno
+        // contrasto al testo dell'hero.
         Box(modifier = Modifier.fillMaxSize().background(scrimHorizontal))
         Box(modifier = Modifier.fillMaxSize().background(scrimVertical))
 
