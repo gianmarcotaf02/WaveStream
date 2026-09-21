@@ -1762,11 +1762,13 @@ private fun EpisodesSectionHeader(
             
             // Download season button
             val seasonDownloadScale by animateFloatAsState(
-                targetValue = if (isSeasonDownloadFocused) 1.15f else 1f,
+                targetValue = if (isSeasonDownloadFocused) AppAnimations.GlassPillFocusScale else 1f,
+                animationSpec = AppAnimations.SpringCardFocus,
                 label = "seasonDownloadScale"
             )
             val seasonDownloadBg by animateColorAsState(
-                targetValue = if (isSeasonDownloadFocused) WaveStreamColors.Accent else WaveStreamColors.BackgroundTertiary,
+                targetValue = if (isSeasonDownloadFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+                animationSpec = AppAnimations.SpringCardFocus,
                 label = "seasonDownloadBg"
             )
             
@@ -1790,7 +1792,7 @@ private fun EpisodesSectionHeader(
                 Icon(
                     imageVector = Icons.Default.Download,
                     contentDescription = "Scarica stagione $selectedSeason",
-                    tint = if (isSeasonDownloadFocused) Color.White else WaveStreamColors.TextSecondary,
+                    tint = if (isSeasonDownloadFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -1799,15 +1801,15 @@ private fun EpisodesSectionHeader(
         // Season dropdown
         Box {
             val borderColor by animateColorAsState(
-                targetValue = if (isFocused || dropdownExpanded) WaveStreamColors.Accent else WaveStreamColors.BackgroundTertiary,
+                targetValue = if (isFocused || dropdownExpanded) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
                 label = "dropdownBorder"
             )
             
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(1.dp, borderColor, RoundedCornerShape(8.dp))
-                    .background(if (dropdownExpanded) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary)
+                    .clip(RoundedCornerShape(50))
+                    .border(1.dp, borderColor, RoundedCornerShape(50))
+                    .background(if (dropdownExpanded) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill)
                     .focusable(interactionSource = interactionSource)
                     .clickable(
                         interactionSource = interactionSource,
@@ -1870,16 +1872,19 @@ private fun SeasonTab(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.05f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "seasonScale"
     )
     
+    // Stagione selezionata = accent SOFT, non fondo accent pieno (Fase D5).
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isSelected -> WaveStreamColors.Accent
-            isFocused -> WaveStreamColors.BackgroundTertiary
-            else -> WaveStreamColors.BackgroundSecondary
+            isSelected -> WaveStreamColors.Accent.copy(alpha = 0.22f)
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            else -> GlassTokens.SurfaceFill
         },
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "seasonBg"
     )
     
@@ -1889,7 +1894,7 @@ private fun SeasonTab(
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(50))
             .background(backgroundColor)
             .focusable(interactionSource = interactionSource)
             .clickable(
@@ -1942,17 +1947,20 @@ private fun EpisodeCard(
     val isDownloadFocused by downloadInteractionSource.collectIsFocusedAsState()
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.02f else 1f,
+        targetValue = if (isFocused) 1.02f else 1f,  // liste lunghe: scala minima, nessun cambio di layout
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "episodeScale"
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.06f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "episodeBorder"
     )
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.CardBackground,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "episodeBg"
     )
     
@@ -1975,8 +1983,8 @@ private fun EpisodeCard(
                 scaleX = scale
                 scaleY = scale
             }
-                .clip(RoundedCornerShape(8.dp))
-                .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(14.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(14.dp))
                 .background(backgroundColor)
                 .focusable(interactionSource = interactionSource)
                 .onPreviewKeyEvent { keyEvent ->
