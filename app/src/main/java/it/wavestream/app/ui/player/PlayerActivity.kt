@@ -1196,7 +1196,6 @@ class PlayerActivity : ComponentActivity() {
                     return
                 }
                 hiddenSeekAccumulatedSeconds += hiddenSeekRepeatSeconds
-                android.util.Log.d("HiddenSeek", "tick acc=$hiddenSeekAccumulatedSeconds")
                 hiddenBarSeek(hiddenSeekRepeatSeconds, hiddenSeekAccumulatedSeconds)
                 hiddenSeekRepeatHandler.postDelayed(this, HIDDEN_SEEK_REPEAT_INTERVAL_MS)
             }
@@ -2271,10 +2270,10 @@ class PlayerActivity : ComponentActivity() {
         ) {
             when (event.action) {
                 KeyEvent.ACTION_DOWN -> {
-                    android.util.Log.d("HiddenSeek", "DOWN ${event.keyCode} repeat=${event.repeatCount}")
-                    // La ripetizione è gestita da noi (handler dedicato): avviamo solo
-                    // alla prima pressione e ignoriamo i repeat nativi.
-                    if (event.repeatCount == 0) {
+                    // Avvia solo se il ciclo non è già in corso: i repeat nativi
+                    // (repeatCount > 0) non devono riavviare il ciclo, altrimenti
+                    // il long-press "stalla" e il seek resta fermo a un solo passo.
+                    if (hiddenSeekRepeatRunnable == null) {
                         val step = if (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
                             -HIDDEN_SEEK_STEP_SECONDS
                         } else {
@@ -2285,7 +2284,6 @@ class PlayerActivity : ComponentActivity() {
                     return true
                 }
                 KeyEvent.ACTION_UP -> {
-                    android.util.Log.d("HiddenSeek", "UP ${event.keyCode}")
                     stopHiddenSeekRepeat()
                     return true
                 }
