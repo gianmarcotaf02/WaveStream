@@ -1,0 +1,3530 @@
+{
+  "playUpdate": {
+    "title": "Opdatering tilgængelig",
+    "body": "KIPTV {{version}} er tilgængelig i Google Play. Vil du hente den nu?",
+    "now": "Opdater nu",
+    "later": "Senere",
+    "settingsDescription": "Tjek, om der er en nyere version af KIPTV i Play Butik."
+  },
+  "sideload": {
+    "update": {
+      "title": "Opdatering tilgængelig",
+      "body": "KIPTV {{version}} er klar til installation. Vil du opdatere nu?",
+      "now": "Opdater nu",
+      "later": "Senere",
+      "downloading": "Downloader KIPTV {{version}}…",
+      "verifying": "Kontrollerer filen…",
+      "install": "Installer",
+      "readyBody": "Download fuldført. Tryk på Installer, og bekræft på systemskærmen.",
+      "failedBody": "Downloaden mislykkedes. Tjek forbindelsen, og prøv igen.",
+      "permissionTitle": "Tillad installationen",
+      "permissionBody": "Dit tv skal give KIPTV lov til at installere apps. Åbn indstillingerne, slå kontakten for KIPTV til, og kom tilbage hertil: installationen fortsætter af sig selv.",
+      "openSettings": "Åbn indstillinger",
+      "manualTitle": "Opdater med Downloader",
+      "manualBody": "Åbn appen Downloader, og indtast adressen {{link}}: den downloader og installerer den nye version oven på denne.",
+      "manualBodyWithCode": "Åbn appen Downloader, og indtast koden {{code}} (eller adressen {{link}}): den downloader og installerer den nye version oven på denne.",
+      "openDownloader": "Åbn Downloader",
+      "settingsRow": "Opdateringer",
+      "settingsDescription": "Tjek, om der findes en nyere version af KIPTV, og installer den herfra.",
+      "statusAvailable": "{{version}} tilgængelig",
+      "statusUpToDate": "Opdateret",
+      "statusChecking": "Kontrollerer…",
+      "statusUnknown": "Tjek nu"
+    }
+  },
+  "ratings": {
+    "title": "Bedømmelser",
+    "critics": "Kritikere",
+    "audience": "Publikum",
+    "fromAge": "fra {{age}} år"
+  },
+  "playback": {
+    "playWith": "Afspil med",
+    "externalPlayerSection": "Åbn i ekstern app"
+  },
+  "browser": {
+    "reload": "Genindlæs",
+    "stop": "Stop indlæsning",
+    "openInBrowser": "Åbn i browser"
+  },
+  "quickAction": {
+    "chat": {
+      "title": "Vent, slet mig ikke!",
+      "subtitle": "Chat med os – vi finder en løsning"
+    }
+  },
+  "avatars": {
+    "group": {
+      "people": "Personer",
+      "animals": "Dyr",
+      "football": "Fodbold"
+    }
+  },
+  "errors": {
+    "xtream": {
+      "networkNoCacheData": "Netværksfejl og ingen cachedata",
+      "serverRetrying": "IPTV-serverfejl - forsøger igen...",
+      "serverHttp": "Serverfejl (HTTP {{status}})",
+      "slowConnection": "Langsom forbindelse - anmodning fik timeout",
+      "rateLimitWait": "XTREAM-server sats begrænset. Prøv igen om {{seconds}}s.",
+      "rateLimitBlocked": "XTREAM-server blokerede midlertidigt anmodninger (HTTP 429). Vent {{seconds}}s og prøv igen.",
+      "serverNotFound": "XTREAM-server ikke fundet - Kontroller URL",
+      "staleCacheWarning": "Data fra cache ({{minutes}}min siden) - netværk ikke tilgængeligt",
+      "noInternet": "Ingen internetforbindelse - kontroller dit netværk",
+      "invalidRequest": "Ugyldig anmodning - kontroller playlists legitimationsoplysninger",
+      "credentialsExpired": "Legitimationsoplysninger udløbet - genautentificer playlist",
+      "accessDenied": "Adgang nægtet af IPTV-udbyder",
+      "contentNotFound": "Indhold ikke fundet hos IPTV-udbyder",
+      "tooManyRequests": "For mange anmodninger - vent et øjeblik",
+      "serverMaintenance": "IPTV-server under vedligeholdelse - prøv igen senere",
+      "serverTimeout": "IPTV-serverens timeout - langsom forbindelse",
+      "unauthorized": "Uautoriserede legitimationsoplysninger",
+      "serverUnavailable": "Server midlertidigt utilgængelig",
+      "invalidCredentials": "Ugyldige legitimationsoplysninger eller udløbet konto",
+      "connectionTimeout": "Forbindelses timeout - Server svarer ikke",
+      "networkError": "Netværksfejl - Kontroller internetforbindelsen",
+      "invalidUrl": "Ugyldig URL eller server ikke tilgængelig",
+      "unknownConnection": "Ukendt forbindelsesfejl"
+    },
+    "boundaryTitle": "Ups! Der gik noget galt",
+    "boundaryMessage": "Appen stødte på en uventet fejl. Prøv igen eller genstart appen, hvis problemet fortsætter.",
+    "limitsCheckFailed": "Kan ikke bekræfte visningsgrænser. Prøv igen senere.",
+    "limitsLoadError": "Fejl ved indlæsning af grænser. Prøv igen senere.",
+    "playlistSave": "Fejl ved gemning af playlist",
+    "playlistRemove": "Fejl ved fjernelse af playlist",
+    "playlistUpdate": "Fejl ved opdatering af playlist",
+    "unknown": "Ukendt fejl",
+    "unifiedLoad": "Fejl i samlet indlæsning",
+    "liveTVLoad": "Fejl ved indlæsning af Live",
+    "logout": "Fejl under log ud",
+    "loadError": "Fejl ved indlæsning af indhold",
+    "loadingFailed": "Indlæsning mislykkedes. Prøv venligst igen."
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "Ugyldig email eller adgangskode",
+      "invalid_email_or_password": "Ugyldig email eller adgangskode",
+      "user_not_found": "Ingen konto fundet med denne email",
+      "user_already_registered": "Denne email er allerede registreret - prøv at logge ind",
+      "password_min_length": "Adgangskode skal være mindst 6 tegn",
+      "password_too_weak": "Adgangskode er for svag - brug bogstaver, tal og symboler",
+      "same_password": "Ny adgangskode skal være anderledes end den nuværende",
+      "email_invalid_format": "Ugyldig emailadresse",
+      "email_validation_failed": "Forkert emailformat",
+      "email_invalid": "Ugyldig email",
+      "network_failed": "Ingen internetforbindelse - kontroller dit netværk",
+      "fetch_failed": "Forbindelsesfejl - prøv igen",
+      "network_error": "Netværksproblem - kontroller din forbindelse",
+      "jwt_expired": "Session udløbet - log venligst ind igen",
+      "jwt_invalid": "Ugyldig session - log ind igen",
+      "refresh_token_not_found": "Session udløbet - log ind igen",
+      "oauth_cancelled": "Login annulleret",
+      "oauth_access_denied": "Login annulleret - du nægtede adgang",
+      "oauth_redirect_mismatch": "Konfigurationsfejl - kontakt support",
+      "oauth_unauthorized": "OAuth-fejl - kontakt support",
+      "rate_limit_email": "For mange anmodninger - vent et øjeblik før du prøver igen",
+      "rate_limit_general": "For mange anmodninger - prøv igen om et par minutter",
+      "password_invalid": "Ugyldig adgangskode",
+      "security_purposes": "Af sikkerhedsårsager skal du prøve igen senere",
+      "auth_failed": "Godkendelse mislykkedes - prøv igen",
+      "bad_request": "Ugyldig anmodning - kontroller dine data",
+      "unauthorized": "Uautoriseret adgang - kontroller dine legitimationsoplysninger",
+      "rate_limit": "For mange anmodninger - vent et par minutter",
+      "server_error": "Tjeneste midlertidigt utilgængelig - prøv igen senere",
+      "default": "Godkendelsesfejl - prøv igen",
+      "email_not_confirmed": "Bekræft venligst din email før login"
+    },
+    "login": "Log ind",
+    "forgotPassword": "Glemt adgangskode?",
+    "forgotPasswordTitle": "Glemt adgangskode?",
+    "forgotPasswordSubtitle": "Indtast din email, så sender vi dig et link til at nulstille din adgangskode.",
+    "emailLabel": "E-mail",
+    "sendResetEmail": "Send nulstillings-email",
+    "resetEmailSent": "✅ Kontroller din email for nulstillinkslink",
+    "resetEmailError": "Kunne ikke sende email. Prøv venligst igen.",
+    "resetPasswordTitle": "Nulstil adgangskode",
+    "resetPasswordSubtitle": "Indtast din nye adgangskode nedenfor",
+    "newPassword": "Ny adgangskode",
+    "confirmPassword": "Bekræft adgangskode",
+    "resetPasswordButton": "Nulstil adgangskode",
+    "resetPasswordSuccess": "✅ Adgangskode nulstillet med succes!",
+    "passwordsDoNotMatch": "Adgangskoderne stemmer ikke overens",
+    "backToLogin": "Tilbage til login",
+    "loginTitle": "Velkommen tilbage",
+    "loginSubtitle": "Log ind for at gendanne playlists, lister og fremskridt.",
+    "emailPlaceholder": "mail@eksempel.dk",
+    "noAccountPrompt": "Har du ikke en konto?",
+    "registerCta": "Registrer dig nu",
+    "createAccountTitle": "Opret konto",
+    "createAccountSubtitle": "Synkroniser playlists og præferencer på tværs af alle dine enheder.",
+    "createAccountButton": "Opret konto",
+    "alreadyHaveAccountCta": "Har du allerede en konto?",
+    "tagline": "Din underholdning, overalt",
+    "continueWithGoogle": "Fortsæt med Google",
+    "continueWithApple": "Fortsæt med Apple",
+    "signInWithGoogle": "Log ind med Google",
+    "continueWithEmail": "Fortsæt med email",
+    "termsPrefix": "Ved at fortsætte accepterer du vores",
+    "termsOfService": "Servicevilkår",
+    "privacyPolicy": "Privatlivspolitik",
+    "appleCredentialsInvalid": "Ugyldige Apple-legitimationsoplysninger",
+    "appleSignInError": "Apple Sign In-fejl",
+    "googleComingSoon": "Google Sign In vil snart være tilgængeligt",
+    "registerSubtitle": "Indtast dine detaljer for at registrere dig",
+    "welcomeBack": "Velkommen tilbage!",
+    "resetEmailSentMessage": "Nulstillings-email sendt! Kontroller din indbakke.",
+    "register": "Registrer",
+    "invalidEmailFirst": "Indtast venligst en gyldig email først",
+    "changePassword": "Skift adgangskode"
+  },
+  "common": {
+    "returnToHomeTitle": "Vil du vende tilbage til hjemmeskærmen?",
+    "on": "Til",
+    "off": "Fra",
+    "loading": "Indlæser...",
+    "error": "Fejl",
+    "success": "Succes",
+    "retry": "Prøv igen",
+    "cancel": "Annuller",
+    "confirm": "Bekræft",
+    "delete": "Slet",
+    "save": "Gem",
+    "close": "Luk",
+    "back": "Tilbage",
+    "next": "Næste",
+    "done": "Udført",
+    "ok": "OK",
+    "edit": "Rediger",
+    "name": "Navn",
+    "domain": "Domæne",
+    "url": "URL",
+    "username": "Brugernavn",
+    "password": "Adgangskode",
+    "or": "eller",
+    "saveChanges": "Gem ændringer",
+    "resumeFrom": "Fortsæt fra {{time}}",
+    "completed": "{{percent}}% gennemført",
+    "resume": "Fortsæt",
+    "plot": "Handling",
+    "cast": "Besetzung",
+    "directedBy": "Instrueret af",
+    "genres": "Genrer",
+    "trailer": "Trailer",
+    "trailerComingSoon": "Trailer kommer snart",
+    "continue": "Fortsæt",
+    "download": "Hent",
+    "cancelDownload": "Annuller download",
+    "downloaded": "Hentet",
+    "saving": "Gemmer...",
+    "fillFields": "Udfyld felterne",
+    "contents": "indhold",
+    "noContent": "Intet indhold",
+    "addPlaylistToSeeContent": "Tilføj en playlist for at se indhold",
+    "remove": "Fjern",
+    "item": "element",
+    "items": "elementer",
+    "day": "dag",
+    "days": "dage",
+    "descriptionNotAvailable": "Beskrivelse ikke tilgængelig",
+    "titleNotAvailable": "Titel ikke tilgængelig",
+    "unknownTitle": "Ukendt titel",
+    "and": "og",
+    "search": "Søg",
+    "seeAll": "Se alle",
+    "episodes": "episoder"
+  },
+  "loading": {
+    "triviaTitle": "Vidste du det?"
+  },
+  "settings": {
+    "heroStyle": "Fremhævet stil",
+    "heroStyleSubtitle": "Sådan vises fremhævet indhold øverst i Film og Serier",
+    "heroStyleFull": "Fuld skærm",
+    "heroStyleCard": "Kort",
+    "introSkip": {
+      "enabled": "Spring intro over",
+      "subtitle": "Vis en «Spring intro over»-knap under afsnittenes intro.",
+      "autoEnabled": "Spring over automatisk",
+      "autoSubtitle": "Springer automatisk over resumé og intro uden at trykke.",
+      "defaultLength": "Standardspringlængde",
+      "seconds": "{{seconds}}s",
+      "autoSkip": "Spring over automatisk",
+      "autoSkipSubtitle": "Springer automatisk over resumé og intro uden at trykke."
+    },
+    "title": "Indstillinger",
+    "account": "Konto",
+    "playlist": "Spilleliste",
+    "videoQuality": "Videokvalitet",
+    "downloads": "Overførsler",
+    "cache": "Cache",
+    "auto": "Auto",
+    "changePlaylist": "Skift playlist",
+    "sortHideCategories": "Sorter / skjul kategorier",
+    "sortHideCategoriesSubtitle": "Tilpas film, serier og kanaler for denne playlist.",
+    "logout": "Log ud",
+    "logoutConfirm": "Er du sikker på, at du vil logge ud?",
+    "language": "Sprog",
+    "manageAccount": "Administrer konto",
+    "playlistComingSoon": "Playlistindstillinger kommer snart",
+    "playlistComingSoonSubtitle": "Vi glitrer på playlistkontroller. Hold øje.",
+    "about": "Om",
+    "version": "Version",
+    "support": "Støtte",
+    "supportDiscord": "Deltag i vores Discord-fællesskab",
+    "followUs": "Følg os på X",
+    "followUsDescription": "Gå ikke glip af de seneste opdateringer og nyheder",
+    "followUsScanHint": "Scan for at følge på X",
+    "followUsInstagram": "Følg os på Instagram",
+    "followUsInstagramScanHint": "Scan for at følge på Instagram",
+    "feedback": {
+      "subtitle": "Rapportér fejl, foreslå forbedringer, anmod om nye funktioner"
+    },
+    "termsOfService": "Servicevilkår",
+    "privacyPolicy": "Privatlivspolitik",
+    "termsDescription": "Læs vores Servicevilkår",
+    "privacyDescription": "Læs vores Privatlivspolitik",
+    "supportQRTitle": "Deltag i KIPTV Support",
+    "supportQRSubtitle": "Scan denne QR-kode med din iPhone eller iPad for at åbne vores Discord-fællesskab",
+    "myPlaylists": "Mine playlists",
+    "appSection": "App",
+    "infoSection": "Info",
+    "logoutWarning": "Du skal logge ind igen",
+    "playlistManagement": "Playlistadministration",
+    "contentManagement": "Indholdsstyring",
+    "contentManagementSubtitle": "Sorter, skjul og lås playlistindhold",
+    "deviceSection": "Enhed",
+    "subtitleLanguage": "Undertekstsprog",
+    "subtitleOff": "Slået fra",
+    "subtitleAuto": "Standard",
+    "audioLanguage": "Lydsproget",
+    "defaultLanguages": "Standardsprog",
+    "audioOriginal": "Original",
+    "autoplayNextEpisode": "Automatisk afspilning af næste episode",
+    "backgroundPlayback": "Baggrundsafspilning",
+    "backgroundPlaybackSubtitle": "Lyden bliver ved med at spille, når du forlader appen og går til tv'ets startskærm. Når den er slået fra, sættes afspilningen på pause og fortsætter, når du vender tilbage til KIPTV.",
+    "skipForward": "Spring frem",
+    "skipBackward": "Spring tilbage",
+    "seconds5": "5 sekunder",
+    "seconds10": "10 sekunder",
+    "seconds15": "15 sekunder",
+    "seconds30": "30 sekunder",
+    "playerEngine": "Afspiller",
+    "playerSelectEngine": "Vælg afspillermotor",
+    "playerAuto": "Auto",
+    "playerNative": "Nativ (AVPlayer)",
+    "playerExo": "ExoPlayer",
+    "playerMPV": "MPV",
+    "playerAether": "Aether",
+    "playerVLC": "VLC",
+    "playerKSPlayer": "KSPlayer",
+    "playerMoviesSeries": "Afspiller til film og serier",
+    "playerLive": "Afspiller til Live",
+    "playerFallbackOnFailure": "Brug andre afspillere hvis den valgte fejler",
+    "playerFallbackDescription": "Prøv automatisk en anden afspillermotor hvis den valgte fejler",
+    "metadata": "Metadata",
+    "metadataSection": "Metadata",
+    "metadataSource": "Metadatakilde",
+    "smartHide": "Smart skjul",
+    "metadataWeb": "Web",
+    "metadataPlaylist": "Spilleliste",
+    "metadataSubtitle": "Web: plakater, vurderinger og beskrivelser fra nettet. Playlist: brug kun data fra IPTV-udbyder.",
+    "titleCleaning": "Rens film- og serietitler",
+    "titleCleaningSubtitle": "Fjern kvalitetsmærker, sprogetiketter og år fra streamtitler",
+    "includeAdultContent": "Inkluder indhold for voksne",
+    "hiddenCategories": "Skjulte kategorier",
+    "hiddenCategoriesCount": "{{count}} skjult",
+    "noHiddenCategories": "Ingen skjulte kategorier",
+    "languageAuto": "Systemstandard",
+    "settingsCategories": "Kategorier",
+    "general": "Generelt",
+    "playback": "Afspilning",
+    "playbackVodSection": "Film og serier",
+    "playbackLiveSection": "Live",
+    "networkPerformance": "Netværk og ydelse",
+    "networkRequestsSection": "Anmodninger",
+    "requestTimeout": "Anmodnings timeout",
+    "retryAttempts": "Forsøg igen",
+    "cacheFallbackOnError": "Brug gammelt cache ved netværksfejl",
+    "clearRuntimeCaches": "Ryd runtime-caches",
+    "localOnly": "Disse indstillinger gemmes kun på denne enhed.",
+    "contentSection": "Indhold",
+    "parentalControl": "Forældreskab kontrol",
+    "contentControl": "Indholdskontrol",
+    "contentControlDisabled": "Kontroller slået fra",
+    "contentControlEnabled": "Kontroller aktiveret",
+    "parentalControlEnabled": "Aktivér forældreskab kontrol",
+    "parentalRequirePinForSettings": "Kræv PIN for at åbne indstillinger",
+    "disableParentalTitle": "Deaktiver forældreskab kontrol?",
+    "disableParentalMessage": "Alt aktuelt låst indhold og kategorier låses op.",
+    "disableParentalConfirm": "Deaktiver og lås op",
+    "parentalManageHint": "For at låse eller låse op for kategorier og elementer skal du gå til indholdsstyring",
+    "enterPin": "Indtast PIN",
+    "lockedContentSubtitle": "Dette indhold er låst. Indtast din PIN for at fortsætte.",
+    "hideAdultCategories": "Skjul voksen kategorier (XXX)",
+    "pinSection": "PIN",
+    "setPin": "Indstil PIN",
+    "changePin": "Skift PIN",
+    "removePin": "Fjern PIN",
+    "parentalPin": "4-cifret PIN",
+    "parentalPinConfirm": "Bekræft PIN",
+    "pinMustBe4Digits": "PIN skal være præcis 4 cifre.",
+    "pinMismatch": "PINs stemmer ikke overens.",
+    "diagnostics": "Diagnostik",
+    "diagnosticsHealthy": "Ingen problemer opdaget",
+    "diagnosticsIssueDetected": "Opmærksomhed påkrævet",
+    "diagnosticsPlaylistSection": "Playlistatus",
+    "diagnosticsEpgSection": "EPG-status",
+    "diagnosticsErrorsSection": "Seneste fejl",
+    "diagnosticsActionsSection": "Handlinger",
+    "diagnosticsXmltvChannels": "XMLTV-kanaler",
+    "diagnosticsXmltvPrograms": "XMLTV-programmer",
+    "diagnosticsEpgCache": "EPG-cache",
+    "diagnosticsXtreamError": "Xtream",
+    "diagnosticsPlaylistError": "Spilleliste",
+    "diagnosticsXmltvError": "XMLTV",
+    "noIssuesDetected": "Ingen fejl",
+    "refreshDiagnostics": "Opdater diagnostik",
+    "diagnosticsRefreshed": "Diagnostik opdateret",
+    "runtimeCacheCleared": "Runtime-caches ryddet",
+    "clearPosterCache": "Ryd plakat-cache",
+    "clearPosterCacheSubtitle": "Tvinger plakatomslag til at blive hentet igen fra netværket. Brug dette, hvis du ser pladsholdere i stedet for omslag.",
+    "clearPosterCacheDone": "Plakat-cache ryddet",
+    "statusIdle": "Ledig",
+    "statusReady": "Klar",
+    "statusNever": "Aldrig",
+    "lastUpdate": "Sidst opdateret",
+    "lastContentUpdate": "Sidst indholdsopdatering",
+    "xmltvStatus": "XMLTV-status",
+    "moviesLoaded": "Film indlæst",
+    "seriesLoaded": "Serier indlæst",
+    "channelsLoaded": "Kanaler indlæst",
+    "infoPlaylistSection": "Playlistdetaljer",
+    "infoContentSection": "Indlæst indhold",
+    "infoAccountSection": "Status på udbyders konto",
+    "activePlaylistSection": "Aktiv playlist",
+    "savedPlaylistsSection": "Gemte playlists",
+    "active": "Aktiv",
+    "noSavedPlaylists": "Ingen gemte playlists",
+    "vodAskBeforeAutoplay": "Spørg før autoplay næste episode",
+    "liveStartMuted": "Start live-kanaler stummede",
+    "liveOpenEpgOnChannelChange": "Åbn EPG ved kanalskift",
+    "livePreferLowLatency": "Foretrækker lav latens for live",
+    "epgPreviewMode": "EPG-forhåndsvisning",
+    "epgPreviewModeDescription": "Vælg, om der skal startes en forhåndsvisning af kanalen på EPG-skærmen.",
+    "epgPreviewModeOff": "Fra",
+    "epgPreviewModeOnFocus": "Ved fokus",
+    "epgPreviewModeOnTap": "Ved tryk",
+    "epgPreviewModeLowMemoryWarning": "På ældre tv-modeller kan dette forårsage forsinkelser.",
+    "liveTVPreviewMode": "Live TV-forhåndsvisning",
+    "liveTVPreviewModeDescription": "Vælg, om der skal startes en kanalforhåndsvisning, mens du gennemser Live TV-skærmen.",
+    "liveTVPreviewModeOff": "Fra",
+    "liveTVPreviewModeOnFocus": "Ved fokus",
+    "liveTVPreviewModeOnTap": "Ved tryk",
+    "liveTabLayout": "Layout for Live-skærm",
+    "liveTabLayoutDescription": "Vælg, hvad Live-skærmen viser.",
+    "liveTabLayoutChannelList": "Kanalliste",
+    "liveTabLayoutCarousel": "Karruseller",
+    "hideItem": "Skjul element",
+    "hideGroupedChannelTitle": "Skjul alle versioner",
+    "hideGroupedChannelMessage": "Dette vil skjule alle {{count}} kvalitetsversioner af denne kanal. Vil du fortsætte?",
+    "lockGroupedChannelTitle": "Lås alle versioner",
+    "lockGroupedChannelMessage": "Dette vil låse alle {{count}} kvalitetsversioner af denne kanal. Vil du fortsætte?",
+    "unlockGroupedChannelTitle": "Lås op alle versioner",
+    "unlockGroupedChannelMessage": "Dette vil låse alle {{count}} kvalitetsversioner af denne kanal op. Vil du fortsætte?",
+    "unhide": "Vis",
+    "hiddenItems": "Skjulte elementer",
+    "noHiddenItems": "Ingen skjulte elementer",
+    "hiddenItemsCount": "{{count}} skjult",
+    "autoHideKeywords": "Nøgleord til automatisk skjulning",
+    "autoHideKeywordsHeader": "Nøgleord",
+    "autoHideKeywordsFooter": "Kategorier indeholdende disse nøgleord vil automatisk blive skjult fra alt indhold.",
+    "addKeywordPlaceholder": "f.eks. 'xxx'",
+    "autoHidden": "Automatisk skjult",
+    "categoryOrder": "Kategorirækkefølge",
+    "categoryOrderFooter": "Træk kategorier for at omarrangere dem. Dette indstiller en brugerdefineret sorteringsrækkefølge.",
+    "reorderSearchDisabled": "Ryd søgningen for at ændre rækkefølge",
+    "resetOrder": "Nulstil rækkefølge",
+    "hiddenCategoriesFooter": "Til/fra synlighed for hver kategori. Auto-skjulte kategorier administreres via nøgleord.",
+    "noCategoriesAvailable": "Ingen kategorier tilgængelige",
+    "manageCategories": "Administrer kategorier",
+    "manageCategoriesHeader": "Træk for at omarrangere. Tryk på øjet for at vise/skjule.",
+    "manageCategoriesHeaderFull": "Træk for at omarrangere. Tryk på øjet for at vise/skjule. Tryk på en kategori for at administrere dens indhold.",
+    "autoHiddenSection": "Automatisk skjult",
+    "autoHideKeywordsFooterPerType": "Kategorier indeholdende disse nøgleord vil automatisk blive skjult.",
+    "autoHiddenCategoriesSection": "Kategorier skjult af nøgleord",
+    "allHiddenContent": "Skjult indhold",
+    "allLockedContent": "Låst indhold",
+    "hiddenCategoriesSection": "Skjulte kategorier",
+    "hiddenItemsSection": "Skjulte elementer",
+    "lockedCategoriesSection": "Låste kategorier",
+    "lockedItemsSection": "Låste elementer",
+    "showAll": "Vis alle",
+    "unlockAllItems": "Lås alle op",
+    "showAllConfirmTitle": "Vis alt skjult indhold?",
+    "showAllConfirmMessage": "Dette vil vise alle {{count}} skjulte kategorier og elementer. Vil du fortsætte?",
+    "unlockAllConfirmTitle": "Lås alt indhold op?",
+    "unlockAllConfirmMessage": "Dette vil låse alle {{count}} låste kategorier og elementer op. Vil du fortsætte?",
+    "noItemsInCategory": "Ingen elementer i denne kategori",
+    "contentType": "Indholdstype",
+    "contentTypeDescription": "Vælg hvilken indholdtype der skal administreres",
+    "categorySortDescription": "Skift hvordan kategorier er ordnet i listen",
+    "allHiddenContentDescription": "Gennemse og gendannels alt skjult indhold og kategorier",
+    "allLockedContentDescription": "Gennemse og låse alt låst indhold og kategorier op",
+    "categoryTapDescription": "Tryk for at administrere indholdet i denne kategori",
+    "categoryEyeDescription": "Tryk for at vise eller skjule denne kategori",
+    "categoryLockDescription": "Tryk for at låse eller låse op for denne kategori",
+    "categoryMoveDescription": "Tryk for at flytte denne kategori op eller ned",
+    "contentSortDescription": "Skift hvordan elementer sorteres i denne kategori",
+    "filterItemsDescription": "Skriv for at filtrere elementer efter navn",
+    "itemEyeDescription": "Tryk for at vise eller skjule dette element",
+    "itemLockDescription": "Tryk for at låse eller låse op for dette element",
+    "categoryContentDescription": "Administrer individuelle elementer i denne kategori",
+    "addKeywordDescription": "Indtast et nøgleord for automatisk at skjule matchende kategorier",
+    "removeKeywordDescription": "Lang tryk et nøgleord for at fjerne det",
+    "unhideCategoryDescription": "Tryk knappen for at vise denne kategori",
+    "unhideItemDescription": "Tryk knappen for at vise dette element",
+    "showAllDescription": "Vis alle skjulte kategorier og elementer på én gang",
+    "unlockCategoryDescription": "Tryk knappen for at låse denne kategori op",
+    "unlockItemDescription": "Tryk knappen for at låse dette element op",
+    "unlockAllDescription": "Lås alle låste kategorier og elementer op på én gang",
+    "showCategory": "Vis kategori",
+    "hideCategory": "Skjul kategori",
+    "lockCategory": "Lås kategori",
+    "unlockCategory": "Lås kategori op",
+    "renameCategory": "Omdøb kategori",
+    "moveCategoryToTop": "Flyt øverst",
+    "restoreCategoryName": "Gendan oprindeligt navn",
+    "renameChannel": "Omdøb kanal",
+    "moveChannelToTop": "Flyt øverst",
+    "restoreChannelName": "Gendan oprindeligt navn",
+    "showItem": "Vis element",
+    "lockItem": "Lås",
+    "unlockItem": "Lås op",
+    "removeKeyword": "Fjern nøgleord",
+    "removeKeywordConfirm": "Fjern \"{{keyword}}\"?",
+    "moveToTop": "Flyt til toppen",
+    "moveUp": "Flyt op",
+    "moveDown": "Flyt ned",
+    "moveToBottom": "Flyt til bunden",
+    "defaultStartScreen": "Startskærm",
+    "defaultStartScreenSubtitle": "Vælg hvilken fane der åbnes, når du går ind i en playlist",
+    "autoOpenPlaylist": "Åbn playliste automatisk",
+    "autoOpenPlaylistSubtitle": "Hvilken playliste der åbnes, når appen starter",
+    "autoOpenPlaylistOff": "Nej",
+    "autoOpenPlaylistLast": "Seneste playliste",
+    "startScreenMovies": "Film",
+    "startScreenSeries": "Serier",
+    "startScreenLive": "Live",
+    "startScreenGuide": "Guide",
+    "incognitoMode": "Inkognito-tilstand",
+    "incognitoModeSubtitle": "Se uden at gemme fremskridt eller historie på denne enhed",
+    "incognitoActive": "Inkognito-tilstand er aktiv",
+    "privacy": "Privatliv",
+    "recentlyWatchedLive": "Vis 'Sent set'",
+    "recentlyWatchedLiveSubtitle": "Vis en \"Sent viste\" kategori øverst i Live",
+    "continueWatchingTapPlays": "Afspil med et tryk",
+    "continueWatchingTapPlaysSubtitle": "Tryk på \"Fortsæt med at se\" afspiller direkte. Når det er slået fra, åbnes detaljskærmen.",
+    "metadataLanguage": "Metadatasproget",
+    "metadataLanguageSubtitle": "Sproget for film-, serie- og programoplysninger (TMDB)",
+    "metadataLanguageAuto": "Samme som app",
+    "subtitleStyling": "Undertekstudseende",
+    "subtitleFontSize": "Skriftstørrelse",
+    "subtitleFontSizeSmall": "Lille",
+    "subtitleFontSizeMedium": "Mellem",
+    "subtitleFontSizeLarge": "Stor",
+    "subtitleFontSizeXLarge": "Ekstra stor",
+    "subtitleColor": "Tekstfarve",
+    "subtitleColorWhite": "Hvid",
+    "subtitleColorYellow": "Gul",
+    "subtitleColorGreen": "Grøn",
+    "subtitleColorCyan": "Cyan",
+    "subtitleColorOrange": "Orange",
+    "subtitleBackground": "Baggrund",
+    "subtitleBackgroundNone": "Ingen",
+    "subtitleBackgroundSemiTransparent": "Halvgennemsigtig",
+    "subtitleBackgroundOpaque": "Uigennemsigtig",
+    "subtitlePosition": "Position",
+    "subtitlePositionBottom": "Nederst",
+    "subtitlePositionTop": "Øverst",
+    "subtitleStyleSourceSystem": "Systemindstillinger",
+    "subtitleStyleSourceCustom": "Brugerdefineret",
+    "subtitleFont": "Skrifttype",
+    "subtitleFontDefault": "Standard",
+    "subtitleFontRounded": "Afrundet",
+    "subtitleFontSerif": "Serif",
+    "subtitleFontMono": "Monospace",
+    "subtitleBold": "Fed",
+    "subtitleEdge": "Kant",
+    "subtitleEdgeNone": "Ingen",
+    "subtitleEdgeShadow": "Skygge",
+    "subtitleEdgeOutline": "Kontur",
+    "subtitleStyleSource": "Undertekststil",
+    "subtitleStyleSystemHint": "Bruger enhedens systemindstillinger for undertekster",
+    "subtitlePreview": "Forhåndsvisning",
+    "subtitlePreviewText": "Sådan ser undertekster ud",
+    "networkBuffer": "Netværksbuffer",
+    "networkBufferSubtitle": "Hvor meget video der skal forhåndslæses. Større værdier hjælper med langsomme forbindelser.",
+    "networkBufferAuto": "Auto",
+    "hardwareAcceleration": "Hardwareacceleration",
+    "hardwareAccelerationSubtitle": "Brug GPU til videoafkodning. Deaktiver hvis du oplever nedbrud.",
+    "hardwareAccelerationOn": "Til",
+    "hardwareAccelerationOff": "Fra",
+    "hardwareAccelerationAuto": "Auto",
+    "deinterlacing": "Deinterlacing",
+    "deinterlacingSubtitle": "Konverter interlaced video til progressiv. Nyttigt til live-kanaler.",
+    "deinterlacingAuto": "Auto",
+    "deinterlacingOff": "Slået fra",
+    "liveStreamFormat": "Live stream-format",
+    "liveStreamFormatSubtitle": "Auto vælger det bedste format baseret på afspillermotor: HLS til AVPlayer, MPEG-TS til KSPlayer/VLC/MPV/Aether",
+    "groupSimilarChannels": "Gruppér lignende kanaler",
+    "groupSimilarChannelsSubtitle": "Kombiner HD, 4K, FHD-varianter af samme kanal til en post",
+    "splitMyListByTag": "Opdel Min liste efter tag",
+    "showTrending": "Vis 'Trending'",
+    "hideEmptyTabs": "Skjul tomme faner",
+    "hideEmptyTabsSubtitle": "Skjuler fanen Film, Serier eller Live, når afspilningslisten ikke har indhold af den type",
+    "showTrendingSubtitle": "Vis trending-banneret og karrusellerne på startskærmen",
+    "showRecentlyAdded": "Vis 'Nyligt tilføjet'",
+    "splitMyListByTagSubtitle": "Vis et karrusel for hver tag i stedet for én blandet liste",
+    "showRecentlyAddedSubtitle": "Fremhæv indhold tilføjet inden for de seneste 30 dage",
+    "chooseQuality": "Vælg kvalitet",
+    "contentRefreshFrequency": "Indholdsopfriskningstakst",
+    "contentRefreshEveryAccess": "Ved hver adgang",
+    "contentRefreshFrequencySubtitle": "Hvor ofte skal alt playlistindhold genindlæses (kategorier, film, serier, kanaler)",
+    "epgRefreshFrequency": "EPG-opfriskningstakst",
+    "epgRefreshFrequencySubtitle": "Hvor ofte skal programguidedata genindlæses",
+    "epgRefreshMinutes": "{{count}} min",
+    "epgRefreshHours": "{{count}} t",
+    "epgForceRefresh": "Opdater EPG nu",
+    "customUserAgent": "User agent",
+    "customUserAgentSubtitle": "Brugerdefineret HTTP user agent til streamanmodninger. Lad stå tom for standard.",
+    "customUserAgentDefault": "Standard",
+    "playerComparison": "Afspiller sammenligning",
+    "playerComparisonSubtitle": "Sammenlign funktioner for hver afspillermotor",
+    "playerComparisonEngine": "Motor",
+    "playerComparisonFormats": "Formater",
+    "playerComparisonPros": "Styrker",
+    "playerComparisonCons": "Svagheder",
+    "playerAvplayerPro1": "Bedste batterilevetid og systemintegration",
+    "playerAvplayerPro2": "Inbygget AirPlay og Picture-in-Picture support",
+    "playerAvplayerPro3": "Mest pålideligt til HLS-streams",
+    "playerAvplayerCon1": "Begrænset formatstøtte (ingen MKV, AVI, RTSP)",
+    "playerAvplayerCon2": "Ingen softwareafkodning fallback",
+    "playerKsplayerPro1": "Bredeste format- og codec-understøttelse",
+    "playerKsplayerPro2": "Hardware og softwareafkodning",
+    "playerKsplayerPro3": "Undertekst og audiotrack valg",
+    "playerKsplayerCon1": "Højere batteriforbrugelse",
+    "playerKsplayerCon2": "Lejlighedsvise stabilitets problemer med nogle streams",
+    "playerVlcPro1": "Fremragende formatkompatibilitet",
+    "playerVlcPro2": "Moden og testet motor",
+    "playerVlcPro3": "Godt håndtering af problematiske streams",
+    "playerVlcCon1": "Højere hukommelsesforbrug",
+    "playerVlcCon2": "Ingen indfødt iOS-kontrolintegration",
+    "liveTvSettings": "Live",
+    "advancedSettings": "Avanceret",
+    "lockedCategories": "Låste kategorier",
+    "lockedItems": "Låste elementer",
+    "pinRequired": "PIN påkrævet",
+    "pinRequiredMessage": "Indtast din 4-cifret PIN for at fortsætte",
+    "pinIncorrect": "Forkert PIN",
+    "pinTryAgain": "Prøv venligst igen",
+    "pinSetSuccess": "PIN indstillet med succes",
+    "pinRemovedSuccess": "PIN fjernet",
+    "pinChangedSuccess": "PIN ændret",
+    "enterCurrentPin": "Indtast nuværende PIN",
+    "enterNewPin": "Indtast ny PIN",
+    "confirmNewPin": "Bekræft ny PIN",
+    "recentlyWatched": "Sent viste",
+    "credits": "Anerkendelser",
+    "creditsMovieData": "Dette produkt bruger TMDB API men er ikke godkendt eller certificeret af TMDB.",
+    "creditsOpenSource": "Open Source-licenser",
+    "creditsVLC": "Videoafspilning drevet af VLC — LGPLv2.1",
+    "creditsKSPlayer": "Avanceret afspilning drevet af KSPlayer",
+    "creditsFFmpeg": "Denne software bruger biblioteker fra FFmpeg-projektet — LGPLv2.1",
+    "creditsMPV": "Reserveafspilning drevet af MPV (libmpv) — LGPLv2.1+",
+    "devices": "Enheder",
+    "linkTV": "Forbind en TV",
+    "accountDescription": "Se kontooplysninger og abonnementstatus",
+    "premiumDescription": "Lås ubegrænset streaming og præmium-funktioner op",
+    "generalDescription": "Sproget og opstartsindstillinger",
+    "playbackDescription": "Afspillermotor, undertekster, lyd og avancerede muligheder",
+    "parentalControlsDescription": "PIN-beskyttelse til at begrænse adgang til indhold og indstillinger",
+    "metadataDescription": "Sproget og kildeindstillinger for film- og TV-serieoplysninger",
+    "playlistInfoDescription": "Serverdetaljer, indholdstællinger og EPG-status",
+    "reloadPlaylistDescription": "Genindlæs alt playlistindhold fra serveren",
+    "reloadEPGDescription": "Genindlæs programguidedata fra serveren",
+    "changePlaylistDescription": "Skift til en anden IPTV-playlist",
+    "versionDescription": "Nuværende app-version og build-nummer",
+    "creditsDescription": "Open source biblioteker og tjenester brugt af KIPTV",
+    "services": "Tjenester",
+    "logoutDescription": "Log ud af din konto på denne enhed",
+    "defaultDescription": "Konfigurer KIPTV efter dine præferencer",
+    "languageDescription": "Vælg app-grænsefladesprog",
+    "startScreenDescription": "Vælg hvilken fane der åbnes først, når du går ind i en playlist",
+    "autoOpenPlaylistDescription": "Spring valg af playliste over, og åbn den senest brugte eller en bestemt playliste ved start",
+    "playerEngineDescription": "Vælg videoafspillermotoren til indholdafspilning",
+    "autoplayNextEpisodeDescription": "Afspil automatisk næste episode, når den nuværende slutter",
+    "subtitleLanguageDescription": "Standardsproget for undertekster",
+    "audioLanguageDescription": "Standardsproget for lydspor",
+    "subtitleStylingDescription": "Tilpas undertekstskriftstørrelse, farve, baggrund og position",
+    "metadataSourceDescription": "Vælg hvor du får film- og serieoplysninger fra",
+    "titleCleaningDescription": "Fjern kvalitetsmærker (HD, 4K, FHD osv.) og andet brus fra titler",
+    "setPinDescription": "Indstil en 4-cifret PIN for at beskytte indstillinger og indhold",
+    "changePinDescription": "Skift din PIN for forældreskab kontrol",
+    "removePinDescription": "Fjern PIN-beskyttelse fra denne enhed",
+    "parentalEnabledDescription": "Når aktiveret skjules låst indhold fra hovedlisterne",
+    "requirePinForSettingsDescription": "Kræv PIN for at få adgang til indstillingsskærmen",
+    "subtitleFontSizeDescription": "Størrelse på undertekst på skærmen",
+    "subtitleBackgroundDescription": "Baggrund bag undertekst for bedre læselighed",
+    "subtitlePositionDescription": "Hvor undertekster vises på skærmen",
+    "subtitleColorDescription": "Farve på undertekstfarve",
+    "accountPlanDescription": "Dit nuværende abonnementplan",
+    "accountPlaylistLimitDescription": "Maksimalt antal playlists du kan gemme",
+    "accountSubscriptionDescription": "Administrer dit Premium-abonnement",
+    "accountDailyUsageDescription": "Din daglige streamingbrug og resterende tid",
+    "accountProfileDescription": "Din kontoprofil og loginoplysninger",
+    "dangerZone": "Farezonen",
+    "resetProgressButton": "Nulstil alt se-fremskridt",
+    "resetProgressSubtitle": "Slet permanent alt se-fremskridt for film og serier",
+    "resetProgressTitle": "Nulstil alt se-fremskridt?",
+    "resetProgressMessage": "Dette vil permanent slette ALT se-fremskridt for denne playlist, herunder filmfremskridt, serieepisode-tracking og fuldførelsestatus.\n\nDenne handling er irreversibel.",
+    "resetProgressSuccess": "Alt se-fremskridt er blevet nulstillet",
+    "deleteAccount": "Slet konto",
+    "deleteAccountDescription": "Slet din konto og alle data permanent",
+    "deleteAccountTitle": "Slet konto?",
+    "deleteAccountMessage": "Dette vil permanent slette din konto og alle tilknyttede data, herunder playlister, afspilningshistorik, lister og indstillinger.\n\nDenne handling kan ikke fortrydes.",
+    "deleteAccountConfirm": "Slet min konto",
+    "deleteAccountFinalTitle": "Er du helt sikker?",
+    "deleteAccountFinalMessage": "Dette er din sidste chance. Din konto og alle data vil blive permanent slettet.",
+    "deletingAccount": "Sletter konto...",
+    "openSubtitles": {
+      "title": "OpenSubtitles",
+      "description": "Søg og download undertekster fra OpenSubtitles",
+      "username": "Brugernavn",
+      "password": "Adgangskode",
+      "logIn": "Log ind",
+      "logOut": "Log ud",
+      "loggedIn": "Logget ind som {{username}}",
+      "notLoggedIn": "Uden en konto kan du hente op til 5 undertekster pr. dag. Log ind med din gratis OpenSubtitles.com-konto for at øge grænsen til 20 pr. dag.",
+      "remainingDownloads": "Downloads tilbage i dag: {{count}}",
+      "loginRequired": "Log ind for flere downloads",
+      "clearCache": "Ryd undertekst cache",
+      "usernameDescription": "Indtast dit OpenSubtitles-brugernavn",
+      "passwordDescription": "Indtast din OpenSubtitles-adgangskode",
+      "loginDescription": "Log ind for at øge din daglige downloadgrænse",
+      "loggedInDescription": "Din OpenSubtitles-konto er aktiv",
+      "logoutDescription": "Log ud fra din OpenSubtitles-konto",
+      "clearCacheDescription": "Fjern alle cachelagte undertekster fra lokal lagring",
+      "multipleOptions": "Flere undertekstmuligheder",
+      "multipleOptionsDescription": "Vis alle tilgængelige undertekster pr. sprog sorteret efter vurdering i stedet for kun den bedste."
+    },
+    "clearAllHidden": "Ryd alle",
+    "hiddenContinueWatching": "Skjult fra Fortsæt afspilning",
+    "epgSource": "EPG-kilde",
+    "epgLoadingStatus": "Indlæsningsstatus for EPG",
+    "epgSourceCustomUrl": "Brugerdefineret URL",
+    "epgSourceXtreamServer": "Xtream-server",
+    "epgSourceNone": "Ingen",
+    "parentalControlsSection": "Forældrekontrol",
+    "contentDisplaySection": "Visning",
+    "contentOrganizationSection": "Organisering",
+    "contentDataSection": "Data og opdatering",
+    "contentDescription": "Visning, organisering og opdatering af indhold",
+    "autoQuality": "Automatisk kvalitet (eksperimentel)",
+    "autoQualitySubtitle": "Starter grupperede kanaler i den bedste kvalitet for din forbindelse og sænker den, hvis streamen bliver ved med at buffere. Hver ændring genindlæser kanalen, så billedet kan blive sort et øjeblik.",
+    "securitySection": "Sikkerhed",
+    "playbackEngineTitle": "Afspiller og motorer",
+    "playbackEngineSubtitle": "VOD- og Live TV-motorer, avancerede indstillinger",
+    "playbackSubtitlesAudioTitle": "Undertekster og lyd",
+    "playbackSubtitlesAudioSubtitle": "Standardsprog, undertekststil, OpenSubtitles",
+    "playbackViewingTitle": "Under afspilning",
+    "playbackViewingSubtitle": "Autoplay, Spring intro over, Fortsæt med at se",
+    "scopeSynced": "Synkroniseres på alle enheder og playlists",
+    "scopePlaylist": "Kun for playlisten “{{name}}”",
+    "scopeDevice": "Kun på denne {{device}}",
+    "themeSection": "Tema",
+    "displayDescription": "Vælg, hvad skærmene viser: karruseller, faner og kanaler.",
+    "scopeDeviceTV": "Kun på dette tv",
+    "infoDescription": "Vilkår, privatliv, krediteringer og appversion",
+    "showHome": "Vis Hjem",
+    "showHomeSubtitle": "Fanen Hjem samler det, du ser, dine kanaler og nyheder på én skærm",
+    "startScreenHome": "Hjem"
+  },
+  "feedback": {
+    "title": "Send feedback",
+    "submit": "Send",
+    "picker": {
+      "header": "Hvad vil du sende?",
+      "footer": "KIPTV-teamet læser hver rapport. Vi svarer via e-mail, hvis du har angivet en kontakt."
+    },
+    "bug": {
+      "title": "Rapportér en fejl",
+      "subtitle": "Noget fungerer ikke som forventet",
+      "titleField": "Kort titel",
+      "descriptionField": "Detaljeret beskrivelse",
+      "stepsFieldPlaceholder": "Eksempel:\n1. Åbn Live TV\n2. Tryk på RAI 1\n3. Appen går ned",
+      "expectedField": "Forventet adfærd",
+      "actualField": "Hvad der faktisk skete",
+      "frequencyField": "Hyppighed",
+      "screenField": "Berørt skærm",
+      "contactField": "Kontakt-e-mail",
+      "screenshotAdd": "Tilføj skærmbillede",
+      "screenshotChange": "Skift skærmbillede",
+      "screenshotRemove": "Fjern skærmbillede",
+      "diagnosticsLink": "Hvad vi inkluderer i rapporten",
+      "section": {
+        "what": "Hvad skete der",
+        "whatFooter": "Vær så specifik som muligt – det hjælper os med at genskabe problemet.",
+        "steps": "Trin til at gengive",
+        "stepsFooter": "Ét trin pr. linje.",
+        "expectedActual": "Forventet vs. faktisk",
+        "context": "Kontekst",
+        "attachment": "Vedhæftninger",
+        "attachmentFooter": "Et skærmbillede er valgfrit, men meget nyttigt.",
+        "contact": "Kontakt",
+        "contactFooter": "Valgfrit, men anbefalet — uden en kontakt-e-mail kan vi ikke kontakte dig for afklaringer eller opdateringer."
+      }
+    },
+    "improvement": {
+      "title": "Foreslå en forbedring",
+      "subtitle": "Noget kunne fungere bedre",
+      "titleField": "Kort opsummering af forbedringen",
+      "descriptionField": "Beskrivelse",
+      "screenField": "Hvor i appen?",
+      "contactField": "Kontakt-e-mail",
+      "section": {
+        "what": "Dit forslag",
+        "whatFooter": "Fortæl os, hvad der ville gøre oplevelsen bedre.",
+        "where": "Hvor det gælder",
+        "contact": "Kontakt",
+        "contactFooter": "Valgfrit, men anbefalet — uden en kontakt-e-mail kan vi ikke kontakte dig for afklaringer."
+      }
+    },
+    "feature": {
+      "title": "Anmod om en ny funktion",
+      "subtitle": "Noget du gerne vil se i KIPTV",
+      "titleField": "Funktionsnavn",
+      "descriptionField": "Beskrivelse",
+      "useCaseField": "Hvorfor du har brug for den / hvordan du ville bruge den",
+      "contactField": "Kontakt-e-mail",
+      "section": {
+        "what": "Funktionen du ønsker",
+        "whatFooter": "Jo mere kontekst du giver, desto større er chancen for, at vi bygger den.",
+        "contact": "Kontakt",
+        "contactFooter": "Valgfrit, men anbefalet — uden en kontakt-e-mail kan vi ikke give dig besked, når funktionen lanceres."
+      }
+    },
+    "frequency": {
+      "unspecified": "— Ikke angivet —",
+      "always": "Altid",
+      "sometimes": "Nogle gange",
+      "once": "Kun én gang",
+      "cannotReproduce": "Kan ikke gengives"
+    },
+    "screen": {
+      "unspecified": "— Ikke angivet —",
+      "auth": "Login / Tilmelding",
+      "playlist": "Playlist-opsætning",
+      "home": "Start",
+      "movies": "Film",
+      "series": "TV-serier",
+      "live": "Live TV",
+      "search": "Søg",
+      "downloads": "Downloads",
+      "settings": "Indstillinger",
+      "player": "Videoafspiller",
+      "parental": "Forældrekontrol",
+      "other": "Andet"
+    },
+    "disclosure": {
+      "title": "Hvad vi inkluderer",
+      "attachedHeader": "Data vedhæftet rapporten",
+      "attachedFooter": "Vi bruger kun disse data til at gengive fejlen. De slettes efter 12 måneder.",
+      "notSentHeader": "Hvad vi IKKE sender",
+      "device": {
+        "title": "Model og version",
+        "body": "Enhedstype, OS-version, sprog, tidszone."
+      },
+      "app": {
+        "title": "App-version",
+        "body": "KIPTV-version og buildnummer."
+      },
+      "network": {
+        "title": "Forbindelsestype",
+        "body": "WiFi eller mobilnet. Ingen IP-adresse, intet netværksnavn."
+      },
+      "playlist": {
+        "title": "Playlist-udbyder",
+        "body": "Kun værten på IPTV-serveren (f.eks. iptv.example.com), for at identificere udbyderspecifikke problemer."
+      },
+      "logs": {
+        "title": "Seneste diagnostiske logfiler",
+        "body": "Seneste app-hændelser (fejl, indlæsninger, navigation). Loginoplysninger maskeres automatisk."
+      },
+      "notSent": {
+        "credentialsTitle": "Playlist-loginoplysninger",
+        "credentialsBody": "Dit playlist-brugernavn og adgangskode forlader aldrig enheden.",
+        "contactsTitle": "Kontakter og adressebog",
+        "contactsBody": "Appen tilgår eller sender ikke dine telefonkontakter."
+      },
+      "retention": {
+        "title": "Hvor længe vi opbevarer data",
+        "body": "Rapporter slettes automatisk efter 12 måneder. Du kan anmode om tidligere sletning via e-mail."
+      }
+    },
+    "tv": {
+      "subtitle": "Vælg, hvordan du vil rapportere problemet fra dit TV",
+      "qr": {
+        "title": "Færdiggør på din telefon",
+        "subtitle": "Scan QR-koden med din iPhone eller Android: formularen åbnes forudfyldt med data fra dit TV.",
+        "urlLabel": "Eller besøg denne URL:",
+        "expiry": "Koden udløber om 30 minutter."
+      },
+      "quick": {
+        "title": "Hurtig rapport",
+        "subtitle": "Send TV-diagnostikdata med det samme uden at skrive noget. Vi sender dig en e-mail for detaljer.",
+        "send": "Send nu",
+        "sent": "Sendt!",
+        "sentDetail": "Vi har modtaget alle diagnostikdataene. Vi sender dig en e-mail, hvis vi har brug for mere.",
+        "disclaimer": "Vi bruger kun disse data til at gengive fejlen. Dine playliste-loginoplysninger sendes aldrig.",
+        "autoDescription": "Hurtig rapport sendt fra tv: brugeren rapporterer et generelt problem. Kontakt for detaljer."
+      }
+    },
+    "error": {
+      "title": "Fejl",
+      "notAuthenticated": "Du skal være logget ind for at sende feedback.",
+      "missingTitle": "Indtast venligst en titel.",
+      "uploadFailed": "Upload af skærmbillede mislykkedes",
+      "insertFailed": "Indsendelse mislykkedes"
+    },
+    "success": {
+      "title": "Tak!",
+      "message": "Feedback sendt. Vi kontakter dig, hvis vi har brug for flere oplysninger."
+    }
+  },
+  "playlist": {
+    "noPlaylist": "Ingen playlist",
+    "noPlaylistMessage": "Tilføj en IPTV-playlist for at komme i gang",
+    "noPlaylistMessageLiveTV": "Tilføj en IPTV-playlist for at se TV-kanaler",
+    "addPlaylist": "Tilføj playlist",
+    "changePlaylist": "Skift playlist",
+    "noPlaylists": "Ingen gemte playlists",
+    "noPlaylistsMessage": "Tilføj din første Xtream-playlist for at begynde at se.",
+    "addFirstPlaylist": "Tilføj playlist",
+    "playlistWithoutName": "Unavngivet playlist",
+    "unableToLoadDetails": "Kan ikke indlæse playlistdetaljer",
+    "unableToConnect": "Kan ikke oprette forbindelse til playlist.",
+    "unableToSave": "Kan ikke gemme playlist.",
+    "unableToLoad": "Kan ikke indlæse playlist.",
+    "addXtreamPlaylist": "Tilføj en Xtream-playlist",
+    "removePlaylistTitle": "Fjern playlist",
+    "removePlaylistMessage": "Sletning af playlist fjerner alt tilknyttet fremskridt, lister og indstillinger. Vil du fortsætte?",
+    "deleteConfirmTitle": "Slet permanent",
+    "deleteConfirmMessage": "Dette sletter permanent ALT se-fremskridt, episodespoling, brugerdefinerede indstillinger og præferencer for denne playlist.\n\nDenne handling er irreversibel — der er ingen måde at gendanne disse data.",
+    "playlistType": "Playlisttype",
+    "editPlaylist": "Rediger playlist",
+    "editPlaylistSubtitle": "Opdater domæne, legitimationsoplysninger og avatar.",
+    "limitReached": "Playlistgrænse nået",
+    "limitReachedMessage": "Du kan have maksimalt 5 gemte playlists. Fjern en eksisterende for at tilføje en anden.",
+    "limitReachedMessageDynamic": "Dit nuværende plan tillader {{limit}} playlist. Opgrader til Premium Plus for at administrere op til 5 playlists.",
+    "limitBullet1": "• Slet playlists du ikke længere bruger",
+    "limitBullet2": "• Behold kun dem du har brug for aktive",
+    "openPlaylist": "Åbn playlist",
+    "canModifyInSettings": "Du kan ændre playlists og forbinde en konto i indstillingerne.",
+    "verifyingCredentials": "Bekræfter legitimationsoplysninger...",
+    "saving": "Forbindelse vellykket, gemmer playlist...",
+    "loadingContent": "Indlæser playlistindhold...",
+    "preparingContent": "Forbereder anbefalet indhold...",
+    "finalizingExperience": "Afslutter oplevelsen...",
+    "preparing": "Forbereder playlist...",
+    "newPlaylist": "Ny playlist",
+    "loginToRecover": "Log ind for at gendanne playlists, kategorier og indstillinger gemt i clouden.",
+    "enterNameAndDomain": "Indtast venligst mindst playlistnavn og domæne.",
+    "orEnterXtream": "Eller indtast din Xtream-playlist",
+    "playerOnlyNoContent": "KIPTV er en medieforskelningsapparat og leverer ikke indhold.",
+    "playlistName": "Playlistnavn",
+    "playlistNamePlaceholder": "F.eks. Hovedplaylist",
+    "domainXtream": "Domain (Xtream)",
+    "savePlaylist": "Gem playlist",
+    "syncedToAccount": "Det synkroniseres til din konto for at få adgang hvor som helst.",
+    "loadingIPTVContent": "Indlæser IPTV-indhold...",
+    "connectingToPlaylist": "Forbinder til playlist...",
+    "playlistAdded": "Playlist tilføjet",
+    "sourceReady": "Din kilde er klar. Her er et hurtigt sammendrag.",
+    "unnamedPlaylist": "Unavngivet playlist",
+    "tierLimitMessage": "{{tier}} plan: grænse {{limit}} playlist(s). {{upgradeMessage}}",
+    "upgradeToFamily": "Opgrader til Plus for 5 playlists.",
+    "upgradeToPremium": "Opgrader til Premium for ubegrænset tid og flere playlists.",
+    "loginRequiredToAdd": "Du skal logge ind for at tilføje playlists.",
+    "noPlaylistSelected": "Ingen playlist valgt",
+    "chooseAvatar": "Vælg en avatar",
+    "changeAvatar": "Skift avatar",
+    "noAvatar": "Ingen avatar",
+    "whoIsWatching": "Hvem ser?",
+    "add": "Tilføj",
+    "connectionError": "Fejl ved forbindelse til playlist",
+    "xtreamRecommended": "Xtream (anbefalet)",
+    "usernamePlaceholder": "Dit brugernavn",
+    "passwordPlaceholder": "Din adgangskode",
+    "m3uUrl": "Spilleliste-URL",
+    "securityNote": "Dine data gemmes sikkert",
+    "epgOptional": "Valgfrit — Rediger kun hvis det er nødvendigt",
+    "connectionFailed": "Kunne ikke oprette forbindelse. Kontroller dine data.",
+    "saveError": "Fejl ved gemning",
+    "nameDuplicate": "En playlist med dette navn findes allerede",
+    "premiumRequired": "Premium påkrævet",
+    "upgradeToAccess": "Opgrader for at få adgang til denne playlist",
+    "forceReloadPlaylist": "Genindlæs playlist",
+    "forceReloadEPG": "Genindlæs EPG",
+    "m3uConfirmTitle": "Brug M3U URL?",
+    "m3uConfirmMessage": "M3U-playlists fungerer til grundlæggende visning, men nogle funktioner som catchup, kontoinfo og rig metadata er kun tilgængelig med Xtream-legitimationsoplysninger. Vi anbefaler at bruge Xtream hvis muligt.",
+    "m3uConfirmContinue": "Fortsæt med M3U",
+    "m3uHint": "Har du ikke Xtream-legitimationsoplysninger? Prøv M3U URL",
+    "useXtream": "Har du Xtream-legitimationsoplysninger? Brug Xtream Codes",
+    "m3uInvalidURL": "Ugyldig M3U URL. Kontroller URL'en og prøv igen.",
+    "m3uDownloading": "Henter playlist...",
+    "m3uParsing": "Analyserer indhold...",
+    "xtreamDetectedTitle": "Xtream tilgængelig",
+    "xtreamDetectedMessage": "Din server understøtter Xtream Codes, som giver hurtigere indlæsning, catchup/replay og rigere metadata. Vil du bruge det i stedet for M3U?",
+    "xtreamDetectedUseXtream": "Brug Xtream",
+    "xtreamDetectedKeepM3U": "Behold M3U",
+    "epgUrlLabel": "EPG-URL",
+    "epgUrlHint": "Valgfrit — auto-detekteret fra playlist hvis tilgængelig",
+    "error": {
+      "timeout": {
+        "title": "Forbindelses timeout",
+        "message": "Kunne ikke indlæse indhold fra IPTV-serveren. Serveren kan være langsom eller midlertidigt utilgængelig."
+      },
+      "server": {
+        "title": "Serverfejl",
+        "message": "IPTV-serveren returnerede en fejl. Serveren kan være under vedligeholdelse eller have problemer."
+      },
+      "network": {
+        "title": "Ingen forbindelse",
+        "message": "Kunne ikke oprette forbindelse til internettet. Kontroller din netværksforbindelse."
+      },
+      "auth": {
+        "title": "Godkendelse mislykkedes",
+        "message": "Playlistlegitimationsoplysningerne er ugyldige eller kontoen er udløbet."
+      },
+      "expired": {
+        "title": "Abonnement udløbet",
+        "message": "Dit IPTV-abonnement er udløbet. Kontakt din udbyder for at forny det."
+      },
+      "solutions": "Mulige løsninger",
+      "solution": {
+        "checkServer": "Bekræft at IPTV-serveren er online",
+        "tryLater": "Prøv igen om et par minutter",
+        "checkInternet": "Kontroller din internetforbindelse",
+        "serverMaintenance": "Serveren kan være under vedligeholdelse",
+        "contactProvider": "Kontakt din IPTV-udbyder",
+        "checkWifi": "Kontroller din WiFi eller mobil dataforbindelse",
+        "checkCellular": "Prøv at skifte mellem WiFi og mobil",
+        "disableVPN": "Deaktiver VPN hvis aktivt",
+        "toggleVPN": "Prøv at aktivere/deaktivere din VPN",
+        "checkCredentials": "Bekræft brugernavn og adgangskode",
+        "checkExpiration": "Bekræft at din konto ikke er udløbet"
+      }
+    },
+    "connection": "Forbindelse"
+  },
+  "movies": {
+    "markWatched": "Markér som set",
+    "markUnwatched": "Markér som ikke set",
+    "title": "Film",
+    "noMovies": "Ingen film fundet",
+    "noMoviesMessage": "Den valgte playlist indeholder ingen film",
+    "contentNotLoaded": "Indholdet kunne ikke indlæses",
+    "contentNotLoadedMessage": "Kunne ikke indlæse film. Tjek din forbindelse og prøv igen.",
+    "otherMovies": "Andre film",
+    "top20Trending": "TOP 20 trendende film",
+    "categoriesRemaining": "{{count}} kategorier tilbage...",
+    "noPlaylistSelected": "Ingen playlist valgt",
+    "loadingMovies": "Indlæser film...",
+    "movieNotAvailable": "Film ikke tilgængelig",
+    "movieNotAvailableMessage": "Ingen match blev fundet i din playlist. Prøv at søge efter indholdet manuelt.",
+    "movieNotAvailableInPlaylist": "Film ikke tilgængelig i din playlist",
+    "popularMovies": "Populære film",
+    "newArrivals": "Nye ankomster"
+  },
+  "series": {
+    "title": "Serier",
+    "noSeries": "Ingen serier fundet",
+    "noSeriesMessage": "Den valgte playlist indeholder ingen serier",
+    "otherSeries": "Andre serier",
+    "top20Trending": "TOP 20 trendende serier",
+    "categoriesRemaining": "{{count}} kategorier tilbage...",
+    "seriesNotAvailableInPlaylist": "Serie ikke tilgængelig i din playlist",
+    "notAvailable": "Serie ikke tilgængelig",
+    "notAvailableMessage": "Ingen match blev fundet i din playlist. Prøv at søge efter indholdet manuelt.",
+    "playlistAttaching": "Playlist vedhæftning. Prøv igen om kort tid.",
+    "episodeNotAvailable": "Episode ikke tilgængelig",
+    "attachingPlaylist": "Vedhæfter playlist...",
+    "loadingSeries": "Indlæser serier...",
+    "popularSeries": "Populære serier",
+    "engagingTvSeries": "En engagerende serie",
+    "season": "Sæson",
+    "seasonCount": "{{count}} SÆSON",
+    "seasonsCount": "{{count}} SÆSONER",
+    "noEpisodes": "Ingen episoder",
+    "noEpisodesMessage": "Ingen episoder tilgængelig for denne sæson",
+    "resumeFrom": "Fortsæt fra",
+    "lastWatchedPoint": "sidste sete punkt",
+    "watchNow": "Se nu",
+    "startSeason": "Start sæson {{season}}",
+    "resume": "Fortsæt",
+    "goBack": "Gå tilbage",
+    "loadError": "Kunne ikke indlæse seriedetaljer",
+    "loadErrorMessage": "Fejl ved indlæsning: {{message}}",
+    "episode": "Afsnit {{number}}",
+    "markWatched": "Markér som set",
+    "markUnwatched": "Markér som ikke set",
+    "markWatchedUpTo": "Set op til her",
+    "markAllWatched": "Marker hele serien som set",
+    "markAllUnwatched": "Marker hele serien som ikke set",
+    "resetEpisodeProgress": "Nulstil episodefremgang",
+    "resetProgress": "Nulstil seriens fremskridt",
+    "resetProgressTitle": "Nulstil fremskridt",
+    "resetProgressMessage": "Dette fjerner alt se-fremskridt for denne serie. Denne handling kan ikke fortrydes.",
+    "resetProgressConfirm": "Nulstil",
+    "episodeInfo": "Episode info",
+    "downloadEpisode": "Download afsnit"
+  },
+  "multiview": {
+    "title": "Multiview",
+    "openInMultiview": "Åbn i Multiview",
+    "addToMultiview": "Tilføj til Multiview",
+    "empty": "Tilføj en kanal for at se flere streams samtidig",
+    "addChannel": "Tilføj kanal",
+    "maxReached": "Maks. 4 kanaler nået",
+    "removeTile": "Fjern fra Multiview",
+    "audioTracks": "Lyd",
+    "subtitles": "Undertekster",
+    "settings": "Indstillinger",
+    "layout": {
+      "auto": "Auto",
+      "stack": "Stak",
+      "grid": "Gitter",
+      "strip": "Stribe",
+      "focus": "Fokus"
+    },
+    "tile": {
+      "loading": "Indlæser…",
+      "error": "Afspilningsfejl",
+      "retry": "Prøv igen",
+      "noProgram": "Ingen programinfo"
+    },
+    "close": "Luk Multiview",
+    "vodBlocked": "Luk Multiview for at åbne film og serier",
+    "confirmDismiss": "Tryk på Back igen for at lukke",
+    "minimizedHint": "Vælg en anden kanal for at føje den til Multiview"
+  },
+  "livetv": {
+    "startSection": "Live TV-startsektion",
+    "startSectionSubtitle": "Vælg hvilken liste Live TV åbner på",
+    "title": "Live",
+    "noChannels": "Ingen kanaler fundet",
+    "noChannelsMessage": "Den valgte playlist indeholder ingen TV-kanaler",
+    "otherChannels": "Andre kanaler",
+    "selectChannel": "Vælg en kanal",
+    "selectChannelMessage": "Vælg en kanal for at komme i gang",
+    "channels": "Kanaler",
+    "epg": "EPG",
+    "noDescription": "Ingen beskrivelse tilgængelig",
+    "watchNow": "Se nu",
+    "epgLoadError": "EPG indlæsningsfejl",
+    "epgNotAvailable": "Programmeguide ikke tilgængelig",
+    "epgNotAvailableMessage": "EPG-data for denne kanal er ikke tilgængelig i øjeblikket",
+    "infoChannel": "Infokanal",
+    "streamNotAvailable": "Stream ikke tilgængelig",
+    "streamUnavailable": "Stream utilgængelig. Prøv igen senere eller vælg en anden kanal.",
+    "limitReachedLiveMessage": "Du nåede det daglige visningsgrænse under Live-afspilning. Opgrader til Premium for ubegrænset visning.",
+    "popularChannels": "Populære kanaler",
+    "tvProgram": "TV-program",
+    "tapForFullscreen": "Tryk for fuldskærm",
+    "noChannelSelected": "Ingen kanal valgt",
+    "selectChannelToSeeGuide": "Vælg en kanal for at se programmeguiden",
+    "inProgress": "I gang",
+    "inHoursMinutes": "Om {{hours}}t {{minutes}}m",
+    "inMinutes": "Om {{minutes}}m",
+    "startingSoon": "Starter snart",
+    "now": "NU",
+    "next": "Næste",
+    "loadingEpg": "Indlæser programinfo...",
+    "epgRateLimited": "For mange anmodninger - prøv senere",
+    "epgDataNotAvailable": "EPG-data for denne kanal er ikke tilgængelig i øjeblikket",
+    "unknownChannel": "Ukendt kanal",
+    "noProgram": "Intet program",
+    "loadingChannels": "Indlæser kanaler...",
+    "viewModeList": "Liste",
+    "viewModeEPG": "TV-guide",
+    "viewModeCarousel": "Karrusel",
+    "viewModeLabel": "Visningstilstand",
+    "sortOrderLabel": "Sorteringsrækkefølge",
+    "allChannels": "Alle kanaler",
+    "recentlyWatched": "Sent set",
+    "recentlyAdded": "Nyligt tilføjet",
+    "removeFromRecentlyWatched": "Fjern fra \"Sent set\"",
+    "favorites": "Favoritter",
+    "categoriesSection": "Kategorier",
+    "nextProgram": "Næste: ",
+    "upNext": "Næste",
+    "today": "I dag",
+    "tomorrow": "I morgen",
+    "selectQuality": "Vælg kvalitet",
+    "qualityVariants": "kvaliteter tilgængelig",
+    "replay": "Genvisning",
+    "yesterday": "I går",
+    "replaySelectQuality": "Vælg kvalitet til Replay",
+    "startsIn": "Starter om {{time}}",
+    "searchChannels": "Søg kanaler...",
+    "viewModeGrid": "Gitter",
+    "customizeLogo": "Tilpas logo",
+    "renameChannelFooter": "Versioner med samme navn grupperes sammen.",
+    "renameChannelSelected": "Valgt kanal",
+    "renameChannelOthers": "Andre grupperede versioner",
+    "restoreAllChannelNames": "Gendan alle oprindelige navne",
+    "customizeEPG": "Tilpas EPG",
+    "overrideAppliesTo": "Gælder for",
+    "overrideAppliesToCount": "%d kanaler",
+    "epgSheet": {
+      "search": "Søg efter navn eller EPG-id",
+      "sources": "EPG-kilder",
+      "useProviderDefault": "Automatisk",
+      "loading": "Indlæser EPG-guide…",
+      "loadingHint": "Downloader programguiden — det kan tage et øjeblik for store guider.",
+      "epgNotLoaded": "EPG-guiden er ikke indlæst endnu",
+      "refineSearch": "Indsnævr søgningen for at se flere resultater",
+      "source": "EPG-kilde",
+      "programCount": "%d programmer"
+    },
+    "logoSheet": {
+      "search": "Søg efter logoer",
+      "title": "Kanal-logo",
+      "suggested": "Foreslået",
+      "customURL": "Brugerdefineret URL",
+      "restore": "Nulstil til standard",
+      "invalidURL": "Ugyldig URL",
+      "loadFailed": "Kan ikke indlæses"
+    },
+    "epgOffset": "EPG-tidsforskydning",
+    "epgOffsetMinutesShort": "min",
+    "epgOffsetChannelHint": "0 = brug afspilningslistens forskydning",
+    "epgOffsetPlaylistHint": "Forskyder alle programtider for denne afspilningsliste.",
+    "epgGuide": "EPG-guide",
+    "qualityAuto": "Auto",
+    "qualityAutoExperimental": "Auto (eksperimentel)"
+  },
+  "epg": {
+    "title": "Guide",
+    "movie": "Film",
+    "tvShow": "Serie",
+    "cast": "Besetzung",
+    "rating": "Vurdering",
+    "loadingMetadata": "Indlæser info...",
+    "identifiedAs": "Identificeret som",
+    "remindMe": "Påmind mig",
+    "reminderSet": "Påmindelse indstillet",
+    "remind10min": "10 minutter før",
+    "remind30min": "30 minutter før",
+    "remind1hour": "1 time før",
+    "reminderRemove": "Fjern påmindelse",
+    "reminderTitle": "{{playlist}}, få popcorn klar! 🍿",
+    "reminderBody": "{{title}} starter om {{time}} på {{channel}}",
+    "reminderTime10": "10 minutter",
+    "reminderTime30": "30 minutter",
+    "reminderTime60": "1 time",
+    "reminderTooSoon": "Program is too close to set a reminder",
+    "reminderNeedsIOSDevice": "Påmindelser leveres til din iPhone eller iPad. Åbn KIPTV på en iOS-enhed, tillad notifikationer, og prøv igen."
+  },
+  "trending": {
+    "movies": "Trendende film",
+    "series": "Trendende serier",
+    "all": "Trendende indhold",
+    "loadingTrending": "Indlæser trendende indhold...",
+    "inPlaylist": "Tilgængelig i playlist",
+    "notInPlaylist": "Ikke i playlist",
+    "checkingPlaylist": "Kontrollerer playlist..."
+  },
+  "search": {
+    "title": "Søg",
+    "placeholder": "Søg film, serier, kanaler, programmer eller personer...",
+    "searchContent": "Søg indhold",
+    "searchMessage": "Brug søgelisten for at komme i gang",
+    "typeAtLeast": "Skriv mindst 2 tegn for at søge...",
+    "noResults": "Ingen resultater",
+    "noResultsMessage": "Intet indhold fundet for \"{{query}}\"",
+    "resultsFor": "{{count}} resultater for \"{{query}}\"",
+    "resultsForQuery": "Resultater for \"{{query}}\"",
+    "movies": "Film ({{count}})",
+    "series": "Serier ({{count}})",
+    "liveChannels": "Live-kanaler ({{count}})",
+    "initializingSearch": "Initialiserer søgning...",
+    "indexingInProgress": "Indeksering i gang",
+    "indexingMessage": "Vent venligst mens vi indekserer indholdet...",
+    "indexingHint": "Du kan frit navigere appen i mellemtiden",
+    "searchError": "Søgningsfejl",
+    "selectPlaylistFirst": "Vælg en playlist før søgning",
+    "noPlaylistMessage": "Tilføj en IPTV-playlist for at søge efter indhold",
+    "noResultsHint": "Prøv en anden søgning",
+    "moviesSeriesChannels": "Film, serier og live-kanaler",
+    "indexingTitle": "Indeksering af indhold...",
+    "indexingSubtitle": "Resultater opdateres efterhånden som mere indhold indekseres",
+    "filterAll": "Alle",
+    "filterMovies": "Film",
+    "filterSeries": "Serier",
+    "filterChannels": "Kanaler",
+    "sectionChannels": "Kanaler",
+    "sectionMovies": "Film",
+    "sectionSeries": "Serier",
+    "noInfoAvailable": "Ingen info tilgængelig",
+    "filterPeople": "Mennesker",
+    "filterPrograms": "TV-programmer",
+    "sectionPeople": "Mennesker",
+    "sectionPrograms": "TV-programmer",
+    "clearHistory": "Ryd",
+    "recentSearches": "Seneste søgninger",
+    "collectionFilms": "{{count}} film",
+    "collectionAvailable": "{{available}} af {{total}} i playlisten",
+    "collectionSpine": "Samling",
+    "collectionFilmNumber": "Film {{number}}"
+  },
+  "premium": {
+    "title": "Premium",
+    "kiptvPremium": "KIPTV Premium",
+    "streamingUnlimited": "Ubegrænset streaming",
+    "unlimitedViewing": "Ubegrænset visning",
+    "multiplePlaylists": "Flere playlists (op til 5)",
+    "simplePlaylist": "Personlig playlist",
+    "cloudSync": "Skysynkronisering",
+    "earlyAccess": "Early Access-funktioner",
+    "perYear": "/år",
+    "perMonth": "Kun €1,67/måned • Sparer €22 vs månedligt",
+    "upgradeToPremium": "Opgrader til Premium",
+    "upgrade": "Opgrader",
+    "unlockAllBenefits": "Lås alle fordele op",
+    "restorePurchases": "Gendan køb",
+    "continueFree": "Fortsæt gratis",
+    "upgradeAlert": "Premium-opgraderingsfunktionalitet implementeres med RevenueCat i kommende versioner.",
+    "restoreAlert": "Gendan købsfunktionalitet implementeres med RevenueCat.",
+    "goBack": "Gå tilbage",
+    "subscribeAnnual": "Abonner - {{price}}/år",
+    "subscribeMonthly": "Abonner - {{price}}/måned",
+    "startFreeTrial": "Start gratis prøveperiode",
+    "freeTrialBadge": "{{days}} dages gratis prøve",
+    "trialDisclaimer": "Gratis i {{days}} dage, derefter {{price}}/{{period}}. Fornyes automatisk, medmindre den annulleres mindst 24 timer før prøveperiodens udløb. Administrer i {{storeName}} indstillinger.",
+    "disclaimer": "Betaling bliver opkrævet til din {{storeName}}-konto ved bekræftelse af køb. Abonnement fornys automatisk medmindre annulleret mindst 24 timer før slutningen af den nuværende periode.",
+    "storeNameIOS": "App Store",
+    "storeNameAndroid": "Google Play",
+    "familyServiceIOS": "Apples familiedelingsfunktionalitet",
+    "familyServiceAndroid": "Google Play Family Library",
+    "contentDisclaimer": "KIPTV er en videoforskelningsapparat og leverer ikke indhold. Billeder vises kun til illustrationsformål.",
+    "deviceShowcase": "Ét abonnement, alle dine enheder",
+    "comingSoon": "Kommer snart",
+    "planOneSubtitle": "Alle funktioner inkluderet. 1 afspilningsliste.",
+    "planPlusSubtitle": "Alle funktioner inkluderet. Op til 5 afspilningslister.",
+    "termsOfService": "Servicevilkår",
+    "privacyPolicy": "Privatlivspolitik",
+    "planFree": "Gratis",
+    "monthly": "Månedlig",
+    "annual": "Årlig",
+    "monthShort": "måned",
+    "yearShort": "år",
+    "savePercent": "Spar {{percent}}%",
+    "selectPlan": "Vælg dit plan",
+    "mostPopular": "Mest populær",
+    "bestValue": "Bedste værdi",
+    "currentPlan": "Nuværende plan",
+    "subscribing": "Behandler...",
+    "restoring": "Gendanner...",
+    "purchaseSuccess": "Velkommen til Premium!",
+    "purchaseSuccessMessage": "Dit abonnement er nu aktivt. Nyd ubegrænset streaming!",
+    "restoreSuccess": "Køb genoprettet med succes!",
+    "restoreNotFound": "Ingen tidligere køb fundet",
+    "manageSubscription": "Administrer abonnement",
+    "managedByAppStore": "Administreret via App Store",
+    "managedByPlayStore": "Administreret via Google Play",
+    "renewsOn": "Fornys den",
+    "expiresOn": "Udløber den",
+    "manageInAppStore": "Administrer i App Store",
+    "manageInPlayStore": "Administrer i Play Store",
+    "errors": {
+      "cancelled": "Køb annulleret",
+      "network": "Netværksfejl. Kontroller din forbindelse.",
+      "notAllowed": "Køb ikke tilladt på denne enhed",
+      "alreadyOwned": "Du har allerede et aktivt abonnement",
+      "generic": "Noget gik galt. Prøv igen.",
+      "storeUnavailable": "Butik midlertidigt utilgængelig"
+    },
+    "features": {
+      "unlimited": "Ubegrænset streaming",
+      "noAds": "Ingen annoncer",
+      "singlePlaylist": "1 spilleliste",
+      "multiplePlaylists": "Op til 5 playlists",
+      "cloudSync": "Cloud sync på tværs af enheder",
+      "prioritySupport": "Prioritetssupport"
+    },
+    "categories": {
+      "discover": "Opdag",
+      "watchYourWay": "Se på din måde",
+      "yourSpace": "Dit rum, dine regler",
+      "plus": "Bygget til hele familien"
+    },
+    "benefits": {
+      "recentlyAdded": {
+        "title": "Tilføjet for nylig",
+        "subtitle": "KIPTV sporer nye film, serier, episoder og live-kanaler"
+      },
+      "trailers": {
+        "title": "Trailere og mere",
+        "subtitle": "Se trailere, kulisser og bonusindhold"
+      },
+      "recommended": {
+        "title": "Anbefalet",
+        "subtitle": "Personaliserede forslag baseret på hvad du ser"
+      },
+      "trending": {
+        "title": "Populært",
+        "subtitle": "Opdag det mest populære indhold lige nu"
+      },
+      "advancedSearch": {
+        "title": "Avanceret søgning",
+        "subtitle": "Søg film, serier, kanaler, programmer og skuespillere"
+      },
+      "continueWatching": {
+        "title": "Fortsæt med at se",
+        "subtitle": "Hent op præcis hvor du slap"
+      },
+      "offlineDownload": {
+        "title": "Download og offline",
+        "subtitle": "Download indhold for at se uden forbindelse"
+      },
+      "pip": {
+        "title": "Picture in Picture",
+        "subtitle": "Fortsæt med at se mens du bruger andre apps"
+      },
+      "casting": {
+        "title": "AirPlay og Chromecast",
+        "subtitle": "Cast video til dit tv"
+      },
+      "audioSubtitles": {
+        "title": "Lyd og undertekster",
+        "subtitle": "Vælg audiotrack og undertekstsprog"
+      },
+      "tvArchive": {
+        "title": "TV-arkiv",
+        "subtitle": "Se tidligere live-programmer med Catchup/Replay"
+      },
+      "multiplePlaylists": {
+        "title": "Op til 5 playlists",
+        "subtitle": "Administrer flere playlists på samme konto"
+      },
+      "favorites": {
+        "title": "Favoritter og tags",
+        "subtitle": "Organiser dine favoritter med brugerdefinerede tags"
+      },
+      "customOrdering": {
+        "title": "Brugerdefineret rækkefølge",
+        "subtitle": "Sorter kategorier og indhold på din måde"
+      },
+      "liveLastWatched": {
+        "title": "Sent set",
+        "subtitle": "Hurtig adgang til dine senest sete live-kanaler"
+      },
+      "cloudSync": {
+        "title": "Automatisk cloud sync",
+        "subtitle": "Indstillinger, favoritter og fremskridt synkroniseret på tværs af alle enheder"
+      },
+      "parentalControls": {
+        "title": "Forældreskab kontrol",
+        "subtitle": "Indstil en PIN for at blokere følsomt indhold"
+      },
+      "hideContent": {
+        "title": "Skjul indhold",
+        "subtitle": "Skjul kategorier og elementer du ikke ønsker at se"
+      },
+      "multiplatform": {
+        "title": "Multiplatform",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV, Mac"
+      },
+      "unlimitedViewing": {
+        "title": "Ubegrænset visning",
+        "subtitle": "Stream uden daglige tidsbegrænsninger"
+      },
+      "andMoreComing": "Og meget mere kommer!"
+    },
+    "swipeForMore": "Svip for mere",
+    "dailyLimitReached": "Daglig visningsgrænse nået",
+    "one": "One",
+    "plus": "Plus",
+    "planOne": "Premium One",
+    "planPlus": "Premium Plus",
+    "external": {
+      "title": "Sådan får du Premium",
+      "body": "På denne enhed kan du ikke købe eller administrere abonnementer. Få KIPTV Premium på en anden enhed, og log ind her med den samme KIPTV-konto: Premium følger dig på alle dine enheder.",
+      "appleDevices": "iPhone, iPad, Apple TV, Mac",
+      "googleDevices": "Android-telefoner, -tablets, Android TV og Fire TV",
+      "alreadySubscribed": "Jeg har allerede et abonnement",
+      "managedElsewhere": "Administreres af den butik, du abonnerede fra"
+    }
+  },
+  "account": {
+    "connectedAccount": "Forbundet konto",
+    "memberFree": "GRATIS MEDLEM",
+    "memberPremium": "PREMIUM MEDLEM",
+    "syncActive": "Sync aktiv",
+    "syncActiveSubtitle": "Playlists, lister og indstillinger synkroniseret til cloud.",
+    "autoBackup": "Automatisk backup og genoptag visning",
+    "syncAllDevices": "Synkroniser playlists og lister på tværs af alle enheder",
+    "streamingPerDay": "30 minutter gratis streaming pr. dag",
+    "upgradeToPremium": "Opgrader til Premium",
+    "premiumActive": "Premium aktivt",
+    "premiumActiveSubtitle": "Alle funktioner låst op, ubegrænset streaming.",
+    "unlimitedPlaylists": "Ubegrænsede og synkroniserede playlists",
+    "unlimitedStreaming": "Ubegrænset streamingtid",
+    "prioritySupport": "Prioritetssupport og tidlig adgang til nye funktioner",
+    "manageSubscription": "Administrer abonnement",
+    "logoutFromAccount": "Log ud af konto",
+    "logoutSecure": "Log sikkert ud fra denne enhed",
+    "unlockCloud": "Lås alle Cloud-funktioner op",
+    "syncAcrossDevices": "Synkroniser playlists, lister og indstillinger på tværs af alle dine enheder. Det er gratis og tager blot nogle få sekunder.",
+    "playlistsAndFavoritesSynced": "Playlists og lister altid synkroniseret",
+    "resumeWatching": "Genoptag visning fra hvor du slap",
+    "autoBackupAndSecureAccess": "Automatisk backup og sikker adgang",
+    "continueWithoutAccount": "Fortsæt uden konto",
+    "plan": "Abonnement",
+    "free": "Gratis",
+    "dailyUsage": "Daglig forbrug",
+    "playlistLimit": "Playlistgrænse",
+    "minutesUsed": "{{used}}/{{total}} minutter i dag",
+    "playlistsAllowed": "{{count}} spilleliste(r)",
+    "playlistsUnlimited": "Ubegrænset antal playlister"
+  },
+  "usage": {
+    "limitReached": "Grænse nået",
+    "usedToday": "Du har brugt {{minutes}} minutter i dag",
+    "usedTodayShort": "Brugt {{minutes}}min i dag",
+    "remaining": "{{time}} tilbage",
+    "remainingHoursMinutes": "{{hours}}t {{minutes}}m tilbage",
+    "remainingMinutes": "{{minutes}}m tilbage",
+    "nearLimit": "Du er ved at nå den daglige grænse",
+    "premium": "Premium",
+    "unlimited": "Ubegrænset",
+    "upgradeToPremium": "Opgrader til Premium",
+    "discoverPremium": "Opdag Premium",
+    "usageInfo": "Du har brugt {{used}} af dine {{total}} daglige minutter"
+  },
+  "language": {
+    "selectLanguage": "Select Language / Seleziona Lingua",
+    "reloadNote": "Appen genindlæses automatisk efter sprogoverskrift",
+    "reloadNoteEn": "The app will reload automatically after language change",
+    "useDeviceLanguage": "Brug enhedssprog",
+    "confirmChangeTitle": "Bekræft sprogoverskrift",
+    "confirmChangeMessage": "Sprogoverskrift vil rydde alt cachelagret metadata (plakater, beskrivelser, logoer) for at indlæse indhold på {{language}}. Fortsæt?",
+    "changeError": "Kunne ikke skifte sprog. Prøv igen.",
+    "restartRequired": "Omstart påkrævet",
+    "restartMessage": "For at færdiggøre sprogoverskriften skal du lukke og åbne appen manuelt for at indlæse metadata på det nye sprog."
+  },
+  "categories": {
+    "title": "Kategorier",
+    "subtitle": "Sorter eller skjul synlige kategorier i playlistet. Ændringer er øjeblikkelige.",
+    "customizeMovies": "Tilpas film",
+    "customizeSeries": "Tilpas serier",
+    "movies": "Film",
+    "series": "Serier",
+    "liveTV": "Kanaler",
+    "customizeLiveTV": "Tilpas Live",
+    "sortSubtitle": "Vælg rækkefølgen og skjul de kategorier, du ikke er interesseret i. Du kan ændre dem senere i indstillingerne.",
+    "loading": "Indlæser kategorier...",
+    "retrieving": "Henter kategorier..."
+  },
+  "detail": {
+    "rewatch": "Se igen",
+    "alreadyWatched": {
+      "movieTitle": "Allerede set",
+      "episodeTitle": "Allerede set",
+      "message": "Vil du starte forfra?",
+      "restart": "Start forfra"
+    },
+    "lastAccess": "Sidste adgang",
+    "expiresAt": "Udløber",
+    "maxConnections": "Maks forbindelser",
+    "activeConnections": "Aktive forbindelser",
+    "totalContent": "Samlet indhold",
+    "liveTV": "Live-kanaler",
+    "movies": "Film",
+    "series": "Serier",
+    "title": "Playlistdetaljer",
+    "loading": "Henter oplysninger...",
+    "play": "Afspil",
+    "alsoOn": "Også på:",
+    "chooseVersion": "Vælg version",
+    "otherVersions": "Andre versioner",
+    "otherVersionsCount": "Andre versioner ({{count}})",
+    "trailers": "Trailere og mere",
+    "addToFavorites": "Min liste",
+    "download": "Hent",
+    "recommended": "Mere som dette",
+    "collection": "Fra samlingen",
+    "more": "Mere",
+    "less": "Mindre",
+    "comingSoon": "Kommer snart",
+    "ageRating": "Aldersklassificering",
+    "watchNow": "Se nu",
+    "info": {
+      "title": "Info",
+      "status": "Status",
+      "country": "Land",
+      "production": "Produktion",
+      "director": "Instruktør",
+      "creator": "Skaber",
+      "originalTitle": "Originaltitel",
+      "originalLanguage": "Originalsprog",
+      "network": "Netværk",
+      "episodes": "Episoder",
+      "budget": "Budget",
+      "revenue": "Indtjening",
+      "screenplay": "Manuskript",
+      "music": "Musik",
+      "airingPeriod": "Udsendelsesperiode",
+      "ongoing": "I gang",
+      "statusValue": {
+        "released": "Udgivet",
+        "returningSeries": "Fortsættende serie",
+        "ended": "Afsluttet",
+        "canceled": "Aflyst",
+        "inProduction": "Under produktion",
+        "postProduction": "Efterproduktion",
+        "planned": "Planlagt",
+        "rumored": "Rygte",
+        "pilot": "Pilot"
+      }
+    },
+    "privateSearch": "Privat søgning",
+    "searchGoogle": "Søg på Google"
+  },
+  "onboarding": {
+    "subtitle": "Live, film og serier med en ren og hurtig interface.",
+    "slides": {
+      "multiplatform": {
+        "title": "Hvor du end er",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV og Mac. En app til alle dine enheder."
+      },
+      "explore": {
+        "title": "Udforsker dit indhold",
+        "subtitle": "Live, film og serier med en ren og hurtig interface."
+      },
+      "sync": {
+        "title": "En konto, alle enheder",
+        "subtitle": "Gem playlists til clouden og fortsæt hvor du slap."
+      }
+    },
+    "disclaimer": "KIPTV er en mediaforskelningsapparat: det leverer ikke indhold.",
+    "getStarted": "Kom i gang"
+  },
+  "setup": {
+    "skip": "Spring over",
+    "back": "Tilbage",
+    "useDefaults": "Brug standardindstillinger",
+    "welcome": {
+      "title": "Her er din playliste",
+      "subtitleXtream": "{{name}} · Xtream · aktiv indtil {{date}}",
+      "subtitleGeneric": "{{name}} · {{type}}",
+      "movies": "Film",
+      "series": "Serier",
+      "channels": "Kanaler",
+      "withGuide": "Kanaler med guide",
+      "cta": "Tilpas på 1 minut"
+    },
+    "start": {
+      "title": "Hvor vil du starte?",
+      "subtitle": "Skærmen, der åbner ved start.",
+      "home": "Hjem",
+      "homeSub": "Alt på ét blik",
+      "movies": "Film",
+      "moviesSub": "Fokus på film",
+      "series": "Serier",
+      "seriesSub": "Nye afsnit først",
+      "live": "Live",
+      "liveSub": "Kanaler og tv-guide"
+    },
+    "playback": {
+      "title": "Hvad betyder mest i afspilleren?",
+      "subtitle": "Vælg den motor, der passer dig. Du kan altid ændre den.",
+      "quality": "Funktioner og kvalitet",
+      "qualitySub": "Alt det, din enhed kan",
+      "qualityEngine": "Automatisk motor · Aether",
+      "stability": "Stabilitet og hastighed",
+      "stabilitySub": "Starter med det samme, klarer vanskelige streams",
+      "stabilityEngine": "VLC-motor · med automatisk reserve",
+      "pillFastStart": "Hurtig start og spoling",
+      "pillReconnect": "Robust genforbindelse",
+      "pillFormats": "Alle formater",
+      "pillProven": "Gennemprøvet motor",
+      "synced": "Synkroniseret med din konto: hver enhed bruger sin bedste motor."
+    },
+    "channels": {
+      "title": "Hvordan vil du have dine kanaler?",
+      "subtitle": "HD-, FHD- og 4K-varianterne af samme kanal.",
+      "before": "Før",
+      "after": "Efter",
+      "group": "Gruppér",
+      "groupSub": "Én kanal, kvalitetsmærker",
+      "separate": "Hold adskilt",
+      "separateSub": "Én række pr. variant",
+      "recommended": "Anbefalet",
+      "sampleProgram": "Aftennyheder",
+      "sampleNext": "Derefter: Aftenfilm",
+      "sampleProgramShort": "Aftennyheder · Aftenfilm",
+      "fallbackChannel": "Kanal 1"
+    },
+    "adults": {
+      "title": "Indhold for voksne?",
+      "subtitle": "Du bestemmer, hvad der vises i denne playliste.",
+      "showAll": "Vis alt",
+      "showAllSub": "Intet filter",
+      "hide": "Skjul voksenkategorier",
+      "hideSub": "Efter nøgleord: XXX, Adult, 18+",
+      "hidePin": "Skjul og beskyt med PIN",
+      "hidePinSub": "Kategorierne forbliver låst med PIN-koden",
+      "hidePinExistingSub": "Bruger den PIN, du allerede har",
+      "pinPrompt": "Vælg en 4-cifret PIN",
+      "pinConfirm": "Gentag PIN-koden",
+      "pinMismatch": "PIN-koderne stemmer ikke overens, prøv igen",
+      "pinSet": "PIN indstillet"
+    },
+    "color": {
+      "title": "Din farve",
+      "subtitle": "Appen skifter farve, mens du vælger.",
+      "background": "Baggrund",
+      "premiumTitle": "Flere farver med Premium",
+      "premiumCta": "Lås op"
+    },
+    "done": {
+      "title": "Alt er klar",
+      "subtitle": "Her er dine valg.",
+      "autoOpen": "Åbn {{name}} direkte ved start",
+      "autoOpenSub": "Springer valg af playliste over",
+      "hint": "Du kan ændre alt i Indstillinger.",
+      "cta": "Gå til Hjem"
+    },
+    "recap": {
+      "start": "Starter på: {{screen}}",
+      "playbackQuality": "Afspiller: kvalitet",
+      "playbackStability": "Afspiller: stabilitet",
+      "channelsGrouped": "Kanaler grupperet",
+      "channelsSeparate": "Kanaler adskilt",
+      "adultsShown": "Voksne: synlige",
+      "adultsHidden": "Voksne: skjult",
+      "adultsHiddenPin": "Voksne: skjult + PIN",
+      "color": "{{color}} · {{background}}"
+    }
+  },
+  "continueWatching": {
+    "title": "Fortsæt med at se",
+    "removeConfirm": "Vil du fjerne \"{{title}}\" fra \"Fortsæt med at se\"?",
+    "remove": "Fjern",
+    "contentNotAvailable": "Indhold ikke tilgængelig",
+    "contentNotInPlaylist": "Dette indhold findes ikke længere i den nuværende playlist.",
+    "actions": "Handlinger",
+    "removeFromContinueWatching": "Fjern fra \"Fortsæt med at se\"",
+    "markAsWatched": "Markér som set",
+    "remaining": "tilbage",
+    "goToMovie": "Gå til film",
+    "goToSeries": "Gå til serie",
+    "addToFavorites": "Tilføj til min liste",
+    "download": "Hent",
+    "comingSoon": "Kommer snart",
+    "resetSeriesProgress": "Nulstil seriens fremskridt",
+    "resetMovieProgress": "Nulstil filmfremskridt",
+    "resetProgressConfirm": "Dette sletter permanent al visningsfremskridt for \"{{title}}\". Denne handling kan ikke fortrydes.",
+    "resetProgress": "Nulstil"
+  },
+  "player": {
+    "shortcuts": {
+      "seekForward": "Spol frem",
+      "seekBackward": "Spol tilbage",
+      "playPause": "Afspil/pause",
+      "close": "Luk"
+    },
+    "pip": {
+      "active": "Afspilning i Picture in Picture",
+      "expandHintPrefix": "Tryk på",
+      "expandHintSuffix": "for at gå til fuld skærm"
+    },
+    "info": "Info",
+    "videoDataUnavailable": "Videodata ikke tilgængelig",
+    "streamUrlError": "Kunne ikke generere stream URL",
+    "closePlayer": "Luk afspiller",
+    "playbackError": "Afspilningsfejl",
+    "dailyLimitMessage": "Du har nået den daglige visningsgrænse.",
+    "continueWatching": "Fortsæt med at se",
+    "upgradePremium": "Opgrader Premium",
+    "timeUsed": "Tid brugt: {{minutes}} minutter.",
+    "livePlayerClosed": "Afspilleren lukkes. Opgrader til Premium for ubegrænset visning.",
+    "audio": "Lyd",
+    "audioTrack": "Lydspor",
+    "subtitles": "Undertekster",
+    "subtitlesOff": "Slået fra",
+    "speed": "Hastighed",
+    "playbackSpeed": "Afspillingshastighed",
+    "information": "Info",
+    "fromStart": "Fra start",
+    "goToMovie": "Gå til film",
+    "goToSeries": "Gå til serie",
+    "noAudioTracks": "Ingen lydspor tilgængelig",
+    "progress": "Fremskridt",
+    "remainingTime": "%@ tilbage",
+    "restartFromBeginning": "Fra start",
+    "backToVideo": "Tilbage til video",
+    "noDescriptionAvailable": "Ingen beskrivelse tilgængelig for dette indhold.",
+    "noPlotAvailable": "Ingen plot tilgængelig.",
+    "more": "MERE",
+    "liveStreamNoDescription": "Live stream - ingen beskrivelse tilgængelig.",
+    "loading": "Indlæser...",
+    "usingEngine": "Motor:",
+    "engine": "Motor",
+    "enginePicker": "Afspilningsmotor",
+    "track": {
+      "audio": "Lyd",
+      "subtitle": "Undertekst",
+      "off": "Slået fra"
+    },
+    "rate": {
+      "normal": "Normal"
+    },
+    "error": {
+      "title": "Afspilningsfejl",
+      "invalidURL": "Ugyldig stream URL",
+      "unsupportedFormat": "Ikke-understøttet format",
+      "allEnginesFailed": "Kan ikke afspille dette indhold. Alle afspillermotorer fejlede.",
+      "tryAnotherPlayer": "Prøv en anden afspiller",
+      "engineSwitchFailedRestored": "{{failed}} kunne ikke starte. {{previous}} er gendannet.",
+      "unknown": "Ukendt afspilningsfejl",
+      "close": "Luk",
+      "engineCrash": "Afspilleren gik ned. Prøv en anden motor.",
+      "loadFailed": "Kan ikke indlæse dette indhold.",
+      "network": "Netværksfejl. Tjek din forbindelse.",
+      "playbackFailed": "Afspilning mislykkedes.",
+      "timeout": "Streamet tog for lang tid om at svare."
+    },
+    "returnToLive": "Tilbage til live",
+    "retry": "Prøv igen",
+    "playNow": "Afspil nu",
+    "playingIn": "Afspilning om {{seconds}}s",
+    "dailyLimitWarning": "Du har {{minutes}} minutter tilbage i dag",
+    "formatNotSupported": "Dette format er ikke understøttet på dette tv",
+    "nextEpisode": "Næste episode",
+    "upNext": "Næste",
+    "skipIntro": "Spring intro over",
+    "skipRecap": "Spring resumé over",
+    "skipCredits": "Spring rulletekster over",
+    "holdToUnlock": "Hold for at låse op",
+    "epg": "Tidsplan",
+    "retryStream": "Prøv igen",
+    "streamDropped": "Stream forbindelse mistet",
+    "loadEarlierPrograms": "Indlæs tidligere programmer",
+    "replay": "Genvisning",
+    "playReplay": "Afspil",
+    "cancelReplay": "Annuller",
+    "noReplayData": "Ingen replay-data tilgængelig",
+    "favorites": "Favoritter",
+    "recent": "Seneste",
+    "noFavorites": "Ingen favorit kanaler",
+    "noRecentChannels": "Ingen sent sete kanaler",
+    "archiveDays": "{{count}} dages arkiv",
+    "liveIndicator": "LIVE",
+    "openSubtitles": {
+      "external": "OpenSubtitles",
+      "searchOnline": "Søg online undertekster",
+      "loading": "Indlæser undertekster...",
+      "searching": "Søger undertekster...",
+      "downloading": "Henter undertekst...",
+      "downloaded": "Undertekst indlæst",
+      "noResults": "Ingen undertekster fundet",
+      "quotaExceeded": "Downloadgrænse nået. Prøv igen i morgen.",
+      "loginForMore": "Log ind for flere downloads",
+      "hearingImpaired": "CC",
+      "downloads": "overførsler",
+      "remainingDownloads": "Downloads tilbage i dag: {{count}}",
+      "selectLanguage": "Vælg sprog",
+      "searchError": "Søgning af undertekster mislykkedes",
+      "downloadError": "Download af undertekst mislykkedes",
+      "results": "Resultater",
+      "cached": "Cachelagt",
+      "searchAgain": "Søg igen"
+    },
+    "openSubtitlesError": {
+      "invalidKey": "Ugyldig API-nøgle",
+      "invalidCredentials": "Ugyldigt brugernavn eller adgangskode",
+      "forbidden": "Adgang nægtet",
+      "invalidFile": "Ugyldig undertekstfil",
+      "invalidToken": "Session udløbet. Log venligst ind igen.",
+      "linkExpired": "Download link udløbet. Prøv igen.",
+      "rateLimit": "For mange anmodninger. Vent venligst.",
+      "serverError": "Serverfejl. Prøv igen senere.",
+      "network": "Netværksfejl. Kontroller din forbindelse.",
+      "invalidResponse": "Ugyldig serverrespons",
+      "parseFailed": "Kunne ikke analysere undertekstfil"
+    },
+    "chromecast": {
+      "castingTo": "Caster til %@",
+      "stopCasting": "Stop casting",
+      "castTo": "Cast til",
+      "disconnect": "Afbryd",
+      "error": {
+        "title": "Chromecast-fejl",
+        "incompatibleStream": "Denne stream er ikke kompatibel med Chromecast. Afspilningen fortsætter på enheden.",
+        "cleartextHTTP": "Din IPTV-udbyder bruger en usikret forbindelse (HTTP), som Chromecast ikke accepterer. Der kræves en udbyder med sikker forbindelse (HTTPS). Afspilningen fortsætter på enheden."
+      }
+    },
+    "airplay": {
+      "videoActive": "Afspilles via AirPlay",
+      "tapToManage": "Tryk for at skifte eller afbryde enhed",
+      "warning": {
+        "titleBridge": "Video via AirPlay",
+        "messageBridge": "Dette format understøtter ikke AirPlay med video direkte, men KIPTV kan stadig sende det til dit tv. Knapperne er begrænsede (afspil/pause og ±10s, uden statuslinje).",
+        "streamVideo": "Send video til tv",
+        "title": "AirPlay: kun lyd",
+        "messagePlayer": "AirPlay sender kun lyd. Brug AVPlayer eller Aether for også at sende video.",
+        "messageAether": "AirPlay sender kun lyd. Brug Aether for også at sende video.",
+        "messageContent": "Dette indhold kan kun sendes som lyd via AirPlay — videoen bliver på denne enhed.",
+        "useVideoEngine": "Brug AVPlayer",
+        "useAether": "Brug Aether",
+        "continueAudioOnly": "Fortsæt med kun lyd"
+      },
+      "error": {
+        "title": "AirPlay-fejl",
+        "liveBridgeFailed": "Videoen kunne ikke sendes til tv'et. Prøv igen."
+      }
+    },
+    "subtitleDelay": "Undertekstforsinkelse",
+    "audioDelay": "Lydforsinkelse",
+    "resetDelay": "Nulstil",
+    "nowPlaying": "Afspilles nu"
+  },
+  "startup": {
+    "loadingIPTV": "Indlæser IPTV-indhold...",
+    "enhancingQuality": "Forbedrer indholdskvalitet...",
+    "preparationComplete": "Forberedelse fuldført",
+    "connectingPlaylist": "Forbinder til playlist...",
+    "enhancementContinues": "Forbedring fortsætter i baggrund...",
+    "systemReady": "System klar",
+    "contentEnhanced": "{{count}} indhold forbedret",
+    "smartMode": "Smart tilstand: populært indhold",
+    "poweredByTMDB": "Drevet af TMDB • Optimeret til store playlists",
+    "contents": "indhold"
+  },
+  "tmdb": {
+    "completed": "Færdig! {{count}} indhold forbedret",
+    "enhancingMovies": "Forbedrer film...",
+    "enhancingSeries": "Forbedrer serier...",
+    "waiting": "Venter...",
+    "secondsRemaining": "{{seconds}}s tilbage",
+    "minutesRemaining": "{{minutes}}min tilbage",
+    "hoursRemaining": "{{hours}}t {{minutes}}min tilbage"
+  },
+  "poster": {
+    "notAvailable": "{{type}} ikke tilgængelig i din playlist"
+  },
+  "sorting": {
+    "categoryOrder": "Kategorirækkefølge",
+    "contentOrder": "Indholds rækkefølge",
+    "default": "Standard",
+    "mostPopular": "Mest populære",
+    "mostVoted": "Højest vurderet",
+    "oldest": "Ældste",
+    "mostRecent": "Mest nylig",
+    "alphabeticalAsc": "A → Z",
+    "alphabeticalDesc": "Z → A",
+    "custom": "Brugerdefineret",
+    "goToCategory": "Gå til kategori"
+  },
+  "genres": {
+    "animation": "Animation",
+    "action": "Action",
+    "comedy": "Komedie",
+    "crime": "Forbrydelse",
+    "adventure": "Eventyr",
+    "documentary": "Dokumentar",
+    "thriller": "Thriller",
+    "fantasy": "Fantasy",
+    "romance": "Romantik",
+    "drama": "Drama",
+    "sciFi": "Science Fiction",
+    "horror": "Gyser",
+    "family": "Familie",
+    "mystery": "Mysterium",
+    "music": "Musik",
+    "war": "Krig",
+    "history": "Historie",
+    "western": "Western"
+  },
+  "downloads": {
+    "cancelAllTitle": "Annullér alle downloads?",
+    "cancelAllMessage": "{{count}} downloads i gang, i kø eller på pause bliver annulleret. Allerede hentet indhold bevares.",
+    "season": {
+      "confirmTitle": "Download sæson {{season}}",
+      "confirmToDownload": "Afsnit der skal hentes: {{count}}",
+      "confirmSkipped": "Allerede hentet eller i kø: {{count}}",
+      "confirmQueueNote": "De følger køen og grænsen for samtidige downloads.",
+      "downloadRemaining": "Hent de resterende {{count}}",
+      "pauseAll": "Sæt sæsonen på pause",
+      "resumeAll": "Fortsæt sæsonen",
+      "cancelAll": "Annullér sæsonens downloads",
+      "progressA11y": "Sæson {{season}}: {{done}} af {{total}} afsnit hentet"
+    },
+    "title": "Overførsler",
+    "storageUsed": "Brugt lagring",
+    "free": "fri",
+    "cellularDownloads": "Mobilt download",
+    "cellularDownloadsSubtitle": "Tillad downloads over mobil data",
+    "active": "Downloader",
+    "completed": "Fuldført",
+    "failed": "Mislykket",
+    "downloadFailed": "Download mislykkedes",
+    "episodes": "episoder",
+    "movie": "Film",
+    "episode": "Afsnit",
+    "movies": "Film",
+    "series": "Serier",
+    "emptyTitle": "Ingen downloads",
+    "emptyMessage": "Download film og episoder for at se offline",
+    "deleteAll": "Slet alle downloads",
+    "deleteAllTitle": "Slet alle downloads?",
+    "deleteAllMessage": "Dette fjerner alt downloadet indhold og frigør lagerplads.",
+    "downloadSeason": "Download sæson",
+    "downloading": "Downloader...",
+    "downloaded": "Downloadet",
+    "notEnoughSpace": "Ikke nok lagerplads",
+    "wifiOnly": "Forbind til Wi-Fi for at downloade",
+    "streamWarningTitle": "Download i gang",
+    "streamWarningMessage": "Et download er i gang. De fleste IPTV-udbydere tillader kun en forbindelse ad gangen. Streaming og download kan blive afbrudt.",
+    "queued": "I kø",
+    "cancelAll": "Annuller alt",
+    "cellularAlertTitle": "Mobildownloads deaktiveret",
+    "cellularAlertMessage": "Downloads via mobildata er deaktiveret. Vil du aktivere dem?",
+    "cellularAlertEnable": "Aktiver",
+    "allSeasons": "Alle sæsoner",
+    "cancel": "Annuller",
+    "deleteSeason": "Slet sæson",
+    "notFound": "Download blev ikke fundet",
+    "pause": "Pause",
+    "paused": "Pauset",
+    "remove": "Fjern",
+    "resume": "Fortsæt",
+    "subtitle": "Film og afsnit tilgængelige offline",
+    "multipleDownloads": "Samtidige downloads",
+    "multipleDownloadsSubtitle": "Lad flere downloads skride frem sammen",
+    "multipleTitle": "Samtidige downloads",
+    "multipleConnectionsOne": "Din udbyder tillader kun én samtidig forbindelse.",
+    "multipleConnections": "Din udbyder tillader op til %d samtidige forbindelser.",
+    "multipleConnectionsUnknown": "Vi kunne ikke aflæse, hvor mange samtidige forbindelser din udbyder tillader.",
+    "multipleLimit": "KIPTV lader op til %d downloads skride frem sammen; resten venter i køen.",
+    "multipleRisk": "Samtidige downloads kan blive blokeret af din udbyder.",
+    "multipleDontShowAgain": "Vis ikke igen",
+    "multipleRefusedTitle": "Samtidige downloads understøttes ikke",
+    "multipleRefusedMessage": "Din udbyder afviste samtidige downloads. Downloads fortsætter én ad gangen."
+  },
+  "offline": {
+    "title": "Offline-tilstand",
+    "goOnline": "Gå online",
+    "yourPlaylists": "Dine playlists",
+    "selectPlaylist": "Vælg en playlist at gennemse",
+    "items": "elementer",
+    "offlineMode": "Offline-tilstand",
+    "offlineModeDescription": "Browsing af downloadet indhold kun",
+    "stillOffline": "Ingen forbindelse tilgængelig",
+    "noDownloads": "Intet downloadet indhold",
+    "noDownloadsMessage": "Download film og episoder mens online for at se dem offline.",
+    "noConnection": "Ingen internetforbindelse",
+    "downloadsAvailable": "Downloadet indhold tilgængelig",
+    "useOffline": "Brug offline",
+    "syncProgressTitle": "Offline-status fundet",
+    "syncProgressMessage": "Vi fandt {{count}} afspilningspositioner gemt offline. Vil du synkronisere dem med din konto?",
+    "syncProgressConfirm": "Synkroniser",
+    "syncProgressLater": "Nej"
+  },
+  "contextMenu": {
+    "removeFromFavorites": "Fjern fra min liste",
+    "expandCategory": "Udvid kategori",
+    "alreadyDownloaded": "Allerede downloadet",
+    "downloading": "Downloader…",
+    "notAvailableInPlaylist": "Ikke tilgængelig i din playlist"
+  },
+  "myList": {
+    "title": "Min liste",
+    "addToMyList": "Min liste",
+    "createNewTag": "Opret nyt tag",
+    "manageTags": "Administrer tags",
+    "editTags": "Rediger",
+    "tagNamePlaceholder": "Tagnavn",
+    "saveTag": "Gem tag",
+    "cancel": "Annuller",
+    "done": "Udført",
+    "noItems": "Din liste er tom",
+    "noItemsMessage": "Tilføj film, serier eller kanaler til din liste for at finde dem her.",
+    "all": "Alle",
+    "deleteTagTitle": "Slet tag?",
+    "deleteTag": "Slet",
+    "deleteTagMessage": "Alle elementer i \"%@\" fjernes fra min liste.",
+    "tags": {
+      "myMovies": "Mine film",
+      "mySeries": "Mine serier",
+      "myChannels": "Mine kanaler",
+      "mustWatch": "Skal ses",
+      "rewatch": "Se igen",
+      "classics": "Klassikere",
+      "family": "Familie",
+      "kids": "Børn",
+      "liveSports": "Live-sport",
+      "news": "Nyheder",
+      "cartoons": "Tegnefilm",
+      "international": "International",
+      "traktWatchlist": "Trakt Watchlist"
+    },
+    "verifyingAvailability": "Tjekker tilgængelighed…",
+    "notAvailableYet": "Endnu ikke tilgængelig i din playliste",
+    "picker": {
+      "chooseVersion": "Vælg den version, der skal gemmes",
+      "chooseVersionMessage": "Denne titel findes i flere versioner i din playliste. Vælg, hvilken du vil beholde på din liste."
+    },
+    "availability": {
+      "popup": {
+        "title": "Tilgængelig i din playliste",
+        "message": "\"%@\" som du gemte i listen \"%@\", er nu tilgængelig."
+      }
+    },
+    "tmdbOnlyAdded": {
+      "title": "Tilføjet til din liste",
+      "message": "\"%@\" er endnu ikke i din playliste. Vi giver dig besked, når din udbyder tilføjer den."
+    }
+  },
+  "person": {
+    "biography": "Biografi",
+    "personalInfo": "Personlig info",
+    "knownFor": "Kendt for",
+    "knownForMale": "Kendt for",
+    "knownForFemale": "Kendt for",
+    "knownCredits": "Kendte kreditter",
+    "gender": "Køn",
+    "birthday": "Fødselsdag",
+    "deathday": "Dødsdato",
+    "placeOfBirth": "Fødestad",
+    "alsoKnownAs": "Også kendt som",
+    "alsoKnownAsMale": "Også kendt som",
+    "alsoKnownAsFemale": "Også kendt som",
+    "male": "Mand",
+    "female": "Kvinde",
+    "nonBinary": "Non-binær",
+    "filmography": "Filmografi",
+    "movies": "Film",
+    "series": "Serier",
+    "showAll": "Vis alle",
+    "acting": "Skuespil",
+    "directing": "Instruktion",
+    "writing": "Skrift",
+    "production": "Produktion",
+    "noBiography": "Ingen biografi tilgængelig.",
+    "noCredits": "Ingen kreditter tilgængelig."
+  },
+  "tvpairing": {
+    "title": "Forbind dit tv",
+    "instructions": "Åbn KIPTV-appen på din telefon, gå til Indstillinger → Konto → Forbind tv og indtast koden vist nedenfor.",
+    "generating": "Genererer kode",
+    "regenerate": "Ny kode",
+    "waiting": "Venter på bekræftelse",
+    "retry": "Prøv igen",
+    "success": "TV forbundet!",
+    "successSubtitle": "Indlæser dine playlists...",
+    "withApp": "Har du allerede appen?\nGå til Indstillinger → Konto → Forbind tv",
+    "qrCaption": "Scan QR-koden med telefonens kamera",
+    "lead": "Log ind, eller opret din KIPTV-konto",
+    "manual": "Eller gå til kiptv.app/pair\nog indtast koden"
+  },
+  "linkTV": {
+    "title": "Forbind tv",
+    "instructions": "Indtast den 6-cifret kode vist på dit tvs skærm for at forbinde det til din konto.",
+    "enterCode": "Indtast koden",
+    "confirm": "Forbind tv",
+    "success": "TV forbundet!",
+    "connectedTo": "Forbundet til {{device}}",
+    "error": "Ugyldig eller udløbet kode. Prøv igen.",
+    "autoConfirming": "Forbinder dit tv...",
+    "notAuthenticated": "Login påkrævet",
+    "notAuthenticatedMessage": "Log venligst ind på din konto før du forbinder et tv."
+  },
+  "badges": {
+    "new": "Ny",
+    "newMovie": "Ny film",
+    "newSeries": "Ny serie",
+    "newSeason": "Ny sæson",
+    "newEpisode": "Ny episode",
+    "newEpisodes": "Nye episoder"
+  },
+  "topshelf": {
+    "continueWatchingMovies": "{{name}}, fortsæt med at se film",
+    "continueWatchingSeries": "{{name}}, fortsæt med at se serier",
+    "recentlyWatchedLive": "{{name}}, senest sete kanaler"
+  },
+  "update": {
+    "title": "Opdatering tilgængelig",
+    "subtitle": "Version {{version}} er tilgængelig i App Store",
+    "description": "Opdater nu for at få de nyeste funktioner og rettelser.",
+    "releaseNotesHeading": "Nyt i denne version",
+    "action": {
+      "update": "Opdater nu",
+      "later": "Senere"
+    }
+  },
+  "whatsNew": {
+    "title": "Nyheder",
+    "subtitle": "Version {{version}} — Forbedringer og rettelser",
+    "pageSubtitle": "Forbedringer og rettelser",
+    "v3_0": {
+      "homeTab": {
+        "title": "Den nye Start-fane",
+        "desc": "En start, der er din egen, på iPhone, iPad og Apple TV: et smart hero-felt med titlerne, du kan fortsætte, dynamiske rækker, \"I aften på tv\" og egne feeds. Du kan tilpasse eller skjule Start og slå den til igen i indstillingerne"
+      },
+      "traktIntegration": {
+        "title": "Trakt-integration",
+        "desc": "Forbind din Trakt-konto: fremdrift og sete titler holdes synkroniseret, du kan bedømme en film eller et afsnit, når du er færdig, importere din historik og vælge, hvilke afspilningslister integrationen gælder for."
+      },
+      "externalRatings": {
+        "title": "Bedømmelser fra IMDb, Rotten Tomatoes og Metacritic",
+        "desc": "Siderne for film og serier viser bedømmelserne fra IMDb, Rotten Tomatoes og Trakt direkte i hero-feltet. TMDB er stadig den primære kilde."
+      },
+      "dynamicBackground": {
+        "title": "Dynamisk baggrund",
+        "desc": "Under Indstillinger > Tema finder du den nye Baggrund-vælger: Sort, temafarve eller Dynamisk, der toner den fremhævede plakat bag brugerfladen. Dit valg synkroniseres mellem enheder, og på iOS følger ikonet og widgetten med."
+      },
+      "setupWizard": {
+        "title": "Guidet opsætning",
+        "desc": "Efter din første afspilningsliste hjælper et kort forløb dig med det vigtigste: afspilningsprofil, pinkode, automatisk åbning. Du kan også kopiere indstillingerne fra én afspilningsliste til en anden."
+      },
+      "sagaNextPill": {
+        "title": "Filmserier som en serie",
+        "desc": "Knappen \"Next\" i afspilleren foreslår også de næste film i samme filmserie, og siden for en samling har Afspil, Fortsæt og Se igen ligesom en tv-serie."
+      },
+      "tvPlaylistPeek": {
+        "title": "Skift afspilningsliste hurtigt på Apple TV",
+        "desc": "Når du trykker på Menu fra fanelinjen, vises vælgeren til afspilningslister, før du forlader appen: du skifter profil med én bevægelse."
+      },
+      "aetherUpdate": {
+        "title": "Aether-motoren er opdateret",
+        "desc": "Aether-motoren er opdateret til 6.75.0: den viser nu alle lyd- og undertekstspor og starter VOD hurtigere."
+      },
+      "chromecastAirplayImprovements": {
+        "title": "Mere pålidelig Chromecast og AirPlay",
+        "desc": "Livekanaler via AirPlay når nu også tv, der ikke er fra Apple. Flere Chromecast-fejl er rettet."
+      },
+      "epgSourcePicker": {
+        "title": "Nemmere at finde EPG-kilden",
+        "desc": "Vælgeren til EPG-kilde finder nu også de id'er, som guiden ikke oplyser, så flere kanaler får det rigtige program."
+      },
+      "performance": {
+        "title": "Mere responsiv",
+        "desc": "Start og detaljesider åbner hurtigere."
+      },
+      "playerFixes": {
+        "title": "Rettelser i afspillerne",
+        "desc": "Sprogsporene er tydeligere, og dit foretrukne sprog anvendes mere intelligent, også når sporene har mærkelige navne; med MPV er billedet pixeljusteret, ikke flere slørede logoer; at lukke afspilleren under et skift efterlader ikke længere spøgelseslyd; genindlæsning af en livekanal beholder den motor, du selv har valgt."
+      },
+      "continueWatchingFixes": {
+        "title": "Rettelser i Fortsæt med at se",
+        "desc": "Rækken opdateres, lige så snart du lukker afspilleren, fortsæt virker på tværs af enheder også for serier, og når et nyt afsnit udkommer, står der \"Fortsæt SxEy\" i stedet for \"Se igen\"."
+      },
+      "metadataFixes": {
+        "title": "Rettelser i metadata",
+        "desc": "Titler med landepræfiks eller med årstal til sidst finder de rigtige metadata, og en plakat, du selv har valgt, bliver også efter en genstart."
+      },
+      "arabicRtlFixes": {
+        "title": "Rettelser til arabisk",
+        "desc": "I afspilleren går de vandrette bevægelser, strygningen mellem info-fanerne og spring-pilene den rigtige vej, med arabisk-indiske cifre på tasterne."
+      },
+      "tvosFixes": {
+        "title": "Rettelser på Apple TV",
+        "desc": "Forhåndsvisningen af en kanal går til fuld skærm uden at genindlæse den, og \"Kræv pinkode for at åbne Indstillinger\" virker nu."
+      },
+      "accountFixes": {
+        "title": "Andre rettelser",
+        "desc": "Linket til nulstilling af adgangskode virker også uden appen installeret, og søgninger i inkognito gemmes ikke længere."
+      },
+      "headline": {
+        "title": "Start er landet.",
+        "sub1": "Nu med Trakt — det du ser, følger med dig.",
+        "sub2": "Bedømmelser fra IMDb, Rotten Tomatoes og Metacritic.",
+        "sub3": "Og en baggrund, der henter farverne fra det, du har på skærmen."
+      }
+    },
+    "v2_9": {
+      "aetherEngine": {
+        "title": "Aether, den nye afspilningsmotor",
+        "desc": "En ny videomotor, nu standard på iPhone, iPad og Apple TV: hurtigere opstart, kanalskift på cirka et sekund og fuld understøttelse af baggrund, Picture in Picture, AirPlay og Chromecast."
+      },
+      "playerNextTab": {
+        "title": "De næste afsnit inde i afspilleren",
+        "desc": "Afspilleren har en ny fane \"Next\" med resten af sæsonen: hop til næste afsnit uden at forlade afspilningen."
+      },
+      "downloadsSeasonAndOffline": {
+        "title": "Hent en hel sæson, mere offline",
+        "desc": "Hent en hel sæson med én knap, og annuller alle igangværende og ventende downloads på én gang. Nu kan du også springe introen over på hentede afsnit."
+      },
+      "searchSagaFolders": {
+        "title": "Filmserier bliver mapper i søgningen",
+        "desc": "Film fra samme serie samles i en bogmappe i resultaterne: åbn den, og find alle delene i rækkefølge uden at lede dem frem én ad gangen."
+      },
+      "mpvEngine": {
+        "title": "mpv, endnu en afspilningsmotor",
+        "desc": "MPV kommer med på listen over motorer på iPhone, iPad og Apple TV: endnu en mulighed, når et stream driller."
+      },
+      "ipadCategoriesPanel": {
+        "title": "Kategoripanel på iPad i liggende format",
+        "desc": "Med iPad i liggende format bliver kategorierne til Live TV altid liggende i siden, både i kanallisten og i programoversigten."
+      },
+      "UXUIImprovements": {
+        "title": "Forbedringer i UX og UI",
+        "desc": "Øjet vil også have sit, og som altid er det sansen for detaljer, der gør forskellen. Prøv selv."
+      },
+      "tvosNavigationFixes": {
+        "title": "Navigationsfejl på Apple TV rettet",
+        "desc": "Efter valg af en version åbnes den rigtige titel, HØJRE ud over sidste sæson hopper ikke længere et andet sted hen, og guidekortene i kolonnevisningen til Live kan læses igen."
+      },
+      "searchFixes": {
+        "title": "Søgefejl rettet",
+        "desc": "På Apple TV går søgningen først i gang, når du virkelig er holdt op med at skrive. Slut med hak og træghed."
+      },
+      "contentFixes": {
+        "title": "Indholdsfejl rettet",
+        "desc": "En serie forsvinder fra Fortsæt med at se efter sidste tilgængelige afsnit og kommer øverst igen, når et nyt udkommer; skjult indhold forbliver skjult også i versions- og kvalitetsvælgerne; en skuespiller med flere roller får ikke længere appen til at gå ned på Apple TV."
+      },
+      "dutchTranslationFix": {
+        "title": "Rettelser i nogle oversættelser"
+      }
+    },
+    "v2_8": {
+      "dolbyAtmosReliableAudio": {
+        "title": "Dolby Atmos, som det bør være",
+        "desc": "KIPTV registrerer Dolby Atmos-spor mere præcist og vælger den bedst egnede afspiller til Dolby Vision HLS-streams for en mere pålidelig lyd- og videooplevelse."
+      },
+      "uxUiImprovements": {
+        "title": "Forbedringer af UX/UI",
+        "desc": "Den indbyggede browser, supportcentret og mange navigationsdetaljer er blevet finpudset for at gøre appen mere behagelig at bruge."
+      },
+      "providerResponseReliability": {
+        "title": "Mere pålidelige IPTV-udbydere",
+        "desc": "Håndteringen af ufuldstændige eller forkerte svar fra IPTV-udbydere er forbedret, så kataloget hentes mere pålideligt."
+      },
+      "tvosSessionRestore": {
+        "title": "Apple TV-sessioner bevares",
+        "desc": "Gendannelse af appen afbryder ikke længere aktive sessioner på Apple TV."
+      }
+    },
+    "v2_7": {
+      "detailAltreVersioniLeAltre": {
+        "title": "Alle versioner af en titel på én gang",
+        "desc": "På siden for en film eller serie finder du det nye afsnit „Andre versioner“ med de øvrige kopier i din playlist: vælg med det samme den kvalitet eller det sprog, du vil have."
+      },
+      "offlineProgressoSincronizzato": {
+        "title": "Fortsæt hvor du slap, også efter offlinevisning",
+        "desc": "Din position i downloadet indhold gemmes på enheden og overføres til din konto, så snart du er online igen, så du også finder den på dine andre enheder."
+      },
+      "liveMettiInCimaDal": {
+        "title": "„Placer øverst“ for kanaler og kategorier",
+        "desc": "Hold en kanal eller kategori nede for at flytte den øverst på listen, så det du ser mest, altid er lige ved hånden."
+      },
+      "playerRiproduzioneInBackgroundOpzionale": {
+        "title": "Baggrundslyd på Apple TV",
+        "desc": "I indstillingerne kan du lade lyden fortsætte, når du forlader afspilleren eller sender appen i baggrunden. Slået fra som standard."
+      },
+      "detailRicercaGoogleDalDettaglio": {
+        "title": "Søg en titel på Google med ét tryk",
+        "desc": "Åbn en Google-søgning direkte fra siden for en film eller serie – anmeldelser, medvirkende og trivia."
+      },
+      "rtlInterfacciaArabaSuTvos": {
+        "title": "Forbedret RTL-grænseflade på Apple TV",
+        "desc": "Med arabisk placeres menuer, karruseller, tv-guiden og afspilleren korrekt fra højre mod venstre på iPhone, iPad og Apple TV."
+      },
+      "uiRifinitureInterfaccia": {
+        "title": "Finpudsning af grænsefladen",
+        "desc": "Grafiske detaljer og diverse animationer forbedret."
+      },
+      "tvosRiordinareInGestioneContenuti": {
+        "title": "Omrokering af kategorier låser ikke længere appen",
+        "desc": "På Apple TV forbliver flytning af kategorier og indhold i Indholdsstyring flydende, også med meget store playlister."
+      }
+    },
+    "v2_6": {
+      "downloadsReliableAndParallel": {
+        "title": "Mere pålidelige downloads – og samtidige, hvis du vil",
+        "desc": "En afbrudt download genoptages af sig selv, når du åbner appen igen, og mislykkede forsøg gentages automatisk. Du kan desuden slå samtidige downloads til for at hente flere titler på én gang."
+      },
+      "downloadsLiveActivity": {
+        "title": "Dine downloads på den låste skærm",
+        "desc": "Følg downloadenes forløb fra den låste skærm og Dynamic Island, med ét kort for hver film eller serie."
+      },
+      "tvPairingViaWeb": {
+        "title": "Forbind tv'et fra telefonen – også uden appen",
+        "desc": "Ret kameraet mod QR-koden: har du ikke KIPTV på telefonen endnu, kan du logge ind eller oprette dig på websitet og bekræfte forbindelsen derfra. Har du appen, åbnes koden direkte i den."
+      },
+      "bulkCategoryControls": {
+        "title": "Vis eller lås alle kategorier op med ét tryk",
+        "desc": "I Indholdsstyring finder du hurtige kommandoer til at gøre alle skjulte kategorier synlige igen eller fjerne låsen fra de beskyttede."
+      },
+      "instantSearchLargePlaylists": {
+        "title": "Øjeblikkelig søgning – også med enorme playlister",
+        "desc": "Resultaterne vises, mens du skriver, uden at vente på netværket, og de er ikke længere tomme i meget store kataloger."
+      },
+      "tvosLiveImageQuality": {
+        "title": "Renere billede på live-kanaler",
+        "desc": "På Apple TV anvendes deinterlacing nu reelt på interlacede kanaler, mens hardwareafkodning forbliver aktiv på resten: slut med kameffekt ved bevægelse."
+      },
+      "contentManagementStability": {
+        "title": "Ikke flere uventede lukninger i Indholdsstyring",
+        "desc": "At skjule eller låse kategorier i meget store playlister får ikke længere appen til at lukke."
+      },
+      "minorBugfixes": {
+        "title": "Rettelse af mindre fejl"
+      }
+    },
+    "v2_5": {
+      "iosLivePlayerChannelZap": {
+        "title": "Hurtigt kanalskift, nu på iOS",
+        "desc": "I Live-afspilleren kan du skifte til forrige eller næste kanal og hurtigt opdatere streamen."
+      },
+      "continueWatchingLocalizedTitles": {
+        "title": "Lokaliserede titler i Fortsæt med at se",
+        "desc": "Film og serier viser nu TMDB-titlen på appens sprog med mere ensartede oplysninger på kortene."
+      },
+      "minorBugfixes": {
+        "title": "Mindre fejlrettelser"
+      }
+    },
+    "v2_4": {
+      "ipadRedesign": {
+        "title": "Nydesignet iPad-oplevelse",
+        "desc": "Detaljer i liggende format med posterpanel, Indstillinger med sidepanel i split view og kanalliste til Live TV i flere kolonner: på iPad udnytter appen den store skærm meget bedre."
+      },
+      "detailInfoFooter": {
+        "title": "Flere oplysninger om indholdet",
+        "desc": "Sider for film og serier viser nu et nyt panel med status, produktionsland, produktionsselskaber og andre detaljer."
+      },
+      "homeCardHero": {
+        "title": "Fremhævet indhold som kort",
+        "desc": "Øverst i Film og Serier kan du nu vælge at vise det fremhævede indhold i en mere kompakt kortstil i stedet for fuld skærm."
+      },
+      "tvosEpgReminders": {
+        "title": "Programpåmindelser, nu også på Apple TV",
+        "desc": "Indstil en påmindelse for et program på Apple TV, og få en notifikation på iPhone eller iPad, når det er ved at begynde."
+      },
+      "settingsReorg": {
+        "title": "Omorganiserede indstillinger",
+        "desc": "Indstillingerne er omorganiseret i tydeligere afsnit og med flere muligheder for at tilpasse appen."
+      },
+      "widgetsEfficiency": {
+        "title": "Mere effektive widgets og Top Shelf",
+        "desc": "Reduceret ressourceforbrug for widgets og Top Shelf med lettere og hurtigere opdateringer."
+      },
+      "foregroundResponsiveness": {
+        "title": "Tilbage i forgrunden uden lag",
+        "desc": "Rettet en langsommelighed, der kunne opstå, når du åbnede appen igen: den genoptages nu med det samme og uden at hakke."
+      }
+    },
+    "v2_3": {
+      "epgChannelColoredCards": {
+        "title": "Fornyet tv-guide",
+        "desc": "Programkort i kanalens farver, ny topbjælke, mere elegante overgange og forbedret navigation på iOS og Apple TV."
+      },
+      "tvosChannelLogoInLive": {
+        "title": "Mere informativ live-afspiller på Apple TV",
+        "desc": "Kanallogoet er nu synligt i afspilleren, og infopanelet fremhæver billeder fra det aktuelle program."
+      },
+      "iosTabBarMinimize": {
+        "title": "Fanelinje, der minimeres under navigation (iOS 26)",
+        "desc": "På detaljeskærme minimeres fanelinjen automatisk, så der er mere plads til indholdet."
+      },
+      "subtitlesSystemEdgeStyles": {
+        "title": "Undertekster tro mod systemstilen",
+        "desc": "I systemtilstand gengiver underteksternes kanter \"Hævet\" og \"Sænket\" nu præcist stilen fra iOS-indstillingerne."
+      },
+      "myListMultiTag": {
+        "title": "Min liste: flere tags og ny rækkefølge",
+        "desc": "Du kan nu tildele flere tags til samme indhold og frit ændre rækkefølgen. Kanaltilpasninger overlever omdøbning, og kortene i \"Fortsæt med at se\" viser mere præcise oplysninger."
+      },
+      "catalogLoadingPerformance": {
+        "title": "Hurtigere og mere flydende indlæsning af kataloget",
+        "desc": "Kataloget behandles i baggrunden, og navigationen forbliver responsiv under indlæsning: ikke flere blokeringer, når meget store playlister åbnes, især på Apple TV."
+      },
+      "tvosStabilityFixes": {
+        "title": "Stabilitet og navigation på Apple TV",
+        "desc": "Rettet to nedbrud ved indlæsning af indhold, fokus der gik tabt efter tilbagevenden fra app-skifteren, og faneskift ved indholdets kanter."
+      },
+      "playerSmoothness": {
+        "title": "Mere flydende afspilning på 50 fps- og/eller HDR-kanaler",
+        "desc": "Hakken ved brug af afspillerens betjening på Apple TV er fjernet, og 50 fps live-afspilning er mere flydende på iPhone/iPad/Mac."
+      },
+      "minorBugFixes": {
+        "title": "Mindre fejlrettelser",
+        "desc": "Løst flere stabilitets- og ydeevneproblemer i forskellige situationer."
+      }
+    },
+    "v2_2": {
+      "UIUXImprovements": {
+        "title": "UI/UX-forbedringer",
+        "desc": "Layouts og interaktioner er forbedret for at give en mere behagelig brugeroplevelse."
+      },
+      "richLiveReplayInfo": {
+        "title": "Flere oplysninger til Live og Replay",
+        "desc": "Info-panelet kombinerer nu EPG-guiden og TMDB-metadata med bedre billeder og flere oplysninger om programmet, der vises live eller som replay."
+      },
+      "smootherPlayer": {
+        "title": "En mere flydende og responsiv afspiller på iOS",
+        "desc": "Animationer, bevægelser og betjening er mere flydende med fuld ProMotion-understøttelse på kompatible enheder."
+      },
+      "epgReplayAccuracy": {
+        "title": "EPG og Replay forbliver synkroniseret",
+        "desc": "Programpanelet skelner nu bedre mellem live, tidligere og kommende indhold, og Replay viser oplysninger om det korrekte program."
+      },
+      "minorBugFixes": {
+        "title": "Mindre fejlrettelser",
+        "desc": "Flere fejl er blevet rettet for at forbedre appens stabilitet og ydeevne."
+      }
+    },
+    "v2_1": {
+      "accountConnectedDevices": {
+        "title": "Tilsluttede enheder",
+        "desc": "Se alle de enheder, du er logget ind på, og log dem ud eksternt, når du vil."
+      },
+      "recentlyWatchedLiveToggle": {
+        "title": "Skjul nyligt sete kanaler",
+        "desc": "Vis eller skjul de Live-kanaler, du har set for nylig."
+      },
+      "tvosLiveCarouselRedesign": {
+        "title": "Forbedret Live-karruselvisning på Apple TV",
+        "desc": "Live-sektionen på Apple TV har et nyt udseende i stil med Film og Serier: karruseller med 16:9-forhåndsvisninger, en fuldskærmsbaggrund, en glasprogramoversigt og kategorier, der foldes ud fra sidebjælken."
+      },
+      "topShelfChannelLogo": {
+        "title": "Korrekt kanallogo i Top Shelf (Apple TV)",
+        "desc": "Det tilpassede logo, du vælger til en Live-kanal, vises nu også i Apple TV's Top Shelf."
+      },
+      "playerWhiteThemeChips": {
+        "title": "Mere læsbart hvidt tema i afspilleren",
+        "desc": "Med det hvide tema har de valgte knapper i afspillerens betjening nu den rette kontrast."
+      }
+    },
+    "v2_0": {
+      "playerPlayWithEnginePicker": {
+        "title": "Afspil med det samme med din foretrukne afspiller",
+        "desc": "Vælg, hvilken motor afspilningen skal starte med (KSPlayer, VLC eller AVPlayer), ved hver start. Og med Premium kan du åbne film og kanaler direkte i eksterne afspillere (VLC eller Infuse)."
+      },
+      "metadataManualTmdbOverridePersonalizza": {
+        "title": "Tilpas metadata for film og serier",
+        "desc": "Når en titel knyttes til de forkerte oplysninger, kan du rette det manuelt ved at vælge det rigtige TMDB-resultat eller fjerne tilknytningen helt."
+      },
+      "playerOpensubtitlesAlwaysVisibleAudio": {
+        "title": "Mere kontrol over undertekster og lyd",
+        "desc": "Søg efter flere undertekstmuligheder på OpenSubtitles (slå det til i OpenSubtitles-indstillingerne), og justér forsinkelsen af lyd og undertekster. Dine indstillinger huskes for hvert indhold."
+      },
+      "livetvCarouselLayoutForThe": {
+        "title": "Nyt karrusel-layout til Live TV",
+        "desc": "Live TV-sektionen kan nu vise kanaler som vandrette karruseller, ligesom Film og Serier. Vælg det layout, du foretrækker, i indstillingerne."
+      },
+      "themeWhiteTheme4thAdaptive": {
+        "title": "Nyt hvidt tema",
+        "desc": "Prøv det nye hvide tema: elegant, rent og klassisk."
+      },
+      "tabsNascondiSchedeFilmSerie": {
+        "title": "Skjul tomme faner",
+        "desc": "Hvis en playliste ikke har film, serier eller livekanaler, skjules den tilhørende fane automatisk. Du kan slå indstillingen fra i indstillingerne."
+      },
+      "subtitlesSelfRenderCaptionsTo": {
+        "title": "Undertekster tro mod din stil",
+        "desc": "Undertekster følger nu bedre dine systemindstillinger, inklusive farve, med enhver afspilningsmotor."
+      },
+      "cwSelfHealContinueWatching": {
+        "title": "Fortsæt med at se og Min liste reparerer sig selv",
+        "desc": "Når udbyderen af din playliste omfordeler indholds-id'er, viser punkterne i Fortsæt med at se og Min liste ikke længere de forkerte film eller covers: de justerer sig selv efter det opdaterede katalog."
+      },
+      "epgInstantLoadViaStale": {
+        "title": "Hurtigere TV-guide ved start",
+        "desc": "Programoversigten (EPG) indlæses nu med det samme ved at genbruge gemte data og opdatere dem i baggrunden – ingen ventetid på et par sekunder ved hver åbning."
+      },
+      "playerNoFalseCompletionOn": {
+        "title": "Ingen falske «allerede set» på afbrudte streams",
+        "desc": "Visse fejlbehæftede streams fik appen til at tro, at en film var slut, og markerede den som set eller sprang til den næste. Det sker ikke længere."
+      },
+      "playerCatchupDoubleLiveBadge": {
+        "title": "Mere pålidelig Catch-up/Replay",
+        "desc": "Det dobbelte «LIVE»-mærke under catch-up er rettet, lyd- og undertekstknapperne er gendannet, og Replay-oplevelsen er forbedret."
+      },
+      "resolve9RegressionsFound": {
+        "title": "Stabilitetsforbedringer",
+        "desc": "Flere problemer fundet under intern test er rettet for en mere stabil og pålidelig app."
+      }
+    },
+    "v1_9": {
+      "epgShowEpgFanartOn": {
+        "title": "EPG Fanart",
+        "desc": "Programmer, der sendes på kanalerne, viser nu deres eget billede fra EPG'en (hvis det findes), ellers skifter de til TMDB eller kanalens logo som før."
+      },
+      "playerUnifiedSubtitleStylingApple": {
+        "title": "Tilpas underteksternes udseende",
+        "desc": "Vælg skrifttype, størrelse, fed skrift og kant til underteksterne, eller brug Apples systemstil. Du kan ændre dit valg i indstillingerne eller direkte i afspilleren."
+      },
+      "playerUnifyFallbackChainTo": {
+        "title": "Mere pålidelig afspilning",
+        "desc": "Forbedret algoritme til automatisk valg af afspiller på iOS og Apple TV."
+      },
+      "epgEpgEmptyOnFirst": {
+        "title": "Tv-guiden vises straks ved start",
+        "desc": "Tilpassede programguider (EPG) vises nu allerede ved første åbning af appen, uden at du behøver at lukke og åbne den igen."
+      }
+    },
+    "v1_8": {
+      "playerSkipIntroRecapCredits": {
+        "title": "Spring intro, resumé og rulletekster over",
+        "desc": "Spring åbningen, resuméer af tidligere afsnit og rulleteksterne i film og serier over med ét tryk."
+      },
+      "watchedMarkMoviesWholeSeries": {
+        "title": "Markér film og hele serier som set",
+        "desc": "Hold styr på, hvad du allerede har set: plakater for sete titler dæmpes og viser et flueben."
+      },
+      "iosAvatarMenuCompactIcon": {
+        "title": "Mere kompakt afspilningslistemenu på iOS",
+        "desc": "Afspilningslistemenuen er redesignet med en praktisk række hurtige ikoner og er nemmere at bruge."
+      },
+      "settingsMoveDefaultAudioSubtitle": {
+        "title": "Standardsprog for lyd og undertekster, også live",
+        "desc": "Vælg dit foretrukne lyd- og undertekstsprog i et særskilt afsnit i indstillingerne. Det gælder nu også livekanaler, ikke kun film og serier."
+      },
+      "tvosLiveReplayNoEngine": {
+        "title": "Mere jævn genafspilning af live",
+        "desc": "Spol tilbage og scrub i live-tv med det samme, med en statuslinje som til film og serier og mere pålidelig hastighedsstyring."
+      },
+      "playerDefaultVodToHardware": {
+        "title": "Mere jævne og effektive film og serier",
+        "desc": "I automatisk tilstand bruger film og serier nu hardwareafkodning for mere jævn afspilning og lavere batteriforbrug."
+      },
+      "playerAccurateSeekForVod": {
+        "title": "Mere præcis scrubbing og ±10 s-spring",
+        "desc": "På film, serier og catch-up med KSPlayer rammer scrubbing og spring frem og tilbage nu præcis det rigtige sted."
+      }
+    },
+    "v1_7": {
+      "tvosLivePlayerOverhaulKsme": {
+        "title": "KSPlayer forbedret",
+        "desc": "Vi har skrevet KSPlayer-integrationen helt om – den er nu mere optimeret og mere flydende i alle situationer på film, serier og livekanaler."
+      },
+      "iosNativeAirplayNowPlaying": {
+        "title": "AirPlay med video i ethvert format",
+        "desc": "Send via AirPlay ikke kun lyd, men også video, i ethvert filformat – selv de mest eksotiske."
+      },
+      "tvosHomogeneousCustomCornerPip": {
+        "title": "Picture-in-Picture i alle afspillere på Apple TV",
+        "desc": "Se dit indhold i et hjørne af skærmen med en hvilken som helst afspilningsmotor."
+      },
+      "tvosMultiviewFromSingleIs": {
+        "title": "Multiview endnu mere flydende",
+        "desc": "Åbn flere kanaler på samme skærm, og skift mellem dem endnu mere lydhørt – uden at genindlæse."
+      },
+      "tvosKill4sDismissFreeze": {
+        "title": "Hurtigere og mere responsiv live-tv på Apple TV",
+        "desc": "Blokeringen på et par sekunder, når du forlader afspilleren, er fjernet; kanalrulning og kanalskift er mere flydende."
+      },
+      "tvosHeaderClockRespectsSystem": {
+        "title": "Uret øverst følger systemets 12/24-timers format på Apple TV"
+      },
+      "tvosCwCardPlaceholderLogo": {
+        "title": "Rettet et pladsholderlogo, der blev hængende over coveret i Fortsæt med at se"
+      },
+      "tvosAutoPlayerFallbackChain": {
+        "title": "Mere pålidelig automatisk valg af afspiller"
+      }
+    },
+    "v1_6_1": {
+      "liveLogoFromEpg": {
+        "title": "Mere komplette Live TV-kanallogoer",
+        "desc": "Når du tilpasser en kanals logo, kan du nu også vælge det, der leveres af EPG'en, og søge efter det med det nye søgefelt."
+      },
+      "liveAutoQuality": {
+        "title": "“Auto”-kvalitet til live (eksperimentel)",
+        "desc": "En ny eksperimentel indstilling under Indstillinger → Player vælger og tilpasser automatisk kvaliteten af Live-kanaler under afspilning. Slået fra som standard."
+      },
+      "tvosLiveReloadFix": {
+        "title": "Rettet uventede live-genindlæsninger på Apple TV",
+        "desc": "Rettet en fejl introduceret i 1.6, der forårsagede uventede live-genindlæsninger på Apple TV."
+      }
+    },
+    "v1_6": {
+      "categoryManagement": {
+        "title": "Omdøb kategorier",
+        "desc": "Omdøb, lås med en PIN-kode, eller skjul dine kategorier for film, serier og kanaler ved at holde kategorinavnet inde."
+      },
+      "liveChannelRename": {
+        "title": "Omdøb kanaler",
+        "desc": "Giv enhver live-kanal et brugerdefineret navn fra genvejsmenuen. Omdøb en enkelt version eller alle kvalitetsvarianter samlet: kanaler med samme navn forbliver grupperet."
+      },
+      "channelCustomEpgLogo": {
+        "title": "Brugerdefineret EPG pr. kanal",
+        "desc": "Vælg manuelt den korrekte programoversigt for hver kanal, og ret EPG'ens tidsforskydning."
+      },
+      "fasterHugeEpg": {
+        "title": "Hurtigere og lettere programoversigt",
+        "desc": "Meget store EPG-oversigter indlæses nu hurtigere og bruger mindre hukommelse."
+      },
+      "smootherLiveTv": {
+        "title": "Mere flydende Live TV",
+        "desc": "At åbne kanaler og bladre i oversigten reagerer hurtigere på iPhone og Apple TV, med automatisk gendannelse af frosne live-kanaler."
+      },
+      "tvosMovieArtwork": {
+        "title": "Filmplakater og detaljer på Apple TV",
+        "desc": "På Apple TV hentes filmplakater og detaljer nu fra TMDB, selv når udbyderen ikke angiver et id."
+      },
+      "tvosRecentlyAddedPosters": {
+        "title": "Tomme plakater i Tilføjet for nylig på Apple TV",
+        "desc": "Rettet et problem, hvor de første plakater i afsnittet Tilføjet for nylig kunne se tomme ud ved start på Apple TV."
+      },
+      "myListSync": {
+        "title": "Standardtags i My List",
+        "desc": "Rettet et problem, hvor standardtags i My List dukkede op igen efter geninstallation, selvom de var blevet skjult."
+      },
+      "tvosPinPrompt": {
+        "title": "PIN-anmodning på Apple TV",
+        "desc": "Rettet udseendet af skærmen til indtastning af forældre-PIN på Apple TV."
+      }
+    },
+    "v1_5": {
+      "avatarPickerRenewed": {
+        "title": "Nye avatarer",
+        "desc": "Tilpas din oplevelse med over 250 nye avatarer, inspireret af de mest ikoniske figurer fra film, serier, anime og sport."
+      },
+      "livetvPerPlaylistStartSection": {
+        "title": "Åbningskategori for Live TV",
+        "desc": "Vælg, hvilken kanalkategori Live TV åbner med for hver afspilningsliste: listens første kategori, dine favoritter eller senest set."
+      },
+      "playerHardwareKeyboardControls": {
+        "title": "Tastaturstyring på Mac og iPad",
+        "desc": "Afspil/pause, spol frem og tilbage og andre afspillerknapper reagerer nu på det fysiske tastatur på Mac og iPad."
+      },
+      "livetvSmarterChannelGrouping": {
+        "title": "Smartere kanalgruppering",
+        "desc": "KIPTV genkender flere varianter og kvaliteter af samme kanal med langt bredere kompatibilitet på tværs af forskellige udbydere."
+      },
+      "playerSubtitleAppearanceMenu": {
+        "title": "Renere menu til undertekstudseende",
+        "desc": "Menuen til at tilpasse underteksternes udseende vises nu kun, når en ekstern undertekst er aktiv."
+      },
+      "playerAudioSubtitleTracksAllEngines": {
+        "title": "Lyd- og undertekstspor i alle afspillere",
+        "desc": "Lyd- og undertekstspor vises nu korrekt med enhver afspilningsmotor."
+      },
+      "minorBugFixes": {
+        "title": "Mindre fejlrettelser"
+      }
+    },
+    "v1_4": {
+      "customPerCategoryOrder": {
+        "title": "Sortér indhold som du vil, kategori for kategori",
+        "desc": "Indstil en brugerdefineret rækkefølge af indhold for hver kategori af Film, Serier og Live TV: KIPTV husker det og viser det altid, som du efterlod det."
+      },
+      "playlistAvatarActionsMenu": {
+        "title": "Hurtige handlinger fra playlist-avataren",
+        "desc": "Tryk på din playlists avatar for at åbne en menu med hurtige handlinger eller åbne indstillingerne."
+      },
+      "contentSettingsSplit": {
+        "title": "Tydeligere indstillinger: Indhold og Forældrekontrol",
+        "desc": "Indholdsindstillingerne er nu opdelt i to dedikerede sektioner, Indhold og Forældrekontrol, så du hurtigt finder det, du leder efter."
+      },
+      "perPlaylistTrendingToggle": {
+        "title": "Tendenser kan aktiveres per playlist",
+        "desc": "En ny mulighed lader dig bestemme, om tendensafsnittet skal vises for hver playlist."
+      },
+      "playlistCompatibility": {
+        "title": "Hurtigere og mere kompatible playlists",
+        "desc": "M3U-playlists fra Xtream-paneler opgraderes nu automatisk til den native Xtream-version, som er hurtigere og har komplette kategorier, med udvidet kompatibilitet til flere providere."
+      },
+      "supportChatPolish": {
+        "title": "Mere behagelig supportchat",
+        "desc": "Samtalen åbner direkte ved den seneste besked med automatisk scrolling og læsekvitteringer. Notifikationer og badges nulstilles korrekt, når du læser beskederne."
+      },
+      "categoryLockUsability": {
+        "title": "Kategorilås endnu mere praktisk",
+        "desc": "Fra Live TV-gitteret og programguiden låser eller låser du hele kategorier op med ét tryk, og kontekstmenuen foreslår oplåsning, når indhold er beskyttet på kategoriniveau."
+      }
+    },
+    "v1_3": {
+      "contentAggiuntiDiRecenteSection": {
+        "title": "\"Nyligt tilføjet\": find nyt indhold med det samme",
+        "desc": "En ny sektion i Film, Serier og Live TV fremhæver det senest tilføjede indhold i din playlist, så du finder nyheder uden at søge."
+      },
+      "playerMediaInfoBadgesHdr": {
+        "title": "HDR-, Dolby Vision-, 4K- og FPS-badges i afspilleren",
+        "desc": "Under afspilning ser du med det samme streamens kvalitet — HDR, Dolby Vision, 4K og billedhastighed — med automatisk aktivering af HDR-tilstand. Samme oplevelse på iPhone, iPad og Apple TV."
+      },
+      "playerPerEngineAdvancedSettings": {
+        "title": "Avancerede indstillinger pr. motor direkte i afspilleren",
+        "desc": "Fra motorvælgeren i afspilleren kan du nu justere de avancerede indstillinger for hver enkelt motor og tilpasse afspilningen til hvert stream."
+      },
+      "settingsAddOptionForContent": {
+        "title": "Opdater indhold ved hver åbning",
+        "desc": "En ny indstilling genindlæser automatisk indholdet i din playlist, hver gang du åbner appen, så du altid har et opdateret katalog."
+      },
+      "epgGzipXmltvSupportDecoupled": {
+        "title": "Hurtigere og mere kompatibel programguide (EPG)",
+        "desc": "Understøttelse af komprimerede EPG-guider (gzip), med indlæsning uafhængigt af indhold og tydeligere diagnostik af kilder."
+      },
+      "playerTvosCutMainThreadContention": {
+        "title": "Mere flydende Live TV på Apple TV",
+        "desc": "Optimeringer der reducerer hakken under live-afspilning, sammen med flere rettelser i VLC-motoren."
+      },
+      "parentalCategoryAwareGateClose": {
+        "title": "Stærkere forældrekontrol, også pr. kategori",
+        "desc": "PIN-låsen gælder nu korrekt for hele kategorier og kan ikke længere omgås."
+      },
+      "epgRenderCachedEpgWhen": {
+        "title": "Programguide altid synlig under scrolling",
+        "desc": "Løst et problem hvor EPG-oplysninger kunne forsvinde, når gitterrækker blev genbrugt under scrolling."
+      }
+    },
+    "v1_2": {
+      "premiumThemes": {
+        "title": "Tilpas KIPTV som du vil: premium-temaer på iOS og Apple TV",
+        "desc": "Vælg appens farve og hjemmeskærmens ikon fra et nøje sammensat udvalg."
+      },
+      "tvosDetailRewrite": {
+        "title": "Film og serier på Apple TV: helt nye detaljeskærme",
+        "desc": "Detaljsiderne er skrevet fra bunden for at være flydende: filmiske overgange, øjeblikkelig scrollning, ingen tøven selv med enorme kataloger."
+      },
+      "tagsFromAnywhere": {
+        "title": "Organiser alt med tags, fra hvor som helst i appen",
+        "desc": "Opret, omdøb, sorter og slet dine brugerdefinerede tags direkte fra kontekstmenuen på enhver film, serie eller kanal."
+      },
+      "fixMoviesTabEmptyOnSomePlaylists": {
+        "title": "Rettet en fejl hvor nogle playlists ikke viste film",
+        "desc": "På nogle playlists blev Film-sektionen hængende på en sort skærm på grund af providerdata i uventede formater. Nu gendanner KIPTV indholdet korrekt også i disse tilfælde."
+      },
+      "fix4kChannels": {
+        "title": "4K-kanaler: nu starter videoen altid",
+        "desc": "Rettet problemet der sendte nogle 4K-kanaler i audio-only-tilstand med AVPlayer/KSPlayer. Perfekt afspilning på alle playere."
+      },
+      "recentSearches": {
+        "title": "Seneste søgninger altid lige ved hånden",
+        "desc": "Dine seneste søgninger vises øverst på Søg-skærmen på iPhone, iPad og Apple TV: fortsæt hvor du slap med et enkelt tryk."
+      },
+      "customChannelLogos": {
+        "title": "Kanallogoer præcis som du vil have dem",
+        "desc": "Hver kanal kan have sit eget logo: vælg fra et kurateret community-bibliotek, eller søg på nettet. Fuld understøttelse af SVG og gennemsigtighed."
+      },
+      "fixThirdPartyEpgUrls": {
+        "title": "Programguide (EPG) fra enhver kilde, endelig pålidelig",
+        "desc": "Nu håndterer KIPTV tredjeparts-EPG-URL'er korrekt end-to-end: tilføj din foretrukne programguide og lad KIPTV klare resten."
+      }
+    },
+    "v1_1_0": {
+      "multiview": {
+        "title": "Multiview: 4 kanaler samtidig",
+        "desc": "Se op til 4 Live-kanaler samtidig med den nye Multiview-oplevelse. Fliser der kan udvides, mini-afspiller altid inden for rækkevidde, kvalitetsvælger og ambient light der tager farverne fra videoen. Tilgængelig på iPhone, iPad og Apple TV.\n\nOBS: udbyderen skal understøtte flere samtidige forbindelser for denne funktion."
+      },
+      "audioNoInterruptOtherApps": {
+        "title": "Appen afbryder ikke længere musik fra andre apps",
+        "desc": "At åbne KIPTV sætter ikke længere musik eller lyd fra andre apps på pause: lydsessionen aktiveres først, når du rent faktisk starter afspilning af indhold."
+      },
+      "vodPlaybackMoreStable": {
+        "title": "Mere stabil VOD-afspilning",
+        "desc": "Forbedret afspilning af film og serier: mere pålidelig buffering-håndtering, KSPlayer-motor yderligere optimeret."
+      },
+      "playerEngineFallback": {
+        "title": "Mere robust skift af afspilningsmotor",
+        "desc": "Hvis den afspilningsmotor du manuelt har valgt ikke kan starte strømmen, skifter KIPTV automatisk tilbage til den forrige der virkede, uden at afbryde oplevelsen."
+      },
+      "mylistAvailabilityCheck": {
+        "title": "Min Liste: mere pålidelig tilgængelighedstjek",
+        "desc": "Efter indlæsning af playlisten kontrollerer KIPTV de gemte film og serier via TMDB igen og giver dig straks besked om dem der netop er blevet tilgængelige."
+      },
+      "playlistRebuildOnPartialCache": {
+        "title": "Film-fanen tom efter afbrudt indlæsning",
+        "desc": "Løst et tilfælde hvor en afbrudt indlæsning af playlisten efterlod Film-fanen tom."
+      },
+      "tvosCatalogDuringPlayback": {
+        "title": "Apple TV: mere flydende navigation under afspilning",
+        "desc": "På Apple TV påvirker katalogopdateringer ikke længere igangværende afspilning, hvilket undgår afbrydelser eller forsinkelser når du ser en Live-kanal eller en serieepisode."
+      },
+      "tvosLiveAndCatchup": {
+        "title": "Apple TV: Live TV og catchup mere pålidelige",
+        "desc": "Løst et problem der kunne forårsage freeze og buffering."
+      }
+    },
+    "v1_0_9": {
+      "playerInPlayerChannelLists": {
+        "title": "Kanalliste i afspilleren følger Live TV-rækkefølge",
+        "desc": "Også inde i afspilleren vises kanalerne nu i samme rækkefølge som i Live TV, med specialsektioner (Favoritter, Historik) altid lige ved hånden."
+      },
+      "epgAutoRewriteDropboxDrive": {
+        "title": "EPG-links fra Dropbox og Google Drive",
+        "desc": "Delingslinks fra Dropbox og Google Drive fungerer nu direkte som EPG-kilde uden manuelle ændringer."
+      },
+      "mylistTmdbOnlyItemsAvailability": {
+        "title": "Føj indhold til Min Liste selv uden playlist",
+        "desc": "Du kan gemme film og serier fundet via TMDB, selvom de endnu ikke er i din playlist: når de bliver tilgængelige, giver KIPTV dig besked."
+      },
+      "playlistTolerateDuplicateXtreamIds": {
+        "title": "Playlister med duplikerede ID'er",
+        "desc": "Rettet et nedbrud der opstod ved åbning af Xtream-playlister med duplikerede kanal- eller film-ID'er."
+      },
+      "tvosPlayerControlsNotAuto": {
+        "title": "Afspillerkontroller på Apple TV",
+        "desc": "Rettet et problem hvor afspillerkontrollerne ikke automatisk blev skjult ved første fuldskærmsvisning på tvOS."
+      }
+    },
+    "v1_0_8": {
+      "tvosPlayButtonNonResponsive": {
+        "title": "Apple TV: Play-knap fra søgning",
+        "desc": "Rettet et problem hvor Play-knappen ikke reagerede ved åbning af visse titler fra søgeresultaterne."
+      },
+      "tvosSearchBreakQualityPickerLoop": {
+        "title": "Apple TV: kvalitetsvalg for grupperede kanaler",
+        "desc": "Rettet en fejl i kvalitetsvælgeren for kanaler på søgeskærmen, som forårsagede en uendelig løkke, hvis kanalen var grupperet med andre."
+      },
+      "minorBugFixes": {
+        "title": "Mindre fejlrettelser"
+      }
+    },
+    "v1_0_7": {
+      "supportCenterInApp": {
+        "title": "Nyt supportcenter i appen",
+        "desc": "Opret en sag, vedhæft skærmbilleder og modtag svar i realtid direkte fra appen på iPhone, iPad og Apple TV."
+      },
+      "triviaLoadingScreen": {
+        "title": "Langsom forbindelse? Her er noget trivia!",
+        "desc": "Hvis din forbindelse er langsom, og du venter på at playlisten indlæses, kan du opdage sjove fakta om film, serier og anime (ingen spoilere, lovet!)."
+      },
+      "tvosRefocusChannelAfterPlayer": {
+        "title": "Apple TV: fokus vender tilbage til kanalen",
+        "desc": "Når du har zappet rundt i afspilleren og lukker den, bringer kanallisten dig tilbage til præcis det sted, du var."
+      }
+    },
+    "v1_0_6": {
+      "premiumFreeTrialAllPlans": {
+        "title": "Gratis prøveperiode på alle Premium-planer",
+        "desc": "Alle abonnementsplaner tilbyder nu en gratis prøveperiode før betaling."
+      },
+      "tvosInPlayerChannelGuide": {
+        "title": "Gennemse kategorier og kanaler i afspilleren på Apple TV",
+        "desc": "Gennemse kanaler og kategorier direkte fra Live-afspilleren med flydende scrollning mellem karrusellerne, uden at forlade afspilleren."
+      },
+      "playerBrightnessControl": {
+        "title": "Lysstyrkekontrol i iOS-afspilleren",
+        "desc": "Juster skærmens lysstyrke direkte fra afspilleren."
+      },
+      "playerPinchToFill": {
+        "title": "Knib med to fingre for at fylde skærmen på iOS",
+        "desc": "Tilpas videoen med en naturlig bevægelse, knib for at zoome og fylde skærmen."
+      },
+      "settingsFollowOnInstagram": {
+        "title": "Følg os på Instagram",
+        "desc": "Ny knap i Indstillinger til at følge KIPTV på Instagram og holde dig opdateret."
+      },
+      "tvosFocusSkipFix": {
+        "title": "Mere præcis fokusnavigation på Apple TV",
+        "desc": "På de runde knapper i Apple TV-afspilleren springer fokus ikke længere utilsigtet."
+      }
+    },
+    "v1_0_5": {
+      "continueWatchingWidgets": {
+        "title": "Fortsæt med at se-widgets til iPhone og iPad",
+        "desc": "Tilføj de nye Home Screen-widgets for at genoptage film og serier med et tryk. Tilgængelige i alle størrelser."
+      },
+      "inPlayerVolumeControl": {
+        "title": "Lydstyrkekontrol i afspilleren",
+        "desc": "Ny lydstyrkeslider direkte i afspilleren på iOS."
+      },
+      "subtitleAppearanceInPlayer": {
+        "title": "Undertekstudseende direkte fra afspilleren",
+        "desc": "Indstillinger for skrifttype, størrelse og farve på undertekster findes nu i afspilleren, tilgængelige under afspilning."
+      },
+      "myListPerTagCarousels": {
+        "title": "Min Liste opdelt efter tags",
+        "desc": "Du kan nu opdele Min Liste i separate karruseller for hvert tag, du har tildelt. Tilstanden aktiveres i Indstillinger > Indhold."
+      },
+      "systemTimeFormat": {
+        "title": "Tidsformat fra dit system",
+        "desc": "EPG og afspiller respekterer nu 12h/24h-formatet fra dine systemindstillinger."
+      },
+      "tvosPipRestored": {
+        "title": "Picture in Picture genoprettet på Apple TV",
+        "desc": "Picture in Picture fungerer igen korrekt på tvOS efter et problem introduceret i en tidligere version."
+      },
+      "premiumPlaylistsCap": {
+        "title": "Playlistgrænse rettet for Premium Plus-brugere",
+        "desc": "Rettet en fejl, hvor nogle Premium Plus-brugere fejlagtigt var begrænset til kun én playlist."
+      }
+    },
+    "v1_0_4": {
+      "manualRotationButton": {
+        "title": "Rotér afspilleren manuelt, når du vil",
+        "desc": "Ny rotationsknap i iPhone-afspilleren: skift mellem landscape og portrait med et tryk, selv når rotationslås er aktiv."
+      },
+      "followOnX": {
+        "title": "Følg os på X",
+        "desc": "Nu kan du følge os på X (Twitter) direkte fra KIPTV: du finder linket under Indstillinger."
+      },
+      "playerDragDismiss": {
+        "title": "Smidigere lukning af afspilleren på iOS",
+        "desc": "Små justeringer af lukkeanimationen i afspilleren for en mere naturlig oplevelse."
+      },
+      "subsResetBetweenEpisodes": {
+        "title": "Forbedringer af OpenSubtitles-undertekster",
+        "desc": "Bedre håndtering af OpenSubtitles-undertekster for en mere ensartet oplevelse mellem episoder."
+      },
+      "tmdbResilience": {
+        "title": "Hurtigere indlæsning af metadata",
+        "desc": "Optimeret indlæsning af metadata for film og serier for en mere flydende navigation."
+      },
+      "pipFixes": {
+        "title": "Forbedret Picture in Picture",
+        "desc": "Finpudset Picture in Picture-oplevelsen på iPhone og Mac med mere responsive kontroller."
+      }
+    },
+    "v1_0_3": {
+      "inAppFeedback": {
+        "title": "Hjælp os med at forbedre KIPTV med feedback i appen",
+        "desc": "Nu kan du sende os forslag, fejlrapporter og idéer direkte fra appen med få tryk. Vi læser alle beskeder og bruger dem til at forbedre KIPTV sammen med dig."
+      },
+      "playerQualityPicker": {
+        "title": "Skift kanalkvalitet direkte fra afspilleren",
+        "desc": "Når en Live-kanal har flere kvaliteter (HD, FHD, 4K…) kan du vælge den foretrukne direkte fra afspilleren uden at gå tilbage til listen. Tilgængelig på iPhone, iPad og Apple TV."
+      },
+      "liveInlinePreview": {
+        "title": "Live inline-forhåndsvisning på Apple TV",
+        "desc": "Ny indstilling under Indstillinger > Afspilning: på Apple TV kan du se en live-forhåndsvisning af den markerede kanal direkte i Live TV- og EPG-skærmene, før du åbner fuldskærm."
+      }
+    },
+    "versionHeader": "Version {{version}}",
+    "continue": "Fortsæt",
+    "section": {
+      "new": "Nyt",
+      "improvement": "Forbedringer",
+      "bugfix": "Fejlrettelser"
+    },
+    "v1_0_2": {
+      "tmdbAmbiguousMatchPicker": {
+        "title": "Manuel vælger ved flere match",
+        "desc": "Når en titel har flere mulige match på TMDB, kan du nu vælge det rigtige."
+      },
+      "liveTvQualityVariantsGrouping": {
+        "title": "Mere præcis gruppering af Live-kanaler",
+        "desc": "Forbedret genkendelse af kvalitetsvarianter i kanalnavne for en mere pålidelig gruppering."
+      },
+      "memoryOomCrashFix": {
+        "title": "Stabilitet med meget store playlister",
+        "desc": "Rettet et crash pga. utilstrækkelig hukommelse med enorme playlister og en mulig sammenblanding af EPG mellem forskellige playlister."
+      }
+    },
+    "v1_0_1": {
+      "memory": {
+        "title": "Nedbrudsrettelser",
+        "desc": "Rettet et problem, der kunne overbelaste RAM på visse enheder og forårsage app-nedbrud."
+      },
+      "player": {
+        "title": "Mere stabil afspiller",
+        "desc": "Reduceret bufring på Live og VOD ved at følge AVFoundation/VLC bedste praksis."
+      },
+      "infoPanel": {
+        "title": "Infopanel i afspilleren",
+        "desc": "I liggende tilstand kan du nu lukke panelet ved at trykke på videoområdet ovenover."
+      },
+      "tvosFocus": {
+        "title": "Hurtigere Apple TV",
+        "desc": "Mere flydende fanebjælke ved navigation mellem sektioner."
+      },
+      "badges": {
+        "title": "Konsistente \"Nyt\" mærker",
+        "desc": "Ensartede indikatorer for nyt indhold på Film og Serier, både iOS og Apple TV."
+      }
+    }
+  },
+  "widget": {
+    "resume": "Fortsæt",
+    "noMoviesInProgress": "Ingen film i gang",
+    "noEpisodesInProgress": "Ingen afsnit i gang",
+    "openApp": "Åbn KIPTV"
+  },
+  "support": {
+    "centerTitle": "Supportcenter",
+    "centerEmpty": "Ingen samtaler endnu",
+    "centerEmptyHint": "Start en samtale med KIPTV-support for at rapportere et problem, foreslå en forbedring eller anmode om en ny funktion.",
+    "newTicket": "Ny samtale",
+    "you": "Dig",
+    "supportTeam": "KIPTV Support",
+    "send": "Send",
+    "replyPlaceholder": "Skriv en besked…",
+    "closedHint": "Samtale lukket",
+    "closedComposer": "Denne samtale er blevet lukket. Start en ny, hvis du har brug for mere hjælp.",
+    "resolvedHint": "Send en besked for at genåbne denne samtale",
+    "openFollowUp": "Åbn opfølgning",
+    "followUpDraftHeader": "Sv: %@ (#%@)",
+    "newMessageOne": "Ny besked",
+    "newMessageMany": "%d nye beskeder",
+    "typing": "Support skriver…",
+    "unreadBadge": "%d nye",
+    "status": {
+      "open": "Åben",
+      "triaged": "Under vurdering",
+      "in_progress": "I gang",
+      "awaiting_user": "Venter på dit svar",
+      "resolved": "Løst",
+      "closed": "Lukket",
+      "duplicate": "Dublet",
+      "on_hold": "Sat på pause"
+    },
+    "new": {
+      "type": "Type",
+      "typeHeader": "Hvad handler det om?",
+      "deviceHeader": "Enhed",
+      "deviceFooter": "Påkrævet. Vælg den enhed, problemet opstår på, også selvom du skriver fra en anden.",
+      "titleHeader": "Emne",
+      "titlePlaceholder": "Emne",
+      "titleFooter": "En kort sætning, der opsummerer problemet eller anmodningen.",
+      "messageHeader": "Besked",
+      "messagePlaceholder": "Beskriv, hvad der sker, hvad du forventer, og under hvilke betingelser det sker.",
+      "messageFooter": "Du kan tilføje flere detaljer senere ved at chatte med support.",
+      "submit": "Åbn samtale",
+      "successTitle": "Samtale åbnet",
+      "successMessage": "Vi svarer dig her i appen så hurtigt som muligt.",
+      "attachmentHeader": "Vedhæftede filer",
+      "attachmentFooter": "Valgfrit. JPEG, PNG eller HEIC op til 7 MB.",
+      "attachmentFooterCount": "Valgfrit, op til %d billeder. JPEG, PNG eller HEIC op til 7 MB hver.",
+      "attachmentAdd": "Tilføj et billede"
+    },
+    "attachmentReady": "Billede klar til afsendelse",
+    "attachmentPreview": "📷 Billede",
+    "category": {
+      "crash": "Crash",
+      "playback": "Afspilning",
+      "playlist": "Playliste",
+      "epg": "EPG / TV-guide",
+      "subscription": "Abonnement",
+      "auth": "Log ind",
+      "ui": "Brugerflade",
+      "account": "Konto",
+      "other": "Andet"
+    },
+    "device": {
+      "all": "Alle enheder",
+      "iphone": "iPhone",
+      "ipad": "iPad",
+      "appleTV": "Apple TV",
+      "androidTV": "Android TV",
+      "fireTV": "Fire TV",
+      "mac": "Mac",
+      "visionPro": "Vision Pro"
+    },
+    "error": {
+      "title": "Fejl",
+      "notAuthenticated": "Du skal være logget ind for at bruge Supportcenter",
+      "missingTitle": "Indtast venligst en titel",
+      "messageEmpty": "Beskeden kan ikke være tom",
+      "insertFailed": "Afsendelse mislykkedes",
+      "fetchFailed": "Indlæsning mislykkedes",
+      "updateFailed": "Opdatering mislykkedes",
+      "uploadFailed": "Upload af vedhæftning mislykkedes",
+      "attachmentTooLarge": "Billedet er større end 7 MB. Vælg venligst et mindre.",
+      "rateLimited": "Du har åbnet flere samtaler for nylig. Vent venligst et øjeblik, før du åbner endnu en."
+    },
+    "admin": {
+      "analytics": {
+        "chart": {
+          "byCategory": "Efter kategori",
+          "byStatus": "Efter status",
+          "perDay": "Sager pr. dag"
+        },
+        "empty": "Ingen data i denne periode",
+        "kpi": {
+          "firstResponse": "Gns. første svar",
+          "open": "Åbne sager",
+          "resolution": "Gns. løsningstid"
+        },
+        "noOpenTickets": "Ingen åbne sager",
+        "oldestOpen": "Ældste åbne sag",
+        "range": {
+          "30d": "30 dage",
+          "7d": "7 dage",
+          "all": "Hele tiden"
+        },
+        "title": "Statistik"
+      },
+      "bulk": {
+        "assignMe": "Tildel mig",
+        "confirm": {
+          "assignMe": "Tildel %@.",
+          "label": "Tilføj etiketten \"%@\".",
+          "status": "Skift status til %@.",
+          "title": "Anvend på %d sag(er)?"
+        },
+        "label": "Etiket",
+        "labelPlaceholder": "etiketnavn",
+        "labelPrompt": "Tilføj etiket",
+        "selected": "valgte",
+        "status": "Status"
+      },
+      "details": {
+        "assigneeSection": "Tildelt",
+        "auditSection": "Aktivitet",
+        "categorySection": "Kategori",
+        "diagnosticsSection": "Diagnostik",
+        "labelsSection": "Etiketter",
+        "notesPlaceholder": "Interne noter — kun synlige for admins.",
+        "notesSection": "Interne noter",
+        "otherTicketsLabel": "Brugerens øvrige sager",
+        "priorityHigh": "P1 (højeste)",
+        "priorityLow": "P5 (laveste)",
+        "priorityNone": "—",
+        "prioritySection": "Prioritet",
+        "statusSection": "Status",
+        "ticketsOpenOfTotal": "%1$d åbne · %2$d i alt",
+        "title": "Detaljer",
+        "triageSection": "Triage"
+      },
+      "split": {
+        "noDetails": "Åbn en sag for at se detaljerne",
+        "noTicketSelected": "Vælg en sag for at læse samtalen"
+      },
+      "sub": {
+        "active": "Aktivt",
+        "endsOn": "Slutter den %@",
+        "expired": "Udløbet",
+        "expiredOn": "Udløb den %@",
+        "expiry": "Udløb",
+        "free": "Intet abonnement",
+        "lapsing": "Opsagt — fornyes ikke",
+        "manage": "Administrer abonnement",
+        "neverSynced": "Aldrig synkroniseret med RevenueCat",
+        "renewing": "Aktivt, fornyes",
+        "renewsOn": "Fornyes den %@",
+        "section": "Abonnement",
+        "syncedAt": "Data opdateret %@",
+        "since": "Premium siden"
+      },
+      "user": {
+        "activitySection": "Aktivitet",
+        "id": "Bruger-ID",
+        "lastPlayback": "Sidst afspillet",
+        "lastSignIn": "Seneste login",
+        "noOtherTickets": "Ingen andre sager",
+        "noTickets": "Ingen sager",
+        "playlists": "Playlister",
+        "provider": "Logget ind med",
+        "registered": "Registreret den",
+        "ticketsFooter": "%d stadig åbne.",
+        "ticketsSection": "Sager",
+        "watchTime": "Sete tid"
+      }
+    }
+  },
+  "appearance": {
+    "title": "Udseende",
+    "subtitle": "Tilpas appens udseende.",
+    "premiumUpsell": "Lås temaer op med Premium.",
+    "unlockCTA": "Lås op med Premium",
+    "iconChangeNotice": "iOS viser kort en systemmeddelelse, når du skifter ikon.",
+    "section": {
+      "color": "Primær farve",
+      "icon": "App-ikon",
+      "theme": "Tema",
+      "ambient": "Baggrund"
+    },
+    "color": {
+      "red": "Rød",
+      "brown": "Brun",
+      "fuchsia": "Fuchsia",
+      "gold": "Guld",
+      "green": "Grøn",
+      "indigo": "Indigo",
+      "lime": "Lime",
+      "orange": "Orange",
+      "purple": "Lilla",
+      "silver": "Sølv",
+      "teal": "Petroleumsgrøn",
+      "white": "Hvid"
+    },
+    "icon": {
+      "red": "Rød",
+      "brown": "Brun",
+      "fuchsia": "Fuchsia",
+      "gold": "Guld",
+      "green": "Grøn",
+      "indigo": "Indigo",
+      "lime": "Lime",
+      "orange": "Orange",
+      "purple": "Lilla",
+      "silver": "Sølv",
+      "teal": "Petroleumsgrøn",
+      "white": "Hvid"
+    },
+    "background": {
+      "title": "Baggrund",
+      "black": "Sort",
+      "dynamic": "Dynamisk"
+    },
+    "ambient": {
+      "title": "Dynamisk baggrund",
+      "subtitle": "Farver baggrunden med farverne fra plakaten på skærmen."
+    }
+  },
+  "recentlyAdded": {
+    "title": "Nyligt tilføjet"
+  },
+  "metadata": {
+    "customize": "Tilpas metadata",
+    "sheet": {
+      "title": "Tilpas metadata",
+      "search": "Søg efter en film eller serie",
+      "results": "Resultater",
+      "automatic": "Automatisk",
+      "noTMDB": "Ingen TMDB (kun udbyder)",
+      "current": "Aktuelt match",
+      "searchHint": "Skriv en titel for at søge på TMDB",
+      "noResults": "Ingen resultater"
+    }
+  },
+  "devices": {
+    "connectedTitle": "Forbundne enheder",
+    "description": "Enheder, der er logget ind på din konto. Log de enheder ud, du ikke genkender.",
+    "thisDevice": "Denne enhed",
+    "lastActive": "Sidst aktiv {{time}}",
+    "signOut": "Log ud",
+    "signOutConfirmTitle": "Log enhed ud?",
+    "signOutConfirmMessage": "Denne enhed logges ud og skal logge ind igen.",
+    "signOutError": "Enheden kunne ikke logges ud. Prøv igen.",
+    "empty": "Ingen andre enheder",
+    "loading": "Indlæser enheder…",
+    "activeNow": "Aktiv nu"
+  },
+  "home": {
+    "title": "Hjem",
+    "customize": "Tilpas",
+    "customizeTitle": "Tilpas Hjem",
+    "hide": "Skjul Hjem",
+    "hideConfirm": "Skjul",
+    "hideMessage": "Fanen Hjem forsvinder, og appen åbner på den startskærm, du har valgt i Indstillinger. Du kan slå den til igen under Indstillinger → Indhold.",
+    "hideFooter": "Når du skjuler Hjem, vender du tilbage til den startskærm, du havde før.",
+    "sections": "Sektioner",
+    "sectionsActive": "{{count}} aktive",
+    "sectionsFooter": "Træk for at ændre rækkefølgen. Sektioner uden indhold forbliver automatisk skjult.",
+    "addSection": "Tilføj sektion",
+    "addSectionFooter": "Platforme og feeds viser de titler, der findes i din playliste.",
+    "addPlatform": "Streamingplatform",
+    "addFeed": "Brugerdefineret feed",
+    "reset": "Nulstil layout",
+    "resetConfirm": "Nulstil",
+    "resetMessage": "Tilbage til standardrækkefølge og -sektioner. Platforme og brugerdefinerede feeds fjernes.",
+    "applyToAll": "Anvend på alle playlister",
+    "applyToAllConfirm": "Anvend",
+    "applyToAllMessage": "Dette layout erstatter Hjem på alle dine playlister.",
+    "moveUp": "Flyt op",
+    "moveDown": "Flyt ned",
+    "hideSection": "Skjul sektion",
+    "sectionSettings": "Sektionsindstillinger",
+    "emptyLayoutTitle": "Tom Hjem",
+    "emptyLayoutMessage": "Du har slået alle sektioner fra. Tilpas Hjem for at slå dem til igen.",
+    "section": {
+      "hero": "Fremhævet",
+      "nowOnTV": "På tv nu",
+      "newEpisodes": "Nye afsnit til dig",
+      "recommended": "Anbefalet til dig",
+      "tonightOnTV": "I aften på tv",
+      "recentlyAddedMovies": "Nyligt tilføjede film",
+      "recentlyAddedSeries": "Nyligt tilføjede serier",
+      "recentlyAddedLive": "Nyligt tilføjede kanaler",
+      "platform": "Platform",
+      "customFeed": "Brugerdefineret feed",
+      "traktList": "Trakt-liste"
+    },
+    "nowOnTVSubtitle": "Sendes nu på dine kanaler",
+    "newEpisodesSubtitle": "Dine serier har nyheder",
+    "recommendedSubtitle": "Baseret på det, du har set",
+    "tonightSubtitle": "Primetime på dine kanaler",
+    "reason": {
+      "resume": "Fortsæt",
+      "newEpisode": "Nyt afsnit",
+      "trending": "Populært",
+      "recentlyAdded": "Lige tilføjet"
+    },
+    "params": {
+      "both": "Begge",
+      "mediaType": "Indholdstype",
+      "channels": "Kanaler",
+      "channelsFooter": "Hvilke kanaler der vises: dem i Min liste, de senest sete eller begge.",
+      "window": "Periode",
+      "lastDays": "Seneste {{days}} dage",
+      "thisWeek": "Denne uge",
+      "today": "I dag"
+    },
+    "feed": {
+      "name": "Feedets navn",
+      "namePlaceholder": "F.eks. 80'er-gys",
+      "sortBy": "Sortér efter",
+      "sort": {
+        "popularityDesc": "Popularitet (faldende)",
+        "popularityAsc": "Popularitet (stigende)",
+        "ratingDesc": "Højest bedømt",
+        "votesDesc": "Flest stemmer",
+        "newest": "Nyeste",
+        "oldest": "Ældste",
+        "revenueDesc": "Højeste indtjening"
+      },
+      "genres": "Genrer",
+      "excludedGenres": "Udelukkede genrer",
+      "year": "Udgivelsesår",
+      "yearFrom": "Fra",
+      "yearTo": "Til",
+      "anyYear": "Alle år",
+      "language": "Originalsprog",
+      "anyLanguage": "Alle sprog",
+      "platforms": "Platforme",
+      "platformsFooter": "Begræns feedet til titler, der er tilgængelige på disse platforme.",
+      "minVotes": "Minimum antal stemmer",
+      "noMinimum": "Intet minimum",
+      "filters": "Filtre",
+      "customParams": "Ekstra parametre",
+      "customParamsPlaceholder": "with_companies=420&vote_average.gte=7",
+      "customParamsFooter": "Parametre til TMDB Discover API som nøgle=værdi adskilt af &. Komma for OG-logik, lodret streg (|) for ELLER.",
+      "none": "Ingen",
+      "create": "Opret feed",
+      "edit": "Redigér feed",
+      "lang": {
+        "en": "Engelsk",
+        "it": "Italiensk",
+        "es": "Spansk",
+        "fr": "Fransk",
+        "de": "Tysk",
+        "pt": "Portugisisk",
+        "ja": "Japansk",
+        "ko": "Koreansk",
+        "zh": "Kinesisk",
+        "hi": "Hindi",
+        "tr": "Tyrkisk",
+        "ar": "Arabisk",
+        "ru": "Russisk",
+        "nl": "Hollandsk",
+        "sv": "Svensk",
+        "da": "Dansk",
+        "nb": "Norsk",
+        "pl": "Polsk",
+        "el": "Græsk",
+        "fi": "Finsk"
+      }
+    },
+    "platform": {
+      "pickTitle": "Vælg platforme",
+      "search": "Søg platform",
+      "add": "Tilføj",
+      "added": "Tilføjet"
+    },
+    "platformMovies": "{{name}}-film",
+    "platformSeries": "{{name}}-serier",
+    "customizeHint": "Tryk ned for at åbne",
+    "addPlatformSubtitle": "Tilføj en række med én tjenestes titler",
+    "addFeedSubtitle": "Opret en række ud fra dine egne kriterier",
+    "addTraktList": "Trakt-liste",
+    "addTraktListSubtitle": "Watchlist, anbefalinger, dine lister og fællesskabets",
+    "trakt": {
+      "pickTitle": "Tilføj Trakt-liste",
+      "yours": "Din Trakt",
+      "recommendations": "Anbefalet af Trakt",
+      "recommendationsDesc": "Baseret på det, du har set og bedømt på Trakt",
+      "watchlist": "Trakt-watchlist",
+      "watchlistDesc": "Hele din watchlist, også titler der ikke er i din playliste",
+      "myLists": "Mine lister",
+      "likedLists": "Lister jeg synes om",
+      "likedListsFooter": "Synes godt om en liste på trakt.tv, så vises den her.",
+      "community": "Fra Trakt-fællesskabet",
+      "popular": "Populære",
+      "trending": "Trending",
+      "official": "Officielle",
+      "search": "Søg efter en liste, eller indsæt et link eller et ID",
+      "searchResults": "Resultater",
+      "items": "{{count}} titler",
+      "by": "af {{user}}",
+      "none": "Ingen lister",
+      "loadMore": "Vis flere",
+      "inactive": "Tilknyt Trakt på denne playliste for at se rækken",
+      "loadFailed": "Trakt-lister kunne ikke indlæses. Tryk for at prøve igen",
+      "notFound": "Ingen liste fundet",
+      "sort": {
+        "listOrder": "Listens rækkefølge",
+        "added": "Senest tilføjet",
+        "released": "Udgivelsesdato",
+        "title": "Titel",
+        "rating": "Bedømmelse",
+        "popularity": "Popularitet"
+      }
+    }
+  },
+  "trakt": {
+    "title": "Trakt",
+    "description": "Synkronisér set, genoptagelse og din watchlist med din Trakt-konto.",
+    "intro": "Forbind din Trakt-konto for at holde din historik ét sted: det du ser i KIPTV ryger på Trakt, og din Trakt-historik vises i KIPTV på alle dine enheder.",
+    "introFooter": "Valgfrit: uden forbindelse ændres intet.",
+    "notConfigured": "Trakt-integrationen er ikke tilgængelig i denne version.",
+    "link": "Forbind Trakt",
+    "linkedAs": "Forbundet som {{username}}",
+    "vip": "VIP",
+    "linkedFooter": "Forbindelsen gælder hele kontoen: alle enheder med denne KIPTV-konto er også forbundet.",
+    "relinkNeeded": "Trakt-forbindelsen er udløbet: forbind kontoen igen.",
+    "linkRequesting": "Anmoder om kode…",
+    "linkInstructions": "Åbn trakt.tv/activate og indtast denne kode.",
+    "linkInstructionsTV": "Scan QR-koden eller åbn trakt.tv/activate på telefonen og indtast koden.",
+    "openActivate": "Åbn trakt.tv/activate",
+    "codeCopied": "Koden er kopieret til udklipsholderen.",
+    "codeExpires": "Koden udløber om {{time}}",
+    "regenerate": "Ny kode",
+    "linkWaiting": "Venter på bekræftelse på Trakt…",
+    "linkSuccess": "Trakt forbundet",
+    "linkSuccessSubtitle": "Den første synkronisering starter nu.",
+    "linkDenied": "Anmodningen blev afvist på Trakt.",
+    "linkExpired": "Koden er udløbet: lav en ny.",
+    "syncSection": "Hvad der synkroniseres",
+    "scrobble": "Send det du ser til Trakt",
+    "scrobbleDesc": "Film og afsnit afspillet i KIPTV havner i din Trakt-historik.",
+    "pullWatched": "Importér set fra Trakt",
+    "pullWatchedDesc": "Det der er set på Trakt vises som set i KIPTV uden at komme i Fortsæt med at se, før du afspiller det her.",
+    "pullPlayback": "Genoptag fra Trakt-positionen",
+    "pullPlaybackDesc": "Har du sat på pause et andet sted, fortsætter KIPTV derfra, når Trakt-positionen er nyere.",
+    "syncWatchlist": "Synkronisér watchlist",
+    "syncWatchlistDesc": "Din Trakt-watchlist bliver tagget \"Trakt Watchlist\" i Min liste, begge veje.",
+    "syncNow": "Synkronisér nu",
+    "syncing": "Synkroniserer…",
+    "lastSync": "Seneste synkronisering: {{date}}",
+    "neverSynced": "Ingen synkronisering endnu.",
+    "unlink": "Afbryd Trakt",
+    "unlinkConfirm": "Det sete, der er importeret fra Trakt, og tagget Trakt Watchlist fjernes. Det du har set i KIPTV bliver.",
+    "watchlistFullTitle": "Watchlist fuld",
+    "watchlistFull": "Din Trakt-watchlist har nået gratiskontoens grænse: titlen bliver kun i KIPTV.",
+    "linkDescription": "Viser en kode, der skal indtastes på trakt.tv.",
+    "accountDescription": "Din Trakt-konto.",
+    "syncNowDescription": "Opdaterer set, genoptagelse og watchlist fra Trakt med det samme.",
+    "unlinkDescription": "Fjerner forbindelsen og det, der er importeret fra Trakt; det sete i KIPTV bliver.",
+    "error": {
+      "notConfigured": "Trakt er ikke konfigureret i denne version.",
+      "unauthorized": "Trakt afviste forbindelsen: forbind kontoen igen.",
+      "rateLimited": "For mange forespørgsler til Trakt: prøv igen om lidt.",
+      "network": "Trakt kan ikke nås.",
+      "generic": "Kommunikationsfejl med Trakt."
+    },
+    "oneAppNotice": "En gratis Trakt-konto kan kun have én app forbundet: har du allerede en, så afbryd den på trakt.tv, før du fortsætter.",
+    "askRatings": "Bed om en bedømmelse",
+    "askRatingsDesc": "Når en film eller et afsnit slutter, bedes du om en karakter fra 1 til 10, som sendes til Trakt.",
+    "playlists": "Spillelister",
+    "playlistsDesc": "Hvilke spillelister integrationen gælder for",
+    "playlistsAll": "Alle spillelister",
+    "playlistsAllValue": "Alle",
+    "playlistsCount": "{{count}} spillelister",
+    "playlistsFooter": "I udelukkede spillelister sender KIPTV intet til Trakt, og de data, der er importeret fra Trakt, fjernes. Det du har set i KIPTV bliver.",
+    "playlistExcluded": "Denne spilleliste er udelukket fra Trakt-integrationen.",
+    "rateTitle": "Hvad giver du {{title}}?",
+    "rateSubtitle": "Karakteren sendes til din Trakt-konto.",
+    "rateSkip": "Ikke nu",
+    "rateEpisode": "Bedøm episode",
+    "rateSent": "Karakter sendt til Trakt"
+  }
+}

@@ -1,0 +1,3530 @@
+{
+  "playUpdate": {
+    "title": "Update beschikbaar",
+    "body": "KIPTV {{version}} is beschikbaar in Google Play. Nu downloaden?",
+    "now": "Nu bijwerken",
+    "later": "Later",
+    "settingsDescription": "Controleer of er een nieuwere versie van KIPTV in de Play Store staat."
+  },
+  "sideload": {
+    "update": {
+      "title": "Update beschikbaar",
+      "body": "KIPTV {{version}} staat klaar om te installeren. Nu bijwerken?",
+      "now": "Nu bijwerken",
+      "later": "Later",
+      "downloading": "KIPTV {{version}} wordt gedownload…",
+      "verifying": "Bestand wordt gecontroleerd…",
+      "install": "Installeren",
+      "readyBody": "Download voltooid. Druk op Installeren en bevestig in het systeemscherm.",
+      "failedBody": "De download is mislukt. Controleer de verbinding en probeer het opnieuw.",
+      "permissionTitle": "Installatie toestaan",
+      "permissionBody": "Je tv moet KIPTV toestaan apps te installeren. Open de instellingen, zet de schakelaar voor KIPTV aan en kom hier terug: de installatie gaat vanzelf verder.",
+      "openSettings": "Instellingen openen",
+      "manualTitle": "Bijwerken met Downloader",
+      "manualBody": "Open de app Downloader en voer het adres {{link}} in: die downloadt en installeert de nieuwe versie over deze heen.",
+      "manualBodyWithCode": "Open de app Downloader en voer de code {{code}} (of het adres {{link}}) in: die downloadt en installeert de nieuwe versie over deze heen.",
+      "openDownloader": "Downloader openen",
+      "settingsRow": "Updates",
+      "settingsDescription": "Controleer of er een nieuwere versie van KIPTV is en installeer die vanaf hier.",
+      "statusAvailable": "{{version}} beschikbaar",
+      "statusUpToDate": "Up-to-date",
+      "statusChecking": "Controleren…",
+      "statusUnknown": "Nu controleren"
+    }
+  },
+  "ratings": {
+    "title": "Beoordelingen",
+    "critics": "Critici",
+    "audience": "Publiek",
+    "fromAge": "vanaf {{age}} jaar"
+  },
+  "playback": {
+    "playWith": "Afspelen met",
+    "externalPlayerSection": "Openen in externe app"
+  },
+  "browser": {
+    "reload": "Opnieuw laden",
+    "stop": "Laden stoppen",
+    "openInBrowser": "Openen in browser"
+  },
+  "quickAction": {
+    "chat": {
+      "title": "Wacht, verwijder me niet!",
+      "subtitle": "Chat met ons, we lossen het op"
+    }
+  },
+  "avatars": {
+    "group": {
+      "people": "Mensen",
+      "animals": "Dieren",
+      "football": "Voetbal"
+    }
+  },
+  "errors": {
+    "xtream": {
+      "networkNoCacheData": "Netwerkfout en geen cached gegevens",
+      "serverRetrying": "IPTV-serverfout - opnieuw proberen...",
+      "serverHttp": "Serverfout (HTTP {{status}})",
+      "slowConnection": "Trage verbinding - verzoek time-out",
+      "rateLimitWait": "XTREAM-server rate limited. Opnieuw proberen over {{seconds}}s.",
+      "rateLimitBlocked": "XTREAM-server heeft verzoeken tijdelijk geblokkeerd (HTTP 429). Wacht {{seconds}}s en probeer opnieuw.",
+      "serverNotFound": "XTREAM-server niet gevonden - controleer URL",
+      "staleCacheWarning": "Gegevens uit cache ({{minutes}}min geleden) - netwerk niet beschikbaar",
+      "noInternet": "Geen internetverbinding - controleer je netwerk",
+      "invalidRequest": "Ongeldig verzoek - controleer afspeellijst inloggegevens",
+      "credentialsExpired": "Inloggegevens verlopen - herverificeer afspeellijst",
+      "accessDenied": "Toegang geweigerd door IPTV-provider",
+      "contentNotFound": "Inhoud niet gevonden op IPTV-provider",
+      "tooManyRequests": "Te veel verzoeken - wacht even",
+      "serverMaintenance": "IPTV-server in onderhoud - probeer later",
+      "serverTimeout": "IPTV-server time-out - trage verbinding",
+      "unauthorized": "Ongeautoriseerde inloggegevens",
+      "serverUnavailable": "Server tijdelijk niet beschikbaar",
+      "invalidCredentials": "Ongeldige inloggegevens of verlopen account",
+      "connectionTimeout": "Verbinding time-out - Server reageert niet",
+      "networkError": "Netwerkfout - controleer internetverbinding",
+      "invalidUrl": "Ongeldige URL of server niet bereikbaar",
+      "unknownConnection": "Onbekende verbindingsfout"
+    },
+    "boundaryTitle": "Oeps! Er is iets misgegaan",
+    "boundaryMessage": "De app is een onverwachte fout tegengekomen. Probeer opnieuw of herstart",
+    "limitsCheckFailed": "Controleer mislukt",
+    "limitsLoadError": "Limiet laden fout",
+    "playlistSave": "Afspeellijst opslaan",
+    "playlistRemove": "Afspeellijst verwijderen mislukt",
+    "playlistUpdate": "Afspeellijst bijwerken",
+    "unknown": "Onbekende fout",
+    "unifiedLoad": "Laden mislukt",
+    "liveTVLoad": "Live TV laden mislukt",
+    "logout": "Afmelden",
+    "loadError": "Laad fout",
+    "loadingFailed": "Laden mislukt"
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "Ongeldig e-mailadres of wachtwoord",
+      "invalid_email_or_password": "Ongeldig e-mailadres of wachtwoord",
+      "user_not_found": "Geen account gevonden met dit e-mailadres",
+      "user_already_registered": "Dit e-mailadres is al geregistreerd - probeer in te loggen",
+      "password_min_length": "Wachtwoord moet minstens 6 tekens lang zijn",
+      "password_too_weak": "Wachtwoord te zwak - gebruik letters, nummers en symbolen",
+      "same_password": "Nieuw wachtwoord moet anders zijn dan het huidige",
+      "email_invalid_format": "Ongeldig e-mailadres",
+      "email_validation_failed": "Onjuist e-mailadresformaat",
+      "email_invalid": "Ongeldig e-mailadres",
+      "network_failed": "Geen internetverbinding - controleer je netwerk",
+      "fetch_failed": "Verbindingsfout - probeer opnieuw",
+      "network_error": "Netwerkprobleem - controleer je verbinding",
+      "jwt_expired": "Sessie verlopen - meld je opnieuw aan",
+      "jwt_invalid": "Ongeldige sessie - log in",
+      "refresh_token_not_found": "Sessie verlopen - log in",
+      "oauth_cancelled": "Inloggen geannuleerd",
+      "oauth_access_denied": "Inloggen geannuleerd - je hebt toegang geweigerd",
+      "oauth_redirect_mismatch": "Configuratiefout - neem contact op met ondersteuning",
+      "oauth_unauthorized": "OAuth-fout - neem contact op met ondersteuning",
+      "rate_limit_email": "Te veel verzoeken - wacht even voordat je opnieuw probeert",
+      "rate_limit_general": "Te veel verzoeken - probeer over enkele minuten opnieuw",
+      "password_invalid": "Ongeldig wachtwoord",
+      "security_purposes": "Voor veiligheid, probeer later opnieuw",
+      "auth_failed": "Authenticatie mislukt - probeer opnieuw",
+      "bad_request": "Ongeldig verzoek - controleer je gegevens",
+      "unauthorized": "Ongeautoriseerde toegang - controleer je inloggegevens",
+      "rate_limit": "Te veel verzoeken - wacht enkele minuten",
+      "server_error": "Service tijdelijk niet beschikbaar - probeer later opnieuw",
+      "default": "Verificatiefout - probeer opnieuw",
+      "email_not_confirmed": "Bevestig je e-mailadres voordat je inlogt"
+    },
+    "login": "Inloggen",
+    "forgotPassword": "Wachtwoord vergeten?",
+    "forgotPasswordTitle": "Wachtwoord resetten",
+    "forgotPasswordSubtitle": "Voer je e-mailadres in om je wachtwoord in te stellen",
+    "emailLabel": "E-mailadres",
+    "sendResetEmail": "Stuur reset-e-mail",
+    "resetEmailSent": "Reset-e-mail verzonden",
+    "resetEmailError": "Fout bij verzenden reset-e-mail",
+    "resetPasswordTitle": "Wachtwoord resetten",
+    "resetPasswordSubtitle": "Je ontvangt een e-mail met instructies",
+    "newPassword": "Nieuw wachtwoord",
+    "confirmPassword": "Bevestig wachtwoord",
+    "resetPasswordButton": "Wachtwoord resetten",
+    "resetPasswordSuccess": "Wachtwoord succesvol ingesteld",
+    "passwordsDoNotMatch": "Wachtwoorden komen niet overeen",
+    "backToLogin": "Terug naar inloggen",
+    "loginTitle": "Inloggen",
+    "loginSubtitle": "Voer je inloggegevens in",
+    "emailPlaceholder": "Email",
+    "noAccountPrompt": "Nog geen account?",
+    "registerCta": "Maak account aan",
+    "createAccountTitle": "Account aanmaken",
+    "createAccountSubtitle": "Maak een nieuw account aan",
+    "createAccountButton": "Account aanmaken",
+    "alreadyHaveAccountCta": "Heb je al een account?",
+    "tagline": "Tagline",
+    "continueWithGoogle": "Doorgaan met Google",
+    "continueWithApple": "Doorgaan met Apple",
+    "signInWithGoogle": "Inloggen met Google",
+    "continueWithEmail": "Doorgaan met e-mailadres",
+    "termsPrefix": "Door in te loggen accepteer je onze",
+    "termsOfService": "Servicevoorwaarden",
+    "privacyPolicy": "Privacybeleid",
+    "appleCredentialsInvalid": "Ongeldige Apple-inloggegevens",
+    "appleSignInError": "Apple-inloggingsfout",
+    "googleComingSoon": "Google-inloggen komt eraan",
+    "registerSubtitle": "Registreer een account om KIPTV Premium te gebruiken",
+    "welcomeBack": "Welkom terug!",
+    "resetEmailSentMessage": "Controleer je e-mail voor instellingsinstructies",
+    "register": "Registreren",
+    "invalidEmailFirst": "Ongeldige email eerst",
+    "changePassword": "Wachtwoord wijzigen"
+  },
+  "common": {
+    "returnToHomeTitle": "Terug naar het startscherm?",
+    "on": "Aan",
+    "off": "Uit",
+    "loading": "Bezig met laden...",
+    "error": "Fout",
+    "success": "Succes",
+    "retry": "Opnieuw proberen",
+    "cancel": "Annuleren",
+    "confirm": "Bevestigen",
+    "delete": "Verwijderen",
+    "save": "Opslaan",
+    "close": "Sluiten",
+    "back": "Terug",
+    "next": "Volgende",
+    "done": "Gereed",
+    "ok": "OK",
+    "edit": "Bewerken",
+    "name": "Naam",
+    "domain": "Domein",
+    "url": "URL",
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
+    "or": "of",
+    "saveChanges": "Wijzigingen opslaan",
+    "resumeFrom": "Hervatten vanaf {{time}}",
+    "completed": "{{percent}}% voltooid",
+    "resume": "Hervatten",
+    "plot": "Samenvatting",
+    "cast": "Cast",
+    "directedBy": "Regie",
+    "genres": "Genres",
+    "trailer": "Trailer",
+    "trailerComingSoon": "Trailer binnenkort beschikbaar",
+    "continue": "Doorgaan",
+    "download": "Downloaden",
+    "cancelDownload": "Download annuleren",
+    "downloaded": "Gedownload",
+    "saving": "Bezig met opslaan...",
+    "fillFields": "Vul alle velden in",
+    "contents": "Inhoud",
+    "noContent": "Geen inhoud",
+    "addPlaylistToSeeContent": "Voeg afspeellijst toe om inhoud te zien",
+    "remove": "Verwijderen",
+    "item": "Item",
+    "items": "Items",
+    "day": "Dag",
+    "days": "Dagen",
+    "descriptionNotAvailable": "Beschrijving niet beschikbaar",
+    "titleNotAvailable": "Titel niet beschikbaar",
+    "unknownTitle": "Onbekende titel",
+    "and": "en",
+    "search": "Zoeken",
+    "seeAll": "Alles zien",
+    "episodes": "afleveringen"
+  },
+  "loading": {
+    "triviaTitle": "Wist je dat?"
+  },
+  "settings": {
+    "heroStyle": "Uitgelichte stijl",
+    "heroStyleSubtitle": "Weergave van uitgelichte content bovenaan Films en Series",
+    "heroStyleFull": "Volledig scherm",
+    "heroStyleCard": "Kaart",
+    "introSkip": {
+      "enabled": "Intro overslaan",
+      "subtitle": "Toon een knop «Intro overslaan» tijdens de intro van afleveringen.",
+      "autoEnabled": "Automatisch overslaan",
+      "autoSubtitle": "Slaat samenvatting en intro automatisch over, zonder tikken.",
+      "defaultLength": "Standaard overslaglengte",
+      "seconds": "{{seconds}}s",
+      "autoSkip": "Automatisch overslaan",
+      "autoSkipSubtitle": "Slaat samenvatting en intro automatisch over, zonder tikken."
+    },
+    "title": "Instellingen",
+    "account": "Account",
+    "playlist": "Afspeellijst",
+    "videoQuality": "Videokwaliteit",
+    "downloads": "Downloads",
+    "cache": "Cache",
+    "auto": "Automatisch",
+    "changePlaylist": "Wijzig afspeellijst",
+    "sortHideCategories": "Sorteren verberg categorieën",
+    "sortHideCategoriesSubtitle": "Sorteren verberg categorieën ondertitel",
+    "logout": "Afmelden",
+    "logoutConfirm": "Afmelden bevestigen",
+    "language": "Taal",
+    "manageAccount": "Account beheren",
+    "playlistComingSoon": "Afspeellijst binnenkort",
+    "playlistComingSoonSubtitle": "Afspeellijst binnenkort ondertitel",
+    "about": "Over",
+    "version": "Versie",
+    "support": "Ondersteuning",
+    "supportDiscord": "Sluit je aan bij onze Discord-community",
+    "followUs": "Volg ons op X",
+    "followUsDescription": "Mis geen updates en nieuwtjes",
+    "followUsScanHint": "Scan om te volgen op X",
+    "followUsInstagram": "Volg ons op Instagram",
+    "followUsInstagramScanHint": "Scan om te volgen op Instagram",
+    "feedback": {
+      "subtitle": "Meld bugs, stel verbeteringen voor, vraag nieuwe functies aan"
+    },
+    "termsOfService": "Servicevoorwaarden",
+    "privacyPolicy": "Privacybeleid",
+    "termsDescription": "Lees onze Servicevoorwaarden",
+    "privacyDescription": "Lees ons Privacybeleid",
+    "supportQRTitle": "Sluit je aan bij KIPTV Support",
+    "supportQRSubtitle": "Scan deze QR-code met je iPhone of iPad om onze Discord-community te openen",
+    "myPlaylists": "Mijn afspeellijsten",
+    "appSection": "App",
+    "infoSection": "Info",
+    "logoutWarning": "Afmelden waarschuwing",
+    "playlistManagement": "Afspeellijst beheer",
+    "contentManagement": "Inhouds beheer",
+    "contentManagementSubtitle": "Beheer inhoud weergave",
+    "deviceSection": "Apparaat",
+    "subtitleLanguage": "Ondertitel taal",
+    "subtitleOff": "Uit",
+    "subtitleAuto": "Automatisch",
+    "audioLanguage": "Audio taal",
+    "defaultLanguages": "Standaardtalen",
+    "audioOriginal": "Origineel",
+    "autoplayNextEpisode": "Volgende aflevering automatisch afspelen",
+    "backgroundPlayback": "Afspelen op de achtergrond",
+    "backgroundPlaybackSubtitle": "Het geluid blijft doorspelen wanneer je de app verlaat naar het startscherm van de tv. Staat dit uit, dan pauzeert het afspelen en gaat het verder zodra je terugkeert naar KIPTV.",
+    "skipForward": "Vooruit springen",
+    "skipBackward": "Achteruit springen",
+    "seconds5": "5 seconden",
+    "seconds10": "10 seconden",
+    "seconds15": "15 seconden",
+    "seconds30": "30 seconden",
+    "playerEngine": "Speler engine",
+    "playerSelectEngine": "Selecteer speler",
+    "playerAuto": "Automatisch",
+    "playerNative": "Natief",
+    "playerExo": "ExoPlayer",
+    "playerMPV": "MPV",
+    "playerAether": "Aether",
+    "playerVLC": "VLC",
+    "playerKSPlayer": "KSPlayer",
+    "playerMoviesSeries": "Speler voor films/series",
+    "playerLive": "Live speler",
+    "playerFallbackOnFailure": "Fallback bij fout",
+    "playerFallbackDescription": "Speler fallback beschrijving",
+    "metadata": "Metadata",
+    "metadataSection": "Metadata sectie",
+    "metadataSource": "Metadata bron",
+    "smartHide": "Slim verbergen",
+    "metadataWeb": "Web",
+    "metadataPlaylist": "Afspeellijst",
+    "metadataSubtitle": "Verbeter inhoudsinformatie",
+    "titleCleaning": "Titel opschoning",
+    "titleCleaningSubtitle": "Schone titel weergave",
+    "includeAdultContent": "Volwassen inhoud opnemen",
+    "hiddenCategories": "Verborgen categorieën",
+    "hiddenCategoriesCount": "{{count}} verborgen categorieën",
+    "noHiddenCategories": "Geen verborgen categorieën",
+    "languageAuto": "Automatisch",
+    "settingsCategories": "Instellingen categorieën",
+    "general": "Algemeen",
+    "playback": "Afspelen",
+    "playbackVodSection": "VOD afspeel sectie",
+    "playbackLiveSection": "Live afspeel sectie",
+    "networkPerformance": "Netwerk performance",
+    "networkRequestsSection": "Netwerk verzoeken",
+    "requestTimeout": "Verzoek time-out",
+    "retryAttempts": "Herhaalde pogingen",
+    "cacheFallbackOnError": "Cache fallback bij fout",
+    "clearRuntimeCaches": "Wis runtime caches",
+    "localOnly": "Alleen lokaal",
+    "contentSection": "Inhoud",
+    "parentalControl": "Ouderlijk toezicht",
+    "contentControl": "Inhouds controle",
+    "contentControlDisabled": "Inhouds controle uitgeschakeld",
+    "contentControlEnabled": "Inhouds controle ingeschakeld",
+    "parentalControlEnabled": "Ouderlijk toezicht ingeschakeld",
+    "parentalRequirePinForSettings": "PIN vereist voor instellingen",
+    "disableParentalTitle": "Ouderlijk toezicht uitschakelen",
+    "disableParentalMessage": "Ouderlijk toezicht uitschakelen?",
+    "disableParentalConfirm": "Bevestig uitschakeling",
+    "parentalManageHint": "Beheer ouderlijk toezicht",
+    "enterPin": "Voer PIN in",
+    "lockedContentSubtitle": "PIN vereist",
+    "hideAdultCategories": "Volwassen categorieën verbergen",
+    "pinSection": "PIN sectie",
+    "setPin": "PIN instellen",
+    "changePin": "Wijzig PIN",
+    "removePin": "Verwijder PIN",
+    "parentalPin": "Ouderlijk PIN",
+    "parentalPinConfirm": "PIN bevestigen",
+    "pinMustBe4Digits": "PIN moet 4 cijfers zijn",
+    "pinMismatch": "PIN komt niet overeen",
+    "diagnostics": "Diagnostische gegevens",
+    "diagnosticsHealthy": "Gezond",
+    "diagnosticsIssueDetected": "Probleem gedetecteerd",
+    "diagnosticsPlaylistSection": "Afspeellijst",
+    "diagnosticsEpgSection": "EPG",
+    "diagnosticsErrorsSection": "Fouten",
+    "diagnosticsActionsSection": "Acties",
+    "diagnosticsXmltvChannels": "XMLTV kanalen",
+    "diagnosticsXmltvPrograms": "XMLTV programma's",
+    "diagnosticsEpgCache": "EPG-cache",
+    "diagnosticsXtreamError": "Xtream fout",
+    "diagnosticsPlaylistError": "Afspeellijst fout",
+    "diagnosticsXmltvError": "XMLTV fout",
+    "noIssuesDetected": "Geen problemen gedetecteerd",
+    "refreshDiagnostics": "Vernieuw diagnostische gegevens",
+    "diagnosticsRefreshed": "Vernieuwd",
+    "runtimeCacheCleared": "Runtime cache gewist",
+    "clearPosterCache": "Postercache wissen",
+    "clearPosterCacheSubtitle": "Dwingt afbeeldingen van covers af om opnieuw vanaf het netwerk te worden geladen. Gebruik dit als je tijdelijke afbeeldingen ziet in plaats van covers.",
+    "clearPosterCacheDone": "Postercache gewist",
+    "statusIdle": "Inactief",
+    "statusReady": "Klaar",
+    "statusNever": "Nooit",
+    "lastUpdate": "Laatste update",
+    "lastContentUpdate": "Inhoud update",
+    "xmltvStatus": "XMLTV-status",
+    "moviesLoaded": "Films geladen",
+    "seriesLoaded": "Series geladen",
+    "channelsLoaded": "Kanalen geladen",
+    "infoPlaylistSection": "Afspeellijst info",
+    "infoContentSection": "Inhoud info",
+    "infoAccountSection": "Account info",
+    "activePlaylistSection": "Actieve afspeellijst",
+    "savedPlaylistsSection": "Opgeslagen afspeellijsten sectie",
+    "active": "Actief",
+    "noSavedPlaylists": "Geen opgeslagen afspeellijsten",
+    "vodAskBeforeAutoplay": "Vraag voordat automatisch afgespeeld",
+    "liveStartMuted": "Live starten zonder geluid",
+    "liveOpenEpgOnChannelChange": "Open EPG bij kanaal wijziging",
+    "livePreferLowLatency": "Voorkeuren lage latency",
+    "epgPreviewMode": "EPG-voorvertoning",
+    "epgPreviewModeDescription": "Kies of er een voorvertoning van het kanaal moet starten op het EPG-scherm.",
+    "epgPreviewModeOff": "Uit",
+    "epgPreviewModeOnFocus": "Bij focus",
+    "epgPreviewModeOnTap": "Bij tikken",
+    "epgPreviewModeLowMemoryWarning": "Op oudere tv-modellen kan dit vertragingen veroorzaken.",
+    "liveTVPreviewMode": "Live TV-voorvertoning",
+    "liveTVPreviewModeDescription": "Kies of er een voorvertoning van het kanaal moet starten tijdens het bladeren door het Live TV-scherm.",
+    "liveTVPreviewModeOff": "Uit",
+    "liveTVPreviewModeOnFocus": "Bij focus",
+    "liveTVPreviewModeOnTap": "Bij tikken",
+    "liveTabLayout": "Indeling van Live-scherm",
+    "liveTabLayoutDescription": "Kies wat het Live-scherm toont.",
+    "liveTabLayoutChannelList": "Zenderlijst",
+    "liveTabLayoutCarousel": "Carrousels",
+    "hideItem": "Verberg item",
+    "hideGroupedChannelTitle": "Groepskanaal titel",
+    "hideGroupedChannelMessage": "Dit zal alle {{count}} kwaliteitsvarianten van dit kanaal verbergen. Wil je doorgaan?",
+    "lockGroupedChannelTitle": "Groepskanaal titel vergrendelen",
+    "lockGroupedChannelMessage": "Dit zal alle {{count}} kwaliteitsvarianten van dit kanaal vergrendelen. Wil je doorgaan?",
+    "unlockGroupedChannelTitle": "Groepskanaal ontgrendelen",
+    "unlockGroupedChannelMessage": "Dit zal alle {{count}} kwaliteitsvarianten van dit kanaal ontgrendelen. Wil je doorgaan?",
+    "unhide": "Tonen",
+    "hiddenItems": "Verborgen items",
+    "noHiddenItems": "Geen verborgen items",
+    "hiddenItemsCount": "{{count}} verborgen items",
+    "autoHideKeywords": "Trefwoorden auto verbergen",
+    "autoHideKeywordsHeader": "Trefwoorden verbergen",
+    "autoHideKeywordsFooter": "Verberg items met deze trefwoorden",
+    "addKeywordPlaceholder": "Trefwoord",
+    "autoHidden": "Auto verborgen",
+    "categoryOrder": "Categorie volgorde",
+    "categoryOrderFooter": "Herschik categorieën",
+    "reorderSearchDisabled": "Wis de zoekopdracht om te herordenen",
+    "resetOrder": "Stel volgorde in",
+    "hiddenCategoriesFooter": "Categorieën voettekst",
+    "noCategoriesAvailable": "Geen categorieën beschikbaar",
+    "manageCategories": "Categorieën beheren",
+    "manageCategoriesHeader": "Beheer categorieën",
+    "manageCategoriesHeaderFull": "Beheer categorieën volledig",
+    "autoHiddenSection": "Auto verborgen sectie",
+    "autoHideKeywordsFooterPerType": "Per inhoud type",
+    "autoHiddenCategoriesSection": "Auto verborgen categorieën sectie",
+    "allHiddenContent": "Alle verborgen inhoud",
+    "allLockedContent": "Alle vergrendelde inhoud",
+    "hiddenCategoriesSection": "Verborgen categorieën sectie",
+    "hiddenItemsSection": "Verborgen items sectie",
+    "lockedCategoriesSection": "Vergrendelde categorieën sectie",
+    "lockedItemsSection": "Vergrendelde items sectie",
+    "showAll": "Toon alles",
+    "unlockAllItems": "Ontgrendel alle items",
+    "showAllConfirmTitle": "Alles tonen?",
+    "showAllConfirmMessage": "Dit zal alle {{count}} verborgen categorieën en items weergeven. Wil je doorgaan?",
+    "unlockAllConfirmTitle": "Alles ontgrendelen?",
+    "unlockAllConfirmMessage": "Dit zal alle {{count}} vergrendelde categorieën en items ontgrendelen. Wil je doorgaan?",
+    "noItemsInCategory": "Geen items in categorie",
+    "contentType": "Inhouds type",
+    "contentTypeDescription": "Selecteer inhouds type",
+    "categorySortDescription": "Sorteer categorieën",
+    "allHiddenContentDescription": "Alle inhoud verborgen",
+    "allLockedContentDescription": "Alle inhoud vergrendeld",
+    "categoryTapDescription": "Tik op categorie",
+    "categoryEyeDescription": "Verberg categorie",
+    "categoryLockDescription": "Vergrendel categorie",
+    "categoryMoveDescription": "Verplaats categorie",
+    "contentSortDescription": "Sorteer inhoud",
+    "filterItemsDescription": "Filter items",
+    "itemEyeDescription": "Verberg item",
+    "itemLockDescription": "Vergrendel item",
+    "categoryContentDescription": "Categorie inhoud beschrijving",
+    "addKeywordDescription": "Voeg trefwoord toe",
+    "removeKeywordDescription": "Verwijder trefwoord",
+    "unhideCategoryDescription": "Toon categorie",
+    "unhideItemDescription": "Toon dit item",
+    "showAllDescription": "Toon alles",
+    "unlockCategoryDescription": "Ontgrendel categorie",
+    "unlockItemDescription": "Ontgrendel item",
+    "unlockAllDescription": "Ontgrendel alles",
+    "showCategory": "Categorie tonen",
+    "hideCategory": "Verberg categorie",
+    "lockCategory": "Vergrendel categorie",
+    "unlockCategory": "Ontgrendel categorie",
+    "renameCategory": "Categorie hernoemen",
+    "moveCategoryToTop": "Bovenaan plaatsen",
+    "restoreCategoryName": "Oorspronkelijke naam herstellen",
+    "renameChannel": "Kanaal hernoemen",
+    "moveChannelToTop": "Bovenaan plaatsen",
+    "restoreChannelName": "Oorspronkelijke naam herstellen",
+    "showItem": "Toon item",
+    "lockItem": "Vergrendel item",
+    "unlockItem": "Ontgrendel item",
+    "removeKeyword": "Trefwoord verwijderen",
+    "removeKeywordConfirm": "\"{{keyword}}\" verwijderen?",
+    "moveToTop": "Naar boven",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "moveToBottom": "Naar beneden",
+    "defaultStartScreen": "Standaard start scherm",
+    "defaultStartScreenSubtitle": "Selecteer start scherm",
+    "autoOpenPlaylist": "Afspeellijst automatisch openen",
+    "autoOpenPlaylistSubtitle": "Welke afspeellijst bij het starten van de app wordt geopend",
+    "autoOpenPlaylistOff": "Nee",
+    "autoOpenPlaylistLast": "Laatste afspeellijst",
+    "startScreenMovies": "Start scherm films",
+    "startScreenSeries": "Start scherm series",
+    "startScreenLive": "Start scherm live",
+    "startScreenGuide": "Gids",
+    "incognitoMode": "Incognito modus",
+    "incognitoModeSubtitle": "Geen geschiedenis opslaan",
+    "incognitoActive": "Incognito actief",
+    "privacy": "Privacy",
+    "recentlyWatchedLive": "'Recent bekeken' weergeven",
+    "recentlyWatchedLiveSubtitle": "Recent bekeken kanalen",
+    "continueWatchingTapPlays": "Afspelen met één tik",
+    "continueWatchingTapPlaysSubtitle": "Tik om af te spelen",
+    "metadataLanguage": "Metadata taal",
+    "metadataLanguageSubtitle": "Taal voor metadata",
+    "metadataLanguageAuto": "Automatisch",
+    "subtitleStyling": "Ondertitel opmaak",
+    "subtitleFontSize": "Ondertitel lettergrootte",
+    "subtitleFontSizeSmall": "Klein",
+    "subtitleFontSizeMedium": "Gemiddeld",
+    "subtitleFontSizeLarge": "Groot",
+    "subtitleFontSizeXLarge": "Extra groot",
+    "subtitleColor": "Ondertitel kleur",
+    "subtitleColorWhite": "Wit",
+    "subtitleColorYellow": "Geel",
+    "subtitleColorGreen": "Groen",
+    "subtitleColorCyan": "Cyaan",
+    "subtitleColorOrange": "Oranje",
+    "subtitleBackground": "Ondertitel achtergrond",
+    "subtitleBackgroundNone": "Geen",
+    "subtitleBackgroundSemiTransparent": "Semi-transparant",
+    "subtitleBackgroundOpaque": "Ondoorzichtig",
+    "subtitlePosition": "Ondertitel positie",
+    "subtitlePositionBottom": "Onder",
+    "subtitlePositionTop": "Boven",
+    "subtitleStyleSourceSystem": "Systeeminstellingen",
+    "subtitleStyleSourceCustom": "Aangepast",
+    "subtitleFont": "Lettertype",
+    "subtitleFontDefault": "Standaard",
+    "subtitleFontRounded": "Afgerond",
+    "subtitleFontSerif": "Serif",
+    "subtitleFontMono": "Monospace",
+    "subtitleBold": "Vet",
+    "subtitleEdge": "Rand",
+    "subtitleEdgeNone": "Geen",
+    "subtitleEdgeShadow": "Schaduw",
+    "subtitleEdgeOutline": "Contour",
+    "subtitleStyleSource": "Ondertitelstijl",
+    "subtitleStyleSystemHint": "Gebruikt de ondertitelinstellingen van je apparaat",
+    "subtitlePreview": "Ondertitel voorbeeld",
+    "subtitlePreviewText": "Dit is ondertitel voorbeeld",
+    "networkBuffer": "Netwerk buffer",
+    "networkBufferSubtitle": "Buffer grootte voor streaming",
+    "networkBufferAuto": "Automatisch",
+    "hardwareAcceleration": "Hardware versnelling",
+    "hardwareAccelerationSubtitle": "Gebruikt GPU voor decodering",
+    "hardwareAccelerationOn": "Aan",
+    "hardwareAccelerationOff": "Uit",
+    "hardwareAccelerationAuto": "Automatisch",
+    "deinterlacing": "Deïnterlacing",
+    "deinterlacingSubtitle": "Verbeter kwaliteit van interlaced video",
+    "deinterlacingAuto": "Automatisch",
+    "deinterlacingOff": "Uit",
+    "liveStreamFormat": "Live stream formaat",
+    "liveStreamFormatSubtitle": "Auto kiest het beste formaat op basis van de speler-engine: HLS voor AVPlayer, MPEG-TS voor KSPlayer/VLC/MPV/Aether",
+    "groupSimilarChannels": "Groepeer gelijksoortige kanalen",
+    "groupSimilarChannelsSubtitle": "Groepeer kanalen met dezelfde naam",
+    "splitMyListByTag": "Mijn lijst splitsen op tag",
+    "showTrending": "'Trending' tonen",
+    "hideEmptyTabs": "Lege tabbladen verbergen",
+    "hideEmptyTabsSubtitle": "Verbergt het tabblad Films, Series of Live als de afspeellijst geen inhoud van dat type heeft",
+    "showTrendingSubtitle": "Toon de trending-banner en carrousels op het startscherm",
+    "showRecentlyAdded": "'Recent toegevoegd' weergeven",
+    "splitMyListByTagSubtitle": "Toon één carrousel per tag in plaats van één gemengde lijst",
+    "showRecentlyAddedSubtitle": "Markeer inhoud die in de afgelopen 30 dagen is toegevoegd",
+    "chooseQuality": "Kies kwaliteit",
+    "contentRefreshFrequency": "Inhoud vernieuw frequentie",
+    "contentRefreshEveryAccess": "Bij elke toegang",
+    "contentRefreshFrequencySubtitle": "Hoe vaak inhoud vernieuwd wordt",
+    "epgRefreshFrequency": "EPG vernieuw frequentie",
+    "epgRefreshFrequencySubtitle": "Hoe vaak EPG vernieuwd wordt",
+    "epgRefreshMinutes": "{{count}} min",
+    "epgRefreshHours": "{{count}} h",
+    "epgForceRefresh": "Forceer EPG vernieuwen",
+    "customUserAgent": "Aangepaste User Agent",
+    "customUserAgentSubtitle": "Aangepaste User Agent voor requests",
+    "customUserAgentDefault": "Standaard",
+    "playerComparison": "Speler vergelijking",
+    "playerComparisonSubtitle": "Vergelijk speler engines",
+    "playerComparisonEngine": "Engine vergelijking",
+    "playerComparisonFormats": "Ondersteunde formaten",
+    "playerComparisonPros": "Voordelen",
+    "playerComparisonCons": "Nadelen",
+    "playerAvplayerPro1": "AVPlayer Pro 1",
+    "playerAvplayerPro2": "AVPlayer Pro 2",
+    "playerAvplayerPro3": "AVPlayer Pro 3",
+    "playerAvplayerCon1": "AVPlayer Con 1",
+    "playerAvplayerCon2": "AVPlayer Con 2",
+    "playerKsplayerPro1": "KSPlayer Pro 1",
+    "playerKsplayerPro2": "KSPlayer Pro 2",
+    "playerKsplayerPro3": "KSPlayer Pro 3",
+    "playerKsplayerCon1": "KSPlayer Con 1",
+    "playerKsplayerCon2": "KSPlayer Con 2",
+    "playerVlcPro1": "VLC Pro 1",
+    "playerVlcPro2": "VLC Pro 2",
+    "playerVlcPro3": "VLC Pro 3",
+    "playerVlcCon1": "VLC Con 1",
+    "playerVlcCon2": "VLC Con 2",
+    "liveTvSettings": "Live TV instellingen",
+    "advancedSettings": "Geavanceerde instellingen",
+    "lockedCategories": "Vergrendelde categorieën",
+    "lockedItems": "Vergrendelde items",
+    "pinRequired": "PIN vereist",
+    "pinRequiredMessage": "PIN vereist voor instellingen",
+    "pinIncorrect": "PIN onjuist",
+    "pinTryAgain": "Probeer opnieuw",
+    "pinSetSuccess": "PIN succesvol ingesteld",
+    "pinRemovedSuccess": "PIN succesvol verwijderd",
+    "pinChangedSuccess": "PIN succesvol gewijzigd",
+    "enterCurrentPin": "Voer huidige PIN in",
+    "enterNewPin": "Voer nieuwe PIN in",
+    "confirmNewPin": "Bevestig nieuwe PIN",
+    "recentlyWatched": "Recent bekeken",
+    "credits": "Verantwoording",
+    "creditsMovieData": "Film gegevens",
+    "creditsOpenSource": "Open Source",
+    "creditsVLC": "VLC credits",
+    "creditsKSPlayer": "KSPlayer credits",
+    "creditsFFmpeg": "FFmpeg",
+    "creditsMPV": "Reserve-afspelen mogelijk gemaakt door MPV (libmpv) — LGPLv2.1+",
+    "devices": "Apparaten",
+    "linkTV": "Link TV",
+    "accountDescription": "Account beschrijving",
+    "premiumDescription": "Premium beschrijving",
+    "generalDescription": "Algemene beschrijving",
+    "playbackDescription": "Afspeel instellingen",
+    "parentalControlsDescription": "PIN-beveiliging om de toegang tot content en instellingen te beperken",
+    "metadataDescription": "Metadata instellingen",
+    "playlistInfoDescription": "Afspeellijst informatie",
+    "reloadPlaylistDescription": "Afspeellijst opnieuw laden",
+    "reloadEPGDescription": "EPG opnieuw laden",
+    "changePlaylistDescription": "Wijzig afspeellijst",
+    "versionDescription": "Versie beschrijving",
+    "creditsDescription": "Credits beschrijving",
+    "services": "Diensten",
+    "logoutDescription": "Meld je af",
+    "defaultDescription": "Standaard instelling",
+    "languageDescription": "Taal beschrijving",
+    "startScreenDescription": "Start scherm beschrijving",
+    "autoOpenPlaylistDescription": "Sla de afspeellijstkeuze over en open bij het starten de laatst gebruikte of een specifieke afspeellijst",
+    "playerEngineDescription": "Selecteer video speler",
+    "autoplayNextEpisodeDescription": "Volgende aflevering automatisch afspelen",
+    "subtitleLanguageDescription": "Selecteer ondertitel taal",
+    "audioLanguageDescription": "Selecteer audio taal",
+    "subtitleStylingDescription": "Ondertitel stijl instellingen",
+    "metadataSourceDescription": "Selecteer metadata bron",
+    "titleCleaningDescription": "Verwijder overbodige tekens uit titels",
+    "setPinDescription": "Stel PIN in",
+    "changePinDescription": "Wijzig PIN",
+    "removePinDescription": "Verwijder PIN",
+    "parentalEnabledDescription": "Ouderlijk toezicht instellingen",
+    "requirePinForSettingsDescription": "PIN vereist voor instellingen beschrijving",
+    "subtitleFontSizeDescription": "Selecteer lettergrootte",
+    "subtitleBackgroundDescription": "Selecteer achtergrond",
+    "subtitlePositionDescription": "Selecteer positie",
+    "subtitleColorDescription": "Selecteer ondertitel kleur",
+    "accountPlanDescription": "Plan beschrijving",
+    "accountPlaylistLimitDescription": "Afspeellijst limiet beschrijving",
+    "accountSubscriptionDescription": "Abonnement beschrijving",
+    "accountDailyUsageDescription": "Dagelijks gebruik beschrijving",
+    "accountProfileDescription": "Account profiel beschrijving",
+    "dangerZone": "Gevaar zone",
+    "resetProgressButton": "Opnieuw instellen",
+    "resetProgressSubtitle": "Voortgang opnieuw instellen",
+    "resetProgressTitle": "Voortgang opnieuw instellen",
+    "resetProgressMessage": "Wil je voortgang opnieuw instellen?",
+    "resetProgressSuccess": "Voortgang opnieuw ingesteld",
+    "deleteAccount": "Account verwijderen",
+    "deleteAccountDescription": "Verwijder je account en alle gegevens permanent",
+    "deleteAccountTitle": "Account verwijderen?",
+    "deleteAccountMessage": "Dit verwijdert permanent je account en alle bijbehorende gegevens, inclusief afspeellijsten, kijkgeschiedenis, lijsten en instellingen.\n\nDeze actie kan niet ongedaan worden gemaakt.",
+    "deleteAccountConfirm": "Verwijder mijn account",
+    "deleteAccountFinalTitle": "Weet je het absoluut zeker?",
+    "deleteAccountFinalMessage": "Dit is je laatste kans. Je account en alle gegevens worden permanent verwijderd.",
+    "deletingAccount": "Account verwijderen...",
+    "openSubtitles": {
+      "title": "OpenSubtitles",
+      "description": "Zoek en download ondertitels van OpenSubtitles",
+      "username": "Gebruikersnaam",
+      "password": "Wachtwoord",
+      "logIn": "Inloggen",
+      "logOut": "Afmelden",
+      "loggedIn": "Ingelogd als {{username}}",
+      "notLoggedIn": "Zonder account kun je maximaal 5 ondertitels per dag downloaden. Log in met je gratis OpenSubtitles.com-account om de limiet tot 20 per dag te verhogen.",
+      "remainingDownloads": "Downloads resterend vandaag: {{count}}",
+      "loginRequired": "Log in voor meer downloads",
+      "clearCache": "Ondertitelcache wissen",
+      "usernameDescription": "Voer je OpenSubtitles-gebruikersnaam in",
+      "passwordDescription": "Voer je OpenSubtitles-wachtwoord in",
+      "loginDescription": "Log in om je dagelijkse downloadlimiet te verhogen",
+      "loggedInDescription": "Je OpenSubtitles-account is actief",
+      "logoutDescription": "Log uit van je OpenSubtitles-account",
+      "clearCacheDescription": "Alle cached ondertitels uit lokale opslag verwijderen",
+      "multipleOptions": "Meerdere ondertitelopties",
+      "multipleOptionsDescription": "Toon alle beschikbare ondertitels per taal, gesorteerd op beoordeling, in plaats van alleen de beste."
+    },
+    "clearAllHidden": "Alles wissen",
+    "hiddenContinueWatching": "Verborgen uit Doorgaan met kijken",
+    "epgSource": "EPG-bron",
+    "epgLoadingStatus": "EPG-laadstatus",
+    "epgSourceCustomUrl": "Aangepaste URL",
+    "epgSourceXtreamServer": "Xtream-server",
+    "epgSourceNone": "Geen",
+    "parentalControlsSection": "Ouderlijk toezicht",
+    "contentDisplaySection": "Weergave",
+    "contentOrganizationSection": "Indeling",
+    "contentDataSection": "Gegevens en verversen",
+    "contentDescription": "Weergave, indeling en verversen van content",
+    "autoQuality": "Automatische kwaliteit (experimenteel)",
+    "autoQualitySubtitle": "Start gegroepeerde kanalen in de beste kwaliteit voor je verbinding en verlaagt deze als de stream blijft bufferen. Elke wijziging laadt het kanaal opnieuw, dus het beeld kan even zwart worden.",
+    "securitySection": "Beveiliging",
+    "playbackEngineTitle": "Speler en engines",
+    "playbackEngineSubtitle": "VOD- en Live TV-engines, geavanceerde opties",
+    "playbackSubtitlesAudioTitle": "Ondertitels en audio",
+    "playbackSubtitlesAudioSubtitle": "Standaardtalen, ondertitelstijl, OpenSubtitles",
+    "playbackViewingTitle": "Tijdens het kijken",
+    "playbackViewingSubtitle": "Automatisch afspelen, Intro overslaan, Verder kijken",
+    "scopeSynced": "Wordt gesynchroniseerd op alle apparaten en playlists",
+    "scopePlaylist": "Alleen voor playlist “{{name}}”",
+    "scopeDevice": "Alleen op deze {{device}}",
+    "themeSection": "Thema",
+    "displayDescription": "Kies wat de schermen tonen: carrousels, tabbladen en zenders.",
+    "scopeDeviceTV": "Alleen op deze tv",
+    "infoDescription": "Voorwaarden, privacy, credits en appversie",
+    "showHome": "Home tonen",
+    "showHomeSubtitle": "Het Home-tabblad bundelt wat je kijkt, je zenders en nieuwe content op één scherm",
+    "startScreenHome": "Home"
+  },
+  "feedback": {
+    "title": "Feedback verzenden",
+    "submit": "Verzenden",
+    "picker": {
+      "header": "Wat wil je verzenden?",
+      "footer": "Het KIPTV-team leest elk rapport. We antwoorden per e-mail als je een contact hebt opgegeven."
+    },
+    "bug": {
+      "title": "Een bug melden",
+      "subtitle": "Iets werkt niet zoals verwacht",
+      "titleField": "Korte titel",
+      "descriptionField": "Gedetailleerde beschrijving",
+      "stepsFieldPlaceholder": "Voorbeeld:\n1. Open Live TV\n2. Tik op RAI 1\n3. De app crasht",
+      "expectedField": "Verwacht gedrag",
+      "actualField": "Wat er werkelijk gebeurde",
+      "frequencyField": "Frequentie",
+      "screenField": "Betreffend scherm",
+      "contactField": "Contact-e-mail",
+      "screenshotAdd": "Schermafbeelding toevoegen",
+      "screenshotChange": "Schermafbeelding wijzigen",
+      "screenshotRemove": "Schermafbeelding verwijderen",
+      "diagnosticsLink": "Wat we in het rapport opnemen",
+      "section": {
+        "what": "Wat er gebeurde",
+        "whatFooter": "Wees zo specifiek mogelijk — dit helpt ons het probleem te reproduceren.",
+        "steps": "Stappen om te reproduceren",
+        "stepsFooter": "Eén stap per regel.",
+        "expectedActual": "Verwacht vs werkelijk",
+        "context": "Context",
+        "attachment": "Bijlagen",
+        "attachmentFooter": "Een schermafbeelding is optioneel maar zeer nuttig.",
+        "contact": "Contact",
+        "contactFooter": "Optioneel maar aanbevolen — zonder contact-e-mail kunnen we je niet bereiken voor verduidelijking of updates."
+      }
+    },
+    "improvement": {
+      "title": "Een verbetering voorstellen",
+      "subtitle": "Iets zou beter kunnen werken",
+      "titleField": "Korte samenvatting van de verbetering",
+      "descriptionField": "Beschrijving",
+      "screenField": "Waar in de app?",
+      "contactField": "Contact-e-mail",
+      "section": {
+        "what": "Jouw suggestie",
+        "whatFooter": "Vertel ons wat de ervaring beter zou maken.",
+        "where": "Waar het van toepassing is",
+        "contact": "Contact",
+        "contactFooter": "Optioneel maar aanbevolen — zonder contact-e-mail kunnen we je niet bereiken voor verduidelijking."
+      }
+    },
+    "feature": {
+      "title": "Een nieuwe functie aanvragen",
+      "subtitle": "Iets dat je in KIPTV zou willen zien",
+      "titleField": "Naam van de functie",
+      "descriptionField": "Beschrijving",
+      "useCaseField": "Waarom je het nodig hebt / hoe je het zou gebruiken",
+      "contactField": "Contact-e-mail",
+      "section": {
+        "what": "De gewenste functie",
+        "whatFooter": "Hoe meer context je geeft, hoe groter de kans dat we het bouwen.",
+        "contact": "Contact",
+        "contactFooter": "Optioneel maar aanbevolen — zonder contact-e-mail kunnen we je niet laten weten wanneer de functie beschikbaar komt."
+      }
+    },
+    "frequency": {
+      "unspecified": "— Niet gespecificeerd —",
+      "always": "Altijd",
+      "sometimes": "Soms",
+      "once": "Eenmalig",
+      "cannotReproduce": "Kan niet reproduceren"
+    },
+    "screen": {
+      "unspecified": "— Niet gespecificeerd —",
+      "auth": "Inloggen / Aanmelden",
+      "playlist": "Afspeellijst instellen",
+      "home": "Home",
+      "movies": "Films",
+      "series": "TV-series",
+      "live": "Live TV",
+      "search": "Zoeken",
+      "downloads": "Downloads",
+      "settings": "Instellingen",
+      "player": "Videospeler",
+      "parental": "Ouderlijk toezicht",
+      "other": "Overig"
+    },
+    "disclosure": {
+      "title": "Wat we opnemen",
+      "attachedHeader": "Gegevens bij het rapport gevoegd",
+      "attachedFooter": "We gebruiken deze gegevens alleen om de bug te reproduceren. Ze worden na 12 maanden verwijderd.",
+      "notSentHeader": "Wat we NIET verzenden",
+      "device": {
+        "title": "Model en versie",
+        "body": "Apparaattype, OS-versie, taal, tijdzone."
+      },
+      "app": {
+        "title": "App-versie",
+        "body": "KIPTV-versie en buildnummer."
+      },
+      "network": {
+        "title": "Verbindingstype",
+        "body": "WiFi of mobiel. Geen IP-adres, geen netwerknaam."
+      },
+      "playlist": {
+        "title": "Afspeellijstaanbieder",
+        "body": "Alleen de host van de IPTV-server (bijv. iptv.example.com), om aanbiederspecifieke problemen te identificeren."
+      },
+      "logs": {
+        "title": "Recente diagnostische logs",
+        "body": "Recente app-gebeurtenissen (fouten, laadgebeurtenissen, navigatie). Inloggegevens worden automatisch gemaskeerd."
+      },
+      "notSent": {
+        "credentialsTitle": "Inloggegevens van afspeellijst",
+        "credentialsBody": "De gebruikersnaam en het wachtwoord van je afspeellijst verlaten nooit je apparaat.",
+        "contactsTitle": "Contacten en adresboek",
+        "contactsBody": "De app heeft geen toegang tot je telefooncontacten en verzendt deze niet."
+      },
+      "retention": {
+        "title": "Hoe lang we de gegevens bewaren",
+        "body": "Rapporten worden automatisch na 12 maanden verwijderd. Je kunt eerdere verwijdering aanvragen via e-mail."
+      }
+    },
+    "tv": {
+      "subtitle": "Kies hoe je het probleem vanaf je TV wilt melden",
+      "qr": {
+        "title": "Voltooi op je telefoon",
+        "subtitle": "Scan de QR-code met je iPhone of Android: het formulier wordt geopend en is vooraf ingevuld met de gegevens van je TV.",
+        "urlLabel": "Of ga naar deze URL:",
+        "expiry": "De code verloopt over 30 minuten."
+      },
+      "quick": {
+        "title": "Snel rapport",
+        "subtitle": "Verzend nu de TV-diagnosegegevens zonder iets te typen. We sturen je een e-mail voor details.",
+        "send": "Nu verzenden",
+        "sent": "Verzonden!",
+        "sentDetail": "We hebben alle diagnosegegevens ontvangen. We sturen je een e-mail als we meer nodig hebben.",
+        "disclaimer": "We gebruiken deze gegevens alleen om de bug te reproduceren. De inloggegevens van je playlist worden nooit verzonden.",
+        "autoDescription": "Snel rapport verzonden vanaf tv: gebruiker meldt een algemeen probleem. Neem contact op voor details."
+      }
+    },
+    "error": {
+      "title": "Fout",
+      "notAuthenticated": "Je moet zijn ingelogd om feedback te verzenden.",
+      "missingTitle": "Voer een titel in.",
+      "uploadFailed": "Upload van schermafbeelding mislukt",
+      "insertFailed": "Verzending mislukt"
+    },
+    "success": {
+      "title": "Bedankt!",
+      "message": "Feedback verzonden. We nemen contact op als we meer informatie nodig hebben."
+    }
+  },
+  "playlist": {
+    "noPlaylist": "Geen afspeellijst",
+    "noPlaylistMessage": "Voeg IPTV-afspeellijst toe om aan de slag te gaan",
+    "noPlaylistMessageLiveTV": "Voeg IPTV-afspeellijst toe om TV-kanalen te bekijken",
+    "addPlaylist": "Afspeellijst toevoegen",
+    "changePlaylist": "Wijzig afspeellijst",
+    "noPlaylists": "Geen afspeellijsten",
+    "noPlaylistsMessage": "Geen afspeellijsten beschikbaar",
+    "addFirstPlaylist": "Voeg eerste afspeellijst toe",
+    "playlistWithoutName": "Afspeellijst zonder naam",
+    "unableToLoadDetails": "Kan details niet laden",
+    "unableToConnect": "Kan geen verbinding maken",
+    "unableToSave": "Kan niet opslaan",
+    "unableToLoad": "Kan niet laden",
+    "addXtreamPlaylist": "Xtream afspeellijst toevoegen",
+    "removePlaylistTitle": "Afspeellijst verwijderen",
+    "removePlaylistMessage": "Wil je deze afspeellijst verwijderen?",
+    "deleteConfirmTitle": "Afspeellijst verwijderen?",
+    "deleteConfirmMessage": "Weet je zeker dat je deze afspeellijst wilt verwijderen?",
+    "playlistType": "Afspeellijst type",
+    "editPlaylist": "Afspeellijst bewerken",
+    "editPlaylistSubtitle": "Bewerk afspeellijstdetails",
+    "limitReached": "Limiet bereikt",
+    "limitReachedMessage": "Je hebt je limiet bereikt",
+    "limitReachedMessageDynamic": "Je huidige plan staat {{limit}} afspeellijst toe. Upgrade naar Premium Plus om tot 5 afspeellijsten te beheren.",
+    "limitBullet1": "Bullet 1",
+    "limitBullet2": "Bullet 2",
+    "openPlaylist": "Open afspeellijst",
+    "canModifyInSettings": "Je kunt dit wijzigen in instellingen",
+    "verifyingCredentials": "Inloggegevens verifiëren...",
+    "saving": "Bezig met opslaan...",
+    "loadingContent": "Inhoud laden...",
+    "preparingContent": "Inhoud voorbereiden...",
+    "finalizingExperience": "Ervaring afmaken...",
+    "preparing": "Voorbereiding",
+    "newPlaylist": "Nieuwe afspeellijst",
+    "loginToRecover": "Meld je aan om in te stellen",
+    "enterNameAndDomain": "Voer naam en domein in",
+    "orEnterXtream": "Of voer Xtream in",
+    "playerOnlyNoContent": "Geen inhoud beschikbaar",
+    "playlistName": "Afspeellijst naam",
+    "playlistNamePlaceholder": "Afspeellijst naam",
+    "domainXtream": "Xtream domein",
+    "savePlaylist": "Afspeellijst opslaan",
+    "syncedToAccount": "Gesynchroniseerd met account",
+    "loadingIPTVContent": "IPTV-inhoud laden...",
+    "connectingToPlaylist": "Verbinding met afspeellijst...",
+    "playlistAdded": "Afspeellijst toegevoegd",
+    "sourceReady": "Bron klaar",
+    "unnamedPlaylist": "Naamloze afspeellijst",
+    "tierLimitMessage": "{{tier}} plan: limiet {{limit}} afspeellijst(en). {{upgradeMessage}}",
+    "upgradeToFamily": "Upgrade naar Plus",
+    "upgradeToPremium": "Upgrade naar Premium",
+    "loginRequiredToAdd": "Inloggen vereist om toe te voegen",
+    "noPlaylistSelected": "Geen afspeellijst geselecteerd",
+    "chooseAvatar": "Kies avatar",
+    "changeAvatar": "Avatar wijzigen",
+    "noAvatar": "Geen avatar",
+    "whoIsWatching": "Wie kijkt er?",
+    "add": "Toevoegen",
+    "connectionError": "Verbindingsfout",
+    "xtreamRecommended": "Xtream aanbevolen",
+    "usernamePlaceholder": "Gebruikersnaam",
+    "passwordPlaceholder": "Wachtwoord",
+    "m3uUrl": "M3U URL",
+    "securityNote": "Beveiligingsnota",
+    "epgOptional": "EPG optioneel",
+    "connectionFailed": "Verbinding mislukt",
+    "saveError": "Opslaan fout",
+    "nameDuplicate": "Dubbele naam",
+    "premiumRequired": "Premium vereist",
+    "upgradeToAccess": "Upgrade om toegang te krijgen",
+    "forceReloadPlaylist": "Forceer afspeellijst vernieuwen",
+    "forceReloadEPG": "Forceer EPG vernieuwen",
+    "m3uConfirmTitle": "M3U bevestigen",
+    "m3uConfirmMessage": "Is dit een M3U-afspeellijst?",
+    "m3uConfirmContinue": "Doorgaan met M3U",
+    "m3uHint": "bijv. http://...",
+    "useXtream": "Xtream gebruiken",
+    "m3uInvalidURL": "Ongeldige M3U URL",
+    "m3uDownloading": "M3U downloaden...",
+    "m3uParsing": "M3U verwerken...",
+    "xtreamDetectedTitle": "Xtream gedetecteerd",
+    "xtreamDetectedMessage": "Xtream-indeling gedetecteerd",
+    "xtreamDetectedUseXtream": "Xtream gebruiken",
+    "xtreamDetectedKeepM3U": "M3U houden",
+    "epgUrlLabel": "EPG URL (optioneel)",
+    "epgUrlHint": "bijv. http://...",
+    "error": {
+      "timeout": {
+        "title": "Verbindingstimeout",
+        "message": "Kan inhoud niet laden van de IPTV-server. De server is mogelijk traag of tijdelijk niet beschikbaar."
+      },
+      "server": {
+        "title": "Serverfout",
+        "message": "De IPTV-server gaf een foutmelding. De server is mogelijk in onderhoud of ondervindt problemen."
+      },
+      "network": {
+        "title": "Geen verbinding",
+        "message": "Kan geen verbinding maken met het internet. Controleer je netwerkverbinding."
+      },
+      "auth": {
+        "title": "Authenticatie mislukt",
+        "message": "De afspeellijstreferenties zijn ongeldig of het account is verlopen."
+      },
+      "expired": {
+        "title": "Abonnement verlopen",
+        "message": "Uw IPTV-abonnement is verlopen. Neem contact op met uw provider om het te verlengen."
+      },
+      "solutions": "Mogelijke oplossingen",
+      "solution": {
+        "checkServer": "Controleer dat de IPTV-server online is",
+        "tryLater": "Probeer over een paar minuten opnieuw",
+        "checkInternet": "Controleer je internetverbinding",
+        "serverMaintenance": "De server is mogelijk in onderhoud",
+        "contactProvider": "Neem contact op met je IPTV-provider",
+        "checkWifi": "Controleer je WiFi of mobiele internetverbinding",
+        "checkCellular": "Probeer te schakelen tussen WiFi en mobiel",
+        "disableVPN": "Schakel VPN uit als deze actief is",
+        "toggleVPN": "Probeer je VPN in/uit te schakelen",
+        "checkCredentials": "Controleer gebruikersnaam en wachtwoord",
+        "checkExpiration": "Controleer dat je account niet is verlopen"
+      }
+    },
+    "connection": "Verbinding"
+  },
+  "movies": {
+    "markWatched": "Markeer als bekeken",
+    "markUnwatched": "Markeer als onbekeken",
+    "title": "Films",
+    "noMovies": "Geen films gevonden",
+    "noMoviesMessage": "Geen films beschikbaar",
+    "contentNotLoaded": "Inhoud niet geladen",
+    "contentNotLoadedMessage": "Kon films niet laden. Controleer je verbinding en probeer het opnieuw.",
+    "otherMovies": "Andere films",
+    "top20Trending": "Top 20 Trending",
+    "categoriesRemaining": "{{count}} categorieën resterend",
+    "noPlaylistSelected": "Geen afspeellijst geselecteerd",
+    "loadingMovies": "Bezig met laden films...",
+    "movieNotAvailable": "Film niet beschikbaar",
+    "movieNotAvailableMessage": "Deze film is niet beschikbaar",
+    "movieNotAvailableInPlaylist": "Film niet beschikbaar in afspeellijst",
+    "popularMovies": "Populaire films",
+    "newArrivals": "Nieuwe aankomsten"
+  },
+  "series": {
+    "title": "Serie",
+    "noSeries": "Geen series gevonden",
+    "noSeriesMessage": "De geselecteerde afspeellijst bevat geen series",
+    "otherSeries": "Andere series",
+    "top20Trending": "Top 20 Trending",
+    "categoriesRemaining": "{{count}} categorieën resterend",
+    "seriesNotAvailableInPlaylist": "Serie niet beschikbaar in afspeellijst",
+    "notAvailable": "Niet beschikbaar",
+    "notAvailableMessage": "Serie niet beschikbaar",
+    "playlistAttaching": "Afspeellijst koppeling...",
+    "episodeNotAvailable": "Aflevering niet beschikbaar",
+    "attachingPlaylist": "Afspeellijst koppelen...",
+    "loadingSeries": "Bezig met laden series...",
+    "popularSeries": "Populaire series",
+    "engagingTvSeries": "Spannende TV-series",
+    "season": "Seizoen",
+    "seasonCount": "{{count}} SEIZOEN",
+    "seasonsCount": "{{count}} seizoenen",
+    "noEpisodes": "Geen afleveringen",
+    "noEpisodesMessage": "Geen afleveringen beschikbaar",
+    "resumeFrom": "Hervatten van",
+    "lastWatchedPoint": "Laatst bekeken punt",
+    "watchNow": "Nu kijken",
+    "startSeason": "Seizoen {{season}} starten",
+    "resume": "Hervatten",
+    "goBack": "Ga terug",
+    "loadError": "Laad fout",
+    "loadErrorMessage": "Fout bij laden: {{message}}",
+    "episode": "Aflevering {{number}}",
+    "markWatched": "Markeer als bekeken",
+    "markUnwatched": "Markeer als onbekeken",
+    "markWatchedUpTo": "Markeer tot en met als bekeken",
+    "markAllWatched": "Hele serie als bekeken markeren",
+    "markAllUnwatched": "Hele serie als niet-bekeken markeren",
+    "resetEpisodeProgress": "Aflevering voortgang resetten",
+    "resetProgress": "Stel voortgang in",
+    "resetProgressTitle": "Voortgang opnieuw instellen",
+    "resetProgressMessage": "Wil je de voortgang opnieuw instellen?",
+    "resetProgressConfirm": "Voortgang opnieuw instellen",
+    "episodeInfo": "Afleveringsinfo",
+    "downloadEpisode": "Aflevering downloaden"
+  },
+  "multiview": {
+    "title": "Multiview",
+    "openInMultiview": "Openen in Multiview",
+    "addToMultiview": "Toevoegen aan Multiview",
+    "empty": "Voeg een kanaal toe om meerdere streams tegelijk te bekijken",
+    "addChannel": "Kanaal toevoegen",
+    "maxReached": "Maximaal 4 kanalen bereikt",
+    "removeTile": "Verwijderen uit Multiview",
+    "audioTracks": "Audio",
+    "subtitles": "Ondertitels",
+    "settings": "Instellingen",
+    "layout": {
+      "auto": "Auto",
+      "stack": "Stapel",
+      "grid": "Raster",
+      "strip": "Strip",
+      "focus": "Focus"
+    },
+    "tile": {
+      "loading": "Laden…",
+      "error": "Afspeelfout",
+      "retry": "Opnieuw proberen",
+      "noProgram": "Geen programma-info"
+    },
+    "close": "Multiview sluiten",
+    "vodBlocked": "Sluit Multiview om films en series te openen",
+    "confirmDismiss": "Druk opnieuw op Back om te sluiten",
+    "minimizedHint": "Selecteer een ander kanaal om toe te voegen aan Multiview"
+  },
+  "livetv": {
+    "startSection": "Live TV-startsectie",
+    "startSectionSubtitle": "Kies met welke lijst Live TV opent",
+    "title": "Live",
+    "noChannels": "Geen kanalen gevonden",
+    "noChannelsMessage": "De geselecteerde afspeellijst bevat geen TV-kanalen",
+    "otherChannels": "Andere kanalen",
+    "selectChannel": "Selecteer kanaal",
+    "selectChannelMessage": "Selecteer een kanaal om EPG-gids te zien",
+    "channels": "Kanalen",
+    "epg": "Gids",
+    "noDescription": "Geen beschrijving",
+    "watchNow": "Nu kijken",
+    "epgLoadError": "EPG laad fout",
+    "epgNotAvailable": "EPG niet beschikbaar",
+    "epgNotAvailableMessage": "EPG-gegevens niet beschikbaar voor dit kanaal",
+    "infoChannel": "Kanaalinfo",
+    "streamNotAvailable": "Stream niet beschikbaar",
+    "streamUnavailable": "Stream niet beschikbaar",
+    "limitReachedLiveMessage": "Limiet bereikt voor Live TV",
+    "popularChannels": "Populaire kanalen",
+    "tvProgram": "TV-programma",
+    "tapForFullscreen": "Tik voor volledig scherm",
+    "noChannelSelected": "Geen kanaal geselecteerd",
+    "selectChannelToSeeGuide": "Selecteer kanaal voor gids",
+    "inProgress": "In uitvoering",
+    "inHoursMinutes": "Over {{hours}}u {{minutes}}min",
+    "inMinutes": "Over {{minutes}}m",
+    "startingSoon": "Begint binnenkort",
+    "now": "Nu",
+    "next": "Volgende",
+    "loadingEpg": "Bezig met laden programmainfo...",
+    "epgRateLimited": "EPG rate-beperkt",
+    "epgDataNotAvailable": "EPG-gegevens niet beschikbaar",
+    "unknownChannel": "Onbekend kanaal",
+    "noProgram": "Geen programma",
+    "loadingChannels": "Bezig met laden kanalen...",
+    "viewModeList": "Lijstweergave",
+    "viewModeEPG": "EPG-weergave",
+    "viewModeCarousel": "Carrousel",
+    "viewModeLabel": "Weergavemodus",
+    "sortOrderLabel": "Sorteervolgorde",
+    "allChannels": "Alle kanalen",
+    "recentlyWatched": "Recent bekeken",
+    "recentlyAdded": "Recent toegevoegd",
+    "removeFromRecentlyWatched": "Verwijderen uit recent bekeken",
+    "favorites": "Favorieten",
+    "categoriesSection": "Categorieën",
+    "nextProgram": "Volgende programma",
+    "upNext": "Volgende",
+    "today": "Vandaag",
+    "tomorrow": "Morgen",
+    "selectQuality": "Selecteer kwaliteit",
+    "qualityVariants": "Kwaliteitsvarianten",
+    "replay": "Herhaling",
+    "yesterday": "Gisteren",
+    "replaySelectQuality": "Selecteer kwaliteit voor herhaling",
+    "startsIn": "Begint over {{time}}",
+    "searchChannels": "Kanalen zoeken...",
+    "viewModeGrid": "Raster",
+    "customizeLogo": "Logo aanpassen",
+    "renameChannelFooter": "Versies met dezelfde naam worden gegroepeerd.",
+    "renameChannelSelected": "Geselecteerd kanaal",
+    "renameChannelOthers": "Andere gegroepeerde versies",
+    "restoreAllChannelNames": "Alle oorspronkelijke namen herstellen",
+    "customizeEPG": "EPG aanpassen",
+    "overrideAppliesTo": "Van toepassing op",
+    "overrideAppliesToCount": "%d zenders",
+    "epgSheet": {
+      "search": "Zoeken op naam of EPG-ID",
+      "sources": "EPG-bronnen",
+      "useProviderDefault": "Automatisch",
+      "loading": "EPG-gids laden…",
+      "loadingHint": "De programmagids wordt gedownload — dit kan even duren bij grote gidsen.",
+      "epgNotLoaded": "EPG-gids nog niet geladen",
+      "refineSearch": "Verfijn je zoekopdracht voor meer resultaten",
+      "source": "EPG-bron",
+      "programCount": "%d programma's"
+    },
+    "logoSheet": {
+      "search": "Logo's zoeken",
+      "title": "Zenderlogo",
+      "suggested": "Voorgesteld",
+      "customURL": "Eigen URL",
+      "restore": "Standaard herstellen",
+      "invalidURL": "Ongeldige URL",
+      "loadFailed": "Afbeelding kan niet worden geladen"
+    },
+    "epgOffset": "EPG-tijdverschil",
+    "epgOffsetMinutesShort": "min",
+    "epgOffsetChannelHint": "0 = playlist-verschil gebruiken",
+    "epgOffsetPlaylistHint": "Verschuift alle programmatijden van deze playlist.",
+    "epgGuide": "EPG-gids",
+    "qualityAuto": "Auto",
+    "qualityAutoExperimental": "Auto (experimenteel)"
+  },
+  "epg": {
+    "title": "Gids",
+    "movie": "Film",
+    "tvShow": "Serie",
+    "cast": "Cast",
+    "rating": "Beoordeling",
+    "loadingMetadata": "Bezig met laden metadata...",
+    "identifiedAs": "Geïdentificeerd als",
+    "remindMe": "Herinneren",
+    "reminderSet": "Herinnering ingesteld",
+    "remind10min": "Herinneren 10 min van tevoren",
+    "remind30min": "Herinneren 30 min van tevoren",
+    "remind1hour": "Herinneren 1 uur van tevoren",
+    "reminderRemove": "Herinnering verwijderen",
+    "reminderTitle": "{{playlist}}, pak je popcorn! 🍿",
+    "reminderBody": "{{title}} begint over {{time}} op {{channel}}",
+    "reminderTime10": "10 minuten",
+    "reminderTime30": "30 minuten",
+    "reminderTime60": "60 minuten",
+    "reminderTooSoon": "Program is too close to set a reminder",
+    "reminderNeedsIOSDevice": "Herinneringen worden bezorgd op je iPhone of iPad. Open KIPTV op een iOS-apparaat, sta meldingen toe en probeer het opnieuw."
+  },
+  "trending": {
+    "movies": "Trending films",
+    "series": "Trending series",
+    "all": "Trending inhoud",
+    "loadingTrending": "Bezig met laden trending...",
+    "inPlaylist": "In afspeellijst",
+    "notInPlaylist": "Niet in afspeellijst",
+    "checkingPlaylist": "Controleer afspeellijst..."
+  },
+  "search": {
+    "title": "Zoeken",
+    "placeholder": "Zoek films, series, kanalen, programma's of personen...",
+    "searchContent": "Zoekinhoud",
+    "searchMessage": "Zoek naar inhoud in je afspeellijst",
+    "typeAtLeast": "Typ minstens 2 tekens om te zoeken...",
+    "noResults": "Geen resultaten gevonden",
+    "noResultsMessage": "Geen resultaten voor '{{query}}'",
+    "resultsFor": "{{count}} resultaten voor \"{{query}}\"",
+    "resultsForQuery": "Resultaten voor '{{query}}'",
+    "movies": "Films ({{count}})",
+    "series": "Series ({{count}})",
+    "liveChannels": "Livkanalen ({{count}})",
+    "initializingSearch": "Zoeken initialiseren...",
+    "indexingInProgress": "Indexering in voortgang",
+    "indexingMessage": "Indexering van inhoud...",
+    "indexingHint": "Zoeken wordt voorbereikt...",
+    "searchError": "Zoekfout",
+    "selectPlaylistFirst": "Selecteer eerst afspeellijst",
+    "noPlaylistMessage": "Voeg afspeellijst toe om te zoeken",
+    "noResultsHint": "Probeer andere trefwoorden",
+    "moviesSeriesChannels": "Films, Series en Kanalen",
+    "indexingTitle": "Indexering",
+    "indexingSubtitle": "Dit duurt enkele seconden",
+    "filterAll": "Alle",
+    "filterMovies": "Films",
+    "filterSeries": "Series",
+    "filterChannels": "Kanalen",
+    "sectionChannels": "Kanalen",
+    "sectionMovies": "Films",
+    "sectionSeries": "Serie",
+    "noInfoAvailable": "Geen informatie beschikbaar",
+    "filterPeople": "Mensen",
+    "filterPrograms": "Programma's",
+    "sectionPeople": "Mensen",
+    "sectionPrograms": "Programma's",
+    "clearHistory": "Wissen",
+    "recentSearches": "Recente zoekopdrachten",
+    "collectionFilms": "{{count}} films",
+    "collectionAvailable": "{{available}} van {{total}} in afspeellijst",
+    "collectionSpine": "Collectie",
+    "collectionFilmNumber": "Film {{number}}"
+  },
+  "premium": {
+    "title": "Premium",
+    "kiptvPremium": "KIPTV Premium",
+    "streamingUnlimited": "Onbeperkt streamen",
+    "unlimitedViewing": "Onbeperkt kijken",
+    "multiplePlaylists": "Meerdere afspeellijsten",
+    "simplePlaylist": "Eenvoudige afspeellijst",
+    "cloudSync": "Cloud-synchronisatie",
+    "earlyAccess": "Vroege toegang",
+    "perYear": "per jaar",
+    "perMonth": "per maand",
+    "upgradeToPremium": "Upgrade naar Premium",
+    "upgrade": "Upgraden",
+    "unlockAllBenefits": "Ontgrendel alle voordelen",
+    "restorePurchases": "Aankopen herstellen",
+    "continueFree": "Doorgaan gratis",
+    "upgradeAlert": "Upgrade alert",
+    "restoreAlert": "Herstelalert",
+    "goBack": "Ga terug",
+    "subscribeAnnual": "Abonneer u - {{price}}/jaar",
+    "subscribeMonthly": "Abonneer u - {{price}}/maand",
+    "startFreeTrial": "Start gratis proefperiode",
+    "freeTrialBadge": "{{days}} dagen gratis",
+    "trialDisclaimer": "Gratis voor {{days}} dagen, daarna {{price}}/{{period}}. Wordt automatisch verlengd, tenzij ten minste 24 uur voor het einde van de proefperiode geannuleerd. Beheer in {{storeName}}-instellingen.",
+    "disclaimer": "Betaling wordt in rekening gebracht op je {{storeName}}-account na bevestiging van de aankoop. Het abonnement wordt automatisch verlengd, tenzij het minstens 24 uur voor het einde van de huidige periode wordt geannuleerd.",
+    "storeNameIOS": "App Store",
+    "storeNameAndroid": "Google Play",
+    "familyServiceIOS": "Familie abonnement (App Store)",
+    "familyServiceAndroid": "Familie abonnement (Play Store)",
+    "contentDisclaimer": "Inhoud disclamer",
+    "deviceShowcase": "Eén abonnement, al je apparaten",
+    "comingSoon": "Binnenkort",
+    "planOneSubtitle": "Alle functies inbegrepen. 1 playlist.",
+    "planPlusSubtitle": "Alle functies inbegrepen. Tot 5 playlists.",
+    "termsOfService": "Servicevoorwaarden",
+    "privacyPolicy": "Privacybeleid",
+    "planFree": "Gratis plan",
+    "monthly": "Maandelijks",
+    "annual": "Jaarlijks",
+    "monthShort": "mnd",
+    "yearShort": "jr",
+    "savePercent": "Bespaar {{percent}}%",
+    "selectPlan": "Selecteer plan",
+    "mostPopular": "Meest populair",
+    "bestValue": "Beste waarde",
+    "currentPlan": "Huidig plan",
+    "subscribing": "Bezig met abonneren...",
+    "restoring": "Bezig met herstellen...",
+    "purchaseSuccess": "Aankoop succesvol",
+    "purchaseSuccessMessage": "Aankoop succesvol voltooid",
+    "restoreSuccess": "Aankopen succesvol hersteld",
+    "restoreNotFound": "Geen aankopen gevonden",
+    "manageSubscription": "Abonnement beheren",
+    "managedByAppStore": "Beheerd door App Store",
+    "managedByPlayStore": "Beheerd door Play Store",
+    "renewsOn": "Vernieuwt op",
+    "expiresOn": "Verloopt op",
+    "manageInAppStore": "Beheer in App Store",
+    "manageInPlayStore": "Beheer in Play Store",
+    "errors": {
+      "cancelled": "Aankoop geannuleerd",
+      "network": "Netwerkfout. Controleer je verbinding.",
+      "notAllowed": "Aankopen niet toegestaan op dit apparaat",
+      "alreadyOwned": "Je hebt al een actief abonnement",
+      "generic": "Er is iets misgegaan. Probeer het opnieuw.",
+      "storeUnavailable": "Store tijdelijk niet beschikbaar"
+    },
+    "features": {
+      "unlimited": "Onbeperkt streamen",
+      "noAds": "Geen advertenties",
+      "singlePlaylist": "1 afspeellijst",
+      "multiplePlaylists": "Tot 5 afspeellijsten",
+      "cloudSync": "Cloudsynchronisatie op apparaten",
+      "prioritySupport": "Prioriteitsondersteuning"
+    },
+    "categories": {
+      "discover": "Ontdekken",
+      "watchYourWay": "Kijk op jouw manier",
+      "yourSpace": "Jouw ruimte, jouw regels",
+      "plus": "Gebouwd voor het hele gezin"
+    },
+    "benefits": {
+      "recentlyAdded": {
+        "title": "Recent toegevoegd",
+        "subtitle": "KIPTV volgt nieuwe films, series, afleveringen en livkanalen"
+      },
+      "trailers": {
+        "title": "Trailers & meer",
+        "subtitle": "Bekijk trailers, behind-the-scenes en bonusinhoud"
+      },
+      "recommended": {
+        "title": "Aanbevolen",
+        "subtitle": "Gepersonaliseerde suggesties gebaseerd op wat je kijkt"
+      },
+      "trending": {
+        "title": "Trending",
+        "subtitle": "Ontdek de meest populaire inhoud nu"
+      },
+      "advancedSearch": {
+        "title": "Geavanceerd zoeken",
+        "subtitle": "Zoek films, series, kanalen, programma's en acteurs"
+      },
+      "continueWatching": {
+        "title": "Hervatten waar je bleef",
+        "subtitle": "Pak op waar je bent gebleven"
+      },
+      "offlineDownload": {
+        "title": "Download & offline",
+        "subtitle": "Download inhoud om offline te kijken"
+      },
+      "pip": {
+        "title": "Picture in Picture",
+        "subtitle": "Blijf kijken terwijl je andere apps gebruikt"
+      },
+      "casting": {
+        "title": "AirPlay & Chromecast",
+        "subtitle": "Stream video naar je tv"
+      },
+      "audioSubtitles": {
+        "title": "Audio & ondertitels",
+        "subtitle": "Kies audiotracks en ondertiteltalen"
+      },
+      "tvArchive": {
+        "title": "TV-archief",
+        "subtitle": "Bekijk voorbije livprogramma's met Catchup/Replay"
+      },
+      "multiplePlaylists": {
+        "title": "Tot 5 afspeellijsten",
+        "subtitle": "Beheer meerdere afspeellijsten op dezelfde account"
+      },
+      "favorites": {
+        "title": "Favorieten en tags",
+        "subtitle": "Organiseer je favorieten met aangepaste tags"
+      },
+      "customOrdering": {
+        "title": "Aangepaste sortering",
+        "subtitle": "Sorteer categorieën en inhoud op jouw manier"
+      },
+      "liveLastWatched": {
+        "title": "Laatst bekeken",
+        "subtitle": "Snelle toegang tot je laatst bekeken livkanalen"
+      },
+      "cloudSync": {
+        "title": "Automatische cloudsynchronisatie",
+        "subtitle": "Instellingen, favorieten en voortgang gesynchroniseerd op alle apparaten"
+      },
+      "parentalControls": {
+        "title": "Ouderlijk toezicht",
+        "subtitle": "Stel een PIN in om gevoelige inhoud te blokkeren"
+      },
+      "hideContent": {
+        "title": "Inhoud verbergen",
+        "subtitle": "Verberg categorieën en items die je niet wilt zien"
+      },
+      "multiplatform": {
+        "title": "Multiplatform",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV, Mac"
+      },
+      "unlimitedViewing": {
+        "title": "Onbeperkt kijken",
+        "subtitle": "Stream zonder dagelijkse tijdlimieten"
+      },
+      "andMoreComing": "En nog veel meer kommer!"
+    },
+    "swipeForMore": "Veeg voor meer",
+    "dailyLimitReached": "Dagelijkse limiet bereikt",
+    "one": "One",
+    "plus": "Plus",
+    "planOne": "Premium One",
+    "planPlus": "Premium Plus",
+    "external": {
+      "title": "Premium activeren",
+      "body": "Op dit apparaat kun je geen abonnement kopen of beheren. Neem KIPTV Premium op een ander apparaat en log hier in met hetzelfde KIPTV-account: Premium werkt op al je apparaten.",
+      "appleDevices": "iPhone, iPad, Apple TV, Mac",
+      "googleDevices": "Android-telefoons, -tablets, Android TV en Fire TV",
+      "alreadySubscribed": "Ik heb al een abonnement",
+      "managedElsewhere": "Beheerd door de store waar je je hebt geabonneerd"
+    }
+  },
+  "account": {
+    "connectedAccount": "Verbonden account",
+    "memberFree": "GRATIS LID",
+    "memberPremium": "PREMIUM LID",
+    "syncActive": "Synchronisatie actief",
+    "syncActiveSubtitle": "Afspeellijsten, lijsten en instellingen gesynchroniseerd met cloud.",
+    "autoBackup": "Automatische backup",
+    "syncAllDevices": "Sync op alle apparaten",
+    "streamingPerDay": "Streaming per dag",
+    "upgradeToPremium": "Upgrade naar Premium",
+    "premiumActive": "Premium actief",
+    "premiumActiveSubtitle": "Je KIPTV Premium-abonnement is actief.",
+    "unlimitedPlaylists": "Onbeperkt afspeellijsten",
+    "unlimitedStreaming": "Onbeperkt streamen",
+    "prioritySupport": "Prioriteitsondersteuning",
+    "manageSubscription": "Abonnement beheren",
+    "logoutFromAccount": "Afmelden van account",
+    "logoutSecure": "Je wordt veilig afgemeld",
+    "unlockCloud": "Cloud-sync ontgrendelen",
+    "syncAcrossDevices": "Synchroniseer op alle apparaten",
+    "playlistsAndFavoritesSynced": "Afspeellijsten en favorieten gesynchroniseerd",
+    "resumeWatching": "Hervat waar je gebleven bent",
+    "autoBackupAndSecureAccess": "Automatische backup en beveiligde toegang",
+    "continueWithoutAccount": "Doorgaan zonder account",
+    "plan": "Abonnement",
+    "free": "Gratis",
+    "dailyUsage": "Dagelijks gebruik",
+    "playlistLimit": "Afspeellijst limiet",
+    "minutesUsed": "{{used}}/{{total}} minuten vandaag",
+    "playlistsAllowed": "{{count}} afspeellijst(en)",
+    "playlistsUnlimited": "Onbeperkt playlists"
+  },
+  "usage": {
+    "limitReached": "Limiet bereikt",
+    "usedToday": "Je hebt {{minutes}} minuten vandaag gebruikt",
+    "usedTodayShort": "Gebruikt {{minutes}}min vandaag",
+    "remaining": "{{time}} resterend",
+    "remainingHoursMinutes": "{{hours}}h {{minutes}}min resterend",
+    "remainingMinutes": "{{minutes}} minuten resterend",
+    "nearLimit": "Dicht bij limiet",
+    "premium": "Premium",
+    "unlimited": "Onbeperkt",
+    "upgradeToPremium": "Upgrade naar Premium",
+    "discoverPremium": "Ontdek Premium",
+    "usageInfo": "Je hebt {{used}} van je {{total}} dagelijkse minuten gebruikt"
+  },
+  "language": {
+    "selectLanguage": "Selecteer Taal / Seleziona Lingua",
+    "reloadNote": "De app wordt automatisch opnieuw geladen na taalwijziging",
+    "reloadNoteEn": "L'app ricaricherà automaticamente dopo il cambio lingua",
+    "useDeviceLanguage": "Gebruik apparaattaal",
+    "confirmChangeTitle": "Taal wijzigen?",
+    "confirmChangeMessage": "Het wijzigen van de taal zal alle cached metadata (posters, beschrijvingen, logo's) verwijderen om inhoud in {{language}} te laden. Doorgaan?",
+    "changeError": "Fout bij taalwijziging",
+    "restartRequired": "Herstart vereist",
+    "restartMessage": "App opnieuw starten om taalwijziging toe te passen?"
+  },
+  "categories": {
+    "title": "Categorieën",
+    "subtitle": "Sorteer of verberg zichtbare categorieën in afspeellijst. Wijzigingen zijn",
+    "customizeMovies": "Pas films aan",
+    "customizeSeries": "Pas series aan",
+    "movies": "Films",
+    "series": "Serie",
+    "liveTV": "Live TV",
+    "customizeLiveTV": "Pas Live TV aan",
+    "sortSubtitle": "Sorteer categorieën",
+    "loading": "Bezig met laden...",
+    "retrieving": "Ophalen..."
+  },
+  "detail": {
+    "rewatch": "Opnieuw bekijken",
+    "alreadyWatched": {
+      "movieTitle": "Al bekeken",
+      "episodeTitle": "Al bekeken",
+      "message": "Wil je het opnieuw vanaf het begin afspelen?",
+      "restart": "Opnieuw afspelen"
+    },
+    "lastAccess": "Laatste toegang",
+    "expiresAt": "Verloopt op",
+    "maxConnections": "Max verbindingen",
+    "activeConnections": "Actieve verbindingen",
+    "totalContent": "Totale inhoud",
+    "liveTV": "Live TV",
+    "movies": "Films",
+    "series": "Serie",
+    "title": "Detail",
+    "loading": "Bezig met laden...",
+    "play": "Afspelen",
+    "alsoOn": "Ook beschikbaar op",
+    "chooseVersion": "Kies versie",
+    "otherVersions": "Andere versies",
+    "otherVersionsCount": "Andere versies ({{count}})",
+    "trailers": "Trailers",
+    "addToFavorites": "Toevoegen aan favorieten",
+    "download": "Downloaden",
+    "recommended": "Aanbevolen",
+    "collection": "Collectie",
+    "more": "Meer",
+    "less": "Minder",
+    "comingSoon": "Binnenkort beschikbaar",
+    "ageRating": "Leeftijdscertificering",
+    "watchNow": "Nu kijken",
+    "info": {
+      "title": "Info",
+      "status": "Status",
+      "country": "Land",
+      "production": "Productie",
+      "director": "Regie",
+      "creator": "Maker",
+      "originalTitle": "Oorspronkelijke titel",
+      "originalLanguage": "Oorspronkelijke taal",
+      "network": "Netwerk",
+      "episodes": "Afleveringen",
+      "budget": "Budget",
+      "revenue": "Opbrengst",
+      "screenplay": "Scenario",
+      "music": "Muziek",
+      "airingPeriod": "Uitzendperiode",
+      "ongoing": "Lopend",
+      "statusValue": {
+        "released": "Uitgebracht",
+        "returningSeries": "Lopende serie",
+        "ended": "Beëindigd",
+        "canceled": "Geannuleerd",
+        "inProduction": "In productie",
+        "postProduction": "Postproductie",
+        "planned": "Gepland",
+        "rumored": "Gerucht",
+        "pilot": "Pilotaflevering"
+      }
+    },
+    "privateSearch": "Privé zoeken",
+    "searchGoogle": "Zoeken op Google"
+  },
+  "onboarding": {
+    "subtitle": "Live, Films en Series met een schone en snelle interface.",
+    "slides": {
+      "multiplatform": {
+        "title": "Waar je ook bent",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV en Mac. Één app voor al je apparaten."
+      },
+      "explore": {
+        "title": "Verken je inhoud",
+        "subtitle": "Live, Films en Series met een schone en snelle interface."
+      },
+      "sync": {
+        "title": "Één account, alle apparaten",
+        "subtitle": "Sla afspeellijsten op in de cloud en hervat waar je gebleven bent."
+      }
+    },
+    "disclaimer": "KIPTV is een mediaspeler: het biedt geen inhoud.",
+    "getStarted": "Aan de slag"
+  },
+  "setup": {
+    "skip": "Overslaan",
+    "back": "Terug",
+    "useDefaults": "Standaardinstellingen gebruiken",
+    "welcome": {
+      "title": "Dit is je playlist",
+      "subtitleXtream": "{{name}} · Xtream · actief tot {{date}}",
+      "subtitleGeneric": "{{name}} · {{type}}",
+      "movies": "Films",
+      "series": "Series",
+      "channels": "Zenders",
+      "withGuide": "Zenders met gids",
+      "cta": "In 1 minuut personaliseren"
+    },
+    "start": {
+      "title": "Waar wil je beginnen?",
+      "subtitle": "Het scherm dat opent bij het starten.",
+      "home": "Home",
+      "homeSub": "Alles in één oogopslag",
+      "movies": "Films",
+      "moviesSub": "Focus op films",
+      "series": "Series",
+      "seriesSub": "Nieuwe afleveringen eerst",
+      "live": "Live",
+      "liveSub": "Zenders en tv-gids"
+    },
+    "playback": {
+      "title": "Wat telt het meest in de speler?",
+      "subtitle": "Kies de engine die bij je past. Je kunt hem altijd wijzigen.",
+      "quality": "Functies en kwaliteit",
+      "qualitySub": "Alles wat je apparaat kan",
+      "qualityEngine": "Automatische engine · Aether",
+      "stability": "Stabiliteit en snelheid",
+      "stabilitySub": "Start meteen, houdt stand bij lastige streams",
+      "stabilityEngine": "VLC-engine · met automatische reserve",
+      "pillFastStart": "Snel starten en spoelen",
+      "pillReconnect": "Robuust opnieuw verbinden",
+      "pillFormats": "Elk formaat",
+      "pillProven": "Beproefde engine",
+      "synced": "Gesynchroniseerd met je account: elk apparaat gebruikt zijn beste engine."
+    },
+    "channels": {
+      "title": "Hoe wil je je zenders?",
+      "subtitle": "De HD-, FHD- en 4K-varianten van dezelfde zender.",
+      "before": "Voor",
+      "after": "Na",
+      "group": "Groeperen",
+      "groupSub": "Eén zender, kwaliteitsbadges",
+      "separate": "Apart houden",
+      "separateSub": "Eén rij per variant",
+      "recommended": "Aanbevolen",
+      "sampleProgram": "Avondjournaal",
+      "sampleNext": "Daarna: Avondfilm",
+      "sampleProgramShort": "Avondjournaal · Avondfilm",
+      "fallbackChannel": "Zender 1"
+    },
+    "adults": {
+      "title": "Inhoud voor volwassenen?",
+      "subtitle": "Jij bepaalt wat er in deze playlist verschijnt.",
+      "showAll": "Alles tonen",
+      "showAllSub": "Geen filter",
+      "hide": "Categorieën voor volwassenen verbergen",
+      "hideSub": "Op trefwoord: XXX, Adult, 18+",
+      "hidePin": "Verbergen en beveiligen met PIN",
+      "hidePinSub": "De categorieën blijven vergrendeld met de PIN",
+      "hidePinExistingSub": "Gebruikt de PIN die je al hebt",
+      "pinPrompt": "Kies een PIN van 4 cijfers",
+      "pinConfirm": "Herhaal de PIN",
+      "pinMismatch": "De PINs komen niet overeen, probeer opnieuw",
+      "pinSet": "PIN ingesteld"
+    },
+    "color": {
+      "title": "Jouw kleur",
+      "subtitle": "De app kleurt mee terwijl je kiest.",
+      "background": "Achtergrond",
+      "premiumTitle": "Meer kleuren met Premium",
+      "premiumCta": "Ontgrendelen"
+    },
+    "done": {
+      "title": "Alles klaar",
+      "subtitle": "Dit zijn je keuzes.",
+      "autoOpen": "{{name}} meteen openen bij het starten",
+      "autoOpenSub": "Slaat de playlistkeuze over",
+      "hint": "Je kunt alles wijzigen in Instellingen.",
+      "cta": "Naar Home"
+    },
+    "recap": {
+      "start": "Start op: {{screen}}",
+      "playbackQuality": "Speler: kwaliteit",
+      "playbackStability": "Speler: stabiliteit",
+      "channelsGrouped": "Zenders gegroepeerd",
+      "channelsSeparate": "Zenders apart",
+      "adultsShown": "Volwassenen: zichtbaar",
+      "adultsHidden": "Volwassenen: verborgen",
+      "adultsHiddenPin": "Volwassenen: verborgen + PIN",
+      "color": "{{color}} · {{background}}"
+    }
+  },
+  "continueWatching": {
+    "title": "Verder kijken",
+    "removeConfirm": "Wil je \"{{title}}\" verwijderen uit \"Verder kijken\"?",
+    "remove": "Verwijderen",
+    "contentNotAvailable": "Inhoud niet beschikbaar",
+    "contentNotInPlaylist": "Deze inhoud is niet meer aanwezig in de huidige afspeellijst.",
+    "actions": "Acties",
+    "removeFromContinueWatching": "Verwijderen uit \"Verder kijken\"",
+    "markAsWatched": "Als bekeken markeren",
+    "remaining": "Resterend",
+    "goToMovie": "Ga naar film",
+    "goToSeries": "Ga naar serie",
+    "addToFavorites": "Toevoegen aan favorieten",
+    "download": "Downloaden",
+    "comingSoon": "Binnenkort",
+    "resetSeriesProgress": "Seriesvoortgang opnieuw instellen",
+    "resetMovieProgress": "Film voortgang opnieuw instellen",
+    "resetProgressConfirm": "Dit zal permanent alle kijkgeschiedenis verwijderen voor \"{{title}}\". Deze actie kan niet ongedaan gemaakt worden.",
+    "resetProgress": "Voortgang opnieuw instellen"
+  },
+  "player": {
+    "shortcuts": {
+      "seekForward": "Vooruitspoelen",
+      "seekBackward": "Terugspoelen",
+      "playPause": "Afspelen/Pauzeren",
+      "close": "Sluiten"
+    },
+    "pip": {
+      "active": "Afspelen in Picture in Picture",
+      "expandHintPrefix": "Druk op",
+      "expandHintSuffix": "voor volledig scherm"
+    },
+    "info": "Info",
+    "videoDataUnavailable": "Videogegevens niet beschikbaar",
+    "streamUrlError": "Kan stream-URL niet genereren",
+    "closePlayer": "Speler sluiten",
+    "playbackError": "Afspeelfout",
+    "dailyLimitMessage": "Je dagelijkse limiet bereikt",
+    "continueWatching": "Verder kijken",
+    "upgradePremium": "Upgrade naar Premium",
+    "timeUsed": "Gebruikte tijd: {{minutes}} minuten.",
+    "livePlayerClosed": "Live speler gesloten",
+    "audio": "Geluid",
+    "audioTrack": "Audiotrack",
+    "subtitles": "Ondertitels",
+    "subtitlesOff": "Ondertitels uit",
+    "speed": "Snelheid",
+    "playbackSpeed": "Afspeelsnelheid",
+    "information": "Informatie",
+    "fromStart": "Van begin af aan",
+    "goToMovie": "Ga naar film",
+    "goToSeries": "Ga naar serie",
+    "noAudioTracks": "Geen audiotracks",
+    "progress": "Voortgang",
+    "remainingTime": "%@ resterend",
+    "restartFromBeginning": "Opnieuw starten",
+    "backToVideo": "Terug naar video",
+    "noDescriptionAvailable": "Geen beschrijving beschikbaar",
+    "noPlotAvailable": "Geen plot beschikbaar",
+    "more": "Meer",
+    "liveStreamNoDescription": "Live stream - geen beschrijving beschikbaar",
+    "loading": "Bezig met laden...",
+    "usingEngine": "Engine:",
+    "engine": "Engine",
+    "enginePicker": "Afspeel-engine",
+    "track": {
+      "audio": "Audio",
+      "subtitle": "Ondertitel",
+      "off": "Uit"
+    },
+    "rate": {
+      "normal": "Normaal"
+    },
+    "error": {
+      "title": "Afspeelfout",
+      "invalidURL": "Ongeldige stream-URL",
+      "unsupportedFormat": "Niet-ondersteund format",
+      "allEnginesFailed": "Kan deze inhoud niet afspelen. Alle afspeel-engines zijn mislukt.",
+      "tryAnotherPlayer": "Probeer een andere speler",
+      "engineSwitchFailedRestored": "{{failed}} kon niet starten. {{previous}} hersteld.",
+      "unknown": "Onbekende afspeelfout",
+      "close": "Sluiten",
+      "engineCrash": "De speler is gecrasht. Probeer een andere engine.",
+      "loadFailed": "Kan deze inhoud niet laden.",
+      "network": "Netwerkfout. Controleer je verbinding.",
+      "playbackFailed": "Afspelen mislukt.",
+      "timeout": "De stream duurde te lang om te reageren."
+    },
+    "returnToLive": "Terug naar live",
+    "retry": "Opnieuw proberen",
+    "playNow": "Nu afspelen",
+    "playingIn": "Afspelen in {{seconds}}s",
+    "dailyLimitWarning": "Je hebt {{minutes}} minuten restant vandaag",
+    "formatNotSupported": "Formaat niet ondersteund",
+    "nextEpisode": "Volgende aflevering",
+    "upNext": "Volgende",
+    "skipIntro": "Intro overslaan",
+    "skipRecap": "Samenvatting overslaan",
+    "skipCredits": "Aftiteling overslaan",
+    "holdToUnlock": "Houd ingedrukt om te ontgrendelen",
+    "epg": "Gids",
+    "retryStream": "Stream opnieuw proberen",
+    "streamDropped": "Stream verbroken",
+    "loadEarlierPrograms": "Eerdere programma's laden",
+    "replay": "Herhaling",
+    "playReplay": "Herhaling afspelen",
+    "cancelReplay": "Herhaling annuleren",
+    "noReplayData": "Geen herhalingsgegevens",
+    "favorites": "Favorieten",
+    "recent": "Recent",
+    "noFavorites": "Geen favorieten",
+    "noRecentChannels": "Geen recente kanalen",
+    "archiveDays": "{{count}} dagen archief",
+    "liveIndicator": "LIVE",
+    "openSubtitles": {
+      "external": "OpenSubtitles",
+      "searchOnline": "Online ondertitels zoeken",
+      "loading": "Ondertitels laden...",
+      "searching": "Ondertitels zoeken...",
+      "downloading": "Ondertitel downloaden...",
+      "downloaded": "Ondertitel geladen",
+      "noResults": "Geen ondertitels gevonden",
+      "quotaExceeded": "Downloadlimiet bereikt. Probeer morgen opnieuw.",
+      "loginForMore": "Log in voor meer downloads",
+      "hearingImpaired": "CC",
+      "downloads": "downloads",
+      "remainingDownloads": "Downloads resterend vandaag: {{count}}",
+      "selectLanguage": "Selecteer taal",
+      "searchError": "Kan ondertitels niet zoeken",
+      "downloadError": "Kan ondertitel niet downloaden",
+      "results": "Resultaten",
+      "cached": "In cache opgeslagen",
+      "searchAgain": "Opnieuw zoeken"
+    },
+    "openSubtitlesError": {
+      "invalidKey": "Ongeldige API-sleutel",
+      "invalidCredentials": "Ongeldige gebruikersnaam of wachtwoord",
+      "forbidden": "Toegang geweigerd",
+      "invalidFile": "Ongeldig ondertitelbestand",
+      "invalidToken": "Sessie verlopen. Log alstublieft opnieuw in.",
+      "linkExpired": "Downloadkoppeling verlopen. Probeer opnieuw.",
+      "rateLimit": "Te veel aanvragen. Wacht alstublieft.",
+      "serverError": "Serverfout. Probeer later opnieuw.",
+      "network": "Netwerkfout. Controleer je verbinding.",
+      "invalidResponse": "Ongeldig serverantwoord",
+      "parseFailed": "Kan ondertitelbestand niet parseren"
+    },
+    "chromecast": {
+      "castingTo": "Casten naar %@",
+      "stopCasting": "Cast stoppen",
+      "castTo": "Casten naar",
+      "disconnect": "Verbinding verbreken",
+      "error": {
+        "title": "Chromecast-fout",
+        "incompatibleStream": "Deze stream is niet compatibel met Chromecast. Het afspelen gaat door op je apparaat.",
+        "cleartextHTTP": "Je IPTV-provider gebruikt een onbeveiligde verbinding (HTTP), die Chromecast niet accepteert. Er is een provider met een beveiligde verbinding (HTTPS) nodig. Het afspelen gaat door op je apparaat."
+      }
+    },
+    "airplay": {
+      "videoActive": "Afspelen via AirPlay",
+      "tapToManage": "Tik om het apparaat te wijzigen of te ontkoppelen",
+      "warning": {
+        "titleBridge": "Video via AirPlay",
+        "messageBridge": "Deze indeling ondersteunt AirPlay met video niet standaard, maar KIPTV kan het toch naar je tv sturen. De bediening is beperkt (afspelen/pauzeren en ±10s, zonder voortgangsbalk).",
+        "streamVideo": "Video naar tv sturen",
+        "title": "AirPlay: alleen audio",
+        "messagePlayer": "AirPlay verzendt alleen audio. Gebruik AVPlayer of Aether om ook video te verzenden.",
+        "messageAether": "AirPlay verzendt alleen audio. Gebruik Aether om ook video te verzenden.",
+        "messageContent": "Deze inhoud kan via AirPlay alleen als audio worden verzonden — de video blijft op dit apparaat.",
+        "useVideoEngine": "AVPlayer gebruiken",
+        "useAether": "Aether gebruiken",
+        "continueAudioOnly": "Doorgaan met alleen audio"
+      },
+      "error": {
+        "title": "AirPlay-fout",
+        "liveBridgeFailed": "Kan de video niet naar de tv sturen. Probeer het opnieuw."
+      }
+    },
+    "subtitleDelay": "Ondertitelvertraging",
+    "audioDelay": "Audiovertraging",
+    "resetDelay": "Opnieuw instellen",
+    "nowPlaying": "Wordt nu afgespeeld"
+  },
+  "startup": {
+    "loadingIPTV": "IPTV-inhoud laden...",
+    "enhancingQuality": "Inhoudskwaliteit verbeteren...",
+    "preparationComplete": "Voorbereiding voltooid",
+    "connectingPlaylist": "Verbinding met afspeellijst...",
+    "enhancementContinues": "Verbetering gaat door...",
+    "systemReady": "Systeem klaar",
+    "contentEnhanced": "{{count}} inhoud verbeterd",
+    "smartMode": "Slimme modus",
+    "poweredByTMDB": "Mogelijk gemaakt door TMDB",
+    "contents": "Inhoud"
+  },
+  "tmdb": {
+    "completed": "Voltooid! {{count}} inhoud verbeterd",
+    "enhancingMovies": "Films verbeteren...",
+    "enhancingSeries": "Series verbeteren...",
+    "waiting": "Wachten...",
+    "secondsRemaining": "{{seconds}}s resterend",
+    "minutesRemaining": "{{minutes}}min resterend",
+    "hoursRemaining": "{{hours}}h {{minutes}}min resterend"
+  },
+  "poster": {
+    "notAvailable": "{{type}} niet beschikbaar in je afspeellijst"
+  },
+  "sorting": {
+    "categoryOrder": "Categorie volgorde",
+    "contentOrder": "Inhoud volgorde",
+    "default": "Standaard",
+    "mostPopular": "Populairste",
+    "mostVoted": "Best beoordeeld",
+    "oldest": "Oudste",
+    "mostRecent": "Meest recent",
+    "alphabeticalAsc": "A → Z",
+    "alphabeticalDesc": "Z → A",
+    "custom": "Aangepast",
+    "goToCategory": "Ga naar categorie"
+  },
+  "genres": {
+    "animation": "Animatie",
+    "action": "Actie",
+    "comedy": "Komedie",
+    "crime": "Misdaad",
+    "adventure": "Avontuur",
+    "documentary": "Documentaire",
+    "thriller": "Thriller",
+    "fantasy": "Fantasy",
+    "romance": "Romantiek",
+    "drama": "Drama",
+    "sciFi": "Science Fiction",
+    "horror": "Horror",
+    "family": "Familie",
+    "mystery": "Mysterie",
+    "music": "Muziek",
+    "war": "Oorlog",
+    "history": "Geschiedenis",
+    "western": "Western"
+  },
+  "downloads": {
+    "cancelAllTitle": "Alle downloads annuleren?",
+    "cancelAllMessage": "{{count}} downloads die bezig zijn, in de wachtrij staan of gepauzeerd zijn worden geannuleerd. Al gedownloade content blijft behouden.",
+    "season": {
+      "confirmTitle": "Seizoen {{season}} downloaden",
+      "confirmToDownload": "Te downloaden afleveringen: {{count}}",
+      "confirmSkipped": "Al gedownload of in de wachtrij: {{count}}",
+      "confirmQueueNote": "Ze volgen de wachtrij en de limiet voor gelijktijdige downloads.",
+      "downloadRemaining": "De resterende {{count}} downloaden",
+      "pauseAll": "Seizoen pauzeren",
+      "resumeAll": "Seizoen hervatten",
+      "cancelAll": "Downloads van het seizoen annuleren",
+      "progressA11y": "Seizoen {{season}}: {{done}} van {{total}} afleveringen gedownload"
+    },
+    "title": "Downloads",
+    "storageUsed": "Gebruikte opslagruimte",
+    "free": "vrij",
+    "cellularDownloads": "Download via mobiel",
+    "cellularDownloadsSubtitle": "Download video's via mobiele verbinding",
+    "active": "Actief",
+    "completed": "Voltooid",
+    "failed": "Mislukt",
+    "downloadFailed": "Download mislukt",
+    "episodes": "Afleveringen",
+    "movie": "Film",
+    "episode": "Aflevering",
+    "movies": "Films",
+    "series": "Serie",
+    "emptyTitle": "Geen downloads",
+    "emptyMessage": "Geen downloads beschikbaar",
+    "deleteAll": "Alles verwijderen",
+    "deleteAllTitle": "Alle downloads verwijderen?",
+    "deleteAllMessage": "Dit kan niet ongedaan gemaakt worden",
+    "downloadSeason": "Seizoen downloaden",
+    "downloading": "Bezig met downloaden",
+    "downloaded": "Gedownload",
+    "notEnoughSpace": "Niet genoeg opslagruimte",
+    "wifiOnly": "Alleen via WiFi",
+    "streamWarningTitle": "Waarschuwing",
+    "streamWarningMessage": "Je bent niet verbonden met WiFi",
+    "queued": "In wachtrij",
+    "cancelAll": "Alles annuleren",
+    "cellularAlertTitle": "Mobiele downloads uitgeschakeld",
+    "cellularAlertMessage": "Downloads via mobiele data zijn uitgeschakeld. Wil je ze inschakelen?",
+    "cellularAlertEnable": "Inschakelen",
+    "allSeasons": "Alle seizoenen",
+    "cancel": "Annuleren",
+    "deleteSeason": "Seizoen verwijderen",
+    "notFound": "Download niet gevonden",
+    "pause": "Pauzeren",
+    "paused": "Gepauzeerd",
+    "remove": "Verwijderen",
+    "resume": "Hervatten",
+    "subtitle": "Films en afleveringen offline beschikbaar",
+    "multipleDownloads": "Gelijktijdige downloads",
+    "multipleDownloadsSubtitle": "Laat meerdere downloads samen opschieten",
+    "multipleTitle": "Gelijktijdige downloads",
+    "multipleConnectionsOne": "Je provider staat maar één gelijktijdige verbinding toe.",
+    "multipleConnections": "Je provider staat tot %d gelijktijdige verbindingen toe.",
+    "multipleConnectionsUnknown": "We konden niet achterhalen hoeveel gelijktijdige verbindingen je provider toestaat.",
+    "multipleLimit": "KIPTV laat tot %d downloads samen opschieten; de rest blijft in de wachtrij.",
+    "multipleRisk": "Gelijktijdige downloads kunnen door je provider geblokkeerd worden.",
+    "multipleDontShowAgain": "Niet meer tonen",
+    "multipleRefusedTitle": "Gelijktijdige downloads niet ondersteund",
+    "multipleRefusedMessage": "Je provider heeft gelijktijdige downloads geweigerd. De downloads gaan één voor één verder."
+  },
+  "offline": {
+    "title": "Offline-modus",
+    "goOnline": "Ga online",
+    "yourPlaylists": "Je afspeellijsten",
+    "selectPlaylist": "Selecteer afspeellijst",
+    "items": "Items",
+    "offlineMode": "Offline-modus",
+    "offlineModeDescription": "Je bent offline - beschikbare inhoud wordt weergegeven",
+    "stillOffline": "Je bent nog steeds offline",
+    "noDownloads": "Geen downloads",
+    "noDownloadsMessage": "Download inhoud voor offline gebruik",
+    "noConnection": "Geen verbinding",
+    "downloadsAvailable": "Downloads beschikbaar",
+    "useOffline": "Offline gebruiken",
+    "syncProgressTitle": "Offline voortgang gevonden",
+    "syncProgressMessage": "We hebben {{count}} kijkposities gevonden die offline zijn opgeslagen. Wil je ze synchroniseren met je account?",
+    "syncProgressConfirm": "Synchroniseren",
+    "syncProgressLater": "Nee"
+  },
+  "contextMenu": {
+    "removeFromFavorites": "Verwijderen uit Mijn Lijst",
+    "expandCategory": "Categorie uitvouwen",
+    "alreadyDownloaded": "Al gedownload",
+    "downloading": "Bezig met downloaden…",
+    "notAvailableInPlaylist": "Niet beschikbaar in je afspeellijst"
+  },
+  "myList": {
+    "title": "Mijn Lijst",
+    "addToMyList": "Mijn Lijst",
+    "createNewTag": "Tag aanmaken",
+    "manageTags": "Tags beheren",
+    "editTags": "Bewerken",
+    "tagNamePlaceholder": "Tagenaam",
+    "saveTag": "Tag opslaan",
+    "cancel": "Annuleren",
+    "done": "Gereed",
+    "noItems": "Geen items",
+    "noItemsMessage": "Geen items in Mijn Lijst",
+    "all": "Alle",
+    "deleteTagTitle": "Tag verwijderen?",
+    "deleteTag": "Tag verwijderen",
+    "deleteTagMessage": "Alle items in \"%@\" worden verwijderd uit Mijn Lijst.",
+    "tags": {
+      "myMovies": "Mijn films",
+      "mySeries": "Mijn series",
+      "myChannels": "Mijn kanalen",
+      "mustWatch": "Moet zien",
+      "rewatch": "Opnieuw kijken",
+      "classics": "Klassiekers",
+      "family": "Familie",
+      "kids": "Kinderen",
+      "liveSports": "Livesport",
+      "news": "Nieuws",
+      "cartoons": "Tekenfilms",
+      "international": "Internationaal",
+      "traktWatchlist": "Trakt Watchlist"
+    },
+    "verifyingAvailability": "Beschikbaarheid controleren…",
+    "notAvailableYet": "Nog niet beschikbaar in je afspeellijst",
+    "picker": {
+      "chooseVersion": "Kies de versie om op te slaan",
+      "chooseVersionMessage": "Deze titel is in meerdere versies beschikbaar in je afspeellijst. Kies welke je in je lijst wilt bewaren."
+    },
+    "availability": {
+      "popup": {
+        "title": "Beschikbaar in je afspeellijst",
+        "message": "\"%@\" dat je hebt opgeslagen in de lijst \"%@\" is nu beschikbaar."
+      }
+    },
+    "tmdbOnlyAdded": {
+      "title": "Toegevoegd aan je lijst",
+      "message": "\"%@\" staat nog niet in je afspeellijst. We laten het weten zodra je provider het toevoegt."
+    }
+  },
+  "person": {
+    "biography": "Biografie",
+    "personalInfo": "Persoonlijk info",
+    "knownFor": "Bekend van",
+    "knownForMale": "Bekend van (M)",
+    "knownForFemale": "Bekend van (V)",
+    "knownCredits": "Bekende credits",
+    "gender": "Geslacht",
+    "birthday": "Geboortedatum",
+    "deathday": "Overlijdensdatum",
+    "placeOfBirth": "Geboorteplaats",
+    "alsoKnownAs": "Ook bekend als",
+    "alsoKnownAsMale": "Ook bekend als (M)",
+    "alsoKnownAsFemale": "Ook bekend als (V)",
+    "male": "Man",
+    "female": "Vrouw",
+    "nonBinary": "Non-binair",
+    "filmography": "Filmografie",
+    "movies": "Films",
+    "series": "Serie",
+    "showAll": "Alles tonen",
+    "acting": "Acteren",
+    "directing": "Regie",
+    "writing": "Schrijven",
+    "production": "Productie",
+    "noBiography": "Geen biografie beschikbaar",
+    "noCredits": "Geen credits"
+  },
+  "tvpairing": {
+    "title": "Verbind je TV",
+    "instructions": "Open KIPTV op je iPhone of iPad, ga naar Instellingen → Account → Link een TV",
+    "generating": "Genereren...",
+    "regenerate": "Opnieuw genereren",
+    "waiting": "Wachten...",
+    "retry": "Opnieuw proberen",
+    "success": "Succes",
+    "successSubtitle": "TV succesvol gekoppeld",
+    "withApp": "Heb je de app al?\nGa naar Instellingen → Account → Link een TV",
+    "qrCaption": "Scan de QR-code met de camera van je telefoon",
+    "lead": "Log in of maak je KIPTV-account aan",
+    "manual": "Of ga naar kiptv.app/pair\nen voer de code in"
+  },
+  "linkTV": {
+    "title": "Link een TV",
+    "instructions": "Voer de 6-cijferige code in die op je TV-scherm wordt weergegeven om verbinding te maken",
+    "enterCode": "Voer code in",
+    "confirm": "Bevestigen",
+    "success": "Succes",
+    "connectedTo": "Verbonden met {{device}}",
+    "error": "Fout",
+    "autoConfirming": "Automatisch bevestigen...",
+    "notAuthenticated": "Niet geverifieerd",
+    "notAuthenticatedMessage": "Je bent niet geverifieerd"
+  },
+  "badges": {
+    "new": "Nieuw",
+    "newMovie": "Nieuwe film",
+    "newSeries": "Nieuwe serie",
+    "newSeason": "Nieuw Seizoen",
+    "newEpisode": "Nieuwe Aflevering",
+    "newEpisodes": "Nieuwe Afleveringen"
+  },
+  "topshelf": {
+    "continueWatchingMovies": "{{name}}, films verder kijken",
+    "continueWatchingSeries": "{{name}}, series verder kijken",
+    "recentlyWatchedLive": "{{name}}, recent bekeken kanalen"
+  },
+  "update": {
+    "title": "Update beschikbaar",
+    "subtitle": "Versie {{version}} is beschikbaar in de App Store",
+    "description": "Werk nu bij om de nieuwste functies en verbeteringen te krijgen.",
+    "releaseNotesHeading": "Nieuw in deze versie",
+    "action": {
+      "update": "Nu bijwerken",
+      "later": "Later"
+    }
+  },
+  "whatsNew": {
+    "title": "Wat is er nieuw",
+    "subtitle": "Versie {{version}} — Verbeteringen en correcties",
+    "pageSubtitle": "Verbeteringen en correcties",
+    "v3_0": {
+      "homeTab": {
+        "title": "Het nieuwe tabblad Start",
+        "desc": "Een eigen startscherm op iPhone, iPad en Apple TV: een slimme hero met de titels om te hervatten, dynamische rijen, \"Vanavond op tv\" en eigen feeds. Je kunt het startscherm aanpassen of verbergen en het weer inschakelen via de instellingen"
+      },
+      "traktIntegration": {
+        "title": "Trakt-integratie",
+        "desc": "Koppel je Trakt-account: voortgang en bekeken-status blijven synchroon, je kunt een film of aflevering beoordelen als je klaar bent, je geschiedenis importeren en kiezen op welke afspeellijsten de integratie geldt."
+      },
+      "externalRatings": {
+        "title": "Cijfers van IMDb, Rotten Tomatoes en Metacritic",
+        "desc": "Op pagina's van films en series staan de cijfers van IMDb, Rotten Tomatoes en Trakt meteen in de hero. TMDB blijft de primaire bron."
+      },
+      "dynamicBackground": {
+        "title": "Dynamische achtergrond",
+        "desc": "In Instellingen > Thema staat de nieuwe keuze Achtergrond: Zwart, themakleur of Dynamisch, dat de uitgelichte poster achter de interface vervaagt. Je keuze synchroniseert tussen apparaten, en op iOS volgen ook het icoon en de widget."
+      },
+      "setupWizard": {
+        "title": "Begeleide configuratie",
+        "desc": "Na je eerste afspeellijst helpt een korte procedure je met het belangrijkste: afspeelprofiel, pincode, automatisch openen. Je kunt de instellingen ook van de ene afspeellijst naar de andere kopiëren."
+      },
+      "sagaNextPill": {
+        "title": "Filmreeksen als een serie",
+        "desc": "De knop \"Next\" in de speler stelt ook de volgende films uit dezelfde reeks voor, en de pagina van een collectie heeft Afspelen, Hervatten en Opnieuw kijken net als een serie."
+      },
+      "tvPlaylistPeek": {
+        "title": "Snel van afspeellijst wisselen op Apple TV",
+        "desc": "Als je Menu indrukt vanuit de tabbalk verschijnt de afspeellijstkiezer voordat je afsluit: je wisselt van profiel in één gebaar."
+      },
+      "aetherUpdate": {
+        "title": "Aether-engine bijgewerkt",
+        "desc": "Aether-engine bijgewerkt naar 6.75.0: toont nu alle audio- en ondertitelsporen en start VOD sneller."
+      },
+      "chromecastAirplayImprovements": {
+        "title": "Chromecast en AirPlay betrouwbaarder",
+        "desc": "Livezenders via AirPlay komen nu ook aan op niet-Apple-tv's. Meerdere Chromecast-fouten zijn verholpen."
+      },
+      "epgSourcePicker": {
+        "title": "EPG-bron makkelijker te vinden",
+        "desc": "De EPG-bronkiezer vindt nu ook de ID's die de gids niet opgeeft, zodat meer zenders de juiste programma's krijgen."
+      },
+      "performance": {
+        "title": "Sneller in gebruik",
+        "desc": "Het startscherm en de detailpagina's openen sneller."
+      },
+      "playerFixes": {
+        "title": "Correcties in de spelers",
+        "desc": "De taalsporen zijn duidelijker en je voorkeurstaal wordt slimmer toegepast, ook als sporen rare namen hebben; met MPV is het beeld pixelscherp, geen wazige logo's meer; de speler sluiten tijdens een fallback laat geen spookgeluid meer achter; het herladen van een livezender houdt de handmatig gekozen engine aan."
+      },
+      "continueWatchingFixes": {
+        "title": "Correcties in Verder kijken",
+        "desc": "De rij werkt meteen bij na het sluiten van de speler, hervatten werkt tussen apparaten ook bij series, en bij een nieuwe aflevering verschijnt \"SxEy hervatten\" in plaats van \"Opnieuw kijken\"."
+      },
+      "metadataFixes": {
+        "title": "Correcties in de metadata",
+        "desc": "Titels met een landprefix of met het jaartal achteraan vinden de juiste metadata, en een handmatig gekozen poster blijft na een herstart staan."
+      },
+      "arabicRtlFixes": {
+        "title": "Correcties voor het Arabisch",
+        "desc": "In de speler gaan de horizontale gebaren, het vegen tussen de infotabbladen en de spring-pijlen de goede kant op, met Arabisch-Indische cijfers op de toetsen."
+      },
+      "tvosFixes": {
+        "title": "Correcties op Apple TV",
+        "desc": "De preview van een zender gaat naar volledig scherm zonder hem opnieuw te laden, en \"Pincode vragen om Instellingen te openen\" werkt nu."
+      },
+      "accountFixes": {
+        "title": "Overige correcties",
+        "desc": "De link om je wachtwoord opnieuw in te stellen werkt ook zonder geïnstalleerde app, en zoekopdrachten in incognito worden niet meer bewaard."
+      },
+      "headline": {
+        "title": "Start is er.",
+        "sub1": "Nu met Trakt: wat je kijkt gaat met je mee.",
+        "sub2": "De cijfers van IMDb, Rotten Tomatoes en Metacritic.",
+        "sub3": "En een achtergrond die de kleuren overneemt van wat er op het scherm staat."
+      }
+    },
+    "v2_9": {
+      "aetherEngine": {
+        "title": "Aether, de nieuwe afspeelengine",
+        "desc": "Een nieuwe video-engine, nu standaard op iPhone, iPad en Apple TV: sneller starten, zappen tussen kanalen in ongeveer een seconde en volledige ondersteuning voor achtergrond, Picture in Picture, AirPlay en Chromecast."
+      },
+      "playerNextTab": {
+        "title": "De volgende afleveringen in de speler",
+        "desc": "De speler heeft een nieuw tabblad \"Next\" met de rest van het seizoen: ga naar de volgende aflevering zonder het afspelen te verlaten."
+      },
+      "downloadsSeasonAndOffline": {
+        "title": "Download een heel seizoen, meer offline",
+        "desc": "Download een heel seizoen met één knop en annuleer in één keer alle lopende en wachtende downloads. Je kunt de intro nu ook overslaan bij gedownloade afleveringen."
+      },
+      "searchSagaFolders": {
+        "title": "Reeksen worden mappen in het zoeken",
+        "desc": "Films uit dezelfde reeks komen samen in een boekmap in de resultaten: open hem en vind alle delen op volgorde, zonder ze stuk voor stuk te zoeken."
+      },
+      "mpvEngine": {
+        "title": "mpv, nog een afspeelengine",
+        "desc": "MPV komt bij de lijst met engines op iPhone, iPad en Apple TV: nog een optie voor als een stream dwarsligt."
+      },
+      "ipadCategoriesPanel": {
+        "title": "Categorieënpaneel op de iPad in liggende stand",
+        "desc": "Met de iPad in liggende stand blijven de categorieën van Live TV altijd aan de zijkant staan, zowel in de zenderlijst als in de programmagids."
+      },
+      "UXUIImprovements": {
+        "title": "Verbeteringen in UX en UI",
+        "desc": "Het oog wil ook wat, en zoals altijd maakt aandacht voor detail het verschil. Zie het zelf."
+      },
+      "tvosNavigationFixes": {
+        "title": "Navigatiefouten op Apple TV opgelost",
+        "desc": "Na het kiezen van een versie opent de juiste titel, RECHTS voorbij het laatste seizoen springt niet meer ergens anders heen en de gidskaarten in de Live-kolomweergave zijn weer leesbaar."
+      },
+      "searchFixes": {
+        "title": "Zoekfouten opgelost",
+        "desc": "Op Apple TV begint het zoeken pas als je echt gestopt bent met typen. Geen haperingen en vertragingen meer."
+      },
+      "contentFixes": {
+        "title": "Fouten in content opgelost",
+        "desc": "Een serie verdwijnt uit Verder kijken na de laatste beschikbare aflevering en staat weer bovenaan zodra er een nieuwe is; verborgen content blijft ook in de versie- en kwaliteitskiezers verborgen; een acteur met meerdere rollen laat de app op Apple TV niet meer crashen."
+      },
+      "dutchTranslationFix": {
+        "title": "Correcties in enkele vertalingen"
+      }
+    },
+    "v2_8": {
+      "dolbyAtmosReliableAudio": {
+        "title": "Dolby Atmos zoals het hoort",
+        "desc": "KIPTV herkent Dolby Atmos-tracks nauwkeuriger en kiest de meest geschikte speler voor Dolby Vision HLS-streams, voor een betrouwbaardere audio- en video-ervaring."
+      },
+      "uxUiImprovements": {
+        "title": "UX/UI-verbeteringen",
+        "desc": "De ingebouwde browser, het Supportcentrum en tal van navigatiedetails zijn verfijnd om de app prettiger in gebruik te maken."
+      },
+      "providerResponseReliability": {
+        "title": "Betrouwbaardere IPTV-providers",
+        "desc": "De verwerking van onvolledige of onjuiste reacties van IPTV-providers is verbeterd, zodat de catalogus betrouwbaarder wordt opgehaald."
+      },
+      "tvosSessionRestore": {
+        "title": "Apple TV-sessies blijven behouden",
+        "desc": "Het herstellen van de app onderbreekt actieve sessies op Apple TV niet langer."
+      }
+    },
+    "v2_7": {
+      "detailAltreVersioniLeAltre": {
+        "title": "Alle versies van een titel in één overzicht",
+        "desc": "Op de pagina van een film of serie vind je het nieuwe onderdeel ‘Andere versies’ met de andere kopieën in je playlist: kies meteen de kwaliteit of taal die je wilt."
+      },
+      "offlineProgressoSincronizzato": {
+        "title": "Ga verder waar je was, ook na offline kijken",
+        "desc": "Je positie in gedownloade content wordt op het toestel bewaard en naar je account overgezet zodra je weer online bent, zodat je hem ook op je andere toestellen terugvindt."
+      },
+      "liveMettiInCimaDal": {
+        "title": "‘Bovenaan zetten’ voor zenders en categorieën",
+        "desc": "Houd een zender of categorie ingedrukt om die bovenaan de lijst te zetten: wat je het vaakst kijkt blijft binnen handbereik."
+      },
+      "playerRiproduzioneInBackgroundOpzionale": {
+        "title": "Achtergrondgeluid op Apple TV",
+        "desc": "In de instellingen kun je het geluid laten doorspelen als je de speler verlaat of de app naar de achtergrond stuurt. Standaard uitgeschakeld."
+      },
+      "detailRicercaGoogleDalDettaglio": {
+        "title": "Zoek een titel met één tik op Google",
+        "desc": "Open een Google-zoekopdracht rechtstreeks vanaf de pagina van een film of serie, voor recensies, cast en weetjes."
+      },
+      "rtlInterfacciaArabaSuTvos": {
+        "title": "Verbeterde RTL-interface op Apple TV",
+        "desc": "Met Arabisch worden menu’s, carrousels, de tv-gids en de speler op iPhone, iPad en Apple TV correct van rechts naar links geplaatst."
+      },
+      "uiRifinitureInterfaccia": {
+        "title": "Verfijningen in de interface",
+        "desc": "Grafische details en diverse animaties verbeterd."
+      },
+      "tvosRiordinareInGestioneContenuti": {
+        "title": "Categorieën herschikken blokkeert de app niet meer",
+        "desc": "Op Apple TV blijft het verplaatsen van categorieën en content in Contentbeheer soepel, ook bij heel grote playlists."
+      }
+    },
+    "v2_6": {
+      "downloadsReliableAndParallel": {
+        "title": "Betrouwbaardere downloads, en gelijktijdig als je wilt",
+        "desc": "Een onderbroken download gaat vanzelf verder wanneer je de app opnieuw opent, en mislukte pogingen worden automatisch herhaald. Je kunt ook gelijktijdige downloads inschakelen om meerdere titels samen op te halen."
+      },
+      "downloadsLiveActivity": {
+        "title": "Je downloads op het toegangsscherm",
+        "desc": "Volg de voortgang van downloads via het toegangsscherm en de Dynamic Island, met één kaart per film of serie."
+      },
+      "tvPairingViaWeb": {
+        "title": "Verbind de tv vanaf je telefoon, ook zonder de app",
+        "desc": "Richt de camera op de QR-code: heb je KIPTV nog niet op je telefoon, dan kun je op de website inloggen of je registreren en de verbinding daar bevestigen. Heb je hem wel, dan opent de code meteen in de app."
+      },
+      "bulkCategoryControls": {
+        "title": "Toon of ontgrendel alle categorieën met één tik",
+        "desc": "In Inhoudsbeheer vind je snelle opdrachten om alle verborgen categorieën weer zichtbaar te maken of de vergrendeling van de beschermde op te heffen."
+      },
+      "instantSearchLargePlaylists": {
+        "title": "Direct zoeken, ook bij enorme afspeellijsten",
+        "desc": "De resultaten verschijnen terwijl je typt, zonder op het netwerk te wachten, en blijven bij zeer grote catalogi niet langer leeg."
+      },
+      "tvosLiveImageQuality": {
+        "title": "Een schoner beeld op live-kanalen",
+        "desc": "Op de Apple TV wordt deinterlacing nu echt toegepast op interlaced kanalen, terwijl hardwaredecodering op de rest actief blijft: geen kameffect meer bij beweging."
+      },
+      "contentManagementStability": {
+        "title": "Geen onverwachte afsluitingen meer in Inhoudsbeheer",
+        "desc": "Categorieën verbergen of vergrendelen bij zeer grote afspeellijsten sluit de app niet langer af."
+      },
+      "minorBugfixes": {
+        "title": "Kleine bugs opgelost"
+      }
+    },
+    "v2_5": {
+      "iosLivePlayerChannelZap": {
+        "title": "Snel van kanaal wisselen, nu op iOS",
+        "desc": "In de Live-speler kun je naar het vorige of volgende kanaal gaan en de stream snel vernieuwen."
+      },
+      "continueWatchingLocalizedTitles": {
+        "title": "Gelokaliseerde titels in Verder kijken",
+        "desc": "Films en series tonen nu de TMDB-titel in de taal van de app, met consistentere informatie op kaarten."
+      },
+      "minorBugfixes": {
+        "title": "Kleine bugfixes"
+      }
+    },
+    "v2_4": {
+      "ipadRedesign": {
+        "title": "Opnieuw ontworpen iPad-ervaring",
+        "desc": "Details in liggende weergave met posterpaneel, Instellingen met zijbalk in split view en een Live TV-zenderlijst met meerdere kolommen: op de iPad benut de app het grote scherm veel beter."
+      },
+      "detailInfoFooter": {
+        "title": "Meer informatie over content",
+        "desc": "Pagina's van films en series tonen nu een nieuw paneel met status, productieland, productiebedrijven en andere details."
+      },
+      "homeCardHero": {
+        "title": "Uitgelichte content als kaart",
+        "desc": "Boven aan Films en Series kun je de uitgelichte content nu in een compactere kaartstijl tonen in plaats van schermvullend."
+      },
+      "tvosEpgReminders": {
+        "title": "Programmaherinneringen, nu ook op Apple TV",
+        "desc": "Stel op de Apple TV een herinnering voor een programma in en ontvang een melding op je iPhone of iPad wanneer het bijna begint."
+      },
+      "settingsReorg": {
+        "title": "Opnieuw ingedeelde instellingen",
+        "desc": "De instellingen zijn opnieuw ingedeeld in duidelijkere secties met meer opties om de app aan te passen."
+      },
+      "widgetsEfficiency": {
+        "title": "Efficiëntere widgets en Top Shelf",
+        "desc": "Lager resourceverbruik voor widgets en Top Shelf, met lichtere en snellere updates."
+      },
+      "foregroundResponsiveness": {
+        "title": "Terug naar de voorgrond zonder vertraging",
+        "desc": "Een vertraging die kon optreden bij het opnieuw openen van de app is opgelost: de app hervat nu direct en zonder haperingen."
+      }
+    },
+    "v2_3": {
+      "epgChannelColoredCards": {
+        "title": "Vernieuwde tv-gids",
+        "desc": "Programmakaarten in de kleuren van de zender, nieuwe koptekst, elegantere overgangen en verbeterde navigatie op iOS en Apple TV."
+      },
+      "tvosChannelLogoInLive": {
+        "title": "Informatievere live-speler op Apple TV",
+        "desc": "Het zenderlogo is nu zichtbaar in de speler en het infopaneel toont prominent beelden van het lopende programma."
+      },
+      "iosTabBarMinimize": {
+        "title": "Tabbalk die kleiner wordt tijdens het navigeren (iOS 26)",
+        "desc": "Op detailschermen wordt de tabbalk automatisch geminimaliseerd, zodat er meer ruimte is voor de inhoud."
+      },
+      "subtitlesSystemEdgeStyles": {
+        "title": "Ondertitels trouw aan de systeemstijl",
+        "desc": "In de systeemmodus volgen de randen \"Verhoogd\" en \"Verlaagd\" van de ondertitels nu getrouw de stijl uit de iOS-instellingen."
+      },
+      "myListMultiTag": {
+        "title": "Mijn lijst: meerdere tags en herschikken",
+        "desc": "Je kunt nu meerdere tags aan dezelfde inhoud toewijzen en ze vrij herschikken. Zenderaanpassingen blijven behouden bij hernoemen en de kaarten van \"Verder kijken\" tonen nauwkeurigere informatie."
+      },
+      "catalogLoadingPerformance": {
+        "title": "Sneller en soepeler laden van de catalogus",
+        "desc": "De catalogus wordt op de achtergrond verwerkt en de navigatie blijft reageren tijdens het laden: geen blokkades meer bij het openen van zeer grote playlists, vooral op Apple TV."
+      },
+      "tvosStabilityFixes": {
+        "title": "Stabiliteit en navigatie op Apple TV",
+        "desc": "Twee crashes bij het laden van inhoud opgelost, plus de focus die verloren ging na terugkeer uit de appkiezer en het wisselen van tabblad aan de randen van de inhoud."
+      },
+      "playerSmoothness": {
+        "title": "Soepelere weergave op 50 fps- en/of HDR-zenders",
+        "desc": "Haperingen bij het gebruik van de bediening op Apple TV verholpen en soepelere 50 fps live-weergave op iPhone/iPad/Mac."
+      },
+      "minorBugFixes": {
+        "title": "Kleine bugfixes",
+        "desc": "Diverse stabiliteits- en prestatieproblemen in verschillende situaties opgelost."
+      }
+    },
+    "v2_2": {
+      "UIUXImprovements": {
+        "title": "UI/UX-verbeteringen",
+        "desc": "Lay-outs en interacties zijn verbeterd voor een prettigere gebruikerservaring."
+      },
+      "richLiveReplayInfo": {
+        "title": "Meer informatie voor Live en Replay",
+        "desc": "Het Info-paneel combineert nu de EPG-gids en TMDB-metadata, met betere beelden en uitgebreidere details over het live- of replayprogramma."
+      },
+      "smootherPlayer": {
+        "title": "Een soepelere, snellere player op iOS",
+        "desc": "Animaties, gebaren en bediening zijn vloeiender, met volledige ProMotion-ondersteuning op geschikte apparaten."
+      },
+      "epgReplayAccuracy": {
+        "title": "EPG en Replay blijven gesynchroniseerd",
+        "desc": "Het programmapaneel onderscheidt live, afgelopen en komende inhoud nauwkeuriger, en Replay toont informatie voor het juiste programma."
+      },
+      "minorBugFixes": {
+        "title": "Kleine bugfixes",
+        "desc": "Diverse bugs zijn opgelost om de stabiliteit en prestaties van de app te verbeteren."
+      }
+    },
+    "v2_1": {
+      "accountConnectedDevices": {
+        "title": "Verbonden apparaten",
+        "desc": "Bekijk alle apparaten waarop je bent ingelogd en meld ze op afstand af wanneer je wilt."
+      },
+      "recentlyWatchedLiveToggle": {
+        "title": "Recent bekeken kanalen verbergen",
+        "desc": "Toon of verberg de recent bekeken Live-kanalen."
+      },
+      "tvosLiveCarouselRedesign": {
+        "title": "Verbeterde Live-carrouselweergave op Apple TV",
+        "desc": "Het Live-gedeelte op Apple TV heeft een nieuwe look in de stijl van Films en Series: carrousels met 16:9-voorbeelden, een schermvullende achtergrond, een glazen programmagids en categorieën die uitklappen vanuit de zijbalk."
+      },
+      "topShelfChannelLogo": {
+        "title": "Correct kanaallogo in de Top Shelf (Apple TV)",
+        "desc": "Het eigen logo dat je voor een Live-kanaal kiest, verschijnt nu ook in de Top Shelf van Apple TV."
+      },
+      "playerWhiteThemeChips": {
+        "title": "Beter leesbaar wit thema in de speler",
+        "desc": "Met het witte thema hebben de geselecteerde knoppen in de spelerbediening nu het juiste contrast."
+      }
+    },
+    "v2_0": {
+      "playerPlayWithEnginePicker": {
+        "title": "Direct afspelen met je favoriete speler",
+        "desc": "Kies bij elke start met welke engine het afspelen begint (KSPlayer, VLC of AVPlayer). En met Premium open je films en kanalen rechtstreeks in externe spelers (VLC of Infuse)."
+      },
+      "metadataManualTmdbOverridePersonalizza": {
+        "title": "Metadata van films en series aanpassen",
+        "desc": "Als een titel aan de verkeerde informatie is gekoppeld, kun je dat handmatig corrigeren door het juiste TMDB-resultaat te kiezen, of de koppeling helemaal verwijderen."
+      },
+      "playerOpensubtitlesAlwaysVisibleAudio": {
+        "title": "Meer controle over ondertitels en audio",
+        "desc": "Zoek meer ondertitelopties op OpenSubtitles (in te schakelen in de OpenSubtitles-instellingen) en pas de vertraging van audio en ondertitels aan. Je voorkeuren worden per item onthouden."
+      },
+      "livetvCarouselLayoutForThe": {
+        "title": "Nieuwe carrousel-indeling voor Live TV",
+        "desc": "De sectie Live TV kan kanalen nu als horizontale carrousels tonen, net als Films en Series. Kies de gewenste indeling in de instellingen."
+      },
+      "themeWhiteTheme4thAdaptive": {
+        "title": "Nieuw wit thema",
+        "desc": "Probeer het nieuwe witte thema: elegant, strak en klassiek."
+      },
+      "tabsNascondiSchedeFilmSerie": {
+        "title": "Lege tabbladen verbergen",
+        "desc": "Als een playlist geen films, series of live-kanalen bevat, wordt het bijbehorende tabblad automatisch verborgen. Je kunt de optie uitschakelen in de instellingen."
+      },
+      "subtitlesSelfRenderCaptionsTo": {
+        "title": "Ondertitels trouw aan jouw stijl",
+        "desc": "Ondertitels volgen nu beter je systeeminstellingen, inclusief kleur, met elke afspeelengine."
+      },
+      "cwSelfHealContinueWatching": {
+        "title": "Verder kijken en Mijn lijst herstellen zichzelf",
+        "desc": "Wanneer je playlist-provider de content-ID's opnieuw toewijst, tonen de items in Verder kijken en Mijn lijst niet langer de verkeerde films of covers: ze stemmen zichzelf weer af op de bijgewerkte catalogus."
+      },
+      "epgInstantLoadViaStale": {
+        "title": "Snellere TV-gids bij het starten",
+        "desc": "De programmagids (EPG) laadt nu meteen door opgeslagen gegevens te hergebruiken en op de achtergrond te vernieuwen, zonder telkens enkele seconden te wachten bij het openen."
+      },
+      "playerNoFalseCompletionOn": {
+        "title": "Geen valse «al bekeken» bij onderbroken streams",
+        "desc": "Sommige defecte streams lieten de app denken dat een film was afgelopen, waardoor die als bekeken werd gemarkeerd of naar de volgende sprong. Dit gebeurt niet meer."
+      },
+      "playerCatchupDoubleLiveBadge": {
+        "title": "Betrouwbaardere Catch-up/Replay",
+        "desc": "De dubbele «LIVE»-badge tijdens catch-up is opgelost, de audio- en ondertitelbediening is hersteld en de Replay-ervaring is verbeterd."
+      },
+      "resolve9RegressionsFound": {
+        "title": "Stabiliteitsverbeteringen",
+        "desc": "Verschillende problemen die tijdens interne tests zijn gevonden, zijn opgelost voor een stabielere en betrouwbaardere app."
+      }
+    },
+    "v1_9": {
+      "epgShowEpgFanartOn": {
+        "title": "EPG Fanart",
+        "desc": "Programma's die op de kanalen worden uitgezonden, tonen nu hun eigen afbeelding uit de EPG (indien beschikbaar), anders vallen ze terug op TMDB of het kanaallogo, zoals voorheen."
+      },
+      "playerUnifiedSubtitleStylingApple": {
+        "title": "Pas het uiterlijk van ondertitels aan",
+        "desc": "Kies het lettertype, de grootte, vet en de rand van ondertitels, of gebruik de systeemstijl van Apple. Je kunt je keuze wijzigen in de instellingen of rechtstreeks in de speler."
+      },
+      "playerUnifyFallbackChainTo": {
+        "title": "Betrouwbaardere weergave",
+        "desc": "Verbeterd algoritme voor automatische spelerselectie op iOS en Apple TV."
+      },
+      "epgEpgEmptyOnFirst": {
+        "title": "Tv-gids meteen zichtbaar bij opstarten",
+        "desc": "Aangepaste programmagidsen (EPG) verschijnen nu al bij de eerste keer dat je de app opent, zonder dat je hem hoeft te sluiten en opnieuw te openen."
+      }
+    },
+    "v1_8": {
+      "playerSkipIntroRecapCredits": {
+        "title": "Intro, samenvatting en aftiteling overslaan",
+        "desc": "Sla met één tik de begintitels, de samenvattingen van vorige afleveringen en de aftiteling van films en series over."
+      },
+      "watchedMarkMoviesWholeSeries": {
+        "title": "Films en hele series als bekeken markeren",
+        "desc": "Houd bij wat je al hebt gezien: posters van bekeken titels worden gedimd en tonen een vinkje."
+      },
+      "iosAvatarMenuCompactIcon": {
+        "title": "Compacter afspeellijstmenu op iOS",
+        "desc": "Het afspeellijstmenu is opnieuw ontworpen met een handige rij snelle pictogrammen en is makkelijker in gebruik."
+      },
+      "settingsMoveDefaultAudioSubtitle": {
+        "title": "Standaardtaal voor audio en ondertitels, ook live",
+        "desc": "Stel je voorkeurstaal voor audio en ondertitels in via een apart gedeelte in de instellingen. Dit geldt nu ook voor livekanalen, niet alleen voor films en series."
+      },
+      "tvosLiveReplayNoEngine": {
+        "title": "Soepelere live-replay",
+        "desc": "Spoel live-tv direct terug en scrub erdoorheen, met een voortgangsbalk zoals bij films en series en betrouwbaardere snelheidsregeling."
+      },
+      "playerDefaultVodToHardware": {
+        "title": "Soepelere en efficiëntere films en series",
+        "desc": "In de automatische modus gebruiken films en series nu hardwarematige decodering voor soepelere weergave en minder batterijverbruik."
+      },
+      "playerAccurateSeekForVod": {
+        "title": "Nauwkeuriger scrubben en ±10 s-sprongen",
+        "desc": "Bij films, series en catch-up met KSPlayer komen scrubben en vooruit/achteruit springen nu precies op de juiste plek uit."
+      }
+    },
+    "v1_7": {
+      "tvosLivePlayerOverhaulKsme": {
+        "title": "KSPlayer verbeterd",
+        "desc": "De KSPlayer-integratie is volledig herschreven: nu beter geoptimaliseerd en vloeiender in elke situatie bij films, series en livekanalen."
+      },
+      "iosNativeAirplayNowPlaying": {
+        "title": "AirPlay met video in elk formaat",
+        "desc": "Stream via AirPlay niet alleen audio maar ook video, in elk bestandsformaat, zelfs de meest exotische."
+      },
+      "tvosHomogeneousCustomCornerPip": {
+        "title": "Picture-in-Picture in elke speler op Apple TV",
+        "desc": "Bekijk je content in een hoek van het scherm met elke afspeel-engine."
+      },
+      "tvosMultiviewFromSingleIs": {
+        "title": "Multiview nog vloeiender",
+        "desc": "Open meerdere kanalen op hetzelfde scherm en schakel er nog vlotter tussen, zonder opnieuw te laden."
+      },
+      "tvosKill4sDismissFreeze": {
+        "title": "Snellere, vlottere live-tv op Apple TV",
+        "desc": "De blokkering van enkele seconden bij het verlaten van de speler is weg; scrollen en kanaal wisselen gaan vloeiender."
+      },
+      "tvosHeaderClockRespectsSystem": {
+        "title": "De klok bovenaan volgt de 12/24-uursnotatie van het systeem op Apple TV"
+      },
+      "tvosCwCardPlaceholderLogo": {
+        "title": "Tijdelijk logo opgelost dat over de cover bleef hangen in Verder kijken"
+      },
+      "tvosAutoPlayerFallbackChain": {
+        "title": "Betrouwbaardere automatische spelerselectie"
+      }
+    },
+    "v1_6_1": {
+      "liveLogoFromEpg": {
+        "title": "Vollediger Live TV-zenderlogo's",
+        "desc": "Wanneer je het logo van een zender aanpast, kun je nu ook het logo van de EPG kiezen en het opzoeken met het nieuwe zoekveld."
+      },
+      "liveAutoQuality": {
+        "title": "“Auto”-kwaliteit voor live (experimenteel)",
+        "desc": "Een nieuwe experimentele optie in Instellingen → Player selecteert en past de kwaliteit van Live-zenders automatisch aan tijdens het afspelen. Standaard uitgeschakeld."
+      },
+      "tvosLiveReloadFix": {
+        "title": "Onverwachte live-herladingen op Apple TV opgelost",
+        "desc": "Een in 1.6 geïntroduceerde bug die onverwachte live-herladingen op Apple TV veroorzaakte, is opgelost."
+      }
+    },
+    "v1_6": {
+      "categoryManagement": {
+        "title": "Categorieën hernoemen",
+        "desc": "Hernoem je film-, serie- en zendercategorieën, vergrendel ze met een pincode of verberg ze door de categorienaam ingedrukt te houden."
+      },
+      "liveChannelRename": {
+        "title": "Zenders hernoemen",
+        "desc": "Geef elke live-zender een eigen naam via het contextmenu. Hernoem één versie of alle kwaliteitsvarianten samen: zenders met dezelfde naam blijven gegroepeerd."
+      },
+      "channelCustomEpgLogo": {
+        "title": "Eigen EPG per zender",
+        "desc": "Kies handmatig de juiste programmagids voor elke zender en corrigeer de tijdsverschuiving van de EPG."
+      },
+      "fasterHugeEpg": {
+        "title": "Snellere, lichtere programmagids",
+        "desc": "Zeer grote EPG-gidsen laden nu sneller en gebruiken minder geheugen."
+      },
+      "smootherLiveTv": {
+        "title": "Soepelere Live TV",
+        "desc": "Zenders openen en door de gids bladeren reageren sneller op iPhone en Apple TV, met automatisch herstel van vastgelopen live-zenders."
+      },
+      "tvosMovieArtwork": {
+        "title": "Filmposters en details op Apple TV",
+        "desc": "Op Apple TV worden filmposters en details nu ook uit TMDB opgehaald wanneer de provider geen identifier opgeeft."
+      },
+      "tvosRecentlyAddedPosters": {
+        "title": "Lege posters in Recent toegevoegd op Apple TV",
+        "desc": "Een probleem opgelost waarbij de eerste posters in het gedeelte Recent toegevoegd bij het opstarten leeg konden lijken op Apple TV."
+      },
+      "myListSync": {
+        "title": "Standaardtags van My List",
+        "desc": "Een probleem opgelost waarbij de standaardtags van My List na opnieuw installeren weer verschenen, ook als ze waren verborgen."
+      },
+      "tvosPinPrompt": {
+        "title": "Pincodeprompt op Apple TV",
+        "desc": "Het uiterlijk van het invoerscherm voor de ouderlijke pincode op Apple TV is gecorrigeerd."
+      }
+    },
+    "v1_5": {
+      "avatarPickerRenewed": {
+        "title": "Nieuwe avatars",
+        "desc": "Personaliseer je ervaring met meer dan 250 nieuwe avatars, geïnspireerd op de meest iconische personages uit films, series, anime en sport."
+      },
+      "livetvPerPlaylistStartSection": {
+        "title": "Openingscategorie voor Live TV",
+        "desc": "Kies met welke zendercategorie Live TV opent voor elke afspeellijst: de eerste categorie van de afspeellijst, je favorieten of onlangs bekeken."
+      },
+      "playerHardwareKeyboardControls": {
+        "title": "Toetsenbordbediening op Mac en iPad",
+        "desc": "Afspelen/pauzeren, vooruit- en terugspoelen en andere spelerbediening reageren nu op het fysieke toetsenbord op Mac en iPad."
+      },
+      "livetvSmarterChannelGrouping": {
+        "title": "Slimmere zendergroepering",
+        "desc": "KIPTV herkent meer varianten en kwaliteiten van hetzelfde kanaal, met veel bredere compatibiliteit tussen verschillende providers."
+      },
+      "playerSubtitleAppearanceMenu": {
+        "title": "Overzichtelijker ondertitelmenu",
+        "desc": "Het menu om de weergave van ondertitels aan te passen verschijnt nu alleen als er een externe ondertitel actief is."
+      },
+      "playerAudioSubtitleTracksAllEngines": {
+        "title": "Audio- en ondertitelsporen in elke speler",
+        "desc": "Audio- en ondertitelsporen worden nu correct weergegeven met elke afspeel-engine."
+      },
+      "minorBugFixes": {
+        "title": "Kleine bugfixes"
+      }
+    },
+    "v1_4": {
+      "customPerCategoryOrder": {
+        "title": "Sorteer inhoud zoals jij wilt, per categorie",
+        "desc": "Stel een eigen volgorde in voor de inhoud van elke categorie bij Films, Series en Live TV: KIPTV onthoudt je keuze en past die altijd weer toe."
+      },
+      "playlistAvatarActionsMenu": {
+        "title": "Snelle acties via de playlist-avatar",
+        "desc": "Tik op de avatar van je playlist om een menu met snelle acties te openen of de instellingen te bekijken."
+      },
+      "contentSettingsSplit": {
+        "title": "Duidelijkere instellingen: Inhoud en Ouderlijk Toezicht",
+        "desc": "De inhoudsinstellingen zijn nu opgesplitst in twee aparte secties, Inhoud en Ouderlijk Toezicht, zodat je meteen vindt wat je zoekt."
+      },
+      "perPlaylistTrendingToggle": {
+        "title": "Trends per playlist in- of uitschakelen",
+        "desc": "Met een nieuwe optie bepaal je zelf of de trendsectie wordt getoond voor elke playlist."
+      },
+      "playlistCompatibility": {
+        "title": "Snellere en meer compatibele playlists",
+        "desc": "M3U-playlists van Xtream-panelen worden nu automatisch omgezet naar de snellere, native Xtream-versie met volledige categorieën, met uitgebreidere compatibiliteit voor meer providers."
+      },
+      "supportChatPolish": {
+        "title": "Comfortabelere supportchat",
+        "desc": "Het gesprek opent direct bij het laatste bericht, met automatisch scrollen en leesbevestigingen. Notificaties en badges worden correct gewist zodra je de berichten leest."
+      },
+      "categoryLockUsability": {
+        "title": "Vergrendeling per categorie nog handiger",
+        "desc": "Vanuit het Live TV-raster en de programmagids vergrendel of ontgrendel je hele categorieën met één tik, en het contextmenu biedt ontgrendeling aan wanneer inhoud op categorieniveau is beveiligd."
+      }
+    },
+    "v1_3": {
+      "contentAggiuntiDiRecenteSection": {
+        "title": "\"Recent toegevoegd\": ontdek meteen het nieuwe aanbod",
+        "desc": "Een nieuwe sectie in Films, Series en Live TV toont de meest recent aan je playlist toegevoegde content, zodat je nieuwe titels vindt zonder te zoeken."
+      },
+      "playerMediaInfoBadgesHdr": {
+        "title": "HDR-, Dolby Vision-, 4K- en FPS-badges in de speler",
+        "desc": "Tijdens het afspelen zie je in één oogopslag de streamkwaliteit — HDR, Dolby Vision, 4K en framerate — met automatische activering van de HDR-modus. Dezelfde ervaring op iPhone, iPad en Apple TV."
+      },
+      "playerPerEngineAdvancedSettings": {
+        "title": "Geavanceerde instellingen per engine, direct in de speler",
+        "desc": "Via de engine-kiezer in de speler kun je nu de geavanceerde opties van elke engine apart instellen, om het afspelen per stream aan te passen."
+      },
+      "settingsAddOptionForContent": {
+        "title": "Content vernieuwen bij elke toegang",
+        "desc": "Een nieuwe optie in de instellingen herlaadt automatisch de content van je playlist telkens wanneer je de app opent, zodat je catalogus altijd up-to-date is."
+      },
+      "epgGzipXmltvSupportDecoupled": {
+        "title": "Programmagids (EPG) sneller en breder compatibel",
+        "desc": "Ondersteuning toegevoegd voor gecomprimeerde EPG-gidsen (gzip), met laden onafhankelijk van de content en duidelijkere diagnostiek van bronnen."
+      },
+      "playerTvosCutMainThreadContention": {
+        "title": "Vloeiendere Live TV op Apple TV",
+        "desc": "Optimalisaties die vertragingen tijdens live afspelen verminderen, samen met diverse correcties aan de VLC-engine."
+      },
+      "parentalCategoryAwareGateClose": {
+        "title": "Ouderlijk toezicht steviger, ook per categorie",
+        "desc": "De PIN-vergrendeling wordt nu correct op volledige categorieën toegepast en kan niet meer worden omzeild."
+      },
+      "epgRenderCachedEpgWhen": {
+        "title": "Programmagids altijd zichtbaar tijdens scrollen",
+        "desc": "Een probleem opgelost waarbij EPG-informatie kon verdwijnen wanneer gridrijen werden hergebruikt bij het scrollen."
+      }
+    },
+    "v1_2": {
+      "premiumThemes": {
+        "title": "Personaliseer KIPTV zoals jij wilt: premium thema's op iOS en Apple TV",
+        "desc": "Kies de kleur van de app en het icoon op het beginscherm uit een zorgvuldig samengestelde selectie."
+      },
+      "tvosDetailRewrite": {
+        "title": "Films en series op Apple TV: volledig vernieuwde detailschermen",
+        "desc": "De detailpagina's zijn vanaf nul herschreven voor een vloeiende ervaring: filmische overgangen, direct scrollen, geen hapering zelfs bij enorme catalogi."
+      },
+      "tagsFromAnywhere": {
+        "title": "Organiseer alles met tags, vanuit elke plek in de app",
+        "desc": "Maak, hernoem, sorteer en verwijder je eigen tags rechtstreeks vanuit het contextmenu van elke film, serie of zender."
+      },
+      "fixMoviesTabEmptyOnSomePlaylists": {
+        "title": "Bug opgelost waarbij sommige playlists geen films toonden",
+        "desc": "Bij sommige playlists bleef het Films-tabblad hangen op een zwart scherm door providergegevens in onverwachte formaten. Nu herstelt KIPTV de inhoud correct, ook in deze gevallen."
+      },
+      "fix4kChannels": {
+        "title": "4K-zenders: video start nu altijd",
+        "desc": "Het probleem opgelost waarbij sommige 4K-zenders alleen audio afspeelden bij gebruik van AVPlayer/KSPlayer. Perfecte weergave op alle spelers."
+      },
+      "recentSearches": {
+        "title": "Recente zoekopdrachten altijd binnen handbereik",
+        "desc": "Je laatste zoekopdrachten verschijnen bovenaan het Zoeken-scherm op iPhone, iPad en Apple TV: hervat waar je gebleven was met één tik."
+      },
+      "customChannelLogos": {
+        "title": "Zenderlogo's precies zoals jij ze wilt",
+        "desc": "Elke zender kan zijn eigen logo hebben: kies uit een samengestelde communitybibliotheek of zoek er een op het web. Volledige ondersteuning voor SVG en transparantie."
+      },
+      "fixThirdPartyEpgUrls": {
+        "title": "Programmagids (EPG) van elke bron, eindelijk betrouwbaar",
+        "desc": "KIPTV verwerkt nu EPG-URL's van derden correct end-to-end: voeg je favoriete programmagids toe en laat KIPTV de rest doen."
+      }
+    },
+    "v1_1_0": {
+      "multiview": {
+        "title": "Multiview: 4 zenders tegelijk",
+        "desc": "Bekijk tot 4 Live-zenders tegelijkertijd met de nieuwe Multiview-ervaring. Uitklapbare tegels, mini-player altijd binnen handbereik, kwaliteitskiezer en ambient light dat de kleuren van de video overneemt. Beschikbaar op iPhone, iPad en Apple TV.\n\nLet op: de provider moet meerdere gelijktijdige verbindingen ondersteunen voor deze functie."
+      },
+      "audioNoInterruptOtherApps": {
+        "title": "App onderbreekt geen muziek van andere apps meer",
+        "desc": "KIPTV openen pauzeert niet langer de muziek of audio die op andere apps wordt afgespeeld: de audiosessie wordt pas geactiveerd wanneer je daadwerkelijk een stream start."
+      },
+      "vodPlaybackMoreStable": {
+        "title": "Stabielere VOD-weergave",
+        "desc": "Verbeterde weergave van films en series: betrouwbaardere bufferingafhandeling, KSPlayer-engine verder geoptimaliseerd."
+      },
+      "playerEngineFallback": {
+        "title": "Wisselen van afspeelengine veerkrachtiger",
+        "desc": "Als de handmatig gekozen afspeelengine de stream niet kan starten, schakelt KIPTV automatisch terug naar de vorige engine die wel werkte, zonder de ervaring te onderbreken."
+      },
+      "mylistAvailabilityCheck": {
+        "title": "Mijn Lijst: betrouwbaardere beschikbaarheidscontrole",
+        "desc": "Na het laden van de playlist controleert KIPTV opgeslagen films en series opnieuw via TMDB en meldt direct welke zojuist beschikbaar zijn geworden."
+      },
+      "playlistRebuildOnPartialCache": {
+        "title": "Filmtab leeg na onderbroken laden",
+        "desc": "Een probleem opgelost waarbij een onderbroken laden van de playlist de Filmtab leeg achterliet."
+      },
+      "tvosCatalogDuringPlayback": {
+        "title": "Apple TV: vloeiendere navigatie tijdens afspelen",
+        "desc": "Op Apple TV verstoren catalogusupdates de lopende weergave niet meer, waardoor onderbrekingen of vertragingen worden voorkomen wanneer je een Live-zender of serie-aflevering bekijkt."
+      },
+      "tvosLiveAndCatchup": {
+        "title": "Apple TV: Live TV en catchup betrouwbaarder",
+        "desc": "Een probleem opgelost dat kon leiden tot bevriezingen en buffering."
+      }
+    },
+    "v1_0_9": {
+      "playerInPlayerChannelLists": {
+        "title": "Kanalenlijst in de player gelijk aan Live TV",
+        "desc": "Ook in de player zie je kanalen nu in dezelfde volgorde als in Live TV, met speciale secties (Favorieten, Geschiedenis) altijd binnen handbereik."
+      },
+      "epgAutoRewriteDropboxDrive": {
+        "title": "EPG-links van Dropbox en Google Drive",
+        "desc": "Deellinks van Dropbox en Google Drive werken nu rechtstreeks als EPG-bron, zonder handmatige aanpassingen."
+      },
+      "mylistTmdbOnlyItemsAvailability": {
+        "title": "Voeg ook content buiten je playlist toe aan Mijn Lijst",
+        "desc": "Je kunt films en series ontdekt via TMDB opslaan, ook als ze nog niet in je playlist staan: zodra ze beschikbaar worden, laat KIPTV het je weten."
+      },
+      "playlistTolerateDuplicateXtreamIds": {
+        "title": "Playlists met dubbele ID's",
+        "desc": "Een crash opgelost die optrad bij het openen van Xtream-playlists met dubbele kanaal- of film-ID's."
+      },
+      "tvosPlayerControlsNotAuto": {
+        "title": "Playerbediening op Apple TV",
+        "desc": "Een probleem opgelost waarbij de playerbediening zich niet automatisch verborg bij de eerste keer volledig scherm op tvOS."
+      }
+    },
+    "v1_0_8": {
+      "tvosPlayButtonNonResponsive": {
+        "title": "Apple TV: Play-knop vanuit zoekresultaten",
+        "desc": "Probleem opgelost waarbij de Play-knop niet reageerde bij het openen van bepaalde titels vanuit zoekresultaten."
+      },
+      "tvosSearchBreakQualityPickerLoop": {
+        "title": "Apple TV: kwaliteitskeuze gegroepeerde zenders",
+        "desc": "Bug opgelost in de kwaliteitskiezer van zenders in het zoekscherm die een oneindige lus veroorzaakte wanneer de zender met andere was gegroepeerd."
+      },
+      "minorBugFixes": {
+        "title": "Kleine bugfixes"
+      }
+    },
+    "v1_0_7": {
+      "supportCenterInApp": {
+        "title": "Nieuw in-app Ondersteuningscentrum",
+        "desc": "Open tickets, voeg screenshots toe en ontvang antwoorden in realtime, rechtstreeks vanuit de app op iPhone, iPad en Apple TV."
+      },
+      "triviaLoadingScreen": {
+        "title": "Trage verbinding? Hier is wat trivia!",
+        "desc": "Als je een trage verbinding hebt en wacht tot de playlist is geladen, ontdek je weetjes over films, series en anime (geen spoilers, beloofd!)."
+      },
+      "tvosRefocusChannelAfterPlayer": {
+        "title": "Apple TV: focus keert terug naar bekeken zender",
+        "desc": "Na het zappen in de player keert de zenderlijst bij het sluiten van de player precies terug naar waar je was."
+      }
+    },
+    "v1_0_6": {
+      "premiumFreeTrialAllPlans": {
+        "title": "Gratis proefperiode op alle Premium-abonnementen",
+        "desc": "Alle abonnementen bieden nu een gratis proefperiode voordat je betaalt."
+      },
+      "tvosInPlayerChannelGuide": {
+        "title": "Blader door categorieën en zenders in de Apple TV-speler",
+        "desc": "Bekijk zenders en categorieën rechtstreeks vanuit de Live-speler, met vloeiend scrollen tussen de carrousels, zonder de speler te verlaten."
+      },
+      "playerBrightnessControl": {
+        "title": "Helderheidsregeling in de iOS-speler",
+        "desc": "Pas de schermhelderheid rechtstreeks vanuit de speler aan."
+      },
+      "playerPinchToFill": {
+        "title": "Knijp met twee vingers om het scherm te vullen op iOS",
+        "desc": "Pas de video aan met een natuurlijk gebaar, knijp om in te zoomen en het scherm te vullen."
+      },
+      "settingsFollowOnInstagram": {
+        "title": "Volg ons op Instagram",
+        "desc": "Nieuwe knop in Instellingen om KIPTV op Instagram te volgen en op de hoogte te blijven."
+      },
+      "tvosFocusSkipFix": {
+        "title": "Nauwkeurigere focusnavigatie op Apple TV",
+        "desc": "Bij de ronde knoppen van de Apple TV-speler springt de navigatie niet meer onbedoeld over."
+      }
+    },
+    "v1_0_5": {
+      "continueWatchingWidgets": {
+        "title": "Verder kijken-widgets voor iPhone en iPad",
+        "desc": "Voeg de nieuwe Home Screen-widgets toe om films en series met één tik te hervatten. Beschikbaar in alle formaten."
+      },
+      "inPlayerVolumeControl": {
+        "title": "Volumeregeling in de player",
+        "desc": "Nieuwe volumeschuifregelaar direct in de player op iOS."
+      },
+      "subtitleAppearanceInPlayer": {
+        "title": "Ondertitelweergave rechtstreeks vanuit de player",
+        "desc": "Instellingen voor lettertype, grootte en kleur van ondertitels zijn nu in de player te vinden, bereikbaar tijdens het afspelen."
+      },
+      "myListPerTagCarousels": {
+        "title": "Mijn Lijst opgedeeld per tag",
+        "desc": "Je kunt Mijn Lijst nu opsplitsen in aparte carrousels per toegewezen tag. De modus activeer je in Instellingen > Inhoud."
+      },
+      "systemTimeFormat": {
+        "title": "Tijden in je systeemnotatie",
+        "desc": "EPG en player respecteren nu de 12u/24u-instelling van je systeemvoorkeuren."
+      },
+      "tvosPipRestored": {
+        "title": "Picture in Picture hersteld op Apple TV",
+        "desc": "Picture in Picture werkt weer correct op tvOS na een probleem dat in een eerdere versie was ontstaan."
+      },
+      "premiumPlaylistsCap": {
+        "title": "Playlistlimiet gecorrigeerd voor Premium Plus",
+        "desc": "Een bug opgelost waarbij sommige Premium Plus-gebruikers onterecht beperkt waren tot één playlist."
+      }
+    },
+    "v1_0_4": {
+      "manualRotationButton": {
+        "title": "Draai de player handmatig wanneer je wilt",
+        "desc": "Nieuwe rotatieknop in de iPhone-player: wissel met één tik tussen landscape en portrait, ook als rotatievergrendeling aan staat."
+      },
+      "followOnX": {
+        "title": "Volg ons op X",
+        "desc": "Je kunt ons nu volgen op X (Twitter) rechtstreeks vanuit KIPTV: je vindt de link in Instellingen."
+      },
+      "playerDragDismiss": {
+        "title": "Soepeler sluiten van de player op iOS",
+        "desc": "Kleine verbeteringen aan de sluitanimatie van de player voor een natuurlijker gevoel."
+      },
+      "subsResetBetweenEpisodes": {
+        "title": "Verbeteringen aan OpenSubtitles-ondertiteling",
+        "desc": "Verfijnde verwerking van OpenSubtitles-ondertitels voor een consistentere ervaring tussen afleveringen."
+      },
+      "tmdbResilience": {
+        "title": "Sneller laden van metadata",
+        "desc": "Het laden van metadata voor films en series is geoptimaliseerd voor soepeler browsen."
+      },
+      "pipFixes": {
+        "title": "Picture in Picture verbeterd",
+        "desc": "Verfijnde Picture in Picture-ervaring op iPhone en Mac, met responsievere bediening."
+      }
+    },
+    "v1_0_3": {
+      "inAppFeedback": {
+        "title": "Help KIPTV te verbeteren met in-app feedback",
+        "desc": "Vanaf nu kun je suggesties, meldingen en ideeën rechtstreeks vanuit de app versturen, in een paar tikken. We lezen alle berichten en gebruiken ze om KIPTV samen met jou te verbeteren."
+      },
+      "playerQualityPicker": {
+        "title": "Wijzig kanaalkwaliteit vanuit de player",
+        "desc": "Wanneer een Live-kanaal meerdere kwaliteiten heeft (HD, FHD, 4K...) kun je direct vanuit de player kiezen welke je wilt, zonder terug te gaan naar de lijst. Beschikbaar op iPhone, iPad en Apple TV."
+      },
+      "liveInlinePreview": {
+        "title": "Live inline-voorvertoning op Apple TV",
+        "desc": "Nieuwe instelling te activeren via Instellingen > Afspelen: op Apple TV kun je een live voorvertoning van het gemarkeerde kanaal bekijken in de Live TV- en EPG-schermen, voordat je fullscreen opent."
+      }
+    },
+    "versionHeader": "Versie {{version}}",
+    "continue": "Doorgaan",
+    "section": {
+      "new": "Nieuw",
+      "improvement": "Verbeteringen",
+      "bugfix": "Bugfixes"
+    },
+    "v1_0_2": {
+      "tmdbAmbiguousMatchPicker": {
+        "title": "Handmatige keuze bij meerdere matches",
+        "desc": "Wanneer een titel meerdere mogelijke overeenkomsten heeft op TMDB, kun je nu zelf de juiste kiezen."
+      },
+      "liveTvQualityVariantsGrouping": {
+        "title": "Nauwkeuriger groeperen van Live-kanalen",
+        "desc": "Verbeterde herkenning van kwaliteitsvarianten in kanaalnamen voor een betrouwbaardere groepering."
+      },
+      "memoryOomCrashFix": {
+        "title": "Stabiliteit met zeer grote playlists",
+        "desc": "Een crash door onvoldoende geheugen bij enorme playlists opgelost, evenals een mogelijke vermenging van EPG tussen verschillende playlists."
+      }
+    },
+    "v1_0_1": {
+      "memory": {
+        "title": "Crash-oplossingen",
+        "desc": "Probleem opgelost dat RAM-verzadiging veroorzaakte op bepaalde apparaten en kon leiden tot het crashen van de app."
+      },
+      "player": {
+        "title": "Stabielere speler",
+        "desc": "Buffering verminderd bij Live en VOD door de speler af te stemmen op AVFoundation/VLC-best practices."
+      },
+      "infoPanel": {
+        "title": "Informatiepaneel speler",
+        "desc": "In liggende modus sluit het paneel nu door op het videogebied erboven te tikken."
+      },
+      "tvosFocus": {
+        "title": "Snellere Apple TV",
+        "desc": "Vloeiendere tabbalk bij navigeren tussen secties."
+      },
+      "badges": {
+        "title": "Consistente \"Nieuw\"-badges",
+        "desc": "Uniforme indicatoren voor nieuwe inhoud in Films en Series, op zowel iOS als Apple TV."
+      }
+    }
+  },
+  "widget": {
+    "resume": "Hervatten",
+    "noMoviesInProgress": "Geen films bezig",
+    "noEpisodesInProgress": "Geen afleveringen bezig",
+    "openApp": "Open KIPTV"
+  },
+  "support": {
+    "centerTitle": "Supportcentrum",
+    "centerEmpty": "Nog geen gesprekken",
+    "centerEmptyHint": "Start een gesprek met KIPTV-support om een probleem te melden, een verbetering voor te stellen of een nieuwe functie aan te vragen.",
+    "newTicket": "Nieuw gesprek",
+    "you": "Jij",
+    "supportTeam": "KIPTV Support",
+    "send": "Verstuur",
+    "replyPlaceholder": "Schrijf een bericht…",
+    "closedHint": "Gesprek gesloten",
+    "closedComposer": "Dit gesprek is gesloten. Start een nieuw gesprek als je meer hulp nodig hebt.",
+    "resolvedHint": "Stuur een bericht om dit gesprek opnieuw te openen",
+    "openFollowUp": "Vervolggesprek openen",
+    "followUpDraftHeader": "Re: %@ (#%@)",
+    "newMessageOne": "Nieuw bericht",
+    "newMessageMany": "%d nieuwe berichten",
+    "typing": "Support is aan het typen…",
+    "unreadBadge": "%d nieuw",
+    "status": {
+      "open": "Open",
+      "triaged": "In beoordeling",
+      "in_progress": "Wordt behandeld",
+      "awaiting_user": "Wacht op je antwoord",
+      "resolved": "Opgelost",
+      "closed": "Gesloten",
+      "duplicate": "Duplicaat",
+      "on_hold": "In de wacht"
+    },
+    "new": {
+      "type": "Type",
+      "typeHeader": "Waar gaat het over?",
+      "deviceHeader": "Apparaat",
+      "deviceFooter": "Verplicht. Kies het apparaat waarop het probleem optreedt, ook als je vanaf een ander apparaat schrijft.",
+      "titleHeader": "Onderwerp",
+      "titlePlaceholder": "Onderwerp",
+      "titleFooter": "Een korte zin die het probleem of verzoek samenvat.",
+      "messageHeader": "Bericht",
+      "messagePlaceholder": "Beschrijf wat er gebeurt, wat je zou verwachten en onder welke omstandigheden het optreedt.",
+      "messageFooter": "Je kunt later meer details toevoegen door met support te chatten.",
+      "submit": "Gesprek openen",
+      "successTitle": "Gesprek geopend",
+      "successMessage": "We reageren hier in de app zo snel mogelijk.",
+      "attachmentHeader": "Bijlagen",
+      "attachmentFooter": "Optioneel. JPEG, PNG of HEIC tot 7 MB.",
+      "attachmentFooterCount": "Optioneel, tot %d foto's. JPEG, PNG of HEIC tot 7 MB per stuk.",
+      "attachmentAdd": "Foto toevoegen"
+    },
+    "attachmentReady": "Foto klaar om te versturen",
+    "attachmentPreview": "📷 Foto",
+    "category": {
+      "crash": "Crash",
+      "playback": "Afspelen",
+      "playlist": "Afspeellijst",
+      "epg": "EPG / Tv-gids",
+      "subscription": "Abonnement",
+      "auth": "Aanmelden",
+      "ui": "Interface",
+      "account": "Account",
+      "other": "Overig"
+    },
+    "device": {
+      "all": "Alle apparaten",
+      "iphone": "iPhone",
+      "ipad": "iPad",
+      "appleTV": "Apple TV",
+      "androidTV": "Android TV",
+      "fireTV": "Fire TV",
+      "mac": "Mac",
+      "visionPro": "Vision Pro"
+    },
+    "error": {
+      "title": "Fout",
+      "notAuthenticated": "Je moet aangemeld zijn om het Supportcentrum te gebruiken",
+      "missingTitle": "Voer een titel in",
+      "messageEmpty": "Bericht mag niet leeg zijn",
+      "insertFailed": "Versturen mislukt",
+      "fetchFailed": "Laden mislukt",
+      "updateFailed": "Bijwerken mislukt",
+      "uploadFailed": "Uploaden van bijlage mislukt",
+      "attachmentTooLarge": "De afbeelding is groter dan 7 MB. Kies een kleinere.",
+      "rateLimited": "Je hebt onlangs meerdere gesprekken geopend. Wacht even voordat je een nieuw gesprek opent."
+    },
+    "admin": {
+      "analytics": {
+        "chart": {
+          "byCategory": "Per categorie",
+          "byStatus": "Per status",
+          "perDay": "Tickets per dag"
+        },
+        "empty": "Geen gegevens in deze periode",
+        "kpi": {
+          "firstResponse": "Gem. eerste reactie",
+          "open": "Open tickets",
+          "resolution": "Gem. oplostijd"
+        },
+        "noOpenTickets": "Geen open tickets",
+        "oldestOpen": "Langst openstaande ticket",
+        "range": {
+          "30d": "30 dagen",
+          "7d": "7 dagen",
+          "all": "Alles"
+        },
+        "title": "Statistieken"
+      },
+      "bulk": {
+        "assignMe": "Aan mij toewijzen",
+        "confirm": {
+          "assignMe": "Toewijzen aan %@.",
+          "label": "Label \"%@\" toevoegen.",
+          "status": "Status wijzigen naar %@.",
+          "title": "Toepassen op %d ticket(s)?"
+        },
+        "label": "Label",
+        "labelPlaceholder": "labelnaam",
+        "labelPrompt": "Label toevoegen",
+        "selected": "geselecteerd",
+        "status": "Status"
+      },
+      "details": {
+        "assigneeSection": "Toegewezen aan",
+        "auditSection": "Activiteit",
+        "categorySection": "Categorie",
+        "diagnosticsSection": "Diagnostiek",
+        "labelsSection": "Labels",
+        "notesPlaceholder": "Interne notities — alleen zichtbaar voor admins.",
+        "notesSection": "Interne notities",
+        "otherTicketsLabel": "Andere tickets van de gebruiker",
+        "priorityHigh": "P1 (hoogste)",
+        "priorityLow": "P5 (laagste)",
+        "priorityNone": "—",
+        "prioritySection": "Prioriteit",
+        "statusSection": "Status",
+        "ticketsOpenOfTotal": "%1$d open · %2$d totaal",
+        "title": "Details",
+        "triageSection": "Triage"
+      },
+      "split": {
+        "noDetails": "Open een ticket om de details te zien",
+        "noTicketSelected": "Selecteer een ticket om het gesprek te lezen"
+      },
+      "sub": {
+        "active": "Actief",
+        "endsOn": "Eindigt op %@",
+        "expired": "Verlopen",
+        "expiredOn": "Verlopen op %@",
+        "expiry": "Vervaldatum",
+        "free": "Geen abonnement",
+        "lapsing": "Opgezegd — wordt niet verlengd",
+        "manage": "Abonnement beheren",
+        "neverSynced": "Nooit gesynchroniseerd met RevenueCat",
+        "renewing": "Actief, wordt verlengd",
+        "renewsOn": "Verlengt op %@",
+        "section": "Abonnement",
+        "syncedAt": "Gegevens bijgewerkt %@",
+        "since": "Premium sinds"
+      },
+      "user": {
+        "activitySection": "Activiteit",
+        "id": "Gebruikers-ID",
+        "lastPlayback": "Laatst afgespeeld",
+        "lastSignIn": "Laatste aanmelding",
+        "noOtherTickets": "Geen andere tickets",
+        "noTickets": "Geen tickets",
+        "playlists": "Playlists",
+        "provider": "Aangemeld met",
+        "registered": "Geregistreerd op",
+        "ticketsFooter": "%d nog open.",
+        "ticketsSection": "Tickets",
+        "watchTime": "Kijktijd"
+      }
+    }
+  },
+  "appearance": {
+    "title": "Weergave",
+    "subtitle": "Pas het uiterlijk van de app aan.",
+    "premiumUpsell": "Ontgrendel thema-aanpassing met Premium.",
+    "unlockCTA": "Ontgrendelen met Premium",
+    "iconChangeNotice": "iOS toont kort een systeemmelding bij het wisselen van icoon.",
+    "section": {
+      "color": "Hoofdkleur",
+      "icon": "App-icoon",
+      "theme": "Thema",
+      "ambient": "Achtergrond"
+    },
+    "color": {
+      "red": "Rood",
+      "brown": "Bruin",
+      "fuchsia": "Fuchsia",
+      "gold": "Goud",
+      "green": "Groen",
+      "indigo": "Indigo",
+      "lime": "Limoen",
+      "orange": "Oranje",
+      "purple": "Paars",
+      "silver": "Zilver",
+      "teal": "Teal",
+      "white": "Wit"
+    },
+    "icon": {
+      "red": "Rood",
+      "brown": "Bruin",
+      "fuchsia": "Fuchsia",
+      "gold": "Goud",
+      "green": "Groen",
+      "indigo": "Indigo",
+      "lime": "Limoen",
+      "orange": "Oranje",
+      "purple": "Paars",
+      "silver": "Zilver",
+      "teal": "Teal",
+      "white": "Wit"
+    },
+    "background": {
+      "title": "Achtergrond",
+      "black": "Zwart",
+      "dynamic": "Dynamisch"
+    },
+    "ambient": {
+      "title": "Dynamische achtergrond",
+      "subtitle": "Kleurt de achtergrond met de kleuren van de afbeelding op het scherm."
+    }
+  },
+  "recentlyAdded": {
+    "title": "Recent toegevoegd"
+  },
+  "metadata": {
+    "customize": "Metadata aanpassen",
+    "sheet": {
+      "title": "Metadata aanpassen",
+      "search": "Zoek een film of serie",
+      "results": "Resultaten",
+      "automatic": "Automatisch",
+      "noTMDB": "Geen TMDB (alleen provider)",
+      "current": "Huidige match",
+      "searchHint": "Typ een titel om op TMDB te zoeken",
+      "noResults": "Geen resultaten"
+    }
+  },
+  "devices": {
+    "connectedTitle": "Verbonden apparaten",
+    "description": "Apparaten die momenteel bij je account zijn aangemeld. Meld apparaten af die je niet herkent.",
+    "thisDevice": "Dit apparaat",
+    "lastActive": "Laatst actief {{time}}",
+    "signOut": "Afmelden",
+    "signOutConfirmTitle": "Apparaat afmelden?",
+    "signOutConfirmMessage": "Dit apparaat wordt afgemeld en moet opnieuw inloggen.",
+    "signOutError": "Kan dat apparaat niet afmelden. Probeer het opnieuw.",
+    "empty": "Geen andere apparaten",
+    "loading": "Apparaten laden…",
+    "activeNow": "Nu actief"
+  },
+  "home": {
+    "title": "Home",
+    "customize": "Aanpassen",
+    "customizeTitle": "Home aanpassen",
+    "hide": "Home verbergen",
+    "hideConfirm": "Verbergen",
+    "hideMessage": "Het Home-tabblad verdwijnt en de app opent op het startscherm dat je in Instellingen hebt gekozen. Je kunt het weer inschakelen via Instellingen → Inhoud.",
+    "hideFooter": "Als je Home verbergt, keer je terug naar je vorige startscherm.",
+    "sections": "Secties",
+    "sectionsActive": "{{count}} actief",
+    "sectionsFooter": "Sleep om te herschikken. Secties zonder inhoud blijven automatisch verborgen.",
+    "addSection": "Sectie toevoegen",
+    "addSectionFooter": "Platforms en feeds tonen de titels uit je playlist.",
+    "addPlatform": "Streamingplatform",
+    "addFeed": "Aangepaste feed",
+    "reset": "Lay-out herstellen",
+    "resetConfirm": "Herstellen",
+    "resetMessage": "Terug naar de standaardvolgorde en -secties. Platforms en aangepaste feeds worden verwijderd.",
+    "applyToAll": "Toepassen op alle playlists",
+    "applyToAllConfirm": "Toepassen",
+    "applyToAllMessage": "Deze lay-out vervangt de Home van al je playlists.",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "hideSection": "Sectie verbergen",
+    "sectionSettings": "Sectie-opties",
+    "emptyLayoutTitle": "Lege Home",
+    "emptyLayoutMessage": "Je hebt alle secties uitgeschakeld. Pas de Home aan om ze terug te zetten.",
+    "section": {
+      "hero": "Uitgelicht",
+      "nowOnTV": "Nu op tv",
+      "newEpisodes": "Nieuwe afleveringen voor jou",
+      "recommended": "Aanbevolen voor jou",
+      "tonightOnTV": "Vanavond op tv",
+      "recentlyAddedMovies": "Recent toegevoegde films",
+      "recentlyAddedSeries": "Recent toegevoegde series",
+      "recentlyAddedLive": "Recent toegevoegde zenders",
+      "platform": "Platform",
+      "customFeed": "Aangepaste feed",
+      "traktList": "Trakt-lijst"
+    },
+    "nowOnTVSubtitle": "Nu te zien op jouw zenders",
+    "newEpisodesSubtitle": "Je series hebben nieuws",
+    "recommendedSubtitle": "Op basis van wat je hebt gekeken",
+    "tonightSubtitle": "Primetime op jouw zenders",
+    "reason": {
+      "resume": "Hervatten",
+      "newEpisode": "Nieuwe aflevering",
+      "trending": "Trending",
+      "recentlyAdded": "Net toegevoegd"
+    },
+    "params": {
+      "both": "Beide",
+      "mediaType": "Inhoudstype",
+      "channels": "Zenders",
+      "channelsFooter": "Welke zenders tonen: die uit Mijn lijst, de recent bekeken of beide.",
+      "window": "Periode",
+      "lastDays": "Laatste {{days}} dagen",
+      "thisWeek": "Deze week",
+      "today": "Vandaag"
+    },
+    "feed": {
+      "name": "Naam van de feed",
+      "namePlaceholder": "Bijv. horror uit de jaren 80",
+      "sortBy": "Sorteren op",
+      "sort": {
+        "popularityDesc": "Populariteit (aflopend)",
+        "popularityAsc": "Populariteit (oplopend)",
+        "ratingDesc": "Hoogst beoordeeld",
+        "votesDesc": "Meeste stemmen",
+        "newest": "Nieuwste",
+        "oldest": "Oudste",
+        "revenueDesc": "Hoogste opbrengst"
+      },
+      "genres": "Genres",
+      "excludedGenres": "Uitgesloten genres",
+      "year": "Jaar van uitgave",
+      "yearFrom": "Van",
+      "yearTo": "Tot",
+      "anyYear": "Elk jaar",
+      "language": "Oorspronkelijke taal",
+      "anyLanguage": "Elke taal",
+      "platforms": "Platforms",
+      "platformsFooter": "Beperk de feed tot titels die op deze platforms beschikbaar zijn.",
+      "minVotes": "Minimum aantal stemmen",
+      "noMinimum": "Geen minimum",
+      "filters": "Filters",
+      "customParams": "Extra parameters",
+      "customParamsPlaceholder": "with_companies=420&vote_average.gte=7",
+      "customParamsFooter": "Parameters van de TMDB Discover API als sleutel=waarde, gescheiden door &. Komma voor EN-logica, verticale streep (|) voor OF.",
+      "none": "Geen",
+      "create": "Feed maken",
+      "edit": "Feed bewerken",
+      "lang": {
+        "en": "Engels",
+        "it": "Italiaans",
+        "es": "Spaans",
+        "fr": "Frans",
+        "de": "Duits",
+        "pt": "Portugees",
+        "ja": "Japans",
+        "ko": "Koreaans",
+        "zh": "Chinees",
+        "hi": "Hindi",
+        "tr": "Turks",
+        "ar": "Arabisch",
+        "ru": "Russisch",
+        "nl": "Nederlands",
+        "sv": "Zweeds",
+        "da": "Deens",
+        "nb": "Noors",
+        "pl": "Pools",
+        "el": "Grieks",
+        "fi": "Fins"
+      }
+    },
+    "platform": {
+      "pickTitle": "Platforms kiezen",
+      "search": "Platform zoeken",
+      "add": "Toevoegen",
+      "added": "Toegevoegd"
+    },
+    "platformMovies": "{{name}}-films",
+    "platformSeries": "{{name}}-series",
+    "customizeHint": "Druk omlaag om te openen",
+    "addPlatformSubtitle": "Voeg een rij toe met de titels van één dienst",
+    "addFeedSubtitle": "Maak een rij op basis van je eigen criteria",
+    "addTraktList": "Trakt-lijst",
+    "addTraktListSubtitle": "Watchlist, aanbevelingen, je eigen lijsten en die van de community",
+    "trakt": {
+      "pickTitle": "Trakt-lijst toevoegen",
+      "yours": "Jouw Trakt",
+      "recommendations": "Aanbevolen door Trakt",
+      "recommendationsDesc": "Op basis van wat je op Trakt hebt gekeken en beoordeeld",
+      "watchlist": "Trakt-watchlist",
+      "watchlistDesc": "Je hele watchlist, ook titels die niet in je playlist staan",
+      "myLists": "Mijn lijsten",
+      "likedLists": "Lijsten die ik leuk vind",
+      "likedListsFooter": "Vind een lijst leuk op trakt.tv en hij verschijnt hier.",
+      "community": "Uit de Trakt-community",
+      "popular": "Populair",
+      "trending": "Trending",
+      "official": "Officieel",
+      "search": "Zoek een lijst of plak een link of ID",
+      "searchResults": "Resultaten",
+      "items": "{{count}} titels",
+      "by": "van {{user}}",
+      "none": "Geen lijsten",
+      "loadMore": "Meer tonen",
+      "inactive": "Koppel Trakt aan deze playlist om deze rij te zien",
+      "loadFailed": "Trakt-lijsten laden mislukt. Tik om opnieuw te proberen",
+      "notFound": "Geen lijst gevonden",
+      "sort": {
+        "listOrder": "Volgorde van de lijst",
+        "added": "Recent toegevoegd",
+        "released": "Releasedatum",
+        "title": "Titel",
+        "rating": "Beoordeling",
+        "popularity": "Populariteit"
+      }
+    }
+  },
+  "trakt": {
+    "title": "Trakt",
+    "description": "Synchroniseer gekeken items, hervatten en je watchlist met je Trakt-account.",
+    "intro": "Koppel je Trakt-account om je kijkgeschiedenis op één plek te houden: wat je in KIPTV kijkt gaat naar Trakt, en je Trakt-geschiedenis verschijnt in KIPTV op al je apparaten.",
+    "introFooter": "Optioneel: zonder koppeling verandert er niets.",
+    "notConfigured": "De Trakt-integratie is niet beschikbaar in deze build.",
+    "link": "Trakt koppelen",
+    "linkedAs": "Gekoppeld als {{username}}",
+    "vip": "VIP",
+    "linkedFooter": "De koppeling geldt voor het hele account: elk apparaat met dit KIPTV-account is ook gekoppeld.",
+    "relinkNeeded": "De Trakt-koppeling is verlopen: koppel het account opnieuw.",
+    "linkRequesting": "Code aanvragen…",
+    "linkInstructions": "Open trakt.tv/activate en voer deze code in.",
+    "linkInstructionsTV": "Scan de QR-code of open trakt.tv/activate op je telefoon en voer de code in.",
+    "openActivate": "trakt.tv/activate openen",
+    "codeCopied": "Code gekopieerd naar het klembord.",
+    "codeExpires": "De code verloopt over {{time}}",
+    "regenerate": "Nieuwe code",
+    "linkWaiting": "Wachten op bevestiging op Trakt…",
+    "linkSuccess": "Trakt gekoppeld",
+    "linkSuccessSubtitle": "De eerste synchronisatie start nu.",
+    "linkDenied": "Verzoek geweigerd op Trakt.",
+    "linkExpired": "Code verlopen: maak een nieuwe.",
+    "syncSection": "Wat synchroniseren",
+    "scrobble": "Naar Trakt sturen wat je kijkt",
+    "scrobbleDesc": "Films en afleveringen die je in KIPTV afspeelt komen in je Trakt-geschiedenis.",
+    "pullWatched": "Gekeken items importeren van Trakt",
+    "pullWatchedDesc": "Wat op Trakt als gekeken staat, verschijnt als gekeken in KIPTV – zonder in Verder kijken te komen tot je het hier afspeelt.",
+    "pullPlayback": "Hervatten vanaf de Trakt-positie",
+    "pullPlaybackDesc": "Heb je elders gepauzeerd, dan hervat KIPTV daar als de Trakt-positie recenter is.",
+    "syncWatchlist": "Watchlist synchroniseren",
+    "syncWatchlistDesc": "Je Trakt-watchlist wordt de tag \"Trakt Watchlist\" in Mijn lijst, in beide richtingen.",
+    "syncNow": "Nu synchroniseren",
+    "syncing": "Synchroniseren…",
+    "lastSync": "Laatste synchronisatie: {{date}}",
+    "neverSynced": "Nog geen synchronisatie.",
+    "unlink": "Trakt ontkoppelen",
+    "unlinkConfirm": "De van Trakt geïmporteerde gekeken items en de tag Trakt Watchlist worden verwijderd. Wat je in KIPTV keek blijft.",
+    "watchlistFullTitle": "Watchlist vol",
+    "watchlistFull": "Je Trakt-watchlist heeft de limiet van het gratis account bereikt: de titel blijft alleen in KIPTV.",
+    "linkDescription": "Toont een code om in te voeren op trakt.tv.",
+    "accountDescription": "Je Trakt-account.",
+    "syncNowDescription": "Werkt gekeken items, hervatposities en de watchlist meteen bij vanaf Trakt.",
+    "unlinkDescription": "Verwijdert de koppeling en de van Trakt geïmporteerde gegevens; de gekeken items van KIPTV blijven.",
+    "error": {
+      "notConfigured": "Trakt is niet geconfigureerd in deze build.",
+      "unauthorized": "Trakt heeft de koppeling geweigerd: koppel het account opnieuw.",
+      "rateLimited": "Te veel verzoeken aan Trakt: probeer het zo opnieuw.",
+      "network": "Trakt is niet bereikbaar.",
+      "generic": "Communicatiefout met Trakt."
+    },
+    "oneAppNotice": "Een gratis Trakt-account kan maar één app gekoppeld houden: heb je er al een, ontkoppel die dan op trakt.tv voordat je verdergaat.",
+    "askRatings": "Om een beoordeling vragen",
+    "askRatingsDesc": "Vraagt na afloop van een film of aflevering om een cijfer van 1 tot 10 en stuurt dat naar Trakt.",
+    "playlists": "Afspeellijsten",
+    "playlistsDesc": "Voor welke afspeellijsten de integratie geldt",
+    "playlistsAll": "Alle afspeellijsten",
+    "playlistsAllValue": "Alle",
+    "playlistsCount": "{{count}} afspeellijsten",
+    "playlistsFooter": "In uitgesloten afspeellijsten stuurt KIPTV niets naar Trakt en worden de van Trakt geïmporteerde gegevens verwijderd. Wat je in KIPTV keek blijft.",
+    "playlistExcluded": "Deze afspeellijst is uitgesloten van de Trakt-integratie.",
+    "rateTitle": "Welk cijfer geef je {{title}}?",
+    "rateSubtitle": "Het cijfer gaat naar je Trakt-account.",
+    "rateSkip": "Niet nu",
+    "rateEpisode": "Aflevering beoordelen",
+    "rateSent": "Cijfer naar Trakt gestuurd"
+  }
+}

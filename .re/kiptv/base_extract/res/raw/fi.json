@@ -1,0 +1,3530 @@
+{
+  "playUpdate": {
+    "title": "Päivitys saatavilla",
+    "body": "KIPTV {{version}} on saatavilla Google Playssa. Ladataanko se nyt?",
+    "now": "Päivitä nyt",
+    "later": "Myöhemmin",
+    "settingsDescription": "Tarkista, onko Play Kaupassa uudempi KIPTV-versio."
+  },
+  "sideload": {
+    "update": {
+      "title": "Päivitys saatavilla",
+      "body": "KIPTV {{version}} on valmis asennettavaksi. Päivitetäänkö nyt?",
+      "now": "Päivitä nyt",
+      "later": "Myöhemmin",
+      "downloading": "Ladataan KIPTV {{version}}…",
+      "verifying": "Tarkistetaan tiedostoa…",
+      "install": "Asenna",
+      "readyBody": "Lataus valmis. Paina Asenna ja vahvista järjestelmän näytössä.",
+      "failedBody": "Lataus epäonnistui. Tarkista yhteys ja yritä uudelleen.",
+      "permissionTitle": "Salli asennus",
+      "permissionBody": "Television on sallittava, että KIPTV asentaa sovelluksia. Avaa asetukset, kytke KIPTV:n valitsin päälle ja palaa tänne: asennus jatkuu itsestään.",
+      "openSettings": "Avaa asetukset",
+      "manualTitle": "Päivitä Downloaderilla",
+      "manualBody": "Avaa Downloader-sovellus ja syötä osoite {{link}}: se lataa ja asentaa uuden version tämän päälle.",
+      "manualBodyWithCode": "Avaa Downloader-sovellus ja syötä koodi {{code}} (tai osoite {{link}}): se lataa ja asentaa uuden version tämän päälle.",
+      "openDownloader": "Avaa Downloader",
+      "settingsRow": "Päivitykset",
+      "settingsDescription": "Tarkista, onko KIPTV:stä uudempi versio, ja asenna se tästä.",
+      "statusAvailable": "Saatavilla {{version}}",
+      "statusUpToDate": "Ajan tasalla",
+      "statusChecking": "Tarkistetaan…",
+      "statusUnknown": "Tarkista nyt"
+    }
+  },
+  "ratings": {
+    "title": "Arviot",
+    "critics": "Kriitikot",
+    "audience": "Yleisö",
+    "fromAge": "{{age}} vuodesta ylöspäin"
+  },
+  "playback": {
+    "playWith": "Toista sovelluksella",
+    "externalPlayerSection": "Avaa ulkoisessa sovelluksessa"
+  },
+  "browser": {
+    "reload": "Lataa uudelleen",
+    "stop": "Keskeytä lataus",
+    "openInBrowser": "Avaa selaimessa"
+  },
+  "quickAction": {
+    "chat": {
+      "title": "Hetki, älä poista minua!",
+      "subtitle": "Jutellaan – ratkaistaan se yhdessä"
+    }
+  },
+  "avatars": {
+    "group": {
+      "people": "Ihmiset",
+      "animals": "Eläimet",
+      "football": "Jalkapallo"
+    }
+  },
+  "errors": {
+    "xtream": {
+      "networkNoCacheData": "Verkkovirhe ja cache-dataa ei ole saatavilla",
+      "serverRetrying": "IPTV-palvelimen virhe - yritetään uudelleen...",
+      "serverHttp": "Palvelimen virhe (HTTP {{status}})",
+      "slowConnection": "Hidas yhteys - pyynnön aikakatkaisu",
+      "rateLimitWait": "XTREAM-palvelin rajoitti pyyntöjä. Yritä uudelleen {{seconds}}s kuluttua.",
+      "rateLimitBlocked": "XTREAM-palvelin on tilapäisesti estänyt pyynnöt (HTTP 429). Odota {{seconds}}s ja yritä uudelleen.",
+      "serverNotFound": "XTREAM-palvelinta ei löytynyt - Tarkista URL",
+      "staleCacheWarning": "Tiedot välimuistista ({{minutes}}min sitten) - verkko ei ole käytettävissä",
+      "noInternet": "Ei internet-yhteyttä - tarkista verkkosi",
+      "invalidRequest": "Virheellinen pyyntö - tarkista soittolistasi tunnistetiedot",
+      "credentialsExpired": "Tunnistetiedot vanhentuneet - todenna soittolista uudelleen",
+      "accessDenied": "Pääsy evätty IPTV-palveluntarjoajalta",
+      "contentNotFound": "Sisältöä ei löytynyt IPTV-palveluntarjoajalta",
+      "tooManyRequests": "Liian monta pyyntöä - odota hetki",
+      "serverMaintenance": "IPTV-palvelin on huollossa - yritä myöhemmin",
+      "serverTimeout": "IPTV-palvelimen aikakatkaisu - hidas yhteys",
+      "unauthorized": "Luvuttomat tunnistetiedot",
+      "serverUnavailable": "Palvelin on tilapäisesti poissa käytöstä",
+      "invalidCredentials": "Virheelliset tunnistetiedot tai vanhentuneet tunnukset",
+      "connectionTimeout": "Yhteyden aikakatkaisu - Palvelin ei vastaa",
+      "networkError": "Verkkovirhe - Tarkista internet-yhteys",
+      "invalidUrl": "Virheellinen URL tai palvelin ei ole tavoitettavissa",
+      "unknownConnection": "Tuntematon yhteyden virhe"
+    },
+    "boundaryTitle": "Oops! Jokin meni pieleen",
+    "boundaryMessage": "Sovellus kohtasi odottamattoman virheen. Yritä uudelleen tai käynnistä sovellus uudelleen, jos ongelma jatkuu.",
+    "limitsCheckFailed": "Katselurajoitusten tarkistus epäonnistui. Yritä myöhemmin.",
+    "limitsLoadError": "Virhe rajoitusten lataamisessa. Yritä myöhemmin.",
+    "playlistSave": "Virhe soittolistaa tallennettaessa",
+    "playlistRemove": "Virhe soittolistaa poistaessa",
+    "playlistUpdate": "Virhe soittolistaa päivitettäessä",
+    "unknown": "Tuntematon virhe",
+    "unifiedLoad": "Virhe yhdistetyssa latauksessa",
+    "liveTVLoad": "Virhe Live-sisällön lataamisessa",
+    "logout": "Virhe uloskirjautumisen aikana",
+    "loadError": "Virhe sisällön lataamisessa",
+    "loadingFailed": "Lataus epäonnistui. Yritä uudelleen."
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "Virheellinen sähköpostiosoite tai salasana",
+      "invalid_email_or_password": "Virheellinen sähköpostiosoite tai salasana",
+      "user_not_found": "Tälle sähköpostiosoitteelle ei löytynyt tiliä",
+      "user_already_registered": "Tämä sähköpostiosoite on jo rekisteröity - yritä kirjautua sisään",
+      "password_min_length": "Salasanan on oltava vähintään 6 merkkiä",
+      "password_too_weak": "Salasana on liian heikko - käytä kirjaimia, numeroita ja symboleja",
+      "same_password": "Uuden salasanan on oltava erilainen kuin nykyinen salasana",
+      "email_invalid_format": "Virheellinen sähköpostiosoite",
+      "email_validation_failed": "Virheellinen sähköpostin muoto",
+      "email_invalid": "Virheellinen sähköpostiosoite",
+      "network_failed": "Ei internet-yhteyttä - tarkista verkkosi",
+      "fetch_failed": "Yhteysvirhe - yritä uudelleen",
+      "network_error": "Verkko-ongelma - tarkista yhteytesi",
+      "jwt_expired": "Istunto on vanhentunut - kirjaudu uudelleen sisään",
+      "jwt_invalid": "Virheellinen istunto - kirjaudu sisään uudelleen",
+      "refresh_token_not_found": "Istunto on vanhentunut - kirjaudu sisään uudelleen",
+      "oauth_cancelled": "Sisäänkirjautuminen peruutettu",
+      "oauth_access_denied": "Sisäänkirjautuminen peruutettu - kielsit pääsyn",
+      "oauth_redirect_mismatch": "Konfiguraatiovirhe - ota yhteyttä tukeen",
+      "oauth_unauthorized": "OAuth-virhe - ota yhteyttä tukeen",
+      "rate_limit_email": "Liian monta pyyntöä - odota hetki ennen uudelleen yritystä",
+      "rate_limit_general": "Liian monta pyyntöä - yritä uudelleen muutaman minuutin kuluttua",
+      "password_invalid": "Virheellinen salasana",
+      "security_purposes": "Turvallisuussyistä yritä myöhemmin",
+      "auth_failed": "Todennus epäonnistui - yritä uudelleen",
+      "bad_request": "Virheellinen pyyntö - tarkista tietosi",
+      "unauthorized": "Luvaton pääsy - tarkista tunnistetietosi",
+      "rate_limit": "Liian monta pyyntöä - odota muutama minuutti",
+      "server_error": "Palvelu on tilapäisesti poissa käytöstä - yritä myöhemmin",
+      "default": "Todennusvirhe - yritä uudelleen",
+      "email_not_confirmed": "Vahvista sähköpostiosoitteesi ennen sisäänkirjautumista"
+    },
+    "login": "Kirjaudu sisään",
+    "forgotPassword": "Unohditko salasanan?",
+    "forgotPasswordTitle": "Unohditko salasanan?",
+    "forgotPasswordSubtitle": "Syötä sähköpostiosoitteesi ja lähetämme sinulle linkin salasanan nollaamiseen.",
+    "emailLabel": "Sähköpostiosoite",
+    "sendResetEmail": "Lähetä salasanan nollaamislinkin sähköposti",
+    "resetEmailSent": "✅ Tarkista sähköpostistasi nollaamislinkin",
+    "resetEmailError": "Sähköpostin lähettäminen epäonnistui. Yritä uudelleen.",
+    "resetPasswordTitle": "Nollaa salasana",
+    "resetPasswordSubtitle": "Syötä uusi salasana alla",
+    "newPassword": "Uusi salasana",
+    "confirmPassword": "Vahvista salasana",
+    "resetPasswordButton": "Nollaa salasana",
+    "resetPasswordSuccess": "✅ Salasana nollattu onnistuneesti!",
+    "passwordsDoNotMatch": "Salasanat eivät täsmää",
+    "backToLogin": "Takaisin sisäänkirjautumiseen",
+    "loginTitle": "Tervetuloa takaisin",
+    "loginSubtitle": "Kirjaudu sisään soittolistojesi, listojen ja edistymisen palauttamiseksi.",
+    "emailPlaceholder": "sahkoposti@esimerkki.com",
+    "noAccountPrompt": "Eikö sinulla ole tiliä?",
+    "registerCta": "Rekisteröidy nyt",
+    "createAccountTitle": "Luo tili",
+    "createAccountSubtitle": "Synkronoi soittolistat ja asetukset kaikilla laitteillasi.",
+    "createAccountButton": "Luo tili",
+    "alreadyHaveAccountCta": "Onko sinulla jo tili?",
+    "tagline": "Sinun viihteesi, kaikkialla",
+    "continueWithGoogle": "Jatka Googlen kanssa",
+    "continueWithApple": "Jatka Applen kanssa",
+    "signInWithGoogle": "Kirjaudu Googlen avulla",
+    "continueWithEmail": "Jatka sähköpostin kanssa",
+    "termsPrefix": "Jatkamalla hyväksyt meidän",
+    "termsOfService": "Käyttöehdot",
+    "privacyPolicy": "Tietosuojakäytäntö",
+    "appleCredentialsInvalid": "Virheelliset Apple-tunnistetiedot",
+    "appleSignInError": "Apple Sign In -virhe",
+    "googleComingSoon": "Google Sign In tulee pian saataville",
+    "registerSubtitle": "Syötä tietosi rekisteröitymistä varten",
+    "welcomeBack": "Tervetuloa takaisin!",
+    "resetEmailSentMessage": "Salasanan nollaamislinkin sähköposti lähetetty! Tarkista saapuneesi.",
+    "register": "Rekisteröidy",
+    "invalidEmailFirst": "Syötä ensin kelvollinen sähköpostiosoite",
+    "changePassword": "Vaihda salasana"
+  },
+  "common": {
+    "returnToHomeTitle": "Palataanko aloitusnäyttöön?",
+    "on": "Päällä",
+    "off": "Pois",
+    "loading": "Ladataan...",
+    "error": "Virhe",
+    "success": "Onnistui",
+    "retry": "Yritä uudelleen",
+    "cancel": "Peruuta",
+    "confirm": "Vahvista",
+    "delete": "Poista",
+    "save": "Tallenna",
+    "close": "Sulje",
+    "back": "Takaisin",
+    "next": "Seuraava",
+    "done": "Valmis",
+    "ok": "OK",
+    "edit": "Muokkaa",
+    "name": "Nimi",
+    "domain": "Toimialue",
+    "url": "URL",
+    "username": "Käyttäjänimi",
+    "password": "Salasana",
+    "or": "tai",
+    "saveChanges": "Tallenna muutokset",
+    "resumeFrom": "Jatka {{time}}-kohdasta",
+    "completed": "{{percent}}% valmis",
+    "resume": "Jatka",
+    "plot": "Juoni",
+    "cast": "Näyttelijät",
+    "directedBy": "Ohjannut",
+    "genres": "Genret",
+    "trailer": "Traileri",
+    "trailerComingSoon": "Traileri saapuu pian",
+    "continue": "Jatka",
+    "download": "Lataa",
+    "cancelDownload": "Peruuta lataus",
+    "downloaded": "Ladattu",
+    "saving": "Tallennetaan...",
+    "fillFields": "Täytä kentät",
+    "contents": "sisältöä",
+    "noContent": "Ei sisältöä",
+    "addPlaylistToSeeContent": "Lisää soittolista nähdäksesi sisältöä",
+    "remove": "Poista",
+    "item": "kohde",
+    "items": "kohteet",
+    "day": "päivä",
+    "days": "päivää",
+    "descriptionNotAvailable": "Kuvaus ei ole saatavilla",
+    "titleNotAvailable": "Otsikko ei ole saatavilla",
+    "unknownTitle": "Tuntematon otsikko",
+    "and": "ja",
+    "search": "Hae",
+    "seeAll": "Näytä kaikki",
+    "episodes": "jaksoa"
+  },
+  "loading": {
+    "triviaTitle": "Tiesitkö?"
+  },
+  "settings": {
+    "heroStyle": "Nostetun sisällön tyyli",
+    "heroStyleSubtitle": "Miten nostettu sisältö näkyy Elokuvat- ja Sarjat-näkymien yläosassa",
+    "heroStyleFull": "Koko näyttö",
+    "heroStyleCard": "Kortti",
+    "introSkip": {
+      "enabled": "Ohita alku",
+      "subtitle": "Näytä «Ohita alku» -painike jaksojen alussa.",
+      "autoEnabled": "Ohita automaattisesti",
+      "autoSubtitle": "Ohittaa kertauksen ja alun automaattisesti, ilman napautusta.",
+      "defaultLength": "Oletusohituksen pituus",
+      "seconds": "{{seconds}}s",
+      "autoSkip": "Ohita automaattisesti",
+      "autoSkipSubtitle": "Ohittaa kertauksen ja alun automaattisesti, ilman napautusta."
+    },
+    "title": "Asetukset",
+    "account": "Tili",
+    "playlist": "Soittolista",
+    "videoQuality": "Videon laatu",
+    "downloads": "Lataukset",
+    "cache": "Välimuisti",
+    "auto": "Automaattinen",
+    "changePlaylist": "Vaihda soittolistaa",
+    "sortHideCategories": "Lajittele / piilota kategoriat",
+    "sortHideCategoriesSubtitle": "Mukauta elokuvia, sarjoja ja kanavia tälle soittolistalle.",
+    "logout": "Kirjaudu ulos",
+    "logoutConfirm": "Oletko varma, että haluat kirjautua ulos?",
+    "language": "Kieli",
+    "manageAccount": "Hallitse tiliä",
+    "playlistComingSoon": "Soittolistaasetukset saapuvat pian!",
+    "playlistComingSoonSubtitle": "Viimeistelemme soittolistaohjaimia. Tule pian takaisin.",
+    "about": "Tietoja",
+    "version": "Versio",
+    "support": "Tuki",
+    "supportDiscord": "Liity Discord-yhteisöömme",
+    "followUs": "Seuraa meitä X:ssä",
+    "followUsDescription": "Älä jää paitsi uusimmista päivityksistä ja uutisista",
+    "followUsScanHint": "Skannaa seurataksesi X:ssä",
+    "followUsInstagram": "Seuraa meitä Instagramissa",
+    "followUsInstagramScanHint": "Skannaa seurataksesi Instagramissa",
+    "feedback": {
+      "subtitle": "Ilmoita virheistä, ehdota parannuksia, pyydä uusia ominaisuuksia"
+    },
+    "termsOfService": "Käyttöehdot",
+    "privacyPolicy": "Tietosuojakäytäntö",
+    "termsDescription": "Lue Käyttöehtomme",
+    "privacyDescription": "Lue Tietosuojakäytäntömme",
+    "supportQRTitle": "Liity KIPTV-tukeen",
+    "supportQRSubtitle": "Skannaa tämä QR-koodi iPhonella tai iPadilla avataksesi Discord-yhteisömme",
+    "myPlaylists": "Omat soittolistani",
+    "appSection": "Sovellus",
+    "infoSection": "Tiedot",
+    "logoutWarning": "Sinun on kirjauduttava sisään uudelleen",
+    "playlistManagement": "Soittolistahallinta",
+    "contentManagement": "Sisällönhallinta",
+    "contentManagementSubtitle": "Lajittele, piilota ja lukitse soittolistasisältöä",
+    "deviceSection": "Laite",
+    "subtitleLanguage": "Tekstitysvaihtoehtojen kieli",
+    "subtitleOff": "Pois päältä",
+    "subtitleAuto": "Oletusarvoinen",
+    "audioLanguage": "Äänen kieli",
+    "defaultLanguages": "Oletuskielet",
+    "audioOriginal": "Alkuperäinen",
+    "autoplayNextEpisode": "Toista seuraava jakso automaattisesti",
+    "backgroundPlayback": "Taustatoisto",
+    "backgroundPlaybackSubtitle": "Ääni jatkuu, kun poistut sovelluksesta television aloitusnäyttöön. Kun asetus on pois käytöstä, toisto keskeytyy ja jatkuu, kun palaat KIPTV:hen.",
+    "skipForward": "Kelaa eteenpäin",
+    "skipBackward": "Kelaa taaksepäin",
+    "seconds5": "5 sekuntia",
+    "seconds10": "10 sekuntia",
+    "seconds15": "15 sekuntia",
+    "seconds30": "30 sekuntia",
+    "playerEngine": "Toistaja",
+    "playerSelectEngine": "Valitse toistajan moottori",
+    "playerAuto": "Automaattinen",
+    "playerNative": "Natiivi (AVPlayer)",
+    "playerExo": "ExoPlayer",
+    "playerMPV": "MPV",
+    "playerAether": "Aether",
+    "playerVLC": "VLC",
+    "playerKSPlayer": "KSPlayer",
+    "playerMoviesSeries": "Elokuvien ja sarjojen toistaja",
+    "playerLive": "Live-toistaja",
+    "playerFallbackOnFailure": "Käytä muita toistajia, jos valittu epäonnistuu",
+    "playerFallbackDescription": "Yritä automaattisesti toista toistimen moottoria, jos valittu epäonnistuu",
+    "metadata": "Metatiedot",
+    "metadataSection": "Metatiedot",
+    "metadataSource": "Metatietojen lähde",
+    "smartHide": "Älykäs piilotus",
+    "metadataWeb": "Verkko",
+    "metadataPlaylist": "Soittolista",
+    "metadataSubtitle": "Verkko: julisteet, arviot ja kuvaukset verkosta. Soittolista: käytä vain IPTV-palveluntarjoajan tietoja.",
+    "titleCleaning": "Puhdista elokuvien ja sarjojen otsikot",
+    "titleCleaningSubtitle": "Poista laaturiippuvuudet, kieliä ja vuosi virran otsikkoista",
+    "includeAdultContent": "Sisällytä aikuissisältö",
+    "hiddenCategories": "Piilotetut kategoriat",
+    "hiddenCategoriesCount": "{{count}} piilotettu",
+    "noHiddenCategories": "Ei piilotettujen kategorioiden",
+    "languageAuto": "Järjestelmän oletusarvo",
+    "settingsCategories": "Kategoriat",
+    "general": "Yleinen",
+    "playback": "Toisto",
+    "playbackVodSection": "Elokuvat ja sarjat",
+    "playbackLiveSection": "Suora",
+    "networkPerformance": "Verkko ja suorituskyky",
+    "networkRequestsSection": "Pyynnöt",
+    "requestTimeout": "Pyynnön aikakatkaisu",
+    "retryAttempts": "Uudelleen yrityskerrat",
+    "cacheFallbackOnError": "Käytä vanhaa välimuistia verkkourheiluvioissa",
+    "clearRuntimeCaches": "Tyhjennä runtime-välimuistit",
+    "localOnly": "Nämä asetukset tallennetaan vain tälle laitteelle.",
+    "contentSection": "Sisältö",
+    "parentalControl": "Vanhempainvalvonta",
+    "contentControl": "Sisällönhallinta",
+    "contentControlDisabled": "Hallinta pois päältä",
+    "contentControlEnabled": "Hallinta päällä",
+    "parentalControlEnabled": "Ota vanhempainvalvonta käyttöön",
+    "parentalRequirePinForSettings": "Vaadi PIN-koodi asetuksien avaamiseen",
+    "disableParentalTitle": "Poista vanhempainvalvonta käytöstä?",
+    "disableParentalMessage": "Kaikki tällä hetkellä lukitut sisällöt ja kategoriat avataan.",
+    "disableParentalConfirm": "Poista käytöstä ja avaa",
+    "parentalManageHint": "Lukitaksesi tai avataksesi kategorioita ja sisältöä, siirry sisällönhallintaan",
+    "enterPin": "Syötä PIN-koodi",
+    "lockedContentSubtitle": "Tämä sisältö on lukittu. Syötä PIN-koodi jatkaaksesi.",
+    "hideAdultCategories": "Piilota aikuiskategoriat (XXX)",
+    "pinSection": "PIN-koodi",
+    "setPin": "Aseta PIN-koodi",
+    "changePin": "Vaihda PIN-koodi",
+    "removePin": "Poista PIN-koodi",
+    "parentalPin": "4-numeroinen PIN-koodi",
+    "parentalPinConfirm": "Vahvista PIN-koodi",
+    "pinMustBe4Digits": "PIN-koodin on oltava tarkalleen 4 numeroa.",
+    "pinMismatch": "PIN-koodit eivät täsmää.",
+    "diagnostics": "Diagnostiikka",
+    "diagnosticsHealthy": "Ei ongelmia havaittu",
+    "diagnosticsIssueDetected": "Huomiota tarvitaan",
+    "diagnosticsPlaylistSection": "Soittolistastatus",
+    "diagnosticsEpgSection": "EPG-status",
+    "diagnosticsErrorsSection": "Viimeaikaiset virheet",
+    "diagnosticsActionsSection": "Toiminnot",
+    "diagnosticsXmltvChannels": "XMLTV-kanavat",
+    "diagnosticsXmltvPrograms": "XMLTV-ohjelmat",
+    "diagnosticsEpgCache": "EPG-välimuisti",
+    "diagnosticsXtreamError": "Xtream",
+    "diagnosticsPlaylistError": "Soittolista",
+    "diagnosticsXmltvError": "XMLTV",
+    "noIssuesDetected": "Ei virheitä",
+    "refreshDiagnostics": "Päivitä diagnostiikka",
+    "diagnosticsRefreshed": "Diagnostiikka päivitetty",
+    "runtimeCacheCleared": "Runtime-välimuistit tyhjennetty",
+    "clearPosterCache": "Tyhjennä julistevälimuisti",
+    "clearPosterCacheSubtitle": "Pakottaa kansikuvien lataamisen uudelleen verkosta. Käytä tätä, jos näet paikkamerkit kansikuvien sijaan.",
+    "clearPosterCacheDone": "Julistevälimuisti tyhjennetty",
+    "statusIdle": "Lepotila",
+    "statusReady": "Valmis",
+    "statusNever": "Ei koskaan",
+    "lastUpdate": "Viimeksi päivitetty",
+    "lastContentUpdate": "Viimeisin sisällönpäivitys",
+    "xmltvStatus": "XMLTV-status",
+    "moviesLoaded": "Elokuvat ladattu",
+    "seriesLoaded": "Sarjat ladattu",
+    "channelsLoaded": "Kanavat ladattu",
+    "infoPlaylistSection": "Soittolistatiedot",
+    "infoContentSection": "Ladattu sisältö",
+    "infoAccountSection": "Palveluntarjoajan tilin status",
+    "activePlaylistSection": "Aktiivinen soittolista",
+    "savedPlaylistsSection": "Tallennetut soittolistat",
+    "active": "Aktiivinen",
+    "noSavedPlaylists": "Ei tallennettuja soittolistoja",
+    "vodAskBeforeAutoplay": "Kysy ennen seuraavan jakson automaattista toistoa",
+    "liveStartMuted": "Käynnistä live-kanavat äänettömästi",
+    "liveOpenEpgOnChannelChange": "Avaa EPG kanavan vaihdettaessa",
+    "livePreferLowLatency": "Halua matalan latenssin livenä",
+    "epgPreviewMode": "EPG-esikatselu",
+    "epgPreviewModeDescription": "Valitse, käynnistetäänkö kanavan esikatselu EPG-näytöllä.",
+    "epgPreviewModeOff": "Pois päältä",
+    "epgPreviewModeOnFocus": "Kohdistettaessa",
+    "epgPreviewModeOnTap": "Napauttamalla",
+    "epgPreviewModeLowMemoryWarning": "Vanhemmissa televisiomalleissa tämä voi aiheuttaa hitautta.",
+    "liveTVPreviewMode": "Live TV -esikatselu",
+    "liveTVPreviewModeDescription": "Valitse, käynnistetäänkö kanavan esikatselu, kun selaat Live TV -näyttöä.",
+    "liveTVPreviewModeOff": "Pois päältä",
+    "liveTVPreviewModeOnFocus": "Kohdistettaessa",
+    "liveTVPreviewModeOnTap": "Napauttamalla",
+    "liveTabLayout": "Live-näytön asettelu",
+    "liveTabLayoutDescription": "Valitse, mitä Live-näyttö näyttää.",
+    "liveTabLayoutChannelList": "Kanavaluettelo",
+    "liveTabLayoutCarousel": "Karusellit",
+    "hideItem": "Piilota kohde",
+    "hideGroupedChannelTitle": "Piilota kaikki versiot",
+    "hideGroupedChannelMessage": "Tämä piilottaa kaikki {{count}} laaturyhmän versiota tästä kanavasta. Haluatko jatkaa?",
+    "lockGroupedChannelTitle": "Lukitse kaikki versiot",
+    "lockGroupedChannelMessage": "Tämä lukitsee kaikki {{count}} laaturyhmän versiota tästä kanavasta. Haluatko jatkaa?",
+    "unlockGroupedChannelTitle": "Avaa kaikki versiot",
+    "unlockGroupedChannelMessage": "Tämä avaa kaikki {{count}} laaturyhmän versiota tästä kanavasta. Haluatko jatkaa?",
+    "unhide": "Näytä",
+    "hiddenItems": "Piilotettu sisältö",
+    "noHiddenItems": "Ei piilotettu sisältöä",
+    "hiddenItemsCount": "{{count}} piilotettu",
+    "autoHideKeywords": "Automaattiset piilotussanat",
+    "autoHideKeywordsHeader": "Avainsanat",
+    "autoHideKeywordsFooter": "Nämä avainsanat sisältävät kategoriat piilotetaan automaattisesti kaikista sisältötyypeistä.",
+    "addKeywordPlaceholder": "esim. 'xxx'",
+    "autoHidden": "Automaattisesti piilotettu",
+    "categoryOrder": "Kategorioiden järjestys",
+    "categoryOrderFooter": "Vedä kategorioita uudelleen järjestääksesi ne. Tämä asettaa mukautetun lajittelujärjestyksen.",
+    "reorderSearchDisabled": "Tyhjennä haku järjestääksesi uudelleen",
+    "resetOrder": "Nollaa järjestys",
+    "hiddenCategoriesFooter": "Ota näkyvyys käyttöön tai pois käytöstä jokaiselle kategorialle. Automaattisesti piilotetut kategoriat hallitaan avainsanojen avulla.",
+    "noCategoriesAvailable": "Ei saatavilla olevia kategorioita",
+    "manageCategories": "Hallitse kategorioita",
+    "manageCategoriesHeader": "Vedä uudelleen järjestääksesi. Napauta silmä-kuvaketta näyttääksesi/piilottaaksesi.",
+    "manageCategoriesHeaderFull": "Vedä uudelleen järjestääksesi. Napauta silmä-kuvaketta näyttääksesi/piilottaaksesi. Napauta kategoriaa hallitaksesi sen sisältöä.",
+    "autoHiddenSection": "Automaattisesti piilotettu",
+    "autoHideKeywordsFooterPerType": "Nämä avainsanat sisältävät kategoriat piilotetaan automaattisesti.",
+    "autoHiddenCategoriesSection": "Avainsanoilla piilotetut kategoriat",
+    "allHiddenContent": "Piilotettu sisältö",
+    "allLockedContent": "Lukittu sisältö",
+    "hiddenCategoriesSection": "Piilotetut kategoriat",
+    "hiddenItemsSection": "Piilotetut kohteet",
+    "lockedCategoriesSection": "Lukitut kategoriat",
+    "lockedItemsSection": "Lukitut kohteet",
+    "showAll": "Näytä kaikki",
+    "unlockAllItems": "Avaa kaikki",
+    "showAllConfirmTitle": "Näytä kaikki piilotettu sisältö?",
+    "showAllConfirmMessage": "Tämä näyttää kaikki {{count}} piilotetut kategoriat ja kohteet. Haluatko jatkaa?",
+    "unlockAllConfirmTitle": "Avaa kaikki sisältö?",
+    "unlockAllConfirmMessage": "Tämä avaa kaikki {{count}} lukitut kategoriat ja kohteet. Haluatko jatkaa?",
+    "noItemsInCategory": "Ei sisältöä tässä kategoriassa",
+    "contentType": "Sisältötyyppi",
+    "contentTypeDescription": "Valitse, minkä tyyppistä sisältöä haluat hallita",
+    "categorySortDescription": "Muuta kategorioiden lajittelujärjestystä luettelossa",
+    "allHiddenContentDescription": "Tarkista ja palauta kaikki piilotetut kategoriat ja kohteet",
+    "allLockedContentDescription": "Tarkista ja avaa kaikki lukitut kategoriat ja kohteet",
+    "categoryTapDescription": "Paina hallitaksesi tämän kategorian sisältöä",
+    "categoryEyeDescription": "Paina näyttääksesi tai piilottaaksesi tämän kategorian",
+    "categoryLockDescription": "Paina lukitaksesi tai avataksesi tämän kategorian",
+    "categoryMoveDescription": "Paina siirtääksesi tämän kategorian ylös tai alas",
+    "contentSortDescription": "Muuta kohteiden lajittelujärjestystä tässä kategoriassa",
+    "filterItemsDescription": "Kirjoita suodattaaksesi kohteet nimen perusteella",
+    "itemEyeDescription": "Paina näyttääksesi tai piilottaaksesi tämän kohteen",
+    "itemLockDescription": "Paina lukitaksesi tai avataksesi tämän kohteen",
+    "categoryContentDescription": "Hallitse tämän kategorian yksittäisiä kohteita",
+    "addKeywordDescription": "Syötä avainsana automaattisesti piilottaaksesi vastaavat kategoriat",
+    "removeKeywordDescription": "Pidä avainsanaa pitkään poistaaksesi sen",
+    "unhideCategoryDescription": "Paina painiketta näyttääksesi tämän kategorian",
+    "unhideItemDescription": "Paina painiketta näyttääksesi tämän kohteen",
+    "showAllDescription": "Näytä kaikki piilotetut kategoriat ja kohteet kerralla",
+    "unlockCategoryDescription": "Paina painiketta avataksesi tämän kategorian",
+    "unlockItemDescription": "Paina painiketta avataksesi tämän kohteen",
+    "unlockAllDescription": "Avaa kaikki lukitut kategoriat ja kohteet kerralla",
+    "showCategory": "Näytä kategoria",
+    "hideCategory": "Piilota kategoria",
+    "lockCategory": "Lukitse kategoria",
+    "unlockCategory": "Avaa kategoria",
+    "renameCategory": "Nimeä luokka uudelleen",
+    "moveCategoryToTop": "Siirrä ylimmäksi",
+    "restoreCategoryName": "Palauta alkuperäinen nimi",
+    "renameChannel": "Nimeä kanava uudelleen",
+    "moveChannelToTop": "Siirrä ylimmäksi",
+    "restoreChannelName": "Palauta alkuperäinen nimi",
+    "showItem": "Näytä kohde",
+    "lockItem": "Lukitse",
+    "unlockItem": "Avaa",
+    "removeKeyword": "Poista avainsana",
+    "removeKeywordConfirm": "Poistetaanko \"{{keyword}}\"?",
+    "moveToTop": "Siirrä ylös",
+    "moveUp": "Siirrä ylemmäs",
+    "moveDown": "Siirrä alemmäs",
+    "moveToBottom": "Siirrä alas",
+    "defaultStartScreen": "Aloitusnäyttö",
+    "defaultStartScreenSubtitle": "Valitse, mikä välilehti avautuu, kun kirjaudut soittolistaan",
+    "autoOpenPlaylist": "Avaa soittolista automaattisesti",
+    "autoOpenPlaylistSubtitle": "Mikä soittolista avataan sovelluksen käynnistyessä",
+    "autoOpenPlaylistOff": "Ei",
+    "autoOpenPlaylistLast": "Viimeisin soittolista",
+    "startScreenMovies": "Elokuvat",
+    "startScreenSeries": "Sarjat",
+    "startScreenLive": "Suora",
+    "startScreenGuide": "Opas",
+    "incognitoMode": "Incognito-tila",
+    "incognitoModeSubtitle": "Katso ilman edistymisen tai historian tallentamista tällä laitteella",
+    "incognitoActive": "Incognito-tila on aktiivinen",
+    "privacy": "Yksityisyys",
+    "recentlyWatchedLive": "Näytä 'Äskettäin katsotut'",
+    "recentlyWatchedLiveSubtitle": "Näytä \"Äskettäin katsotut\" kategoria Live-osioon",
+    "continueWatchingTapPlays": "Toista yhdellä napautuksella",
+    "continueWatchingTapPlaysSubtitle": "Napauta \"Jatka katselua\" toistaaksesi suoraan. Kun poistettu, avaa yksityiskohtien näytön.",
+    "metadataLanguage": "Metatietojen kieli",
+    "metadataLanguageSubtitle": "Kieli elokuvien, sarjojen ja ohjelmien tiedoille (TMDB)",
+    "metadataLanguageAuto": "Sama kuin sovellus",
+    "subtitleStyling": "Tekstitysvaihtoehtojen ulkoasu",
+    "subtitleFontSize": "Kirjasinkoko",
+    "subtitleFontSizeSmall": "Pieni",
+    "subtitleFontSizeMedium": "Keskikoko",
+    "subtitleFontSizeLarge": "Suuri",
+    "subtitleFontSizeXLarge": "Erittäin suuri",
+    "subtitleColor": "Tekstin väri",
+    "subtitleColorWhite": "Valkoinen",
+    "subtitleColorYellow": "Keltainen",
+    "subtitleColorGreen": "Vihreä",
+    "subtitleColorCyan": "Syaani",
+    "subtitleColorOrange": "Oranssi",
+    "subtitleBackground": "Tausta",
+    "subtitleBackgroundNone": "Ei mitään",
+    "subtitleBackgroundSemiTransparent": "Puoliksi läpinäkyvä",
+    "subtitleBackgroundOpaque": "Läpinäkymätön",
+    "subtitlePosition": "Sijainti",
+    "subtitlePositionBottom": "Alhaalla",
+    "subtitlePositionTop": "Ylhäällä",
+    "subtitleStyleSourceSystem": "Järjestelmäasetukset",
+    "subtitleStyleSourceCustom": "Mukautettu",
+    "subtitleFont": "Fontti",
+    "subtitleFontDefault": "Oletus",
+    "subtitleFontRounded": "Pyöristetty",
+    "subtitleFontSerif": "Serif",
+    "subtitleFontMono": "Tasalevyinen",
+    "subtitleBold": "Lihavoitu",
+    "subtitleEdge": "Reuna",
+    "subtitleEdgeNone": "Ei mitään",
+    "subtitleEdgeShadow": "Varjo",
+    "subtitleEdgeOutline": "Ääriviiva",
+    "subtitleStyleSource": "Tekstitysten tyyli",
+    "subtitleStyleSystemHint": "Käytetään laitteen järjestelmän tekstitysasetuksia",
+    "subtitlePreview": "Esikatselu",
+    "subtitlePreviewText": "Näin tekstitykset näyttävät",
+    "networkBuffer": "Verkon puskuri",
+    "networkBufferSubtitle": "Kuinka paljon videota esidatata. Suuremmat arvot auttavat hitaiden yhteyksien kanssa.",
+    "networkBufferAuto": "Automaattinen",
+    "hardwareAcceleration": "Laitteistokiihdytys",
+    "hardwareAccelerationSubtitle": "Käytä GPU:ta videon dekoodaukseen. Poista käytöstä, jos kohtaat kaatumisia.",
+    "hardwareAccelerationOn": "Päällä",
+    "hardwareAccelerationOff": "Pois päältä",
+    "hardwareAccelerationAuto": "Automaattinen",
+    "deinterlacing": "Lomituksen poisto",
+    "deinterlacingSubtitle": "Muunna lomitettu video progressiiviseksi. Hyödyllinen live-kanaville.",
+    "deinterlacingAuto": "Automaattinen",
+    "deinterlacingOff": "Pois päältä",
+    "liveStreamFormat": "Live-stream-muoto",
+    "liveStreamFormatSubtitle": "Automaattinen valitsee parhaan muodon toistajan perusteella: HLS AVPlayerille, MPEG-TS KSPlayerille/VLC:lle/MPV:lle/Aetherille",
+    "groupSimilarChannels": "Ryhmittele samanlaiset kanavat",
+    "groupSimilarChannelsSubtitle": "Yhdistä saman kanavan HD-, 4K- ja FHD-versiot yhteen kohtaan",
+    "splitMyListByTag": "Jaa Oma lista tunnisteen mukaan",
+    "showTrending": "Näytä 'Suositut'",
+    "hideEmptyTabs": "Piilota tyhjät välilehdet",
+    "hideEmptyTabsSubtitle": "Piilottaa Elokuvat-, Sarjat- tai Live-välilehden, kun soittolistalla ei ole kyseisen tyypin sisältöä",
+    "showTrendingSubtitle": "Näytä suosittujen banneri ja karusellit aloitusnäytössä",
+    "showRecentlyAdded": "Näytä 'Hiljattain lisätyt'",
+    "splitMyListByTagSubtitle": "Näytä yksi karuselli kullekin tunnisteelle yhden sekoitetun listan sijaan",
+    "showRecentlyAddedSubtitle": "Korosta viimeisten 30 päivän aikana lisätty sisältö",
+    "chooseQuality": "Valitse laatu",
+    "contentRefreshFrequency": "Sisällön päivitystaajuus",
+    "contentRefreshEveryAccess": "Jokaisella avauksella",
+    "contentRefreshFrequencySubtitle": "Kuinka usein ladata kaikki soittolistasisiältö (kategoriat, elokuvat, sarjat, kanavat)",
+    "epgRefreshFrequency": "EPG:n päivitystaajuus",
+    "epgRefreshFrequencySubtitle": "Kuinka usein ladata ohjelmaopas-tiedot",
+    "epgRefreshMinutes": "{{count}} min",
+    "epgRefreshHours": "{{count}} h",
+    "epgForceRefresh": "Päivitä EPG nyt",
+    "customUserAgent": "User Agent",
+    "customUserAgentSubtitle": "Mukautettu HTTP user agent virran pyynnöille. Jätä tyhjäksi oletukselle.",
+    "customUserAgentDefault": "Oletusarvoinen",
+    "playerComparison": "Toistajien vertailu",
+    "playerComparisonSubtitle": "Vertaa kunkin toistinmoottorin ominaisuuksia",
+    "playerComparisonEngine": "Moottori",
+    "playerComparisonFormats": "Muodot",
+    "playerComparisonPros": "Vahvuudet",
+    "playerComparisonCons": "Heikkoudet",
+    "playerAvplayerPro1": "Paras akun kesto ja järjestelmän integraatio",
+    "playerAvplayerPro2": "Natiivi AirPlay ja Picture-in-Picture tuki",
+    "playerAvplayerPro3": "Luotettavin HLS-virroille",
+    "playerAvplayerCon1": "Rajoitettu muodon tuki (ei MKV, AVI, RTSP)",
+    "playerAvplayerCon2": "Ei ohjelmistojen dekoodauksen varmuuspalvelua",
+    "playerKsplayerPro1": "Laajin muoto ja codec-tuki",
+    "playerKsplayerPro2": "Laitteisto- ja ohjelmistojen dekoodaus",
+    "playerKsplayerPro3": "Tekstitys ja ääni-raitajako",
+    "playerKsplayerCon1": "Suurempi akun kulutus",
+    "playerKsplayerCon2": "Satunnaiset vakausongelman joidenkin virtojen kanssa",
+    "playerVlcPro1": "Erinomainen muodon yhteensopivuus",
+    "playerVlcPro2": "Kypsä ja testattu moottori",
+    "playerVlcPro3": "Hyvä ongelmallisten virtojen käsittely",
+    "playerVlcCon1": "Suurempi muistin käyttö",
+    "playerVlcCon2": "Ei natiivi iOS-kontrollien integraatio",
+    "liveTvSettings": "Suora",
+    "advancedSettings": "Edistynyt",
+    "lockedCategories": "Lukitut kategoriat",
+    "lockedItems": "Lukitut kohteet",
+    "pinRequired": "PIN-koodi vaaditaan",
+    "pinRequiredMessage": "Syötä 4-numeroinen PIN-koodi jatkaaksesi",
+    "pinIncorrect": "Virheellinen PIN-koodi",
+    "pinTryAgain": "Yritä uudelleen",
+    "pinSetSuccess": "PIN-koodi asetettu onnistuneesti",
+    "pinRemovedSuccess": "PIN-koodi poistettu",
+    "pinChangedSuccess": "PIN-koodi muutettu",
+    "enterCurrentPin": "Syötä nykyinen PIN-koodi",
+    "enterNewPin": "Syötä uusi PIN-koodi",
+    "confirmNewPin": "Vahvista uusi PIN-koodi",
+    "recentlyWatched": "Äskettäin katsottu",
+    "credits": "Tekijät",
+    "creditsMovieData": "Tämä tuote käyttää TMDB API:a, mutta sitä ei ole TMDB:n hyväksynyt tai sertifioitu.",
+    "creditsOpenSource": "Avoimien lähdekoodien lisenssit",
+    "creditsVLC": "Videon toisto VLC:n toimesta — LGPLv2.1",
+    "creditsKSPlayer": "Edistynyt toisto KSPlayerin toimesta",
+    "creditsFFmpeg": "Tämä ohjelmisto käyttää FFmpeg-projektin kirjastoja — LGPLv2.1",
+    "creditsMPV": "Varatoisto perustuu MPV:hen (libmpv) — LGPLv2.1+",
+    "devices": "Laitteet",
+    "linkTV": "Yhdistä TV",
+    "accountDescription": "Näytä tilin tiedot ja tilausvaiheen tila",
+    "premiumDescription": "Avaa rajaton streaming ja premium-ominaisuudet",
+    "generalDescription": "Kieli ja käynnistysasetukset",
+    "playbackDescription": "Toistimen moottori, tekstitykset, ääni ja edistyneet vaihtoehdot",
+    "parentalControlsDescription": "PIN-suojaus rajoittaa pääsyä sisältöön ja asetuksiin",
+    "metadataDescription": "Kieli ja lähde elokuville ja TV-sarjoille",
+    "playlistInfoDescription": "Palvelimen tiedot, sisällön määrät ja EPG-tila",
+    "reloadPlaylistDescription": "Lataa soittolistasisiältö palvelimelta uudelleen",
+    "reloadEPGDescription": "Lataa ohjelmaopas-tiedot palvelimelta uudelleen",
+    "changePlaylistDescription": "Siirry eri IPTV-soittolistaan",
+    "versionDescription": "Sovelluksen nykyinen versio ja koontinumero",
+    "creditsDescription": "KIPTV:n käyttämät avoimen lähdekoodin kirjastot ja palvelut",
+    "services": "Palvelut",
+    "logoutDescription": "Kirjaudu ulos tililtäsi tällä laitteella",
+    "defaultDescription": "Määritä KIPTV mieltymystenmukaansa",
+    "languageDescription": "Valitse sovelluksen käyttöliittymän kieli",
+    "startScreenDescription": "Valitse, mikä välilehti avautuu ensin, kun kirjaudut soittolistaan",
+    "autoOpenPlaylistDescription": "Ohita soittolistan valinta ja avaa käynnistyksessä viimeksi käytetty tai tietty soittolista",
+    "playerEngineDescription": "Valitse videon toistimen moottori sisällön toistoon",
+    "autoplayNextEpisodeDescription": "Toista seuraava jakso automaattisesti, kun nykyinen päättyy",
+    "subtitleLanguageDescription": "Tekstitysvaihtoehtojen oletuskieli",
+    "audioLanguageDescription": "Ääni-raitojen oletutkieli",
+    "subtitleStylingDescription": "Mukauta tekstitysvaihtoehtojen kirjasinkokoa, väriä, taustaa ja sijaintia",
+    "metadataSourceDescription": "Valitse, mistä elokuvien ja sarjojen tiedot saadaan",
+    "titleCleaningDescription": "Poista laaturiippuvuudet (HD, 4K, FHD jne.) ja muu melu otsikosta",
+    "setPinDescription": "Aseta 4-numeroinen PIN-koodi suojataksesi asetuksia ja sisältöä",
+    "changePinDescription": "Muuta vanhempainvalvonnan PIN-koodia",
+    "removePinDescription": "Poista PIN-suojaus tältä laitteelta",
+    "parentalEnabledDescription": "Kun otettu käyttöön, lukittu sisältö on piilotettu päälistoista",
+    "requirePinForSettingsDescription": "Vaadi PIN-koodi asetusruudun käyttöön",
+    "subtitleFontSizeDescription": "Tekstitysvaihtoehtojen teksti näytöllä",
+    "subtitleBackgroundDescription": "Tausta tekstitysvaihtoehtojen tekstin takana parempaa luettavuutta varten",
+    "subtitlePositionDescription": "Missä tekstitysvaihtoehto näkyvät näytöllä",
+    "subtitleColorDescription": "Tekstitysvaihtoehtojen tekstin väri",
+    "accountPlanDescription": "Nykyinen tilausvaiheesi",
+    "accountPlaylistLimitDescription": "Enimmäismäärä soittolistoja, joita voit tallentaa",
+    "accountSubscriptionDescription": "Hallitse Premium-tilaustasi",
+    "accountDailyUsageDescription": "Päivittäinen streaming-käyttösi ja jäljellä oleva aika",
+    "accountProfileDescription": "Tilin profiili ja kirjautumistiedot",
+    "dangerZone": "Varovaisuusalue",
+    "resetProgressButton": "Nollaa kaikki katseluhistoria",
+    "resetProgressSubtitle": "Poista pysyvästi kaikki elokuvan ja sarjan katseluhistoria",
+    "resetProgressTitle": "Nollataan kaikki katseluhistoria?",
+    "resetProgressMessage": "Tämä poistaa pysyvästi KAIKEN katseluhistorian tässä soittolistassa, sisältäen elokuvan edistymisen, sarjan jaksojen seurannan ja valmistumisen tilan.\n\nTämä toiminto on peruuttamaton.",
+    "resetProgressSuccess": "Kaikki katseluhistoria on nollattu",
+    "deleteAccount": "Poista tili",
+    "deleteAccountDescription": "Poista tilisi ja kaikki tiedot pysyvästi",
+    "deleteAccountTitle": "Poista tili?",
+    "deleteAccountMessage": "Tämä poistaa pysyvästi tilisi ja kaikki siihen liittyvät tiedot, mukaan lukien soittolistat, katseluhistorian, listat ja asetukset.\n\nTätä toimintoa ei voi kumota.",
+    "deleteAccountConfirm": "Poista tilini",
+    "deleteAccountFinalTitle": "Oletko aivan varma?",
+    "deleteAccountFinalMessage": "Tämä on viimeinen mahdollisuutesi. Tilisi ja kaikki tiedot poistetaan pysyvästi.",
+    "deletingAccount": "Poistetaan tiliä...",
+    "openSubtitles": {
+      "title": "OpenSubtitles",
+      "description": "Hae ja lataa tekstitykset OpenSubtitles-palvelusta",
+      "username": "Käyttäjänimi",
+      "password": "Salasana",
+      "logIn": "Kirjaudu sisään",
+      "logOut": "Kirjaudu ulos",
+      "loggedIn": "Kirjautunut nimellä {{username}}",
+      "notLoggedIn": "Ilman tiliä voit ladata enintään 5 tekstitystä päivässä. Kirjaudu ilmaisen OpenSubtitles.com-tilisi avulla nostaaksesi rajaa 20:een päivässä.",
+      "remainingDownloads": "Latauksia jäljellä tänään: {{count}}",
+      "loginRequired": "Kirjaudu sisään lisälatauksia varten",
+      "clearCache": "Tyhjennä tekstityksien välimuisti",
+      "usernameDescription": "Syötä OpenSubtitles-käyttäjänimesi",
+      "passwordDescription": "Syötä OpenSubtitles-salasanasi",
+      "loginDescription": "Kirjaudu sisään päivittäisen latausrajoituksesi nostamiseksi",
+      "loggedInDescription": "OpenSubtitles-tilisi on aktiivinen",
+      "logoutDescription": "Kirjaudu ulos OpenSubtitles-tililtäsi",
+      "clearCacheDescription": "Poista kaikki tekstitysten välimuisti paikallisesta varastosta",
+      "multipleOptions": "Useita tekstitysvaihtoehtoja",
+      "multipleOptionsDescription": "Näytä kaikki saatavilla olevat tekstitykset kielittäin arvosanan mukaan järjestettyinä pelkän parhaan sijaan."
+    },
+    "clearAllHidden": "Tyhjennä kaikki",
+    "hiddenContinueWatching": "Piilotettu Jatka katselua -listalta",
+    "epgSource": "EPG-lähde",
+    "epgLoadingStatus": "EPG:n latauksen tila",
+    "epgSourceCustomUrl": "Mukautettu URL",
+    "epgSourceXtreamServer": "Xtream-palvelin",
+    "epgSourceNone": "Ei mitään",
+    "parentalControlsSection": "Lapsilukko",
+    "contentDisplaySection": "Näyttö",
+    "contentOrganizationSection": "Järjestäminen",
+    "contentDataSection": "Tiedot ja päivitys",
+    "contentDescription": "Sisällön näyttö, järjestäminen ja päivitys",
+    "autoQuality": "Automaattinen laatu (kokeellinen)",
+    "autoQualitySubtitle": "Käynnistää ryhmitellyt kanavat yhteydellesi parhaalla laadulla ja laskee sitä, jos lähetys puskuroi jatkuvasti. Jokainen vaihto lataa kanavan uudelleen, joten kuva voi hetkeksi pimentyä.",
+    "securitySection": "Turvallisuus",
+    "playbackEngineTitle": "Soitin ja moottorit",
+    "playbackEngineSubtitle": "VOD- ja Live TV -moottorit, lisäasetukset",
+    "playbackSubtitlesAudioTitle": "Tekstitys ja ääni",
+    "playbackSubtitlesAudioSubtitle": "Oletuskielet, tekstitystyyli, OpenSubtitles",
+    "playbackViewingTitle": "Katselun aikana",
+    "playbackViewingSubtitle": "Automaattinen toisto, Ohita intro, Jatka katsomista",
+    "scopeSynced": "Synkronoituu kaikille laitteille ja playlisteille",
+    "scopePlaylist": "Vain playlistillä “{{name}}”",
+    "scopeDevice": "Vain tällä laitteella ({{device}})",
+    "themeSection": "Teema",
+    "displayDescription": "Valitse, mitä näytöt näyttävät: karusellit, välilehdet ja kanavat.",
+    "scopeDeviceTV": "Vain tässä televisiossa",
+    "infoDescription": "Ehdot, tietosuoja, tekijätiedot ja sovellusversio",
+    "showHome": "Näytä Koti",
+    "showHomeSubtitle": "Koti-välilehti kokoaa yhteen näkymään sen mitä katsot, kanavasi ja uutuudet",
+    "startScreenHome": "Koti"
+  },
+  "feedback": {
+    "title": "Lähetä palautetta",
+    "submit": "Lähetä",
+    "picker": {
+      "header": "Mitä haluat lähettää?",
+      "footer": "KIPTV-tiimi lukee jokaisen ilmoituksen. Vastaamme sähköpostitse, jos olet antanut yhteystietosi."
+    },
+    "bug": {
+      "title": "Ilmoita virheestä",
+      "subtitle": "Jokin ei toimi odotetulla tavalla",
+      "titleField": "Lyhyt otsikko",
+      "descriptionField": "Yksityiskohtainen kuvaus",
+      "stepsFieldPlaceholder": "Esimerkki:\n1. Avaan Live TV:n\n2. Napautan RAI 1:tä\n3. Sovellus kaatuu",
+      "expectedField": "Odotettu toiminta",
+      "actualField": "Mitä todella tapahtui",
+      "frequencyField": "Toistuvuus",
+      "screenField": "Vaikutuksen kohde -näkymä",
+      "contactField": "Yhteyssähköposti",
+      "screenshotAdd": "Lisää kuvakaappaus",
+      "screenshotChange": "Vaihda kuvakaappausta",
+      "screenshotRemove": "Poista kuvakaappaus",
+      "diagnosticsLink": "Mitä sisällytämme raporttiin",
+      "section": {
+        "what": "Mitä tapahtui",
+        "whatFooter": "Ole mahdollisimman tarkka — se auttaa meitä toistamaan ongelman.",
+        "steps": "Vaiheet ongelman toistamiseksi",
+        "stepsFooter": "Yksi vaihe per rivi.",
+        "expectedActual": "Odotettu vs todellinen",
+        "context": "Konteksti",
+        "attachment": "Liitteet",
+        "attachmentFooter": "Kuvakaappaus on vapaaehtoinen mutta erittäin hyödyllinen.",
+        "contact": "Yhteystiedot",
+        "contactFooter": "Valinnainen mutta suositeltu — ilman yhteyssähköpostia emme voi ottaa yhteyttä tarkennuksia tai päivityksiä varten."
+      }
+    },
+    "improvement": {
+      "title": "Ehdota parannusta",
+      "subtitle": "Jokin voisi toimia paremmin",
+      "titleField": "Lyhyt yhteenveto parannuksesta",
+      "descriptionField": "Kuvaus",
+      "screenField": "Missä sovelluksessa?",
+      "contactField": "Yhteyssähköposti",
+      "section": {
+        "what": "Ehdotuksesi",
+        "whatFooter": "Kerro meille, mikä tekisi käyttökokemuksesta paremman.",
+        "where": "Mihin tämä koskee",
+        "contact": "Yhteystiedot",
+        "contactFooter": "Valinnainen mutta suositeltu — ilman yhteyssähköpostia emme voi ottaa yhteyttä tarkennuksia varten."
+      }
+    },
+    "feature": {
+      "title": "Pyydä uutta ominaisuutta",
+      "subtitle": "Jotain, mitä haluaisit nähdä KIPTV:ssä",
+      "titleField": "Ominaisuuden nimi",
+      "descriptionField": "Kuvaus",
+      "useCaseField": "Miksi tarvitset sitä / miten käyttäisit sitä",
+      "contactField": "Yhteyssähköposti",
+      "section": {
+        "what": "Haluamasi ominaisuus",
+        "whatFooter": "Mitä enemmän kontekstia annat, sitä todennäköisemmin toteutamme sen.",
+        "contact": "Yhteystiedot",
+        "contactFooter": "Valinnainen mutta suositeltu — ilman yhteyssähköpostia emme voi ilmoittaa sinulle, kun ominaisuus julkaistaan."
+      }
+    },
+    "frequency": {
+      "unspecified": "— Ei määritetty —",
+      "always": "Aina",
+      "sometimes": "Joskus",
+      "once": "Vain kerran",
+      "cannotReproduce": "Ei voida toistaa"
+    },
+    "screen": {
+      "unspecified": "— Ei määritetty —",
+      "auth": "Kirjautuminen / Rekisteröinti",
+      "playlist": "Soittolistan asetukset",
+      "home": "Etusivu",
+      "movies": "Elokuvat",
+      "series": "TV-sarjat",
+      "live": "Live TV",
+      "search": "Haku",
+      "downloads": "Lataukset",
+      "settings": "Asetukset",
+      "player": "Videosoitin",
+      "parental": "Lapsilukko",
+      "other": "Muu"
+    },
+    "disclosure": {
+      "title": "Mitä sisällytämme",
+      "attachedHeader": "Raporttiin liitetyt tiedot",
+      "attachedFooter": "Käytämme näitä tietoja vain virheen toistamiseen. Ne poistetaan 12 kuukauden kuluttua.",
+      "notSentHeader": "Mitä EMME lähetä",
+      "device": {
+        "title": "Malli ja versio",
+        "body": "Laitetyyppi, käyttöjärjestelmäversio, kieli, aikavyöhyke."
+      },
+      "app": {
+        "title": "Sovelluksen versio",
+        "body": "KIPTV:n versio ja koontinumero."
+      },
+      "network": {
+        "title": "Yhteyden tyyppi",
+        "body": "WiFi tai mobiiliyhteys. Ei IP-osoitetta, ei verkon nimeä."
+      },
+      "playlist": {
+        "title": "Soittolistan tarjoaja",
+        "body": "Vain IPTV-palvelimen isäntänimi (esim. iptv.example.com), tarjoajakohtaisten ongelmien tunnistamiseksi."
+      },
+      "logs": {
+        "title": "Viimeisimmät diagnostiikkalokit",
+        "body": "Sovelluksen viimeisimmät tapahtumat (virheet, lataukset, navigointi). Tunnukset peitetään automaattisesti."
+      },
+      "notSent": {
+        "credentialsTitle": "Soittolistan tunnukset",
+        "credentialsBody": "Soittolistan käyttäjätunnuksesi ja salasanasi eivät koskaan lähde laitteeltasi.",
+        "contactsTitle": "Yhteystiedot ja osoitekirja",
+        "contactsBody": "Sovellus ei käytä eikä lähetä puhelimesi yhteystietoja."
+      },
+      "retention": {
+        "title": "Kuinka kauan säilytämme tietoja",
+        "body": "Raportit poistetaan automaattisesti 12 kuukauden kuluttua. Voit pyytää aikaisempaa poistoa sähköpostitse."
+      }
+    },
+    "tv": {
+      "subtitle": "Valitse, miten haluat ilmoittaa ongelmasta TV:stäsi",
+      "qr": {
+        "title": "Täytä puhelimellasi",
+        "subtitle": "Skannaa QR-koodi iPhonella tai Android-puhelimella: lomake avautuu valmiiksi täytettynä TV:n tiedoilla.",
+        "urlLabel": "Tai käy tässä URL-osoitteessa:",
+        "expiry": "Koodi vanhenee 30 minuutissa."
+      },
+      "quick": {
+        "title": "Pikailmoitus",
+        "subtitle": "Lähetä TV:n diagnostiikkatiedot heti ilman kirjoittamista. Otamme yhteyttä sähköpostitse lisätietoja varten.",
+        "send": "Lähetä nyt",
+        "sent": "Lähetetty!",
+        "sentDetail": "Olemme saaneet kaikki diagnostiikkatiedot. Lähetämme sinulle sähköpostia, jos tarvitsemme lisätietoja.",
+        "disclaimer": "Käytämme näitä tietoja vain bugin toistamiseen. Soittolistasi tunnuksia ei koskaan lähetetä.",
+        "autoDescription": "Pikailmoitus lähetetty televisiosta: käyttäjä raportoi yleisestä ongelmasta. Ota yhteyttä lisätietoja varten."
+      }
+    },
+    "error": {
+      "title": "Virhe",
+      "notAuthenticated": "Sinun on oltava kirjautuneena lähettääksesi palautetta.",
+      "missingTitle": "Anna otsikko.",
+      "uploadFailed": "Kuvakaappauksen lataus epäonnistui",
+      "insertFailed": "Lähettäminen epäonnistui"
+    },
+    "success": {
+      "title": "Kiitos!",
+      "message": "Palaute lähetetty. Otamme yhteyttä, jos tarvitsemme lisätietoja."
+    }
+  },
+  "playlist": {
+    "noPlaylist": "Ei soittolistaa",
+    "noPlaylistMessage": "Lisää IPTV-soittolista aloittaaksesi",
+    "noPlaylistMessageLiveTV": "Lisää IPTV-soittolista katsellaksesi TV-kanavia",
+    "addPlaylist": "Lisää soittolista",
+    "changePlaylist": "Vaihda soittolistaa",
+    "noPlaylists": "Ei tallennettuja soittolistoja",
+    "noPlaylistsMessage": "Lisää ensimmäinen Xtream-soittolista aloittaaksesi katselun.",
+    "addFirstPlaylist": "Lisää soittolista",
+    "playlistWithoutName": "Nimetön soittolista",
+    "unableToLoadDetails": "Soittolistaan ei voi ladata tietoja",
+    "unableToConnect": "Soittolistaan ei voi muodostaa yhteyttä.",
+    "unableToSave": "Soittolistaa ei voi tallentaa.",
+    "unableToLoad": "Soittolistaa ei voi ladata.",
+    "addXtreamPlaylist": "Lisää Xtream-soittolista",
+    "removePlaylistTitle": "Poista soittolista",
+    "removePlaylistMessage": "Soittolistaa poistaessa kaikki liittyvät edistymistiedot, listat ja asetukset poistetaan. Haluatko jatkaa?",
+    "deleteConfirmTitle": "Poista pysyvästi",
+    "deleteConfirmMessage": "Tämä poistaa pysyvästi KAIKEN katseluhistorian, jaksojen seurannan, mukautetut asetukset ja mieltymykset tässä soittolistassa.\n\nTämä toiminto on peruuttamaton — dataa ei voi palauttaa.",
+    "playlistType": "Soittolistalaji",
+    "editPlaylist": "Muokkaa soittolistaa",
+    "editPlaylistSubtitle": "Päivitä toimialue, tunnistetiedot ja avatar.",
+    "limitReached": "Soittolistakiinteys saavutettu",
+    "limitReachedMessage": "Voit tallentaa enintään 5 soittolistaa. Poista olemassa oleva saadaksesi lisää tilaa.",
+    "limitReachedMessageDynamic": "Nykyisen suunnitelmasi sallii {{limit}} soittolistaa. Päivitä Premium Plus hallitaksesi enintään 5 soittolistaa.",
+    "limitBullet1": "• Poista soittolistat, joita et enää käytä",
+    "limitBullet2": "• Pidä vain aktiiviset",
+    "openPlaylist": "Avaa soittolista",
+    "canModifyInSettings": "Voit muokata soittolistoja ja linkittää tilin asetuksissa.",
+    "verifyingCredentials": "Todistetaan tunnistetiedot...",
+    "saving": "Yhteys onnistui, tallennetaan soittolistaa...",
+    "loadingContent": "Ladataan soittolistasisisältöä...",
+    "preparingContent": "Valmistetaan suositeltua sisältöä...",
+    "finalizingExperience": "Viimeistellään kokemusta...",
+    "preparing": "Valmistellaan soittolistaa...",
+    "newPlaylist": "Uusi soittolista",
+    "loginToRecover": "Kirjaudu sisään palauttaaksesi pilvipalveluun tallennetut soittolistat, kategoriat ja asetukset.",
+    "enterNameAndDomain": "Kirjoita vähintään soittolistaa nimi ja toimialue.",
+    "orEnterXtream": "Tai syötä Xtream-soittolistasi",
+    "playerOnlyNoContent": "KIPTV on mediatoistaja eikä se tarjoa sisältöä.",
+    "playlistName": "Soittolistaa nimi",
+    "playlistNamePlaceholder": "Esim. Pääsoittolista",
+    "domainXtream": "Toimialue (Xtream)",
+    "savePlaylist": "Tallenna soittolista",
+    "syncedToAccount": "Se synkronoidaan tilillesi käytettäviksi mistä tahansa.",
+    "loadingIPTVContent": "Ladataan IPTV-sisältöä...",
+    "connectingToPlaylist": "Muodostetaan yhteyttä soittolistaan...",
+    "playlistAdded": "Soittolista lisätty",
+    "sourceReady": "Lähteesi on valmis. Tässä on nopea yhteenveto.",
+    "unnamedPlaylist": "Nimetön soittolista",
+    "tierLimitMessage": "{{tier}} suunnitelma: rajaa {{limit}} soittolista(a). {{upgradeMessage}}",
+    "upgradeToFamily": "Päivitä Plus 5 soittolistaa varten.",
+    "upgradeToPremium": "Päivitä Premiumiin rajattomalla ajalla ja lisää soittolistoja.",
+    "loginRequiredToAdd": "Sinun on kirjauduttava sisään soittolistojen lisäämiseksi.",
+    "noPlaylistSelected": "Soittolistaa ei valittu",
+    "chooseAvatar": "Valitse avatar",
+    "changeAvatar": "Vaihda avatar",
+    "noAvatar": "Ei avataria",
+    "whoIsWatching": "Kuka katsoo?",
+    "add": "Lisää",
+    "connectionError": "Virhe muodostaessa yhteyttä soittolistaan",
+    "xtreamRecommended": "Xtream (suositeltu)",
+    "usernamePlaceholder": "Käyttäjänimesi",
+    "passwordPlaceholder": "Salasanasi",
+    "m3uUrl": "Soittolistaa URL",
+    "securityNote": "Tietosi tallennetaan turvallisesti",
+    "epgOptional": "Valinnainen — Muokkaa vain tarvittaessa",
+    "connectionFailed": "Yhteyden muodostus epäonnistui. Tarkista tietosi.",
+    "saveError": "Tallennusvirhe",
+    "nameDuplicate": "Samanniminen soittolista on jo olemassa",
+    "premiumRequired": "Premium vaaditaan",
+    "upgradeToAccess": "Päivitä käyttääksesi tätä soittolistaa",
+    "forceReloadPlaylist": "Lataa soittolista pakolla uudelleen",
+    "forceReloadEPG": "Lataa EPG pakolla uudelleen",
+    "m3uConfirmTitle": "Käytä M3U-URL:ia?",
+    "m3uConfirmMessage": "M3U-soittolistat toimivat peruskatseluun, mutta joitain ominaisuuksia, kuten jatkoa, tilin tietoja ja rikasta metatietoja, on saatavilla vain Xtream-tunnistetiedoilla. Suosittelemme Xtream-palvelun käyttöä, jos mahdollista.",
+    "m3uConfirmContinue": "Jatka M3U:lla",
+    "m3uHint": "Eikö sinulla ole Xtream-tunnistetietoja? Kokeile M3U-URL:ia",
+    "useXtream": "Onko sinulla Xtream-tunnistetiedot? Käytä Xtream Codes",
+    "m3uInvalidURL": "Virheellinen M3U-URL. Tarkista URL ja yritä uudelleen.",
+    "m3uDownloading": "Ladataan soittolistaa...",
+    "m3uParsing": "Jäsennetään sisältöä...",
+    "xtreamDetectedTitle": "Xtream saatavilla",
+    "xtreamDetectedMessage": "Palvelimesi tukee Xtream Codesia, joka tarjoaa nopeamman latauksen, jatkoa/uudelleenlähetyksestä ja rikkaampia metatietoja. Haluatko käyttää sitä M3U:n sijaan?",
+    "xtreamDetectedUseXtream": "Käytä Xtream-palvelua",
+    "xtreamDetectedKeepM3U": "Säilytä M3U",
+    "epgUrlLabel": "EPG-URL",
+    "epgUrlHint": "Valinnainen — auto-havaittu soittolistasta, jos saatavilla",
+    "error": {
+      "timeout": {
+        "title": "Yhteyden aikakatkaisu",
+        "message": "Sisällön lataaminen IPTV-palvelimelta epäonnistui. Palvelin saattaa olla hidas tai tilapäisesti poissa käytöstä."
+      },
+      "server": {
+        "title": "Palvelimen virhe",
+        "message": "IPTV-palvelin palautti virheen. Palvelin saattaa olla huollossa tai kokea ongelmia."
+      },
+      "network": {
+        "title": "Ei yhteyttä",
+        "message": "Internetiin ei voi muodostaa yhteyttä. Tarkista verkkosi."
+      },
+      "auth": {
+        "title": "Todentaminen epäonnistui",
+        "message": "Soittolistaan tunnistetiedot ovat virheelliset tai tili on vanhentunut."
+      },
+      "expired": {
+        "title": "Tilaus vanhentunut",
+        "message": "IPTV-tilauksesi on vanhentunut. Ota yhteyttä palveluntarjoajaasi uusiaksesi sen."
+      },
+      "solutions": "Mahdollisia ratkaisuja",
+      "solution": {
+        "checkServer": "Varmista, että IPTV-palvelin on pois päältä",
+        "tryLater": "Yritä uudelleen muutaman minuutin kuluttua",
+        "checkInternet": "Tarkista internet-yhteytesi",
+        "serverMaintenance": "Palvelin saattaa olla huollossa",
+        "contactProvider": "Ota yhteyttä IPTV-palveluntarjoajaasi",
+        "checkWifi": "Tarkista WiFi- tai mobiilidata-yhteytesi",
+        "checkCellular": "Kokeile vaihtaa WiFi:n ja mobiiliverkon välillä",
+        "disableVPN": "Poista VPN käytöstä, jos käytössä",
+        "toggleVPN": "Kokeile VPN:n ottamista käyttöön/poistamista käytöstä",
+        "checkCredentials": "Tarkista käyttäjänimi ja salasana",
+        "checkExpiration": "Varmista, että tilisi ei ole vanhentunut"
+      }
+    },
+    "connection": "Yhteys"
+  },
+  "movies": {
+    "markWatched": "Merkitse katsotuksi",
+    "markUnwatched": "Merkitse katsomaattomaksi",
+    "title": "Elokuvat",
+    "noMovies": "Elokuvia ei löytynyt",
+    "noMoviesMessage": "Valittu soittolista ei sisällä elokuvia",
+    "contentNotLoaded": "Sisältöä ei voitu ladata",
+    "contentNotLoadedMessage": "Elokuvia ei voitu ladata. Tarkista yhteytesi ja yritä uudelleen.",
+    "otherMovies": "Muita elokuvia",
+    "top20Trending": "TOP 20 Suosittuja elokuvia",
+    "categoriesRemaining": "{{count}} kategoriaa jäljellä...",
+    "noPlaylistSelected": "Soittolistaa ei valittu",
+    "loadingMovies": "Ladataan elokuvia...",
+    "movieNotAvailable": "Elokuva ei ole saatavilla",
+    "movieNotAvailableMessage": "Vastaavuutta ei löytynyt soittolistastasi. Yritä hakea sisältöä manuaalisesti.",
+    "movieNotAvailableInPlaylist": "Elokuva ei ole saatavilla soittolistassasi",
+    "popularMovies": "Suositut elokuvat",
+    "newArrivals": "Uudet saapumiset"
+  },
+  "series": {
+    "title": "Sarjat",
+    "noSeries": "Sarjoja ei löytynyt",
+    "noSeriesMessage": "Valittu soittolista ei sisällä sarjoja",
+    "otherSeries": "Muita sarjoja",
+    "top20Trending": "TOP 20 Suosittuja sarjoja",
+    "categoriesRemaining": "{{count}} kategoriaa jäljellä...",
+    "seriesNotAvailableInPlaylist": "Sarja ei ole saatavilla soittolistassasi",
+    "notAvailable": "Sarja ei ole saatavilla",
+    "notAvailableMessage": "Vastaavuutta ei löytynyt soittolistastasi. Yritä hakea sisältöä manuaalisesti.",
+    "playlistAttaching": "Soittolistaa liitetään. Yritä uudelleen pian.",
+    "episodeNotAvailable": "Jakso ei ole saatavilla",
+    "attachingPlaylist": "Liitetään soittolistaa...",
+    "loadingSeries": "Ladataan sarjoja...",
+    "popularSeries": "Suositut sarjat",
+    "engagingTvSeries": "Kiinnostava sarja",
+    "season": "Kausi",
+    "seasonCount": "{{count}} KAUSI",
+    "seasonsCount": "{{count}} KAUTTA",
+    "noEpisodes": "Ei jaksoja",
+    "noEpisodesMessage": "Tälle kaudelle ei ole saatavilla jaksoja",
+    "resumeFrom": "Jatka",
+    "lastWatchedPoint": "viimeksi katsotusta kohdasta",
+    "watchNow": "Katso nyt",
+    "startSeason": "Aloita kausi {{season}}",
+    "resume": "Jatka",
+    "goBack": "Mene takaisin",
+    "loadError": "Sarjan tietoja ei voi ladata",
+    "loadErrorMessage": "Latausvirhe: {{message}}",
+    "episode": "Jakso {{number}}",
+    "markWatched": "Merkitse katsotuksi",
+    "markUnwatched": "Merkitse katsomaattomaksi",
+    "markWatchedUpTo": "Katsottu tähän asti",
+    "markAllWatched": "Merkitse koko sarja katsotuksi",
+    "markAllUnwatched": "Merkitse koko sarja katsomattomaksi",
+    "resetEpisodeProgress": "Nollaa jakson edistyminen",
+    "resetProgress": "Nollaa sarjan edistyminen",
+    "resetProgressTitle": "Nollaa edistyminen",
+    "resetProgressMessage": "Tämä poistaa kaiken katseluhistorian tälle sarjalle. Tätä toimintoa ei voi peruuttaa.",
+    "resetProgressConfirm": "Nollaa",
+    "episodeInfo": "Jakson tiedot",
+    "downloadEpisode": "Lataa jakso"
+  },
+  "multiview": {
+    "title": "Multiview",
+    "openInMultiview": "Avaa Multiviewissä",
+    "addToMultiview": "Lisää Multiviewiin",
+    "empty": "Lisää kanava katsoaksesi useita lähetyksiä samanaikaisesti",
+    "addChannel": "Lisää kanava",
+    "maxReached": "Enintään 4 kanavaa saavutettu",
+    "removeTile": "Poista Multiviewistä",
+    "audioTracks": "Ääni",
+    "subtitles": "Tekstitykset",
+    "settings": "Asetukset",
+    "layout": {
+      "auto": "Auto",
+      "stack": "Pino",
+      "grid": "Ruudukko",
+      "strip": "Rivi",
+      "focus": "Tarkennus"
+    },
+    "tile": {
+      "loading": "Ladataan…",
+      "error": "Toistovirhe",
+      "retry": "Yritä uudelleen",
+      "noProgram": "Ei ohjelmatietoja"
+    },
+    "close": "Sulje Multiview",
+    "vodBlocked": "Sulje Multiview avataksesi elokuvia ja sarjoja",
+    "confirmDismiss": "Paina Back uudelleen sulkeaksesi",
+    "minimizedHint": "Valitse toinen kanava lisätäksesi sen Multiview'iin"
+  },
+  "livetv": {
+    "startSection": "Live TV -aloitusosio",
+    "startSectionSubtitle": "Valitse, mistä listasta Live TV avautuu",
+    "title": "Suora",
+    "noChannels": "Kanavia ei löytynyt",
+    "noChannelsMessage": "Valittu soittolista ei sisällä TV-kanavia",
+    "otherChannels": "Muita kanavia",
+    "selectChannel": "Valitse kanava",
+    "selectChannelMessage": "Valitse kanava aloittaaksesi",
+    "channels": "Kanavat",
+    "epg": "EPG",
+    "noDescription": "Kuvausta ei ole saatavilla",
+    "watchNow": "Katso nyt",
+    "epgLoadError": "EPG-latausvirhe",
+    "epgNotAvailable": "Ohjelmaopas ei ole saatavilla",
+    "epgNotAvailableMessage": "Tämän kanavan EPG-tiedot eivät ole tällä hetkellä saatavilla",
+    "infoChannel": "Kanavan tiedot",
+    "streamNotAvailable": "Striimi ei ole saatavilla",
+    "streamUnavailable": "Striimi ei ole saatavilla. Yritä myöhemmin tai valitse toinen kanava.",
+    "limitReachedLiveMessage": "Saavutit päivittäisen katselurajan Live-toiston aikana. Päivitä Premium:iin rajattomaksi katseluksi.",
+    "popularChannels": "Suositut kanavat",
+    "tvProgram": "TV-ohjelma",
+    "tapForFullscreen": "Napauta kokoruuduksi",
+    "noChannelSelected": "Kanavaa ei valittu",
+    "selectChannelToSeeGuide": "Valitse kanava nähdäksesi ohjelmaoppaan",
+    "inProgress": "Käynnissä",
+    "inHoursMinutes": "{{hours}}h {{minutes}}min päästä",
+    "inMinutes": "{{minutes}}min päästä",
+    "startingSoon": "Alkaa pian",
+    "now": "NYTÄÄN",
+    "next": "Seuraava",
+    "loadingEpg": "Ladataan ohjelman tietoja...",
+    "epgRateLimited": "Liian monta pyyntöä - yritä myöhemmin",
+    "epgDataNotAvailable": "Tämän kanavan EPG-tiedot eivät ole tällä hetkellä saatavilla",
+    "unknownChannel": "Tuntematon kanava",
+    "noProgram": "Ei ohjelmaa",
+    "loadingChannels": "Ladataan kanavia...",
+    "viewModeList": "Luettelo",
+    "viewModeEPG": "TV-opas",
+    "viewModeCarousel": "Karuselli",
+    "viewModeLabel": "Näkymä-tila",
+    "sortOrderLabel": "Lajittelujärjestys",
+    "allChannels": "Kaikki kanavat",
+    "recentlyWatched": "Äskettäin katsottu",
+    "recentlyAdded": "Hiljattain lisätyt",
+    "removeFromRecentlyWatched": "Poista \"Äskettäin katsotusta\"",
+    "favorites": "Suosikit",
+    "categoriesSection": "Kategoriat",
+    "nextProgram": "Seuraava: ",
+    "upNext": "Seuraava",
+    "today": "Tänään",
+    "tomorrow": "Huomenna",
+    "selectQuality": "Valitse laatu",
+    "qualityVariants": "laatua saatavilla",
+    "replay": "Uudelleenlähetys",
+    "yesterday": "Eilen",
+    "replaySelectQuality": "Valitse uudelleenlähetyksen laatu",
+    "startsIn": "Alkaa {{time}} kuluttua",
+    "searchChannels": "Etsi kanavia...",
+    "viewModeGrid": "Ruudukko",
+    "customizeLogo": "Mukauta logoa",
+    "renameChannelFooter": "Saman nimiset versiot ryhmitellään yhteen.",
+    "renameChannelSelected": "Valittu kanava",
+    "renameChannelOthers": "Muut ryhmitellyt versiot",
+    "restoreAllChannelNames": "Palauta kaikki alkuperäiset nimet",
+    "customizeEPG": "Mukauta EPG",
+    "overrideAppliesTo": "Koskee",
+    "overrideAppliesToCount": "%d kanavaa",
+    "epgSheet": {
+      "search": "Hae nimellä tai EPG-tunnuksella",
+      "sources": "EPG-lähteet",
+      "useProviderDefault": "Automaattinen",
+      "loading": "Ladataan EPG-opasta…",
+      "loadingHint": "Ladataan ohjelmaopasta — suurissa oppaissa tämä voi kestää hetken.",
+      "epgNotLoaded": "EPG-opasta ei ole vielä ladattu",
+      "refineSearch": "Tarkenna hakua nähdäksesi lisää tuloksia",
+      "source": "EPG-lähde",
+      "programCount": "%d ohjelmaa"
+    },
+    "logoSheet": {
+      "search": "Hae logoja",
+      "title": "Kanavan logo",
+      "suggested": "Ehdotetut",
+      "customURL": "Mukautettu URL-osoite",
+      "restore": "Palauta oletus",
+      "invalidURL": "Virheellinen URL-osoite",
+      "loadFailed": "Kuvaa ei voida ladata"
+    },
+    "epgOffset": "EPG-aikasiirtymä",
+    "epgOffsetMinutesShort": "min",
+    "epgOffsetChannelHint": "0 = käytä soittolistan siirtymää",
+    "epgOffsetPlaylistHint": "Siirtää tämän soittolistan kaikkien ohjelmien aikoja.",
+    "epgGuide": "EPG-opas",
+    "qualityAuto": "Auto",
+    "qualityAutoExperimental": "Auto (kokeellinen)"
+  },
+  "epg": {
+    "title": "Opas",
+    "movie": "Elokuva",
+    "tvShow": "Sarja",
+    "cast": "Näyttelijät",
+    "rating": "Arvostelu",
+    "loadingMetadata": "Ladataan tietoja...",
+    "identifiedAs": "Tunnistettu nimellä",
+    "remindMe": "Muistuta minua",
+    "reminderSet": "Muistutus asetettu",
+    "remind10min": "10 minuuttia ennen",
+    "remind30min": "30 minuuttia ennen",
+    "remind1hour": "1 tunti ennen",
+    "reminderRemove": "Poista muistutus",
+    "reminderTitle": "{{playlist}}, valmista popcornia! 🍿",
+    "reminderBody": "{{title}} alkaa {{time}}-minuutin kuluttua kanavalla {{channel}}",
+    "reminderTime10": "10 minuuttia",
+    "reminderTime30": "30 minuuttia",
+    "reminderTime60": "1 tunti",
+    "reminderTooSoon": "Program is too close to set a reminder",
+    "reminderNeedsIOSDevice": "Muistutukset toimitetaan iPhoneen tai iPadiin. Avaa KIPTV iOS-laitteella, salli ilmoitukset ja yritä uudelleen."
+  },
+  "trending": {
+    "movies": "Suositut elokuvat",
+    "series": "Suositut sarjat",
+    "all": "Suosittu sisältö",
+    "loadingTrending": "Ladataan suosittua sisältöä...",
+    "inPlaylist": "Saatavilla soittolistassa",
+    "notInPlaylist": "Ei soittolistassa",
+    "checkingPlaylist": "Tarkistetaan soittolistaa..."
+  },
+  "search": {
+    "title": "Haku",
+    "placeholder": "Hae elokuvia, sarjoja, kanavia, ohjelmia tai henkilöitä...",
+    "searchContent": "Hae sisältöä",
+    "searchMessage": "Käytä hakupalkkia aloittaaksesi",
+    "typeAtLeast": "Kirjoita vähintään 2 merkkiä hakua varten...",
+    "noResults": "Ei tuloksia",
+    "noResultsMessage": "Sisältöä ei löytynyt haulle \"{{query}}\"",
+    "resultsFor": "{{count}} tulosta haulle \"{{query}}\"",
+    "resultsForQuery": "Tulokset haulle \"{{query}}\"",
+    "movies": "Elokuvat ({{count}})",
+    "series": "Sarjat ({{count}})",
+    "liveChannels": "Live-kanavat ({{count}})",
+    "initializingSearch": "Alustetaan hakua...",
+    "indexingInProgress": "Indeksointi käynnissä",
+    "indexingMessage": "Odota, kun indeksoimme sisältöä...",
+    "indexingHint": "Voit vapaasti selata sovellusta sillä välin",
+    "searchError": "Hakuvirhe",
+    "selectPlaylistFirst": "Valitse soittolista ennen hakua",
+    "noPlaylistMessage": "Lisää IPTV-soittolista hakea sisältöä",
+    "noResultsHint": "Yritä eri hakua",
+    "moviesSeriesChannels": "Elokuvat, sarjat ja live-kanavat",
+    "indexingTitle": "Indeksoidaan sisältöä...",
+    "indexingSubtitle": "Tulokset päivittyvät, kun enemmän sisältöä indeksoidaan",
+    "filterAll": "Kaikki",
+    "filterMovies": "Elokuvat",
+    "filterSeries": "Sarjat",
+    "filterChannels": "Kanavat",
+    "sectionChannels": "Kanavat",
+    "sectionMovies": "Elokuvat",
+    "sectionSeries": "Sarjat",
+    "noInfoAvailable": "Tietoja ei ole saatavilla",
+    "filterPeople": "Ihmiset",
+    "filterPrograms": "TV-ohjelmat",
+    "sectionPeople": "Ihmiset",
+    "sectionPrograms": "TV-ohjelmat",
+    "clearHistory": "Tyhjennä",
+    "recentSearches": "Viimeisimmät haut",
+    "collectionFilms": "{{count}} elokuvaa",
+    "collectionAvailable": "{{available}}/{{total}} soittolistassa",
+    "collectionSpine": "Kokoelma",
+    "collectionFilmNumber": "Elokuva {{number}}"
+  },
+  "premium": {
+    "title": "Premium",
+    "kiptvPremium": "KIPTV Premium",
+    "streamingUnlimited": "Rajaton striimaus",
+    "unlimitedViewing": "Rajaton katseleminen",
+    "multiplePlaylists": "Useita soittolistoja (enintään 5)",
+    "simplePlaylist": "Henkilökohtainen soittolista",
+    "cloudSync": "Pilvien synkronointi",
+    "earlyAccess": "Varhainen pääsy ominaisuuksiin",
+    "perYear": "/vuosi",
+    "perMonth": "Vain 1,67€/kuukausi • Säästä 22€ kuukausittaisiin verrattuna",
+    "upgradeToPremium": "Päivitä Premiumiin",
+    "upgrade": "Päivitä",
+    "unlockAllBenefits": "Avaa kaikki edut",
+    "restorePurchases": "Palauta ostot",
+    "continueFree": "Jatka ilmaisella",
+    "upgradeAlert": "Premium-päivitystoiminto toteutetaan RevenueCat:lla tulevissa versioissa.",
+    "restoreAlert": "Ostojen palautus toteutetaan RevenueCat:lla.",
+    "goBack": "Mene takaisin",
+    "subscribeAnnual": "Tilaa - {{price}}/vuosi",
+    "subscribeMonthly": "Tilaa - {{price}}/kuukausi",
+    "startFreeTrial": "Aloita ilmainen kokeilu",
+    "freeTrialBadge": "{{days}} päivää ilmaiseksi",
+    "trialDisclaimer": "Ilmainen {{days}} päivän ajan, sitten {{price}}/{{period}}. Uusiutuu automaattisesti, ellei sitä peruuteta vähintään 24 tuntia ennen kokeilujakson päättymistä. Hallinnoi {{storeName}}-asetuksissa.",
+    "disclaimer": "Maksu veloitetaan {{storeName}}-tililtäsi ostojen vahvistamisen yhteydessä. Tilaus uusiutuu automaattisesti, elleivät se peruuta vähintään 24 tuntia ennen nykyisen ajanjakson päättymistä.",
+    "storeNameIOS": "App Store",
+    "storeNameAndroid": "Google Play",
+    "familyServiceIOS": "Applen perheiden jakaminen",
+    "familyServiceAndroid": "Google Play -perheiden kirjasto",
+    "contentDisclaimer": "KIPTV on videosoitin eikä se tarjoa sisältöä. Näytetyt kuvat ovat vain havainnollisiin tarkoituksiin.",
+    "deviceShowcase": "Yksi tilaus, kaikki laitteesi",
+    "comingSoon": "Tulossa pian",
+    "planOneSubtitle": "Kaikki ominaisuudet sisältyvät. 1 soittolista.",
+    "planPlusSubtitle": "Kaikki ominaisuudet sisältyvät. Jopa 5 soittolistaa.",
+    "termsOfService": "Käyttöehdot",
+    "privacyPolicy": "Tietosuojakäytäntö",
+    "planFree": "Ilmainen",
+    "monthly": "Kuukausittain",
+    "annual": "Vuosittain",
+    "monthShort": "kuukausi",
+    "yearShort": "vuosi",
+    "savePercent": "Säästä {{percent}}%",
+    "selectPlan": "Valitse suunnitelmasi",
+    "mostPopular": "Suosituin",
+    "bestValue": "Paras arvo",
+    "currentPlan": "Nykyinen suunnitelma",
+    "subscribing": "Käsitellään...",
+    "restoring": "Palautetaan...",
+    "purchaseSuccess": "Tervetuloa Premiumiin!",
+    "purchaseSuccessMessage": "Tilauksesi on nyt aktiivinen. Nauti rajattomasta striimuksesta!",
+    "restoreSuccess": "Ostot palautettu onnistuneesti!",
+    "restoreNotFound": "Aiempia ostoja ei löytynyt",
+    "manageSubscription": "Hallitse tilausta",
+    "managedByAppStore": "Hallitaan App Storella",
+    "managedByPlayStore": "Hallitaan Google Playssa",
+    "renewsOn": "Uusiutuu",
+    "expiresOn": "Päättyy",
+    "manageInAppStore": "Hallitse App Storessa",
+    "manageInPlayStore": "Hallitse Play Storessa",
+    "errors": {
+      "cancelled": "Osto peruutettu",
+      "network": "Verkkovirhe. Tarkista yhteytesi.",
+      "notAllowed": "Ostot eivät ole sallittuja tällä laitteella",
+      "alreadyOwned": "Sinulla on jo aktiivinen tilaus",
+      "generic": "Jokin meni pieleen. Yritä uudelleen.",
+      "storeUnavailable": "Kauppa on tilapäisesti poissa käytöstä"
+    },
+    "features": {
+      "unlimited": "Rajaton striimaus",
+      "noAds": "Ei mainoksia",
+      "singlePlaylist": "1 soittolista",
+      "multiplePlaylists": "Enintään 5 soittolistaa",
+      "cloudSync": "Pilvien synkronointi kaikkien laitteiden välillä",
+      "prioritySupport": "Prioriteettituki"
+    },
+    "categories": {
+      "discover": "Tutustu",
+      "watchYourWay": "Katso tavallasi",
+      "yourSpace": "Sinun tila, sinun säännöt",
+      "plus": "Rakennettu koko perheelle"
+    },
+    "benefits": {
+      "recentlyAdded": {
+        "title": "Äskettäin lisätyt",
+        "subtitle": "KIPTV seuraa uusia elokuvia, sarjoja, jaksoja ja live-kanavia"
+      },
+      "trailers": {
+        "title": "Traileri ja lisää",
+        "subtitle": "Katso trailereita, kulissien takaa ja bonussisältöä"
+      },
+      "recommended": {
+        "title": "Suositeltu",
+        "subtitle": "Henkilökohtaisia ehdotuksia sen perusteella, mitä katselet"
+      },
+      "trending": {
+        "title": "Suosittu",
+        "subtitle": "Tutustu suosituimpaan sisältöön juuri nyt"
+      },
+      "advancedSearch": {
+        "title": "Edistynyt haku",
+        "subtitle": "Hae elokuvia, sarjoja, kanavia, ohjelmia ja näyttelijöitä"
+      },
+      "continueWatching": {
+        "title": "Jatka katselua",
+        "subtitle": "Jatka siitä, mihin jäit"
+      },
+      "offlineDownload": {
+        "title": "Lataa ja offline",
+        "subtitle": "Lataa sisältöä katsellaksesi ilman yhteyttä"
+      },
+      "pip": {
+        "title": "Kuva kuvassa",
+        "subtitle": "Jatka katselua muiden sovellusten käytöstä"
+      },
+      "casting": {
+        "title": "AirPlay ja Chromecast",
+        "subtitle": "Lähetä video televisioon"
+      },
+      "audioSubtitles": {
+        "title": "Ääni ja tekstitykset",
+        "subtitle": "Valitse ääni-raidat ja tekstityksien kielet"
+      },
+      "tvArchive": {
+        "title": "TV-arkisto",
+        "subtitle": "Katso menneitä live-ohjelmia jatkoa/uudelleenlähityksellä"
+      },
+      "multiplePlaylists": {
+        "title": "Enintään 5 soittolistaa",
+        "subtitle": "Hallitse useita soittolistoja samalla tilillä"
+      },
+      "favorites": {
+        "title": "Suosikit ja tunnisteet",
+        "subtitle": "Järjestä suosikit mukautetuilla tunnisteilla"
+      },
+      "customOrdering": {
+        "title": "Mukautettu järjestys",
+        "subtitle": "Lajittele kategoriat ja sisältö haluamallasi tavalla"
+      },
+      "liveLastWatched": {
+        "title": "Äskettäin katsottu",
+        "subtitle": "Pika-pääsy viimeksi katsottuihin live-kanaviin"
+      },
+      "cloudSync": {
+        "title": "Automaattinen pilvien synkronointi",
+        "subtitle": "Asetukset, suosikit ja edistyminen synkronoidaan kaikilla laitteilla"
+      },
+      "parentalControls": {
+        "title": "Vanhempainvalvonta",
+        "subtitle": "Aseta PIN-koodi herkkää sisältöä varten"
+      },
+      "hideContent": {
+        "title": "Piilota sisältö",
+        "subtitle": "Piilota kategoriat ja kohteet, joita et halua nähdä"
+      },
+      "multiplatform": {
+        "title": "Useille alustoille",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV, Mac"
+      },
+      "unlimitedViewing": {
+        "title": "Rajaton katseleminen",
+        "subtitle": "Lähetä ilman päivittäisiä aikarajoja"
+      },
+      "andMoreComing": "Ja paljon muuta tulossa!"
+    },
+    "swipeForMore": "Pyöritä nähdäksesi lisää",
+    "dailyLimitReached": "Päivittäinen katseluraja saavutettu",
+    "one": "One",
+    "plus": "Plus",
+    "planOne": "Premium One",
+    "planPlus": "Premium Plus",
+    "external": {
+      "title": "Näin hankit Premiumin",
+      "body": "Tällä laitteella ei voi ostaa eikä hallita tilauksia. Hanki KIPTV Premium toisella laitteella ja kirjaudu sitten tänne samalla KIPTV-tilillä: Premium seuraa mukanasi kaikilla laitteillasi.",
+      "appleDevices": "iPhone, iPad, Apple TV, Mac",
+      "googleDevices": "Android-puhelimet, -tabletit, Android TV ja Fire TV",
+      "alreadySubscribed": "Minulla on jo tilaus",
+      "managedElsewhere": "Hallinnoidaan kaupassa, josta tilauksen teit"
+    }
+  },
+  "account": {
+    "connectedAccount": "Yhdistetty tili",
+    "memberFree": "ILMAINEN JÄSEN",
+    "memberPremium": "PREMIUM-JÄSEN",
+    "syncActive": "Synkronointi aktiivinen",
+    "syncActiveSubtitle": "Soittolistat, listat ja asetukset synkronoidaan pilveen.",
+    "autoBackup": "Automaattinen varmuuskopiointi ja jatka katselua",
+    "syncAllDevices": "Synkronoi soittolistat ja listat kaikilla laitteilla",
+    "streamingPerDay": "30 minuuttia ilmaista striimusta päivässä",
+    "upgradeToPremium": "Päivitä Premiumiin",
+    "premiumActive": "Premium aktiivinen",
+    "premiumActiveSubtitle": "Kaikki ominaisuudet avattu, rajaton striimaus.",
+    "unlimitedPlaylists": "Rajalliset ja synkronoidut soittolistat",
+    "unlimitedStreaming": "Rajaton striimausaika",
+    "prioritySupport": "Prioriteettituki ja varhainen pääsy uusiin ominaisuuksiin",
+    "manageSubscription": "Hallitse tilausta",
+    "logoutFromAccount": "Kirjaudu ulos tililtä",
+    "logoutSecure": "Kirjaudu turvallisesti ulos tältä laitteelta",
+    "unlockCloud": "Avaa kaikki pilvitoiminnot",
+    "syncAcrossDevices": "Synkronoi soittolistat, listat ja asetukset kaikilla laitteillasi. Se on ilmaista ja vie vain muutaman sekunnin.",
+    "playlistsAndFavoritesSynced": "Soittolistat ja listat aina synkronoitu",
+    "resumeWatching": "Jatka katselua siitä mihin jäit",
+    "autoBackupAndSecureAccess": "Automaattinen varmuuskopiointi ja turvallinen pääsy",
+    "continueWithoutAccount": "Jatka ilman tiliä",
+    "plan": "Suunnitelma",
+    "free": "Ilmainen",
+    "dailyUsage": "Päivittäinen käyttö",
+    "playlistLimit": "Soittolistakiinteys",
+    "minutesUsed": "{{used}}/{{total}} minuuttia tänään",
+    "playlistsAllowed": "{{count}} soittolista(a)",
+    "playlistsUnlimited": "Rajattomasti soittolistoja"
+  },
+  "usage": {
+    "limitReached": "Raja saavutettu",
+    "usedToday": "Olet käyttänyt {{minutes}} minuuttia tänään",
+    "usedTodayShort": "Käytetty {{minutes}}min tänään",
+    "remaining": "{{time}} jäljellä",
+    "remainingHoursMinutes": "{{hours}}h {{minutes}}m jäljellä",
+    "remainingMinutes": "{{minutes}}m jäljellä",
+    "nearLimit": "Olet lähellä päivittäisen rajan saavuttamista",
+    "premium": "Premium",
+    "unlimited": "Rajaton",
+    "upgradeToPremium": "Päivitä Premiumiin",
+    "discoverPremium": "Tutustu Premiumiin",
+    "usageInfo": "Olet käyttänyt {{used}} {{total}} päivittäisistä minuuteista"
+  },
+  "language": {
+    "selectLanguage": "Select Language / Seleziona Lingua",
+    "reloadNote": "Sovellus ladataan uudelleen automaattisesti kielenvaihdoston jälkeen",
+    "reloadNoteEn": "L'app ricaricherà automaticamente dopo il cambio lingua",
+    "useDeviceLanguage": "Käytä laitteen kieltä",
+    "confirmChangeTitle": "Vahvista kielenvaihdos",
+    "confirmChangeMessage": "Kielenvaihdos poistaa kaikki välimuistissa olevat metatiedot (julisteet, kuvaukset, logot) ladatakseen sisältöä {{language}}-kielellä. Haluatko jatkaa?",
+    "changeError": "Kielenvaihdos epäonnistui. Yritä uudelleen.",
+    "restartRequired": "Uudelleenkäynnistys vaaditaan",
+    "restartMessage": "Kielenvaihdoksen suorittamiseksi sulje ja avaa sovellus manuaalisesti ladataksesi metatietoja uudella kielellä."
+  },
+  "categories": {
+    "title": "Kategoriat",
+    "subtitle": "Lajittele tai piilota näkyvät kategoriat soittolistassa. Muutokset ovat heti voimassa.",
+    "customizeMovies": "Mukauta elokuvia",
+    "customizeSeries": "Mukauta sarjoja",
+    "movies": "Elokuvat",
+    "series": "Sarjat",
+    "liveTV": "Kanavat",
+    "customizeLiveTV": "Mukauta Live",
+    "sortSubtitle": "Valitse järjestys ja piilota kategoriat, joista et ole kiinnostunut. Voit muuttaa niitä myöhemmin asetuksissa.",
+    "loading": "Ladataan kategorioita...",
+    "retrieving": "Haetaan kategorioita..."
+  },
+  "detail": {
+    "rewatch": "Katso uudelleen",
+    "alreadyWatched": {
+      "movieTitle": "Jo katsottu",
+      "episodeTitle": "Jo katsottu",
+      "message": "Haluatko aloittaa uudelleen alusta?",
+      "restart": "Aloita uudelleen"
+    },
+    "lastAccess": "Viimeisin pääsy",
+    "expiresAt": "Päättyy",
+    "maxConnections": "Suurin yhteyksien määrä",
+    "activeConnections": "Aktiiviset yhteydet",
+    "totalContent": "Sisällön kokonaismäärä",
+    "liveTV": "Live-kanavat",
+    "movies": "Elokuvat",
+    "series": "Sarjat",
+    "title": "Soittolistaan tiedot",
+    "loading": "Haetaan tietoja...",
+    "play": "Toista",
+    "alsoOn": "Myös:",
+    "chooseVersion": "Valitse versio",
+    "otherVersions": "Muut versiot",
+    "otherVersionsCount": "Muut versiot ({{count}})",
+    "trailers": "Traileri ja lisää",
+    "addToFavorites": "Oma lista",
+    "download": "Lataa",
+    "recommended": "Lisää tämän kaltaista",
+    "collection": "Kokoelmasta",
+    "more": "Lisää",
+    "less": "Vähemmän",
+    "comingSoon": "Saapuu pian",
+    "ageRating": "Ikärajoitus",
+    "watchNow": "Katso nyt",
+    "info": {
+      "title": "Tiedot",
+      "status": "Tila",
+      "country": "Maa",
+      "production": "Tuotanto",
+      "director": "Ohjaaja",
+      "creator": "Luoja",
+      "originalTitle": "Alkuperäinen nimi",
+      "originalLanguage": "Alkuperäinen kieli",
+      "network": "Verkko",
+      "episodes": "Jaksot",
+      "budget": "Budjetti",
+      "revenue": "Lipputulot",
+      "screenplay": "Käsikirjoitus",
+      "music": "Musiikki",
+      "airingPeriod": "Esityskausi",
+      "ongoing": "Jatkuu",
+      "statusValue": {
+        "released": "Julkaistu",
+        "returningSeries": "Jatkuva sarja",
+        "ended": "Päättynyt",
+        "canceled": "Peruttu",
+        "inProduction": "Tuotannossa",
+        "postProduction": "Jälkituotannossa",
+        "planned": "Suunnitteilla",
+        "rumored": "Huhu",
+        "pilot": "Pilotti"
+      }
+    },
+    "privateSearch": "Yksityinen haku",
+    "searchGoogle": "Hae Googlesta"
+  },
+  "onboarding": {
+    "subtitle": "Live, elokuvat ja sarjat puhtaalla ja nopealla käyttöliittymällä.",
+    "slides": {
+      "multiplatform": {
+        "title": "Missä vain oletkin",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV ja Mac. Yksi sovellus kaikille laitteillesi."
+      },
+      "explore": {
+        "title": "Tutustu sisältöön",
+        "subtitle": "Live, elokuvat ja sarjat puhtaalla ja nopealla käyttöliittymällä."
+      },
+      "sync": {
+        "title": "Yksi tili, kaikki laitteet",
+        "subtitle": "Tallenna soittolistat pilveen ja jatka siitä mihin jäit."
+      }
+    },
+    "disclaimer": "KIPTV on mediasoitin: se ei tarjoa sisältöä.",
+    "getStarted": "Aloita"
+  },
+  "setup": {
+    "skip": "Ohita",
+    "back": "Takaisin",
+    "useDefaults": "Käytä oletuksia",
+    "welcome": {
+      "title": "Tässä on soittolistasi",
+      "subtitleXtream": "{{name}} · Xtream · voimassa {{date}} asti",
+      "subtitleGeneric": "{{name}} · {{type}}",
+      "movies": "Elokuvat",
+      "series": "Sarjat",
+      "channels": "Kanavat",
+      "withGuide": "Kanavat, joilla on opas",
+      "cta": "Mukauta minuutissa"
+    },
+    "start": {
+      "title": "Mistä haluat aloittaa?",
+      "subtitle": "Näyttö, joka avautuu käynnistettäessä.",
+      "home": "Koti",
+      "homeSub": "Kaikki yhdellä silmäyksellä",
+      "movies": "Elokuvat",
+      "moviesSub": "Elokuvat etusijalla",
+      "series": "Sarjat",
+      "seriesSub": "Uudet jaksot ensin",
+      "live": "Live",
+      "liveSub": "Kanavat ja TV-opas"
+    },
+    "playback": {
+      "title": "Mikä soittimessa on tärkeintä?",
+      "subtitle": "Valitse sinulle sopiva moottori. Voit vaihtaa sen milloin tahansa.",
+      "quality": "Ominaisuudet ja laatu",
+      "qualitySub": "Kaikki, mihin laitteesi pystyy",
+      "qualityEngine": "Automaattinen moottori · Aether",
+      "stability": "Vakaus ja nopeus",
+      "stabilitySub": "Käynnistyy heti, kestää hankalat lähetykset",
+      "stabilityEngine": "VLC-moottori · automaattisella varalla",
+      "pillFastStart": "Nopea käynnistys ja kelaus",
+      "pillReconnect": "Vankka uudelleenyhdistäminen",
+      "pillFormats": "Kaikki formaatit",
+      "pillProven": "Koeteltu moottori",
+      "synced": "Synkronoitu tiliisi: jokainen laite käyttää parasta moottoriaan."
+    },
+    "channels": {
+      "title": "Miten haluat kanavasi?",
+      "subtitle": "Saman kanavan HD-, FHD- ja 4K-versiot.",
+      "before": "Ennen",
+      "after": "Jälkeen",
+      "group": "Ryhmittele",
+      "groupSub": "Yksi kanava, laatumerkit",
+      "separate": "Pidä erillään",
+      "separateSub": "Yksi rivi per versio",
+      "recommended": "Suositeltu",
+      "sampleProgram": "Illan uutiset",
+      "sampleNext": "Seuraavaksi: Illan elokuva",
+      "sampleProgramShort": "Illan uutiset · Illan elokuva",
+      "fallbackChannel": "Kanava 1"
+    },
+    "adults": {
+      "title": "Aikuissisältö?",
+      "subtitle": "Sinä päätät, mitä tässä soittolistassa näkyy.",
+      "showAll": "Näytä kaikki",
+      "showAllSub": "Ei suodatinta",
+      "hide": "Piilota aikuisten kategoriat",
+      "hideSub": "Avainsanan mukaan: XXX, Adult, 18+",
+      "hidePin": "Piilota ja suojaa PIN-koodilla",
+      "hidePinSub": "Kategoriat pysyvät lukittuina PIN-koodilla",
+      "hidePinExistingSub": "Käyttää PIN-koodia, joka sinulla jo on",
+      "pinPrompt": "Valitse 4-numeroinen PIN",
+      "pinConfirm": "Toista PIN",
+      "pinMismatch": "PIN-koodit eivät täsmää, yritä uudelleen",
+      "pinSet": "PIN asetettu"
+    },
+    "color": {
+      "title": "Sinun värisi",
+      "subtitle": "Sovellus vaihtaa väriä valitessasi.",
+      "background": "Tausta",
+      "premiumTitle": "Lisää värejä Premiumilla",
+      "premiumCta": "Avaa"
+    },
+    "done": {
+      "title": "Kaikki valmista",
+      "subtitle": "Tässä ovat valintasi.",
+      "autoOpen": "Avaa {{name}} heti käynnistettäessä",
+      "autoOpenSub": "Ohittaa soittolistan valinnan",
+      "hint": "Voit muuttaa kaiken Asetuksissa.",
+      "cta": "Siirry kotiin"
+    },
+    "recap": {
+      "start": "Alkaa: {{screen}}",
+      "playbackQuality": "Soitin: laatu",
+      "playbackStability": "Soitin: vakaus",
+      "channelsGrouped": "Kanavat ryhmitelty",
+      "channelsSeparate": "Kanavat erillään",
+      "adultsShown": "Aikuiset: näkyvissä",
+      "adultsHidden": "Aikuiset: piilotettu",
+      "adultsHiddenPin": "Aikuiset: piilotettu + PIN",
+      "color": "{{color}} · {{background}}"
+    }
+  },
+  "continueWatching": {
+    "title": "Jatka katselua",
+    "removeConfirm": "Haluatko poistaa \"{{title}}\" \"Jatka katselua\" -lista?",
+    "remove": "Poista",
+    "contentNotAvailable": "Sisältö ei ole saatavilla",
+    "contentNotInPlaylist": "Tämä sisältö ei ole enää nykyisessä soittolistassa.",
+    "actions": "Toiminnot",
+    "removeFromContinueWatching": "Poista \"Jatka katselua\" -listalta",
+    "markAsWatched": "Merkitse katsotuksi",
+    "remaining": "jäljellä",
+    "goToMovie": "Siirry elokuvaan",
+    "goToSeries": "Siirry sarjaan",
+    "addToFavorites": "Lisää oma listan",
+    "download": "Lataa",
+    "comingSoon": "Saapuu pian",
+    "resetSeriesProgress": "Nollaa sarjan edistyminen",
+    "resetMovieProgress": "Nollaa elokuvan edistyminen",
+    "resetProgressConfirm": "Tämä poistaa pysyvästi kaiken katseluhistorian \"{{title}}\"-kohteesta. Tätä toimintoa ei voi peruuttaa.",
+    "resetProgress": "Nollaa"
+  },
+  "player": {
+    "shortcuts": {
+      "seekForward": "Kelaa eteenpäin",
+      "seekBackward": "Kelaa taaksepäin",
+      "playPause": "Toista/Keskeytä",
+      "close": "Sulje"
+    },
+    "pip": {
+      "active": "Toistetaan kuva kuvassa",
+      "expandHintPrefix": "Paina",
+      "expandHintSuffix": "palataksesi koko näyttöön"
+    },
+    "info": "Tiedot",
+    "videoDataUnavailable": "Videotiedot eivät ole saatavilla",
+    "streamUrlError": "Virta-URL:n luominen epäonnistui",
+    "closePlayer": "Sulje toistaja",
+    "playbackError": "Toiston virhe",
+    "dailyLimitMessage": "Olet saavuttanut päivittäisen katselurajan.",
+    "continueWatching": "Jatka katselua",
+    "upgradePremium": "Päivitä Premium",
+    "timeUsed": "Käytetty aika: {{minutes}} minuuttia.",
+    "livePlayerClosed": "Toistaja suljetaan. Päivitä Premium-tilille rajattomaksi katseluksi.",
+    "audio": "Ääni",
+    "audioTrack": "Ääni-raita",
+    "subtitles": "Tekstitykset",
+    "subtitlesOff": "Pois päältä",
+    "speed": "Nopeus",
+    "playbackSpeed": "Toiston nopeus",
+    "information": "Tiedot",
+    "fromStart": "Alusta",
+    "goToMovie": "Siirry elokuvaan",
+    "goToSeries": "Siirry sarjaan",
+    "noAudioTracks": "Ääni-raitoja ei ole saatavilla",
+    "progress": "Edistyminen",
+    "remainingTime": "%@ jäljellä",
+    "restartFromBeginning": "Alusta",
+    "backToVideo": "Takaisin videoon",
+    "noDescriptionAvailable": "Kuvaus ei ole saatavilla tälle sisällölle.",
+    "noPlotAvailable": "Kuvausta ei ole saatavilla.",
+    "more": "LISÄÄ",
+    "liveStreamNoDescription": "Live-striimi - kuvausta ei ole saatavilla.",
+    "loading": "Ladataan...",
+    "usingEngine": "Moottori:",
+    "engine": "Moottori",
+    "enginePicker": "Toistomoottori",
+    "track": {
+      "audio": "Ääni",
+      "subtitle": "Teksti",
+      "off": "Pois päältä"
+    },
+    "rate": {
+      "normal": "Normaali"
+    },
+    "error": {
+      "title": "Toiston virhe",
+      "invalidURL": "Virheellinen virta-URL",
+      "unsupportedFormat": "Muoto ei ole tuettu",
+      "allEnginesFailed": "Tätä sisältöä ei voi toistaa. Kaikki toistinmoottorit epäonnistuivat.",
+      "tryAnotherPlayer": "Kokeile toista soitinta",
+      "engineSwitchFailedRestored": "{{failed}} ei käynnistynyt. {{previous}} palautettu.",
+      "unknown": "Tuntematon toiston virhe",
+      "close": "Sulje",
+      "engineCrash": "Soitin kaatui. Kokeile toista moottoria.",
+      "loadFailed": "Tätä sisältöä ei voi ladata.",
+      "network": "Verkkovirhe. Tarkista yhteytesi.",
+      "playbackFailed": "Toisto epäonnistui.",
+      "timeout": "Striimin vastaaminen kesti liian kauan."
+    },
+    "returnToLive": "Palaa Live:iin",
+    "retry": "Yritä uudelleen",
+    "playNow": "Toista nyt",
+    "playingIn": "Toistetaan {{seconds}}s:n kuluttua",
+    "dailyLimitWarning": "Sinulla on {{minutes}} minuuttia jäljellä tänään",
+    "formatNotSupported": "Tämä muoto ei ole tuettu tässä televisiossa",
+    "nextEpisode": "Seuraava jakso",
+    "upNext": "Seuraavat",
+    "skipIntro": "Ohita alku",
+    "skipRecap": "Ohita kertaus",
+    "skipCredits": "Ohita lopputekstit",
+    "holdToUnlock": "Pidä avataksesi",
+    "epg": "Ohjelma",
+    "retryStream": "Yritä uudelleen",
+    "streamDropped": "Virta-yhteys katkennut",
+    "loadEarlierPrograms": "Lataa aikaisempia ohjelmia",
+    "replay": "Uudelleenlähetys",
+    "playReplay": "Toista",
+    "cancelReplay": "Peruuta",
+    "noReplayData": "Uudelleenlähitystietoja ei ole saatavilla",
+    "favorites": "Suosikit",
+    "recent": "Viimeaikaiset",
+    "noFavorites": "Ei suosikki-kanavia",
+    "noRecentChannels": "Ei äskettäin katsottuja kanavia",
+    "archiveDays": "{{count}} päivän arkisto",
+    "liveIndicator": "SUORA",
+    "openSubtitles": {
+      "external": "OpenSubtitles",
+      "searchOnline": "Hae verkon tekstityksiä",
+      "loading": "Ladataan tekstityksiä...",
+      "searching": "Etsitään tekstityksiä...",
+      "downloading": "Ladataan tekstitystä...",
+      "downloaded": "Teksti ladattu",
+      "noResults": "Tekstityksiä ei löytynyt",
+      "quotaExceeded": "Latausraja saavutettu. Yritä uudelleen huomenna.",
+      "loginForMore": "Kirjaudu sisään lisälatauksia varten",
+      "hearingImpaired": "CC",
+      "downloads": "lataukset",
+      "remainingDownloads": "Latauksia jäljellä tänään: {{count}}",
+      "selectLanguage": "Valitse kieli",
+      "searchError": "Tekstitysjen haku epäonnistui",
+      "downloadError": "Tekstityksen lataaminen epäonnistui",
+      "results": "Tulokset",
+      "cached": "Välimuistissa",
+      "searchAgain": "Hae uudelleen"
+    },
+    "openSubtitlesError": {
+      "invalidKey": "Virheellinen API-avain",
+      "invalidCredentials": "Virheellinen käyttäjänimi tai salasana",
+      "forbidden": "Pääsy evätty",
+      "invalidFile": "Virheellinen tekstitystiedosto",
+      "invalidToken": "Istunto vanhentunut. Kirjaudu uudelleen sisään.",
+      "linkExpired": "Latauslinkki vanhentunut. Yritä uudelleen.",
+      "rateLimit": "Liian monta pyyntöä. Odota hetki.",
+      "serverError": "Palvelimen virhe. Yritä myöhemmin.",
+      "network": "Verkkovirhe. Tarkista yhteytesi.",
+      "invalidResponse": "Virheellinen palvelinvastaus",
+      "parseFailed": "Tekstitystiedoston jäsentäminen epäonnistui"
+    },
+    "chromecast": {
+      "castingTo": "Lähetetään kohteeseen %@",
+      "stopCasting": "Lopeta lähetys",
+      "castTo": "Lähetä kohteeseen",
+      "disconnect": "Katkaise yhteys",
+      "error": {
+        "title": "Chromecast-virhe",
+        "incompatibleStream": "Tämä suoratoisto ei ole yhteensopiva Chromecastin kanssa. Toisto jatkuu laitteellasi.",
+        "cleartextHTTP": "IPTV-palveluntarjoajasi käyttää suojaamatonta yhteyttä (HTTP), jota Chromecast ei hyväksy. Tarvitaan palveluntarjoaja, jolla on suojattu yhteys (HTTPS). Toisto jatkuu laitteella."
+      }
+    },
+    "airplay": {
+      "videoActive": "Toistetaan AirPlayn kautta",
+      "tapToManage": "Vaihda tai katkaise laite napauttamalla",
+      "warning": {
+        "titleBridge": "Video AirPlayn kautta",
+        "messageBridge": "Tämä muoto ei tue AirPlayta videon kanssa natiivisti, mutta KIPTV voi silti lähettää sen televisioon. Säätimet ovat rajalliset (toisto/tauko ja ±10s, ei edistymispalkkia).",
+        "streamVideo": "Lähetä video televisioon",
+        "title": "AirPlay: vain ääni",
+        "messagePlayer": "AirPlay lähettää vain äänen. Käytä AVPlayer tai Aether lähettääksesi myös videon.",
+        "messageAether": "AirPlay lähettää vain äänen. Käytä Aether lähettääksesi myös videon.",
+        "messageContent": "Tämä sisältö voidaan lähettää AirPlayn kautta vain äänenä — video jää tähän laitteeseen.",
+        "useVideoEngine": "Käytä AVPlayer",
+        "useAether": "Käytä Aether",
+        "continueAudioOnly": "Jatka vain äänellä"
+      },
+      "error": {
+        "title": "AirPlay-virhe",
+        "liveBridgeFailed": "Videon lähettäminen televisioon ei onnistunut. Yritä uudelleen."
+      }
+    },
+    "subtitleDelay": "Tekstityksen viive",
+    "audioDelay": "Äänen viive",
+    "resetDelay": "Nollaa",
+    "nowPlaying": "Toistetaan nyt"
+  },
+  "startup": {
+    "loadingIPTV": "Ladataan IPTV-sisältöä...",
+    "enhancingQuality": "Parannetaan sisällön laatua...",
+    "preparationComplete": "Valmistelu valmis",
+    "connectingPlaylist": "Muodostetaan yhteyttä soittolistaan...",
+    "enhancementContinues": "Parantaminen jatkuu taustalla...",
+    "systemReady": "Järjestelmä valmis",
+    "contentEnhanced": "{{count}} sisältöä parannettuja",
+    "smartMode": "Älykäs tila: suosittu sisältö",
+    "poweredByTMDB": "TMDB:n toimesta • Optimoitu suurille soittolistoille",
+    "contents": "sisältöä"
+  },
+  "tmdb": {
+    "completed": "Valmis! {{count}} sisältöä parannettuja",
+    "enhancingMovies": "Parannetaan elokuvia...",
+    "enhancingSeries": "Parannetaan sarjoja...",
+    "waiting": "Odotetaan...",
+    "secondsRemaining": "{{seconds}}s jäljellä",
+    "minutesRemaining": "{{minutes}}min jäljellä",
+    "hoursRemaining": "{{hours}}h {{minutes}}min jäljellä"
+  },
+  "poster": {
+    "notAvailable": "{{type}} ei ole saatavilla soittolistassasi"
+  },
+  "sorting": {
+    "categoryOrder": "Kategorioiden järjestys",
+    "contentOrder": "Sisällön järjestys",
+    "default": "Oletusarvoinen",
+    "mostPopular": "Suosituimmat",
+    "mostVoted": "Parhaiten arvioidut",
+    "oldest": "Vanhimmat",
+    "mostRecent": "Uusimmat",
+    "alphabeticalAsc": "A → Z",
+    "alphabeticalDesc": "Z → A",
+    "custom": "Mukautettu",
+    "goToCategory": "Siirry kategoriaan"
+  },
+  "genres": {
+    "animation": "Animaatio",
+    "action": "Toiminta",
+    "comedy": "Komedia",
+    "crime": "Rikos",
+    "adventure": "Seikkailu",
+    "documentary": "Dokumentti",
+    "thriller": "Trilleri",
+    "fantasy": "Fantasia",
+    "romance": "Romanssi",
+    "drama": "Draama",
+    "sciFi": "Sci-Fi",
+    "horror": "Kauhu",
+    "family": "Perhe",
+    "mystery": "Mysteeri",
+    "music": "Musiikki",
+    "war": "Sota",
+    "history": "Historia",
+    "western": "Western"
+  },
+  "downloads": {
+    "cancelAllTitle": "Peruutetaanko kaikki lataukset?",
+    "cancelAllMessage": "{{count}} käynnissä olevaa, jonossa olevaa tai keskeytettyä latausta peruutetaan. Jo ladattu sisältö säilyy.",
+    "season": {
+      "confirmTitle": "Lataa kausi {{season}}",
+      "confirmToDownload": "Ladattavia jaksoja: {{count}}",
+      "confirmSkipped": "Jo ladattu tai jonossa: {{count}}",
+      "confirmQueueNote": "Ne noudattavat jonoa ja samanaikaisten latausten rajaa.",
+      "downloadRemaining": "Lataa {{count}} jäljellä olevaa",
+      "pauseAll": "Keskeytä kausi",
+      "resumeAll": "Jatka kautta",
+      "cancelAll": "Peruuta kauden lataukset",
+      "progressA11y": "Kausi {{season}}: {{done}}/{{total}} jaksoa ladattu"
+    },
+    "title": "Lataukset",
+    "storageUsed": "Käytetty tallennustila",
+    "free": "vapaa",
+    "cellularDownloads": "Matkapuhelinverkkojen lataukset",
+    "cellularDownloadsSubtitle": "Salli lataukset mobiilitiedon kautta",
+    "active": "Ladataan",
+    "completed": "Valmis",
+    "failed": "Epäonnistunut",
+    "downloadFailed": "Lataus epäonnistui",
+    "episodes": "jaksot",
+    "movie": "Elokuva",
+    "episode": "Jakso",
+    "movies": "Elokuvat",
+    "series": "Sarjat",
+    "emptyTitle": "Ei latauksia",
+    "emptyMessage": "Lataa elokuvia ja jaksoja katsellaksesi offline-tilassa",
+    "deleteAll": "Poista kaikki lataukset",
+    "deleteAllTitle": "Poistetaanko kaikki lataukset?",
+    "deleteAllMessage": "Tämä poistaa kaikki ladatut sisältö ja vapauttaa tallennustilaa.",
+    "downloadSeason": "Lataa kausi",
+    "downloading": "Ladataan...",
+    "downloaded": "Ladattu",
+    "notEnoughSpace": "Ei tarpeeksi tallennustilaa",
+    "wifiOnly": "Muodosta yhteys Wi-Fi:hin ladataksesi",
+    "streamWarningTitle": "Lataus käynnissä",
+    "streamWarningMessage": "Lataus on käynnissä. Useimmat IPTV-palveluntarjoajat sallivat vain yhden yhteyden kerralla. Striimaus ja lataus saattavat keskeyttyä.",
+    "queued": "Jonossa",
+    "cancelAll": "Peruuta kaikki",
+    "cellularAlertTitle": "Mobiililataukset pois käytöstä",
+    "cellularAlertMessage": "Mobiilidata-lataukset ovat tällä hetkellä pois käytöstä. Haluatko ottaa ne käyttöön?",
+    "cellularAlertEnable": "Ota käyttöön",
+    "allSeasons": "Kaikki kaudet",
+    "cancel": "Peruuta",
+    "deleteSeason": "Poista kausi",
+    "notFound": "Latausta ei löytynyt",
+    "pause": "Keskeytä",
+    "paused": "Keskeytetty",
+    "remove": "Poista",
+    "resume": "Jatka",
+    "subtitle": "Elokuvat ja jaksot saatavilla offline-tilassa",
+    "multipleDownloads": "Samanaikaiset lataukset",
+    "multipleDownloadsSubtitle": "Anna useiden latausten edetä yhdessä",
+    "multipleTitle": "Samanaikaiset lataukset",
+    "multipleConnectionsOne": "Palveluntarjoajasi sallii vain yhden samanaikaisen yhteyden.",
+    "multipleConnections": "Palveluntarjoajasi sallii enintään %d samanaikaista yhteyttä.",
+    "multipleConnectionsUnknown": "Emme saaneet selville, montako samanaikaista yhteyttä palveluntarjoajasi sallii.",
+    "multipleLimit": "KIPTV edistää enintään %d latausta yhdessä; loput jäävät jonoon.",
+    "multipleRisk": "Palveluntarjoaja voi estää samanaikaiset lataukset.",
+    "multipleDontShowAgain": "Älä näytä uudelleen",
+    "multipleRefusedTitle": "Samanaikaisia latauksia ei tueta",
+    "multipleRefusedMessage": "Palveluntarjoajasi hylkäsi samanaikaiset lataukset. Lataukset jatkuvat yksi kerrallaan."
+  },
+  "offline": {
+    "title": "Offline-tila",
+    "goOnline": "Siirry verkkoon",
+    "yourPlaylists": "Omat soittolistani",
+    "selectPlaylist": "Valitse soittolista selataksesi",
+    "items": "kohteet",
+    "offlineMode": "Offline-tila",
+    "offlineModeDescription": "Selataan vain ladattua sisältöä",
+    "stillOffline": "Yhteyttä ei ole saatavilla",
+    "noDownloads": "Ei ladattua sisältöä",
+    "noDownloadsMessage": "Lataa elokuvia ja jaksoja online-tilassa katsellaksesi offline-tilassa.",
+    "noConnection": "Ei internet-yhteyttä",
+    "downloadsAvailable": "Ladattu sisältö saatavilla",
+    "useOffline": "Käytä offline-tilaa",
+    "syncProgressTitle": "Offline-katselukohdat löytyivät",
+    "syncProgressMessage": "Löysimme {{count}} offline-tilassa tallennettua katselukohtaa. Synkronoidaanko ne tilillesi?",
+    "syncProgressConfirm": "Synkronoi",
+    "syncProgressLater": "Ei"
+  },
+  "contextMenu": {
+    "removeFromFavorites": "Poista oma listalta",
+    "expandCategory": "Laajenna kategoria",
+    "alreadyDownloaded": "Jo ladattu",
+    "downloading": "Ladataan…",
+    "notAvailableInPlaylist": "Ei saatavilla soittolistassasi"
+  },
+  "myList": {
+    "title": "Oma lista",
+    "addToMyList": "Oma lista",
+    "createNewTag": "Luo uusi tunniste",
+    "manageTags": "Hallinnoi tunnisteita",
+    "editTags": "Muokkaa",
+    "tagNamePlaceholder": "Tunnisteen nimi",
+    "saveTag": "Tallenna tunniste",
+    "cancel": "Peruuta",
+    "done": "Valmis",
+    "noItems": "Listasi on tyhjä",
+    "noItemsMessage": "Lisää elokuvia, sarjoja tai kanavia listallesi löytääksesi ne täältä.",
+    "all": "Kaikki",
+    "deleteTagTitle": "Poistetaanko tunniste?",
+    "deleteTag": "Poista",
+    "deleteTagMessage": "Kaikki kohteet osiossa \"%@\" poistetaan omalta listalta.",
+    "tags": {
+      "myMovies": "Omat elokuvani",
+      "mySeries": "Omat sarjani",
+      "myChannels": "Omat kanavani",
+      "mustWatch": "On katsottava",
+      "rewatch": "Katsoa uudelleen",
+      "classics": "Klassikot",
+      "family": "Perhe",
+      "kids": "Lapset",
+      "liveSports": "Live-urheilu",
+      "news": "Uutiset",
+      "cartoons": "Piirrossarjat",
+      "international": "Kansainvälinen",
+      "traktWatchlist": "Trakt Watchlist"
+    },
+    "verifyingAvailability": "Tarkistetaan saatavuutta…",
+    "notAvailableYet": "Ei vielä saatavilla soittolistassasi",
+    "picker": {
+      "chooseVersion": "Valitse tallennettava versio",
+      "chooseVersionMessage": "Tämä nimike on saatavilla useina versioina soittolistallasi. Valitse, minkä haluat säilyttää listallasi."
+    },
+    "availability": {
+      "popup": {
+        "title": "Saatavilla soittolistassasi",
+        "message": "\"%@\", jonka tallensit listalle \"%@\", on nyt saatavilla."
+      }
+    },
+    "tmdbOnlyAdded": {
+      "title": "Lisätty listallesi",
+      "message": "\"%@\" ei ole vielä soittolistassasi. Ilmoitamme sinulle, kun palveluntarjoajasi lisää sen."
+    }
+  },
+  "person": {
+    "biography": "Elämäkerta",
+    "personalInfo": "Henkilökohtaiset tiedot",
+    "knownFor": "Tunnettu",
+    "knownForMale": "Tunnettu",
+    "knownForFemale": "Tunnettu",
+    "knownCredits": "Tunnetut kunnianosoitukset",
+    "gender": "Sukupuoli",
+    "birthday": "Syntymäpäivä",
+    "deathday": "Kuolinpäivä",
+    "placeOfBirth": "Syntymäpaikka",
+    "alsoKnownAs": "Tunnetaan myös nimellä",
+    "alsoKnownAsMale": "Tunnetaan myös nimellä",
+    "alsoKnownAsFemale": "Tunnetaan myös nimellä",
+    "male": "Mies",
+    "female": "Nainen",
+    "nonBinary": "Muuta kuin binaarinen",
+    "filmography": "Filmiografia",
+    "movies": "Elokuvat",
+    "series": "Sarjat",
+    "showAll": "Näytä kaikki",
+    "acting": "Näytteleminen",
+    "directing": "Ohjaus",
+    "writing": "Kirjoittaminen",
+    "production": "Tuotanto",
+    "noBiography": "Elämäkerta ei ole saatavilla.",
+    "noCredits": "Kunnianosoituksia ei ole saatavilla."
+  },
+  "tvpairing": {
+    "title": "Yhdistä TV",
+    "instructions": "Avaa KIPTV-sovellus puhelimessasi, siirry Asetukset → Tili → Yhdistä TV -kohtaan ja syötä alla näkyvä koodi.",
+    "generating": "Luodaan koodia",
+    "regenerate": "Uusi koodi",
+    "waiting": "Odotetaan vahvistusta",
+    "retry": "Yritä uudelleen",
+    "success": "TV yhdistetty!",
+    "successSubtitle": "Ladataan soittolistojasi...",
+    "withApp": "Onko sovellus jo asennettuna?\nSiirry Asetukset → Tili → Yhdistä TV -kohtaan",
+    "qrCaption": "Skannaa QR-koodi puhelimen kameralla",
+    "lead": "Kirjaudu sisään tai luo KIPTV-tili",
+    "manual": "Tai mene osoitteeseen kiptv.app/pair\nja syötä koodi"
+  },
+  "linkTV": {
+    "title": "Yhdistä TV",
+    "instructions": "Syötä 6-numeroinen koodi, joka näkyy televisiossasi, yhdistääksesi sen tilillesi.",
+    "enterCode": "Syötä koodi",
+    "confirm": "Yhdistä TV",
+    "success": "TV yhdistetty!",
+    "connectedTo": "Yhdistetty {{device}}-laitteeseen",
+    "error": "Virheellinen tai vanhentunut koodi. Yritä uudelleen.",
+    "autoConfirming": "Yhdistetään TV:tä...",
+    "notAuthenticated": "Sisäänkirjautuminen vaaditaan",
+    "notAuthenticatedMessage": "Kirjaudu tilillesi ennen TV:n yhdistämistä."
+  },
+  "badges": {
+    "new": "Uusi",
+    "newMovie": "Uusi elokuva",
+    "newSeries": "Uusi sarja",
+    "newSeason": "Uusi tuotantokausi",
+    "newEpisode": "Uusi jakso",
+    "newEpisodes": "Uudet jaksot"
+  },
+  "topshelf": {
+    "continueWatchingMovies": "{{name}}, jatka elokuvien katselua",
+    "continueWatchingSeries": "{{name}}, jatka sarjojen katselua",
+    "recentlyWatchedLive": "{{name}}, viimeksi katsotut kanavat"
+  },
+  "update": {
+    "title": "Päivitys saatavilla",
+    "subtitle": "Versio {{version}} on saatavilla App Storessa",
+    "description": "Päivitä nyt saadaksesi uusimmat ominaisuudet ja korjaukset.",
+    "releaseNotesHeading": "Uutta tässä versiossa",
+    "action": {
+      "update": "Päivitä nyt",
+      "later": "Myöhemmin"
+    }
+  },
+  "whatsNew": {
+    "title": "Uutta",
+    "subtitle": "Versio {{version}} — Parannuksia ja korjauksia",
+    "pageSubtitle": "Parannuksia ja korjauksia",
+    "v3_0": {
+      "homeTab": {
+        "title": "Uusi Etusivu-välilehti",
+        "desc": "Oma etusivu iPhonella, iPadilla ja Apple TV:llä: älykäs nostoalue jatkettavine nimikkeineen, dynaamiset rivit, \"Tänään illalla TV:ssä\" ja omat syötteet. Voit muokata tai piilottaa etusivun ja ottaa sen taas käyttöön asetuksista"
+      },
+      "traktIntegration": {
+        "title": "Trakt-integraatio",
+        "desc": "Yhdistä Trakt-tilisi: edistyminen ja katsotut pysyvät synkronissa, voit arvioida elokuvan tai jakson katsottuasi, tuoda historiasi ja valita, mihin soittolistoihin integraatio pätee."
+      },
+      "externalRatings": {
+        "title": "IMDb:n, Rotten Tomatoesin ja Metacriticin arviot",
+        "desc": "Elokuvien ja sarjojen sivuilla näkyvät IMDb:n, Rotten Tomatoesin ja Traktin arviot suoraan nostoalueella. TMDB on edelleen ensisijainen lähde."
+      },
+      "dynamicBackground": {
+        "title": "Dynaaminen tausta",
+        "desc": "Asetukset > Teema sisältää uuden Tausta-valitsimen: Musta, teeman väri tai Dynaaminen, joka häivyttää nostetun julisteen käyttöliittymän taakse. Valinta synkronoituu laitteiden välillä, ja iOS:ssä myös kuvake ja widget seuraavat sitä."
+      },
+      "setupWizard": {
+        "title": "Ohjattu määritys",
+        "desc": "Ensimmäisen soittolistan jälkeen lyhyt vaiheistus auttaa olennaisessa: toistoprofiili, PIN-koodi, automaattinen avaus. Voit myös kopioida asetukset soittolistalta toiselle."
+      },
+      "sagaNextPill": {
+        "title": "Elokuvasarjat kuin sarja",
+        "desc": "Soittimen \"Next\"-painike ehdottaa myös saman elokuvasarjan seuraavia elokuvia, ja kokoelman sivulla on Toista, Jatka ja Katso uudelleen kuten sarjassa."
+      },
+      "tvPlaylistPeek": {
+        "title": "Nopea soittolistan vaihto Apple TV:llä",
+        "desc": "Kun painat Menu-painiketta välilehtipalkista, soittolistan valitsin tulee näkyviin ennen poistumista: vaihdat profiilia yhdellä eleellä."
+      },
+      "aetherUpdate": {
+        "title": "Aether-moottori päivitetty",
+        "desc": "Aether-moottori päivitetty versioon 6.75.0: se listaa nyt kaikki ääni- ja tekstitysraidat ja käynnistää VOD:n nopeammin."
+      },
+      "chromecastAirplayImprovements": {
+        "title": "Chromecast ja AirPlay luotettavampia",
+        "desc": "Suorat kanavat AirPlayn kautta yltävät nyt myös muihin kuin Applen televisioihin. Useita Chromecast-vikoja on korjattu."
+      },
+      "epgSourcePicker": {
+        "title": "EPG-lähde helpompi löytää",
+        "desc": "EPG-lähteen valitsin löytää nyt myös tunnukset, joita opas ei ilmoita, joten useampi kanava saa oikean ohjelmiston."
+      },
+      "performance": {
+        "title": "Nopeampi reagoimaan",
+        "desc": "Etusivu ja tietosivut avautuvat nopeammin."
+      },
+      "playerFixes": {
+        "title": "Korjauksia soittimiin",
+        "desc": "Kieliraidat ovat selkeämpiä ja haluamasi kieli otetaan käyttöön älykkäämmin silloinkin, kun raidoilla on outoja nimiä; MPV:llä kuva on pikselintarkka, ei enää sumeita logoja; soittimen sulkeminen varamoottoriin siirtymisen aikana ei jätä haamuääntä; suoran kanavan uudelleenlataus säilyttää käsin valitun moottorin."
+      },
+      "continueWatchingFixes": {
+        "title": "Korjauksia Jatka katselua -riviin",
+        "desc": "Rivi päivittyy heti soittimen sulkemisen jälkeen, jatkaminen toimii laitteiden välillä myös sarjoissa, ja uuden jakson ilmestyessä näkyy \"Jatka SxEy\" eikä \"Katso uudelleen\"."
+      },
+      "metadataFixes": {
+        "title": "Korjauksia metatietoihin",
+        "desc": "Nimet, joissa on maatunnus edessä tai vuosiluku lopussa, löytävät oikeat metatiedot, ja käsin valittu juliste säilyy uudelleenkäynnistyksen jälkeen."
+      },
+      "arabicRtlFixes": {
+        "title": "Korjauksia arabiaan",
+        "desc": "Soittimessa vaakasuuntaiset eleet, tietovälilehtien välinen pyyhkäisy ja siirtymisnuolet kulkevat oikeaan suuntaan, ja näppäimissä on arabialais-intialaiset numerot."
+      },
+      "tvosFixes": {
+        "title": "Korjauksia Apple TV:hen",
+        "desc": "Kanavan esikatselu siirtyy koko näytön tilaan lataamatta sitä uudelleen, ja \"Vaadi PIN-koodi Asetusten avaamiseen\" toimii nyt."
+      },
+      "accountFixes": {
+        "title": "Muita korjauksia",
+        "desc": "Salasanan palautuslinkki toimii myös ilman asennettua sovellusta, eikä incognito-hakuja enää tallenneta."
+      },
+      "headline": {
+        "title": "Etusivu on täällä.",
+        "sub1": "Nyt mukana Trakt — katsomasi seuraa sinua.",
+        "sub2": "Arviot IMDb:stä, Rotten Tomatoesista ja Metacriticistä.",
+        "sub3": "Ja tausta, joka ottaa värinsä siitä, mitä ruudulla on."
+      }
+    },
+    "v2_9": {
+      "aetherEngine": {
+        "title": "Aether, uusi toistomoottori",
+        "desc": "Uusi videomoottori, nyt oletuksena iPhonessa, iPadissa ja Apple TV:ssä: nopeampi käynnistys, kanavien vaihto noin sekunnissa sekä täysi tuki taustatoistolle, Picture in Picturelle, AirPlaylle ja Chromecastille."
+      },
+      "playerNextTab": {
+        "title": "Seuraavat jaksot suoraan soittimessa",
+        "desc": "Soittimessa on uusi \"Next\"-välilehti, jossa on loppukausi: siirry seuraavaan jaksoon poistumatta toistosta."
+      },
+      "downloadsSeasonAndOffline": {
+        "title": "Lataa koko kausi, enemmän offline-tilassa",
+        "desc": "Lataa koko kausi yhdellä painikkeella ja peruuta kerralla käynnissä olevat ja jonossa olevat lataukset. Nyt voit ohittaa alkutunnarin myös ladatuissa jaksoissa."
+      },
+      "searchSagaFolders": {
+        "title": "Elokuvasarjoista tulee kansioita hakuun",
+        "desc": "Saman sarjan elokuvat kootaan tuloksissa kirjakansioon: avaa se ja löydä kaikki osat järjestyksessä ilman että etsit ne yksitellen."
+      },
+      "mpvEngine": {
+        "title": "mpv, vielä yksi toistomoottori",
+        "desc": "MPV liittyy iPhonen, iPadin ja Apple TV:n moottorien listalle: yksi vaihtoehto lisää, kun lähetys temppuilee."
+      },
+      "ipadCategoriesPanel": {
+        "title": "Kategoriapaneeli iPadissa vaakatilassa",
+        "desc": "Kun iPad on vaakatilassa, Live TV:n kategoriat pysyvät aina sivussa sekä kanavalistassa että ohjelmaoppaassa."
+      },
+      "UXUIImprovements": {
+        "title": "Parannuksia käyttökokemukseen ja käyttöliittymään",
+        "desc": "Silmäkin haluaa osansa, ja kuten aina yksityiskohdista huolehtiminen ratkaisee. Kokeile itse."
+      },
+      "tvosNavigationFixes": {
+        "title": "Navigointikorjauksia Apple TV:ssä",
+        "desc": "Version valinnan jälkeen avautuu oikea nimike, OIKEA viimeisen kauden jälkeen ei enää hyppää muualle, ja oppaan kortit Livein sarakenäkymässä ovat taas luettavia."
+      },
+      "searchFixes": {
+        "title": "Hakukorjauksia",
+        "desc": "Apple TV:ssä haku käynnistyy vasta, kun olet oikeasti lopettanut kirjoittamisen. Ei enää nykimistä eikä hitautta."
+      },
+      "contentFixes": {
+        "title": "Sisältökorjauksia",
+        "desc": "Sarja poistuu Jatka katselua -listalta viimeisen saatavilla olevan jakson jälkeen ja palaa kärkeen, kun uusi ilmestyy; piilotettu sisältö pysyy piilossa myös versio- ja laatuvalitsimissa; useassa roolissa esiintyvä näyttelijä ei enää kaada sovellusta Apple TV:ssä."
+      },
+      "dutchTranslationFix": {
+        "title": "Korjauksia joihinkin käännöksiin"
+      }
+    },
+    "v2_8": {
+      "dolbyAtmosReliableAudio": {
+        "title": "Dolby Atmos niin kuin pitääkin",
+        "desc": "KIPTV tunnistaa Dolby Atmos -raidat tarkemmin ja valitsee sopivimman soittimen Dolby Vision HLS -virroille luotettavampaa ääni- ja videokokemusta varten."
+      },
+      "uxUiImprovements": {
+        "title": "UX/UI-parannuksia",
+        "desc": "Sisäänrakennettua selainta, tukikeskusta ja lukuisia navigoinnin yksityiskohtia on hiottu, jotta sovellusta on miellyttävämpi käyttää."
+      },
+      "providerResponseReliability": {
+        "title": "Luotettavammat IPTV-palveluntarjoajat",
+        "desc": "IPTV-palveluntarjoajien puutteellisten tai virheellisten vastausten käsittelyä on parannettu, jotta luettelo voidaan hakea luotettavammin."
+      },
+      "tvosSessionRestore": {
+        "title": "Apple TV -istunnot säilyvät",
+        "desc": "Sovelluksen palauttaminen ei enää keskeytä aktiivisia Apple TV -istuntoja."
+      }
+    },
+    "v2_7": {
+      "detailAltreVersioniLeAltre": {
+        "title": "Nimikkeen kaikki versiot yhdellä kertaa",
+        "desc": "Elokuvan tai sarjan sivulla on uusi ”Muut versiot” -osio, jossa näet soittolistasi muut kopiot: valitse heti haluamasi laatu tai kieli."
+      },
+      "offlineProgressoSincronizzato": {
+        "title": "Jatka siitä mihin jäit, myös offline-katselun jälkeen",
+        "desc": "Kohta, johon jäit ladatuissa sisällöissä, tallentuu laitteelle ja siirtyy tilillesi heti kun palaat verkkoon, joten löydät sen myös muilta laitteiltasi."
+      },
+      "liveMettiInCimaDal": {
+        "title": "”Nosta ylimmäksi” kanaville ja luokille",
+        "desc": "Paina kanavaa tai luokkaa pitkään siirtääksesi sen listan kärkeen: eniten katsomasi asiat pysyvät aina käsillä."
+      },
+      "playerRiproduzioneInBackgroundOpzionale": {
+        "title": "Taustaääni Apple TV:ssä",
+        "desc": "Asetuksista voit jättää äänen soimaan, kun poistut soittimesta tai siirrät sovelluksen taustalle. Pois käytöstä oletuksena."
+      },
+      "detailRicercaGoogleDalDettaglio": {
+        "title": "Hae nimike Googlesta yhdellä napautuksella",
+        "desc": "Avaa Google-haku suoraan elokuvan tai sarjan sivulta: arvostelut, näyttelijät ja kuriositeetit."
+      },
+      "rtlInterfacciaArabaSuTvos": {
+        "title": "Parannettu RTL-käyttöliittymä Apple TV:ssä",
+        "desc": "Arabiaksi valikot, karusellit, TV-opas ja soitin asettuvat oikein oikealta vasemmalle iPhonessa, iPadissa ja Apple TV:ssä."
+      },
+      "uiRifinitureInterfaccia": {
+        "title": "Käyttöliittymän hienosäätöä",
+        "desc": "Graafisia yksityiskohtia ja animaatioita parannettu."
+      },
+      "tvosRiordinareInGestioneContenuti": {
+        "title": "Luokkien järjestely ei enää jumita sovellusta",
+        "desc": "Apple TV:ssä luokkien ja sisältöjen siirtäminen Sisällönhallinnassa pysyy sujuvana myös hyvin suurilla soittolistoilla."
+      }
+    },
+    "v2_6": {
+      "downloadsReliableAndParallel": {
+        "title": "Luotettavammat lataukset – ja halutessasi rinnakkain",
+        "desc": "Keskeytynyt lataus jatkuu itsestään, kun avaat sovelluksen uudelleen, ja epäonnistuneet yritykset toistetaan automaattisesti. Voit myös ottaa käyttöön rinnakkaiset lataukset ja hakea useita nimikkeitä yhtä aikaa."
+      },
+      "downloadsLiveActivity": {
+        "title": "Lataukset lukitusnäytöllä",
+        "desc": "Seuraa latausten edistymistä lukitusnäytöltä ja Dynamic Islandista – yksi kortti kutakin elokuvaa tai sarjaa kohden."
+      },
+      "tvPairingViaWeb": {
+        "title": "Yhdistä televisio puhelimella – myös ilman sovellusta",
+        "desc": "Suuntaa kamera QR-koodiin: jos KIPTV ei ole vielä puhelimessasi, voit kirjautua tai rekisteröityä verkkosivustolla ja vahvistaa yhteyden sieltä. Jos sovellus on jo puhelimessa, koodi avautuu suoraan siinä."
+      },
+      "bulkCategoryControls": {
+        "title": "Näytä tai avaa kaikki luokat yhdellä napautuksella",
+        "desc": "Sisällönhallinnasta löydät pikakomennot, joilla saat kaikki piilotetut luokat taas näkyviin tai poistat lukituksen suojatuista."
+      },
+      "instantSearchLargePlaylists": {
+        "title": "Välitön haku – myös valtavilla soittolistoilla",
+        "desc": "Tulokset ilmestyvät kirjoittaessasi ilman verkon odottelua, eivätkä ne enää jää tyhjiksi hyvin suurissa luetteloissa."
+      },
+      "tvosLiveImageQuality": {
+        "title": "Puhtaampi kuva live-kanavilla",
+        "desc": "Apple TV:ssä lomituksenpoisto todella kohdistuu lomitettuihin kanaviin, ja laitteistopurku pysyy käytössä muilla: liikkeen kampaefekti on poissa."
+      },
+      "contentManagementStability": {
+        "title": "Ei enää yllättäviä sulkeutumisia sisällönhallinnassa",
+        "desc": "Luokkien piilottaminen tai lukitseminen hyvin suurilla soittolistoilla ei enää sulje sovellusta."
+      },
+      "minorBugfixes": {
+        "title": "Pienten virheiden korjauksia"
+      }
+    },
+    "v2_5": {
+      "iosLivePlayerChannelZap": {
+        "title": "Nopea kanavanvaihto, nyt iOS:ssä",
+        "desc": "Live-soittimessa voit siirtyä edelliseen tai seuraavaan kanavaan ja päivittää streamin nopeasti."
+      },
+      "continueWatchingLocalizedTitles": {
+        "title": "Paikallistetut nimet Jatka katselua -osiossa",
+        "desc": "Elokuvat ja sarjat näyttävät nyt TMDB-nimen sovelluksen kielellä, ja korttien tiedot ovat yhtenäisempiä."
+      },
+      "minorBugfixes": {
+        "title": "Pieniä virheenkorjauksia"
+      }
+    },
+    "v2_4": {
+      "ipadRedesign": {
+        "title": "Uudistettu iPad-kokemus",
+        "desc": "Tiedot vaakanäkymässä julistepaneelilla, Asetukset sivupalkilla split view -tilassa ja monisarakkeinen Live TV -kanavaluettelo: iPadilla sovellus hyödyntää suurta näyttöä paljon paremmin."
+      },
+      "detailInfoFooter": {
+        "title": "Lisää tietoa sisällöstä",
+        "desc": "Elokuvien ja sarjojen sivuilla näkyy uusi paneeli, jossa on tila, tuotantomaa, tuotantoyhtiöt ja muita tietoja."
+      },
+      "homeCardHero": {
+        "title": "Nostettu sisältö korttina",
+        "desc": "Elokuvien ja sarjojen yläreunassa voit nyt näyttää nostetun sisällön tiiviimmässä korttityylissä koko näytön sijaan."
+      },
+      "tvosEpgReminders": {
+        "title": "Ohjelmamuistutukset, nyt myös Apple TV:ssä",
+        "desc": "Aseta ohjelmalle muistutus Apple TV:ssä ja saat ilmoituksen iPhoneen tai iPadiin, kun se on alkamassa."
+      },
+      "settingsReorg": {
+        "title": "Uudelleen järjestetyt asetukset",
+        "desc": "Asetukset on järjestetty selkeämpiin osioihin, ja sovelluksen mukauttamiseen on lisää vaihtoehtoja."
+      },
+      "widgetsEfficiency": {
+        "title": "Tehokkaammat widgetit ja Top Shelf",
+        "desc": "Widgetien ja Top Shelfin resurssien käyttö on pienempi, ja päivitykset ovat kevyempiä ja nopeampia."
+      },
+      "foregroundResponsiveness": {
+        "title": "Paluu etualalle ilman viivettä",
+        "desc": "Korjattu hidastelu, jota saattoi esiintyä sovellusta avattaessa uudelleen: sovellus jatkuu nyt heti ja ilman jumeja."
+      }
+    },
+    "v2_3": {
+      "epgChannelColoredCards": {
+        "title": "Uudistettu TV-opas",
+        "desc": "Ohjelmakortit kanavan väreissä, uusi yläpalkki, tyylikkäämmät häivytykset ja parannettu navigointi iOS:llä ja Apple TV:llä."
+      },
+      "tvosChannelLogoInLive": {
+        "title": "Informatiivisempi live-soitin Apple TV:llä",
+        "desc": "Kanavan logo näkyy nyt soittimessa, ja tietopaneeli nostaa esiin meneillään olevan ohjelman kuvat."
+      },
+      "iosTabBarMinimize": {
+        "title": "Välilehtipalkki pienenee selatessa (iOS 26)",
+        "desc": "Yksityiskohtanäkymissä välilehtipalkki pienenee automaattisesti ja jättää enemmän tilaa sisällölle."
+      },
+      "subtitlesSystemEdgeStyles": {
+        "title": "Tekstitykset noudattavat järjestelmän tyyliä",
+        "desc": "Järjestelmätilassa tekstitysten reunat \"Koholla\" ja \"Upotettu\" noudattavat nyt tarkasti iOS-asetusten tyyliä."
+      },
+      "myListMultiTag": {
+        "title": "Oma lista: useita tunnisteita ja uudelleenjärjestys",
+        "desc": "Voit nyt antaa samalle sisällölle useita tunnisteita ja järjestää ne vapaasti. Kanavien mukautukset säilyvät uudelleennimeämisessä, ja \"Jatka katselua\" -kortit näyttävät tarkempia tietoja."
+      },
+      "catalogLoadingPerformance": {
+        "title": "Nopeampi ja sujuvampi katalogin lataus",
+        "desc": "Katalogi käsitellään taustalla ja navigointi pysyy sujuvana latauksen aikana: ei enää jumiutumisia hyvin suuria soittolistoja avattaessa, etenkään Apple TV:llä."
+      },
+      "tvosStabilityFixes": {
+        "title": "Vakaus ja navigointi Apple TV:llä",
+        "desc": "Korjattu kaksi kaatumista sisältöä ladattaessa, kohdistuksen katoaminen sovellusvalitsimesta palattaessa ja välilehden vaihto sisällön reunoilla."
+      },
+      "playerSmoothness": {
+        "title": "Sujuvampi toisto 50 fps- ja/tai HDR-kanavilla",
+        "desc": "Nykiminen soittimen säätimiä käytettäessä Apple TV:llä on korjattu, ja 50 fps:n live-toisto on sujuvampaa iPhonella/iPadilla/Macilla."
+      },
+      "minorBugFixes": {
+        "title": "Pieniä virheenkorjauksia",
+        "desc": "Korjattu useita vakaus- ja suorituskykyongelmia eri käyttötilanteissa."
+      }
+    },
+    "v2_2": {
+      "UIUXImprovements": {
+        "title": "UI/UX-parannuksia",
+        "desc": "Asetteluja ja vuorovaikutusta on parannettu miellyttävämmän käyttökokemuksen takaamiseksi."
+      },
+      "richLiveReplayInfo": {
+        "title": "Lisätietoja Live- ja Replay-sisällöistä",
+        "desc": "Tietopaneeli yhdistää nyt EPG-oppaan ja TMDB-metatiedot sekä näyttää paremmat kuvat ja kattavammat tiedot suorasta tai Replay-ohjelmasta."
+      },
+      "smootherPlayer": {
+        "title": "Sulavampi ja nopeammin reagoiva iOS-soitin",
+        "desc": "Animaatiot, eleet ja säätimet toimivat sulavammin, ja yhteensopivilla laitteilla on täysi ProMotion-tuki."
+      },
+      "epgReplayAccuracy": {
+        "title": "EPG ja Replay pysyvät ajan tasalla",
+        "desc": "Ohjelmapaneeli erottaa suoran, aiemman ja tulevan sisällön aiempaa tarkemmin, ja Replay näyttää oikean ohjelman tiedot."
+      },
+      "minorBugFixes": {
+        "title": "Pieniä virheenkorjauksia",
+        "desc": "Useita virheitä on korjattu sovelluksen vakauden ja suorituskyvyn parantamiseksi."
+      }
+    },
+    "v2_1": {
+      "accountConnectedDevices": {
+        "title": "Yhdistetyt laitteet",
+        "desc": "Näe kaikki laitteet, joilla olet kirjautuneena, ja kirjaa ne ulos etänä milloin haluat."
+      },
+      "recentlyWatchedLiveToggle": {
+        "title": "Piilota äskettäin katsotut kanavat",
+        "desc": "Näytä tai piilota äskettäin katsotut Live-kanavat."
+      },
+      "tvosLiveCarouselRedesign": {
+        "title": "Parannettu Live-karusellinäkymä Apple TV:ssä",
+        "desc": "Apple TV:n Live-osio on saanut uuden ilmeen Elokuvat- ja Sarjat-tyyliin: karusellit 16:9-esikatseluilla, koko näytön taustakuva, lasinen ohjelmaopas ja kategoriat, jotka laajenevat sivupalkista."
+      },
+      "topShelfChannelLogo": {
+        "title": "Oikea kanavan logo Top Shelfissä (Apple TV)",
+        "desc": "Live-kanavalle valitsemasi mukautettu logo näkyy nyt myös Apple TV:n Top Shelfissä."
+      },
+      "playerWhiteThemeChips": {
+        "title": "Luettavampi valkoinen teema soittimessa",
+        "desc": "Valkoisessa teemassa soittimen säätimistä valituilla painikkeilla on nyt oikea kontrasti."
+      }
+    },
+    "v2_0": {
+      "playerPlayWithEnginePicker": {
+        "title": "Toista heti haluamallasi soittimella",
+        "desc": "Valitse, millä moottorilla toisto käynnistyy (KSPlayer, VLC tai AVPlayer) joka kerta. Ja Premiumilla voit avata elokuvat ja kanavat suoraan ulkoisissa soittimissa (VLC tai Infuse)."
+      },
+      "metadataManualTmdbOverridePersonalizza": {
+        "title": "Mukauta elokuvien ja sarjojen metatietoja",
+        "desc": "Kun nimike yhdistyy vääriin tietoihin, voit korjata sen käsin valitsemalla oikean TMDB-tuloksen tai poistaa yhdistämisen kokonaan."
+      },
+      "playerOpensubtitlesAlwaysVisibleAudio": {
+        "title": "Enemmän hallintaa tekstityksiin ja ääneen",
+        "desc": "Hae lisää tekstitysvaihtoehtoja OpenSubtitlesista (ota käyttöön OpenSubtitles-asetuksista) ja säädä äänen ja tekstitysten viivettä. Asetukset muistetaan jokaiselle sisällölle."
+      },
+      "livetvCarouselLayoutForThe": {
+        "title": "Uusi karuselliasettelu Live TV:lle",
+        "desc": "Live TV -osio voi nyt näyttää kanavat vaakasuorina karuselleina, aivan kuten Elokuvat ja Sarjat. Valitse haluamasi asettelu asetuksista."
+      },
+      "themeWhiteTheme4thAdaptive": {
+        "title": "Uusi valkoinen teema",
+        "desc": "Kokeile uutta valkoista teemaa: tyylikäs, selkeä ja klassinen."
+      },
+      "tabsNascondiSchedeFilmSerie": {
+        "title": "Piilota tyhjät välilehdet",
+        "desc": "Jos soittolistalla ei ole elokuvia, sarjoja tai livekanavia, vastaava välilehti piilotetaan automaattisesti. Voit poistaa asetuksen käytöstä asetuksista."
+      },
+      "subtitlesSelfRenderCaptionsTo": {
+        "title": "Tekstitykset oman tyylisi mukaan",
+        "desc": "Tekstitykset noudattavat nyt paremmin järjestelmäasetuksiasi, väri mukaan lukien, millä tahansa toistomoottorilla."
+      },
+      "cwSelfHealContinueWatching": {
+        "title": "Jatka katselua ja Oma lista korjaavat itsensä",
+        "desc": "Kun soittolistasi palveluntarjoaja määrittää sisältötunnukset uudelleen, Jatka katselua- ja Oma lista -kohteet eivät enää näytä vääriä elokuvia tai kansikuvia: ne kohdistuvat itsestään päivitettyyn luetteloon."
+      },
+      "epgInstantLoadViaStale": {
+        "title": "Nopeampi TV-opas käynnistyksessä",
+        "desc": "Ohjelmaopas (EPG) latautuu nyt heti käyttämällä tallennettuja tietoja uudelleen ja päivittämällä ne taustalla – ei enää parin sekunnin odotusta joka avauksella."
+      },
+      "playerNoFalseCompletionOn": {
+        "title": "Ei vääriä ”jo katsottu” katkenneilla virroilla",
+        "desc": "Jotkin vialliset virrat saivat sovelluksen luulemaan, että elokuva oli päättynyt, jolloin se merkittiin katsotuksi tai siirryttiin seuraavaan. Näin ei enää tapahdu."
+      },
+      "playerCatchupDoubleLiveBadge": {
+        "title": "Luotettavampi Catch-up/Replay",
+        "desc": "Catch-upin aikana näkynyt kaksinkertainen ”LIVE”-merkki on korjattu, äänen ja tekstitysten säätimet palautettu ja Replay-kokemusta parannettu."
+      },
+      "resolve9RegressionsFound": {
+        "title": "Vakauskorjaukset",
+        "desc": "Useita sisäisessä testauksessa löytyneitä ongelmia on korjattu vakaamman ja luotettavamman sovelluksen vuoksi."
+      }
+    },
+    "v1_9": {
+      "epgShowEpgFanartOn": {
+        "title": "EPG Fanart",
+        "desc": "Kanavilla esitettävät ohjelmat näyttävät nyt oman kuvansa EPG:stä (jos saatavilla), muuten ne käyttävät TMDB:tä tai kanavan logoa kuten ennen."
+      },
+      "playerUnifiedSubtitleStylingApple": {
+        "title": "Mukauta tekstitysten ulkoasua",
+        "desc": "Valitse tekstitysten fontti, koko, lihavointi ja reunus, tai käytä Applen järjestelmätyyliä. Voit muuttaa valintaasi asetuksissa tai suoraan soittimessa."
+      },
+      "playerUnifyFallbackChainTo": {
+        "title": "Luotettavampi toisto",
+        "desc": "Parannettu soittimen automaattisen valinnan algoritmi iOS:ssä ja Apple TV:ssä."
+      },
+      "epgEpgEmptyOnFirst": {
+        "title": "TV-opas näkyy heti käynnistyksessä",
+        "desc": "Mukautetut ohjelmaoppaat (EPG) näkyvät nyt jo sovelluksen ensimmäisellä avauskerralla, ilman että sitä tarvitsee sulkea ja avata uudelleen."
+      }
+    },
+    "v1_8": {
+      "playerSkipIntroRecapCredits": {
+        "title": "Ohita intro, kertaus ja lopputekstit",
+        "desc": "Ohita elokuvien ja sarjojen alkutekstit, edellisten jaksojen kertaukset ja lopputekstit yhdellä napautuksella."
+      },
+      "watchedMarkMoviesWholeSeries": {
+        "title": "Merkitse elokuvat ja kokonaiset sarjat katsotuiksi",
+        "desc": "Pidä kirjaa siitä, mitä olet jo katsonut: katsottujen nimikkeiden julisteet himmenevät ja niissä näkyy valintamerkki."
+      },
+      "iosAvatarMenuCompactIcon": {
+        "title": "Tiiviimpi soittolistavalikko iOS:ssä",
+        "desc": "Soittolistavalikko on suunniteltu uudelleen kätevällä pikakuvakerivillä, ja se on helpompi käyttää."
+      },
+      "settingsMoveDefaultAudioSubtitle": {
+        "title": "Oletusääni- ja tekstityskieli, myös suorissa lähetyksissä",
+        "desc": "Valitse ensisijainen ääni- ja tekstityskieli asetusten omasta osiosta. Se koskee nyt myös suoria kanavia, ei vain elokuvia ja sarjoja."
+      },
+      "tvosLiveReplayNoEngine": {
+        "title": "Sulavampi suoran lähetyksen uusinta",
+        "desc": "Kelaa ja selaa suoraa TV-lähetystä välittömästi edistymispalkilla kuten elokuvissa ja sarjoissa, ja luotettavammalla nopeudensäädöllä."
+      },
+      "playerDefaultVodToHardware": {
+        "title": "Sulavammat ja tehokkaammat elokuvat ja sarjat",
+        "desc": "Automaattitilassa elokuvat ja sarjat käyttävät nyt laitteistopohjaista purkua sulavampaan toistoon ja pienempään akunkulutukseen."
+      },
+      "playerAccurateSeekForVod": {
+        "title": "Tarkempi selaus ja ±10 s hypyt",
+        "desc": "Elokuvissa, sarjoissa ja catch-up-sisällössä KSPlayerilla selaus ja hypyt eteen ja taakse osuvat nyt täsmälleen oikeaan kohtaan."
+      }
+    },
+    "v1_7": {
+      "tvosLivePlayerOverhaulKsme": {
+        "title": "KSPlayer parannettu",
+        "desc": "KSPlayer-integraatio on kirjoitettu kokonaan uudelleen: se on nyt optimoidumpi ja sulavampi kaikissa tilanteissa elokuvissa, sarjoissa ja livekanavilla."
+      },
+      "iosNativeAirplayNowPlaying": {
+        "title": "AirPlay ja video missä tahansa muodossa",
+        "desc": "Lähetä AirPlaylla äänen lisäksi myös video missä tahansa tiedostomuodossa – jopa eksoottisimmissa."
+      },
+      "tvosHomogeneousCustomCornerPip": {
+        "title": "Picture-in-Picture jokaisessa soittimessa Apple TV:ssä",
+        "desc": "Katso sisältöä näytön kulmassa millä tahansa toistomoottorilla."
+      },
+      "tvosMultiviewFromSingleIs": {
+        "title": "Multiview entistä sulavampi",
+        "desc": "Avaa useita kanavia samalle näytölle ja vaihda niiden välillä entistä reagoivammin ilman uudelleenlatausta."
+      },
+      "tvosKill4sDismissFreeze": {
+        "title": "Nopeampi ja sulavampi Live TV Apple TV:ssä",
+        "desc": "Soittimesta poistuttaessa esiintynyt muutaman sekunnin jumi on poistettu; kanavien selaus ja vaihto ovat sulavampia."
+      },
+      "tvosHeaderClockRespectsSystem": {
+        "title": "Yläreunan kello noudattaa järjestelmän 12/24 tunnin muotoa Apple TV:ssä"
+      },
+      "tvosCwCardPlaceholderLogo": {
+        "title": "Korjattu paikkamerkkilogo, joka jäi kansikuvan päälle Jatka katselua -kohdassa"
+      },
+      "tvosAutoPlayerFallbackChain": {
+        "title": "Luotettavampi automaattinen soittimen valinta"
+      }
+    },
+    "v1_6_1": {
+      "liveLogoFromEpg": {
+        "title": "Täydellisemmät Live TV -kanavalogot",
+        "desc": "Kun mukautat kanavan logoa, voit nyt valita myös EPG:n tarjoaman logon ja etsiä sitä uudella hakukentällä."
+      },
+      "liveAutoQuality": {
+        "title": "“Auto”-laatu suoralähetyksille (kokeellinen)",
+        "desc": "Uusi kokeellinen asetus kohdassa Asetukset → Player valitsee ja säätää Live-kanavien laadun automaattisesti toiston aikana. Oletuksena pois käytöstä."
+      },
+      "tvosLiveReloadFix": {
+        "title": "Korjattu odottamattomat suoran uudelleenlataukset Apple TV:ssä",
+        "desc": "Korjattu versiossa 1.6 ilmennyt virhe, joka aiheutti odottamattomia suoran uudelleenlatauksia Apple TV:ssä."
+      }
+    },
+    "v1_6": {
+      "categoryManagement": {
+        "title": "Nimeä luokat uudelleen",
+        "desc": "Nimeä uudelleen, lukitse PIN-koodilla tai piilota elokuva-, sarja- ja kanavaluokkasi pitämällä luokan nimeä painettuna."
+      },
+      "liveChannelRename": {
+        "title": "Nimeä kanavat uudelleen",
+        "desc": "Anna mille tahansa live-kanavalle oma nimi pikavalikosta. Nimeä uudelleen yksittäinen versio tai kaikki laatuvaihtoehdot yhdessä: samannimiset kanavat pysyvät ryhmiteltyinä."
+      },
+      "channelCustomEpgLogo": {
+        "title": "Mukautettu EPG kanavakohtaisesti",
+        "desc": "Valitse jokaiselle kanavalle oikea ohjelmaopas käsin ja korjaa EPG:n aikasiirtymä."
+      },
+      "fasterHugeEpg": {
+        "title": "Nopeampi ja kevyempi ohjelmaopas",
+        "desc": "Erittäin suuret EPG-oppaat latautuvat nyt nopeammin ja käyttävät vähemmän muistia."
+      },
+      "smootherLiveTv": {
+        "title": "Sulavampi Live TV",
+        "desc": "Kanavien avaaminen ja oppaan selaaminen toimivat nopeammin iPhonessa ja Apple TV:ssä, ja jumiutuneet live-kanavat palautuvat automaattisesti."
+      },
+      "tvosMovieArtwork": {
+        "title": "Elokuvajulisteet ja tiedot Apple TV:ssä",
+        "desc": "Apple TV:ssä elokuvajulisteet ja tiedot haetaan nyt TMDB:stä myös silloin, kun palveluntarjoaja ei anna tunnistetta."
+      },
+      "tvosRecentlyAddedPosters": {
+        "title": "Tyhjät julisteet Äskettäin lisätyt -osiossa Apple TV:ssä",
+        "desc": "Korjattu ongelma, jossa Äskettäin lisätyt -osion ensimmäiset julisteet saattoivat näkyä tyhjinä käynnistyksessä Apple TV:ssä."
+      },
+      "myListSync": {
+        "title": "My Listin oletustunnisteet",
+        "desc": "Korjattu ongelma, jossa My Listin oletustunnisteet ilmestyivät uudelleen uudelleenasennuksen jälkeen, vaikka ne oli piilotettu."
+      },
+      "tvosPinPrompt": {
+        "title": "PIN-kysely Apple TV:ssä",
+        "desc": "Korjattu vanhempien PIN-koodin syöttönäytön ulkoasu Apple TV:ssä."
+      }
+    },
+    "v1_5": {
+      "avatarPickerRenewed": {
+        "title": "Uudet avatarit",
+        "desc": "Mukauta kokemustasi yli 250 uudella avatarilla, jotka on saatu elokuvien, sarjojen, animen ja urheilun ikonisimmista hahmoista."
+      },
+      "livetvPerPlaylistStartSection": {
+        "title": "Live TV:n avauskategoria",
+        "desc": "Valitse, mistä kanavakategoriasta Live TV avautuu kullekin soittolistalle: soittolistan ensimmäinen kategoria, suosikit tai viimeksi katsotut."
+      },
+      "playerHardwareKeyboardControls": {
+        "title": "Näppäimistöohjaus Macilla ja iPadilla",
+        "desc": "Toisto/tauko, kelaus eteen- ja taaksepäin sekä muut soittimen säätimet vastaavat nyt fyysiseen näppäimistöön Macilla ja iPadilla."
+      },
+      "livetvSmarterChannelGrouping": {
+        "title": "Älykkäämpi kanavien ryhmittely",
+        "desc": "KIPTV tunnistaa saman kanavan useampia versioita ja laatuja, ja yhteensopivuus eri palveluntarjoajien välillä on paljon laajempi."
+      },
+      "playerSubtitleAppearanceMenu": {
+        "title": "Selkeämpi tekstitysten ulkoasuvalikko",
+        "desc": "Tekstitysten ulkoasun mukautusvalikko näkyy nyt vain, kun ulkoinen tekstitys on käytössä."
+      },
+      "playerAudioSubtitleTracksAllEngines": {
+        "title": "Ääni- ja tekstitysraidat kaikissa soittimissa",
+        "desc": "Ääni- ja tekstitysraidat näkyvät nyt oikein millä tahansa toistomoottorilla."
+      },
+      "minorBugFixes": {
+        "title": "Pieniä virheenkorjauksia"
+      }
+    },
+    "v1_4": {
+      "customPerCategoryOrder": {
+        "title": "Järjestä sisällöt haluamallasi tavalla kategoria kerrallaan",
+        "desc": "Aseta mukautettu sisältöjärjestys jokaiselle Elokuvien, Sarjojen ja Live TV:n kategorialle: KIPTV muistaa valintasi ja näyttää sisällöt aina samassa järjestyksessä."
+      },
+      "playlistAvatarActionsMenu": {
+        "title": "Pikatoiminnot soittolistan avatarista",
+        "desc": "Napauta soittolistasi avataria avataksesi pikatoimintovalikon tai siirtyäksesi asetuksiin."
+      },
+      "contentSettingsSplit": {
+        "title": "Selkeämmät asetukset: Sisällöt ja Lapsilukko",
+        "desc": "Sisältöasetukset on nyt jaettu kahteen erilliseen osioon, Sisällöt ja Lapsilukko, joten löydät etsimäsi heti."
+      },
+      "perPlaylistTrendingToggle": {
+        "title": "Trendit erikseen käyttöön jokaiselle soittolistalle",
+        "desc": "Uudella asetuksella voit valita, näytetäänkö trendit-osio kullekin soittolistalle erikseen."
+      },
+      "playlistCompatibility": {
+        "title": "Nopeammat ja yhteensopivammat soittolistat",
+        "desc": "Xtream-paneelien kautta tuodut M3U-soittolistat päivitetään nyt automaattisesti natiiviin Xtream-muotoon, joka on nopeampi ja sisältää täydelliset kategoriat, ja joka tukee entistä useampia palveluntarjoajia."
+      },
+      "supportChatPolish": {
+        "title": "Mukavampi tukikeskustelu",
+        "desc": "Keskustelu avautuu suoraan viimeisimpään viestiin automaattisella vierityksellä ja lukukuittauksilla. Ilmoitukset ja merkit nollautuvat oikein, kun luet viestit."
+      },
+      "categoryLockUsability": {
+        "title": "Kategorian lukitus entistä kätevämpää",
+        "desc": "Live TV -ruudukosta ja ohjelmaoppaasta voit lukita tai avata kokonaisia kategorioita yhdellä napautuksella, ja kontekstivalikko ehdottaa lukituksen poistoa, kun sisältö on suojattu kategoriatasolla."
+      }
+    },
+    "v1_3": {
+      "contentAggiuntiDiRecenteSection": {
+        "title": "\"Äskettäin lisätyt\": löydä uutuudet heti",
+        "desc": "Uusi osio elokuvissa, sarjoissa ja Live TV:ssä nostaa esiin viimeksi soittolistallesi lisätyt sisällöt, joten löydät uutuudet ilman etsimistä."
+      },
+      "playerMediaInfoBadgesHdr": {
+        "title": "HDR-, Dolby Vision-, 4K- ja FPS-merkit soittimessa",
+        "desc": "Toiston aikana näet yhdellä silmäyksellä streamin laadun — HDR, Dolby Vision, 4K ja kuvataajuus — ja HDR-tila aktivoituu automaattisesti. Sama kokemus iPhonella, iPadilla ja Apple TV:llä."
+      },
+      "playerPerEngineAdvancedSettings": {
+        "title": "Lisäasetukset jokaiselle moottorille suoraan soittimessa",
+        "desc": "Soittimen moottorinvalitsimesta voit nyt säätää kunkin moottorin lisäasetuksia ja mukauttaa toiston jokaiselle streamille sopivaksi."
+      },
+      "settingsAddOptionForContent": {
+        "title": "Päivitä sisällöt jokaisella käynnistyksellä",
+        "desc": "Uusi asetus lataa soittolistasi sisällöt automaattisesti uudelleen aina kun avaat sovelluksen, joten katalogisi on aina ajan tasalla."
+      },
+      "epgGzipXmltvSupportDecoupled": {
+        "title": "Nopeampi ja yhteensopivampi ohjelmaopas (EPG)",
+        "desc": "Lisätty tuki pakatuille EPG-oppaille (gzip), sisällöstä riippumaton lataus ja selkeämpi lähdediagnostiikka."
+      },
+      "playerTvosCutMainThreadContention": {
+        "title": "Sulavampi suora lähetys Apple TV:llä",
+        "desc": "Optimointeja, jotka vähentävät live-toiston hidastumisia, sekä useita VLC-moottorin korjauksia."
+      },
+      "parentalCategoryAwareGateClose": {
+        "title": "Vahvempi lapsilukko, myös kategoriakohtaisesti",
+        "desc": "PIN-lukitus koskee nyt oikein kokonaisia kategorioita eikä sitä voi enää ohittaa."
+      },
+      "epgRenderCachedEpgWhen": {
+        "title": "Ohjelmaopas pysyy näkyvissä vieritettäessä",
+        "desc": "Korjattu ongelma, jossa EPG-tiedot saattoivat kadota ruudukon rivien uudelleenkäytön yhteydessä vieritettäessä."
+      }
+    },
+    "v1_2": {
+      "premiumThemes": {
+        "title": "Mukauta KIPTV mieleiseksesi: premium-teemat iOS:lle ja Apple TV:lle",
+        "desc": "Valitse sovelluksen väri ja kotinäytön kuvake huolella kootusta valikoimasta."
+      },
+      "tvosDetailRewrite": {
+        "title": "Elokuvat ja sarjat Apple TV:llä: täysin uudistetut tietonäkymät",
+        "desc": "Tietonäkymät on kirjoitettu alusta asti uudelleen: elokuvamaisen sulava navigointi, välitön vieritys ja nolla viiveitä suurillakin katalogeilla."
+      },
+      "tagsFromAnywhere": {
+        "title": "Järjestä kaikki tageilla, mistä tahansa sovelluksessa",
+        "desc": "Luo, nimeä uudelleen, järjestä ja poista omia tagejasi suoraan minkä tahansa elokuvan, sarjan tai kanavan kontekstivalikosta."
+      },
+      "fixMoviesTabEmptyOnSomePlaylists": {
+        "title": "Korjattu bugi, jossa osa soittolistoista ei näyttänyt elokuvia",
+        "desc": "Joillakin soittolistoilla Elokuvat-osio jumittui mustaan näyttöön odottamattomien provider-datamuotojen takia. Nyt KIPTV palauttaa ja näyttää sisällöt oikein myös näissä tapauksissa."
+      },
+      "fix4kChannels": {
+        "title": "4K-kanavat: nyt video käynnistyy aina",
+        "desc": "Korjattu ongelma, jossa osa 4K-kanavista toistui pelkkänä äänenä AVPlayer/KSPlayer-moottoreilla. Moitteeton toisto kaikilla soittimilla."
+      },
+      "recentSearches": {
+        "title": "Viimeaikaiset haut aina käden ulottuvilla",
+        "desc": "Viimeisimmät hakusi näkyvät Haku-näkymän yläreunassa iPhonella, iPadilla ja Apple TV:llä: jatka siitä mihin jäit yhdellä napautuksella."
+      },
+      "customChannelLogos": {
+        "title": "Kanavalogot juuri sellaisina kuin haluat",
+        "desc": "Jokaiselle kanavalle voi asettaa oman logon: valitse kuratoidusta yhteisökirjastosta tai hae verkosta. Täysi tuki myös SVG:lle ja läpinäkyvyyksille."
+      },
+      "fixThirdPartyEpgUrls": {
+        "title": "Ohjelmaopas (EPG) mistä tahansa lähteestä, vihdoin luotettavasti",
+        "desc": "Nyt KIPTV käsittelee kolmannen osapuolen EPG-URL:t oikein alusta loppuun: lisää haluamasi ohjelmaopas ja anna KIPTV:n hoitaa loput."
+      }
+    },
+    "v1_1_0": {
+      "multiview": {
+        "title": "Multiview: 4 kanavaa yhtä aikaa",
+        "desc": "Katso jopa 4 Live-kanavaa samanaikaisesti uudella Multiview-toiminnolla. Laajennettavat ruudut, minisoitin aina käden ulottuvilla, laatuvalitsin ja ambient light, joka poimii värit videosta. Saatavilla iPhonessa, iPadissa ja Apple TV:ssä.\n\nHuom: palveluntarjoajan tulee tukea useita samanaikaisia yhteyksiä tämän toiminnon käyttöön."
+      },
+      "audioNoInterruptOtherApps": {
+        "title": "Sovellus ei enää keskeytä muiden sovellusten musiikkia",
+        "desc": "KIPTV:n avaaminen ei enää pysäytä muiden sovellusten musiikkia tai ääntä: ääni-istunto aktivoidaan vasta kun aloitat sisällön toiston."
+      },
+      "vodPlaybackMoreStable": {
+        "title": "Vakaampi VOD-toisto",
+        "desc": "Film- ja sarjatoistoa parannettu: luotettavampi puskuroinnin hallinta, KSPlayer-moottoria optimoitu entisestään."
+      },
+      "playerEngineFallback": {
+        "title": "Joustavampi toistomoottorivaihto",
+        "desc": "Jos manuaalisesti valitsemasi toistomoottori ei pysty käynnistämään suoratoistoa, KIPTV palaa automaattisesti edelliseen toimineeseen moottoriin keskeyttämättä katselukokemusta."
+      },
+      "mylistAvailabilityCheck": {
+        "title": "Oma lista: luotettavampi saatavuustarkistus",
+        "desc": "Soittolistan lataamisen jälkeen KIPTV tarkistaa tallennetut elokuvat ja sarjat TMDB:n kautta uudelleen ja ilmoittaa heti juuri saataville tulleista."
+      },
+      "playlistRebuildOnPartialCache": {
+        "title": "Elokuvat-välilehti tyhjä keskeytetyn latauksen jälkeen",
+        "desc": "Korjattu tapaus, jossa soittolistan keskeytynyt lataus jätti Elokuvat-välilehden tyhjäksi."
+      },
+      "tvosCatalogDuringPlayback": {
+        "title": "Apple TV: sulavampi navigointi toiston aikana",
+        "desc": "Apple TV:ssä katalogipäivitykset eivät enää häiritse käynnissä olevaa toistoa, mikä estää katkokset ja hidastumisen Live-kanavaa tai sarjajaksoa katsottaessa."
+      },
+      "tvosLiveAndCatchup": {
+        "title": "Apple TV: luotettavampi Live TV ja catchup",
+        "desc": "Korjattu ongelma, joka saattoi aiheuttaa jumiutumista ja puskurointia."
+      }
+    },
+    "v1_0_9": {
+      "playerInPlayerChannelLists": {
+        "title": "Kanavaluettelo playerissa Live TV:n mukaisessa järjestyksessä",
+        "desc": "Myös playerin sisällä kanavat näkyvät nyt samassa järjestyksessä kuin Live TV:ssä, ja erikoisosiot (Suosikit, Historia) ovat aina käden ulottuvilla."
+      },
+      "epgAutoRewriteDropboxDrive": {
+        "title": "EPG-linkit Dropboxista ja Google Drivesta",
+        "desc": "Dropboxin ja Google Driven jakolinkit toimivat nyt suoraan EPG-lähteenä ilman manuaalisia muutoksia."
+      },
+      "mylistTmdbOnlyItemsAvailability": {
+        "title": "Lisää Omaan listaan myös playlistin ulkopuolisia sisältöjä",
+        "desc": "Voit tallentaa TMDB:n kautta löydetyt elokuvat ja sarjat, vaikka niitä ei ole vielä playlistissäsi: kun ne tulevat saataville, KIPTV ilmoittaa sinulle."
+      },
+      "playlistTolerateDuplicateXtreamIds": {
+        "title": "Playlistit, joissa on päällekkäisiä tunnuksia",
+        "desc": "Korjattu kaatuminen, joka tapahtui avattaessa Xtream-playlistejä, joissa oli päällekkäisiä kanava- tai elokuvatunnisteita."
+      },
+      "tvosPlayerControlsNotAuto": {
+        "title": "Playerin ohjaimet Apple TV:llä",
+        "desc": "Korjattu ongelma, jossa playerin ohjaimet eivät piiloutuneet automaattisesti ensimmäisellä koko näytön käynnistyksellä tvOS:llä."
+      }
+    },
+    "v1_0_8": {
+      "tvosPlayButtonNonResponsive": {
+        "title": "Apple TV: Play-painike hausta",
+        "desc": "Korjattu ongelma, jossa Play-painike ei reagoinut avattaessa tiettyjä nimikkeitä hakutuloksista."
+      },
+      "tvosSearchBreakQualityPickerLoop": {
+        "title": "Apple TV: ryhmiteltyjen kanavien laadun valinta",
+        "desc": "Korjattu virhe hakuruudun laadunvalitsimessa, joka aiheutti loputtoman silmukan, jos kanava oli ryhmitelty muiden kanssa."
+      },
+      "minorBugFixes": {
+        "title": "Pieniä virhekorjauksia"
+      }
+    },
+    "v1_0_7": {
+      "supportCenterInApp": {
+        "title": "Uusi sovelluksen sisäinen tukikeskus",
+        "desc": "Avaa tukipyyntö, liitä kuvakaappauksia ja saa vastauksia reaaliajassa suoraan sovelluksesta – iPhonella, iPadilla ja Apple TV:llä."
+      },
+      "triviaLoadingScreen": {
+        "title": "Hidas yhteys? Tässä triviaa!",
+        "desc": "Jos yhteytesi on hidas ja odotat playlistin latautumista, tutustu elokuva-, TV-sarja- ja anime-tietämykseen (ei spoilereita, lupaamme!)."
+      },
+      "tvosRefocusChannelAfterPlayer": {
+        "title": "Apple TV: fokus palaa katsottuun kanavaan",
+        "desc": "Kun olet vaihtanut kanavaa playerissa ja suljet sen, kanavaluettelo palaa täsmälleen siihen kohtaan, johon jäit."
+      }
+    },
+    "v1_0_6": {
+      "premiumFreeTrialAllPlans": {
+        "title": "Ilmainen kokeilu kaikissa Premium-paketeissa",
+        "desc": "Kaikki tilauspaketit tarjoavat nyt ilmaisen kokeilujakson ennen maksua."
+      },
+      "tvosInPlayerChannelGuide": {
+        "title": "Selaa kategorioita ja kanavia Apple TV:n soittimessa",
+        "desc": "Selaa kanavia ja kategorioita suoraan Live-soittimessa karusellien välillä vaihtaen, poistumatta soittimesta."
+      },
+      "playerBrightnessControl": {
+        "title": "Kirkkauden säätö iOS-soittimessa",
+        "desc": "Säädä näytön kirkkautta suoraan soittimesta."
+      },
+      "playerPinchToFill": {
+        "title": "Nipistä kahdella sormella täyttääksesi näytön iOS:llä",
+        "desc": "Sovita video luonnollisella eleellä – nipistä zoomataksesi ja täyttääksesi näytön."
+      },
+      "settingsFollowOnInstagram": {
+        "title": "Seuraa meitä Instagramissa",
+        "desc": "Uusi painike Asetuksissa KIPTV:n Instagram-tilin seuraamiseen ja kuulumisten saamiseen."
+      },
+      "tvosFocusSkipFix": {
+        "title": "Tarkempi fokusnavigointi Apple TV:llä",
+        "desc": "Apple TV:n soittimen pyöreissä painikkeissa navigointi ei enää hyppää tahattomasti."
+      }
+    },
+    "v1_0_5": {
+      "continueWatchingWidgets": {
+        "title": "Jatka katselua -widgetit iPhonelle ja iPadille",
+        "desc": "Lisää uudet aloitusnäytön widgetit ja jatka elokuvia ja sarjoja yhdellä napautuksella. Saatavilla kaikissa ko'oissa."
+      },
+      "inPlayerVolumeControl": {
+        "title": "Äänenvoimakkuuden säätö soittimessa",
+        "desc": "Uusi äänenvoimakkuuden liukusäädin suoraan soittimessa iOS:llä."
+      },
+      "subtitleAppearanceInPlayer": {
+        "title": "Tekstitysten ulkoasu suoraan soittimesta",
+        "desc": "Tekstityksen fontti-, koko- ja väriasetukset löytyvät nyt soittimesta, käytettävissä toiston aikana."
+      },
+      "myListPerTagCarousels": {
+        "title": "Oma lista jaettuna tageittain",
+        "desc": "Voit nyt jakaa Oma lista -osion erillisiin karuselleihin kullekin määrittämällesi tagille. Tila aktivoidaan kohdassa Asetukset > Sisältö."
+      },
+      "systemTimeFormat": {
+        "title": "Kellonajat järjestelmäsi muodossa",
+        "desc": "EPG ja soitin noudattavat nyt järjestelmäasetuksissa määritettyä 12h/24h-muotoa."
+      },
+      "tvosPipRestored": {
+        "title": "Picture in Picture palautettu Apple TV:llä",
+        "desc": "Picture in Picture toimii jälleen oikein tvOS:llä aiemmassa versiossa ilmenneen ongelman jälkeen."
+      },
+      "premiumPlaylistsCap": {
+        "title": "Soittolistaraja korjattu Premium Plus -käyttäjille",
+        "desc": "Korjattu virhe, jossa osaa Premium Plus -käyttäjistä rajoitettiin virheellisesti yhteen soittolistaan."
+      }
+    },
+    "v1_0_4": {
+      "manualRotationButton": {
+        "title": "Käännä soitinta käsin, milloin haluat",
+        "desc": "Uusi käännöspainike iPhonen soittimessa: vaihda vaaka- tai pystytilaan yhdellä napautuksella, myös kierron lukituksen ollessa päällä."
+      },
+      "followOnX": {
+        "title": "Seuraa meitä X:ssä",
+        "desc": "Nyt voit seurata meitä X:ssä (Twitter) suoraan KIPTVstä: löydät linkin Asetuksista."
+      },
+      "playerDragDismiss": {
+        "title": "Soittimen sulkeminen sujuvampaa iOS:llä",
+        "desc": "Pieniä parannuksia soittimen sulkemisanimaatioon luonnollisemman tunteen saavuttamiseksi."
+      },
+      "subsResetBetweenEpisodes": {
+        "title": "OpenSubtitles-tekstitykset parannettu",
+        "desc": "OpenSubtitles-tekstitysten käsittelyä hiottu yhtenäisemmän kokemuksen takaamiseksi jaksojen välillä."
+      },
+      "tmdbResilience": {
+        "title": "Metatietojen lataus nopeampaa",
+        "desc": "Elokuvien ja sarjojen metatietojen latausta optimoitu sujuvamman selailun takaamiseksi."
+      },
+      "pipFixes": {
+        "title": "Picture in Picture parannettu",
+        "desc": "Picture in Picture -kokemusta hiottu iPhonella ja Macilla, ohjaimet reagoivat nyt nopeammin."
+      }
+    },
+    "v1_0_3": {
+      "inAppFeedback": {
+        "title": "Auta kehittämään KIPTV:tä sovelluksen palautteella",
+        "desc": "Nyt voit lähettää ehdotuksia, ilmoituksia ja ideoita suoraan sovelluksesta muutamalla napautuksella. Luemme jokaisen viestin ja käytämme niitä KIPTV:n parantamiseen yhdessä kanssasi."
+      },
+      "playerQualityPicker": {
+        "title": "Vaihda kanavan laatua suoraan soittimesta",
+        "desc": "Kun Live-kanavalla on useita laatuvaihtoehtoja (HD, FHD, 4K...), voit valita haluamasi suoraan soittimesta palaamatta listaan. Käytettävissä iPhonella, iPadilla ja Apple TV:llä."
+      },
+      "liveInlinePreview": {
+        "title": "Live-esikatselu suoraan Apple TV:llä",
+        "desc": "Uusi asetus kohdassa Asetukset > Toisto: Apple TV:llä voit nähdä korostetun kanavan live-esikatselun suoraan Live TV- ja EPG-näkymissä ennen kokokuvaan siirtymistä."
+      }
+    },
+    "versionHeader": "Versio {{version}}",
+    "continue": "Jatka",
+    "section": {
+      "new": "Uutta",
+      "improvement": "Parannukset",
+      "bugfix": "Virheenkorjaukset"
+    },
+    "v1_0_2": {
+      "tmdbAmbiguousMatchPicker": {
+        "title": "Manuaalinen valitsin useille osumille",
+        "desc": "Kun nimikkeellä on useita mahdollisia vastaavuuksia TMDB:ssä, voit nyt valita oikean."
+      },
+      "liveTvQualityVariantsGrouping": {
+        "title": "Tarkempi Live-kanavien ryhmittely",
+        "desc": "Kanavanimien laatuvarianttien tunnistusta parannettiin luotettavamman ryhmittelyn takaamiseksi."
+      },
+      "memoryOomCrashFix": {
+        "title": "Vakaus erittäin suurilla soittolistoilla",
+        "desc": "Korjattu muistin loppumisesta johtuva kaatuminen valtavilla soittolistoilla sekä mahdollinen EPG-tietojen sekoittuminen eri soittolistojen välillä."
+      }
+    },
+    "v1_0_1": {
+      "memory": {
+        "title": "Kaatumiskorjaukset",
+        "desc": "Korjattiin ongelma, joka aiheutti RAM-muistin täyttymisen joissakin laitteissa ja saattoi johtaa sovelluksen kaatumiseen."
+      },
+      "player": {
+        "title": "Vakaampi soitin",
+        "desc": "Vähennetty puskurointia Live- ja VOD-sisällössä noudattamalla AVFoundation/VLC-parhaita käytäntöjä."
+      },
+      "infoPanel": {
+        "title": "Soittimen tietopaneeli",
+        "desc": "Vaakatilassa voi nyt sulkea napauttamalla paneelin yläpuolista videoaluetta."
+      },
+      "tvosFocus": {
+        "title": "Sujuvampi Apple TV",
+        "desc": "Sujuvampi välilehtipalkki osioiden välillä siirryttäessä."
+      },
+      "badges": {
+        "title": "Yhtenäiset \"Uusi\"-merkit",
+        "desc": "Yhtenäiset uuden sisällön ilmaisimet Elokuvissa ja Sarjoissa, sekä iOS:ssä että Apple TV:ssä."
+      }
+    }
+  },
+  "widget": {
+    "resume": "Jatka",
+    "noMoviesInProgress": "Ei elokuvia kesken",
+    "noEpisodesInProgress": "Ei jaksoja kesken",
+    "openApp": "Avaa KIPTV"
+  },
+  "support": {
+    "centerTitle": "Tukikeskus",
+    "centerEmpty": "Ei vielä keskusteluja",
+    "centerEmptyHint": "Aloita keskustelu KIPTV-tuen kanssa raportoidaksesi ongelmasta, ehdottaaksesi parannusta tai pyytääksesi uutta ominaisuutta.",
+    "newTicket": "Uusi keskustelu",
+    "you": "Sinä",
+    "supportTeam": "KIPTV-tuki",
+    "send": "Lähetä",
+    "replyPlaceholder": "Kirjoita viesti…",
+    "closedHint": "Keskustelu suljettu",
+    "closedComposer": "Tämä keskustelu on suljettu. Aloita uusi, jos tarvitset lisää apua.",
+    "resolvedHint": "Lähetä viesti avataksesi tämän keskustelun uudelleen",
+    "openFollowUp": "Avaa jatkokeskustelu",
+    "followUpDraftHeader": "Vs: %@ (#%@)",
+    "newMessageOne": "Uusi viesti",
+    "newMessageMany": "%d uutta viestiä",
+    "typing": "Tuki kirjoittaa…",
+    "unreadBadge": "%d uutta",
+    "status": {
+      "open": "Avoinna",
+      "triaged": "Arvioinnissa",
+      "in_progress": "Käsittelyssä",
+      "awaiting_user": "Odottaa vastaustasi",
+      "resolved": "Ratkaistu",
+      "closed": "Suljettu",
+      "duplicate": "Kaksoiskappale",
+      "on_hold": "Pidossa"
+    },
+    "new": {
+      "type": "Tyyppi",
+      "typeHeader": "Mistä on kyse?",
+      "deviceHeader": "Laite",
+      "deviceFooter": "Pakollinen. Valitse laite, jolla ongelma ilmenee, vaikka kirjoittaisit toiselta laitteelta.",
+      "titleHeader": "Aihe",
+      "titlePlaceholder": "Aihe",
+      "titleFooter": "Lyhyt lause, joka tiivistää ongelman tai pyynnön.",
+      "messageHeader": "Viesti",
+      "messagePlaceholder": "Kuvaile mitä tapahtuu, mitä odottaisit ja missä olosuhteissa se tapahtuu.",
+      "messageFooter": "Voit lisätä tarkempia tietoja myöhemmin keskustelemalla tuen kanssa.",
+      "submit": "Avaa keskustelu",
+      "successTitle": "Keskustelu avattu",
+      "successMessage": "Vastaamme sinulle täällä sovelluksessa mahdollisimman pian.",
+      "attachmentHeader": "Liitteet",
+      "attachmentFooter": "Valinnainen. JPEG, PNG tai HEIC enintään 7 Mt.",
+      "attachmentFooterCount": "Valinnainen, enintään %d valokuvaa. JPEG, PNG tai HEIC enintään 7 Mt kukin.",
+      "attachmentAdd": "Lisää valokuva"
+    },
+    "attachmentReady": "Kuva valmis lähetettäväksi",
+    "attachmentPreview": "📷 Kuva",
+    "category": {
+      "crash": "Kaatuminen",
+      "playback": "Toisto",
+      "playlist": "Soittolista",
+      "epg": "EPG / TV-opas",
+      "subscription": "Tilaus",
+      "auth": "Kirjautuminen",
+      "ui": "Käyttöliittymä",
+      "account": "Tili",
+      "other": "Muu"
+    },
+    "device": {
+      "all": "Kaikki laitteet",
+      "iphone": "iPhone",
+      "ipad": "iPad",
+      "appleTV": "Apple TV",
+      "androidTV": "Android TV",
+      "fireTV": "Fire TV",
+      "mac": "Mac",
+      "visionPro": "Vision Pro"
+    },
+    "error": {
+      "title": "Virhe",
+      "notAuthenticated": "Sinun on oltava kirjautuneena käyttääksesi Tukikeskusta",
+      "missingTitle": "Anna otsikko",
+      "messageEmpty": "Viesti ei voi olla tyhjä",
+      "insertFailed": "Lähetys epäonnistui",
+      "fetchFailed": "Lataus epäonnistui",
+      "updateFailed": "Päivitys epäonnistui",
+      "uploadFailed": "Liitteen lataus epäonnistui",
+      "attachmentTooLarge": "Kuva on suurempi kuin 7 Mt. Valitse pienempi.",
+      "rateLimited": "Olet avannut useita keskusteluja viime aikoina. Odota hetki, ennen kuin avaat uuden."
+    },
+    "admin": {
+      "analytics": {
+        "chart": {
+          "byCategory": "Luokittain",
+          "byStatus": "Tilan mukaan",
+          "perDay": "Tikettejä päivässä"
+        },
+        "empty": "Ei tietoja tällä aikavälillä",
+        "kpi": {
+          "firstResponse": "Ensivastaus (ka.)",
+          "open": "Avoimet tiketit",
+          "resolution": "Ratkaisuaika (ka.)"
+        },
+        "noOpenTickets": "Ei avoimia tikettejä",
+        "oldestOpen": "Vanhin avoin tiketti",
+        "range": {
+          "30d": "30 päivää",
+          "7d": "7 päivää",
+          "all": "Koko ajalta"
+        },
+        "title": "Tilastot"
+      },
+      "bulk": {
+        "assignMe": "Määritä minulle",
+        "confirm": {
+          "assignMe": "Määritä käyttäjälle %@.",
+          "label": "Lisää tunniste ”%@”.",
+          "status": "Vaihda tilaksi %@.",
+          "title": "Käytetäänkö %d tikettiin?"
+        },
+        "label": "Tunniste",
+        "labelPlaceholder": "tunnisteen nimi",
+        "labelPrompt": "Lisää tunniste",
+        "selected": "valittu",
+        "status": "Tila"
+      },
+      "details": {
+        "assigneeSection": "Vastuuhenkilö",
+        "auditSection": "Toiminta",
+        "categorySection": "Luokka",
+        "diagnosticsSection": "Diagnostiikka",
+        "labelsSection": "Tunnisteet",
+        "notesPlaceholder": "Sisäiset muistiinpanot — vain ylläpitäjille.",
+        "notesSection": "Sisäiset muistiinpanot",
+        "otherTicketsLabel": "Käyttäjän muut tiketit",
+        "priorityHigh": "P1 (korkein)",
+        "priorityLow": "P5 (matalin)",
+        "priorityNone": "—",
+        "prioritySection": "Prioriteetti",
+        "statusSection": "Tila",
+        "ticketsOpenOfTotal": "%1$d avointa · %2$d yhteensä",
+        "title": "Tiedot",
+        "triageSection": "Triage"
+      },
+      "split": {
+        "noDetails": "Avaa tiketti nähdäksesi tiedot",
+        "noTicketSelected": "Valitse tiketti lukeaksesi keskustelun"
+      },
+      "sub": {
+        "active": "Aktiivinen",
+        "endsOn": "Päättyy %@",
+        "expired": "Vanhentunut",
+        "expiredOn": "Vanhentui %@",
+        "expiry": "Voimassa",
+        "free": "Ei tilausta",
+        "lapsing": "Peruttu — ei uusiudu",
+        "manage": "Hallitse tilausta",
+        "neverSynced": "Ei koskaan synkronoitu RevenueCatin kanssa",
+        "renewing": "Aktiivinen, uusiutuu",
+        "renewsOn": "Uusiutuu %@",
+        "section": "Tilaus",
+        "syncedAt": "Tiedot päivitetty %@",
+        "since": "Premium alkaen"
+      },
+      "user": {
+        "activitySection": "Toiminta",
+        "id": "Käyttäjätunnus",
+        "lastPlayback": "Viimeksi toistettu",
+        "lastSignIn": "Viimeisin kirjautuminen",
+        "noOtherTickets": "Ei muita tikettejä",
+        "noTickets": "Ei tikettejä",
+        "playlists": "Soittolistat",
+        "provider": "Kirjautunut palvelulla",
+        "registered": "Rekisteröity",
+        "ticketsFooter": "%d yhä avoinna.",
+        "ticketsSection": "Tiketit",
+        "watchTime": "Katseluaika"
+      }
+    }
+  },
+  "appearance": {
+    "title": "Ulkoasu",
+    "subtitle": "Mukauta sovelluksen ulkoasua.",
+    "premiumUpsell": "Avaa teemamukautukset Premiumilla.",
+    "unlockCTA": "Avaa Premiumilla",
+    "iconChangeNotice": "iOS näyttää lyhyen ilmoituksen kuvakkeen vaihdosta.",
+    "section": {
+      "color": "Pääväri",
+      "icon": "Sovelluskuvake",
+      "theme": "Teema",
+      "ambient": "Tausta"
+    },
+    "color": {
+      "red": "Punainen",
+      "brown": "Ruskea",
+      "fuchsia": "Fuksianpunainen",
+      "gold": "Kulta",
+      "green": "Vihreä",
+      "indigo": "Indigo",
+      "lime": "Lime",
+      "orange": "Oranssi",
+      "purple": "Violetti",
+      "silver": "Hopea",
+      "teal": "Sinivihreä",
+      "white": "Valkoinen"
+    },
+    "icon": {
+      "red": "Punainen",
+      "brown": "Ruskea",
+      "fuchsia": "Fuksianpunainen",
+      "gold": "Kulta",
+      "green": "Vihreä",
+      "indigo": "Indigo",
+      "lime": "Lime",
+      "orange": "Oranssi",
+      "purple": "Violetti",
+      "silver": "Hopea",
+      "teal": "Sinivihreä",
+      "white": "Valkoinen"
+    },
+    "background": {
+      "title": "Tausta",
+      "black": "Musta",
+      "dynamic": "Dynaaminen"
+    },
+    "ambient": {
+      "title": "Dynaaminen tausta",
+      "subtitle": "Värittää taustan ruudulla näkyvän kuvan väreillä."
+    }
+  },
+  "recentlyAdded": {
+    "title": "Hiljattain lisätyt"
+  },
+  "metadata": {
+    "customize": "Mukauta metatietoja",
+    "sheet": {
+      "title": "Mukauta metatietoja",
+      "search": "Hae elokuvaa tai sarjaa",
+      "results": "Tulokset",
+      "automatic": "Automaattinen",
+      "noTMDB": "Ei TMDB:tä (vain palveluntarjoaja)",
+      "current": "Nykyinen osuma",
+      "searchHint": "Kirjoita nimi hakeaksesi TMDB:stä",
+      "noResults": "Ei tuloksia"
+    }
+  },
+  "devices": {
+    "connectedTitle": "Yhdistetyt laitteet",
+    "description": "Laitteet, joilla on kirjauduttu tilillesi. Kirjaa ulos laitteet, joita et tunnista.",
+    "thisDevice": "Tämä laite",
+    "lastActive": "Viimeksi aktiivinen {{time}}",
+    "signOut": "Kirjaudu ulos",
+    "signOutConfirmTitle": "Kirjataanko laite ulos?",
+    "signOutConfirmMessage": "Tämä laite kirjataan ulos, ja sillä on kirjauduttava uudelleen.",
+    "signOutError": "Laitteen uloskirjaus epäonnistui. Yritä uudelleen.",
+    "empty": "Ei muita laitteita",
+    "loading": "Ladataan laitteita…",
+    "activeNow": "Aktiivinen nyt"
+  },
+  "home": {
+    "title": "Koti",
+    "customize": "Mukauta",
+    "customizeTitle": "Mukauta Kotia",
+    "hide": "Piilota Koti",
+    "hideConfirm": "Piilota",
+    "hideMessage": "Koti-välilehti katoaa ja sovellus avautuu Asetuksissa valittuun aloitusnäkymään. Voit ottaa sen uudelleen käyttöön kohdasta Asetukset → Sisältö.",
+    "hideFooter": "Kun piilotat Kodin, palaat aiempaan aloitusnäkymään.",
+    "sections": "Osiot",
+    "sectionsActive": "{{count}} käytössä",
+    "sectionsFooter": "Järjestä vetämällä. Tyhjät osiot pysyvät automaattisesti piilossa.",
+    "addSection": "Lisää osio",
+    "addSectionFooter": "Alustat ja syötteet näyttävät soittolistasi sisältämät nimikkeet.",
+    "addPlatform": "Suoratoistoalusta",
+    "addFeed": "Mukautettu syöte",
+    "reset": "Palauta asettelu",
+    "resetConfirm": "Palauta",
+    "resetMessage": "Palaa oletusjärjestykseen ja -osioihin. Alustat ja mukautetut syötteet poistetaan.",
+    "applyToAll": "Käytä kaikissa soittolistoissa",
+    "applyToAllConfirm": "Käytä",
+    "applyToAllMessage": "Tämä asettelu korvaa Kodin kaikissa soittolistoissasi.",
+    "moveUp": "Siirrä ylös",
+    "moveDown": "Siirrä alas",
+    "hideSection": "Piilota osio",
+    "sectionSettings": "Osion asetukset",
+    "emptyLayoutTitle": "Tyhjä Koti",
+    "emptyLayoutMessage": "Olet poistanut kaikki osiot käytöstä. Mukauta Kotia ottaaksesi ne takaisin käyttöön.",
+    "section": {
+      "hero": "Nostot",
+      "nowOnTV": "Nyt TV:ssä",
+      "newEpisodes": "Uusia jaksoja sinulle",
+      "recommended": "Suositellut sinulle",
+      "tonightOnTV": "Tänä iltana TV:ssä",
+      "recentlyAddedMovies": "Äskettäin lisätyt elokuvat",
+      "recentlyAddedSeries": "Äskettäin lisätyt sarjat",
+      "recentlyAddedLive": "Äskettäin lisätyt kanavat",
+      "platform": "Alusta",
+      "customFeed": "Mukautettu syöte",
+      "traktList": "Trakt-lista"
+    },
+    "nowOnTVSubtitle": "Nyt menossa kanavillasi",
+    "newEpisodesSubtitle": "Seuraamissasi sarjoissa on uutta",
+    "recommendedSubtitle": "Katsomasi perusteella",
+    "tonightSubtitle": "Paras katseluaika kanavillasi",
+    "reason": {
+      "resume": "Jatka",
+      "newEpisode": "Uusi jakso",
+      "trending": "Nousussa",
+      "recentlyAdded": "Juuri lisätty"
+    },
+    "params": {
+      "both": "Molemmat",
+      "mediaType": "Sisältötyyppi",
+      "channels": "Kanavat",
+      "channelsFooter": "Näytettävät kanavat: Oma lista, äskettäin katsotut tai molemmat.",
+      "window": "Ajanjakso",
+      "lastDays": "Viimeiset {{days}} päivää",
+      "thisWeek": "Tällä viikolla",
+      "today": "Tänään"
+    },
+    "feed": {
+      "name": "Syötteen nimi",
+      "namePlaceholder": "Esim. 80-luvun kauhu",
+      "sortBy": "Lajittelu",
+      "sort": {
+        "popularityDesc": "Suosio (laskeva)",
+        "popularityAsc": "Suosio (nouseva)",
+        "ratingDesc": "Parhaat arviot",
+        "votesDesc": "Eniten ääniä",
+        "newest": "Uusimmat",
+        "oldest": "Vanhimmat",
+        "revenueDesc": "Suurimmat tuotot"
+      },
+      "genres": "Lajityypit",
+      "excludedGenres": "Poissuljetut lajityypit",
+      "year": "Julkaisuvuosi",
+      "yearFrom": "Alkaen",
+      "yearTo": "Asti",
+      "anyYear": "Mikä tahansa vuosi",
+      "language": "Alkuperäinen kieli",
+      "anyLanguage": "Mikä tahansa kieli",
+      "platforms": "Alustat",
+      "platformsFooter": "Rajaa syöte näillä alustoilla saatavilla oleviin nimikkeisiin.",
+      "minVotes": "Vähimmäisäänet",
+      "noMinimum": "Ei minimiä",
+      "filters": "Suodattimet",
+      "customParams": "Lisäparametrit",
+      "customParamsPlaceholder": "with_companies=420&vote_average.gte=7",
+      "customParamsFooter": "TMDB Discover API:n parametrit muodossa avain=arvo &-merkillä eroteltuina. Pilkku = JA, pystyviiva (|) = TAI.",
+      "none": "Ei mitään",
+      "create": "Luo syöte",
+      "edit": "Muokkaa syötettä",
+      "lang": {
+        "en": "Englanti",
+        "it": "Italia",
+        "es": "Espanja",
+        "fr": "Ranska",
+        "de": "Saksa",
+        "pt": "Portugali",
+        "ja": "Japani",
+        "ko": "Korea",
+        "zh": "Kiina",
+        "hi": "Hindi",
+        "tr": "Turkki",
+        "ar": "Arabia",
+        "ru": "Venäjä",
+        "nl": "Hollanti",
+        "sv": "Ruotsi",
+        "da": "Tanska",
+        "nb": "Norja",
+        "pl": "Puola",
+        "el": "Kreikka",
+        "fi": "Suomi"
+      }
+    },
+    "platform": {
+      "pickTitle": "Valitse alustat",
+      "search": "Hae alustaa",
+      "add": "Lisää",
+      "added": "Lisätty"
+    },
+    "platformMovies": "{{name}}-elokuvat",
+    "platformSeries": "{{name}}-sarjat",
+    "customizeHint": "Avaa painamalla alas",
+    "addPlatformSubtitle": "Lisää rivi yhden palvelun nimikkeillä",
+    "addFeedSubtitle": "Luo rivi omilla ehdoillasi",
+    "addTraktList": "Trakt-lista",
+    "addTraktListSubtitle": "Watchlist, suositukset, omat listasi ja yhteisön listat",
+    "trakt": {
+      "pickTitle": "Lisää Trakt-lista",
+      "yours": "Oma Trakt",
+      "recommendations": "Traktin suosittelemat",
+      "recommendationsDesc": "Sen perusteella, mitä olet katsonut ja arvioinut Traktissa",
+      "watchlist": "Trakt-watchlist",
+      "watchlistDesc": "Koko watchlistisi, myös nimikkeet, joita ei ole soittolistallasi",
+      "myLists": "Omat listat",
+      "likedLists": "Tykkäämäni listat",
+      "likedListsFooter": "Tykkää listasta trakt.tv:ssä, niin se ilmestyy tänne.",
+      "community": "Trakt-yhteisöltä",
+      "popular": "Suositut",
+      "trending": "Nousussa",
+      "official": "Viralliset",
+      "search": "Hae listaa tai liitä linkki tai ID",
+      "searchResults": "Tulokset",
+      "items": "{{count}} nimikettä",
+      "by": "tekijä {{user}}",
+      "none": "Ei listoja",
+      "loadMore": "Näytä lisää",
+      "inactive": "Yhdistä Trakt tähän soittolistaan nähdäksesi rivin",
+      "loadFailed": "Trakt-listojen lataus epäonnistui. Napauta yrittääksesi uudelleen",
+      "notFound": "Listaa ei löytynyt",
+      "sort": {
+        "listOrder": "Listan järjestys",
+        "added": "Äskettäin lisätyt",
+        "released": "Julkaisupäivä",
+        "title": "Nimi",
+        "rating": "Arvosana",
+        "popularity": "Suosio"
+      }
+    }
+  },
+  "trakt": {
+    "title": "Trakt",
+    "description": "Synkronoi katsotut, jatkokohta ja watchlist Trakt-tilisi kanssa.",
+    "intro": "Yhdistä Trakt-tilisi, niin katseluhistoriasi pysyy yhdessä paikassa: KIPTV:ssä katsomasi menee Traktiin, ja Trakt-historiasi näkyy KIPTV:ssä kaikilla laitteillasi.",
+    "introFooter": "Vapaaehtoista: ilman yhdistämistä mikään ei muutu.",
+    "notConfigured": "Trakt-integraatio ei ole käytettävissä tässä versiossa.",
+    "link": "Yhdistä Trakt",
+    "linkedAs": "Yhdistetty käyttäjänä {{username}}",
+    "vip": "VIP",
+    "linkedFooter": "Yhdistys koskee koko tiliä: jokainen tällä KIPTV-tilillä kirjautunut laite on myös yhdistetty.",
+    "relinkNeeded": "Trakt-yhteys on vanhentunut: yhdistä tili uudelleen.",
+    "linkRequesting": "Pyydetään koodia…",
+    "linkInstructions": "Avaa trakt.tv/activate ja syötä tämä koodi.",
+    "linkInstructionsTV": "Skannaa QR-koodi tai avaa trakt.tv/activate puhelimella ja syötä koodi.",
+    "openActivate": "Avaa trakt.tv/activate",
+    "codeCopied": "Koodi kopioitu leikepöydälle.",
+    "codeExpires": "Koodi vanhenee {{time}} kuluttua",
+    "regenerate": "Uusi koodi",
+    "linkWaiting": "Odotetaan vahvistusta Traktissa…",
+    "linkSuccess": "Trakt yhdistetty",
+    "linkSuccessSubtitle": "Ensimmäinen synkronointi alkaa nyt.",
+    "linkDenied": "Pyyntö hylättiin Traktissa.",
+    "linkExpired": "Koodi vanhentui: luo uusi.",
+    "syncSection": "Mitä synkronoidaan",
+    "scrobble": "Lähetä katsomasi Traktiin",
+    "scrobbleDesc": "KIPTV:ssä toistetut elokuvat ja jaksot päätyvät Trakt-historiaasi.",
+    "pullWatched": "Tuo katsotut Traktista",
+    "pullWatchedDesc": "Traktissa katsotuksi merkitty näkyy katsottuna KIPTV:ssä, mutta ei tule Jatka katselua -riville ennen kuin toistat sen täällä.",
+    "pullPlayback": "Jatka Traktin kohdasta",
+    "pullPlaybackDesc": "Jos pysäytit muualla, KIPTV jatkaa siitä, kun Traktin kohta on tuoreempi.",
+    "syncWatchlist": "Synkronoi watchlist",
+    "syncWatchlistDesc": "Trakt-watchlististäsi tulee Oma lista -näkymän tunniste \"Trakt Watchlist\", molempiin suuntiin.",
+    "syncNow": "Synkronoi nyt",
+    "syncing": "Synkronoidaan…",
+    "lastSync": "Viimeisin synkronointi: {{date}}",
+    "neverSynced": "Ei vielä synkronointia.",
+    "unlink": "Poista Trakt-yhteys",
+    "unlinkConfirm": "Traktista tuodut katsotut ja tunniste Trakt Watchlist poistetaan. KIPTV:ssä katsomasi säilyy.",
+    "watchlistFullTitle": "Watchlist täynnä",
+    "watchlistFull": "Trakt-watchlistisi on saavuttanut ilmaistilin rajan: nimike jää vain KIPTV:hen.",
+    "linkDescription": "Näyttää koodin, joka syötetään osoitteessa trakt.tv.",
+    "accountDescription": "Trakt-tilisi.",
+    "syncNowDescription": "Päivittää katsotut, jatkokohdat ja watchlistin Traktista heti.",
+    "unlinkDescription": "Poistaa yhteyden ja Traktista tuodut tiedot; KIPTV:n omat katsotut säilyvät.",
+    "error": {
+      "notConfigured": "Traktia ei ole määritetty tässä versiossa.",
+      "unauthorized": "Trakt hylkäsi yhteyden: yhdistä tili uudelleen.",
+      "rateLimited": "Liian monta pyyntöä Traktiin: yritä hetken kuluttua uudelleen.",
+      "network": "Traktiin ei saada yhteyttä.",
+      "generic": "Virhe yhteydessä Traktiin."
+    },
+    "oneAppNotice": "Ilmainen Trakt-tili voi pitää yhdistettynä vain yhden sovelluksen: jos sinulla on jo yksi, poista sen yhteys osoitteessa trakt.tv ennen jatkamista.",
+    "askRatings": "Kysy arvosanaa",
+    "askRatingsDesc": "Elokuvan tai jakson päätyttyä kysyy arvosanaa 1–10 ja lähettää sen Traktiin.",
+    "playlists": "Soittolistat",
+    "playlistsDesc": "Mitä soittolistoja integraatio koskee",
+    "playlistsAll": "Kaikki soittolistat",
+    "playlistsAllValue": "Kaikki",
+    "playlistsCount": "{{count}} soittolistaa",
+    "playlistsFooter": "Pois jätetyissä soittolistoissa KIPTV ei lähetä mitään Traktiin, ja Traktista tuodut tiedot poistetaan. KIPTV:ssä katsomasi säilyy.",
+    "playlistExcluded": "Tämä soittolista on jätetty Trakt-integraation ulkopuolelle.",
+    "rateTitle": "Minkä arvosanan annat: {{title}}?",
+    "rateSubtitle": "Arvosana menee Trakt-tilillesi.",
+    "rateSkip": "Ei nyt",
+    "rateEpisode": "Arvioi jakso",
+    "rateSent": "Arvosana lähetetty Traktiin"
+  }
+}

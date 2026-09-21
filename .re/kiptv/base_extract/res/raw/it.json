@@ -1,0 +1,3630 @@
+{
+  "playUpdate": {
+    "title": "Aggiornamento disponibile",
+    "body": "KIPTV {{version}} è disponibile su Google Play. Vuoi scaricarla adesso?",
+    "now": "Aggiorna ora",
+    "later": "Più tardi",
+    "settingsDescription": "Controlla se c'è una versione più recente di KIPTV sul Play Store."
+  },
+  "sideload": {
+    "update": {
+      "title": "Aggiornamento disponibile",
+      "body": "KIPTV {{version}} è pronta da installare. Vuoi aggiornare adesso?",
+      "now": "Aggiorna ora",
+      "later": "Più tardi",
+      "downloading": "Download di KIPTV {{version}} in corso…",
+      "verifying": "Verifica del file…",
+      "install": "Installa",
+      "readyBody": "Download completato. Premi Installa e conferma nella schermata di sistema.",
+      "failedBody": "Il download non è riuscito. Controlla la connessione e riprova.",
+      "permissionTitle": "Consenti l'installazione",
+      "permissionBody": "La TV deve permettere a KIPTV di installare app. Apri le impostazioni, attiva l'interruttore per KIPTV e torna qui: l'installazione riparte da sola.",
+      "openSettings": "Apri impostazioni",
+      "manualTitle": "Aggiorna con Downloader",
+      "manualBody": "Apri l'app Downloader e inserisci l'indirizzo {{link}}: scarica e installa la nuova versione sopra questa.",
+      "manualBodyWithCode": "Apri l'app Downloader e inserisci il codice {{code}} (oppure l'indirizzo {{link}}): scarica e installa la nuova versione sopra questa.",
+      "openDownloader": "Apri Downloader",
+      "settingsRow": "Aggiornamenti",
+      "settingsDescription": "Controlla se c'è una versione più recente di KIPTV e installala da qui.",
+      "statusAvailable": "Disponibile {{version}}",
+      "statusUpToDate": "Aggiornata",
+      "statusChecking": "Controllo…",
+      "statusUnknown": "Controlla ora"
+    }
+  },
+  "ratings": {
+    "title": "Valutazioni",
+    "critics": "Critica",
+    "audience": "Pubblico",
+    "fromAge": "dai {{age}} anni"
+  },
+  "playback": {
+    "playWith": "Riproduci con",
+    "externalPlayerSection": "Apri in app esterna"
+  },
+  "browser": {
+    "reload": "Ricarica",
+    "stop": "Interrompi caricamento",
+    "openInBrowser": "Apri nel browser"
+  },
+  "quickAction": {
+    "chat": {
+      "title": "Aspetta, non eliminarmi!",
+      "subtitle": "Chatta con noi, troviamo una soluzione"
+    }
+  },
+  "avatars": {
+    "group": {
+      "people": "Persone",
+      "animals": "Animali",
+      "football": "Calcio"
+    }
+  },
+  "errors": {
+    "xtream": {
+      "networkNoCacheData": "Errore di rete e nessun dato in cache",
+      "serverRetrying": "Errore del server IPTV - nuovo tentativo in corso...",
+      "serverHttp": "Errore server (HTTP {{status}})",
+      "slowConnection": "Connessione lenta - timeout della richiesta",
+      "rateLimitWait": "Server XTREAM ha limitato le richieste. Riprova tra {{seconds}}s.",
+      "rateLimitBlocked": "Server XTREAM ha temporaneamente bloccato le richieste (HTTP 429). Attendi {{seconds}}s e riprova.",
+      "serverNotFound": "Server XTREAM non trovato - Verifica URL",
+      "staleCacheWarning": "Dati dalla cache ({{minutes}}min fa) - rete non disponibile",
+      "noInternet": "Nessuna connessione internet - verifica la rete",
+      "invalidRequest": "Richiesta non valida - verifica le credenziali della playlist",
+      "credentialsExpired": "Credenziali scadute - riautentica la playlist",
+      "accessDenied": "Accesso negato dal provider IPTV",
+      "contentNotFound": "Contenuto non trovato sul provider IPTV",
+      "tooManyRequests": "Troppe richieste - attendere un momento",
+      "serverMaintenance": "Server IPTV in manutenzione - riprovare più tardi",
+      "serverTimeout": "Timeout del server IPTV - connessione lenta",
+      "unauthorized": "Credenziali non autorizzate",
+      "serverUnavailable": "Server temporaneamente non disponibile",
+      "invalidCredentials": "Credenziali non valide o account scaduto",
+      "connectionTimeout": "Timeout connessione - Server non risponde",
+      "networkError": "Errore di rete - Verifica connessione Internet",
+      "invalidUrl": "URL non valido o server non raggiungibile",
+      "unknownConnection": "Errore sconosciuto di connessione"
+    },
+    "boundaryTitle": "Oops! Qualcosa è andato storto",
+    "boundaryMessage": "L'applicazione ha riscontrato un errore imprevisto. Riprova o riavvia l'app se il problema persiste.",
+    "limitsCheckFailed": "Impossibile verificare i limiti di visualizzazione. Riprova più tardi.",
+    "limitsLoadError": "Errore durante il caricamento dei limiti. Riprova più tardi.",
+    "playlistSave": "Errore nel salvare la playlist",
+    "playlistRemove": "Errore nella rimozione della playlist",
+    "playlistUpdate": "Errore nell'aggiornamento della playlist",
+    "unknown": "Errore sconosciuto",
+    "unifiedLoad": "Errore nel caricamento unificato",
+    "liveTVLoad": "Errore nel caricamento Live",
+    "logout": "Errore durante il logout",
+    "loadError": "Errore nel caricamento",
+    "loadingFailed": "Caricamento fallito. Riprova."
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "Email o password errati",
+      "invalid_email_or_password": "Email o password non validi",
+      "user_not_found": "Nessun account trovato con questa email",
+      "user_already_registered": "Questa email è già registrata - prova ad accedere",
+      "password_min_length": "La password deve essere di almeno 6 caratteri",
+      "password_too_weak": "Password troppo debole - usa lettere, numeri e simboli",
+      "same_password": "La nuova password deve essere diversa da quella attuale",
+      "email_invalid_format": "Indirizzo email non valido",
+      "email_validation_failed": "Formato email non corretto",
+      "email_invalid": "Email non valida",
+      "network_failed": "Nessuna connessione internet - verifica la rete",
+      "fetch_failed": "Errore di connessione - riprova",
+      "network_error": "Problema di rete - controlla la connessione",
+      "jwt_expired": "Sessione scaduta - effettua nuovamente il login",
+      "jwt_invalid": "Sessione non valida - riaccedi",
+      "refresh_token_not_found": "Sessione scaduta - accedi di nuovo",
+      "oauth_cancelled": "Login annullato",
+      "oauth_access_denied": "Login annullato - hai rifiutato l'accesso",
+      "oauth_redirect_mismatch": "Errore di configurazione - contatta il supporto",
+      "oauth_unauthorized": "Errore OAuth - contatta il supporto",
+      "rate_limit_email": "Troppe richieste - attendi un momento prima di riprovare",
+      "rate_limit_general": "Troppe richieste - riprova tra qualche minuto",
+      "password_invalid": "Password non valida",
+      "security_purposes": "Per motivi di sicurezza, riprova più tardi",
+      "auth_failed": "Autenticazione fallita - riprova",
+      "bad_request": "Richiesta non valida - verifica i dati inseriti",
+      "unauthorized": "Accesso non autorizzato - verifica le credenziali",
+      "rate_limit": "Troppe richieste - attendi qualche minuto",
+      "server_error": "Servizio temporaneamente non disponibile - riprova più tardi",
+      "default": "Errore di autenticazione - riprova",
+      "email_not_confirmed": "Conferma la tua email prima di accedere"
+    },
+    "login": "Accedi",
+    "forgotPassword": "Password dimenticata?",
+    "forgotPasswordTitle": "Password Dimenticata?",
+    "forgotPasswordSubtitle": "Inserisci la tua email e ti invieremo un link per reimpostare la password.",
+    "emailLabel": "Email",
+    "sendResetEmail": "Invia Email di Reset",
+    "resetEmailSent": "✅ Controlla la tua email per il link di reset",
+    "resetEmailError": "Impossibile inviare l'email. Riprova.",
+    "resetPasswordTitle": "Reimposta Password",
+    "resetPasswordSubtitle": "Inserisci la tua nuova password qui sotto",
+    "newPassword": "Nuova Password",
+    "confirmPassword": "Conferma Password",
+    "resetPasswordButton": "Reimposta Password",
+    "resetPasswordSuccess": "✅ Password reimpostata con successo!",
+    "passwordsDoNotMatch": "Le password non corrispondono",
+    "backToLogin": "Torna al Login",
+    "loginTitle": "Accedi all'account",
+    "loginSubtitle": "Accedi per recuperare playlist, liste e progressi.",
+    "emailPlaceholder": "mail@example.com",
+    "noAccountPrompt": "Non hai un account?",
+    "registerCta": "Registrati ora",
+    "createAccountTitle": "Crea account",
+    "createAccountSubtitle": "Sincronizza playlist e preferenze su tutti i dispositivi.",
+    "createAccountButton": "Crea account",
+    "alreadyHaveAccountCta": "Hai già un account?",
+    "tagline": "Il tuo intrattenimento, ovunque",
+    "continueWithGoogle": "Continua con Google",
+    "continueWithApple": "Continua con Apple",
+    "signInWithGoogle": "Accedi con Google",
+    "continueWithEmail": "Continua con Email",
+    "termsPrefix": "Continuando, accetti i nostri",
+    "termsOfService": "Termini di Servizio",
+    "privacyPolicy": "Privacy Policy",
+    "appleCredentialsInvalid": "Credenziali Apple non valide",
+    "appleSignInError": "Errore Apple Sign In",
+    "googleComingSoon": "Google Sign In sarà disponibile presto",
+    "registerSubtitle": "Inserisci i tuoi dati per registrarti",
+    "welcomeBack": "Bentornato!",
+    "resetEmailSentMessage": "Email di reset inviata! Controlla la tua casella.",
+    "register": "Registrati",
+    "invalidEmailFirst": "Inserisci prima una email valida",
+    "changePassword": "Cambia password"
+  },
+  "common": {
+    "returnToHomeTitle": "Vuoi tornare alla Home?",
+    "on": "Sì",
+    "off": "No",
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo",
+    "retry": "Riprova",
+    "cancel": "Annulla",
+    "confirm": "Conferma",
+    "delete": "Elimina",
+    "save": "Salva",
+    "close": "Chiudi",
+    "back": "Indietro",
+    "next": "Avanti",
+    "done": "Fatto",
+    "ok": "OK",
+    "edit": "Modifica",
+    "name": "Nome",
+    "domain": "Dominio",
+    "url": "URL",
+    "username": "Username",
+    "password": "Password",
+    "or": "oppure",
+    "saveChanges": "Salva modifiche",
+    "resumeFrom": "Riprendi da {{time}}",
+    "completed": "{{percent}}% completato",
+    "resume": "Riprendi",
+    "plot": "Trama",
+    "cast": "Cast",
+    "directedBy": "Regia di",
+    "genres": "Generi",
+    "trailer": "Trailer",
+    "trailerComingSoon": "Trailer in arrivo",
+    "continue": "Continua",
+    "download": "Scarica",
+    "cancelDownload": "Annulla download",
+    "downloaded": "Scaricato",
+    "saving": "Salvataggio in corso...",
+    "fillFields": "Completa i campi",
+    "contents": "contenuti",
+    "noContent": "Nessun contenuto",
+    "addPlaylistToSeeContent": "Aggiungi una playlist per vedere i contenuti",
+    "remove": "Rimuovi",
+    "item": "elemento",
+    "items": "elementi",
+    "day": "giorno",
+    "days": "giorni",
+    "descriptionNotAvailable": "Descrizione non disponibile",
+    "titleNotAvailable": "Titolo non disponibile",
+    "unknownTitle": "Titolo sconosciuto",
+    "search": "Cerca",
+    "and": "e",
+    "seeAll": "Vedi tutto",
+    "episodes": "episodi",
+    "noChanges": "Nessuna modifica",
+    "tapAgainConfirm": "Tocca di nuovo per confermare",
+    "deleteError": "Errore eliminazione"
+  },
+  "loading": {
+    "triviaTitle": "Lo sapevi?"
+  },
+  "settings": {
+    "setupWizardRerun": "Ripeti la configurazione guidata",
+    "setupWizardRerunSubtitle": "Rifai i passi iniziali sulla playlist attiva.",
+    "playbackProfile": "Profilo di riproduzione",
+    "playbackProfileQuality": "Qualità",
+    "playbackProfileStability": "Stabilità",
+    "playbackProfileCustom": "Personalizzato",
+    "playbackProfileSubtitle": "Qualità usa il motore automatico, Stabilità usa VLC con riserva. Cambiare i motori a mano imposta Personalizzato solo su questo dispositivo.",
+    "heroStyle": "Stile in evidenza",
+    "heroStyleSubtitle": "Aspetto del contenuto in evidenza in cima a Film e Serie TV",
+    "heroStyleFull": "A schermo intero",
+    "heroStyleCard": "A scheda",
+    "introSkip": {
+      "enabled": "Salta intro",
+      "subtitle": "Mostra un pulsante «Salta intro» durante le sigle degli episodi.",
+      "autoEnabled": "Salta automaticamente",
+      "autoSubtitle": "Salta riassunto e intro senza dover toccare.",
+      "defaultLength": "Durata salto predefinita",
+      "seconds": "{{seconds}}s",
+      "autoSkip": "Salta automaticamente",
+      "autoSkipSubtitle": "Salta intro e riassunti senza premere nulla."
+    },
+    "title": "Impostazioni",
+    "account": "Account",
+    "playlist": "Playlist",
+    "videoQuality": "Qualita video",
+    "downloads": "Download",
+    "cache": "Cache",
+    "auto": "Auto",
+    "changePlaylist": "Cambia playlist",
+    "sortHideCategories": "Ordina / nascondi categorie",
+    "sortHideCategoriesSubtitle": "Personalizza Film, Serie e Canali per questa playlist.",
+    "logout": "Logout",
+    "logoutConfirm": "Sei sicuro di voler uscire?",
+    "language": "Lingua",
+    "manageAccount": "Gestisci account",
+    "playlistComingSoon": "Impostazioni in arrivo!",
+    "playlistComingSoonSubtitle": "Stiamo rifinendo le impostazioni della playlist. Arrivano a breve.",
+    "about": "Informazioni",
+    "version": "Versione",
+    "support": "Supporto",
+    "supportDiscord": "Unisciti alla community Discord",
+    "followUs": "Seguici su X",
+    "followUsDescription": "Non perderti gli ultimi aggiornamenti e novità",
+    "followUsScanHint": "Scansiona per seguirci su X",
+    "followUsInstagram": "Seguici su Instagram",
+    "followUsInstagramScanHint": "Scansiona per seguirci su Instagram",
+    "feedback": {
+      "subtitle": "Segnala bug, suggerisci miglioramenti, richiedi nuove funzioni"
+    },
+    "termsOfService": "Termini di servizio",
+    "privacyPolicy": "Informativa sulla privacy",
+    "termsDescription": "Leggi i nostri Termini di servizio",
+    "privacyDescription": "Leggi la nostra Informativa sulla privacy",
+    "supportQRTitle": "Unisciti al supporto KIPTV",
+    "supportQRSubtitle": "Scansiona questo codice QR con il tuo iPhone o iPad per aprire la nostra community Discord",
+    "myPlaylists": "Le mie playlist",
+    "appSection": "App",
+    "infoSection": "Info",
+    "logoutWarning": "Dovrai effettuare nuovamente l'accesso",
+    "playlistManagement": "Gestione Playlist",
+    "contentManagement": "Gestione contenuti",
+    "contentManagementSubtitle": "Ordina, nascondi e blocca i contenuti della playlist",
+    "deviceSection": "Dispositivo",
+    "subtitleLanguage": "Lingua sottotitoli",
+    "subtitleOff": "Disattivati",
+    "subtitleAuto": "Predefinito",
+    "audioLanguage": "Lingua audio",
+    "audioOriginal": "Originale",
+    "autoplayNextEpisode": "Riproduci prossimo episodio",
+    "backgroundPlayback": "Riproduzione in background",
+    "backgroundPlaybackSubtitle": "Continua a riprodurre l'audio quando esci dall'app e torni alla schermata principale della TV. Se disattivo, la riproduzione va in pausa e riparte quando rientri in KIPTV.",
+    "skipForward": "Avanti veloce",
+    "skipBackward": "Indietro veloce",
+    "seconds5": "5 secondi",
+    "seconds10": "10 secondi",
+    "seconds15": "15 secondi",
+    "seconds30": "30 secondi",
+    "playerEngine": "Player",
+    "playerSelectEngine": "Seleziona motore player",
+    "playerAuto": "Auto",
+    "playerNative": "Nativo (AVPlayer)",
+    "playerExo": "ExoPlayer",
+    "playerMPV": "MPV",
+    "playerAether": "Aether",
+    "playerVLC": "VLC",
+    "playerKSPlayer": "KSPlayer",
+    "playerMoviesSeries": "Player Film e Serie",
+    "playerLive": "Player Live",
+    "playerFallbackOnFailure": "Usa altri player se quello scelto fallisce",
+    "playerFallbackDescription": "Prova automaticamente un altro motore se quello selezionato fallisce",
+    "metadata": "Metadati",
+    "metadataSection": "Metadati",
+    "metadataSource": "Fonte metadati",
+    "smartHide": "Smart Hide",
+    "metadataWeb": "Web",
+    "metadataPlaylist": "Playlist",
+    "metadataSubtitle": "Web: poster, valutazioni e descrizioni dal web. Playlist: usa solo i dati del provider IPTV.",
+    "titleCleaning": "Pulisci titoli film e serie",
+    "titleCleaningSubtitle": "Rimuovi tag qualita, lingua e anno dai titoli degli stream",
+    "includeAdultContent": "Includi contenuti per adulti",
+    "hiddenCategories": "Categorie nascoste",
+    "hiddenCategoriesCount": "{{count}} nascoste",
+    "noHiddenCategories": "Nessuna categoria nascosta",
+    "languageAuto": "Predefinito di sistema",
+    "settingsCategories": "Categorie",
+    "general": "Generale",
+    "playback": "Riproduzione",
+    "playbackVodSection": "Film e Serie",
+    "playbackLiveSection": "Live",
+    "networkPerformance": "Rete e prestazioni",
+    "networkRequestsSection": "Richieste",
+    "requestTimeout": "Timeout richieste",
+    "retryAttempts": "Tentativi retry",
+    "cacheFallbackOnError": "Usa cache precedente su errori di rete",
+    "clearRuntimeCaches": "Svuota cache runtime",
+    "localOnly": "Queste impostazioni vengono salvate solo su questo dispositivo.",
+    "contentSection": "Contenuti",
+    "parentalControl": "Parent control",
+    "contentControl": "Controllo contenuti",
+    "contentControlDisabled": "Controlli disattivati",
+    "contentControlEnabled": "Controlli attivi",
+    "parentalControlEnabled": "Abilita controllo parentale",
+    "parentalRequirePinForSettings": "Richiedi PIN per aprire impostazioni",
+    "disableParentalTitle": "Disattivare il controllo parentale?",
+    "disableParentalMessage": "Tutti i contenuti e le categorie attualmente bloccate verranno sbloccati.",
+    "disableParentalConfirm": "Disattiva e sblocca",
+    "parentalManageHint": "Per bloccare o sbloccare categorie e contenuti, vai a Gestione contenuti",
+    "enterPin": "Inserisci PIN",
+    "lockedContentSubtitle": "Questo contenuto è bloccato. Inserisci il PIN per continuare.",
+    "hideAdultCategories": "Nascondi categorie adulte (XXX)",
+    "pinSection": "PIN",
+    "setPin": "Imposta PIN",
+    "changePin": "Cambia PIN",
+    "removePin": "Rimuovi PIN",
+    "parentalPin": "PIN a 4 cifre",
+    "parentalPinConfirm": "Conferma PIN",
+    "pinMustBe4Digits": "Il PIN deve avere esattamente 4 cifre.",
+    "pinMismatch": "I PIN non coincidono.",
+    "diagnostics": "Diagnostica",
+    "diagnosticsHealthy": "Nessun problema rilevato",
+    "diagnosticsIssueDetected": "Richiede attenzione",
+    "diagnosticsPlaylistSection": "Stato playlist",
+    "diagnosticsEpgSection": "Stato EPG",
+    "diagnosticsErrorsSection": "Errori recenti",
+    "diagnosticsActionsSection": "Azioni",
+    "diagnosticsXmltvChannels": "Canali XMLTV",
+    "diagnosticsXmltvPrograms": "Programmi XMLTV",
+    "diagnosticsEpgCache": "Cache EPG",
+    "diagnosticsXtreamError": "Xtream",
+    "diagnosticsPlaylistError": "Playlist",
+    "diagnosticsXmltvError": "XMLTV",
+    "noIssuesDetected": "Nessun errore",
+    "refreshDiagnostics": "Aggiorna diagnostica",
+    "diagnosticsRefreshed": "Diagnostica aggiornata",
+    "runtimeCacheCleared": "Cache runtime svuotata",
+    "clearPosterCache": "Pulisci cache poster",
+    "clearPosterCacheSubtitle": "Forza il ricaricamento delle copertine dalla rete. Usalo se vedi placeholder al posto delle copertine.",
+    "clearPosterCacheDone": "Cache poster svuotata",
+    "statusIdle": "Inattivo",
+    "statusReady": "Pronto",
+    "statusNever": "Mai",
+    "lastUpdate": "Ultimo aggiornamento",
+    "lastContentUpdate": "Ultimo aggiornamento contenuti",
+    "xmltvStatus": "Stato XMLTV",
+    "moviesLoaded": "Film caricati",
+    "seriesLoaded": "Serie caricate",
+    "channelsLoaded": "Canali caricati",
+    "infoPlaylistSection": "Dettagli playlist",
+    "infoContentSection": "Contenuti caricati",
+    "infoAccountSection": "Stato account provider",
+    "activePlaylistSection": "Playlist attiva",
+    "savedPlaylistsSection": "Playlist salvate",
+    "active": "Attiva",
+    "noSavedPlaylists": "Nessuna playlist salvata",
+    "vodAskBeforeAutoplay": "Chiedi prima dell'autoplay episodio successivo",
+    "liveStartMuted": "Avvia canali live in muto",
+    "liveOpenEpgOnChannelChange": "Apri EPG al cambio canale",
+    "livePreferLowLatency": "Preferisci bassa latenza per il live",
+    "epgPreviewMode": "Anteprima EPG",
+    "epgPreviewModeDescription": "Scegli se avviare la riproduzione in anteprima del canale nella schermata EPG.",
+    "epgPreviewModeOff": "No",
+    "epgPreviewModeOnFocus": "Al focus",
+    "epgPreviewModeOnTap": "Al tocco",
+    "epgPreviewModeLowMemoryWarning": "Su modelli di TV meno recenti potrebbe causare rallentamenti.",
+    "liveTVPreviewMode": "Anteprima Live TV",
+    "liveTVPreviewModeDescription": "Scegli se avviare la riproduzione in anteprima del canale nella schermata Live TV.",
+    "liveTVPreviewModeOff": "No",
+    "liveTVPreviewModeOnFocus": "Al focus",
+    "liveTVPreviewModeOnTap": "Al tocco",
+    "liveTabLayout": "Layout schermata Live",
+    "liveTabLayoutDescription": "Scegli cosa mostra la schermata Live.",
+    "liveTabLayoutChannelList": "Elenco canali",
+    "liveTabLayoutCarousel": "Caroselli",
+    "hideItem": "Nascondi contenuto",
+    "hideGroupedChannelTitle": "Nascondi tutte le versioni",
+    "hideGroupedChannelMessage": "Verranno nascoste tutte le {{count}} versioni di qualità di questo canale. Vuoi continuare?",
+    "lockGroupedChannelTitle": "Blocca tutte le versioni",
+    "lockGroupedChannelMessage": "Verranno bloccate tutte le {{count}} versioni di qualità di questo canale. Vuoi continuare?",
+    "unlockGroupedChannelTitle": "Sblocca tutte le versioni",
+    "unlockGroupedChannelMessage": "Verranno sbloccate tutte le {{count}} versioni di qualità di questo canale. Vuoi continuare?",
+    "unhide": "Mostra",
+    "hiddenItems": "Contenuti nascosti",
+    "noHiddenItems": "Nessun contenuto nascosto",
+    "hiddenItemsCount": "{{count}} nascosti",
+    "autoHideKeywords": "Parole chiave auto-nascondi",
+    "autoHideKeywordsHeader": "Parole chiave",
+    "autoHideKeywordsFooter": "Le categorie che contengono queste parole chiave verranno nascoste automaticamente da tutti i tipi di contenuto.",
+    "addKeywordPlaceholder": "es. 'xxx'",
+    "autoHidden": "Nascosta automaticamente",
+    "categoryOrder": "Ordine categorie",
+    "categoryOrderFooter": "Trascina le categorie per riordinarle. Questo imposta un ordine personalizzato.",
+    "reorderSearchDisabled": "Cancella la ricerca per riordinare",
+    "resetOrder": "Ripristina ordine",
+    "hiddenCategoriesFooter": "Attiva o disattiva la visibilita per ogni categoria. Le categorie nascoste automaticamente sono gestite tramite parole chiave.",
+    "noCategoriesAvailable": "Nessuna categoria disponibile",
+    "manageCategories": "Gestisci categorie",
+    "manageCategoriesHeader": "Trascina per riordinare. Tocca l'occhio per mostrare/nascondere.",
+    "manageCategoriesHeaderFull": "Trascina per riordinare. Tocca l'occhio per mostrare/nascondere. Tocca una categoria per gestirne i contenuti.",
+    "autoHiddenSection": "Nascoste automaticamente",
+    "autoHideKeywordsFooterPerType": "Le categorie contenenti queste parole chiave verranno nascoste automaticamente.",
+    "autoHiddenCategoriesSection": "Categorie nascoste dalle parole chiave",
+    "allHiddenContent": "Contenuti nascosti",
+    "allLockedContent": "Contenuti bloccati",
+    "hiddenCategoriesSection": "Categorie nascoste",
+    "hiddenItemsSection": "Elementi nascosti",
+    "lockedCategoriesSection": "Categorie bloccate",
+    "lockedItemsSection": "Elementi bloccati",
+    "showAll": "Mostra tutti",
+    "unlockAllItems": "Sblocca tutti",
+    "showAllConfirmTitle": "Mostrare tutti i contenuti nascosti?",
+    "showAllConfirmMessage": "Verranno mostrati tutti i {{count}} elementi e categorie nascosti. Vuoi continuare?",
+    "unlockAllConfirmTitle": "Sbloccare tutti i contenuti?",
+    "unlockAllConfirmMessage": "Verranno sbloccati tutti i {{count}} elementi e categorie bloccati. Vuoi continuare?",
+    "noItemsInCategory": "Nessun contenuto in questa categoria",
+    "contentType": "Tipo di contenuto",
+    "contentTypeDescription": "Scegli quale tipo di contenuto gestire",
+    "categorySortDescription": "Cambia l'ordinamento delle categorie nella lista",
+    "allHiddenContentDescription": "Rivedi e ripristina tutte le categorie e i contenuti nascosti",
+    "allLockedContentDescription": "Rivedi e sblocca tutte le categorie e i contenuti bloccati",
+    "categoryTapDescription": "Premi per gestire i contenuti di questa categoria",
+    "categoryEyeDescription": "Premi per mostrare o nascondere questa categoria",
+    "categoryLockDescription": "Premi per bloccare o sbloccare questa categoria",
+    "categoryMoveDescription": "Premi per spostare questa categoria in alto o in basso",
+    "contentSortDescription": "Cambia l'ordinamento dei contenuti in questa categoria",
+    "filterItemsDescription": "Digita per filtrare i contenuti per nome",
+    "itemEyeDescription": "Premi per mostrare o nascondere questo contenuto",
+    "itemLockDescription": "Premi per bloccare o sbloccare questo contenuto",
+    "categoryContentDescription": "Gestisci i singoli contenuti di questa categoria",
+    "addKeywordDescription": "Inserisci una parola chiave per nascondere automaticamente le categorie corrispondenti",
+    "removeKeywordDescription": "Tieni premuto una parola chiave per rimuoverla",
+    "unhideCategoryDescription": "Premi il pulsante per mostrare questa categoria",
+    "unhideItemDescription": "Premi il pulsante per mostrare questo contenuto",
+    "showAllDescription": "Mostra tutte le categorie e i contenuti nascosti in una volta",
+    "unlockCategoryDescription": "Premi il pulsante per sbloccare questa categoria",
+    "unlockItemDescription": "Premi il pulsante per sbloccare questo contenuto",
+    "unlockAllDescription": "Sblocca tutte le categorie e i contenuti bloccati in una volta",
+    "showCategory": "Mostra categoria",
+    "hideCategory": "Nascondi categoria",
+    "lockCategory": "Blocca categoria",
+    "unlockCategory": "Sblocca categoria",
+    "renameCategory": "Rinomina categoria",
+    "moveCategoryToTop": "Metti in cima",
+    "restoreCategoryName": "Ripristina nome originale",
+    "renameChannel": "Rinomina canale",
+    "moveChannelToTop": "Metti in cima",
+    "restoreChannelName": "Ripristina nome originale",
+    "showItem": "Mostra contenuto",
+    "lockItem": "Blocca",
+    "unlockItem": "Sblocca",
+    "removeKeyword": "Rimuovi parola chiave",
+    "removeKeywordConfirm": "Rimuovere \"{{keyword}}\"?",
+    "moveToTop": "Sposta in cima",
+    "moveUp": "Sposta su",
+    "moveDown": "Sposta giù",
+    "moveToBottom": "Sposta in fondo",
+    "defaultStartScreen": "Schermata di avvio",
+    "defaultStartScreenSubtitle": "Scegli quale tab si apre quando entri in una playlist",
+    "autoOpenPlaylist": "Apri automaticamente playlist",
+    "autoOpenPlaylistSubtitle": "Quale playlist aprire all'avvio dell'app",
+    "autoOpenPlaylistOff": "No",
+    "autoOpenPlaylistLast": "Ultima playlist",
+    "startScreenMovies": "Film",
+    "startScreenSeries": "Serie",
+    "startScreenLive": "Live",
+    "startScreenGuide": "Guida",
+    "incognitoMode": "Modalita incognito",
+    "incognitoModeSubtitle": "Guarda senza salvare progressi o cronologia su questo dispositivo",
+    "incognitoActive": "Modalita incognito attiva",
+    "privacy": "Privacy",
+    "recentlyWatchedLive": "Mostra 'Visti di recente'",
+    "recentlyWatchedLiveSubtitle": "Mostra una categoria \"Visti di recente\" in cima alla sezione Live",
+    "continueWatchingTapPlays": "Riproduci con un tocco",
+    "continueWatchingTapPlaysSubtitle": "Tocca su \"Continua a guardare\" per riprodurre direttamente. Se disattivato, apre la schermata dettaglio.",
+    "metadataLanguage": "Lingua metadati",
+    "metadataLanguageSubtitle": "Lingua per le informazioni su film, serie e programmi (TMDB)",
+    "metadataLanguageAuto": "Come l'app",
+    "subtitleStyling": "Aspetto sottotitoli",
+    "subtitleFontSize": "Dimensione font",
+    "subtitleFontSizeSmall": "Piccolo",
+    "subtitleFontSizeMedium": "Medio",
+    "subtitleFontSizeLarge": "Grande",
+    "subtitleFontSizeXLarge": "Extra grande",
+    "subtitleColor": "Colore testo",
+    "subtitleColorWhite": "Bianco",
+    "subtitleColorYellow": "Giallo",
+    "subtitleColorGreen": "Verde",
+    "subtitleColorCyan": "Ciano",
+    "subtitleColorOrange": "Arancione",
+    "subtitleBackground": "Sfondo",
+    "subtitleBackgroundNone": "Nessuno",
+    "subtitleBackgroundSemiTransparent": "Semi-trasparente",
+    "subtitleBackgroundOpaque": "Opaco",
+    "subtitlePosition": "Posizione",
+    "subtitlePositionBottom": "In basso",
+    "subtitlePositionTop": "In alto",
+    "subtitleStyleSourceSystem": "Impostazioni di sistema",
+    "subtitleStyleSourceCustom": "Personalizzato",
+    "subtitleFont": "Carattere",
+    "subtitleFontDefault": "Predefinito",
+    "subtitleFontRounded": "Arrotondato",
+    "subtitleFontSerif": "Con grazie",
+    "subtitleFontMono": "Monospazio",
+    "subtitleBold": "Grassetto",
+    "subtitleEdge": "Bordo",
+    "subtitleEdgeNone": "Nessuno",
+    "subtitleEdgeShadow": "Ombra",
+    "subtitleEdgeOutline": "Contorno",
+    "subtitleStyleSource": "Stile sottotitoli",
+    "subtitleStyleSystemHint": "Usa le impostazioni sottotitoli di sistema del dispositivo",
+    "subtitlePreview": "Anteprima",
+    "subtitlePreviewText": "Ecco come appariranno i sottotitoli",
+    "networkBuffer": "Buffer di rete",
+    "networkBufferSubtitle": "Quanto video precaricare. Valori maggiori aiutano con connessioni lente.",
+    "networkBufferAuto": "Auto",
+    "hardwareAcceleration": "Accelerazione hardware",
+    "hardwareAccelerationSubtitle": "Usa la GPU per la decodifica video. Disattiva se riscontri crash.",
+    "hardwareAccelerationOn": "Attiva",
+    "hardwareAccelerationOff": "Disattiva",
+    "hardwareAccelerationAuto": "Auto",
+    "deinterlacing": "Deinterlacciamento",
+    "deinterlacingSubtitle": "Converte il video interlacciato in progressivo. Utile per i canali live.",
+    "deinterlacingAuto": "Auto",
+    "deinterlacingOff": "Disattivato",
+    "liveStreamFormat": "Formato stream live",
+    "liveStreamFormatSubtitle": "Auto sceglie il formato migliore in base al player: HLS per AVPlayer, MPEG-TS per KSPlayer/VLC/MPV/Aether",
+    "groupSimilarChannels": "Raggruppa canali simili",
+    "groupSimilarChannelsSubtitle": "Combina le varianti HD, 4K, FHD dello stesso canale in un'unica voce",
+    "splitMyListByTag": "Suddividi La mia lista per tag",
+    "showTrending": "Mostra 'Tendenze'",
+    "hideEmptyTabs": "Nascondi schede vuote",
+    "hideEmptyTabsSubtitle": "Nascondi le schede Film, Serie o Live quando la playlist non ha contenuti di quel tipo",
+    "showTrendingSubtitle": "Mostra il banner e i caroselli di tendenza nella schermata principale",
+    "showRecentlyAdded": "Mostra 'Aggiunti di recente'",
+    "splitMyListByTagSubtitle": "Mostra un carosello per ciascun tag invece di una lista unica",
+    "showRecentlyAddedSubtitle": "Evidenzia i contenuti aggiunti negli ultimi 30 giorni",
+    "chooseQuality": "Scegli qualita",
+    "contentRefreshFrequency": "Frequenza aggiornamento contenuti",
+    "contentRefreshEveryAccess": "A ogni accesso",
+    "contentRefreshFrequencySubtitle": "Ogni quanto ricaricare tutti i contenuti della playlist (categorie, film, serie, canali)",
+    "epgRefreshFrequency": "Frequenza aggiornamento EPG",
+    "epgRefreshFrequencySubtitle": "Ogni quanto ricaricare i dati della guida programmi",
+    "epgRefreshMinutes": "{{count}} min",
+    "epgRefreshHours": "{{count}} h",
+    "epgForceRefresh": "Aggiorna EPG ora",
+    "customUserAgent": "User agent",
+    "customUserAgentSubtitle": "User agent HTTP personalizzato per le richieste stream. Lascia vuoto per il predefinito.",
+    "customUserAgentDefault": "Predefinito",
+    "playerComparison": "Confronto player",
+    "playerComparisonSubtitle": "Confronta le funzionalita di ogni motore di riproduzione",
+    "playerComparisonEngine": "Motore",
+    "playerComparisonFormats": "Formati",
+    "playerComparisonPros": "Punti di forza",
+    "playerComparisonCons": "Punti deboli",
+    "playerAvplayerPro1": "Migliore autonomia batteria e integrazione di sistema",
+    "playerAvplayerPro2": "Supporto nativo AirPlay e Picture-in-Picture",
+    "playerAvplayerPro3": "Il piu affidabile per stream HLS",
+    "playerAvplayerCon1": "Supporto formati limitato (no MKV, AVI, RTSP)",
+    "playerAvplayerCon2": "Nessun fallback di decodifica software",
+    "playerKsplayerPro1": "Supporto formati e codec piu ampio",
+    "playerKsplayerPro2": "Decodifica hardware e software",
+    "playerKsplayerPro3": "Selezione tracce sottotitoli e audio",
+    "playerKsplayerCon1": "Consumo batteria maggiore",
+    "playerKsplayerCon2": "Occasionali problemi di stabilita con alcuni stream",
+    "playerVlcPro1": "Eccellente compatibilita formati",
+    "playerVlcPro2": "Motore maturo e collaudato",
+    "playerVlcPro3": "Buona gestione di stream problematici",
+    "playerVlcCon1": "Utilizzo memoria piu alto",
+    "playerVlcCon2": "Nessuna integrazione con i controlli nativi iOS",
+    "liveTvSettings": "Live",
+    "advancedSettings": "Avanzate",
+    "lockedCategories": "Categorie bloccate",
+    "lockedItems": "Contenuti bloccati",
+    "pinRequired": "PIN richiesto",
+    "pinRequiredMessage": "Inserisci il PIN a 4 cifre per continuare",
+    "pinIncorrect": "PIN errato",
+    "pinTryAgain": "Riprova",
+    "pinSetSuccess": "PIN impostato con successo",
+    "pinRemovedSuccess": "PIN rimosso",
+    "pinChangedSuccess": "PIN modificato",
+    "enterCurrentPin": "Inserisci PIN attuale",
+    "enterNewPin": "Inserisci nuovo PIN",
+    "confirmNewPin": "Conferma nuovo PIN",
+    "recentlyWatched": "Visti di recente",
+    "credits": "Crediti",
+    "creditsMovieData": "Questo prodotto utilizza l'API di TMDB ma non è approvato né certificato da TMDB.",
+    "creditsOpenSource": "Licenze Open Source",
+    "creditsVLC": "Riproduzione video basata su VLC — LGPLv2.1",
+    "creditsKSPlayer": "Riproduzione avanzata basata su KSPlayer",
+    "creditsFFmpeg": "Questo software utilizza librerie del progetto FFmpeg — LGPLv2.1",
+    "creditsMPV": "Riproduzione di ripiego basata su MPV (libmpv) — LGPLv2.1+",
+    "devices": "Dispositivi",
+    "linkTV": "Collega la TV",
+    "accountDescription": "Dettagli account e stato dell'abbonamento",
+    "premiumDescription": "Sblocca streaming illimitato e funzionalità premium",
+    "generalDescription": "Lingua e preferenze di avvio",
+    "playbackDescription": "Motore del player, sottotitoli, audio e opzioni avanzate",
+    "parentalControlsDescription": "Protezione con PIN per limitare l'accesso a contenuti e impostazioni",
+    "metadataDescription": "Lingua e fonte delle informazioni su film e serie TV",
+    "playlistInfoDescription": "Dettagli server, conteggio contenuti e stato EPG",
+    "reloadPlaylistDescription": "Ricarica tutti i contenuti della playlist dal server",
+    "reloadEPGDescription": "Ricarica la guida programmi dal server",
+    "changePlaylistDescription": "Passa a una playlist IPTV diversa",
+    "versionDescription": "Versione attuale dell'app e numero di build",
+    "creditsDescription": "Librerie open source e servizi usati da KIPTV",
+    "services": "Servizi",
+    "logoutDescription": "Disconnettiti dal tuo account su questo dispositivo",
+    "defaultDescription": "Configura KIPTV secondo le tue preferenze",
+    "languageDescription": "Scegli la lingua dell'interfaccia dell'app",
+    "startScreenDescription": "Scegli quale scheda si apre quando entri in una playlist",
+    "autoOpenPlaylistDescription": "Salta la selezione playlist e apri all'avvio l'ultima usata o una playlist specifica",
+    "playerEngineDescription": "Scegli il motore del player video per la riproduzione dei contenuti",
+    "autoplayNextEpisodeDescription": "Riproduci automaticamente l'episodio successivo al termine di quello corrente",
+    "subtitleLanguageDescription": "Lingua predefinita per i sottotitoli",
+    "audioLanguageDescription": "Lingua predefinita per le tracce audio",
+    "subtitleStylingDescription": "Personalizza dimensione, colore, sfondo e posizione dei sottotitoli",
+    "metadataSourceDescription": "Scegli la fonte delle informazioni su film e serie TV",
+    "titleCleaningDescription": "Rimuovi tag di qualità (HD, 4K, FHD, ecc.) e altri elementi dai titoli",
+    "setPinDescription": "Imposta un PIN a 4 cifre per proteggere impostazioni e contenuti",
+    "changePinDescription": "Cambia il PIN del controllo genitori",
+    "removePinDescription": "Rimuovi la protezione PIN da questo dispositivo",
+    "parentalEnabledDescription": "Quando attivo, i contenuti bloccati sono nascosti dagli elenchi principali",
+    "requirePinForSettingsDescription": "Richiedi il PIN per accedere alle impostazioni",
+    "subtitleFontSizeDescription": "Dimensione del testo dei sottotitoli sullo schermo",
+    "subtitleBackgroundDescription": "Sfondo dietro il testo dei sottotitoli per una migliore leggibilità",
+    "subtitlePositionDescription": "Dove appaiono i sottotitoli sullo schermo",
+    "subtitleColorDescription": "Colore del testo dei sottotitoli",
+    "accountPlanDescription": "Il tuo piano di abbonamento attuale",
+    "accountPlaylistLimitDescription": "Numero massimo di playlist salvabili",
+    "accountSubscriptionDescription": "Gestisci il tuo abbonamento Premium",
+    "accountDailyUsageDescription": "Il tuo utilizzo giornaliero di streaming e il tempo rimanente",
+    "accountProfileDescription": "Il tuo profilo account e le informazioni di accesso",
+    "dangerZone": "Zona pericolosa",
+    "resetProgressButton": "Azzera tutti i progressi",
+    "resetProgressSubtitle": "Elimina definitivamente tutti i progressi di visione di film e serie",
+    "resetProgressTitle": "Azzerare tutti i progressi?",
+    "resetProgressMessage": "Verranno eliminati definitivamente TUTTI i progressi di visione di questa playlist, inclusi i progressi dei film, il tracciamento degli episodi delle serie e lo stato di completamento.\n\nQuesta azione è irreversibile.",
+    "resetProgressSuccess": "Tutti i progressi sono stati azzerati",
+    "deleteAccount": "Elimina account",
+    "deleteAccountDescription": "Elimina permanentemente il tuo account e tutti i dati",
+    "deleteAccountTitle": "Eliminare l'account?",
+    "deleteAccountMessage": "Questo eliminerà permanentemente il tuo account e tutti i dati associati, incluse playlist, cronologia di visione, liste e impostazioni.\n\nQuesta azione non può essere annullata.",
+    "deleteAccountConfirm": "Elimina il mio account",
+    "deleteAccountFinalTitle": "Sei assolutamente sicuro?",
+    "deleteAccountFinalMessage": "Questa è la tua ultima possibilità. Il tuo account e tutti i dati verranno eliminati permanentemente.",
+    "deletingAccount": "Eliminazione account...",
+    "openSubtitles": {
+      "title": "OpenSubtitles",
+      "description": "Cerca e scarica sottotitoli da OpenSubtitles",
+      "username": "Nome utente",
+      "password": "Password",
+      "logIn": "Accedi",
+      "logOut": "Esci",
+      "loggedIn": "Connesso come {{username}}",
+      "notLoggedIn": "Senza un account puoi scaricare fino a 5 sottotitoli al giorno. Accedi con il tuo account gratuito di OpenSubtitles.com per aumentare il limite a 20 al giorno.",
+      "remainingDownloads": "Download rimanenti oggi: {{count}}",
+      "loginRequired": "Accedi per più download",
+      "clearCache": "Svuota cache sottotitoli",
+      "usernameDescription": "Inserisci il tuo nome utente OpenSubtitles",
+      "passwordDescription": "Inserisci la tua password OpenSubtitles",
+      "loginDescription": "Accedi per aumentare il limite giornaliero di download",
+      "loggedInDescription": "Il tuo account OpenSubtitles è attivo",
+      "logoutDescription": "Esci dal tuo account OpenSubtitles",
+      "clearCacheDescription": "Rimuovi tutti i sottotitoli dalla cache locale",
+      "logoutConfirm": "Vuoi disconnettere il tuo account OpenSubtitles da questo dispositivo?",
+      "loggingIn": "Accesso in corso…",
+      "multipleOptions": "Più opzioni di sottotitoli",
+      "multipleOptionsDescription": "Mostra tutti i sottotitoli disponibili per ogni lingua, ordinati per valutazione, invece del solo migliore."
+    },
+    "clearAllHidden": "Cancella tutti",
+    "hiddenContinueWatching": "Nascosti da Continua a guardare",
+    "epgSource": "Fonte EPG",
+    "epgLoadingStatus": "Stato caricamento EPG",
+    "epgSourceCustomUrl": "URL personalizzato",
+    "epgSourceXtreamServer": "Server Xtream",
+    "epgSourceNone": "Nessuna",
+    "parentalControlsSection": "Controllo genitori",
+    "contentDisplaySection": "Visualizzazione",
+    "contentOrganizationSection": "Organizzazione",
+    "contentDataSection": "Dati e aggiornamento",
+    "contentDescription": "Visualizzazione, organizzazione e aggiornamento dei contenuti",
+    "autoQuality": "Qualità automatica (sperimentale)",
+    "autoQualitySubtitle": "Avvia i canali raggruppati alla qualità migliore per la tua connessione e la abbassa se lo stream continua a bufferizzare. Ogni cambio ricarica il canale, quindi può esserci un breve schermo nero.",
+    "generalPreferences": "Preferenze generali",
+    "defaultLanguages": "Lingue predefinite",
+    "playerEngineVod": "Motore player — Film e serie",
+    "playerEngineLive": "Motore player — Live TV",
+    "engineFallback": "Consenti fallback automatico",
+    "engineFallbackSubtitle": "Se il motore scelto fallisce, prova l'altro",
+    "preferredStreamFormat": "Formato stream preferito",
+    "accountDetails": "Dettagli account",
+    "activeReminders": "Promemoria attivi",
+    "noActiveReminders": "Nessun promemoria impostato",
+    "subtitlePreviewSample": "I sottotitoli appariranno così",
+    "subtitleTextColor": "Colore",
+    "advanced": "Avanzate",
+    "enableTmdb": "Abilita TMDB",
+    "securitySection": "Sicurezza",
+    "playbackEngineTitle": "Player e motori",
+    "playbackEngineSubtitle": "Motori VOD e Live TV, opzioni avanzate",
+    "playbackSubtitlesAudioTitle": "Sottotitoli e audio",
+    "playbackSubtitlesAudioSubtitle": "Lingue predefinite, stile sottotitoli, OpenSubtitles",
+    "playbackViewingTitle": "Durante la visione",
+    "playbackViewingSubtitle": "Riproduzione automatica, Salta intro, Continua a guardare",
+    "scopeSynced": "Si sincronizza su tutti i dispositivi e playlist",
+    "scopePlaylist": "Solo su playlist “{{name}}”",
+    "scopeDevice": "Solo su questo {{device}}",
+    "themeSection": "Tema",
+    "displayDescription": "Scegli cosa mostrano le schermate: caroselli, tab e canali.",
+    "scopeDeviceTV": "Solo su questa TV",
+    "infoDescription": "Termini, privacy, crediti e versione dell'app",
+    "thisDevice": "Questo dispositivo",
+    "showHome": "Mostra la Home",
+    "showHomeSubtitle": "La scheda Home raccoglie in un'unica schermata ciò che stai guardando, i tuoi canali e le novità",
+    "startScreenHome": "Home"
+  },
+  "feedback": {
+    "title": "Invia feedback",
+    "submit": "Invia",
+    "picker": {
+      "header": "Cosa vuoi segnalare?",
+      "footer": "Il team KIPTV legge ogni segnalazione. Riceverai una risposta via email se hai indicato un contatto."
+    },
+    "bug": {
+      "title": "Segnala un bug",
+      "subtitle": "Qualcosa non funziona come dovrebbe",
+      "titleField": "Titolo breve",
+      "descriptionField": "Descrizione dettagliata",
+      "stepsFieldPlaceholder": "Es:\n1. Apro Live TV\n2. Tocco RAI 1\n3. L'app si chiude",
+      "expectedField": "Comportamento atteso",
+      "actualField": "Cosa è successo invece",
+      "frequencyField": "Frequenza",
+      "screenField": "Schermata coinvolta",
+      "contactField": "Email di contatto",
+      "screenshotAdd": "Aggiungi screenshot",
+      "screenshotChange": "Cambia screenshot",
+      "screenshotRemove": "Rimuovi screenshot",
+      "diagnosticsLink": "Cosa includiamo nel report",
+      "section": {
+        "what": "Cosa è successo",
+        "whatFooter": "Sii il più specifico possibile: ci aiuta a riprodurre il problema.",
+        "steps": "Passi per riprodurre",
+        "stepsFooter": "Un passo per riga.",
+        "expectedActual": "Atteso vs reale",
+        "context": "Contesto",
+        "attachment": "Allegati",
+        "attachmentFooter": "Lo screenshot è opzionale ma molto utile.",
+        "contact": "Contatto",
+        "contactFooter": "Opzionale ma consigliata: senza un'email di contatto non possiamo chiederti chiarimenti o aggiornarti."
+      }
+    },
+    "improvement": {
+      "title": "Suggerisci un miglioramento",
+      "subtitle": "C'è qualcosa che si potrebbe fare meglio",
+      "titleField": "Cosa migliorare in poche parole",
+      "descriptionField": "Descrizione",
+      "screenField": "Dove nell'app?",
+      "contactField": "Email di contatto",
+      "section": {
+        "what": "Il tuo suggerimento",
+        "whatFooter": "Spiegaci cosa renderebbe l'esperienza migliore.",
+        "where": "Dove si applica",
+        "contact": "Contatto",
+        "contactFooter": "Opzionale ma consigliata: senza un'email di contatto non possiamo chiederti chiarimenti o aggiornarti."
+      }
+    },
+    "feature": {
+      "title": "Richiedi una nuova funzione",
+      "subtitle": "C'è qualcosa che vorresti vedere in KIPTV",
+      "titleField": "Nome della funzione",
+      "descriptionField": "Descrizione",
+      "useCaseField": "Perché ti serve / come la useresti",
+      "contactField": "Email di contatto",
+      "section": {
+        "what": "La funzione che vuoi",
+        "whatFooter": "Più contesto fornisci, più alta la probabilità che la implementiamo.",
+        "contact": "Contatto",
+        "contactFooter": "Opzionale ma consigliata: senza un'email di contatto non possiamo aggiornarti se la funzione viene aggiunta."
+      }
+    },
+    "frequency": {
+      "unspecified": "— Non specificato —",
+      "always": "Sempre",
+      "sometimes": "A volte",
+      "once": "Una sola volta",
+      "cannotReproduce": "Non riesco a riprodurlo"
+    },
+    "screen": {
+      "unspecified": "— Non specificato —",
+      "auth": "Login / Registrazione",
+      "playlist": "Configurazione playlist",
+      "home": "Home",
+      "movies": "Film",
+      "series": "Serie TV",
+      "live": "Live TV",
+      "search": "Ricerca",
+      "downloads": "Download",
+      "settings": "Impostazioni",
+      "player": "Player video",
+      "parental": "Controllo genitori",
+      "other": "Altro"
+    },
+    "disclosure": {
+      "title": "Cosa includiamo",
+      "attachedHeader": "Dati allegati al report",
+      "attachedFooter": "Questi dati ci servono solo per riprodurre il bug. Vengono cancellati dopo 12 mesi.",
+      "notSentHeader": "Cosa NON inviamo",
+      "device": {
+        "title": "Modello e versione",
+        "body": "Tipo dispositivo, sistema operativo, lingua, fuso orario."
+      },
+      "app": {
+        "title": "Versione app",
+        "body": "Numero di versione e build di KIPTV."
+      },
+      "network": {
+        "title": "Tipo di connessione",
+        "body": "WiFi o cellulare. Niente IP, niente nome rete."
+      },
+      "playlist": {
+        "title": "Provider playlist",
+        "body": "Solo l'host del server IPTV (es. iptv.example.com), per identificare problemi specifici al provider."
+      },
+      "logs": {
+        "title": "Log diagnostici recenti",
+        "body": "Eventi dell'app delle ultime 24 ore (azioni, errori di rete, problemi di playback). Le credenziali sono sempre rimosse prima dell'invio."
+      },
+      "notSent": {
+        "credentialsTitle": "Credenziali playlist",
+        "credentialsBody": "Username e password della tua playlist non escono mai dal dispositivo.",
+        "contactsTitle": "Rubrica e contatti",
+        "contactsBody": "L'app non accede e non invia mai la rubrica del telefono."
+      },
+      "retention": {
+        "title": "Per quanto tempo conserviamo i dati",
+        "body": "I report vengono cancellati automaticamente dopo 12 mesi. Puoi richiedere la cancellazione anticipata via email."
+      }
+    },
+    "tv": {
+      "subtitle": "Scegli come segnalarci il problema dalla TV",
+      "qr": {
+        "title": "Compila dal telefono",
+        "subtitle": "Inquadra il QR code con il tuo iPhone o Android: aprirà il modulo già pre-compilato con i dati dalla TV.",
+        "urlLabel": "Oppure visita questo indirizzo:",
+        "expiry": "Il codice scade in 30 minuti."
+      },
+      "quick": {
+        "title": "Invio rapido",
+        "subtitle": "Invia ora i dati diagnostici della TV senza scrivere nulla. Ti contatteremo via email per i dettagli.",
+        "send": "Invia ora",
+        "sent": "Inviato!",
+        "sentDetail": "Abbiamo ricevuto tutti i dati diagnostici. Ti contatteremo via email se serve altro.",
+        "disclaimer": "Useremo questi dati solo per riprodurre il bug. Le credenziali della tua playlist non vengono inviate.",
+        "autoDescription": "Quick report inviato dalla TV: l'utente segnala un problema generico. Contattare per dettagli."
+      }
+    },
+    "error": {
+      "title": "Errore",
+      "notAuthenticated": "Devi essere loggato per inviare feedback.",
+      "missingTitle": "Inserisci un titolo.",
+      "uploadFailed": "Caricamento screenshot fallito",
+      "insertFailed": "Invio fallito"
+    },
+    "success": {
+      "title": "Grazie!",
+      "message": "Feedback inviato. Ti contatteremo se servono altre informazioni."
+    }
+  },
+  "playlist": {
+    "noPlaylist": "Nessuna playlist",
+    "noPlaylistMessage": "Aggiungi una playlist IPTV per iniziare",
+    "noPlaylistMessageLiveTV": "Aggiungi una playlist IPTV per vedere i canali TV",
+    "addPlaylist": "Aggiungi playlist",
+    "changePlaylist": "Cambia playlist",
+    "noPlaylists": "Nessuna playlist salvata",
+    "noPlaylistsMessage": "Aggiungi la tua prima playlist Xtream per iniziare a guardare.",
+    "addFirstPlaylist": "Aggiungi Playlist",
+    "playlistWithoutName": "Playlist senza nome",
+    "unableToLoadDetails": "Impossibile caricare i dettagli della playlist",
+    "unableToConnect": "Impossibile connettersi alla playlist.",
+    "unableToSave": "Impossibile salvare la playlist.",
+    "unableToLoad": "Impossibile caricare la playlist.",
+    "addXtreamPlaylist": "Aggiungi una playlist Xtream",
+    "removePlaylistTitle": "Rimuovi playlist",
+    "removePlaylistMessage": "Eliminando la playlist verranno rimossi progressi, liste e impostazioni associate. Vuoi procedere?",
+    "deleteConfirmTitle": "Eliminare definitivamente",
+    "deleteConfirmMessage": "Verranno cancellati definitivamente TUTTI i progressi di visione, gli episodi seguiti, le impostazioni personalizzate e le preferenze di questa playlist.\n\nQuesta azione è irreversibile — non sarà possibile recuperare questi dati.",
+    "playlistType": "Tipo di playlist",
+    "editPlaylist": "Modifica playlist",
+    "editPlaylistSubtitle": "Aggiorna dominio, credenziali e avatar.",
+    "limitReached": "Limite playlist raggiunto",
+    "limitReachedMessage": "Puoi avere al massimo 5 playlist salvate. Rimuovine una da quelle esistenti per aggiungerne un'altra.",
+    "limitReachedMessageDynamic": "Il tuo piano attuale consente {{limit}} playlist. Passa a Premium Plus per gestire fino a 5 playlist.",
+    "limitBullet1": "• Elimina le playlist che non utilizzi più",
+    "limitBullet2": "• Mantieni attive solo quelle che ti servono",
+    "openPlaylist": "Apri la playlist",
+    "canModifyInSettings": "Potrai modificare le playlist e collegare un account nelle impostazioni.",
+    "verifyingCredentials": "Verifica credenziali...",
+    "saving": "Connessione riuscita, sto salvando la playlist...",
+    "loadingContent": "Sto caricando i contenuti della playlist...",
+    "preparingContent": "Sto preparando i contenuti consigliati...",
+    "finalizingExperience": "Finalizzo l'esperienza...",
+    "preparing": "Sto preparando la playlist…",
+    "newPlaylist": "Nuova playlist",
+    "loginToRecover": "Accedi per recuperare playlist, categorie e impostazioni salvate nel cloud.",
+    "enterNameAndDomain": "Inserisci almeno nome e dominio della playlist.",
+    "orEnterXtream": "Oppure inserisci la tua playlist Xtream",
+    "playerOnlyNoContent": "KIPTV è un media player e non fornisce contenuti.",
+    "playlistName": "Nome Playlist",
+    "playlistNamePlaceholder": "Es. Playlist principale",
+    "domainXtream": "Domain (Xtream)",
+    "savePlaylist": "Salva Playlist",
+    "syncedToAccount": "Verrà sincronizzata sul tuo account per accedervi ovunque.",
+    "loadingIPTVContent": "Caricamento contenuti IPTV...",
+    "connectingToPlaylist": "Connessione alla playlist in corso...",
+    "playlistAdded": "Playlist aggiunta",
+    "sourceReady": "La tua sorgente è pronta. Ecco un riepilogo veloce.",
+    "unnamedPlaylist": "Playlist senza nome",
+    "tierLimitMessage": "Piano {{tier}}: limite {{limit}} playlist. {{upgradeMessage}}",
+    "upgradeToFamily": "Passa a Plus per 5 playlist.",
+    "upgradeToPremium": "Passa a Premium per tempo illimitato e più playlist.",
+    "loginRequiredToAdd": "Devi effettuare il login per aggiungere playlist.",
+    "noPlaylistSelected": "Nessuna playlist selezionata",
+    "chooseAvatar": "Scegli un avatar",
+    "changeAvatar": "Cambia avatar",
+    "noAvatar": "Nessun avatar",
+    "whoIsWatching": "Chi sta guardando?",
+    "add": "Aggiungi",
+    "connectionError": "Errore di connessione alla playlist",
+    "xtreamRecommended": "Xtream (Consigliato)",
+    "usernamePlaceholder": "Il tuo username",
+    "passwordPlaceholder": "La tua password",
+    "m3uUrl": "URL Playlist",
+    "securityNote": "I tuoi dati sono salvati in modo sicuro",
+    "epgOptional": "Opzionale — Modifica solo se necessario",
+    "connectionFailed": "Impossibile connettersi. Verifica i dati.",
+    "saveError": "Errore nel salvataggio",
+    "nameDuplicate": "Esiste già una playlist con questo nome",
+    "error": {
+      "timeout": {
+        "title": "Timeout Connessione",
+        "message": "Impossibile caricare i contenuti dal server IPTV. Il server potrebbe essere lento o temporaneamente non disponibile."
+      },
+      "server": {
+        "title": "Errore Server",
+        "message": "Il server IPTV ha restituito un errore. Potrebbe essere in manutenzione o avere problemi."
+      },
+      "network": {
+        "title": "Nessuna Connessione",
+        "message": "Impossibile connettersi a internet. Verifica la tua connessione di rete."
+      },
+      "auth": {
+        "title": "Autenticazione Fallita",
+        "message": "Le credenziali della playlist non sono valide o l'account è scaduto."
+      },
+      "expired": {
+        "title": "Abbonamento Scaduto",
+        "message": "Il tuo abbonamento IPTV è scaduto. Contatta il tuo provider per rinnovarlo."
+      },
+      "solutions": "Possibili soluzioni",
+      "solution": {
+        "checkServer": "Verifica che il server IPTV sia online",
+        "tryLater": "Riprova tra qualche minuto",
+        "checkInternet": "Controlla la tua connessione internet",
+        "serverMaintenance": "Il server potrebbe essere in manutenzione",
+        "contactProvider": "Contatta il tuo provider IPTV",
+        "checkWifi": "Controlla la connessione WiFi o dati mobili",
+        "checkCellular": "Prova a passare da WiFi a rete mobile",
+        "disableVPN": "Disattiva la VPN se attiva",
+        "toggleVPN": "Prova ad attivare/disattivare la VPN",
+        "checkCredentials": "Verifica username e password",
+        "checkExpiration": "Verifica che il tuo account non sia scaduto"
+      }
+    },
+    "premiumRequired": "Premium Richiesto",
+    "upgradeToAccess": "Passa a Premium per accedere a questa playlist",
+    "forceReloadPlaylist": "Ricarica playlist",
+    "forceReloadEPG": "Ricarica EPG",
+    "m3uConfirmTitle": "Usare URL M3U?",
+    "m3uConfirmMessage": "Le playlist M3U funzionano per la visione base, ma alcune funzionalità come catchup, info account e metadati ricchi sono disponibili solo con credenziali Xtream. Ti consigliamo di usare Xtream se possibile.",
+    "m3uConfirmContinue": "Continua con M3U",
+    "m3uHint": "Non hai le credenziali Xtream? Prova con URL M3U",
+    "useXtream": "Hai le credenziali Xtream? Usa Xtream Codes",
+    "m3uInvalidURL": "URL M3U non valido. Controlla l'URL e riprova.",
+    "m3uDownloading": "Download playlist in corso...",
+    "m3uParsing": "Analisi contenuti...",
+    "xtreamDetectedTitle": "Xtream disponibile",
+    "xtreamDetectedMessage": "Il tuo server supporta Xtream Codes, che offre caricamento più veloce, catchup/replay e metadati più ricchi. Vuoi usarlo al posto di M3U?",
+    "xtreamDetectedUseXtream": "Usa Xtream",
+    "xtreamDetectedKeepM3U": "Mantieni M3U",
+    "epgUrlLabel": "URL EPG",
+    "epgUrlHint": "Opzionale — rilevato automaticamente dalla playlist se disponibile",
+    "connection": "Connessione",
+    "createdOn": "Creata il",
+    "updatedOn": "Aggiornata il",
+    "dataEncrypted": "I dati sono crittografati in transito e sincronizzati con il tuo account.",
+    "credentialsSection": "Credenziali",
+    "statusSection": "Stato",
+    "notFound": "Playlist non trovata"
+  },
+  "movies": {
+    "markWatched": "Segna come visto",
+    "markUnwatched": "Segna come non visto",
+    "title": "Film",
+    "noMovies": "Nessun film trovato",
+    "noMoviesMessage": "La playlist selezionata non contiene film",
+    "contentNotLoaded": "Contenuti non caricati",
+    "contentNotLoadedMessage": "Impossibile caricare i film. Controlla la connessione e riprova.",
+    "otherMovies": "Altri Film",
+    "top20Trending": "TOP 20 Film Trending",
+    "categoriesRemaining": "{{count}} categorie rimanenti...",
+    "noPlaylistSelected": "Nessuna playlist selezionata",
+    "loadingMovies": "Caricamento film...",
+    "movieNotAvailable": "Film non disponibile",
+    "movieNotAvailableMessage": "Non è stata trovata alcuna corrispondenza nella tua playlist. Prova a cercare il contenuto manualmente.",
+    "movieNotAvailableInPlaylist": "Film non disponibile nella tua Playlist",
+    "popularMovies": "Film Popolari",
+    "newArrivals": "Nuovi Arrivi"
+  },
+  "series": {
+    "title": "Serie",
+    "noSeries": "Nessuna serie trovata",
+    "noSeriesMessage": "La playlist selezionata non contiene serie",
+    "otherSeries": "Altre Serie",
+    "top20Trending": "TOP 20 Serie Trending",
+    "categoriesRemaining": "{{count}} categorie rimanenti...",
+    "seriesNotAvailableInPlaylist": "Serie non disponibile nella tua Playlist",
+    "notAvailable": "Serie non disponibile",
+    "notAvailableMessage": "Non è stata trovata alcuna corrispondenza nella tua playlist. Prova a cercare il contenuto manualmente.",
+    "playlistAttaching": "Aggancio della playlist in corso. Riprova tra qualche istante.",
+    "episodeNotAvailable": "Episodio non disponibile",
+    "attachingPlaylist": "Aggancio playlist...",
+    "loadingSeries": "Caricamento serie...",
+    "popularSeries": "Serie Popolari",
+    "engagingTvSeries": "Una serie coinvolgente",
+    "season": "Stagione",
+    "seasonCount": "{{count}} STAGIONE",
+    "seasonsCount": "{{count}} STAGIONI",
+    "noEpisodes": "Nessun episodio",
+    "noEpisodesMessage": "Non sono disponibili episodi per questa stagione",
+    "resumeFrom": "Riprendi da",
+    "lastWatchedPoint": "ultimo punto visto",
+    "watchNow": "Guarda ora",
+    "startSeason": "Inizia Stagione {{season}}",
+    "resume": "Riprendi",
+    "goBack": "Torna indietro",
+    "loadError": "Impossibile caricare i dettagli della serie",
+    "loadErrorMessage": "Errore nel caricamento: {{message}}",
+    "episode": "Episodio {{number}}",
+    "markWatched": "Segna come visto",
+    "markUnwatched": "Segna come non visto",
+    "markWatchedUpTo": "Vista fino a qui",
+    "markAllWatched": "Segna intera serie come vista",
+    "markAllUnwatched": "Segna intera serie come non vista",
+    "resetEpisodeProgress": "Resetta progresso episodio",
+    "resetProgress": "Resetta progressi serie",
+    "resetProgressTitle": "Resetta progressi",
+    "resetProgressMessage": "Questo rimuoverà tutti i progressi di visualizzazione per questa serie. Questa azione non può essere annullata.",
+    "resetProgressConfirm": "Resetta",
+    "episodeInfo": "Info episodio",
+    "downloadEpisode": "Scarica episodio"
+  },
+  "multiview": {
+    "title": "Multiview",
+    "openInMultiview": "Apri in Multiview",
+    "addToMultiview": "Aggiungi a Multiview",
+    "empty": "Aggiungi un canale per guardare più stream contemporaneamente",
+    "addChannel": "Aggiungi canale",
+    "maxReached": "Massimo 4 canali raggiunto",
+    "removeTile": "Rimuovi da Multiview",
+    "audioTracks": "Audio",
+    "subtitles": "Sottotitoli",
+    "settings": "Impostazioni",
+    "layout": {
+      "auto": "Auto",
+      "stack": "Pila",
+      "grid": "Griglia",
+      "strip": "Striscia",
+      "focus": "Focus"
+    },
+    "tile": {
+      "loading": "Caricamento…",
+      "error": "Errore di riproduzione",
+      "retry": "Riprova",
+      "noProgram": "Nessuna info programma"
+    },
+    "close": "Chiudi Multiview",
+    "vodBlocked": "Chiudi Multiview per aprire film e serie",
+    "confirmDismiss": "Premi di nuovo Back per chiudere",
+    "minimizedHint": "Seleziona un altro canale per aggiungerlo al Multiview",
+    "ambient": {
+      "on": "Accendi luce ambiente",
+      "off": "Spegni luce ambiente"
+    }
+  },
+  "livetv": {
+    "startSection": "Sezione iniziale Live TV",
+    "startSectionSubtitle": "Scegli su quale lista si apre Live TV",
+    "title": "Live",
+    "noChannels": "Nessun canale trovato",
+    "noChannelsMessage": "La playlist selezionata non contiene canali TV",
+    "otherChannels": "Altri Canali",
+    "selectChannel": "Seleziona un canale",
+    "selectChannelMessage": "Scegli un canale per iniziare",
+    "channels": "Canali",
+    "epg": "EPG",
+    "noDescription": "Nessuna descrizione disponibile",
+    "watchNow": "Guarda ora",
+    "epgLoadError": "Errore caricamento EPG",
+    "epgNotAvailable": "Guida programmi non disponibile",
+    "epgNotAvailableMessage": "I dati EPG per questo canale non sono al momento disponibili",
+    "infoChannel": "Canale informativo",
+    "streamNotAvailable": "Stream non disponibile",
+    "streamUnavailable": "Stream non disponibile. Riprova più tardi o scegli un altro canale.",
+    "limitReachedLiveMessage": "Hai raggiunto il limite giornaliero di visualizzazione durante la riproduzione Live. Aggiorna a Premium per visualizzazione illimitata.",
+    "popularChannels": "Canali Popolari",
+    "tvProgram": "Programma TV",
+    "tapForFullscreen": "Tocca per schermo intero",
+    "noChannelSelected": "Nessun canale selezionato",
+    "selectChannelToSeeGuide": "Seleziona un canale per vedere la guida programmi",
+    "inProgress": "In corso",
+    "inHoursMinutes": "Tra {{hours}}h {{minutes}}m",
+    "inMinutes": "Tra {{minutes}}m",
+    "startingSoon": "Inizia a breve",
+    "now": "ORA",
+    "next": "Dopo",
+    "loadingEpg": "Caricamento programmi...",
+    "epgRateLimited": "Troppe richieste - riprova più tardi",
+    "epgDataNotAvailable": "I dati EPG per questo canale non sono al momento disponibili",
+    "unknownChannel": "Canale Sconosciuto",
+    "noProgram": "Nessun programma",
+    "loadingChannels": "Caricamento canali...",
+    "viewModeList": "Lista",
+    "viewModeEPG": "Guida TV",
+    "viewModeCarousel": "Caroselli",
+    "viewModeLabel": "Visualizzazione",
+    "sortOrderLabel": "Ordinamento",
+    "allChannels": "Tutti i Canali",
+    "recentlyWatched": "Visto di recente",
+    "recentlyAdded": "Aggiunti di recente",
+    "removeFromRecentlyWatched": "Rimuovi da \"Visti di recente\"",
+    "favorites": "Preferiti",
+    "categoriesSection": "Categorie",
+    "nextProgram": "A seguire: ",
+    "upNext": "A seguire",
+    "today": "Oggi",
+    "tomorrow": "Domani",
+    "selectQuality": "Seleziona qualità",
+    "qualityVariants": "qualità disponibili",
+    "replay": "Replay",
+    "yesterday": "Ieri",
+    "replaySelectQuality": "Seleziona qualità per Replay",
+    "searchChannels": "Cerca canali...",
+    "viewModeGrid": "Griglia",
+    "startsIn": "Inizia tra {{time}}",
+    "customizeLogo": "Personalizza logo",
+    "renameChannelFooter": "Le versioni con lo stesso nome vengono raggruppate insieme.",
+    "renameChannelSelected": "Canale selezionato",
+    "renameChannelOthers": "Altre versioni raggruppate",
+    "restoreAllChannelNames": "Ripristina tutti i nomi originali",
+    "customizeEPG": "Personalizza EPG",
+    "overrideAppliesTo": "Si applica a",
+    "overrideAppliesToCount": "%d canali",
+    "epgSheet": {
+      "search": "Cerca per nome o ID EPG",
+      "sources": "Sorgenti EPG",
+      "useProviderDefault": "Automatico",
+      "loading": "Caricamento guida EPG…",
+      "loadingHint": "Sto scaricando la guida programmi — può richiedere qualche istante per guide molto grandi.",
+      "epgNotLoaded": "Guida EPG non ancora caricata",
+      "refineSearch": "Affina la ricerca per vedere altri risultati",
+      "source": "Sorgente EPG",
+      "programCount": "%d programmi"
+    },
+    "logoSheet": {
+      "search": "Cerca loghi",
+      "title": "Logo canale",
+      "suggested": "Suggeriti",
+      "customURL": "URL personalizzato",
+      "restore": "Ripristina predefinito",
+      "invalidURL": "URL non valido",
+      "loadFailed": "Immagine non caricabile"
+    },
+    "epgOffset": "Offset EPG",
+    "epgOffsetMinutesShort": "min",
+    "epgOffsetChannelHint": "0 = usa l'offset della playlist",
+    "epgOffsetPlaylistHint": "Sposta gli orari di tutti i programmi di questa playlist.",
+    "epgGuide": "Guida EPG",
+    "qualityAuto": "Auto",
+    "qualityAutoExperimental": "Auto (sperimentale)"
+  },
+  "epg": {
+    "title": "Guida",
+    "movie": "Film",
+    "tvShow": "Serie",
+    "cast": "Cast",
+    "rating": "Voto",
+    "loadingMetadata": "Caricamento info...",
+    "identifiedAs": "Identificato come",
+    "remindMe": "Avvisami",
+    "reminderSet": "Promemoria impostato",
+    "remind10min": "10 minuti prima",
+    "remind30min": "30 minuti prima",
+    "remind1hour": "1 ora prima",
+    "reminderRemove": "Rimuovi promemoria",
+    "reminderTitle": "{{playlist}}, prepara i popcorn! 🍿",
+    "reminderBody": "{{title}} inizia tra {{time}} su {{channel}}",
+    "reminderTime10": "10 minuti",
+    "reminderTime30": "30 minuti",
+    "reminderTime60": "1 ora",
+    "reminderTooSoon": "Programma troppo imminente per un promemoria",
+    "reminderNeedsIOSDevice": "I promemoria arrivano su iPhone o iPad. Apri KIPTV su un dispositivo iOS e consenti le notifiche, poi riprova."
+  },
+  "trending": {
+    "movies": "Film in Tendenza",
+    "series": "Serie in Tendenza",
+    "all": "Contenuti in Tendenza",
+    "loadingTrending": "Caricamento contenuti trending...",
+    "inPlaylist": "Disponibile nella Playlist",
+    "notInPlaylist": "Non nella Playlist",
+    "checkingPlaylist": "Verifica disponibilità..."
+  },
+  "search": {
+    "title": "Cerca",
+    "placeholder": "Cerca film, serie, canali, programmi o persone...",
+    "searchContent": "Cerca contenuti",
+    "searchMessage": "Usa la barra di ricerca per iniziare",
+    "typeAtLeast": "Digita almeno 2 caratteri per cercare...",
+    "noResults": "Nessun risultato",
+    "noResultsMessage": "Nessun contenuto trovato per \"{{query}}\"",
+    "resultsFor": "{{count}} risultati per \"{{query}}\"",
+    "resultsForQuery": "Risultati per \"{{query}}\"",
+    "movies": "Film ({{count}})",
+    "series": "Serie ({{count}})",
+    "liveChannels": "Canali Live ({{count}})",
+    "initializingSearch": "Inizializzazione ricerca...",
+    "indexingInProgress": "Indicizzazione in corso",
+    "indexingMessage": "Attendere qualche istante mentre indicizziamo i contenuti...",
+    "indexingHint": "Nel frattempo puoi navigare liberamente nell'app",
+    "searchError": "Errore ricerca",
+    "selectPlaylistFirst": "Seleziona una playlist prima di cercare",
+    "noPlaylistMessage": "Aggiungi una playlist IPTV per cercare contenuti",
+    "noResultsHint": "Prova con un'altra ricerca",
+    "moviesSeriesChannels": "Film, serie e canali live",
+    "indexingTitle": "Indicizzazione in corso...",
+    "indexingSubtitle": "I risultati si aggiorneranno man mano",
+    "filterAll": "Tutti",
+    "filterMovies": "Film",
+    "filterSeries": "Serie",
+    "filterChannels": "Canali",
+    "sectionChannels": "Canali",
+    "sectionMovies": "Film",
+    "sectionSeries": "Serie",
+    "noInfoAvailable": "Nessuna informazione",
+    "filterPeople": "Persone",
+    "filterPrograms": "Programmi TV",
+    "sectionPeople": "Persone",
+    "sectionPrograms": "Programmi TV",
+    "recentSearches": "Ricerche recenti",
+    "clearHistory": "Cancella",
+    "collectionFilms": "{{count}} film",
+    "collectionAvailable": "{{available}} di {{total}} nella Playlist",
+    "collectionSpine": "Collezione",
+    "collectionFilmNumber": "Film {{number}}"
+  },
+  "premium": {
+    "title": "Premium",
+    "kiptvPremium": "KIPTV Premium",
+    "streamingUnlimited": "Streaming senza limiti",
+    "unlimitedViewing": "Visualizzazione illimitata",
+    "multiplePlaylists": "Playlist multiple (fino a 5)",
+    "simplePlaylist": "Playlist personale",
+    "cloudSync": "Sincronizzazione Cloud",
+    "earlyAccess": "Funzionalità Early Access",
+    "perYear": "/anno",
+    "perMonth": "Solo €1.67/mese • Risparmia €22 vs mensile",
+    "upgradeToPremium": "Aggiorna a Premium",
+    "upgrade": "Aggiorna",
+    "unlockAllBenefits": "Sblocca tutti i vantaggi",
+    "restorePurchases": "Ripristina Acquisti",
+    "continueFree": "Continua gratis",
+    "upgradeAlert": "La funzionalità di upgrade Premium verrà implementata con RevenueCat nelle prossime versioni.",
+    "restoreAlert": "La funzionalità di ripristino acquisti verrà implementata con RevenueCat.",
+    "goBack": "Torna Indietro",
+    "subscribeAnnual": "Abbonati - {{price}}/anno",
+    "subscribeMonthly": "Abbonati - {{price}}/mese",
+    "startFreeTrial": "Inizia prova gratuita",
+    "freeTrialBadge": "{{days}} giorni gratis",
+    "trialDisclaimer": "Gratis per {{days}} giorni, poi {{price}}/{{period}}. Si rinnova automaticamente se non annulli almeno 24 ore prima della fine della prova. Gestisci dalle impostazioni di {{storeName}}.",
+    "disclaimer": "Il pagamento verrà addebitato al tuo account {{storeName}} alla conferma dell'acquisto. L'abbonamento si rinnova automaticamente a meno che non venga annullato almeno 24 ore prima della fine del periodo corrente.",
+    "storeNameIOS": "App Store",
+    "storeNameAndroid": "Google Play",
+    "familyServiceIOS": "la condivisione 'In Famiglia' di Apple",
+    "familyServiceAndroid": "la Raccolta Famiglia di Google Play",
+    "contentDisclaimer": "KIPTV è un video player e non fornisce contenuti. Le immagini mostrate sono solo a scopo illustrativo.",
+    "deviceShowcase": "Un solo abbonamento, tutti i tuoi dispositivi",
+    "comingSoon": "In arrivo",
+    "planOneSubtitle": "Tutte le funzionalità incluse. 1 playlist.",
+    "planPlusSubtitle": "Tutte le funzionalità incluse. Fino a 5 playlist.",
+    "termsOfService": "Termini di Servizio",
+    "privacyPolicy": "Informativa sulla Privacy",
+    "planFree": "Gratuito",
+    "monthly": "Mensile",
+    "annual": "Annuale",
+    "monthShort": "mese",
+    "yearShort": "anno",
+    "savePercent": "Risparmia {{percent}}%",
+    "selectPlan": "Scegli il tuo piano",
+    "mostPopular": "Più Popolare",
+    "bestValue": "Maggior Risparmio",
+    "currentPlan": "Piano Attuale",
+    "subscribing": "Elaborazione...",
+    "restoring": "Ripristino...",
+    "purchaseSuccess": "Benvenuto in Premium!",
+    "purchaseSuccessMessage": "Il tuo abbonamento è ora attivo. Goditi lo streaming illimitato!",
+    "restoreSuccess": "Acquisti ripristinati con successo!",
+    "restoreNotFound": "Nessun acquisto precedente trovato",
+    "manageSubscription": "Gestisci Abbonamento",
+    "managedByAppStore": "Gestito tramite App Store",
+    "managedByPlayStore": "Gestito tramite Google Play",
+    "renewsOn": "Si rinnova il",
+    "expiresOn": "Scade il",
+    "manageInAppStore": "Gestisci in App Store",
+    "manageInPlayStore": "Gestisci in Play Store",
+    "errors": {
+      "cancelled": "Acquisto annullato",
+      "network": "Errore di rete. Controlla la connessione.",
+      "notAllowed": "Acquisti non consentiti su questo dispositivo",
+      "alreadyOwned": "Hai già un abbonamento attivo",
+      "generic": "Qualcosa è andato storto. Riprova.",
+      "storeUnavailable": "Store temporaneamente non disponibile"
+    },
+    "features": {
+      "unlimited": "Streaming illimitato",
+      "noAds": "Senza pubblicità",
+      "singlePlaylist": "1 playlist",
+      "multiplePlaylists": "Fino a 5 playlist",
+      "cloudSync": "Sincronizzazione cloud su tutti i dispositivi",
+      "prioritySupport": "Supporto prioritario"
+    },
+    "categories": {
+      "discover": "Scopri",
+      "watchYourWay": "Guarda come vuoi",
+      "yourSpace": "Il tuo spazio, le tue regole",
+      "plus": "Per tutta la famiglia"
+    },
+    "benefits": {
+      "recentlyAdded": {
+        "title": "Aggiunti di recente",
+        "subtitle": "KIPTV tiene traccia di nuovi film, serie, episodi e canali live"
+      },
+      "trailers": {
+        "title": "Trailer e altro",
+        "subtitle": "Guarda trailer, dietro le quinte e contenuti bonus"
+      },
+      "recommended": {
+        "title": "Consigliati",
+        "subtitle": "Suggerimenti personalizzati in base a cosa guardi"
+      },
+      "trending": {
+        "title": "In tendenza",
+        "subtitle": "Scopri i contenuti più popolari del momento"
+      },
+      "advancedSearch": {
+        "title": "Ricerca avanzata",
+        "subtitle": "Cerca film, serie, canali, programmi e attori"
+      },
+      "continueWatching": {
+        "title": "Continua a guardare",
+        "subtitle": "Riprendi da dove avevi interrotto"
+      },
+      "offlineDownload": {
+        "title": "Download e offline",
+        "subtitle": "Scarica i contenuti per guardarli senza connessione"
+      },
+      "pip": {
+        "title": "Picture in Picture",
+        "subtitle": "Continua a guardare mentre usi altre app"
+      },
+      "casting": {
+        "title": "AirPlay e Chromecast",
+        "subtitle": "Trasmetti video sulla tua TV"
+      },
+      "audioSubtitles": {
+        "title": "Audio e sottotitoli",
+        "subtitle": "Scegli tracce audio e lingue dei sottotitoli"
+      },
+      "tvArchive": {
+        "title": "Archivio TV",
+        "subtitle": "Rivedi i programmi live passati con Catchup/Replay"
+      },
+      "multiplePlaylists": {
+        "title": "Fino a 5 playlist",
+        "subtitle": "Gestisci più playlist sullo stesso account"
+      },
+      "favorites": {
+        "title": "Preferiti e tag",
+        "subtitle": "Organizza i preferiti con tag personalizzati"
+      },
+      "customOrdering": {
+        "title": "Ordinamento personalizzato",
+        "subtitle": "Ordina categorie e contenuti a modo tuo"
+      },
+      "liveLastWatched": {
+        "title": "Visti di recente",
+        "subtitle": "Accesso rapido agli ultimi canali guardati"
+      },
+      "cloudSync": {
+        "title": "Sync cloud automatica",
+        "subtitle": "Impostazioni, preferiti e progressi sincronizzati su tutti i dispositivi"
+      },
+      "parentalControls": {
+        "title": "Controllo genitori",
+        "subtitle": "Imposta un PIN per bloccare i contenuti sensibili"
+      },
+      "hideContent": {
+        "title": "Nascondi contenuti",
+        "subtitle": "Nascondi categorie e contenuti che non vuoi vedere"
+      },
+      "multiplatform": {
+        "title": "Multipiattaforma",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV, Mac"
+      },
+      "unlimitedViewing": {
+        "title": "Visione illimitata",
+        "subtitle": "Guarda senza limiti di tempo giornalieri"
+      },
+      "andMoreComing": "E molto altro in arrivo!"
+    },
+    "swipeForMore": "Scorri per scoprire di più",
+    "dailyLimitReached": "Limite giornaliero di visione raggiunto",
+    "one": "One",
+    "plus": "Plus",
+    "planOne": "Premium One",
+    "planPlus": "Premium Plus",
+    "purchaseFailed": "Acquisto fallito",
+    "restoreFailed": "Ripristino fallito",
+    "alreadyPremium": "Sei già Premium ✓",
+    "tvTagline": "Streaming illimitato, più playlist, download offline",
+    "external": {
+      "title": "Come attivare Premium",
+      "body": "Su questo dispositivo non è possibile acquistare o gestire abbonamenti. Attiva KIPTV Premium da un altro dispositivo, poi accedi qui con lo stesso account KIPTV: Premium ti segue su tutti i tuoi dispositivi.",
+      "appleDevices": "iPhone, iPad, Apple TV, Mac",
+      "googleDevices": "Telefoni e tablet Android, Android TV e Fire TV",
+      "alreadySubscribed": "Ho già un abbonamento",
+      "managedElsewhere": "Gestito dallo store da cui ti sei abbonato"
+    }
+  },
+  "account": {
+    "connectedAccount": "Account collegato",
+    "memberFree": "MEMBRO FREE",
+    "memberPremium": "MEMBRO PREMIUM",
+    "syncActive": "Sincronizzazione attiva",
+    "syncActiveSubtitle": "Playlist, liste e impostazioni sincronizzati sul cloud.",
+    "autoBackup": "Backup automatico e ripresa visione",
+    "syncAllDevices": "Sincronizza playlist e liste su tutti i dispositivi",
+    "streamingPerDay": "30 minuti di streaming al giorno gratis",
+    "upgradeToPremium": "Passa a Premium",
+    "premiumActive": "Premium attivo",
+    "premiumActiveSubtitle": "Tutte le funzionalità sbloccate, streaming illimitato.",
+    "unlimitedPlaylists": "Playlist illimitate e sincronizzate",
+    "unlimitedStreaming": "Streaming senza limiti di tempo",
+    "prioritySupport": "Supporto prioritario e novità in anteprima",
+    "manageSubscription": "Gestisci abbonamento",
+    "logoutFromAccount": "Esci dall'account",
+    "logoutSecure": "Logout sicuro da questo dispositivo",
+    "unlockCloud": "Sblocca tutte le funzionalità Cloud",
+    "syncAcrossDevices": "Sincronizza playlist, liste e impostazioni su tutti i tuoi dispositivi. È gratuito e richiede pochi secondi.",
+    "playlistsAndFavoritesSynced": "Playlist e liste sempre sincronizzati",
+    "resumeWatching": "Riprendi la visione da dove eri rimasto",
+    "autoBackupAndSecureAccess": "Backup automatico e accesso sicuro",
+    "continueWithoutAccount": "Continua senza account",
+    "plan": "Piano",
+    "free": "Gratuito",
+    "dailyUsage": "Utilizzo giornaliero",
+    "playlistLimit": "Limite playlist",
+    "minutesUsed": "{{used}}/{{total}} minuti oggi",
+    "playlistsAllowed": "{{count}} playlist",
+    "playlistsUnlimited": "Playlist illimitate",
+    "dailyLimit": "Limite giornaliero"
+  },
+  "usage": {
+    "limitReached": "Limite Raggiunto",
+    "usedToday": "Oggi hai utilizzato {{minutes}} minuti",
+    "usedTodayShort": "Usati {{minutes}}min oggi",
+    "remaining": "{{time}} rimanenti",
+    "remainingHoursMinutes": "{{hours}}h {{minutes}}m rimanenti",
+    "remainingMinutes": "{{minutes}}m rimanenti",
+    "nearLimit": "Stai per raggiungere il limite giornaliero",
+    "premium": "Premium",
+    "unlimited": "Illimitato",
+    "upgradeToPremium": "Passa a Premium",
+    "discoverPremium": "Scopri Premium",
+    "usageInfo": "Hai usato {{used}} dei tuoi {{total}} minuti giornalieri"
+  },
+  "language": {
+    "selectLanguage": "Seleziona Lingua / Select Language",
+    "reloadNote": "L'app ricaricherà automaticamente dopo il cambio lingua",
+    "reloadNoteEn": "The app will reload automatically after language change",
+    "useDeviceLanguage": "Usa lingua dispositivo",
+    "confirmChangeTitle": "Conferma Cambio Lingua",
+    "confirmChangeMessage": "Il cambio lingua cancellerà tutti i metadata in cache (poster, descrizioni, loghi) per caricare i contenuti in {{language}}. Continuare?",
+    "changeError": "Impossibile cambiare lingua. Riprova.",
+    "restartRequired": "Riavvio Richiesto",
+    "restartMessage": "Per completare il cambio lingua, chiudi e riapri manualmente l'app per caricare i metadata nella nuova lingua."
+  },
+  "categories": {
+    "title": "Categorie",
+    "subtitle": "Ordina o nascondi le categorie visibili nella playlist. Le modifiche sono immediate.",
+    "customizeMovies": "Personalizza i Film",
+    "customizeSeries": "Personalizza le Serie",
+    "movies": "Film",
+    "series": "Serie",
+    "liveTV": "Canali",
+    "customizeLiveTV": "Personalizza Live",
+    "sortSubtitle": "Scegli l'ordine e nascondi le categorie che non ti interessano. Potrai modificarle più avanti dalle impostazioni.",
+    "loading": "Caricamento categorie...",
+    "retrieving": "Sto recuperando le categorie…"
+  },
+  "detail": {
+    "rewatch": "Riguarda",
+    "alreadyWatched": {
+      "movieTitle": "Film già visto",
+      "episodeTitle": "Episodio già visto",
+      "message": "Vuoi ricominciarlo dall'inizio?",
+      "restart": "Sì, ricomincia"
+    },
+    "lastAccess": "Ultimo accesso",
+    "expiresAt": "Scadenza",
+    "maxConnections": "Connessioni max",
+    "activeConnections": "Connessioni attive",
+    "totalContent": "Contenuti totali",
+    "liveTV": "Canali Live",
+    "movies": "Film",
+    "series": "Serie",
+    "title": "Dettagli playlist",
+    "loading": "Sto recuperando le informazioni…",
+    "play": "Riproduci",
+    "alsoOn": "Anche su:",
+    "chooseVersion": "Scegli la versione",
+    "otherVersions": "Altre versioni",
+    "otherVersionsCount": "Altre versioni ({{count}})",
+    "trailers": "Trailer e altro",
+    "addToFavorites": "La mia lista",
+    "download": "Scarica",
+    "recommended": "Consigliati",
+    "collection": "Dalla Collezione",
+    "more": "Altro",
+    "less": "Meno",
+    "comingSoon": "In arrivo",
+    "ageRating": "Classificazione Età",
+    "watchNow": "Guarda Ora",
+    "info": {
+      "title": "Info",
+      "status": "Stato",
+      "country": "Paese",
+      "production": "Produzione",
+      "director": "Regia",
+      "creator": "Creato da",
+      "originalTitle": "Titolo originale",
+      "originalLanguage": "Lingua originale",
+      "network": "Network",
+      "episodes": "Episodi",
+      "budget": "Budget",
+      "revenue": "Incasso",
+      "screenplay": "Sceneggiatura",
+      "music": "Musiche",
+      "airingPeriod": "Periodo di trasmissione",
+      "ongoing": "In corso",
+      "statusValue": {
+        "released": "Uscito",
+        "returningSeries": "Serie in corso",
+        "ended": "Conclusa",
+        "canceled": "Cancellata",
+        "inProduction": "In produzione",
+        "postProduction": "Post-produzione",
+        "planned": "Pianificata",
+        "rumored": "Voce non confermata",
+        "pilot": "Episodio pilota"
+      }
+    },
+    "privateSearch": "Ricerca privata",
+    "searchGoogle": "Cerca su Google"
+  },
+  "onboarding": {
+    "subtitle": "Live, Film e Serie con un'interfaccia pulita e veloce.",
+    "slides": {
+      "multiplatform": {
+        "title": "Ovunque tu sia",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV e Mac. Una sola app per tutti i tuoi dispositivi."
+      },
+      "explore": {
+        "title": "Esplora i tuoi contenuti",
+        "subtitle": "Live, Film e Serie con un'interfaccia pulita e veloce."
+      },
+      "sync": {
+        "title": "Un account, tutti i device",
+        "subtitle": "Salva le playlist nel cloud e riprendi da dove hai lasciato."
+      }
+    },
+    "disclaimer": "KIPTV è un media player: non fornisce contenuti.",
+    "getStarted": "Inizia"
+  },
+  "setup": {
+    "copy": {
+      "copyAllCta": "Copia tutto da {{name}}",
+      "noteSameAccount": "Stesse credenziali di {{name}}: passano anche categorie nascoste, ordinamenti e rinomine.",
+      "title": "Vuoi copiare le impostazioni?",
+      "pickSubtitle": "Scegli la playlist di partenza. Verranno applicate a {{name}}.",
+      "newPlaylist": "{{name}} · nuova",
+      "whatCopied": "Cosa viene copiato",
+      "whatCopiedFrom": "Cosa viene copiato da {{name}}",
+      "note": "Categorie nascoste, ordinamenti manuali e rinomine restano legate a {{name}}.",
+      "copyCta": "Copia da {{name}}",
+      "fromScratch": "Configura da zero",
+      "pill": {
+        "hiddenCategories": "{{count}} categorie nascoste",
+        "hiddenItems": "{{count}} contenuti nascosti",
+        "customOrder": "Ordine personalizzato",
+        "renames": "{{count}} rinomine",
+        "logos": "{{count}} loghi personalizzati",
+        "epgOverrides": "{{count}} guide personalizzate",
+        "tmdbOverrides": "{{count}} correzioni TMDB",
+        "homeHidden": "Home nascosta",
+        "keywords": "{{count}} parole chiave Smart hide",
+        "metadataLanguage": "Metadati: {{language}}",
+        "trendingHidden": "Tendenze nascoste",
+        "tmdbOff": "Metadati TMDB disattivati",
+        "titleCleaningOff": "Pulizia titoli disattivata",
+        "emptyTabsShown": "Schede vuote visibili",
+        "homeCustom": "Home personalizzata",
+        "introSkip": "Salta intro configurato",
+        "subtitlesMulti": "Più opzioni sottotitoli",
+        "epgRefresh": "Guida ogni {{hours}} h",
+        "contentRefresh": "Contenuti ogni {{days}} giorni",
+        "sorting": "Ordinamenti personalizzati",
+        "recentlyAddedHidden": "Aggiunti di recente nascosti",
+        "recentlyWatchedHidden": "Visti di recente nascosti",
+        "liveStart": "Sezione iniziale Live",
+        "keywordOne": "1 parola chiave Smart hide"
+      },
+      "subtitleSingle": "Da {{source}} alla nuova playlist {{target}}.",
+      "pickHint": "Tocca la playlist da cui copiare",
+      "notCopied": "Progressi, cronologia e La mia lista non vengono copiati."
+    },
+    "skip": "Salta",
+    "back": "Indietro",
+    "useDefaults": "Usa i predefiniti",
+    "welcome": {
+      "title": "Ecco la tua playlist",
+      "subtitleXtream": "{{name}} · Xtream · attiva fino al {{date}}",
+      "subtitleGeneric": "{{name}} · {{type}}",
+      "movies": "Film",
+      "series": "Serie TV",
+      "channels": "Canali",
+      "withGuide": "Canali con guida",
+      "cta": "Personalizza in 1 minuto"
+    },
+    "start": {
+      "title": "Da dove vuoi partire?",
+      "subtitle": "La schermata che si apre all'avvio.",
+      "home": "Home",
+      "homeSub": "Tutto in un colpo d'occhio",
+      "movies": "Film",
+      "moviesSub": "Focus sui film",
+      "series": "Serie TV",
+      "seriesSub": "Nuovi episodi in cima",
+      "live": "Live",
+      "liveSub": "Canali e guida TV"
+    },
+    "playback": {
+      "title": "Cosa conta di più nel player?",
+      "subtitle": "Scegli il motore giusto per te. Puoi cambiarlo quando vuoi.",
+      "quality": "Funzionalità e qualità",
+      "qualitySub": "Tutto quello che il tuo dispositivo sa fare",
+      "qualityEngine": "Motore automatico · Aether",
+      "stability": "Stabilità e velocità",
+      "stabilitySub": "Parte subito, regge gli stream difficili",
+      "stabilityEngine": "Motore VLC · con riserva automatica",
+      "pillFastStart": "Avvio e seek rapidi",
+      "pillReconnect": "Riconnessione robusta",
+      "pillFormats": "Ogni formato",
+      "pillProven": "Motore collaudato",
+      "synced": "Sincronizzato sull'account: ogni dispositivo usa il suo motore migliore."
+    },
+    "channels": {
+      "title": "Come vuoi i canali?",
+      "subtitle": "Le varianti HD, FHD e 4K dello stesso canale.",
+      "before": "Prima",
+      "after": "Dopo",
+      "group": "Raggruppa",
+      "groupSub": "Un canale, i badge qualità",
+      "separate": "Tieni separati",
+      "separateSub": "Una riga per variante",
+      "recommended": "Consigliato",
+      "sampleProgram": "Notizie della sera",
+      "sampleNext": "Dopo: Film della sera",
+      "sampleProgramShort": "Notizie della sera · Film della sera",
+      "fallbackChannel": "Canale 1"
+    },
+    "adults": {
+      "title": "Contenuti per adulti?",
+      "subtitle": "Decidi tu cosa compare in questa playlist.",
+      "showAll": "Mostra tutto",
+      "showAllSub": "Nessun filtro",
+      "hide": "Nascondi le categorie per adulti",
+      "hideSub": "Per parola chiave: XXX, Adult, 18+",
+      "hidePin": "Nascondi e proteggi con PIN",
+      "hidePinSub": "Le categorie restano bloccate con il PIN",
+      "hidePinExistingSub": "Userà il PIN che hai già",
+      "pinPrompt": "Scegli un PIN a 4 cifre",
+      "pinConfirm": "Ripeti il PIN",
+      "pinMismatch": "I PIN non coincidono, riprova",
+      "pinSet": "PIN impostato"
+    },
+    "color": {
+      "title": "Il tuo colore",
+      "subtitle": "L'app si ritinge mentre scegli.",
+      "background": "Sfondo",
+      "premiumTitle": "Più colori con Premium",
+      "premiumCta": "Sblocca"
+    },
+    "done": {
+      "title": "Tutto pronto",
+      "subtitle": "Ecco le tue scelte.",
+      "autoOpen": "Apri subito {{name}} all'avvio",
+      "autoOpenSub": "Salta la scelta della playlist",
+      "hint": "Puoi cambiare tutto in Impostazioni.",
+      "cta": "Vai alla Home"
+    },
+    "recap": {
+      "start": "Parte da: {{screen}}",
+      "playbackQuality": "Player: qualità",
+      "playbackStability": "Player: stabilità",
+      "channelsGrouped": "Canali raggruppati",
+      "channelsSeparate": "Canali separati",
+      "adultsShown": "Adulti: visibili",
+      "adultsHidden": "Adulti: nascosti",
+      "adultsHiddenPin": "Adulti: nascosti + PIN",
+      "color": "{{color}} · {{background}}"
+    }
+  },
+  "continueWatching": {
+    "title": "Continua a guardare",
+    "removeConfirm": "Vuoi rimuovere \"{{title}}\" dalla lista \"Continua a guardare\"?",
+    "remove": "Rimuovi",
+    "contentNotAvailable": "Contenuto non disponibile",
+    "contentNotInPlaylist": "Questo contenuto non è più presente nella playlist corrente.",
+    "actions": "Azioni",
+    "removeFromContinueWatching": "Rimuovi da \"Continua a guardare\"",
+    "markAsWatched": "Segna come visto",
+    "remaining": "rimanenti",
+    "goToMovie": "Vai al film",
+    "goToSeries": "Vai alla serie",
+    "addToFavorites": "Aggiungi alla mia lista",
+    "download": "Scarica",
+    "comingSoon": "In arrivo",
+    "resetSeriesProgress": "Azzera progressi serie",
+    "resetMovieProgress": "Azzera progresso film",
+    "resetProgressConfirm": "Questa azione eliminerà permanentemente tutti i progressi di visualizzazione per \"{{title}}\". Questa azione non può essere annullata.",
+    "resetProgress": "Azzera"
+  },
+  "player": {
+    "shortcuts": {
+      "seekForward": "Avanti",
+      "seekBackward": "Indietro",
+      "playPause": "Riproduci/Pausa",
+      "close": "Chiudi"
+    },
+    "pip": {
+      "active": "Riproduzione in Picture in Picture",
+      "expandHintPrefix": "Premi",
+      "expandHintSuffix": "per tornare a schermo intero"
+    },
+    "info": "Info",
+    "videoDataUnavailable": "Dati video non disponibili",
+    "streamUrlError": "Impossibile generare URL stream",
+    "closePlayer": "Chiudi Player",
+    "playbackError": "Errore riproduzione",
+    "dailyLimitMessage": "Hai raggiunto il limite giornaliero di visualizzazione.",
+    "continueWatching": "Continua a guardare",
+    "upgradePremium": "Aggiorna Premium",
+    "timeUsed": "Tempo utilizzato: {{minutes}} minuti.",
+    "livePlayerClosed": "Il player verrà chiuso. Aggiorna a Premium per visualizzazione illimitata.",
+    "audio": "Audio",
+    "audioTrack": "Traccia Audio",
+    "subtitles": "Sottotitoli",
+    "subtitlesOff": "Disattivati",
+    "speed": "Velocità",
+    "playbackSpeed": "Velocità Riproduzione",
+    "information": "Info",
+    "fromStart": "Dall'inizio",
+    "goToMovie": "Vai al film",
+    "goToSeries": "Vai alla serie",
+    "noAudioTracks": "Nessuna traccia audio disponibile",
+    "progress": "Progresso",
+    "remainingTime": "%@ rimanente",
+    "restartFromBeginning": "Dall'inizio",
+    "backToVideo": "Torna al video",
+    "noDescriptionAvailable": "Nessuna descrizione disponibile per questo contenuto.",
+    "noPlotAvailable": "Nessuna trama disponibile.",
+    "more": "ALTRO",
+    "liveStreamNoDescription": "Diretta - nessuna descrizione disponibile.",
+    "loading": "Caricamento...",
+    "usingEngine": "Motore:",
+    "engine": "Motore",
+    "enginePicker": "Motore di Riproduzione",
+    "track": {
+      "audio": "Audio",
+      "subtitle": "Sottotitolo",
+      "off": "Disattivato"
+    },
+    "rate": {
+      "normal": "Normale"
+    },
+    "error": {
+      "title": "Errore di Riproduzione",
+      "invalidURL": "URL stream non valido",
+      "unsupportedFormat": "Formato non supportato",
+      "allEnginesFailed": "Impossibile riprodurre questo contenuto. Tutti i motori hanno fallito.",
+      "tryAnotherPlayer": "Prova un altro player",
+      "engineSwitchFailedRestored": "{{failed}} non è riuscito a partire. Ripristinato {{previous}}.",
+      "unknown": "Errore di riproduzione sconosciuto",
+      "loadFailed": "Impossibile caricare questo contenuto.",
+      "playbackFailed": "Riproduzione fallita.",
+      "network": "Errore di rete. Controlla la connessione.",
+      "timeout": "Lo stream ha impiegato troppo tempo a rispondere.",
+      "engineCrash": "Il player si è bloccato. Prova un altro motore.",
+      "close": "Chiudi"
+    },
+    "returnToLive": "Torna al live",
+    "retry": "Riprova",
+    "playNow": "Riproduci ora",
+    "playingIn": "In riproduzione tra {{seconds}}s",
+    "dailyLimitWarning": "Hai ancora {{minutes}} minuti disponibili oggi",
+    "formatNotSupported": "Questo formato non è supportato su questa TV",
+    "nextEpisode": "Prossimo Episodio",
+    "upNext": "Prossimi",
+    "skipIntro": "Salta intro",
+    "skipRecap": "Salta riassunto",
+    "skipCredits": "Salta sigla finale",
+    "holdToUnlock": "Tieni premuto per sbloccare",
+    "epg": "Programma",
+    "retryStream": "Riprova",
+    "streamDropped": "Connessione allo stream persa",
+    "loadEarlierPrograms": "Carica programmi precedenti",
+    "replay": "Replay",
+    "playReplay": "Riproduci",
+    "cancelReplay": "Annulla",
+    "noReplayData": "Nessun dato replay disponibile",
+    "favorites": "Preferiti",
+    "recent": "Recenti",
+    "noFavorites": "Nessun canale preferito",
+    "noRecentChannels": "Nessun canale visto di recente",
+    "archiveDays": "Archivio di {{count}} giorni",
+    "liveIndicator": "LIVE",
+    "openSubtitles": {
+      "external": "OpenSubtitles",
+      "searchOnline": "Cerca sottotitoli online",
+      "loading": "Caricamento sottotitoli...",
+      "searching": "Ricerca sottotitoli in corso...",
+      "downloading": "Download sottotitolo...",
+      "downloaded": "Sottotitolo caricato",
+      "noResults": "Nessun sottotitolo trovato",
+      "quotaExceeded": "Limite download raggiunto. Riprova domani.",
+      "loginForMore": "Accedi per più download",
+      "hearingImpaired": "CC",
+      "downloads": "download",
+      "remainingDownloads": "Download rimanenti oggi: {{count}}",
+      "selectLanguage": "Seleziona lingua",
+      "searchError": "Ricerca sottotitoli fallita",
+      "downloadError": "Download sottotitolo fallito",
+      "results": "Risultati",
+      "cached": "In cache",
+      "searchAgain": "Cerca ancora",
+      "showAll": "Mostra tutti i risultati",
+      "showBest": "Mostra solo il migliore"
+    },
+    "openSubtitlesError": {
+      "invalidKey": "Chiave API non valida",
+      "invalidCredentials": "Nome utente o password non validi",
+      "forbidden": "Accesso negato",
+      "invalidFile": "File sottotitolo non valido",
+      "invalidToken": "Sessione scaduta. Effettua nuovamente l'accesso.",
+      "linkExpired": "Link di download scaduto. Riprova.",
+      "rateLimit": "Troppe richieste. Attendi un momento.",
+      "serverError": "Errore del server. Riprova più tardi.",
+      "network": "Errore di rete. Controlla la connessione.",
+      "invalidResponse": "Risposta del server non valida",
+      "parseFailed": "Impossibile analizzare il file sottotitolo"
+    },
+    "chromecast": {
+      "castingTo": "Trasmissione su %@",
+      "stopCasting": "Interrompi trasmissione",
+      "castTo": "Trasmetti a",
+      "disconnect": "Disconnetti",
+      "error": {
+        "title": "Errore Chromecast",
+        "incompatibleStream": "Questo stream non è compatibile con Chromecast. La riproduzione continua sul dispositivo.",
+        "cleartextHTTP": "Il tuo provider IPTV usa una connessione non protetta (HTTP), che Chromecast non accetta. Serve un provider con connessione sicura (HTTPS). La riproduzione continua sul dispositivo."
+      }
+    },
+    "airplay": {
+      "videoActive": "In riproduzione su AirPlay",
+      "tapToManage": "Tocca per cambiare o disconnettere il dispositivo",
+      "warning": {
+        "titleBridge": "Video su AirPlay",
+        "messageBridge": "Questo formato non supporta l'AirPlay con il video in modo nativo, ma KIPTV può inviarlo comunque alla TV. I controlli sono limitati (play/pausa e ±10s, senza barra di avanzamento).",
+        "streamVideo": "Invia il video alla TV",
+        "title": "AirPlay: solo audio",
+        "messagePlayer": "Su AirPlay viene trasmesso solo l'audio. Usa AVPlayer o Aether per trasmettere anche il video.",
+        "messageAether": "Su AirPlay viene trasmesso solo l'audio. Usa Aether per trasmettere anche il video.",
+        "messageContent": "Questo contenuto può essere trasmesso solo come audio via AirPlay — il video resta su questo dispositivo.",
+        "useVideoEngine": "Usa AVPlayer",
+        "useAether": "Usa Aether",
+        "continueAudioOnly": "Continua solo audio"
+      },
+      "error": {
+        "title": "Errore AirPlay",
+        "liveBridgeFailed": "Non è stato possibile inviare il video alla TV. Riprova."
+      }
+    },
+    "resolution": "Risoluzione",
+    "subtitleDelay": "Ritardo sottotitoli",
+    "audioDelay": "Ritardo audio",
+    "resetDelay": "Azzera",
+    "nowPlaying": "In riproduzione"
+  },
+  "startup": {
+    "loadingIPTV": "Caricamento contenuti IPTV...",
+    "enhancingQuality": "Miglioramento qualità contenuti...",
+    "preparationComplete": "Preparazione completata",
+    "connectingPlaylist": "Connessione alla playlist in corso...",
+    "enhancementContinues": "Il miglioramento continuerà in background...",
+    "systemReady": "Sistema pronto",
+    "contentEnhanced": "{{count}} contenuti migliorati",
+    "smartMode": "Modalità intelligente: contenuti popolari",
+    "poweredByTMDB": "Alimentato da TMDB • Ottimizzato per grandi playlist",
+    "contents": "contenuti"
+  },
+  "tmdb": {
+    "completed": "Completato! {{count}} contenuti migliorati",
+    "enhancingMovies": "Miglioramento film in corso...",
+    "enhancingSeries": "Miglioramento serie in corso...",
+    "waiting": "In attesa...",
+    "secondsRemaining": "{{seconds}}s rimanenti",
+    "minutesRemaining": "{{minutes}}min rimanenti",
+    "hoursRemaining": "{{hours}}h {{minutes}}min rimanenti"
+  },
+  "poster": {
+    "notAvailable": "{{type}} non disponibile nella tua playlist"
+  },
+  "sorting": {
+    "categoryOrder": "Ordinamento Categorie",
+    "contentOrder": "Ordinamento Contenuti",
+    "default": "Predefinito",
+    "mostPopular": "Più popolari",
+    "mostVoted": "Più votati",
+    "oldest": "Più vecchi",
+    "mostRecent": "Dal più recente",
+    "alphabeticalAsc": "A → Z",
+    "alphabeticalDesc": "Z → A",
+    "custom": "Personalizzato",
+    "goToCategory": "Vai a Categoria"
+  },
+  "genres": {
+    "animation": "Animazione",
+    "action": "Azione",
+    "comedy": "Commedia",
+    "crime": "Crime",
+    "adventure": "Avventura",
+    "documentary": "Documentario",
+    "thriller": "Thriller",
+    "fantasy": "Fantasy",
+    "romance": "Romantico",
+    "drama": "Drammatico",
+    "sciFi": "Fantascienza",
+    "horror": "Horror",
+    "family": "Famiglia",
+    "mystery": "Mistero",
+    "music": "Musica",
+    "war": "Guerra",
+    "history": "Storico",
+    "western": "Western"
+  },
+  "downloads": {
+    "cancelAllTitle": "Annullare tutti i download?",
+    "cancelAllMessage": "{{count}} download in corso, in coda o in pausa verranno annullati. I contenuti già scaricati restano.",
+    "season": {
+      "confirmTitle": "Scarica Stagione {{season}}",
+      "confirmToDownload": "Episodi da scaricare: {{count}}",
+      "confirmSkipped": "Già scaricati o in coda: {{count}}",
+      "confirmQueueNote": "Verranno scaricati seguendo la coda e il limite di download simultanei.",
+      "downloadRemaining": "Scarica i {{count}} rimanenti",
+      "pauseAll": "Metti in pausa la stagione",
+      "resumeAll": "Riprendi la stagione",
+      "cancelAll": "Annulla i download della stagione",
+      "progressA11y": "Stagione {{season}}: {{done}} di {{total}} episodi scaricati"
+    },
+    "title": "Download",
+    "storageUsed": "Spazio utilizzato",
+    "free": "liberi",
+    "cellularDownloads": "Download su rete mobile",
+    "cellularDownloadsSubtitle": "Consenti download tramite dati mobili",
+    "active": "In download",
+    "completed": "Completati",
+    "failed": "Falliti",
+    "downloadFailed": "Download fallito",
+    "episodes": "episodi",
+    "movie": "Film",
+    "episode": "Episodio",
+    "movies": "Film",
+    "series": "Serie",
+    "emptyTitle": "Nessun download",
+    "emptyMessage": "Scarica film ed episodi per guardarli offline",
+    "deleteAll": "Elimina tutti i download",
+    "deleteAllTitle": "Eliminare tutti i download?",
+    "deleteAllMessage": "Verranno rimossi tutti i contenuti scaricati e lo spazio di archiviazione verrà liberato.",
+    "downloadSeason": "Scarica stagione",
+    "downloading": "Download in corso...",
+    "downloaded": "Scaricato",
+    "notEnoughSpace": "Spazio di archiviazione insufficiente",
+    "wifiOnly": "Connettiti al Wi-Fi per scaricare",
+    "streamWarningTitle": "Download in corso",
+    "streamWarningMessage": "Un download è in corso. La maggior parte dei provider IPTV consente una sola connessione. Lo streaming e il download potrebbero essere interrotti.",
+    "queued": "In coda",
+    "cancelAll": "Annulla tutto",
+    "cellularAlertTitle": "Download su rete mobile disattivato",
+    "cellularAlertMessage": "Il download tramite rete mobile è attualmente disattivato. Vuoi attivarlo?",
+    "cellularAlertEnable": "Attiva",
+    "subtitle": "Film ed episodi disponibili offline",
+    "pause": "Pausa",
+    "resume": "Riprendi",
+    "cancel": "Annulla",
+    "remove": "Rimuovi",
+    "paused": "In pausa",
+    "notFound": "Download non trovato",
+    "allSeasons": "Tutte le stagioni",
+    "deleteSeason": "Elimina stagione",
+    "multipleDownloads": "Download simultanei",
+    "multipleDownloadsSubtitle": "Fai avanzare più download insieme",
+    "multipleTitle": "Download simultanei",
+    "multipleConnectionsOne": "Il tuo provider consente una sola connessione simultanea.",
+    "multipleConnections": "Il tuo provider consente fino a %d connessioni simultanee.",
+    "multipleConnectionsUnknown": "Non è stato possibile leggere quante connessioni simultanee consente il tuo provider.",
+    "multipleLimit": "KIPTV farà avanzare fino a %d download insieme; gli altri restano in coda.",
+    "multipleRisk": "I download simultanei potrebbero essere soggetti a blocchi da parte del provider.",
+    "multipleDontShowAgain": "Non mostrare più",
+    "multipleRefusedTitle": "Download simultanei non supportati",
+    "multipleRefusedMessage": "Il tuo provider ha rifiutato i download simultanei. I download proseguono uno alla volta."
+  },
+  "offline": {
+    "title": "Modalità offline",
+    "goOnline": "Vai online",
+    "yourPlaylists": "Le tue playlist",
+    "selectPlaylist": "Seleziona una playlist da sfogliare",
+    "items": "elementi",
+    "offlineMode": "Modalità offline",
+    "offlineModeDescription": "Navigazione dei contenuti scaricati",
+    "stillOffline": "Nessuna connessione disponibile",
+    "noDownloads": "Nessun contenuto scaricato",
+    "noDownloadsMessage": "Scarica film ed episodi quando sei online per guardarli offline.",
+    "noConnection": "Nessuna connessione internet",
+    "downloadsAvailable": "Contenuti scaricati disponibili",
+    "useOffline": "Usa offline",
+    "syncProgressTitle": "Progressi offline trovati",
+    "syncProgressMessage": "Sono stati trovati {{count}} progressi salvati mentre guardavi offline. Vuoi sincronizzarli con il tuo account?",
+    "syncProgressConfirm": "Sincronizza",
+    "syncProgressLater": "No"
+  },
+  "contextMenu": {
+    "removeFromFavorites": "Rimuovi dalla mia lista",
+    "expandCategory": "Espandi categoria",
+    "alreadyDownloaded": "Già scaricato",
+    "downloading": "Download in corso…",
+    "notAvailableInPlaylist": "Non disponibile nella tua playlist"
+  },
+  "myList": {
+    "title": "La mia lista",
+    "addToMyList": "La mia lista",
+    "verifyingAvailability": "Verifica disponibilità…",
+    "notAvailableYet": "Non ancora disponibile nella tua playlist",
+    "picker": {
+      "chooseVersion": "Scegli la versione da salvare",
+      "chooseVersionMessage": "Questo contenuto è disponibile in più varianti nella tua playlist. Scegli quale tenere nella tua lista."
+    },
+    "availability": {
+      "popup": {
+        "title": "Disponibile nella tua playlist",
+        "message": "\"%@\" che hai salvato nella lista \"%@\" è ora disponibile."
+      }
+    },
+    "createNewTag": "Crea nuovo tag",
+    "manageTags": "Gestisci tag",
+    "editTags": "Modifica",
+    "tagNamePlaceholder": "Nome del tag",
+    "saveTag": "Salva tag",
+    "cancel": "Annulla",
+    "done": "Fatto",
+    "noItems": "La tua lista è vuota",
+    "noItemsMessage": "Aggiungi film, serie o canali alla tua lista per trovarli qui.",
+    "all": "Tutti",
+    "deleteTagTitle": "Eliminare il tag?",
+    "deleteTag": "Elimina",
+    "deleteTagMessage": "Tutti gli elementi in \"%@\" verranno rimossi dalla tua lista.",
+    "tags": {
+      "myMovies": "I miei film",
+      "mySeries": "Le mie serie",
+      "myChannels": "I miei canali",
+      "mustWatch": "Da vedere",
+      "rewatch": "Da rivedere",
+      "classics": "Classici",
+      "family": "Famiglia",
+      "kids": "Bambini",
+      "liveSports": "Sport in diretta",
+      "news": "Notizie",
+      "cartoons": "Cartoni animati",
+      "international": "Internazionale",
+      "traktWatchlist": "Trakt Watchlist"
+    },
+    "tmdbOnlyAdded": {
+      "title": "Aggiunto alla tua lista",
+      "message": "\"%@\" non è ancora nella tua playlist. Ti avviseremo quando il tuo provider lo aggiungerà."
+    }
+  },
+  "person": {
+    "biography": "Biografia",
+    "personalInfo": "Informazioni Personali",
+    "knownFor": "Conosciuto/a Per",
+    "knownForMale": "Conosciuto Per",
+    "knownForFemale": "Conosciuta Per",
+    "knownCredits": "Crediti Conosciuti",
+    "gender": "Sesso",
+    "birthday": "Compleanno",
+    "deathday": "Data di Morte",
+    "placeOfBirth": "Luogo di Nascita",
+    "alsoKnownAs": "Conosciuto/a anche come",
+    "alsoKnownAsMale": "Conosciuto anche come",
+    "alsoKnownAsFemale": "Conosciuta anche come",
+    "male": "Maschio",
+    "female": "Femmina",
+    "nonBinary": "Non-binario",
+    "filmography": "Filmografia",
+    "movies": "Film",
+    "series": "Serie",
+    "showAll": "Mostra Tutti",
+    "acting": "Recitazione",
+    "directing": "Regia",
+    "writing": "Sceneggiatura",
+    "production": "Produzione",
+    "noBiography": "Nessuna biografia disponibile.",
+    "noCredits": "Nessun credito disponibile."
+  },
+  "tvpairing": {
+    "title": "Collega la TV",
+    "instructions": "Apri l'app KIPTV sul telefono, vai in Impostazioni → Account → Collega la TV e inserisci il codice mostrato qui sotto.",
+    "generating": "Generazione codice",
+    "regenerate": "Nuovo codice",
+    "waiting": "In attesa di conferma",
+    "retry": "Riprova",
+    "success": "TV Collegata!",
+    "successSubtitle": "Caricamento delle playlist...",
+    "withApp": "Hai già l'app?\nVai su Impostazioni → Account → Collega la TV",
+    "qrCaption": "Inquadra il QR con la fotocamera del telefono",
+    "lead": "Accedi o crea il tuo account KIPTV",
+    "manual": "Oppure vai su kiptv.app/pair\ne inserisci il codice"
+  },
+  "linkTV": {
+    "title": "Collega la TV",
+    "instructions": "Inserisci il codice a 6 cifre mostrato sullo schermo della TV per collegarla al tuo account.",
+    "enterCode": "Inserisci il codice",
+    "confirm": "Collega TV",
+    "success": "TV Collegata!",
+    "connectedTo": "Collegata a {{device}}",
+    "error": "Codice non valido o scaduto. Riprova.",
+    "autoConfirming": "Collegamento alla TV...",
+    "notAuthenticated": "Accesso Richiesto",
+    "notAuthenticatedMessage": "Accedi al tuo account prima di collegare una TV."
+  },
+  "badges": {
+    "new": "Nuovo",
+    "newMovie": "Nuovo Film",
+    "newSeries": "Nuova Serie",
+    "newSeason": "Nuova Stagione",
+    "newEpisode": "Nuovo Episodio",
+    "newEpisodes": "Nuovi Episodi"
+  },
+  "topshelf": {
+    "continueWatchingMovies": "{{name}}, continua a guardare film",
+    "continueWatchingSeries": "{{name}}, continua a guardare serie",
+    "recentlyWatchedLive": "{{name}}, canali visti di recente"
+  },
+  "update": {
+    "title": "Aggiornamento disponibile",
+    "subtitle": "Versione {{version}} disponibile sull'App Store",
+    "description": "Aggiorna ora per ottenere le ultime funzionalità e correzioni.",
+    "releaseNotesHeading": "Novità di questa versione",
+    "action": {
+      "update": "Aggiorna ora",
+      "later": "Più tardi"
+    }
+  },
+  "whatsNew": {
+    "title": "Novità",
+    "subtitle": "Versione {{version}} — Migliorie e correzioni",
+    "pageSubtitle": "Migliorie e correzioni",
+    "v3_0": {
+      "homeTab": {
+        "title": "La nuova scheda Home",
+        "desc": "Una Home tutta tua su iPhone, iPad e Apple TV: hero intelligente con i titoli da riprendere, righe dinamiche, \"Stasera in TV\" e feed personalizzati. Puoi personalizzare o nascondere la Home e riattivarla dalle impostazioni"
+      },
+      "traktIntegration": {
+        "title": "Integrazione Trakt",
+        "desc": "Collega il tuo account Trakt: i progressi e i \"visti\" restano sincronizzati, puoi valutare un film o un episodio a fine visione, importare la cronologia e scegliere a quali playlist applicare l'integrazione."
+      },
+      "externalRatings": {
+        "title": "Valutazioni IMDb, Rotten Tomatoes e Metacritic",
+        "desc": "Le schede di film e serie mostrano le valutazioni di IMDb, Rotten Tomatoes e Trakt direttamente nell'hero. TMDB rimane la fonte primaria."
+      },
+      "dynamicBackground": {
+        "title": "Sfondo dinamico",
+        "desc": "In Impostazioni > Tema trovi il nuovo selettore Sfondo: Nero, colore del tema o Dinamico, che sfuma il poster in evidenza dietro all'interfaccia. La scelta si sincronizza tra i dispositivi e su iOS la seguono anche l'icona e il widget."
+      },
+      "setupWizard": {
+        "title": "Configurazione guidata",
+        "desc": "Dopo la prima playlist una breve procedura ti aiuta a impostare l'essenziale: profilo di riproduzione, PIN, apertura automatica. Puoi anche copiare le impostazioni da una playlist all'altra."
+      },
+      "sagaNextPill": {
+        "title": "Le saghe come una serie",
+        "desc": "Il pulsante \"Next\" nel player propone anche i film successivi della stessa saga, e la scheda di una collezione ha Riproduci, Riprendi e Riguarda come una serie TV."
+      },
+      "tvPlaylistPeek": {
+        "title": "Cambio playlist al volo su Apple TV",
+        "desc": "Premendo Menu dalla barra delle schede compare il selettore delle playlist prima di uscire: cambi profilo in un gesto."
+      },
+      "aetherUpdate": {
+        "title": "Motore Aether aggiornato",
+        "desc": "Motore Aether aggiornato alla 6.75.0: ora elenca tutte le tracce audio e sottotitoli e avvia i VOD più in fretta."
+      },
+      "chromecastAirplayImprovements": {
+        "title": "Chromecast e AirPlay più affidabili",
+        "desc": "I canali live in AirPlay arrivano anche alle TV non Apple. Chromecast è stato corretto su alcuni bug."
+      },
+      "epgSourcePicker": {
+        "title": "Sorgente EPG più facile da trovare",
+        "desc": "Il selettore della sorgente EPG trova anche gli ID che la guida non dichiara, così più canali ricevono i programmi giusti."
+      },
+      "performance": {
+        "title": "Più reattiva",
+        "desc": "Home e schede di dettaglio si aprono più in fretta."
+      },
+      "playerFixes": {
+        "title": "Correzioni ai player",
+        "desc": "Le tracce delle lingue sono ora più chiare, e la lingua preferita viene applicata in modo più intelligente anche quando le tracce hanno nomi strani; con MPV il video è allineato al pixel, niente più loghi sfocati; chiudere il player durante un fallback non lascia audio fantasma; il reload di un live mantiene il motore scelto a mano."
+      },
+      "continueWatchingFixes": {
+        "title": "Correzioni a Continua a guardare",
+        "desc": "La riga si aggiorna subito dopo la chiusura del player, il resume funziona tra dispositivi anche per le serie, e quando esce un nuovo episodio compare \"Riprendi SxEy\" invece di \"Riguarda\"."
+      },
+      "metadataFixes": {
+        "title": "Correzioni ai metadati",
+        "desc": "I titoli con prefisso paese o con l'anno in coda trovano i metadati giusti, e il poster scelto a mano resta anche dopo il riavvio."
+      },
+      "arabicRtlFixes": {
+        "title": "Correzioni per l'arabo",
+        "desc": "Nel player i gesti orizzontali, lo swipe tra le schede info e le frecce di seek seguono la direzione giusta, con le cifre arabo-indiane sui tasti."
+      },
+      "tvosFixes": {
+        "title": "Correzioni su Apple TV",
+        "desc": "L'anteprima di un canale passa a schermo intero senza ricaricarlo, e \"Richiedi PIN per aprire Impostazioni\" ora ha effetto."
+      },
+      "accountFixes": {
+        "title": "Altre correzioni",
+        "desc": "Il link di reset della password funziona anche senza l'app installata, e le ricerche in incognito non vengono più salvate."
+      },
+      "headline": {
+        "title": "La Home è arrivata.",
+        "sub1": "Ora c'è Trakt, e quello che guardi ti segue.",
+        "sub2": "Le valutazioni di IMDb, Rotten Tomatoes e Metacritic.",
+        "sub3": "E uno sfondo che prende i colori da ciò che hai sullo schermo."
+      }
+    },
+    "v2_9": {
+      "aetherEngine": {
+        "title": "Aether, il nuovo motore di riproduzione",
+        "desc": "Un nuovo motore video, ora predefinito su iPhone, iPad e Apple TV: avvio più rapido, zapping tra i canali in circa un secondo e supporto completo a background, Picture in Picture, AirPlay e Chromecast."
+      },
+      "playerNextTab": {
+        "title": "Gli episodi successivi dentro al player",
+        "desc": "Il player ha una nuova scheda \"Next\" con il resto della stagione: passi all'episodio dopo senza uscire dalla riproduzione."
+      },
+      "downloadsSeasonAndOffline": {
+        "title": "Download di un'intera stagione e offline più completo",
+        "desc": "Scarichi tutta una stagione da un solo pulsante e puoi annullare in blocco i download in corso e in coda. Ora puoi saltare l'intro anche su episodi scaricati offline."
+      },
+      "searchSagaFolders": {
+        "title": "Le saghe diventano cartelle nella ricerca",
+        "desc": "I film di una stessa saga si raccolgono in una cartella-libro nei risultati: apri la cartella e trovi tutti i capitoli in ordine, senza doverli cercare uno a uno."
+      },
+      "mpvEngine": {
+        "title": "mpv, un altro motore di riproduzione",
+        "desc": "Si aggiunge MPV alla lista dei motori disponibili su iPhone, iPad e Apple TV: un'alternativa in più quando un flusso fa i capricci."
+      },
+      "ipadCategoriesPanel": {
+        "title": "Pannello categorie su iPad in orizzontale",
+        "desc": "Con l'iPad in orizzontale le categorie della TV in diretta restano sempre a lato, sia nella lista canali sia nella guida programmi."
+      },
+      "UXUIImprovements": {
+        "title": "Migliorie UX e UI",
+        "desc": "L'occhio vuole la sua parte e come sempre la cura dei dettagli fa la differenza, provare per credere."
+      },
+      "tvosNavigationFixes": {
+        "title": "Correzioni alla navigazione su Apple TV",
+        "desc": "Dopo aver scelto una versione si apre il titolo giusto, il tasto DESTRA oltre l'ultima stagione non salta più altrove e le schede della guida nella Live a colonne sono di nuovo leggibili."
+      },
+      "searchFixes": {
+        "title": "Correzioni alla ricerca",
+        "desc": "Su Apple TV la ricerca parte solo quando smetti davvero di digitare. Niente più lag e rallentamenti."
+      },
+      "contentFixes": {
+        "title": "Correzioni ai contenuti",
+        "desc": "Una serie ora sparisce dai 'Continua a Guardare' dopo l'ultimo episodio disponibile e torna in cima quando ne esce uno nuovo; i contenuti nascosti restano nascosti anche nei selettori di versione e qualità; un attore con più ruoli non manda più in crash l'app su Apple TV."
+      },
+      "dutchTranslationFix": {
+        "title": "Correzione su alcune traduzioni"
+      }
+    },
+    "v2_8": {
+      "dolbyAtmosReliableAudio": {
+        "title": "Dolby Atmos, come dovrebbe essere",
+        "desc": "KIPTV rileva più accuratamente le tracce Dolby Atmos e sceglie il player più adatto per gli stream Dolby Vision HLS, per un'esperienza audio e video più affidabile."
+      },
+      "uxUiImprovements": {
+        "title": "Miglioramenti UX/UI",
+        "desc": "Browser integrato, Centro assistenza e numerosi dettagli di navigazione sono stati perfezionati per rendere l'app più piacevole da usare."
+      },
+      "providerResponseReliability": {
+        "title": "Provider IPTV più affidabili",
+        "desc": "Migliorata la gestione delle risposte incomplete o non corrette dai provider IPTV, per recuperare il catalogo in modo più affidabile."
+      },
+      "tvosSessionRestore": {
+        "title": "Sessioni Apple TV preservate",
+        "desc": "Il ripristino dell'app non interrompe più le sessioni già attive su Apple TV."
+      }
+    },
+    "v2_7": {
+      "detailAltreVersioniLeAltre": {
+        "title": "Tutte le versioni di un titolo, in un colpo solo",
+        "desc": "Nella scheda di un film o di una serie trovi la nuova sezione «Altre versioni» con le altre copie presenti nella tua playlist: scegli al volo la qualità o la lingua che preferisci."
+      },
+      "offlineProgressoSincronizzato": {
+        "title": "Riprendi da dove eri, anche se hai guardato offline",
+        "desc": "Il punto in cui ti fermi sui contenuti scaricati viene salvato sul dispositivo e trasferito sul tuo account appena torni online, così ritrovi il segnaposto anche sugli altri dispositivi."
+      },
+      "liveMettiInCimaDal": {
+        "title": "«Metti in cima» a canali e categorie",
+        "desc": "Tieni premuto su un canale o su una categoria per portarlo in cima alla lista: le cose che guardi più spesso restano sempre a portata di mano."
+      },
+      "playerRiproduzioneInBackgroundOpzionale": {
+        "title": "Audio in sottofondo su Apple TV",
+        "desc": "Dalle impostazioni puoi scegliere di lasciare l'audio in riproduzione quando esci dal player o metti l'app in secondo piano. È disattivata di default."
+      },
+      "detailRicercaGoogleDalDettaglio": {
+        "title": "Cerca un titolo su Google con un tocco",
+        "desc": "Dalla scheda di un film o di una serie apri la ricerca Google con un tocco, per recensioni, cast e curiosità."
+      },
+      "rtlInterfacciaArabaSuTvos": {
+        "title": "Interfaccia RTL migliorata su Apple TV",
+        "desc": "Scegliendo l'arabo, su iPhone, iPad e Apple TV menu, caroselli, guida TV e player si dispongono correttamente da destra a sinistra."
+      },
+      "uiRifinitureInterfaccia": {
+        "title": "Rifiniture all'interfaccia",
+        "desc": "Migliorati dettagli grafici e animazioni varie."
+      },
+      "tvosRiordinareInGestioneContenuti": {
+        "title": "Riordinare le categorie non blocca più l'app",
+        "desc": "Su Apple TV lo spostamento di categorie e contenuti in Gestione contenuti resta fluido anche con playlist molto grandi."
+      }
+    },
+    "v2_6": {
+      "downloadsReliableAndParallel": {
+        "title": "Download più affidabili, e simultanei se vuoi",
+        "desc": "Un download interrotto riprende da solo alla riapertura dell'app e i tentativi falliti vengono ripetuti in automatico. In più puoi attivare i download simultanei per scaricare più titoli insieme."
+      },
+      "downloadsLiveActivity": {
+        "title": "I tuoi download sulla schermata di blocco",
+        "desc": "Segui l'avanzamento dei download dalla schermata di blocco e dalla Dynamic Island, con una scheda per ogni film o serie."
+      },
+      "tvPairingViaWeb": {
+        "title": "Colleghi la TV dal telefono, anche senza l'app",
+        "desc": "Inquadra il codice QR con la fotocamera: se non hai ancora KIPTV sul telefono puoi accedere o registrarti dal sito e confermare da lì il collegamento. Se ce l'hai, il codice si apre direttamente nell'app."
+      },
+      "bulkCategoryControls": {
+        "title": "Mostra o sblocca tutte le categorie in un tocco",
+        "desc": "In Gestione contenuti trovi i comandi rapidi per rendere di nuovo visibili tutte le categorie nascoste o togliere il blocco a quelle protette."
+      },
+      "instantSearchLargePlaylists": {
+        "title": "Ricerca istantanea, anche con playlist enormi",
+        "desc": "I risultati compaiono mentre digiti senza aspettare la rete, e non restano più vuoti sui cataloghi molto grandi."
+      },
+      "tvosLiveImageQuality": {
+        "title": "Immagine più pulita sui canali live",
+        "desc": "Su Apple TV il deinterlacciamento viene ora applicato davvero ai canali interlacciati, con la decodifica hardware attiva sul resto: via l'effetto pettine sui movimenti."
+      },
+      "contentManagementStability": {
+        "title": "Niente più chiusure inattese in Gestione contenuti",
+        "desc": "Nascondere o bloccare categorie su playlist molto grandi non fa più chiudere l'app."
+      },
+      "minorBugfixes": {
+        "title": "Correzione di bug minori"
+      }
+    },
+    "v2_5": {
+      "iosLivePlayerChannelZap": {
+        "title": "Zapping veloce, ora anche su iOS",
+        "desc": "Nel player Live puoi passare al canale precedente o successivo e aggiornare rapidamente lo stream."
+      },
+      "continueWatchingLocalizedTitles": {
+        "title": "Titoli localizzati in \"Continua a guardare\"",
+        "desc": "Film e serie mostrano ora il titolo TMDB nella lingua dell'app, con informazioni più coerenti sulle card."
+      },
+      "minorBugfixes": {
+        "title": "Correzione di bug minori"
+      }
+    },
+    "v2_4": {
+      "ipadRedesign": {
+        "title": "Esperienza iPad ridisegnata",
+        "desc": "Dettagli in orizzontale con pannello poster, Impostazioni con sidebar in split view e lista canali Live TV su più colonne: su iPad l'app sfrutta molto meglio lo schermo grande."
+      },
+      "detailInfoFooter": {
+        "title": "Più informazioni sui contenuti",
+        "desc": "Le schede di Film e Serie TV mostrano un nuovo pannello con stato, paese di produzione, case produttrici e altri dettagli."
+      },
+      "homeCardHero": {
+        "title": "Contenuto in evidenza a scheda",
+        "desc": "In cima a Film e Serie TV puoi ora scegliere di mostrare il contenuto in evidenza in stile scheda, più compatto, invece che a schermo intero."
+      },
+      "tvosEpgReminders": {
+        "title": "Promemoria programmi, ora anche su Apple TV",
+        "desc": "Imposta un promemoria per un programma dalla TV e ricevi una notifica su iPhone o iPad quando sta per iniziare."
+      },
+      "settingsReorg": {
+        "title": "Impostazioni riorganizzate",
+        "desc": "Le impostazioni sono state riorganizzate in sezioni più chiare e con più opzioni per personalizzare l'app."
+      },
+      "widgetsEfficiency": {
+        "title": "Widget e Top Shelf più efficienti",
+        "desc": "Ridotto il consumo di risorse di widget e Top Shelf, con aggiornamenti più leggeri e rapidi."
+      },
+      "foregroundResponsiveness": {
+        "title": "Ritorno in primo piano senza lag",
+        "desc": "Risolto un rallentamento che poteva verificarsi riaprendo l'app: il ripristino è ora immediato e senza blocchi."
+      }
+    },
+    "v2_3": {
+      "epgChannelColoredCards": {
+        "title": "Guida TV rinnovata",
+        "desc": "Schede dei programmi con i colori del canale, nuova intestazione, dissolvenze più eleganti e navigazione migliorata su iOS e Apple TV."
+      },
+      "tvosChannelLogoInLive": {
+        "title": "Player live più informativo su Apple TV",
+        "desc": "Il logo del canale è ora visibile nel player e il pannello Info mette in primo piano le immagini del programma in onda."
+      },
+      "iosTabBarMinimize": {
+        "title": "Tab bar che si riduce durante la navigazione (iOS 26)",
+        "desc": "Nelle schermate di dettaglio la tab bar si minimizza automaticamente, lasciando più spazio ai contenuti."
+      },
+      "subtitlesSystemEdgeStyles": {
+        "title": "Sottotitoli fedeli allo stile di sistema",
+        "desc": "In modalità Sistema i bordi \"Rialzato\" e \"Ribassato\" dei sottotitoli riproducono ora fedelmente lo stile delle impostazioni di iOS."
+      },
+      "myListMultiTag": {
+        "title": "La mia lista: tag multipli e riordino",
+        "desc": "Ora puoi assegnare più tag allo stesso contenuto e riordinarli liberamente. Le personalizzazioni dei canali sopravvivono alla rinomina e le schede di Continua a guardare mostrano informazioni più accurate."
+      },
+      "catalogLoadingPerformance": {
+        "title": "Caricamento del catalogo più veloce e fluido",
+        "desc": "Il catalogo viene elaborato in background e la navigazione resta reattiva durante i caricamenti: niente più blocchi all'apertura di playlist molto grandi, soprattutto su Apple TV."
+      },
+      "tvosStabilityFixes": {
+        "title": "Stabilità e navigazione su Apple TV",
+        "desc": "Risolti due crash al caricamento dei contenuti, il focus che si perdeva tornando dall'app switcher e il cambio scheda ai bordi dei contenuti."
+      },
+      "playerSmoothness": {
+        "title": "Riproduzione più fluida su canali 50fps e/o HDR",
+        "desc": "Eliminati gli scatti durante l'uso dei controlli su Apple TV e riproduzione live a 50 fps più fluida su iPhone/iPad/Mac."
+      },
+      "minorBugFixes": {
+        "title": "Correzioni di bug minori",
+        "desc": "Risolti diversi problemi di stabilità e performance in varie situazioni d'uso."
+      }
+    },
+    "v2_2": {
+      "UIUXImprovements": {
+        "title": "Miglioramenti UI/UX",
+        "desc": "Migliorati i layout e le interazioni per un'esperienza utente più piacevole."
+      },
+      "richLiveReplayInfo": {
+        "title": "Informazioni più ricche per Live e Replay",
+        "desc": "Il pannello Info combina ora guida EPG e metadata TMDB, con immagini e dettagli più completi sul programma in onda o in replay."
+      },
+      "smootherPlayer": {
+        "title": "Player più fluido e reattivo su iOS",
+        "desc": "Animazioni, trascinamenti e controlli sono più fluidi, con pieno supporto ProMotion sui dispositivi compatibili."
+      },
+      "epgReplayAccuracy": {
+        "title": "EPG e Replay sempre sincronizzati",
+        "desc": "Il pannello programmi distingue meglio dirette, contenuti passati e prossimi, e mostra nel Replay le informazioni del programma corretto."
+      },
+      "minorBugFixes": {
+        "title": "Correzioni di bug minori",
+        "desc": "Sono state apportate diverse correzioni di bug per migliorare la stabilità e le performance dell'app."
+      }
+    },
+    "v2_1": {
+      "accountConnectedDevices": {
+        "title": "Dispositivi collegati",
+        "desc": "Controlla tutti i dispositivi dove hai effettuato l'accesso e disconnettili da remoto quando vuoi."
+      },
+      "recentlyWatchedLiveToggle": {
+        "title": "Nascondi canali visti di recente",
+        "desc": "Mostra/nascondi i canali Live guardati di recente."
+      },
+      "tvosLiveCarouselRedesign": {
+        "title": "Migliorata vista a caroselli Live su Apple TV",
+        "desc": "La sezione Live su Apple TV ha un nuovo look in stile Film e Serie: caroselli con anteprime 16:9, sfondo a tutto schermo, guida programmi in vetro e categorie che si espandono dalla sidebar."
+      },
+      "topShelfChannelLogo": {
+        "title": "Logo canale corretto nella Top Shelf (Apple TV)",
+        "desc": "Il logo personalizzato che scegli per un canale Live ora appare anche nella Top Shelf di Apple TV."
+      },
+      "playerWhiteThemeChips": {
+        "title": "Tema bianco più leggibile nel player",
+        "desc": "Con il tema bianco, i pulsanti selezionati tra i controlli del player hanno ora il contrasto giusto."
+      }
+    },
+    "v2_0": {
+      "playerPlayWithEnginePicker": {
+        "title": "Riproduci direttamente con il player che preferisci",
+        "desc": "Scegli subito il motore con cui avviare la riproduzione (KSPlayer, VLC o AVPlayer) a ogni avvio. E con Premium puoi aprire film e canali direttamente in player esterni (VLC o Infuse)."
+      },
+      "metadataManualTmdbOverridePersonalizza": {
+        "title": "Personalizza i metadata di film e serie",
+        "desc": "Quando un titolo viene abbinato alle informazioni sbagliate, puoi correggerlo a mano scegliendo il risultato TMDB giusto, oppure rimuovere del tutto l'abbinamento."
+      },
+      "playerOpensubtitlesAlwaysVisibleAudio": {
+        "title": "Più controllo su sottotitoli e audio",
+        "desc": "Cerca più opzioni di sottotitoli su OpenSubtitles (da attivare nelle impostazioni OpenSubtitles) e regola il ritardo di audio e sottotitoli. Le preferenze vengono ricordate per ogni contenuto."
+      },
+      "livetvCarouselLayoutForThe": {
+        "title": "Nuovo layout a caroselli per la Live TV",
+        "desc": "La sezione Live TV può ora mostrare i canali come caroselli orizzontali, in stile Film e Serie. Scegli il layout che preferisci dalle impostazioni."
+      },
+      "themeWhiteTheme4thAdaptive": {
+        "title": "Nuovo tema bianco",
+        "desc": "Prova il nuovo tema bianco: elegante, pulito, classico."
+      },
+      "tabsNascondiSchedeFilmSerie": {
+        "title": "Nascondi le schede vuote",
+        "desc": "Se una playlist non contiene film, serie o canali live, la scheda corrispondente viene nascosta automaticamente. Puoi disattivare l'opzione dalle impostazioni."
+      },
+      "subtitlesSelfRenderCaptionsTo": {
+        "title": "Sottotitoli fedeli al tuo stile",
+        "desc": "I sottotitoli ora rispecchiano meglio le impostazioni di sistema, incluso il colore, con qualsiasi motore di riproduzione."
+      },
+      "cwSelfHealContinueWatching": {
+        "title": "Continua a guardare e La mia lista si correggono da soli",
+        "desc": "Quando il provider della tua playlist riassegna gli ID dei contenuti, le voci di Continue Watching e de La mia lista non mostrano più film o copertine sbagliate: si riallineano da sole al catalogo aggiornato."
+      },
+      "epgInstantLoadViaStale": {
+        "title": "Guida TV più veloce all'avvio",
+        "desc": "La guida programmi (EPG) si carica subito riusando i dati salvati e aggiornandoli in background, senza più l'attesa di qualche secondo a ogni apertura."
+      },
+      "playerNoFalseCompletionOn": {
+        "title": "Niente falsi \"già visto\" sui flussi interrotti",
+        "desc": "Alcuni stream difettosi facevano credere all'app che un film fosse finito, segnandolo come visto o passando al successivo. Ora non accade più."
+      },
+      "playerCatchupDoubleLiveBadge": {
+        "title": "Catch-up/Replay più affidabili",
+        "desc": "Risolto il doppio badge \"LIVE\" durante il catch-up, ripristinati i controlli di audio e sottotitoli e migliorata l'esperienza di Replay."
+      },
+      "resolve9RegressionsFound": {
+        "title": "Correzioni di stabilità",
+        "desc": "Risolte diverse anomalie emerse durante i test interni, per un'app più stabile e affidabile."
+      }
+    },
+    "v1_9": {
+      "epgShowEpgFanartOn": {
+        "title": "EPG Fanart",
+        "desc": "I programmi in onda sui canali mostrano ora la propria immagine presa dall'EPG (se presente), altrimenti passano a TMDB o sul logo del canale, come prima."
+      },
+      "playerUnifiedSubtitleStylingApple": {
+        "title": "Personalizza l'aspetto dei sottotitoli",
+        "desc": "Scegli font, dimensione, grassetto e bordo dei sottotitoli, oppure usa lo stile di sistema di Apple. Puoi modificare la scelta nelle impostazioni o direttamente nel player."
+      },
+      "playerUnifyFallbackChainTo": {
+        "title": "Riproduzione più affidabile",
+        "desc": "Migliorato algoritmo di selezione automatica del player su iOS e Apple TV."
+      },
+      "epgEpgEmptyOnFirst": {
+        "title": "Guida TV visibile subito all'avvio",
+        "desc": "Le guide programmi (EPG) personalizzate ora compaiono già alla prima apertura dell'app, senza bisogno di chiuderla e riaprirla."
+      }
+    },
+    "v1_8": {
+      "playerSkipIntroRecapCredits": {
+        "title": "Salta intro, riassunto e sigla finale",
+        "desc": "Salta con un tocco le sigle iniziali, i riepiloghi delle puntate precedenti e i titoli di coda di film e serie."
+      },
+      "watchedMarkMoviesWholeSeries": {
+        "title": "Segna come visto film e intere serie",
+        "desc": "Tieni traccia di ciò che hai già guardato: i poster dei titoli visti si attenuano e mostrano un segno di spunta."
+      },
+      "iosAvatarMenuCompactIcon": {
+        "title": "Menu playlist più compatto su iOS",
+        "desc": "Il menu della playlist è stato ridisegnato con una pratica riga di icone rapide, più facile da usare."
+      },
+      "settingsMoveDefaultAudioSubtitle": {
+        "title": "Lingua predefinita di audio e sottotitoli, anche in diretta",
+        "desc": "Imposta la lingua preferita per audio e sottotitoli da una sezione dedicata nelle impostazioni. Ora viene applicata anche ai canali in diretta, non solo a film e serie."
+      },
+      "tvosLiveReplayNoEngine": {
+        "title": "Replay della diretta più fluido",
+        "desc": "Riavvolgi e scorri la diretta TV all'istante, con una barra di avanzamento come quella di film e serie e un cambio di velocità più affidabile."
+      },
+      "playerDefaultVodToHardware": {
+        "title": "Film e serie più fluidi ed efficienti",
+        "desc": "In modalità automatica, film e serie usano ora la decodifica hardware per una riproduzione più scorrevole e con meno consumo di batteria."
+      },
+      "playerAccurateSeekForVod": {
+        "title": "Scorrimento e salti di ±10 secondi più precisi",
+        "desc": "Su film, serie e catch-up con KSPlayer, lo scorrimento e i salti avanti e indietro ora arrivano esattamente nel punto giusto."
+      }
+    },
+    "v1_7": {
+      "tvosLivePlayerOverhaulKsme": {
+        "title": "KSPlayer migliorato",
+        "desc": "Riscritta completamente l'integrazione di KSPlayer, ora più ottimizzato e più fluido in ogni situazione su film, serie e canali live."
+      },
+      "iosNativeAirplayNowPlaying": {
+        "title": "AirPlay con video su qualsiasi formato",
+        "desc": "Trasmetti via AirPlay il video oltre all'audio, con qualsiasi formato di file, anche i più esotici."
+      },
+      "tvosHomogeneousCustomCornerPip": {
+        "title": "Picture-in-Picture in ogni player su Apple TV",
+        "desc": "Guarda i tuoi contenuti in un riquadro nell'angolo dello schermo con qualsiasi motore di riproduzione."
+      },
+      "tvosMultiviewFromSingleIs": {
+        "title": "Multiview ancora più fluido",
+        "desc": "Apri più canali nello stesso schermo e passa da uno all'altro in modo ancora più reattivo, senza ricaricare."
+      },
+      "tvosKill4sDismissFreeze": {
+        "title": "Live TV più reattiva e veloce su Apple TV",
+        "desc": "Eliminato il blocco di qualche secondo all'uscita dal player; scorrimento dei canali e cambio canale più fluidi."
+      },
+      "tvosHeaderClockRespectsSystem": {
+        "title": "L'orario in alto rispetta il formato 12/24 ore del sistema su Apple TV"
+      },
+      "tvosCwCardPlaceholderLogo": {
+        "title": "Risolto un logo segnaposto che restava sopra la copertina in Continua a guardare"
+      },
+      "tvosAutoPlayerFallbackChain": {
+        "title": "Selezione automatica del player più affidabile"
+      }
+    },
+    "v1_6_1": {
+      "liveLogoFromEpg": {
+        "title": "Logo dei canali Live TV più completo",
+        "desc": "Quando personalizzi il logo di un canale puoi ora scegliere anche quello fornito dall'EPG e cercarlo con il nuovo campo di ricerca."
+      },
+      "liveAutoQuality": {
+        "title": "Qualità \"Auto\" per la diretta (sperimentale)",
+        "desc": "Una nuova opzione sperimentale in Impostazioni → Player seleziona e adatta automaticamente la qualità dei canali Live durante la riproduzione. Disattivata di default."
+      },
+      "tvosLiveReloadFix": {
+        "title": "Risolte ricariche impreviste della diretta su Apple TV",
+        "desc": "Risolto un bug introdotto in 1.6 che causava ricariche impreviste della diretta su Apple TV."
+      }
+    },
+    "v1_6": {
+      "categoryManagement": {
+        "title": "Rinomina le categorie",
+        "desc": "Rinomina, blocca con il PIN o nascondi le categorie di film, serie e canali direttamente tenendo premuto sul nome della categoria."
+      },
+      "liveChannelRename": {
+        "title": "Rinomina i canali",
+        "desc": "Dai un nome personalizzato a qualsiasi canale live dal menu contestuale. Puoi rinominare una singola versione o tutte le varianti di qualità insieme: i canali con lo stesso nome restano raggruppati."
+      },
+      "channelCustomEpgLogo": {
+        "title": "Personalizza EPG per canale",
+        "desc": "Scegli manualmente la guida programmi corretta per ogni canale e correggi lo sfasamento orario dell'EPG."
+      },
+      "fasterHugeEpg": {
+        "title": "Guida programmi più veloce e leggera",
+        "desc": "Le guide EPG molto grandi ora si caricano più rapidamente e consumano meno memoria."
+      },
+      "smootherLiveTv": {
+        "title": "Live TV più fluida",
+        "desc": "Apertura dei canali e navigazione nella guida più reattive su iPhone e Apple TV, con recupero automatico dei canali live che si bloccano."
+      },
+      "tvosMovieArtwork": {
+        "title": "Poster e dettagli dei film su Apple TV",
+        "desc": "Su Apple TV, i poster e le informazioni dei film vengono ora recuperati da TMDB anche quando il provider non fornisce un identificativo."
+      },
+      "tvosRecentlyAddedPosters": {
+        "title": "Poster vuoti negli Aggiunti di recente su Apple TV",
+        "desc": "Risolto un problema per cui i primi poster della sezione Aggiunti di recente potevano apparire vuoti all'avvio su Apple TV."
+      },
+      "myListSync": {
+        "title": "Tag predefiniti di My List",
+        "desc": "Risolto un problema che faceva ricomparire i tag predefiniti di My List dopo reinstallazione, anche se erano stati nascosti."
+      },
+      "tvosPinPrompt": {
+        "title": "Richiesta del PIN su Apple TV",
+        "desc": "Corretto l'aspetto della schermata di inserimento del PIN parentale su Apple TV."
+      }
+    },
+    "v1_5": {
+      "avatarPickerRenewed": {
+        "title": "Nuovi avatar",
+        "desc": "Personalizza la tua esperienza scegliendo tra oltre 250 nuovi avatar, ispirati ai personaggi più iconici di film, serie, anime e sport."
+      },
+      "livetvPerPlaylistStartSection": {
+        "title": "Categoria di apertura della Live TV",
+        "desc": "Scegli con quale categoria di canali si apre la Live TV per ogni playlist: la prima categoria della playlist, i preferiti o i visti di recente."
+      },
+      "playerHardwareKeyboardControls": {
+        "title": "Controlli da tastiera su Mac e iPad",
+        "desc": "Play/pausa, avanti e indietro e altri comandi del player ora rispondono alla tastiera fisica su Mac e iPad."
+      },
+      "livetvSmarterChannelGrouping": {
+        "title": "Raggruppamento canali più intelligente",
+        "desc": "KIPTV riconosce più varianti e qualità dello stesso canale, con una compatibilità molto più ampia tra i diversi provider."
+      },
+      "playerSubtitleAppearanceMenu": {
+        "title": "Menu aspetto sottotitoli più pulito",
+        "desc": "Il menu per personalizzare l'aspetto dei sottotitoli compare solo quando è attivo un sottotitolo esterno."
+      },
+      "playerAudioSubtitleTracksAllEngines": {
+        "title": "Tracce audio e sottotitoli su tutti i player",
+        "desc": "Le tracce audio e dei sottotitoli ora compaiono correttamente con qualsiasi motore di riproduzione."
+      },
+      "minorBugFixes": {
+        "title": "Correzioni di bug minori"
+      }
+    },
+    "v1_4": {
+      "customPerCategoryOrder": {
+        "title": "Ordina i contenuti come vuoi, categoria per categoria",
+        "desc": "Imposta un ordine personalizzato dei contenuti per ogni categoria di Film, Serie TV e Live TV: KIPTV lo memorizza e te lo ripropone sempre come l'hai lasciato."
+      },
+      "playlistAvatarActionsMenu": {
+        "title": "Azioni rapide dall'avatar della playlist",
+        "desc": "Tocca l'avatar della tua playlist per aprire un menu di azioni rapide o aprire le impostazioni."
+      },
+      "contentSettingsSplit": {
+        "title": "Impostazioni più chiare: Contenuti e Controllo Genitori",
+        "desc": "Le impostazioni dei contenuti sono ora divise in due sezioni dedicate, Contenuti e Controllo Genitori, così trovi subito ciò che cerchi."
+      },
+      "perPlaylistTrendingToggle": {
+        "title": "Tendenze attivabili per ogni playlist",
+        "desc": "Una nuova opzione ti lascia decidere se mostrare la sezione di tendenza per ciascuna playlist."
+      },
+      "playlistCompatibility": {
+        "title": "Playlist più veloci e compatibili",
+        "desc": "Le playlist M3U che arrivano da pannelli Xtream vengono ora aggiornate automaticamente alla versione nativa Xtream, più veloce e con categorie complete, con compatibilità estesa a più provider."
+      },
+      "supportChatPolish": {
+        "title": "Chat di supporto più comoda",
+        "desc": "La conversazione si apre subito sull'ultimo messaggio, con scorrimento automatico e conferme di lettura. Notifiche e badge si azzerano correttamente quando leggi i messaggi."
+      },
+      "categoryLockUsability": {
+        "title": "Blocco per categoria ancora più pratico",
+        "desc": "Dalla griglia Live TV e dalla guida programmi blocchi o sblocchi intere categorie con un tocco, e il menu contestuale propone lo sblocco quando un contenuto è protetto a livello di categoria."
+      }
+    },
+    "v1_3": {
+      "contentAggiuntiDiRecenteSection": {
+        "title": "«Aggiunti di recente»: scopri subito le novità",
+        "desc": "Una nuova sezione in Film, Serie TV e Live TV mette in evidenza i contenuti aggiunti più di recente alla tua playlist, così trovi le novità senza cercarle."
+      },
+      "playerMediaInfoBadgesHdr": {
+        "title": "Badge HDR, Dolby Vision, 4K e FPS sul player",
+        "desc": "Durante la riproduzione vedi a colpo d'occhio la qualità del flusso — HDR, Dolby Vision, 4K e frame rate — con attivazione automatica della modalità HDR. Stessa esperienza su iPhone, iPad e Apple TV."
+      },
+      "playerPerEngineAdvancedSettings": {
+        "title": "Impostazioni avanzate per ogni motore, direttamente nel player",
+        "desc": "Dal selettore motore nel player puoi ora regolare le opzioni avanzate specifiche di ciascun motore, per adattare la riproduzione a ogni flusso."
+      },
+      "settingsAddOptionForContent": {
+        "title": "Aggiorna i contenuti a ogni accesso",
+        "desc": "Una nuova opzione nelle impostazioni ricarica automaticamente i contenuti della tua playlist ogni volta che apri l'app, così hai sempre il catalogo aggiornato."
+      },
+      "epgGzipXmltvSupportDecoupled": {
+        "title": "Guida programmi (EPG) più veloce e compatibile",
+        "desc": "Aggiunto il supporto alle guide EPG compresse (gzip), con caricamento indipendente dai contenuti e una diagnostica più chiara delle sorgenti."
+      },
+      "playerTvosCutMainThreadContention": {
+        "title": "TV in diretta più fluida su Apple TV",
+        "desc": "Ottimizzazioni che riducono i rallentamenti durante la riproduzione live, insieme a diverse correzioni del motore VLC."
+      },
+      "parentalCategoryAwareGateClose": {
+        "title": "Controllo genitori più solido, anche per categoria",
+        "desc": "Il blocco con PIN ora si applica correttamente a intere categorie e non può più essere aggirato."
+      },
+      "epgRenderCachedEpgWhen": {
+        "title": "Guida programmi sempre visibile durante lo scroll",
+        "desc": "Risolto un problema per cui le informazioni EPG potevano sparire quando le righe della griglia venivano riutilizzate scorrendo."
+      }
+    },
+    "v1_2": {
+      "premiumThemes": {
+        "title": "Personalizza KIPTV come vuoi tu: temi premium su iOS e Apple TV",
+        "desc": "Scegli il colore dell'app e l'icona della home tra una selezione curata fin nei minimi dettagli."
+      },
+      "tvosDetailRewrite": {
+        "title": "Film e serie TV su Apple TV: schermate di dettaglio completamente rinnovate",
+        "desc": "Le pagine di dettaglio sono state riscritte da zero per essere fluide: transizioni cinematografiche, scorrimento istantaneo, zero esitazioni anche con cataloghi enormi."
+      },
+      "tagsFromAnywhere": {
+        "title": "Organizza tutto con i tag, da ovunque nell'app",
+        "desc": "Crea, rinomina, riordina ed elimina i tuoi tag personalizzati direttamente dal menu contestuale di qualsiasi film, serie o canale."
+      },
+      "fixMoviesTabEmptyOnSomePlaylists": {
+        "title": "Risolto un bug per cui alcune playlist non mostravano film",
+        "desc": "Su alcune playlist la sezione Film restava bloccata su uno schermo nero a causa di dati provider in formati inattesi. Ora KIPTV recupera e mostra i contenuti correttamente anche in questi casi."
+      },
+      "fix4kChannels": {
+        "title": "Canali 4K: ora il video parte sempre",
+        "desc": "Risolto il problema che mandava alcuni canali in 4K in modalità audio-only usando AVPlayer/KSPlayer. Riproduzione perfetta su tutti i player."
+      },
+      "recentSearches": {
+        "title": "Ricerche recenti sempre a portata di mano",
+        "desc": "Le tue ultime ricerche compaiono in cima alla schermata Cerca su iPhone, iPad e Apple TV: riprendi da dove avevi lasciato in un solo tap."
+      },
+      "customChannelLogos": {
+        "title": "Loghi canali esattamente come piacciono a te",
+        "desc": "Ogni canale può avere il suo logo: scegli da una libreria community curata, cercane uno sul web. Pieno supporto anche per SVG e trasparenze."
+      },
+      "fixThirdPartyEpgUrls": {
+        "title": "Guida programmi (EPG) da qualsiasi fonte, finalmente affidabile",
+        "desc": "Ora KIPTV gestisce correttamente gli URL EPG di terze parti end-to-end: aggiungi la tua guida programmi preferita e lascia che KIPTV faccia il resto."
+      }
+    },
+    "v1_1_0": {
+      "multiview": {
+        "title": "Multiview: 4 canali insieme",
+        "desc": "Guarda fino a 4 canali Live in contemporanea con la nuova esperienza Multiview. Tile espandibili, mini player sempre a portata di mano, picker qualità e ambient light che prende i colori dal video. Disponibile su iPhone, iPad e Apple TV.\n\nN.B.: il provider deve supportare più connessioni simultanee per questa funzionalità."
+      },
+      "audioNoInterruptOtherApps": {
+        "title": "L'app non interrompe più la musica delle altre app",
+        "desc": "Aprire KIPTV non mette più in pausa la musica o l'audio in riproduzione su altre app: la sessione audio viene attivata solo quando avvii davvero un contenuto."
+      },
+      "vodPlaybackMoreStable": {
+        "title": "Riproduzione VOD più stabile",
+        "desc": "Migliorata la riproduzione di film e serie: gestione più affidabile del buffering, motore KSPlayer ottimizzato ulteriormente."
+      },
+      "playerEngineFallback": {
+        "title": "Cambio motore di riproduzione più resiliente",
+        "desc": "Se il motore di riproduzione che hai scelto manualmente non riesce ad avviare il flusso, KIPTV torna in automatico a quello precedente che stava funzionando, senza interrompere l'esperienza."
+      },
+      "mylistAvailabilityCheck": {
+        "title": "Mia Lista: rilevamento disponibilità più affidabile",
+        "desc": "Dopo il caricamento della playlist, KIPTV ricontrolla i film e le serie salvati via TMDB e ti segnala subito quelli appena diventati disponibili."
+      },
+      "playlistRebuildOnPartialCache": {
+        "title": "Tab Film vuoto dopo caricamento interrotto",
+        "desc": "Risolto un caso in cui un caricamento interrotto della playlist lasciava il tab Film vuoto."
+      },
+      "tvosCatalogDuringPlayback": {
+        "title": "Apple TV: navigazione più fluida durante la riproduzione",
+        "desc": "Su Apple TV gli aggiornamenti del catalogo non intaccano più la riproduzione in corso, evitando interruzioni o rallentamenti quando stai guardando un canale Live o un episodio di una serie."
+      },
+      "tvosLiveAndCatchup": {
+        "title": "Apple TV: Live TV e catchup più affidabili",
+        "desc": "Risolto un problema che poteva causare freeze e buffering."
+      }
+    },
+    "v1_0_9": {
+      "playerInPlayerChannelLists": {
+        "title": "Lista canali nel player allineata a Live TV",
+        "desc": "Anche dentro al player ora vedi i canali nello stesso ordine di Live TV, con le sezioni speciali (Preferiti, Cronologia) sempre a portata di mano."
+      },
+      "epgAutoRewriteDropboxDrive": {
+        "title": "Link EPG da Dropbox e Google Drive",
+        "desc": "I link di condivisione di Dropbox e Google Drive ora funzionano direttamente come sorgente EPG, senza modifiche manuali."
+      },
+      "mylistTmdbOnlyItemsAvailability": {
+        "title": "Aggiungi alla Mia Lista anche contenuti non in playlist",
+        "desc": "Puoi salvare film e serie scoperti via TMDB anche se non sono ancora nella tua playlist: quando diventano disponibili, KIPTV te lo segnala."
+      },
+      "playlistTolerateDuplicateXtreamIds": {
+        "title": "Playlist con ID duplicati",
+        "desc": "Risolto un crash che si verificava aprendo playlist Xtream con ID di canali o film duplicati."
+      },
+      "tvosPlayerControlsNotAuto": {
+        "title": "Controlli del player su Apple TV",
+        "desc": "Risolto un problema per cui i controlli del player non si nascondevano automaticamente al primo avvio a schermo intero su tvOS."
+      }
+    },
+    "v1_0_8": {
+      "tvosPlayButtonNonResponsive": {
+        "title": "Apple TV: pulsante Play dalla ricerca",
+        "desc": "Risolto il caso in cui il pulsante Play non rispondeva aprendo alcuni titolidai risultati di ricerca."
+      },
+      "tvosSearchBreakQualityPickerLoop": {
+        "title": "Apple TV: selezione qualità canali raggruppati",
+        "desc": "Risolto un bug nel selettore qualità dei canali nella schermata di Ricerca che causava un loop infinito se il canale era raggruppato con altri."
+      },
+      "minorBugFixes": {
+        "title": "Correzioni di bug minori"
+      }
+    },
+    "v1_0_7": {
+      "supportCenterInApp": {
+        "title": "Nuovo Centro Supporto in-app",
+        "desc": "Apri ticket, allega screenshot e ricevi risposte in tempo reale direttamente dall'app, su iPhone, iPad e Apple TV."
+      },
+      "triviaLoadingScreen": {
+        "title": "Connessione lenta? Ecco le trivia!",
+        "desc": "Se hai un connessione lenta e stai aspettando che la playlist si carichi, scopri curiosità su film, serie TV e anime (No spoiler, promesso!)."
+      },
+      "tvosRefocusChannelAfterPlayer": {
+        "title": "Apple TV: il focus torna al canale guardato",
+        "desc": "Dopo aver fatto zapping all'interno del player, alla chiusura del player, la lista canali ti riporta esattamente dove eri."
+      }
+    },
+    "v1_0_6": {
+      "premiumFreeTrialAllPlans": {
+        "title": "Prova gratuita su tutti i piani Premium",
+        "desc": "Tutti i piani di abbonamento offrono ora una prova gratuita prima del pagamento."
+      },
+      "tvosInPlayerChannelGuide": {
+        "title": "Scorri categorie e canali nel player su Apple TV",
+        "desc": "Sfoglia canali e categorie direttamente dal player Live, con scorrimento fluido tra i caroselli, senza dover uscire dal player."
+      },
+      "playerBrightnessControl": {
+        "title": "Controllo luminosità nel player iOS",
+        "desc": "Regola la luminosità dello schermo direttamente dal player."
+      },
+      "playerPinchToFill": {
+        "title": "Pizzica con due dita per riempire lo schermo su iOS",
+        "desc": "Adatta il video con un gesto naturale, pizzica per zoomare e riempire lo schermo."
+      },
+      "settingsFollowOnInstagram": {
+        "title": "Seguici su Instagram",
+        "desc": "Nuovo pulsante in Impostazioni per seguire KIPTV su Instagram e restare aggiornato."
+      },
+      "tvosFocusSkipFix": {
+        "title": "Navigazione focus più precisa su Apple TV",
+        "desc": "Sui pulsanti circolari del player Apple TV la navigazione non salta più involontariamente."
+      }
+    },
+    "v1_0_5": {
+      "continueWatchingWidgets": {
+        "title": "Widget Continua a guardare per iPhone e iPad",
+        "desc": "Aggiungi i nuovi widget Home Screen per riprendere film e serie con un tap. Disponibili in tutte le dimensioni."
+      },
+      "inPlayerVolumeControl": {
+        "title": "Controllo del volume dentro il player",
+        "desc": "Nuovo slider del volume direttamente nel player su iOS."
+      },
+      "subtitleAppearanceInPlayer": {
+        "title": "Aspetto sottotitoli direttamente dal player",
+        "desc": "Le impostazioni di font, dimensione e colore dei sottotitoli si trovano ora nel player, accessibili durante la riproduzione."
+      },
+      "myListPerTagCarousels": {
+        "title": "La Mia Lista divisa per tag",
+        "desc": "Ora puoi suddividere La Mia Lista in caroselli separati per ogni tag che hai assegnato. La modalità si attiva in Impostazioni > Contenuti."
+      },
+      "systemTimeFormat": {
+        "title": "Orari nel formato del tuo sistema",
+        "desc": "EPG e player rispettano ora il formato 12h/24h impostato nelle preferenze di sistema."
+      },
+      "tvosPipRestored": {
+        "title": "Picture in Picture ripristinato su Apple TV",
+        "desc": "Il Picture in Picture torna a funzionare correttamente su tvOS dopo un problema introdotto in una versione precedente."
+      },
+      "premiumPlaylistsCap": {
+        "title": "Limite playlist corretto per gli utenti Premium Plus",
+        "desc": "Risolto un bug per cui alcuni utenti Premium Plus erano erroneamente limitati a una sola playlist."
+      }
+    },
+    "v1_0_4": {
+      "manualRotationButton": {
+        "title": "Ruota il player a mano, quando vuoi tu",
+        "desc": "Nuovo pulsante di rotazione nel player iPhone: scegli landscape o portrait con un tap, anche con il blocco rotazione attivo."
+      },
+      "followOnX": {
+        "title": "Seguici su X",
+        "desc": "Ora puoi seguirci su X (Twitter) direttamente da KIPTV: trovi il collegamento in Impostazioni."
+      },
+      "playerDragDismiss": {
+        "title": "Chiusura del player più fluida su iOS",
+        "desc": "Piccoli ritocchi all'animazione di chiusura del player per renderla più naturale."
+      },
+      "subsResetBetweenEpisodes": {
+        "title": "Miglioramenti ai sottotitoli OpenSubtitles",
+        "desc": "Affinata la gestione dei sottotitoli OpenSubtitles per un'esperienza più coerente tra un episodio e l'altro."
+      },
+      "tmdbResilience": {
+        "title": "Caricamento metadati più rapido",
+        "desc": "Ottimizzato il caricamento dei metadati di film e serie per una navigazione più fluida."
+      },
+      "pipFixes": {
+        "title": "Picture in Picture migliorato",
+        "desc": "Affinata l'esperienza Picture in Picture su iPhone e Mac, con controlli più reattivi."
+      }
+    },
+    "v1_0_3": {
+      "inAppFeedback": {
+        "title": "Aiutaci a far crescere KIPTV con il feedback in-app",
+        "desc": "Da oggi puoi inviarci suggerimenti, segnalazioni e idee direttamente dall'app, in pochi tap. Leggiamo tutti i messaggi e li usiamo per migliorare KIPTV insieme a te."
+      },
+      "playerQualityPicker": {
+        "title": "Cambia qualità del canale dal player",
+        "desc": "Quando un canale Live ha più qualità (HD, FHD, 4K...) puoi scegliere quella che preferisci direttamente dal player, senza tornare alla lista. Disponibile su iPhone, iPad e Apple TV."
+      },
+      "liveInlinePreview": {
+        "title": "Anteprima live inline su Apple TV",
+        "desc": "Nuova impostazione attivabile da Impostazioni > Riproduzione: su Apple TV puoi vedere un'anteprima dal vivo del canale evidenziato direttamente nelle schermate Live TV ed EPG, prima di aprire il fullscreen."
+      }
+    },
+    "versionHeader": "Versione {{version}}",
+    "continue": "Continua",
+    "section": {
+      "new": "Nuovo",
+      "improvement": "Migliorie",
+      "bugfix": "Correzioni di bug"
+    },
+    "v1_0_2": {
+      "tmdbAmbiguousMatchPicker": {
+        "title": "Selettore manuale per i match multipli",
+        "desc": "Quando un titolo ha più corrispondenze possibili su TMDB, ora puoi scegliere quella giusta."
+      },
+      "liveTvQualityVariantsGrouping": {
+        "title": "Raggruppamento canali Live più preciso",
+        "desc": "Migliorato il riconoscimento delle varianti di qualità nei nomi dei canali per un raggruppamento più affidabile."
+      },
+      "memoryOomCrashFix": {
+        "title": "Stabilità con playlist molto grandi",
+        "desc": "Risolto un crash da memoria insufficiente con playlist enormi e un possibile mescolamento di EPG tra playlist diverse."
+      }
+    },
+    "v1_0_1": {
+      "memory": {
+        "title": "Crash risolti",
+        "desc": "Risolto un problema che portava alla saturazione della memoria RAM su alcuni dispositivi e poteva causare il crash dell'app."
+      },
+      "player": {
+        "title": "Player più stabile",
+        "desc": "Ridotto il buffering su Live e VOD, allineando il player alle migliori pratiche AVFoundation/VLC."
+      },
+      "infoPanel": {
+        "title": "Pannello Info nel player",
+        "desc": "In landscape ora si chiude toccando l'area video sopra il pannello."
+      },
+      "tvosFocus": {
+        "title": "Apple TV più reattiva",
+        "desc": "Tab bar più fluida durante la navigazione tra sezioni."
+      },
+      "badges": {
+        "title": "Badge \"Nuovo\" più coerenti",
+        "desc": "Indicatori di nuovi contenuti uniformi su Film e Serie, sia iOS che Apple TV."
+      }
+    }
+  },
+  "widget": {
+    "resume": "Riprendi",
+    "noMoviesInProgress": "Nessun film in corso",
+    "noEpisodesInProgress": "Nessun episodio in corso",
+    "openApp": "Apri KIPTV"
+  },
+  "support": {
+    "centerTitle": "Centro assistenza",
+    "centerEmpty": "Nessuna conversazione",
+    "centerEmptyHint": "Apri una conversazione con il supporto KIPTV per segnalare un problema, suggerire un miglioramento o richiedere una nuova funzione.",
+    "newTicket": "Nuova conversazione",
+    "you": "Tu",
+    "supportTeam": "Supporto KIPTV",
+    "send": "Invia",
+    "replyPlaceholder": "Scrivi un messaggio…",
+    "closedHint": "Conversazione chiusa",
+    "closedComposer": "Questa conversazione è stata chiusa. Apri una nuova conversazione se hai bisogno di aiuto.",
+    "resolvedHint": "Scrivi un messaggio per riaprire questa conversazione",
+    "openFollowUp": "Apri una nuova conversazione",
+    "followUpDraftHeader": "Re: %@ (#%@)",
+    "newMessageOne": "Nuovo messaggio",
+    "newMessageMany": "%d nuovi messaggi",
+    "typing": "Il supporto sta scrivendo…",
+    "unreadBadge": "%d nuovi",
+    "status": {
+      "open": "Aperto",
+      "triaged": "In valutazione",
+      "in_progress": "In lavorazione",
+      "awaiting_user": "In attesa di una tua risposta",
+      "resolved": "Risolto",
+      "closed": "Chiuso",
+      "duplicate": "Duplicato",
+      "on_hold": "In pausa"
+    },
+    "new": {
+      "type": "Tipo",
+      "typeHeader": "Di cosa vuoi parlarci?",
+      "deviceHeader": "Dispositivo",
+      "deviceFooter": "Obbligatorio. Scegli il dispositivo su cui si verifica il problema, anche se stai scrivendo da un altro.",
+      "titleHeader": "Oggetto",
+      "titlePlaceholder": "Oggetto",
+      "titleFooter": "Una frase breve che riassuma il problema o la richiesta.",
+      "messageHeader": "Messaggio",
+      "messagePlaceholder": "Descrivi cosa succede, cosa ti aspetteresti e in quali condizioni.",
+      "messageFooter": "Potrai aggiungere altri dettagli in seguito chattando con il supporto.",
+      "submit": "Apri conversazione",
+      "successTitle": "Conversazione aperta",
+      "successMessage": "Ti risponderemo qui in app appena possibile.",
+      "attachmentHeader": "Allegati",
+      "attachmentFooter": "Facoltativo. JPEG, PNG o HEIC fino a 7 MB.",
+      "attachmentFooterCount": "Facoltativo, fino a %d foto. JPEG, PNG o HEIC fino a 7 MB ciascuna.",
+      "attachmentAdd": "Aggiungi una foto"
+    },
+    "attachmentReady": "Foto pronta da inviare",
+    "attachmentPreview": "📷 Foto",
+    "category": {
+      "crash": "Crash",
+      "playback": "Riproduzione",
+      "playlist": "Playlist",
+      "epg": "EPG / Guida TV",
+      "subscription": "Abbonamento",
+      "auth": "Accesso",
+      "ui": "Interfaccia",
+      "account": "Account",
+      "other": "Altro"
+    },
+    "device": {
+      "all": "Tutti i dispositivi",
+      "iphone": "iPhone",
+      "ipad": "iPad",
+      "appleTV": "Apple TV",
+      "androidTV": "Android TV",
+      "fireTV": "Fire TV",
+      "mac": "Mac",
+      "visionPro": "Vision Pro"
+    },
+    "admin": {
+      "bannerTitle": "Modalità admin",
+      "bannerHint": "Stai vedendo i ticket di tutti gli utenti.",
+      "usersTitle": "Utenti",
+      "usersSearch": "Cerca per nome, email o UUID",
+      "copyUserId": "Copia ID utente",
+      "threadFooterTitle": "Sola lettura",
+      "threadFooterHint": "Per rispondere a questo ticket usa il pannello admin web.",
+      "publicReplyChip": "Pubblico",
+      "internalNoteChip": "Interno",
+      "internalNoteLabel": "NOTA INTERNA",
+      "internalNotePlaceholder": "Scrivi una nota interna (solo admin)…",
+      "addNote": "Aggiungi nota",
+      "analytics": {
+        "chart": {
+          "byCategory": "Per categoria",
+          "byStatus": "Per stato",
+          "perDay": "Ticket al giorno"
+        },
+        "empty": "Nessun dato in questo intervallo",
+        "kpi": {
+          "firstResponse": "Prima risposta (media)",
+          "open": "Ticket aperti",
+          "resolution": "Risoluzione (media)"
+        },
+        "noOpenTickets": "Nessun ticket aperto",
+        "oldestOpen": "Ticket aperto da più tempo",
+        "range": {
+          "30d": "30 giorni",
+          "7d": "7 giorni",
+          "all": "Sempre"
+        },
+        "title": "Statistiche"
+      },
+      "bulk": {
+        "assignMe": "Assegna a me",
+        "confirm": {
+          "assignMe": "Assegna a %@.",
+          "label": "Aggiungi l'etichetta \"%@\".",
+          "status": "Cambia lo stato in %@.",
+          "title": "Applicare a %d ticket?"
+        },
+        "label": "Etichetta",
+        "labelPlaceholder": "nome etichetta",
+        "labelPrompt": "Aggiungi etichetta",
+        "selected": "selezionati",
+        "status": "Stato"
+      },
+      "details": {
+        "assigneeSection": "Assegnatario",
+        "auditSection": "Attività",
+        "categorySection": "Categoria",
+        "diagnosticsSection": "Diagnostica",
+        "labelsSection": "Etichette",
+        "notesPlaceholder": "Note interne — visibili solo agli admin.",
+        "notesSection": "Note interne",
+        "otherTicketsLabel": "Altri ticket dell'utente",
+        "priorityHigh": "P1 (massima)",
+        "priorityLow": "P5 (minima)",
+        "priorityNone": "—",
+        "prioritySection": "Priorità",
+        "statusSection": "Stato",
+        "ticketsOpenOfTotal": "%1$d aperti · %2$d totali",
+        "title": "Dettagli",
+        "triageSection": "Triage"
+      },
+      "split": {
+        "noDetails": "Apri un ticket per vederne i dettagli",
+        "noTicketSelected": "Seleziona un ticket per leggere la conversazione"
+      },
+      "sub": {
+        "active": "Attivo",
+        "endsOn": "Termina il %@",
+        "expired": "Scaduto",
+        "expiredOn": "Scaduto il %@",
+        "expiry": "Scadenza",
+        "free": "Nessun abbonamento",
+        "lapsing": "Disdetto — non si rinnova",
+        "manage": "Gestione abbonamento",
+        "neverSynced": "Mai sincronizzato con RevenueCat",
+        "renewing": "Attivo, si rinnova",
+        "renewsOn": "Rinnovo il %@",
+        "section": "Abbonamento",
+        "syncedAt": "Dati aggiornati %@",
+        "since": "Premium dal"
+      },
+      "user": {
+        "activitySection": "Attività",
+        "id": "ID utente",
+        "lastPlayback": "Ultima riproduzione",
+        "lastSignIn": "Ultimo accesso",
+        "noOtherTickets": "Nessun altro ticket",
+        "noTickets": "Nessun ticket",
+        "playlists": "Playlist",
+        "provider": "Accesso con",
+        "registered": "Registrato il",
+        "ticketsFooter": "%d ancora aperti.",
+        "ticketsSection": "Ticket",
+        "watchTime": "Tempo di visione"
+      }
+    },
+    "error": {
+      "title": "Errore",
+      "notAuthenticated": "Devi accedere per usare il Centro assistenza",
+      "missingTitle": "Inserisci un titolo",
+      "messageEmpty": "Il messaggio non può essere vuoto",
+      "insertFailed": "Invio non riuscito",
+      "fetchFailed": "Caricamento non riuscito",
+      "updateFailed": "Aggiornamento non riuscito",
+      "uploadFailed": "Caricamento allegato non riuscito",
+      "attachmentTooLarge": "L'immagine supera 7 MB. Scegline una più piccola.",
+      "rateLimited": "Hai aperto diverse conversazioni di recente. Aspetta un attimo prima di aprirne un'altra."
+    }
+  },
+  "appearance": {
+    "title": "Aspetto",
+    "subtitle": "Personalizza l'aspetto dell'app.",
+    "premiumUpsell": "Sblocca la personalizzazione del tema con Premium.",
+    "unlockCTA": "Sblocca con Premium",
+    "iconChangeNotice": "iOS mostrerà un breve avviso di sistema al cambio icona.",
+    "section": {
+      "color": "Colore primario",
+      "icon": "Icona app",
+      "theme": "Tema",
+      "ambient": "Sfondo"
+    },
+    "color": {
+      "red": "Rosso",
+      "brown": "Marrone",
+      "fuchsia": "Fucsia",
+      "gold": "Oro",
+      "green": "Verde",
+      "indigo": "Indaco",
+      "lime": "Lime",
+      "orange": "Arancione",
+      "purple": "Viola",
+      "silver": "Argento",
+      "teal": "Verde acqua",
+      "white": "Bianco"
+    },
+    "icon": {
+      "red": "Rosso",
+      "brown": "Marrone",
+      "fuchsia": "Fucsia",
+      "gold": "Oro",
+      "green": "Verde",
+      "indigo": "Indaco",
+      "lime": "Lime",
+      "orange": "Arancione",
+      "purple": "Viola",
+      "silver": "Argento",
+      "teal": "Verde acqua",
+      "white": "Bianco"
+    },
+    "background": {
+      "title": "Sfondo",
+      "black": "Nero",
+      "dynamic": "Dinamico"
+    },
+    "ambient": {
+      "title": "Sfondo dinamico",
+      "subtitle": "Colora lo sfondo con le tinte della locandina a schermo."
+    }
+  },
+  "recentlyAdded": {
+    "title": "Aggiunti di recente"
+  },
+  "replay": {
+    "selectChannel": "Seleziona un canale per vedere il replay"
+  },
+  "metadata": {
+    "customize": "Personalizza metadata",
+    "sheet": {
+      "title": "Personalizza metadata",
+      "search": "Cerca un film o una serie",
+      "results": "Risultati",
+      "automatic": "Automatico",
+      "noTMDB": "Nessun TMDB (solo provider)",
+      "current": "Corrispondenza attuale",
+      "searchHint": "Digita un titolo per cercare su TMDB",
+      "noResults": "Nessun risultato"
+    }
+  },
+  "devices": {
+    "connectedTitle": "Dispositivi collegati",
+    "description": "Dispositivi attualmente connessi al tuo account. Disconnetti quelli che non riconosci.",
+    "thisDevice": "Questo dispositivo",
+    "lastActive": "Attivo {{time}}",
+    "signOut": "Disconnetti",
+    "signOutConfirmTitle": "Disconnettere il dispositivo?",
+    "signOutConfirmMessage": "Questo dispositivo verrà disconnesso e dovrà accedere di nuovo.",
+    "signOutError": "Impossibile disconnettere il dispositivo. Riprova.",
+    "empty": "Nessun altro dispositivo",
+    "loading": "Caricamento dispositivi…",
+    "activeNow": "Attivo ora"
+  },
+  "home": {
+    "title": "Home",
+    "customize": "Personalizza",
+    "customizeTitle": "Personalizza Home",
+    "hide": "Nascondi Home",
+    "hideConfirm": "Nascondi",
+    "hideMessage": "La scheda Home sparirà e l'app si aprirà sulla schermata iniziale scelta nelle Impostazioni. Puoi riattivarla da Impostazioni → Contenuti.",
+    "hideFooter": "Nascondendo la Home torni alla schermata iniziale che avevi prima.",
+    "sections": "Sezioni",
+    "sectionsActive": "{{count}} attive",
+    "sectionsFooter": "Trascina per riordinare. Le sezioni senza contenuti restano nascoste automaticamente.",
+    "addSection": "Aggiungi sezione",
+    "addSectionFooter": "Piattaforme e feed mostrano i titoli presenti nella tua playlist.",
+    "addPlatform": "Piattaforma di streaming",
+    "addFeed": "Feed personalizzato",
+    "reset": "Ripristina layout",
+    "resetConfirm": "Ripristina",
+    "resetMessage": "Torni all'ordine e alle sezioni predefinite. Piattaforme e feed personalizzati verranno rimossi.",
+    "applyToAll": "Applica a tutte le playlist",
+    "applyToAllConfirm": "Applica",
+    "applyToAllMessage": "Questo layout sostituirà la Home di tutte le tue playlist.",
+    "moveUp": "Sposta su",
+    "moveDown": "Sposta giù",
+    "hideSection": "Nascondi sezione",
+    "sectionSettings": "Opzioni sezione",
+    "emptyLayoutTitle": "Home vuota",
+    "emptyLayoutMessage": "Hai disattivato tutte le sezioni. Personalizza la Home per riattivarle.",
+    "section": {
+      "hero": "In evidenza",
+      "nowOnTV": "Adesso in TV",
+      "newEpisodes": "Nuovi episodi per te",
+      "recommended": "Consigliati per te",
+      "tonightOnTV": "Stasera in TV",
+      "recentlyAddedMovies": "Film aggiunti di recente",
+      "recentlyAddedSeries": "Serie aggiunte di recente",
+      "recentlyAddedLive": "Canali aggiunti di recente",
+      "platform": "Piattaforma",
+      "customFeed": "Feed personalizzato",
+      "traktList": "Lista Trakt"
+    },
+    "nowOnTVSubtitle": "In onda ora sui tuoi canali",
+    "newEpisodesSubtitle": "Le serie che segui hanno novità",
+    "recommendedSubtitle": "In base a ciò che hai guardato",
+    "tonightSubtitle": "Prima serata sui tuoi canali",
+    "reason": {
+      "resume": "Riprendi",
+      "newEpisode": "Nuovo episodio",
+      "trending": "Di tendenza",
+      "recentlyAdded": "Appena aggiunto"
+    },
+    "params": {
+      "both": "Entrambi",
+      "mediaType": "Tipo di contenuto",
+      "channels": "Canali",
+      "channelsFooter": "Quali canali mostrare: quelli nella Mia lista, quelli visti di recente o entrambi.",
+      "window": "Periodo",
+      "lastDays": "Ultimi {{days}} giorni",
+      "thisWeek": "Questa settimana",
+      "today": "Oggi"
+    },
+    "feed": {
+      "name": "Nome del feed",
+      "namePlaceholder": "Es. Horror anni '80",
+      "sortBy": "Ordina per",
+      "sort": {
+        "popularityDesc": "Popolarità (decrescente)",
+        "popularityAsc": "Popolarità (crescente)",
+        "ratingDesc": "Valutazione più alta",
+        "votesDesc": "Più votati",
+        "newest": "Più recenti",
+        "oldest": "Meno recenti",
+        "revenueDesc": "Incassi più alti"
+      },
+      "genres": "Generi",
+      "excludedGenres": "Generi esclusi",
+      "year": "Anno di uscita",
+      "yearFrom": "Dal",
+      "yearTo": "Al",
+      "anyYear": "Qualsiasi anno",
+      "language": "Lingua originale",
+      "anyLanguage": "Qualsiasi lingua",
+      "platforms": "Piattaforme",
+      "platformsFooter": "Limita il feed ai titoli disponibili su queste piattaforme.",
+      "minVotes": "Voti minimi",
+      "noMinimum": "Nessun minimo",
+      "filters": "Filtri",
+      "customParams": "Parametri aggiuntivi",
+      "customParamsPlaceholder": "with_companies=420&vote_average.gte=7",
+      "customParamsFooter": "Parametri dell'API TMDB Discover nel formato chiave=valore separati da &. Usa la virgola per la logica E, il pipe (|) per la logica O.",
+      "none": "Nessuno",
+      "create": "Crea feed",
+      "edit": "Modifica feed",
+      "lang": {
+        "en": "Inglese",
+        "it": "Italiano",
+        "es": "Spagnolo",
+        "fr": "Francese",
+        "de": "Tedesco",
+        "pt": "Portoghese",
+        "ja": "Giapponese",
+        "ko": "Coreano",
+        "zh": "Cinese",
+        "hi": "Hindi",
+        "tr": "Turco",
+        "ar": "Arabo",
+        "ru": "Russo",
+        "nl": "Olandese",
+        "sv": "Svedese",
+        "da": "Danese",
+        "nb": "Norvegese",
+        "pl": "Polacco",
+        "el": "Greco",
+        "fi": "Finlandese"
+      }
+    },
+    "platform": {
+      "pickTitle": "Scegli le piattaforme",
+      "search": "Cerca piattaforma",
+      "add": "Aggiungi",
+      "added": "Aggiunta"
+    },
+    "platformMovies": "Film {{name}}",
+    "platformSeries": "Serie {{name}}",
+    "customizeHint": "Premi giù per aprire",
+    "addPlatformSubtitle": "Aggiungi una riga con i titoli di un servizio",
+    "addFeedSubtitle": "Crea una riga con i tuoi criteri",
+    "addTraktList": "Lista Trakt",
+    "addTraktListSubtitle": "Watchlist, consigliati, le tue liste e quelle della community",
+    "trakt": {
+      "pickTitle": "Aggiungi lista Trakt",
+      "yours": "Il tuo Trakt",
+      "recommendations": "Consigliati da Trakt",
+      "recommendationsDesc": "In base a ciò che hai visto e votato su Trakt",
+      "watchlist": "Watchlist Trakt",
+      "watchlistDesc": "Tutta la tua watchlist, anche i titoli non in playlist",
+      "myLists": "Le mie liste",
+      "likedLists": "Liste che mi piacciono",
+      "likedListsFooter": "Metti \"Mi piace\" a una lista su trakt.tv e comparirà qui.",
+      "community": "Dalla community Trakt",
+      "popular": "Popolari",
+      "trending": "Di tendenza",
+      "official": "Ufficiali",
+      "search": "Cerca una lista, incolla un link o un ID",
+      "searchResults": "Risultati",
+      "items": "{{count}} titoli",
+      "by": "di {{user}}",
+      "none": "Nessuna lista",
+      "loadMore": "Mostra altre",
+      "inactive": "Collega Trakt su questa playlist per vedere la riga",
+      "loadFailed": "Impossibile caricare le liste Trakt. Tocca per riprovare",
+      "notFound": "Nessuna lista trovata",
+      "sort": {
+        "listOrder": "Ordine della lista",
+        "added": "Aggiunti di recente",
+        "released": "Data di uscita",
+        "title": "Titolo",
+        "rating": "Voto",
+        "popularity": "Popolarità"
+      }
+    }
+  },
+  "trakt": {
+    "title": "Trakt",
+    "description": "Sincronizza visti, ripresa e watchlist con il tuo account Trakt.",
+    "intro": "Collega il tuo account Trakt per tenere aggiornato il diario di visione: ciò che guardi in KIPTV finisce su Trakt, e la storia di Trakt compare in KIPTV su tutti i tuoi dispositivi.",
+    "introFooter": "È una scelta: senza collegamento non cambia nulla.",
+    "notConfigured": "L'integrazione Trakt non è disponibile in questa build.",
+    "link": "Collega Trakt",
+    "linkedAs": "Collegato come {{username}}",
+    "vip": "VIP",
+    "linkedFooter": "Il collegamento vale per tutto l'account: ogni dispositivo con questo account KIPTV è già collegato.",
+    "relinkNeeded": "Il collegamento con Trakt è scaduto: collega di nuovo l'account.",
+    "linkRequesting": "Richiesta del codice…",
+    "linkInstructions": "Apri trakt.tv/activate e inserisci questo codice.",
+    "linkInstructionsTV": "Inquadra il QR o apri trakt.tv/activate sul telefono e inserisci il codice.",
+    "openActivate": "Apri trakt.tv/activate",
+    "codeCopied": "Codice copiato negli appunti.",
+    "codeExpires": "Il codice scade tra {{time}}",
+    "regenerate": "Nuovo codice",
+    "linkWaiting": "In attesa della conferma su Trakt…",
+    "linkSuccess": "Trakt collegato",
+    "linkSuccessSubtitle": "La prima sincronizzazione parte adesso.",
+    "linkDenied": "Richiesta rifiutata su Trakt.",
+    "linkExpired": "Codice scaduto: generane uno nuovo.",
+    "syncSection": "Cosa sincronizzare",
+    "scrobble": "Invia a Trakt ciò che guardi",
+    "scrobbleDesc": "Film ed episodi riprodotti in KIPTV finiscono nella cronologia di Trakt.",
+    "pullWatched": "Importa i visti da Trakt",
+    "pullWatchedDesc": "Ciò che risulta visto su Trakt compare come visto in KIPTV, senza entrare in Continua a guardare finché non lo riproduci qui.",
+    "pullPlayback": "Riprendi dalla posizione di Trakt",
+    "pullPlaybackDesc": "Se hai messo in pausa altrove, KIPTV riparte da lì quando la posizione di Trakt è più recente.",
+    "syncWatchlist": "Sincronizza la watchlist",
+    "syncWatchlistDesc": "La watchlist di Trakt diventa il tag \"Trakt Watchlist\" in La mia lista, in entrambe le direzioni.",
+    "syncNow": "Sincronizza ora",
+    "syncing": "Sincronizzazione…",
+    "lastSync": "Ultima sincronizzazione: {{date}}",
+    "neverSynced": "Nessuna sincronizzazione ancora.",
+    "unlink": "Scollega Trakt",
+    "unlinkConfirm": "Spariranno i visti importati da Trakt e il tag Trakt Watchlist. Ciò che hai guardato in KIPTV resta.",
+    "watchlistFullTitle": "Watchlist piena",
+    "watchlistFull": "La watchlist di Trakt ha raggiunto il limite dell'account gratuito: il titolo resta solo in KIPTV.",
+    "linkDescription": "Mostra un codice da inserire su trakt.tv.",
+    "accountDescription": "Il tuo account Trakt.",
+    "syncNowDescription": "Aggiorna subito visti, ripresa e watchlist da Trakt.",
+    "unlinkDescription": "Toglie il collegamento e i dati importati da Trakt; i visti di KIPTV restano.",
+    "error": {
+      "notConfigured": "Trakt non è configurato in questa build.",
+      "unauthorized": "Trakt ha rifiutato il collegamento: collega di nuovo l'account.",
+      "rateLimited": "Troppe richieste a Trakt: riprova tra poco.",
+      "network": "Trakt non è raggiungibile.",
+      "generic": "Errore di comunicazione con Trakt."
+    },
+    "oneAppNotice": "Con un account Trakt gratuito puoi tenere collegata una sola app: se ne hai già una, scollegala su trakt.tv prima di continuare.",
+    "askRatings": "Chiedi una valutazione",
+    "askRatingsDesc": "Alla fine di un film o di un episodio chiede un voto da 1 a 10 e lo invia a Trakt.",
+    "playlists": "Playlist",
+    "playlistsDesc": "Su quali playlist vale l'integrazione",
+    "playlistsAll": "Tutte le playlist",
+    "playlistsAllValue": "Tutte",
+    "playlistsCount": "{{count}} playlist",
+    "playlistsFooter": "Nelle playlist escluse KIPTV non invia nulla a Trakt e i dati importati da Trakt vengono rimossi. Ciò che hai guardato in KIPTV resta.",
+    "playlistExcluded": "Questa playlist è esclusa dall'integrazione Trakt.",
+    "rateTitle": "Come valuti {{title}}?",
+    "rateSubtitle": "Il voto va sul tuo account Trakt.",
+    "rateSkip": "Non ora",
+    "rateEpisode": "Valuta episodio",
+    "rateSent": "Voto inviato a Trakt"
+  }
+}
