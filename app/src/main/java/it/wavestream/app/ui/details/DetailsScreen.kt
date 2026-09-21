@@ -54,6 +54,8 @@ import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.CustomGroup
 import it.wavestream.app.data.database.entity.Episode
 import it.wavestream.app.data.entity.PersonInfo
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
@@ -802,34 +804,46 @@ private fun DetailsTopBar(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "backScale"
     )
-    
+
+    // Fase D1 — top bar flottante in vetro: capsula con back, focus ad alone.
+    // Prima era una capsula a tinta piena col bordo netto, staccata dall'hero.
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        label = "topBarFill"
+    )
+
     Row(modifier = modifier) {
-        Box(
+        GlassSurface(
+            shape = CircleShape,
+            fill = fill,
             modifier = Modifier
                 .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(WaveStreamColors.BackgroundTertiary.copy(alpha = 0.8f))
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .size(40.dp)
                 .focusable(interactionSource = interactionSource)
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,
                     onClick = onBackClick
-                ),
-            contentAlignment = Alignment.Center
+                )
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
-                modifier = Modifier.size(18.dp)
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = WaveStreamColors.TextPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -1051,13 +1065,14 @@ private fun PlayButton(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,  // Increased from 1.05f for better visibility
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,  // uniforme con la famiglia azioni
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "playScale"
     )
     
-    // Border color - accent when focused for clear indication
+    // Ring chiaro su focus (il bottone resta accent: è la CTA primaria)
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.55f) else Color.Transparent,
         label = "playBorder"
     )
     
@@ -1195,23 +1210,23 @@ private fun ExplainEndingButton(onClick: () -> Unit) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "endingScale"
     )
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f),
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "endingBg"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary.copy(alpha = 0.7f),
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "endingBorder"
     )
     val iconColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        targetValue = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "endingIcon"
     )
 
@@ -1442,11 +1457,8 @@ private fun FavoriteButton(
     
     // Focus scale
     val focusScale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
-        animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 300f
-        ),
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "focusScale"
     )
     
@@ -1464,23 +1476,21 @@ private fun FavoriteButton(
     val borderColor by animateColorAsState(
         targetValue = when {
             isFavorite -> Color(0xFFE91E63)  // Pink border when favorite
-            isFocused -> WaveStreamColors.Accent  // Accent border when focused
-            else -> WaveStreamColors.TextSecondary.copy(alpha = 0.7f)  // Visible default border
+            isFocused -> Color.White.copy(alpha = 0.30f)  // Alone di focus
+            else -> Color.White.copy(alpha = 0.10f)
         },
-        animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 300f
-        ),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "favBorder"
     )
     
     // Background when favorite
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFavorite) Color(0xFFE91E63).copy(alpha = 0.15f) else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f),
-        animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 300f
-        ),
+        targetValue = when {
+            isFavorite -> Color(0xFFE91E63).copy(alpha = 0.15f)
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            else -> GlassTokens.SurfaceFill
+        },
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "favBg"
     )
     
@@ -1528,41 +1538,29 @@ private fun MarkAsWatchedButton(
     
     // Focus scale
     val focusScale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
-        animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 300f
-        ),
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "focusScale"
     )
     
     // Border color - animated based on state
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary.copy(alpha = 0.7f),
-        animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 300f
-        ),
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "eyeBorder"
     )
     
     // Background
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f),
-        animationSpec = spring(
-            dampingRatio = 0.6f,
-            stiffness = 300f
-        ),
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "eyeBg"
     )
     
     // Icon tint
     val iconTint by animateColorAsState(
         targetValue = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
-        animationSpec = spring(
-            dampingRatio = 0.5f,
-            stiffness = 400f
-        ),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "eyeColor"
     )
     
@@ -1608,8 +1606,8 @@ private fun DownloadButton(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val focusScale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "focusScale"
     )
     
@@ -1618,10 +1616,10 @@ private fun DownloadButton(
             isDownloaded && isFocused -> Color.Red
             isDownloaded -> Color.Green
             isDownloading -> WaveStreamColors.Accent
-            isFocused -> WaveStreamColors.Accent
-            else -> WaveStreamColors.TextSecondary.copy(alpha = 0.7f)
+            isFocused -> Color.White.copy(alpha = 0.30f)
+            else -> Color.White.copy(alpha = 0.10f)
         },
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "downloadBorder"
     )
     
@@ -1629,10 +1627,10 @@ private fun DownloadButton(
         targetValue = when {
             isDownloaded -> Color.Green.copy(alpha = 0.15f)
             isDownloading -> WaveStreamColors.Accent.copy(alpha = 0.15f)
-            isFocused -> WaveStreamColors.Accent
-            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f)
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            else -> GlassTokens.SurfaceFill
         },
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "downloadBg"
     )
     
@@ -1643,7 +1641,7 @@ private fun DownloadButton(
             isFocused -> WaveStreamColors.TextPrimary
             else -> WaveStreamColors.TextSecondary
         },
-        animationSpec = spring(dampingRatio = 0.5f, stiffness = 400f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "downloadColor"
     )
     
