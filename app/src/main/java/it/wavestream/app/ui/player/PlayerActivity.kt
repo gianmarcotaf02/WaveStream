@@ -2286,14 +2286,20 @@ class PlayerActivity : ComponentActivity() {
             // visibili l'evento non arriva qui (il focus Compose naviga i pulsanti).
             KeyEvent.KEYCODE_DPAD_LEFT -> {
                 if (!_controlsVisible.value && !_isMiniPlayer.value) {
-                    hiddenBarSeek(-HIDDEN_SEEK_STEP_SECONDS)
+                    // Ignora i repeat nativi: il long-press è gestito da noi,
+                    // con intervallo e accumulo controllati.
+                    if ((event?.repeatCount ?: 0) == 0) {
+                        startHiddenSeekRepeat(-HIDDEN_SEEK_STEP_SECONDS)
+                    }
                     return true
                 }
                 return false
             }
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (!_controlsVisible.value && !_isMiniPlayer.value) {
-                    hiddenBarSeek(HIDDEN_SEEK_STEP_SECONDS)
+                    if ((event?.repeatCount ?: 0) == 0) {
+                        startHiddenSeekRepeat(HIDDEN_SEEK_STEP_SECONDS)
+                    }
                     return true
                 }
                 return false
@@ -2306,6 +2312,7 @@ class PlayerActivity : ComponentActivity() {
             // Quando i controlli sono visibili, gestisce Compose (click sui bottoni).
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
                 if (!_controlsVisible.value) {
+                    stopHiddenSeekRepeat()
                     _controlsVisible.value = true
                     return true
                 }
@@ -2314,6 +2321,7 @@ class PlayerActivity : ComponentActivity() {
             }
             // D-pad up/down to show controls
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN -> {
+                stopHiddenSeekRepeat()
                 _controlsVisible.value = true
                 return false  // Let Compose handle focus navigation
             }
@@ -2339,6 +2347,11 @@ class PlayerActivity : ComponentActivity() {
     }
     
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        // Rilascio del tasto: interrompe il seek ripetuto a barra nascosta.
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+            stopHiddenSeekRepeat()
+            if (!_controlsVisible.value && !_isMiniPlayer.value) return true
+        }
         return super.onKeyUp(keyCode, event)
     }
     
