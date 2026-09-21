@@ -861,8 +861,16 @@ private fun CastPersonCard(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.08f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "castScale"
+    )
+
+    // Card persona in vetro (Fase D5): cerchio foto + focus ad alone.
+    val cardFill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "castFill"
     )
 
     Column(
@@ -873,6 +881,8 @@ private fun CastPersonCard(
                 scaleX = scale
                 scaleY = scale
             }
+            .clip(RoundedCornerShape(14.dp))
+            .background(cardFill)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -914,7 +924,7 @@ private fun CastPersonCard(
         Text(
             text = person.name,
             style = MaterialTheme.typography.labelSmall,
-            color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
+            color = WaveStreamColors.TextPrimary,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
@@ -1098,7 +1108,7 @@ private fun PlayButton(
             .widthIn(min = if (badge != null) 132.dp else 120.dp)
             // Serie TV (badge episodio): altezza ridotta — il codice SxEy sta sotto in piccolo
             .height(if (badge != null) 56.dp else 52.dp)
-            .border(3.dp, borderColor, RoundedCornerShape(12.dp))
+            .border(1.5.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
@@ -2269,18 +2279,20 @@ private fun TrailerButton(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "trailerBtnScale"
     )
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) Color.White else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f),
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "trailerBtnBg"
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary.copy(alpha = 0.5f),
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "trailerBtnBorder"
     )
 
@@ -2336,8 +2348,8 @@ private fun AddToListButton(
     
     // Animated scale
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 400f),
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "listBtnScale"
     )
     
@@ -2345,10 +2357,10 @@ private fun AddToListButton(
     val backgroundColor by animateColorAsState(
         targetValue = when {
             isInList -> Color.White
-            isFocused -> WaveStreamColors.BackgroundTertiary
-            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f)  // Semi-transparent like other buttons
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            else -> GlassTokens.SurfaceFill
         },
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "listBtnBg"
     )
     
@@ -2356,10 +2368,10 @@ private fun AddToListButton(
     val borderColor by animateColorAsState(
         targetValue = when {
             isInList -> Color.White
-            isFocused -> WaveStreamColors.Accent  // Bright accent when focused
-            else -> WaveStreamColors.TextSecondary.copy(alpha = 0.7f) // Visible default border
+            isFocused -> Color.White.copy(alpha = 0.30f)
+            else -> Color.White.copy(alpha = 0.10f)
         },
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "listBtnBorder"
     )
     
@@ -2367,10 +2379,10 @@ private fun AddToListButton(
     val iconColor by animateColorAsState(
         targetValue = when {
             isInList -> WaveStreamColors.BackgroundDark
-            isFocused -> WaveStreamColors.Accent
+            isFocused -> WaveStreamColors.TextPrimary
             else -> WaveStreamColors.TextSecondary
         },
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "listBtnIcon"
     )
 
