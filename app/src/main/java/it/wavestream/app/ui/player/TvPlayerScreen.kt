@@ -2691,6 +2691,10 @@ private fun CreditsWatchdog(
     val latestCallback by rememberUpdatedState(onCreditsDetected)
     val latestAudioCandidate by rememberUpdatedState(audioCandidate)
 
+    // Il detector si conserva tra un seek e l'altro (chiave `sessionKey`): così il grid
+    // del frame precedente non si perde e la latenza al rientro in finestra resta bassa.
+    val detector = remember(playerView) { CreditsDetector() }
+
     LaunchedEffect(enabled, isLiveChannel, playerView, sessionKey) {
         debugText?.value = when {
             !enabled -> "credits: OFF (impostazione disattivata)"
@@ -2701,7 +2705,7 @@ private fun CreditsWatchdog(
 
         if (!enabled || isLiveChannel || playerView == null) return@LaunchedEffect
 
-        val detector = CreditsDetector()
+        detector.rearm()
         var frame: Bitmap? = null
         var failedCaptures = 0
 
@@ -2712,6 +2716,7 @@ private fun CreditsWatchdog(
         var blackStreak = 0
         var maxBlackStreak = 0
         var hitCount = 0
+        var wasInWindow = false
 
         android.util.Log.i(
             CREDITS_DIAG_TAG,
@@ -2737,6 +2742,19 @@ private fun CreditsWatchdog(
                 // Finestra utile: ultimi minuti dell'episodio, esclusa l'intro.
                 val inWindow = position >= CreditsDetector.MIN_POSITION_MS &&
                         remaining <= CreditsDetector.WINDOW_MS
+
+                // Diagnosi: log delle transizioni di finestra (una sola volta per lato),
+                // così dai log si capisce subito se il detector è stato escluso (rem > 5 min).
+                if (inWindow != wasInWindow) {
+                    wasInWindow = inWindow
+                    android.util.Log.i(
+                        CREDITS_DIAG_TAG,
+                        (if (inWindow) "windowEnter" else "windowExit") +
+                            " pos=$position rem=$remaining rel=%.3f".format(
+                                if (duration > 0) position.toFloat() / duration else 0f
+                            )
+                    )
+                }
 
                 // Fuori finestra: senza debug non si campiona affatto (risparmio CPU)
                 if (!inWindow && debugText == null) {

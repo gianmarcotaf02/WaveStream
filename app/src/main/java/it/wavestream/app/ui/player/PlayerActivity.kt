@@ -179,6 +179,7 @@ class PlayerActivity : ComponentActivity() {
     private var nextEpisodeTriggered = false  // Prevent double trigger
     private var nextEpisodeLookupInFlight = false // Evita lookup concorrenti ripetute
     private var nextEpisodeUnavailable = false    // Nessun episodio successivo: stop ai retry
+    private var creditsTriggerLogged = false      // Diagnosi: log una volta per episodio
     private var creditsDetected = false       // Titoli di coda rilevati dall'analisi frame
     private var creditsDismissed = false      // L'utente ha ignorato l'overlay: non riproporlo per questo contenuto
     private var creditsTunnelLogged = false   // Diagnostica Passo 0: log tunneling una volta per playback
@@ -1375,6 +1376,14 @@ class PlayerActivity : ComponentActivity() {
                         val creditsTrigger = creditsDetected &&
                             _creditsDetectionEnabled.value &&
                             _autoPlayNextEnabled.value
+                        if (creditsTrigger && !creditsTriggerLogged) {
+                            creditsTriggerLogged = true
+                            android.util.Log.i(
+                                "CreditsDiag",
+                                "creditsTrigger armed pos=${player.currentPosition} remaining=$remainingMs " +
+                                    "markerStart=$creditsMarkerStartMs"
+                            )
+                        }
                         if (remainingMs in 1..10_000 || creditsTrigger) {
                             triggerNextEpisode(fromCredits = creditsTrigger)
                         }
@@ -1447,6 +1456,7 @@ class PlayerActivity : ComponentActivity() {
         // Tornando indietro il meccanismo si ri-arma: l'eventuale "ignora" decade.
         creditsDismissed = false
         nextEpisodeUnavailable = false
+        creditsTriggerLogged = false
         _showSkipCredits.value = false
         creditsAudioMonitor.reset()
         _audioCandidate.value = false
@@ -1474,6 +1484,7 @@ class PlayerActivity : ComponentActivity() {
         nextEpisodeTriggered = false
         nextEpisodeUnavailable = false
         nextEpisodeLookupInFlight = false
+        creditsTriggerLogged = false
         creditsMarkerStartMs = null
         creditsMarkerEndMs = null
         creditsMarkerLoaded = false
