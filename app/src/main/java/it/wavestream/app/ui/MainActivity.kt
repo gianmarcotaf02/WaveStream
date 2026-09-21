@@ -22,6 +22,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
@@ -62,16 +65,22 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import it.wavestream.app.ui.util.requestFocusSafely
 import it.wavestream.app.ui.util.requestFocusWhenReady
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.input.key.onKeyEvent
@@ -1770,23 +1779,23 @@ private fun CreateListDialog(
     onCreate: (String) -> Unit
 ) {
     var listName by remember { mutableStateOf("") }
-    val focusRequester = remember { FocusRequester() }
-    
-    // Semi-transparent backdrop
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.7f))
-            .noRippleClickable { onDismiss() },
-        contentAlignment = Alignment.Center
-    ) {
-        // Dialog card
+    val nameFocusRequester = remember { FocusRequester() }
+    val createFocusRequester = remember { FocusRequester() }
+
+    // Dialog reale (finestra separata): su Android TV l'input di testo funziona solo
+    // se il campo ha davvero il focus. Il precedente overlay era un Box nella stessa
+    // finestra, quindi il TextField non riceveva mai input: nome vuoto, "Crea" inerte
+    // e lista mai creata.
+    LaunchedEffect(Unit) {
+        nameFocusRequester.requestFocusWhenReady()
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
-                .width(400.dp)
+                .width(420.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(WaveStreamColors.BackgroundSecondary)
-                .noRippleClickable { } // Prevent closing when clicking inside
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -1796,30 +1805,65 @@ private fun CreateListDialog(
                 color = WaveStreamColors.TextPrimary,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
-            // Text input
-            androidx.compose.material3.OutlinedTextField(
-                value = listName,
-                onValueChange = { listName = it },
-                label = { Text("Nome della lista") },
-                singleLine = true,
+
+            // Text input: BasicTextField mostra cursore e testo digitato su TV
+            val fieldInteraction = remember { MutableInteractionSource() }
+            val fieldFocused by fieldInteraction.collectIsFocusedAsState()
+            val fieldBorder by animateColorAsState(
+                targetValue = if (fieldFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
+                label = "listNameBorder"
+            )
+
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = WaveStreamColors.TextPrimary,
-                    unfocusedTextColor = WaveStreamColors.TextSecondary,
-                    focusedBorderColor = WaveStreamColors.Accent,
-                    unfocusedBorderColor = WaveStreamColors.TextTertiary,
-                    focusedLabelColor = WaveStreamColors.Accent,
-                    unfocusedLabelColor = WaveStreamColors.TextTertiary
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(WaveStreamColors.BackgroundTertiary)
+                    .border(if (fieldFocused) 2.dp else 1.dp, fieldBorder, RoundedCornerShape(8.dp))
+                    .padding(horizontal = 16.dp),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                BasicTextField(
+                    value = listName,
+                    onValueChange = { listName = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(nameFocusRequester)
+                        .wrapContentHeight(Alignment.CenterVertically),
+                    textStyle = TextStyle(
+                        color = WaveStreamColors.TextPrimary,
+                        fontSize = 16.sp
+                    ),
+                    cursorBrush = SolidColor(WaveStreamColors.Accent),
+                    singleLine = true,
+                    interactionSource = fieldInteraction,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = { createFocusRequester.requestFocusSafely() }
+                    ),
+                    decorationBox = { innerTextField ->
+                        Box(
+                            contentAlignment = Alignment.CenterStart,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (listName.isEmpty()) {
+                                Text(
+                                    text = "Nome della lista",
+                                    color = WaveStreamColors.TextTertiary,
+                                    fontSize = 16.sp
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
                 )
-            )
-            
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             // Buttons
             Row(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -1827,12 +1871,16 @@ private fun CreateListDialog(
                 // Cancel button
                 val cancelInteraction = remember { MutableInteractionSource() }
                 val cancelFocused by cancelInteraction.collectIsFocusedAsState()
-                
+                val cancelBorder by animateColorAsState(
+                    targetValue = if (cancelFocused) Color.White else WaveStreamColors.TextTertiary,
+                    label = "cancelBorder"
+                )
+
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .background(if (cancelFocused) WaveStreamColors.BackgroundTertiary else Color.Transparent)
-                        .border(1.dp, WaveStreamColors.TextTertiary, RoundedCornerShape(8.dp))
+                        .border(if (cancelFocused) 2.dp else 1.dp, cancelBorder, RoundedCornerShape(8.dp))
                         .focusable(interactionSource = cancelInteraction)
                         .clickable(
                             interactionSource = cancelInteraction,
@@ -1846,20 +1894,26 @@ private fun CreateListDialog(
                         color = WaveStreamColors.TextSecondary
                     )
                 }
-                
+
                 // Create button
                 val createInteraction = remember { MutableInteractionSource() }
                 val createFocused by createInteraction.collectIsFocusedAsState()
-                
+
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .background(if (createFocused) WaveStreamColors.AccentLight else WaveStreamColors.Accent)
+                        .border(
+                            width = if (createFocused) 2.dp else 0.dp,
+                            color = Color.White,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .focusRequester(createFocusRequester)
                         .focusable(interactionSource = createInteraction)
                         .clickable(
                             interactionSource = createInteraction,
                             indication = null,
-                            onClick = { 
+                            onClick = {
                                 if (listName.isNotBlank()) {
                                     onCreate(listName.trim())
                                 }
@@ -1875,11 +1929,6 @@ private fun CreateListDialog(
                 }
             }
         }
-    }
-    
-    // Request focus on text input
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocusWhenReady()
     }
 }
 
