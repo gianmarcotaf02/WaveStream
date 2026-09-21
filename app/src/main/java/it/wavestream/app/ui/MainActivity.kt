@@ -1173,14 +1173,6 @@ private fun MiniTopBar(
                     fontWeight = FontWeight.SemiBold
                 )
             }
-            // Fase 2.3b — l'ingranaggio stava nella rail (rimossa): va riportato qui,
-            // altrimenti Impostazioni diventa irraggiungibile.
-            TopBarIconButton(
-                icon = Icons.Default.Settings,
-                contentDescription = "Impostazioni",
-                onClick = onSettingsClick,
-                onDownPress = onContentFocusRequest
-            )
         }
 
         // Fase 2.3b — navigazione principale: pillola in vetro orizzontale.
@@ -1231,6 +1223,17 @@ private fun MiniTopBar(
                 icon = Icons.Default.Person,
                 contentDescription = "Profilo",
                 onClick = onProfileClick,
+                onDownPress = onContentFocusRequest
+            )
+
+            // Fase 2.3b — Impostazioni (prima stava nella rail, rimossa).
+            // Sta nel gruppo azioni a destra e non a sinistra: lì era il PRIMO
+            // focusable della schermata e al lancio il focus iniziale finiva
+            // sull'ingranaggio invece che sul contenuto.
+            TopBarIconButton(
+                icon = Icons.Default.Settings,
+                contentDescription = "Impostazioni",
+                onClick = onSettingsClick,
                 onDownPress = onContentFocusRequest
             )
         }
