@@ -176,6 +176,8 @@ class PlayerActivity : ComponentActivity() {
     private var autoSaveCounter = 0
     private var nextEpisodeCountdown = DEFAULT_NEXT_COUNTDOWN_SECONDS
     private var nextEpisodeTriggered = false  // Prevent double trigger
+    private var nextEpisodeLookupInFlight = false // Evita lookup concorrenti ripetute
+    private var nextEpisodeUnavailable = false    // Nessun episodio successivo: stop ai retry
     private var creditsDetected = false       // Titoli di coda rilevati dall'analisi frame
     private var creditsDismissed = false      // L'utente ha ignorato l'overlay: non riproporlo per questo contenuto
     private var creditsTunnelLogged = false   // Diagnostica Passo 0: log tunneling una volta per playback
@@ -1333,7 +1335,18 @@ class PlayerActivity : ComponentActivity() {
                     _audioCandidate.value = creditsAudioMonitor.candidate
 
                     if (!creditsDismissed && !nextEpisodeTriggered && contentType == ContentType.EPISODE) {
-                        // Livello 0: marker esatto dell'utente (o futuro EXTERNAL_DB).
+                        // Stima della coda a partire da un marker (IntroDB/utente) di un altro
+                        // episodio della stessa serie. Richiede la durata, nota solo qui.
+                        if (creditsMarkerStartMs == null && seriesCreditsReference != null && player.duration > 0) {
+                            mediaSegmentRepository.estimateCreditsStart(seriesCreditsReference!!, player.duration)?.let {
+                                creditsMarkerStartMs = it
+                                android.util.Log.i(
+                                    "CreditsDiag",
+                                    "creditsEstimatedFromSeries start=$it duration=${player.duration}"
+                                )
+                            }
+                        }
+                        // Livello 0: marker esatto (IntroDB EXTERNAL_DB, utente, o stima per serie).
                         val markerStart = creditsMarkerStartMs
                         if (markerStart != null && !creditsDetected &&
                             player.currentPosition >= markerStart
@@ -1345,10 +1358,11 @@ class PlayerActivity : ComponentActivity() {
                             onCreditsDetected()
                         }
                         val remainingMs = player.duration - player.currentPosition
-                        val creditsTrigger = creditsDetected && _autoPlayNextEnabled.value
+                        val creditsTrigger = creditsDetected &&
+                            _creditsDetectionEnabled.value &&
+                            _autoPlayNextEnabled.value
                         if (remainingMs in 1..10_000 || creditsTrigger) {
-                            nextEpisodeTriggered = true
-                            triggerNextEpisodeOverlay(fromCredits = creditsTrigger)
+                            triggerNextEpisode(fromCredits = creditsTrigger)
                         }
                     }
                 }
@@ -1377,6 +1391,7 @@ class PlayerActivity : ComponentActivity() {
         )
         // Tornando indietro il meccanismo si ri-arma: l'eventuale "ignora" decade.
         creditsDismissed = false
+        nextEpisodeUnavailable = false
         creditsAudioMonitor.reset()
         _audioCandidate.value = false
         hideNextEpisodeOverlay() // resetta nextEpisodeTriggered e creditsDetected
@@ -1401,6 +1416,8 @@ class PlayerActivity : ComponentActivity() {
         creditsDetected = false
         creditsDismissed = false
         nextEpisodeTriggered = false
+        nextEpisodeUnavailable = false
+        nextEpisodeLookupInFlight = false
         creditsMarkerStartMs = null
         creditsMarkerEndMs = null
         creditsMarkerLoaded = false
@@ -1706,21 +1723,37 @@ class PlayerActivity : ComponentActivity() {
         }
     }
 
-    private fun triggerNextEpisodeOverlay(fromCredits: Boolean = false) {
+    private fun triggerNextEpisode(fromCredits: Boolean = false) {
+        if (nextEpisodeTriggered || creditsDismissed || nextEpisodeUnavailable || nextEpisodeLookupInFlight) return
+        nextEpisodeLookupInFlight = true
         lifecycleScope.launch {
-            val next = playNextManager.getNext(
-                contentType = contentType,
-                contentId = contentId,
-                seriesId = seriesId,
-                season = season,
-                episode = episode,
-                groupId = groupId
-            )
-            if (next != null) {
-                showNextEpisodeOverlay(
-                    next = next,
-                    countdownSeconds = if (fromCredits) CREDITS_NEXT_COUNTDOWN_SECONDS else DEFAULT_NEXT_COUNTDOWN_SECONDS
+            try {
+                val next = playNextManager.getNext(
+                    contentType = contentType,
+                    contentId = contentId,
+                    seriesId = seriesId,
+                    season = season,
+                    episode = episode,
+                    groupId = groupId
                 )
+                if (next != null) {
+                    nextEpisodeTriggered = true
+                    android.util.Log.i(
+                        "CreditsDiag",
+                        "nextEpisodeOverlay fromCredits=$fromCredits title=${next.title}"
+                    )
+                    showNextEpisodeOverlay(
+                        next = next,
+                        countdownSeconds = if (fromCredits) CREDITS_NEXT_COUNTDOWN_SECONDS else DEFAULT_NEXT_COUNTDOWN_SECONDS
+                    )
+                } else {
+                    // Nessun episodio successivo: non si marca nextEpisodeTriggered (bug:
+                    // bloccava ogni retry) ma si evita di rieseguire la lookup ogni secondo.
+                    nextEpisodeUnavailable = true
+                    android.util.Log.i("CreditsDiag", "nextEpisodeOverlay skipped: no next content")
+                }
+            } finally {
+                nextEpisodeLookupInFlight = false
             }
         }
     }
