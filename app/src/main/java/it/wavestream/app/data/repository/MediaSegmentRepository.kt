@@ -220,6 +220,65 @@ class MediaSegmentRepository @Inject constructor(
     ) = dao.deleteForContent(contentId, contentType, type)
 
     /**
+     * Salva un marker RILEVATO automaticamente (audio/video) con affidabilità inferiore
+     * a quella di un marker utente. Non sovrascrive mai un marker locale esistente
+     * (USER_MARK/EXTERNAL_DB/DETECTOR) per lo stesso contenuto: alla prima detection
+     * "impara" la posizione, così le puntate successive possono stimarla dalla coda.
+     */
+    suspend fun setDetectedMarker(
+        contentType: ContentType,
+        contentId: Long,
+        type: SegmentType,
+        startMs: Long,
+        endMs: Long? = null,
+        durationMs: Long,
+        seriesId: Long? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        tmdbId: Int? = null,
+        imdbId: String? = null,
+        confidence: Float = 0.6f
+    ): MediaSegment? {
+        val existing = getExact(
+            contentType = contentType,
+            contentId = contentId,
+            seriesId = seriesId,
+            season = season,
+            episode = episode,
+            tmdbId = tmdbId,
+            imdbId = imdbId,
+            type = type
+        )
+        if (existing != null) return existing
+
+        val now = System.currentTimeMillis()
+        val segment = MediaSegment(
+            contentType = contentType,
+            type = type,
+            contentId = contentId,
+            seriesId = seriesId,
+            seasonNumber = season,
+            episodeNumber = episode,
+            tmdbId = tmdbId,
+            imdbId = imdbId,
+            startMs = startMs.coerceAtLeast(0),
+            endMs = endMs,
+            durationMs = durationMs.coerceAtLeast(0),
+            source = SegmentSource.DETECTOR,
+            confidence = confidence.coerceIn(0f, 1f),
+            createdAt = now,
+            updatedAt = now
+        )
+        dao.insert(segment)
+        android.util.Log.i(
+            "CreditsDiag",
+            "detectedMarkerSaved type=$type startMs=$startMs durationMs=$durationMs " +
+                "contentId=$contentId seriesId=$seriesId s=$season e=$episode"
+        )
+        return segment
+    }
+
+    /**
      * Marker CREDITS manuale più recente della serie (riferimento per stimare
      * la posizione nei prossimi episodi). Usato dalla stima di Fase 4.
      */

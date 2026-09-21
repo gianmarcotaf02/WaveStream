@@ -1378,6 +1378,47 @@ class PlayerActivity : ComponentActivity() {
         if (creditsDetected) return
         creditsDetected = true
         android.util.Log.d("PlayerActivity", "Titoli di coda rilevati: overlay prossimo episodio anticipato")
+        persistDetectedCredits()
+    }
+
+    /**
+     * Quando i titoli di coda sono riconosciuti dal watchdog (nessun marker/IntroDB/stima)
+     * salva la posizione come marker DETECTOR: le puntate successive della stessa serie
+     * potranno stimarne l'inizio dalla coda, senza ripartire da zero.
+     */
+    private fun persistDetectedCredits() {
+        if (!::player.isInitialized) return
+        if (creditsMarkerStartMs != null) return
+        val position = player.currentPosition
+        val duration = player.duration
+        if (duration <= 0L || position <= 0L) return
+        val ct = contentType
+        val cid = contentId
+        val sid = seriesId
+        val s = season
+        val e = episode
+        lifecycleScope.launch {
+            try {
+                val (tmdbId, imdbId) = resolveContentIdentity()
+                mediaSegmentRepository.setDetectedMarker(
+                    contentType = ct,
+                    contentId = cid,
+                    type = SegmentType.CREDITS,
+                    startMs = position,
+                    endMs = null,
+                    durationMs = duration,
+                    seriesId = sid,
+                    season = s,
+                    episode = e,
+                    tmdbId = tmdbId,
+                    imdbId = imdbId
+                )
+                creditsMarkerStartMs = position
+                creditsMarkerLoaded = true
+            } catch (ex: Exception) {
+                android.util.Log.w("CreditsDiag", "persistDetectedCredits failed: ${ex.message}")
+            }
+        }
     }
 
     /**
