@@ -609,54 +609,9 @@ class SearchActivity : ComponentActivity() {
     }
 
     /**
-     * Suggerimenti fuzzy ("correttore ortografico"): se la query contiene un typo
-     * (es. "breakinf" per "breaking bad") la ricerca LIKE/FTS non trova nulla, quindi
-     * si scansiona l'indice in memoria e si restituiscono i titoli più vicini in
-     * termini di distanza Damerau–Levenshtein. Vengono scartati i contenuti già
-     * presenti tra i risultati (`already`) e quelli bloccati per il profilo.
+     * S0 — il "correttore ortografico" fuzzy è stato rimosso insieme ai suggerimenti:
+     * non aveva più consumatori e scansionava l'intero DB a ogni tasto.
      */
-    private suspend fun findFuzzySuggestions(
-        query: String,
-        already: List<SearchResultItem>
-    ): List<SearchResultItem> {
-        val trimmed = query.trim()
-        // Query molto corte danno solo falsi positivi: fuzzy serve su parole da 3+.
-        if (trimmed.length < 3) return emptyList()
-        val qTokens = normalizeTokens(trimmed)
-        if (qTokens.isEmpty()) return emptyList()
-
-        val alreadyKeys = already.mapTo(HashSet()) { "${it.type}_${it.id}" }
-
-        return withContext(Dispatchers.Default) {
-            val index = ensureFuzzyIndex()
-            if (index.isEmpty()) return@withContext emptyList()
-
-            // Tollera errori in proporzione alla lunghezza della query (min 1).
-            val qLen = trimmed.count { it.isLetterOrDigit() }
-            val allowedTotal = maxOf(1, qLen / 4)
-
-            val best = index.mapNotNull { cand ->
-                val score = fuzzyCandidateScore(cand, qTokens)
-                if (score == null || score / 10 > allowedTotal) null else cand to score
-            }.sortedBy { it.second }
-
-            val out = ArrayList<SearchResultItem>()
-            for ((cand, _) in best) {
-                if (out.size >= 6) break
-                if ("${cand.type}_${cand.id}" in alreadyKeys) continue
-                if (filterBlockedContent.isBlocked(cand.title, cand.category)) continue
-                out += SearchResultItem(
-                    id = cand.id,
-                    title = cand.title,
-                    subtitle = cand.subtitle,
-                    posterUrl = cand.posterUrl,
-                    type = cand.type,
-                    streamUrl = cand.streamUrl
-                )
-            }
-            out
-        }
-    }
 
     private fun openDetails(item: SearchResultItem) {
         if (item.isCategory) {
@@ -745,7 +700,6 @@ fun SearchScreen(
     onQueryChange: (String) -> Unit,
     onVoiceSearch: () -> Unit,
     results: List<SearchResultItem>,
-    suggestions: List<SearchResultItem>,
     isLoading: Boolean,
     focusRequester: FocusRequester,
     onBackClick: () -> Unit,
@@ -755,10 +709,20 @@ fun SearchScreen(
     onItemClick: (SearchResultItem) -> Unit,
     onItemLongClick: (SearchResultItem) -> Unit
 ) {
+    // Fase S1 — fondale coerente con Home/categorie.
+    val screenBackground = remember {
+        androidx.compose.ui.graphics.Brush.verticalGradient(
+            colors = listOf(
+                WaveStreamColors.Accent.copy(alpha = 0.045f),
+                WaveStreamColors.GradientMiddle,
+                WaveStreamColors.GradientBottom
+            )
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(screenBackground)
             .imePadding()
     ) {
         // Top spacing
@@ -776,8 +740,8 @@ fun SearchScreen(
                     .weight(1f)
                     .height(52.dp)
                     .clip(RoundedCornerShape(26.dp))
-                    .background(WaveStreamColors.BackgroundSecondary)
-                    .border(2.dp, WaveStreamColors.Accent, RoundedCornerShape(26.dp))
+                    .background(GlassTokens.SurfaceFill)
+                    .border(1.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(26.dp))
                     .padding(horizontal = 16.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -827,17 +791,19 @@ fun SearchScreen(
             // Voice search button (activates TV remote microphone)
             val micInteractionSource = remember { MutableInteractionSource() }
             val micIsFocused by micInteractionSource.collectIsFocusedAsState()
+            val micFill by animateColorAsState(
+                targetValue = if (micIsFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+                animationSpec = AppAnimations.SpringCardFocusColor,
+                label = "micFill"
+            )
             Box(
                 modifier = Modifier
                     .size(52.dp)
                     .clip(RoundedCornerShape(26.dp))
-                    .background(
-                        if (micIsFocused) WaveStreamColors.Accent
-                        else WaveStreamColors.BackgroundSecondary
-                    )
+                    .background(micFill)
                     .border(
-                        2.dp,
-                        if (micIsFocused) WaveStreamColors.AccentLight else WaveStreamColors.Accent,
+                        1.dp,
+                        if (micIsFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.14f),
                         RoundedCornerShape(26.dp)
                     )
                     .focusable(interactionSource = micInteractionSource)
@@ -847,7 +813,7 @@ fun SearchScreen(
                 Icon(
                     imageVector = Icons.Default.Mic,
                     contentDescription = "Ricerca vocale",
-                    tint = if (micIsFocused) Color.White else WaveStreamColors.TextPrimary,
+                    tint = WaveStreamColors.TextPrimary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -912,26 +878,6 @@ fun SearchScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = WaveStreamColors.TextTertiary
                             )
-                            // Suggerisci comunque i primi match parziali come pill
-                            if (suggestions.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    suggestions.take(3).forEach { item ->
-                                        Text(
-                                            text = item.title,
-                                            color = WaveStreamColors.TextPrimary,
-                                            fontSize = 14.sp,
-                                            maxLines = 1,
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(50))
-                                                .background(WaveStreamColors.BackgroundSecondary)
-                                                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50))
-                                                .clickable { onItemClick(item) }
-                                                .padding(horizontal = 14.dp, vertical = 8.dp)
-                                        )
-                                    }
-                                }
-                            }
                         }
                     }
                     results.isNotEmpty() -> {
@@ -1008,78 +954,6 @@ fun SearchScreen(
 }
 
 /**
- * Etichetta breve del tipo di contenuto, mostrata nelle pill di suggerimento
- * per renderle immediatamente riconoscibili a colpo d'occhio.
- */
-private fun suggestionTypeLabel(item: SearchResultItem): String = when {
-    item.isCategory -> "Categoria"
-    item.type == ContentType.MOVIE -> "Film"
-    item.type == ContentType.SERIES -> "Serie"
-    item.type == ContentType.CHANNEL -> "Live"
-    else -> ""
-}
-
-/**
- * Suggerimenti istantanei stile YouTube: pill a forma di ovale disposte in
- * colonna sotto la tastiera, una parola (opzione) per pill. Ogni pill mostra
- * anche il tipo di contenuto (Film/Serie/Live/Categoria). Al focus la pill
- * si riempie di accent (senza ingrandimento).
- */
-@Composable
-private fun SuggestionPills(
-    suggestions: List<SearchResultItem>,
-    onItemClick: (SearchResultItem) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        suggestions.forEach { item ->
-            val interactionSource = remember { MutableInteractionSource() }
-            val isFocused by interactionSource.collectIsFocusedAsState()
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(
-                        if (isFocused) WaveStreamColors.Accent
-                        else WaveStreamColors.BackgroundSecondary
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.25f),
-                        shape = RoundedCornerShape(50)
-                    )
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) { onItemClick(item) }
-                    .padding(horizontal = 18.dp, vertical = 9.dp)
-            ) {
-                Text(
-                    text = item.title,
-                    color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
-                )
-                // Etichetta tipo: "Film", "Serie", "Live", "Categoria"
-                suggestionTypeLabel(item).takeIf { it.isNotEmpty() }?.let { label ->
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = label,
-                        color = if (isFocused) Color.White.copy(alpha = 0.8f) else WaveStreamColors.TextTertiary,
-                        fontSize = 11.sp,
-                        maxLines = 1
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
  * Pill per le ricerche recenti: icona cronologia + testo della query.
  * Tap = ripete la ricerca, long press = rimuove dalla cronologia.
  */
@@ -1096,18 +970,27 @@ private fun RecentSearchPill(
     // Long press detection via key events (D-pad OK)
     var pressStartTime by remember { mutableStateOf(0L) }
     val longPressThreshold = 500L
+
+    // Fase S3 — capsula in vetro: focus ad alone, non fondo accent pieno.
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "recentFill"
+    )
+    val border by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "recentBorder"
+    )
     
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(
-                if (isFocused) WaveStreamColors.Accent
-                else WaveStreamColors.BackgroundSecondary
-            )
+            .background(fill)
             .border(
                 width = 1.dp,
-                color = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.25f),
+                color = border,
                 shape = RoundedCornerShape(50)
             )
             .focusable(interactionSource = interactionSource)
@@ -1136,13 +1019,13 @@ private fun RecentSearchPill(
         Icon(
             imageVector = Icons.Default.History,
             contentDescription = null,
-            tint = if (isFocused) Color.White else WaveStreamColors.TextTertiary,
+            tint = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextTertiary,
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = text,
-            color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
+            color = WaveStreamColors.TextPrimary,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium,
             maxLines = 1
@@ -1168,13 +1051,21 @@ private fun SearchResultCard(
     val longPressThreshold = 500L // 500ms for long press
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.08f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "resultScale"
     )
     
+    // Fase S2 — card in vetro: focus ad alone, niente bordo accent.
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.06f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "resultBorder"
+    )
+    val posterFill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "resultFill"
     )
     
     Column(
@@ -1216,9 +1107,9 @@ private fun SearchResultCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(210.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-                .background(WaveStreamColors.CardBackground),
+                .clip(RoundedCornerShape(14.dp))
+                .border(1.dp, borderColor, RoundedCornerShape(14.dp))
+                .background(posterFill),
             contentAlignment = Alignment.Center
         ) {
             if (item.isCategory) {
