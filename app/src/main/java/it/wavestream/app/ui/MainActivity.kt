@@ -338,6 +338,16 @@ private fun MainActivityScreen(
             }
         }
     }
+
+    // All'avvio il primo elemento focusabile della top bar è l'icona "Cerca" (sta a
+    // sinistra della Home dentro la pillola di navigazione), quindi il focus atterrava
+    // lì. Portiamo invece il focus sulla tab di navigazione selezionata (Home) appena
+    // la top bar è composta. `navPillFocusRequester` è agganciato proprio al tab
+    // selezionato, quindi il comportamento resta corretto anche se si torna su un tab
+    // diverso dopo un ripristino di stato.
+    LaunchedEffect(Unit) {
+        navPillFocusRequester.requestFocusWhenReady()
+    }
     
     // Refresh content on resume (e.g., after returning from player)
     val lifecycleOwner = LocalLifecycleOwner.current
