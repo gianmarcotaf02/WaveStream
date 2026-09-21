@@ -1336,9 +1336,11 @@ fun DigitalClock(
     textColor: Color = Color.White,
     textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.titleMedium
 ) {
-    val currentTime by produceState(initialValue = getCurrentTimeString()) {
+    // Fase 3.5 — l'orologio segue il formato 12/24h di sistema (prima era sempre 24h).
+    val clockContext = androidx.compose.ui.platform.LocalContext.current
+    val currentTime by produceState(initialValue = getCurrentTimeString(clockContext)) {
         while (true) {
-            value = getCurrentTimeString()
+            value = getCurrentTimeString(clockContext)
             kotlinx.coroutines.delay(1000L)
         }
     }
@@ -1352,8 +1354,12 @@ fun DigitalClock(
     )
 }
 
-private fun getCurrentTimeString(): String {
-    val formatter = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+// Fase 3.5 — rispetta il formato 12/24h configurato dall'utente.
+// `DateFormat.getTimeFormat` restituisce il pattern di sistema ("hh:mm a" dove è
+// attivo il formato a 12 ore, "HH:mm" altrove). Prima era hardcoded "HH:mm",
+// quindi l'orologio restava a 24 ore anche sui dispositivi impostati a 12.
+private fun getCurrentTimeString(context: android.content.Context): String {
+    val formatter = android.text.format.DateFormat.getTimeFormat(context)
     return formatter.format(java.util.Date())
 }
 /**
