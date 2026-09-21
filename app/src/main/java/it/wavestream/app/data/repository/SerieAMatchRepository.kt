@@ -32,7 +32,8 @@ import javax.inject.Singleton
  *   (kickoff - 30 min → kickoff + 2h), one hero per match — simultaneous
  *   matches produce multiple heroes.
  * - `findChannelsForMatch()` filters playlist channels whose name contains
- *   an alias of either team.
+ *   an alias of BOTH teams (home AND away): solo i canali che nominano
+ *   entrambe le squadre trasmettono la partita.
  */
 @Singleton
 class SerieAMatchRepository @Inject constructor(
@@ -221,27 +222,38 @@ class SerieAMatchRepository @Inject constructor(
     }
 
     /**
-     * Playlist channels (all playlists) whose name contains an alias of either
-     * team of [match], deduplicated by stream URL, sorted by name.
+     * Playlist channels (all playlists) whose name contains an alias of BOTH
+     * teams of [match] (casa E ospite), deduplicated by stream URL, sorted by
+     * name.
+     *
+     * Nota: un canale tipo "Inter TV" contiene una sola squadra e NON trasmette
+     * la partita, quindi va escluso. Fanno eccezione i canali evento DAZN 1, che
+     * per nome non contengono le squadre ma sono il canale che manda il match:
+     * vengono aggiunti sempre.
      */
     suspend fun findChannelsForMatch(match: SerieAMatchEntity): List<Channel> = withContext(Dispatchers.IO) {
-        val aliases = SerieATeamAliases.aliasesForMatch(
-            homeTla = match.homeTla,
-            homeShortName = match.homeShortName,
-            awayTla = match.awayTla,
-            awayShortName = match.awayShortName
-        )
-        if (aliases.isEmpty()) return@withContext emptyList()
-
-        val allChannels = channelDao.getAllChannelsList()
-        val matchedHome = matchChannelsForTeam(allChannels, match.homeTla, match.homeShortName)
-        val matchedAway = matchChannelsForTeam(allChannels, match.awayTla, match.awayShortName)
+        val homeAliases = SerieATeamAliases.teamAliases(match.homeTla, match.homeShortName)
+        val awayAliases = SerieATeamAliases.teamAliases(match.awayTla, match.awayShortName)
         // Canali evento DAZN 1 (DAZN HERMES/KALI): non contengono il nome della
         // squadra nel nome, quindi il matching per alias non li trova. Vanno
         // aggiunti per forza, altrimenti la partita risulta "senza canali".
         val daznEvent = channelDao.getDaznEventChannels()
+        if (homeAliases.isEmpty() || awayAliases.isEmpty()) {
+            return@withContext daznEvent
+                .distinctBy { it.streamUrl }
+                .sortedBy { it.name.lowercase() }
+        }
 
-        return@withContext (matchedHome + matchedAway + daznEvent)
+        val allChannels = channelDao.getAllChannelsList()
+        // Scansione per squadra (aggiorna anche il mapping persistente squadra→canale).
+        val matchedHome = matchChannelsForTeam(allChannels, match.homeTla, match.homeShortName)
+        val matchedAway = matchChannelsForTeam(allChannels, match.awayTla, match.awayShortName)
+
+        // Intersezione per streamUrl: solo i canali che matchano ENTRAMBE le squadre.
+        val homeUrls = matchedHome.map { it.streamUrl }.toSet()
+        val bothTeams = matchedAway.filter { it.streamUrl in homeUrls }.distinctBy { it.streamUrl }
+
+        return@withContext (bothTeams + daznEvent)
             .distinctBy { it.streamUrl }
             .sortedBy { it.name.lowercase() }
     }
@@ -262,21 +274,31 @@ class SerieAMatchRepository @Inject constructor(
     /**
      * Canali salvati localmente per le due squadre (lettura istantanea dal DB).
      * Usata per mostrare subito i canali prima della ricerca di aggiornamento.
+     * Vengono restituiti solo i canali presenti per ENTRAMBE le squadre
+     * (intersezione casa ∩ ospite), perché solo quelli nominano il match.
      */
     suspend fun getSavedChannelsForMatch(match: SerieAMatchEntity): List<Channel> = withContext(Dispatchers.IO) {
-        val tlas = listOf(match.homeTla, match.awayTla).filter { it.isNotBlank() }
-        if (tlas.isEmpty()) return@withContext emptyList()
-        val savedUrls = serieATeamChannelDao.getByTeams(tlas)
-            .map { it.channelStreamUrl }
-            .toSet()
-        if (savedUrls.isEmpty()) return@withContext emptyList()
-        // Query mirata per streamUrl: NON si carica l'intera playlist (decine di
-        // migliaia di canali) solo per filtrare i pochi salvati. È il collo di
-        // bottiglia che rende lenta l'apertura del picker canali.
-        val saved = channelDao.getChannelsByStreamUrls(savedUrls.toList())
         // I canali evento DAZN 1 non sono mappati a una squadra (il nome non la
         // contiene): vengono sempre aggiunti per le partite di Serie A.
         val daznEvent = channelDao.getDaznEventChannels()
+        val homeTla = match.homeTla
+        val awayTla = match.awayTla
+        if (homeTla.isBlank() || awayTla.isBlank()) {
+            return@withContext daznEvent
+                .filter { !it.isExcludedCategory() }
+                .distinctBy { it.streamUrl }
+                .sortedBy { it.name.lowercase() }
+        }
+        val links = serieATeamChannelDao.getByTeams(listOf(homeTla, awayTla))
+        val homeUrls = links.filter { it.teamTla == homeTla }.map { it.channelStreamUrl }.toSet()
+        val awayUrls = links.filter { it.teamTla == awayTla }.map { it.channelStreamUrl }.toSet()
+        // Intersezione: canali salvati per casa E per ospite.
+        val bothUrls = homeUrls intersect awayUrls
+        // Query mirata per streamUrl: NON si carica l'intera playlist (decine di
+        // migliaia di canali) solo per filtrare i pochi salvati. È il collo di
+        // bottiglia che rende lenta l'apertura del picker canali.
+        val saved = if (bothUrls.isEmpty()) emptyList()
+            else channelDao.getChannelsByStreamUrls(bothUrls.toList())
         return@withContext (saved + daznEvent)
             .filter { !it.isExcludedCategory() }
             .distinctBy { it.streamUrl }
