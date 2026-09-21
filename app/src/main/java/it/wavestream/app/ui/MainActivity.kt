@@ -99,6 +99,10 @@ import it.wavestream.app.data.database.entity.CustomGroup
 import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.HeroItem
+import it.wavestream.app.ui.home.resolveCurrentHero
+import it.wavestream.app.ui.home.SerieAMatchHeroBackdrop
+import it.wavestream.app.data.database.entity.SerieAMatchEntity
+import coil.compose.AsyncImage
 import it.wavestream.app.ui.home.HomeContentType
 import it.wavestream.app.ui.home.HomeViewModel
 import it.wavestream.app.ui.home.SerieAChannelPickerDialog
@@ -491,18 +495,50 @@ private fun MainActivityScreen(
         })
     }
     
+    // ---------------------------------------------------------------------
+    // Fase 1b — backdrop immersivo a TUTTO schermo.
+    // L'hero non è più ritagliato in una fascia alta 340dp: l'immagine copre anche
+    // rail e top bar (che sono resi traslucidi). Attivo solo sulla Home, perché è
+    // l'unica tab con un hero a cui agganciarsi.
+    // ---------------------------------------------------------------------
+    val immersiveHome = homeState.isHomeTab && !homeState.isGridMode && !homeState.isLoading
+    val ambientHero = remember(
+        homeState.heroItems,
+        homeState.serieAMatchHeroes,
+        homeState.currentHeroIndex,
+        homeState.isHomeTab
+    ) {
+        resolveCurrentHero(homeState)
+    }
+    // Su Home lo sfondo radice deve essere trasparente, altrimenti il gradiente
+    // opaco coprirebbe il backdrop.
+    val rootBackground: Brush = if (immersiveHome) {
+        Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(
+                WaveStreamColors.Accent.copy(alpha = 0.045f),
+                WaveStreamColors.GradientMiddle,
+                WaveStreamColors.GradientBottom
+            )
+        )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        if (immersiveHome && ambientHero != null) {
+            HeroAmbientBackdrop(
+                hero = ambientHero,
+                serieAMatch = homeState.serieAMatches.firstOrNull {
+                    it.id == ambientHero.serieAMatchId
+                }
+            )
+        }
+
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        WaveStreamColors.Accent.copy(alpha = 0.045f),
-                        WaveStreamColors.GradientMiddle,
-                        WaveStreamColors.GradientBottom
-                    )
-                )
-            )
+            .background(rootBackground)
     ) {
         // Navigation Rail (expandable)
         ExpandableNavRail(
@@ -700,6 +736,79 @@ private fun MainActivityScreen(
             )
         }
     }
+    }
+}
+
+/**
+ * Backdrop immersivo a tutto schermo (Fase 1b).
+ *
+ * Disegna l'hero corrente dietro rail e top bar. Riceve l'hero già risolto da
+ * [resolveCurrentHero], la stessa funzione usata dal banner in `TvHomeScreen`: così
+ * immagine di sfondo e testo dell'hero non possono divergere durante la rotazione.
+ *
+ * Le due scrim sono volutamente leggere nella fascia dell'hero: il contrasto del
+ * testo è già gestito dalle scrim interne di `HeroBanner`. Qui servono solo a dare
+ * respiro alla rail (a sinistra) e a dissolvere l'immagine verso il nero nella parte
+ * bassa, dove scorrono le righe di contenuto.
+ */
+@Composable
+private fun HeroAmbientBackdrop(
+    hero: HeroItem,
+    serieAMatch: SerieAMatchEntity?
+) {
+    androidx.compose.animation.Crossfade(
+        targetState = hero,
+        animationSpec = tween(450),
+        label = "heroAmbientBackdrop"
+    ) { current ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            if (current.contentType == "SERIEA_MATCH" && serieAMatch != null) {
+                SerieAMatchHeroBackdrop(
+                    match = serieAMatch,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                AsyncImage(
+                    model = current.backdropUrl ?: current.posterUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.horizontalGradient(
+                    colorStops = arrayOf(
+                        0.00f to Color.Black.copy(alpha = 0.50f),
+                        0.12f to Color.Black.copy(alpha = 0.34f),
+                        0.24f to Color.Black.copy(alpha = 0.12f),
+                        0.38f to Color.Transparent,
+                        1.00f to Color.Transparent
+                    )
+                )
+            )
+    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0.00f to Color.Black.copy(alpha = 0.30f),
+                        0.14f to Color.Transparent,
+                        0.52f to Color.Transparent,
+                        0.84f to Color.Black.copy(alpha = 0.86f),
+                        1.00f to Color.Black
+                    )
+                )
+            )
+    )
 }
 
 /**
