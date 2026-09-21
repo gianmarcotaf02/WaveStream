@@ -1,0 +1,56 @@
+#!/bin/sh
+# pre-push hook — WaveStream
+#
+# Blocca il push se l'albero che si sta spedendo contiene segreti:
+#   1. percorsi sensibili (keystore, keystore.properties, .env, google-services.json, chiavi private)
+#   2. contenuto che matcha pattern di API key / token / chiavi private
+#
+# Scansiona l'ALBERO dei commit da pushare (non la history), così non blocca i push
+# di commit storici già esistenti: impedisce di (ri)introdurre segreti d'ora in avanti.
+#
+# Bypass consapevole: git push --no-verify
+#
+# Attivazione (una volta sola, per repo):
+#   git config core.hooksPath .githooks
+
+status=0
+z40=0000000000000000000000000000000000000000
+
+FORBIDDEN_PATHS='(^|/)(key|keystore\.properties|\.env)$|google-services\.json$|\.(jks|keystore|p12|pfx|pem)$'
+
+SECRET_PATTERN='AIza[0-9A-Za-z_-]{35}|AAAA[A-Za-z0-9_-]{7}:[A-Za-z0-9_-]{100,}|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|sk-or-v1-[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----|4o2LmyQ[A-Za-z0-9]{20,}@'
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    # Cancellazione di un ref: niente da scansionare
+    [ "$local_sha" = "$z40" ] && continue
+
+    paths=$(git ls-tree -r --name-only "$local_sha" 2>/dev/null \
+        | grep -E "$FORBIDDEN_PATHS" \
+        | sort -u | head -20)
+
+    if [ -n "$paths" ]; then
+        echo "" >&2
+        echo "  pre-push: FILE SENSIBILI nell'albero da pushare ($local_ref):" >&2
+        echo "$paths" | sed 's/^/     - /' >&2
+        status=1
+    fi
+
+    hits=$(git grep -I -n -E "$SECRET_PATTERN" "$local_sha" -- 2>/dev/null \
+        | head -10)
+
+    if [ -n "$hits" ]; then
+        echo "" >&2
+        echo "  pre-push: POSSIBILI SEGRETI nel contenuto da pushare ($local_ref):" >&2
+        echo "$hits" | sed 's/^/     - /' >&2
+        status=1
+    fi
+done
+
+if [ "$status" -ne 0 ]; then
+    echo "" >&2
+    echo "PUSH BLOCCATO dal pre-push hook." >&2
+    echo "Rimuovi i segreti dall'albero, oppure forza con: git push --no-verify" >&2
+    echo "" >&2
+fi
+
+exit $status
