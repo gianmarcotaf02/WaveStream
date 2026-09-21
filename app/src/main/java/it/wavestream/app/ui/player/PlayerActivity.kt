@@ -2257,6 +2257,40 @@ class PlayerActivity : ComponentActivity() {
         }
     }
     
+    /**
+     * Intercetta il D-pad PRIMA che le View/Compose lo ricevano.
+     *
+     * Con i controlli nascosti il focus Compose può "catturare" le frecce dopo la
+     * prima pressione: gestendo qui il seek nascosto, sx/dx restano sempre attivi e
+     * il long-press (che avanza/arretra con continuità) funziona in modo affidabile.
+     */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (!_controlsVisible.value && !_isMiniPlayer.value &&
+            (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT || event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
+        ) {
+            when (event.action) {
+                KeyEvent.ACTION_DOWN -> {
+                    // La ripetizione è gestita da noi (handler dedicato): avviamo solo
+                    // alla prima pressione e ignoriamo i repeat nativi.
+                    if (event.repeatCount == 0) {
+                        val step = if (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                            -HIDDEN_SEEK_STEP_SECONDS
+                        } else {
+                            HIDDEN_SEEK_STEP_SECONDS
+                        }
+                        startHiddenSeekRepeat(step)
+                    }
+                    return true
+                }
+                KeyEvent.ACTION_UP -> {
+                    stopHiddenSeekRepeat()
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     // Keep D-pad handling for better responsiveness
     // D-Pad seek is now handled by the UI components (progress bar) via Compose
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -2281,30 +2315,6 @@ class PlayerActivity : ComponentActivity() {
                 seekBy(-10_000)
                 return true
             }
-            // D-pad sinistra/destra con la barra dei controlli nascosta: seek
-            // rapido avanti/indietro senza dover aprire la barra. Con i controlli
-            // visibili l'evento non arriva qui (il focus Compose naviga i pulsanti).
-            KeyEvent.KEYCODE_DPAD_LEFT -> {
-                if (!_controlsVisible.value && !_isMiniPlayer.value) {
-                    // Ignora i repeat nativi: il long-press è gestito da noi,
-                    // con intervallo e accumulo controllati.
-                    if ((event?.repeatCount ?: 0) == 0) {
-                        startHiddenSeekRepeat(-HIDDEN_SEEK_STEP_SECONDS)
-                    }
-                    return true
-                }
-                return false
-            }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                if (!_controlsVisible.value && !_isMiniPlayer.value) {
-                    if ((event?.repeatCount ?: 0) == 0) {
-                        startHiddenSeekRepeat(HIDDEN_SEEK_STEP_SECONDS)
-                    }
-                    return true
-                }
-                return false
-            }
-
             // D-pad center/enter: quando i controlli sono nascosti li mostra
             // senza toccare la riproduzione. Il focus va automaticamente sul
             // pulsante Play/Pausa (TvPlayerScreen), così un secondo OK decide
@@ -2347,11 +2357,7 @@ class PlayerActivity : ComponentActivity() {
     }
     
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        // Rilascio del tasto: interrompe il seek ripetuto a barra nascosta.
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-            stopHiddenSeekRepeat()
-            if (!_controlsVisible.value && !_isMiniPlayer.value) return true
-        }
+        // Il rilascio del seek a barra nascosta è gestito in dispatchKeyEvent.
         return super.onKeyUp(keyCode, event)
     }
     
