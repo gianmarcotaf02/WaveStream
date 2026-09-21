@@ -44,6 +44,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -84,6 +85,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
@@ -110,6 +115,8 @@ import it.wavestream.app.ui.home.SerieAChannelPickerDialog
 import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.search.SearchActivity
 import it.wavestream.app.ui.settings.SettingsActivity
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.ui.theme.AccentColor
@@ -130,6 +137,22 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
  * Main Tab enum for navigation
  */
 enum class MainTab { HOME, MOVIES, SERIES, LIVE, FAVORITES, LISTS, HISTORY }
+
+/**
+ * Fase C0 — stato del sottomenu a tendina di un tab della pillola di navigazione.
+ *
+ * @param tab          tab che ha originato la tendina (Film / Serie)
+ * @param x            coordinata X dell'ancora (positionInRoot del tab)
+ * @param y            coordinata Y sotto il tab (per ancorare la tendina)
+ * @param returnFocus  requester del tab di partenza: alla chiusura il focus DEVE
+ *                     tornare lì, altrimenti il telecomando sembra morto.
+ */
+private data class NavDropdownState(
+    val tab: MainTab,
+    val x: Float,
+    val y: Float,
+    val returnFocus: FocusRequester
+)
 
 /**
  * Main Activity for Android TV
@@ -272,6 +295,8 @@ private fun MainActivityScreen(
     var showCreateListDialog by remember { mutableStateOf(false) }
     // Hero per cui è aperto il selettore liste (null = chiuso)
     var heroListPicker by remember { mutableStateOf<HeroItem?>(null) }
+    // Fase C0 — tendina categorie ancorata ai tab Film/Serie (null = chiusa)
+    var navDropdown by remember { mutableStateOf<NavDropdownState?>(null) }
     
     // Handle back press to exit grid mode (See All view) - restore previous scroll position
     androidx.activity.compose.BackHandler(enabled = homeState.isGridMode) {
@@ -577,6 +602,10 @@ private fun MainActivityScreen(
                 onDownloadsClick = {
                     startActivityWithTransition(Intent(context, DownloadsActivity::class.java))
                 },
+                onTabLongPress = { tab, anchor, returnFocus ->
+                    navDropdown = NavDropdownState(tab, anchor.x, anchor.y, returnFocus)
+                },
+                navDropdownOpen = navDropdown != null,
                 onContentFocusRequest = { moveFocusToContent(FocusDirection.Down) },
                 searchButtonFocusRequester = searchButtonFocusRequester,
                 firstButtonFocusRequester = topBarFocusRequester,
@@ -716,6 +745,38 @@ private fun MainActivityScreen(
                 hero = hero,
                 viewModel = homeViewModel,
                 onDismiss = { heroListPicker = null }
+            )
+        }
+
+        // Fase C0 — tendina in vetro "Tutte le categorie / Tutti i film / Tutte le serie".
+        // Disegnata come ULTIMO figlio della Box radice: se stesse nella barra in alto
+        // finirebbe dietro l'hero e le righe di contenuto.
+        navDropdown?.let { st ->
+            NavTabDropdownMenu(
+                state = st,
+                onDismiss = {
+                    val target = st.returnFocus
+                    navDropdown = null
+                    coroutineScope.launch {
+                        withFrameNanos { }
+                        try { target.requestFocus() } catch (_: Exception) { /* noop */ }
+                    }
+                },
+                onOpenAllCategories = {
+                    navDropdown = null
+                    startActivityWithTransition(
+                        Intent(context, it.wavestream.app.ui.category.AllCategoriesActivity::class.java)
+                    )
+                },
+                onOpenAllContent = {
+                    val target = if (st.tab == MainTab.SERIES) {
+                        it.wavestream.app.ui.series.SeriesActivity::class.java
+                    } else {
+                        it.wavestream.app.ui.film.FilmActivity::class.java
+                    }
+                    navDropdown = null
+                    startActivityWithTransition(Intent(context, target))
+                }
             )
         }
     }
