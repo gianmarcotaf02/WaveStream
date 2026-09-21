@@ -1,0 +1,28 @@
+package io.ktor.http;
+
+/* JADX INFO: loaded from: classes4.dex */
+@kotlin.Metadata(d1 = {"\u0000\u001a\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0010\u000e\n\u0000\n\u0002\u0010\b\n\u0002\b\n\u0018\u00002\u00060\u0001j\u0002`\u0002B\u0017\u0012\u0006\u0010\u0004\u001a\u00020\u0003\u0012\u0006\u0010\u0006\u001a\u00020\u0005¢\u0006\u0004\b\u0007\u0010\bR\u0017\u0010\u0004\u001a\u00020\u00038\u0006¢\u0006\f\n\u0004\b\u0004\u0010\t\u001a\u0004\b\n\u0010\u000bR\u0017\u0010\u0006\u001a\u00020\u00058\u0006¢\u0006\f\n\u0004\b\u0006\u0010\f\u001a\u0004\b\r\u0010\u000e¨\u0006\u000f"}, d2 = {"Lio/ktor/http/IllegalHeaderNameException;", "Ljava/lang/IllegalArgumentException;", "Lkotlin/IllegalArgumentException;", "", "headerName", "", "position", "<init>", "(Ljava/lang/String;I)V", "Ljava/lang/String;", "getHeaderName", "()Ljava/lang/String;", "I", "getPosition", "()I", "ktor-http"}, k = 1, mv = {2, 1, 0}, xi = androidx.media3.container.NalUnitUtil.H265_NAL_UNIT_TYPE_UNSPECIFIED)
+public final class IllegalHeaderNameException extends java.lang.IllegalArgumentException {
+    private final java.lang.String headerName;
+    private final int position;
+
+    public IllegalHeaderNameException(java.lang.String headerName, int i3) {
+        kotlin.jvm.internal.m.e(headerName, "headerName");
+        java.lang.StringBuilder sb = new java.lang.StringBuilder("Header name '");
+        sb.append(headerName);
+        sb.append("' contains illegal character '");
+        sb.append(headerName.charAt(i3));
+        sb.append("' (code ");
+        super(Y6.f.j(sb, headerName.charAt(i3) & 255, ')'));
+        this.headerName = headerName;
+        this.position = i3;
+    }
+
+    public final java.lang.String getHeaderName() {
+        return this.headerName;
+    }
+
+    public final int getPosition() {
+        return this.position;
+    }
+}

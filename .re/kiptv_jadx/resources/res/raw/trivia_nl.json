@@ -1,0 +1,2008 @@
+{
+  "_status": "partial",
+  "_generated_at": "2026-05-09T13:56:00.951007+00:00",
+  "_language": "nl",
+  "_count": 400,
+  "items": [
+    {
+      "id": "tv_001",
+      "text": "De eerste film ooit, \"La Sortie de l'Usine Lumière\", duurt slechts 46 seconden en werd in 1895 in Lyon opgenomen.",
+      "category": "history"
+    },
+    {
+      "id": "tv_002",
+      "text": "Al Pacino en Robert De Niro speelden beiden in \"The Godfather Part II\" zonder ooit samen in één scène te staan.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_003",
+      "text": "Het \"Star Wars\"-thema van John Williams is een van de meest herkenbare filmmuziekstukken ter wereld geworden.",
+      "category": "music"
+    },
+    {
+      "id": "tv_004",
+      "text": "De serie \"Friends\" heette aanvankelijk \"Insomnia Cafe\" voordat de naam tijdens de ontwikkeling werd gewijzigd.",
+      "category": "series"
+    },
+    {
+      "id": "tv_005",
+      "text": "Driekleurentechnicolor debuteerde in 1935 met \"Becky Sharp\" en betekende een revolutie voor kleurenfilm.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_006",
+      "text": "Sean Connery droeg een pruik in al zijn James Bond-films omdat hij al op zijn 21e kaal begon te worden.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_007",
+      "text": "\"Toy Story\" uit 1995 was de eerste speelfilm die volledig met computeranimatie werd gemaakt.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_008",
+      "text": "Viggo Mortensen brak twee tenen toen hij tegen een helm trapte in \"The Two Towers\". Zijn schreeuw in de film is echt.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_009",
+      "text": "HBO wees de oorspronkelijke pilot van \"Game of Thrones\" af omdat testpubliek hem bijna onbegrijpelijk vond.",
+      "category": "series"
+    },
+    {
+      "id": "tv_010",
+      "text": "Alfred Hitchcock won nooit een Oscar voor beste regisseur, ondanks vijf nominaties.",
+      "category": "history"
+    },
+    {
+      "id": "tv_011",
+      "text": "Het gebrul van de T-Rex in \"Jurassic Park\" is een mix van geluiden van een olifant, alligator en tijgerwelp.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_012",
+      "text": "Will Smith sloeg de rol van Neo in \"The Matrix\" af om \"Wild Wild West\" te draaien.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_013",
+      "text": "De tune van \"The Office\" werd opgenomen door The Scrantones, een band die speciaal voor de serie werd opgericht.",
+      "category": "music"
+    },
+    {
+      "id": "tv_014",
+      "text": "De eerste geluidsfilm ooit was \"The Jazz Singer\" uit 1927, met Al Jolson in de hoofdrol.",
+      "category": "history"
+    },
+    {
+      "id": "tv_015",
+      "text": "In \"Titanic\" klopte de sterrenhemel in de scheepswreckscène niet. Cameron corrigeerde dit in de 3D-heruitgave.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_016",
+      "text": "Bryan Cranston nam \"Breaking Bad\" aan nadat de rol was aangeboden aan John Cusack en Matthew Broderick.",
+      "category": "series"
+    },
+    {
+      "id": "tv_017",
+      "text": "De beroemde douchescène in \"Psycho\" vergde 7 dagen opnames voor slechts 45 seconden film.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_018",
+      "text": "Ennio Morricone componeerde meer dan 500 filmmuziekstukken in een carrière van ruim zestig jaar.",
+      "category": "music"
+    },
+    {
+      "id": "tv_019",
+      "text": "Het bullet time-effect in \"The Matrix\" werd bereikt met 120 camera's in een cirkel die achtereenvolgens afvuurden.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_020",
+      "text": "\"The Simpsons\" is de langstlopende animatieserie in prime time van de Amerikaanse televisie.",
+      "category": "series"
+    },
+    {
+      "id": "tv_021",
+      "text": "Stanley Kubrick liet Shelley Duvall de honkbalknuppelscène in \"The Shining\" 127 keer opnieuw spelen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_022",
+      "text": "De beroemde Wilhelm-schreeuw is een geluidseffect uit 1951 dat in meer dan 400 films is gebruikt.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_023",
+      "text": "De eerste openbare televisie-uitzending vond plaats in Londen in 1936 via de BBC.",
+      "category": "history"
+    },
+    {
+      "id": "tv_024",
+      "text": "Heath Ledger sloot zich wekenlang op in een hotelkamer om zijn Joker voor \"The Dark Knight\" op te bouwen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_025",
+      "text": "Hans Zimmer componeerde het thema van \"Inception\" door \"Non, je ne regrette rien\" van Edith Piaf te vertragen.",
+      "category": "music"
+    },
+    {
+      "id": "tv_026",
+      "text": "De productie van \"Mad Max: Fury Road\" duurde in totaal zo'n vijftien jaar, van ontwikkeling tot opnames.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_027",
+      "text": "Andy Serkis' motion capture voor Gollum in \"The Lord of the Rings\" heeft het gebruik van de techniek in film herdefinieerd.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_028",
+      "text": "\"Stranger Things\" werd door meer dan 15 zenders afgewezen voordat Netflix het accepteerde.",
+      "category": "series"
+    },
+    {
+      "id": "tv_029",
+      "text": "Charlie Chaplin deed ooit mee aan een wedstrijd voor dubbelgangers van zichzelf en won niet.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_030",
+      "text": "Het maïsveld in \"Interstellar\" werd echt aangeplant door de productie en na de opnames doorverkocht.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_031",
+      "text": "De eerste Oscaruitreiking in 1929 duurde slechts 15 minuten en de winnaars waren maanden van tevoren bekendgemaakt.",
+      "category": "history"
+    },
+    {
+      "id": "tv_032",
+      "text": "Pedro Pascal werd als hoofdrolspeler van \"The Last of Us\" gekozen toen de serie al jaren in ontwikkeling was.",
+      "category": "series"
+    },
+    {
+      "id": "tv_033",
+      "text": "Het geluid van het lightsaber in \"Star Wars\" ontstond uit de combinatie van het gezoem van een projector en een oude tv.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_034",
+      "text": "Meryl Streep houdt het record voor Oscarnominaties als actrice, met eenentwintig in totaal.",
+      "category": "history"
+    },
+    {
+      "id": "tv_035",
+      "text": "De soundtrack van \"Pulp Fiction\" bevat geen speciaal gecomponeerde muziek: hij bestaat volledig uit bestaande nummers.",
+      "category": "music"
+    },
+    {
+      "id": "tv_036",
+      "text": "\"Squid Game\" werd de meest bekeken niet-Engelstalige serie in de geschiedenis van Netflix.",
+      "category": "series"
+    },
+    {
+      "id": "tv_037",
+      "text": "Jim Carrey bleef de hele opnameperiode van \"Man on the Moon\" in het personage van Andy Kaufman.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_038",
+      "text": "Het IMAX-formaat werd voor het eerst getoond op de Expo van Osaka in 1970 met een multiscreenfilm.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_039",
+      "text": "Robert Downey Jr. werd als onverzekerbaar risico beschouwd voordat hij in 2008 als Iron Man werd gecast.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_040",
+      "text": "\"Chernobyl\" van HBO werd bijna volledig opgenomen in Litouwen, in een echte voormalige Sovjet-kerncentrale.",
+      "category": "series"
+    },
+    {
+      "id": "tv_041",
+      "text": "De piano in het thema van \"The Pianist\" werd echt bespeeld door Adrien Brody, die er maanden voor studeerde.",
+      "category": "music"
+    },
+    {
+      "id": "tv_042",
+      "text": "Quentin Tarantino werkte in een videotheek voordat hij regisseur werd: daar ontwikkelde hij zijn filmkennis.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_043",
+      "text": "De eerste animatiefilm ooit was \"El Apóstol\" uit 1917, een Argentijnse film die nu verloren is gegaan.",
+      "category": "history"
+    },
+    {
+      "id": "tv_044",
+      "text": "In \"Inception\" is de tol niet Cobbs echte totem: zijn originele totem is zijn trouwring.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_045",
+      "text": "\"The Bear\" vereiste dat de acteurs echte professionele kookcursussen volgden vóór de opnames.",
+      "category": "series"
+    },
+    {
+      "id": "tv_046",
+      "text": "De THX Deep Note, het geluid dat in de bioscoop aan veel films voorafgaat, werd in 1983 door een computerprogramma gegenereerd.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_047",
+      "text": "Chadwick Boseman draaide meerdere Marvel-films terwijl hij in stilte vocht tegen darmkanker.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_048",
+      "text": "Het iconische gefluit in de westerns van Sergio Leone werd uitgevoerd door Alessandro Alessandroni, medewerker van Morricone.",
+      "category": "music"
+    },
+    {
+      "id": "tv_049",
+      "text": "\"Parasite\" van Bong Joon-ho was de eerste niet-Engelstalige film die de Oscar voor beste film won.",
+      "category": "history"
+    },
+    {
+      "id": "tv_050",
+      "text": "De sneeuw in \"Game of Thrones\" was vaak chemisch behandeld gerecycled papier om er realistisch uit te zien.",
+      "category": "series"
+    },
+    {
+      "id": "tv_051",
+      "text": "Tom Hanks kreeg geen vast salaris voor \"Forrest Gump\": hij koos voor een percentage van de opbrengst en verdiende zo veel meer.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_052",
+      "text": "Het geluid van de velociraptor in \"Jurassic Park\" werd gemaakt door schildpadden op te nemen tijdens de paring.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_053",
+      "text": "Keanu Reeves deed afstand van een groot deel van zijn salaris voor \"The Matrix\" om het budget voor special effects te verhogen.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_054",
+      "text": "\"Twin Peaks\" van David Lynch wordt beschouwd als de serie die de weg opende voor moderne auteurstelevisie.",
+      "category": "series"
+    },
+    {
+      "id": "tv_055",
+      "text": "De eerste film die wereldwijd meer dan een miljard dollar opbracht was \"Titanic\" van James Cameron in 1998.",
+      "category": "history"
+    },
+    {
+      "id": "tv_056",
+      "text": "Danny DeVito en Arnold Schwarzenegger werden hechte vrienden op de set van \"Twins\" in 1988 en zijn dat nog steeds.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_057",
+      "text": "De muziek van \"Blade Runner\" werd door Vangelis grotendeels geïmproviseerd op synthesizer terwijl hij de gemonteerde scènes bekeek.",
+      "category": "music"
+    },
+    {
+      "id": "tv_058",
+      "text": "\"La Casa de Papel\" was oorspronkelijk bedoeld als tweedelige miniserie voor de Spaanse TV, vóór het wereldwijde succes op Netflix.",
+      "category": "series"
+    },
+    {
+      "id": "tv_059",
+      "text": "Dolby Atmos, geïntroduceerd in 2012 met \"Brave\", plaatst geluiden op precieze punten in de bioscoopzaal.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_060",
+      "text": "Toshiro Mifune weigerde de rollen van Obi-Wan Kenobi en Darth Vader die George Lucas hem aanbood voor \"Star Wars\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_061",
+      "text": "De eerste openbare filmvertoning van de gebroeders Lumière vond plaats op 28 december 1895 in het Grand Café in Parijs.",
+      "category": "history"
+    },
+    {
+      "id": "tv_062",
+      "text": "Jenna Ortega improviseerde de dans van Wednesday in de serie \"Wednesday\", geïnspireerd door gothbewegingen uit de jaren '80.",
+      "category": "series"
+    },
+    {
+      "id": "tv_063",
+      "text": "Het geluid van de communicator in \"Star Trek\" werd gemaakt met het geluid van een aansteker die achterstevoren werd geopend.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_064",
+      "text": "Morgan Freeman kreeg zijn eerste belangrijke filmrol pas op zijn 50e, met \"Street Smart\" in 1987.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_065",
+      "text": "De soundtrack van \"Drive\" van Nicolas Winding Refn droeg bij aan de doorbraak van synthwave in de popcultuur.",
+      "category": "music"
+    },
+    {
+      "id": "tv_066",
+      "text": "Tijdens de opnames van \"The Revenant\" verdroeg de crew temperaturen tot -25 °C in de Canadese bossen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_067",
+      "text": "\"Fleabag\" begon als theatrale monoloog van Phoebe Waller-Bridge op het Edinburgh Festival in 2013.",
+      "category": "series"
+    },
+    {
+      "id": "tv_068",
+      "text": "Het CinemaScope-formaat werd in 1953 geïntroduceerd om te concurreren met televisie door het bioscoopscherm te verbreden.",
+      "category": "history"
+    },
+    {
+      "id": "tv_069",
+      "text": "In \"Fight Club\" plaatste David Fincher in bijna elk beeld van de film een Starbucks-beker.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_070",
+      "text": "De ademhaling van Darth Vader werd opgenomen door een duikregulator in een microfoon te houden.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_071",
+      "text": "Cate Blanchett won de Oscar voor haar vertolking van Katharine Hepburn in \"The Aviator\", zelf ook een Oscarwinnares.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_072",
+      "text": "De tune van \"Succession\", gecomponeerd door Nicholas Britell, mengt bewust hiphop met klassieke muziek.",
+      "category": "music"
+    },
+    {
+      "id": "tv_073",
+      "text": "\"Shōgun\" uit 2024 werd de serie met de meeste Emmy's gewonnen in één seizoen in de televisiegeschiedenis.",
+      "category": "series"
+    },
+    {
+      "id": "tv_074",
+      "text": "Walt Disney houdt het record voor meeste Oscars gewonnen door één persoon: hij ontving er tweeëntwintig tijdens zijn carrière.",
+      "category": "history"
+    },
+    {
+      "id": "tv_075",
+      "text": "Samuel L. Jackson speelde in meer dan 150 films, wat hem een van de meest productieve acteurs van Hollywood maakt.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_076",
+      "text": "Regen in films bevat vaak melk gemengd met water om de druppels beter zichtbaar te maken voor de camera.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_077",
+      "text": "Christian Bale verloor meer dan 25 kg voor \"The Machinist\" en kwam er een paar maanden later 45 aan voor \"Batman Begins\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_078",
+      "text": "De serie \"Dark\" was de eerste Duitse originele productie van Netflix en debuteerde in 2017.",
+      "category": "series"
+    },
+    {
+      "id": "tv_079",
+      "text": "Het thema van \"Schindler's List\" werd op viool gespeeld door Itzhak Perlman, persoonlijk gekozen door Spielberg.",
+      "category": "music"
+    },
+    {
+      "id": "tv_080",
+      "text": "De eerste draadloze tv-afstandsbediening, de Zenith Space Command uit 1956, werkte met mechanische ultrasone signalen.",
+      "category": "history"
+    },
+    {
+      "id": "tv_081",
+      "text": "Harrison Ford was een timmerman die in de studio's werkte toen George Lucas hem opmerkte voor \"Star Wars\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_082",
+      "text": "Digitale deepfake-technologie om acteurs te verjongen werd op grote schaal geïntroduceerd in \"The Irishman\" van Scorsese.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_083",
+      "text": "Natalie Portman trainde een jaar lang met een professionele ballerina ter voorbereiding op \"Black Swan\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_084",
+      "text": "\"Mare of Easttown\" met Kate Winslet zorgde voor een toename van toerisme in de echte Easttown Township in Pennsylvania.",
+      "category": "series"
+    },
+    {
+      "id": "tv_085",
+      "text": "Pink Floyd maakte het album \"The Dark Side of the Moon\" deels als soundtrack voor een film die nooit werd gemaakt.",
+      "category": "music"
+    },
+    {
+      "id": "tv_086",
+      "text": "De eerste postume Oscar werd in 1940 toegekend aan Sidney Howard voor het scenario van \"Gone with the Wind\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_087",
+      "text": "Bill Murray accepteerde \"Ghostbusters\" op voorwaarde dat Columbia zijn film \"The Razor's Edge\" zou financieren.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_088",
+      "text": "De onderwateropnames van \"Avatar: The Way of Water\" werden gefilmd in een speciaal gebouwd bassin van 3,4 miljoen liter.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_089",
+      "text": "Joaquin Phoenix verloor meer dan 23 kg voor de rol van Arthur Fleck in \"Joker\" uit 2019.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_090",
+      "text": "\"Arcane\" vergde zes jaar productietijd voordat de serie in 2021 op Netflix debuteerde.",
+      "category": "series"
+    },
+    {
+      "id": "tv_091",
+      "text": "Het thema van \"The Godfather\" werd gecomponeerd door Nino Rota, die het deels al had gebruikt in een Italiaanse film uit 1958.",
+      "category": "music"
+    },
+    {
+      "id": "tv_092",
+      "text": "De Moviola, het eerste apparaat voor filmmontage, werd in 1924 uitgevonden en bleef decennialang in gebruik.",
+      "category": "history"
+    },
+    {
+      "id": "tv_093",
+      "text": "Robin Williams improviseerde zo veel op de set dat zijn contract hele pagina's vrijliet voor zijn improvisaties.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_094",
+      "text": "De LED Volume-technologie in \"The Mandalorian\" projecteert 3D-omgevingen op enorme schermen achter de acteurs.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_095",
+      "text": "\"Oppenheimer\" van Christopher Nolan beeldde de Trinity-kernproef uit zonder CGI, met echte praktische effecten.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_096",
+      "text": "\"Black Mirror\" dankt zijn titel aan de uitgeschakelde schermen van telefoons en tv's, die als zwarte spiegels reflecteren.",
+      "category": "series"
+    },
+    {
+      "id": "tv_097",
+      "text": "\"Lose Yourself\" van Eminem voor \"8 Mile\" was het eerste hiphopdnummer dat een Oscar won.",
+      "category": "music"
+    },
+    {
+      "id": "tv_098",
+      "text": "Kodachrome, de eerste kleurenfilm voor het grote publiek, werd door Kodak geïntroduceerd in 1935.",
+      "category": "history"
+    },
+    {
+      "id": "tv_099",
+      "text": "Michael Keaton werd in 1989 gecast als Batman onder groot protest van fans, maar werd na de release geprezen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_100",
+      "text": "\"Ted Lasso\" ontstond uit een reclamesketch van NBC om de Premier League te promoten in de Verenigde Staten.",
+      "category": "series"
+    },
+    {
+      "id": "tv_101",
+      "text": "Steven Spielberg werd drie keer afgewezen door de USC School of Cinematic Arts voordat hij de beroemdste regisseur van zijn generatie werd.",
+      "category": "history"
+    },
+    {
+      "id": "tv_102",
+      "text": "In \"Django Unchained\" sneed Leonardo DiCaprio echt zijn hand open aan een glas en speelde de scène gewoon verder.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_103",
+      "text": "Het ingeblikte gelach in Amerikaanse sitcoms stamt uit de jaren '50: sommige opnames bevatten gelach van inmiddels overleden mensen.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_104",
+      "text": "\"The Wire\" had lage kijkcijfers tijdens de uitzending, maar wordt nu beschouwd als een van de beste series ooit gemaakt.",
+      "category": "series"
+    },
+    {
+      "id": "tv_105",
+      "text": "De vleugel in het thema van \"The Truman Show\" werd bespeeld door Burkhard Dallwitz, co-componist naast Philip Glass.",
+      "category": "music"
+    },
+    {
+      "id": "tv_106",
+      "text": "Michelle Yeoh won de Oscar voor beste actrice in 2023 voor \"Everything Everywhere All at Once\", als eerste Aziatische in die categorie.",
+      "category": "history"
+    },
+    {
+      "id": "tv_107",
+      "text": "Voor \"Cast Away\" werd de productie een heel jaar stilgelegd zodat Tom Hanks kon afvallen en zijn baard kon laten groeien.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_108",
+      "text": "De ARRI Alexa-camera, geïntroduceerd in 2010, werd de meest gebruikte digitale filmcamera in Hollywood-producties.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_109",
+      "text": "\"Severance\" van Apple TV+ transformeerde een voormalig AT&T-pakhuis in New Jersey tot de set van de Lumon Industries-kantoren.",
+      "category": "series"
+    },
+    {
+      "id": "tv_110",
+      "text": "De soundtrack van \"Interstellar\" werd door Hans Zimmer gecomponeerd zonder het verhaal te kennen: Nolan gaf hem slechts een persoonlijke brief.",
+      "category": "music"
+    },
+    {
+      "id": "tv_111",
+      "text": "Anthony Hopkins was slechts 16 minuten in beeld in \"The Silence of the Lambs\", maar won toch de Oscar voor beste acteur.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_112",
+      "text": "De eerste videorecorder voor thuisgebruik, de Sony Betamax, kwam in 1975 op de markt en veranderde de manier waarop we tv keken.",
+      "category": "history"
+    },
+    {
+      "id": "tv_113",
+      "text": "Voor de stem van WALL·E bewerkte Ben Burtt zijn eigen stem met een vintage spraaksynthesizer uit de jaren '70.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_114",
+      "text": "\"Better Call Saul\" was twee jaar in ontwikkeling voordat Vince Gilligan de juiste toon vond, anders dan \"Breaking Bad\".",
+      "category": "series"
+    },
+    {
+      "id": "tv_115",
+      "text": "Het nummer \"My Heart Will Go On\" werd opgenomen in \"Titanic\" tegen de aanvankelijke wens van James Cameron in.",
+      "category": "music"
+    },
+    {
+      "id": "tv_116",
+      "text": "Audrey Hepburn werkte als koerier voor het Nederlandse verzet tijdens de Tweede Wereldoorlog, voordat ze actrice werd.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_117",
+      "text": "\"Tutto chiede salvezza\" was een van de eerste Italiaanse Netflix-series gebaseerd op een roman die de Premio Strega Giovani won.",
+      "category": "series"
+    },
+    {
+      "id": "tv_118",
+      "text": "De roterende gangscène in \"Inception\" werd echt gebouwd: een draaiende cilindrische set van dertig meter lang.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_119",
+      "text": "\"Poor Things\" van Yorgos Lanthimos gebruikte fisheye-lenzen en handgeschilderde decors om zijn surrealistische wereld te creëren.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_120",
+      "text": "De eerste sitcom in de tv-geschiedenis was \"Mary Kay and Johnny\", uitgezonden door het DuMont Network in 1947.",
+      "category": "history"
+    },
+    {
+      "id": "tv_121",
+      "text": "Denzel Washington won twee Oscars: voor \"Glory\" in 1990 en voor \"Training Day\" in 2002.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_122",
+      "text": "Explosies in de ruimte in films zijn wetenschappelijk onmogelijk: in een vacuüm is er geen lucht om schokgolven of geluid voort te planten.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_123",
+      "text": "\"Succession\" is losjes geïnspireerd op de familiedynamiek van de Murdochs, maar bedenker Jesse Armstrong heeft dat nooit volledig bevestigd.",
+      "category": "series"
+    },
+    {
+      "id": "tv_124",
+      "text": "Ryuichi Sakamoto componeerde de soundtrack van \"The Last Emperor\" en speelde zelf ook mee als Japanse officier.",
+      "category": "music"
+    },
+    {
+      "id": "tv_125",
+      "text": "\"Nosferatu\" uit 1922 werd bijna vernietigd: de erfgenamen van Bram Stoker kregen een gerechtelijk bevel om alle kopieën te vernietigen.",
+      "category": "history"
+    },
+    {
+      "id": "tv_126",
+      "text": "Voor \"Alien\" vertelde Ridley Scott de cast niets over de chestburster-scène: de geschokte reacties van de acteurs zijn echt.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_127",
+      "text": "Het 4:3-formaat domineerde decennialang de tv. De overstap naar 16:9 werd pas standaard met de komst van hd-televisie.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_128",
+      "text": "\"Gomorra - La serie\" is verkocht aan meer dan 190 landen en werd een van de meest geëxporteerde Italiaanse tv-producties.",
+      "category": "series"
+    },
+    {
+      "id": "tv_129",
+      "text": "De soundtrack van \"The Good, the Bad and the Ugly\" werd vóór de opnames opgenomen: Leone filmde de scènes op de muziek.",
+      "category": "music"
+    },
+    {
+      "id": "tv_130",
+      "text": "Spike Lee financierde zijn eerste film, \"She's Gotta Have It\" uit 1986, met een budget van slechts 175.000 dollar.",
+      "category": "history"
+    },
+    {
+      "id": "tv_131",
+      "text": "In \"The Truman Show\" improviseerde Jim Carrey de tekst voor de spiegel: \"Goedemorgen, goedemiddag en goedenacht.\"",
+      "category": "movies"
+    },
+    {
+      "id": "tv_132",
+      "text": "Sandra Bullock en George Clooney acteerden in \"Gravity\" bijna volledig in een mechanische constructie die gewichtloosheid simuleerde.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_133",
+      "text": "\"Peaky Blinders\" is vernoemd naar een echte bende uit Birmingham, actief van eind 19e tot begin 20e eeuw.",
+      "category": "series"
+    },
+    {
+      "id": "tv_134",
+      "text": "\"Stayin' Alive\" van de Bee Gees voor \"Saturday Night Fever\" blijft een van de bestverkochte singles aller tijden.",
+      "category": "music"
+    },
+    {
+      "id": "tv_135",
+      "text": "Greta Gerwig was de vijfde vrouw ooit die een Oscar-nominatie voor beste regisseur ontving, met \"Lady Bird\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_136",
+      "text": "Gary Oldman was bijna onherkenbaar als Winston Churchill in \"Darkest Hour\": de make-up vergde dagelijks meer dan drie uur.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_137",
+      "text": "Green screen werd voor het eerst gebruikt in de jaren '40, maar werd pas dominant met de digitale cinema rond 2000.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_138",
+      "text": "\"Narcos\" huurde de broer van de echte DEA-agent Steve Murphy in als adviseur om de historische nauwkeurigheid te waarborgen.",
+      "category": "series"
+    },
+    {
+      "id": "tv_139",
+      "text": "Trent Reznor en Atticus Ross van Nine Inch Nails wonnen in 2011 de Oscar voor de soundtrack van \"The Social Network\".",
+      "category": "music"
+    },
+    {
+      "id": "tv_140",
+      "text": "De eerste kleurenfilm opgenomen in Italië was \"Totò a colori\" uit 1952, geschoten op Ferraniacolor, een Italiaanse filmstock.",
+      "category": "history"
+    },
+    {
+      "id": "tv_141",
+      "text": "Voor \"Nope\" bouwde Jordan Peele een compleet westernstadje in de woestijn van Californië als permanente set.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_142",
+      "text": "Real-time ray tracing, tegenwoordig gebruikt in games en virtuele sets, simuleert het werkelijke fysieke gedrag van licht.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_143",
+      "text": "\"Baby Reindeer\" op Netflix is gebaseerd op de echte ervaringen van bedenker en hoofdrolspeler Richard Gadd.",
+      "category": "series"
+    },
+    {
+      "id": "tv_144",
+      "text": "Angelo Badalamenti componeerde het thema van \"Twin Peaks\" door te improviseren op piano terwijl David Lynch hem beelden beschreef.",
+      "category": "music"
+    },
+    {
+      "id": "tv_145",
+      "text": "Buster Keaton deed al zijn stunts zonder stuntdubbel, inclusief de beroemde vallende huisgevel in \"Steamboat Bill, Jr.\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_146",
+      "text": "\"Dune\" van Denis Villeneuve werd opgenomen in Jordanië, in dezelfde woestijnen die David Lean gebruikte voor \"Lawrence of Arabia\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_147",
+      "text": "De Steadicam werd in 1975 uitgevonden door Garrett Brown en voor het eerst op iconische wijze gebruikt in \"Rocky\".",
+      "category": "tech"
+    },
+    {
+      "id": "tv_148",
+      "text": "\"Slow Horses\" met Gary Oldman is gebaseerd op de romans van Mick Herron, die vrijwel onbekend waren tot de Apple TV+-bewerking.",
+      "category": "series"
+    },
+    {
+      "id": "tv_149",
+      "text": "Wes Anderson gebruikt steeds hetzelfde symmetrische kleurenpalet in zijn films: elk beeld is gecomponeerd als een schilderij.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_150",
+      "text": "Federico Fellini bedacht de term \"paparazzo\" in de film \"La dolce vita\" uit 1960, geïnspireerd op een personage uit de film.",
+      "category": "history"
+    },
+    {
+      "id": "tv_151",
+      "text": "Daniel Day-Lewis stopte tussen films met acteren en werkte als schoenmaker in Florence tussen \"Gangs of New York\" en \"There Will Be Blood\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_152",
+      "text": "De zin \"Frankly, my dear, I don't give a damn\" in \"Gone with the Wind\" leverde een boete van 5.000 dollar op wegens overtreding van de Hays-code.",
+      "category": "history"
+    },
+    {
+      "id": "tv_153",
+      "text": "In \"No Country for Old Men\" moest Javier Bardem zijn iconische kapsel maandenlang buiten de set dragen omdat hij het niet mocht knippen.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_154",
+      "text": "De serie \"Mindhunter\" van David Fincher gebruikte gezichtsprotheses op acteurs om de gezichten van echte door de FBI ondervraagde seriemoordenaars na te bootsen.",
+      "category": "series"
+    },
+    {
+      "id": "tv_155",
+      "text": "Het effect van het zinkende schip in \"Titanic\" werd bereikt door een 240 meter lange set in Mexico te kantelen.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_156",
+      "text": "Jack Nicholson improviseerde de tekst \"Heeere's Johnny!\" in \"The Shining\". Kubrick hield het erin hoewel het niet in het script stond.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_157",
+      "text": "\"Squid Game\" werd in 2008 geschreven door Hwang Dong-hyuk, maar niemand wilde het meer dan tien jaar lang produceren.",
+      "category": "series"
+    },
+    {
+      "id": "tv_158",
+      "text": "De eerste kleurentelevisie-uitzending in de VS vond plaats in 1951 op CBS, maar vrijwel niemand bezat een compatibele televisie.",
+      "category": "history"
+    },
+    {
+      "id": "tv_159",
+      "text": "Florence Pugh kreeg de rol in \"Midsommar\" na een auditie waarin ze zo overtuigend huilde dat Ari Aster haar meteen koos.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_160",
+      "text": "Het geluid van een lightsaber in \"Star Wars\" werd per toeval ontdekt: Ben Burtt liep met een microfoon langs een hoogspanningskabel.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_161",
+      "text": "\"Gomorra\" van Matteo Garrone werd op locatie in Scampia gedraaid, met veel niet-professionele acteurs uit de wijk.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_162",
+      "text": "De soundtrack van \"Trainspotting\" maakte nummers als \"Born Slippy\" van Underworld bekend ver buiten de ravescene.",
+      "category": "music"
+    },
+    {
+      "id": "tv_163",
+      "text": "\"La grande bellezza\" won de Oscar voor beste buitenlandse film in 2014, de eerste Italiaanse film die dat lukte sinds \"La vita è bella\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_164",
+      "text": "In \"The Mandalorian\" kostte de fysieke pop van Grogu ongeveer 5 miljoen dollar en werd deze bediend door twee poppenspelers.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_165",
+      "text": "Timothée Chalamet leerde piano spelen voor zijn rol in \"Call Me by Your Name\" en speelde de stukken in de film zelf.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_166",
+      "text": "\"Boris\" geldt als een van de beste Italiaanse komedieseries: het begon in 2007 met een klein budget op Fox Italia.",
+      "category": "series"
+    },
+    {
+      "id": "tv_167",
+      "text": "Het Panavision anamorphic-formaat, geïntroduceerd in de jaren '50, is nog steeds geliefd bij veel regisseurs vanwege de kenmerkende ovale bokeh.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_168",
+      "text": "Guillermo del Toro bouwde in zijn huis een compleet museum van horror- en filmobjecten, genaamd \"Bleak House\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_169",
+      "text": "De titelmuziek van \"Stranger Things\" werd gecomponeerd door Survive, een synthwave-duo uit Austin, in enkele weken na één ontmoeting met de Duffers.",
+      "category": "music"
+    },
+    {
+      "id": "tv_170",
+      "text": "\"Roma\" van Alfonso Cuarón was in 2019 de eerste Netflix-film die genomineerd werd voor de Oscar voor beste film.",
+      "category": "history"
+    },
+    {
+      "id": "tv_171",
+      "text": "In \"Apocalypse Now\" kreeg Martin Sheen een hartaanval tijdens de opnames in de Filipijnse jungle, maar keerde weken later terug op de set.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_172",
+      "text": "Zendaya was de jongste hoofdrolspeelster die een Emmy won voor \"Euphoria\" in de categorie beste actrice in een dramaserie.",
+      "category": "series"
+    },
+    {
+      "id": "tv_173",
+      "text": "\"Parasite\" werd gedraaid in een volledig in de studio gebouwde set: het huis van de Kims en de arme wijk bestaan niet in het echt.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_174",
+      "text": "Sofia Coppola was de derde vrouw in de geschiedenis die genomineerd werd voor de Oscar voor beste regisseur, voor \"Lost in Translation\" in 2004.",
+      "category": "history"
+    },
+    {
+      "id": "tv_175",
+      "text": "Voor \"The Batman\" liet Robert Pattinson zich inspireren door Kurt Cobain voor zijn Bruce Wayne, met goedkeuring van regisseur Matt Reeves.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_176",
+      "text": "Het muziekthema van \"Stranger Things\" is gebaseerd op analoge synthesizers uit de jaren '70 en '80, met name de Roland Juno en Sequential Prophet.",
+      "category": "music"
+    },
+    {
+      "id": "tv_177",
+      "text": "\"True Detective\" seizoen 1 werd in Louisiana in chronologische volgorde opgenomen, een zeldzame keuze voor een moderne televisieproductie.",
+      "category": "series"
+    },
+    {
+      "id": "tv_178",
+      "text": "Miyazaki tekent het grootste deel van de storyboards van Studio Ghibli-films met de hand, ook nu hij ouder is dan tachtig.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_179",
+      "text": "De 70mm-film in \"The Hateful Eight\" van Tarantino werd vertoond met Ultra Panavision-lenzen die sinds de jaren '60 niet meer waren gebruikt.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_180",
+      "text": "Sandra Oh was de eerste actrice van Aziatische afkomst die een nominatie kreeg als beste hoofdrolspeelster bij de Emmy's.",
+      "category": "history"
+    },
+    {
+      "id": "tv_181",
+      "text": "In \"Birdman\" filmde Alejandro González Iñárritu de film zo dat het één doorlopende ononderbroken shot lijkt.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_182",
+      "text": "\"Suburra\" was de eerste Italiaanse originele serie geproduceerd door Netflix, met een debuut in 2017.",
+      "category": "series"
+    },
+    {
+      "id": "tv_183",
+      "text": "De soundtrack van \"Her\" van Spike Jonze werd gecomponeerd door Arcade Fire samen met Owen Pallett, een zeldzaam filmproject voor de band.",
+      "category": "music"
+    },
+    {
+      "id": "tv_184",
+      "text": "De Foley-artist is de persoon die in de studio alle omgevingsgeluiden van een film nabootst: voetstappen, kleding, voorwerpen, met alledaags materiaal.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_185",
+      "text": "Lady Gaga leefde anderhalf jaar lang in het personage van Patrizia Reggiani tijdens de productie van \"House of Gucci\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_186",
+      "text": "\"The Lord of the Rings\" werd volledig in Nieuw-Zeeland opgenomen in één aaneengesloten opnameblok van 438 opeenvolgende dagen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_187",
+      "text": "\"Servant\" op Apple TV+ werd deels geregisseerd door M. Night Shyamalan, die sleutelscènes filmde in zijn eigen huis in Philadelphia.",
+      "category": "series"
+    },
+    {
+      "id": "tv_188",
+      "text": "De Academy Award wordt sinds 1939 \"Oscar\" genoemd: de oorsprong van die naam is tot op heden onzeker en omstreden.",
+      "category": "history"
+    },
+    {
+      "id": "tv_189",
+      "text": "Voor haar rol in \"Monster\" maakte Charlize Theron zichzelf onherkenbaar met prosthesemake-up die elke ochtend vier uur in beslag nam.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_190",
+      "text": "\"1883\" en \"1923\", spin-offs van \"Yellowstone\", behoorden tot de duurste series ooit geproduceerd voor Paramount+.",
+      "category": "series"
+    },
+    {
+      "id": "tv_191",
+      "text": "Alexandre Desplat componeerde de muziek voor acht films die genomineerd werden voor de Oscar voor beste film en won tweemaal.",
+      "category": "music"
+    },
+    {
+      "id": "tv_192",
+      "text": "De CGI van Thanos' gezicht in \"Avengers: Endgame\" gebruikte 150 gezichtsmarkers op Josh Brolins gezicht tijdens elke scène.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_193",
+      "text": "Tilda Swinton is in veel rollen bijna onherkenbaar: in \"Suspiria\" (2018) speelde ze drie personages, waaronder een oude man.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_194",
+      "text": "\"Nuovo Cinema Paradiso\" van Giuseppe Tornatore won de Oscar voor beste buitenlandse film in 1990 en lanceerde de Siciliaanse regisseur wereldwijd.",
+      "category": "history"
+    },
+    {
+      "id": "tv_195",
+      "text": "In \"Mad Max: Fury Road\" bespeelde de Doof Warrior echt een werkende vlammenwerper-gitaar gemonteerd op de truck.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_196",
+      "text": "\"Ripley\" op Netflix werd volledig in zwart-wit gedraaid langs de Italiaanse kust, in Atrani, Rome en Venetië.",
+      "category": "series"
+    },
+    {
+      "id": "tv_197",
+      "text": "De Imperial March van Darth Vader zat niet in de eerste \"Star Wars\": John Williams componeerde het pas voor \"The Empire Strikes Back\".",
+      "category": "music"
+    },
+    {
+      "id": "tv_198",
+      "text": "De eerste film met Dolby Stereo-geluid was \"A Star is Born\" met Barbra Streisand in 1976, een doorbraak voor meerkanaalsgeluid.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_199",
+      "text": "Denis Villeneuve vermeed green screens voor \"Arrival\": het buitenaardse schip werd gebouwd als een fysieke set van twaalf meter hoog.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_200",
+      "text": "Marcello Mastroianni sprak geen Engels en leerde zijn teksten fonetisch voor zijn zeldzame Engelstalige films.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_201",
+      "text": "Matt Damon schreef het script van \"Good Will Hunting\" samen met Ben Affleck op de achterkant van servetten tijdens werkpauzes.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_202",
+      "text": "De rol van Wolverine werd aangeboden aan Russell Crowe, die weigerde en zelf de naam van Hugh Jackman voorstelde.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_203",
+      "text": "\"The Crown\" bouwde volledige sets van Buckingham Palace in de studio na: geen enkele scène werd in het echte paleis opgenomen.",
+      "category": "series"
+    },
+    {
+      "id": "tv_204",
+      "text": "De eerste filmstroken van nitraat waren uiterst brandbaar: veel stomme films gingen verloren bij onbedoelde branden.",
+      "category": "history"
+    },
+    {
+      "id": "tv_205",
+      "text": "John Travolta weigerde de rol van Forrest Gump voordat die aan Tom Hanks werd aangeboden.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_206",
+      "text": "Ingeblikte lach in sitcoms wordt vaak gemixt met die van een echt publiek om een natuurlijker effect te bereiken.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_207",
+      "text": "\"Fargo\" van de Coens opent met \"based on a true story\", maar is volledig verzonnen: een bewuste narratieve keuze.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_208",
+      "text": "De eerste vrouw die de Palme d'Or in Cannes won als regisseur was Jane Campion in 1993 met \"The Piano\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_209",
+      "text": "Edward Norton herschreef een groot deel van het script van \"American History X\" zonder toestemming van regisseur Tony Kaye.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_210",
+      "text": "\"The Witcher\" van Netflix vergde honderden op maat gemaakte pruiken, waarvan veel met de hand genaaid van echt haar.",
+      "category": "series"
+    },
+    {
+      "id": "tv_211",
+      "text": "Het VHS-formaat won de strijd van Betamax ondanks lagere kwaliteit, dankzij langere banden en lagere kosten.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_212",
+      "text": "Sandra Bullock gaf haar Razzie Award terug die ze de dag ervoor had gewonnen, vlak voor ze de Oscar kreeg voor \"The Blind Side\" in 2010.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_213",
+      "text": "Akira Kurosawa had grote invloed op George Lucas: \"The Hidden Fortress\" inspireerde rechtstreeks het verhaal van \"Star Wars\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_214",
+      "text": "\"Chernobyl\" van HBO was de eerste miniserie die \"Breaking Bad\" overtrof als best beoordeelde serie op IMDb bij de première.",
+      "category": "series"
+    },
+    {
+      "id": "tv_215",
+      "text": "Oranje en blauw domineren Hollywood-filmposters omdat het complementaire kleuren zijn die het menselijk oog aantrekken.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_216",
+      "text": "Kate Winslet hield haar adem meer dan zeven minuten in onder water tijdens de opnames van \"Avatar: The Way of Water\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_217",
+      "text": "Alberto Sordi begon als stemacteur: hij was de Italiaanse stem van Oliver Hardy van Laurel en Hardy.",
+      "category": "history"
+    },
+    {
+      "id": "tv_218",
+      "text": "\"Beef\" van Netflix werd geschreven door Lee Sung Jin, gebaseerd op een echt incident van verkeersagressie op de snelweg.",
+      "category": "series"
+    },
+    {
+      "id": "tv_219",
+      "text": "Het geluid van de Millennium Falcon die niet start in \"Star Wars\" is het echte geluid van een vastgelopen 35mm-projector.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_220",
+      "text": "Meryl Streep leerde viool spelen voor \"Music of the Heart\" met dagelijkse lessen gedurende twee maanden voor de opnames.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_221",
+      "text": "\"Shogun\" uit 1980 was zo populair in Amerika dat de verkoop van sojasaus merkbaar steeg na de uitzending.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_222",
+      "text": "De eerste film die aan boord van een vliegtuig werd vertoond was in 1921 op een vlucht van Aeromarine Airways, in een watervliegtuig.",
+      "category": "history"
+    },
+    {
+      "id": "tv_223",
+      "text": "In \"Her\" verving Scarlett Johansson Samantha Morton als stem van Samantha nadat de film al was opgenomen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_224",
+      "text": "\"The White Lotus\" werd tijdens de pandemie opgenomen in het Four Seasons op Maui, met cast en crew in quarantaine in het hotel.",
+      "category": "series"
+    },
+    {
+      "id": "tv_225",
+      "text": "De eerste film met surround sound was Disneys \"Fantasia\" in 1940, met het Fantasound-systeem met meerdere luidsprekers.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_226",
+      "text": "Woody Harrelson ontdekte pas als volwassene dat zijn biologische vader een veroordeelde huurmoordenaar was, wat zijn rolkeuzes beïnvloedde.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_227",
+      "text": "Sergio Leone draaide zeer weinig shots per dag, maar plande elk shot met manische precisie vooraf.",
+      "category": "history"
+    },
+    {
+      "id": "tv_228",
+      "text": "\"Loki\" van Marvel introduceerde het multiverse-concept dat de gehele Fase 4 en 5 van het MCU heeft gestuurd.",
+      "category": "series"
+    },
+    {
+      "id": "tv_229",
+      "text": "Het letterbox-formaat met zwarte balken boven en onder het beeld werd lang gehaat door tv-kijkers in de jaren '80 en '90.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_230",
+      "text": "Adele weigerde aanvankelijk het themalied voor \"Skyfall\" te schrijven, maar veranderde van gedachten na het lezen van het script.",
+      "category": "music"
+    },
+    {
+      "id": "tv_231",
+      "text": "Kubrick liet Tom Cruise de wandelscène in \"Eyes Wide Shut\" ongeveer 95 keer opnieuw doen voordat hij tevreden was.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_232",
+      "text": "\"My Brilliant Friend\" van HBO werd opgenomen in Caserta, in een wijk die getrouw werd nagebouwd naar de jaren '50.",
+      "category": "series"
+    },
+    {
+      "id": "tv_233",
+      "text": "De digitale camera RED ONE uit 2007 maakte digitale cinema toegankelijk voor onafhankelijke filmmakers tegen een voorheen ondenkbare prijs.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_234",
+      "text": "Jackie Chan voert zijn stunts uit zonder stuntdubbel en heeft tijdens zijn carrière breuken opgelopen in bijna elk bot van zijn lichaam.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_235",
+      "text": "\"Ladri di biciclette\" van Vittorio De Sica uit 1948 geldt als het meesterwerk van het Italiaans neorealisme, opgenomen met niet-professionele acteurs.",
+      "category": "history"
+    },
+    {
+      "id": "tv_236",
+      "text": "Voor \"Anatomy of a Fall\" schreef Justine Triet de hondenrol speciaal voor Messi, een Border Collie die al een ervaren acteur was.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_237",
+      "text": "\"Yellowjackets\" verweeft twee tijdlijnen met verschillende casts: de volwassen actrices ontmoetten de jonge pas bij de première.",
+      "category": "series"
+    },
+    {
+      "id": "tv_238",
+      "text": "Digitale kleurcorrectie heeft de chemische baden in het lab bijna volledig vervangen voor het bepalen van het kleurenpalet van films.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_239",
+      "text": "Radiohead stond het gebruik van \"Exit Music (For a Film)\" toe in Baz Luhrmanns \"Romeo + Juliet\", een van hun zeldzame concessies.",
+      "category": "music"
+    },
+    {
+      "id": "tv_240",
+      "text": "Clint Eastwood regisseert bijna altijd in één of twee takes per scène: zijn snelle werkwijze is legendarisch in de industrie.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_241",
+      "text": "Hedy Lamarr, Hollywoodster in de jaren '40, was mede-uitvinder van een frequentiesprongsysteem dat vooruitliep op modern Wi-Fi.",
+      "category": "history"
+    },
+    {
+      "id": "tv_242",
+      "text": "Voor \"Killers of the Flower Moon\" vroeg Scorsese de Osage Nation om elk cultureel detail van de film te superviseren.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_243",
+      "text": "\"Pachinko\" van Apple TV+ werd opgenomen in drie talen — Koreaans, Japans en Engels — over vier generaties heen.",
+      "category": "series"
+    },
+    {
+      "id": "tv_244",
+      "text": "Dolby Vision HDR verdubbelt het dynamisch bereik van het beeld ten opzichte van de standaard, dichter bij hoe het menselijk oog licht waarneemt.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_245",
+      "text": "Jonny Greenwood van Radiohead is ook filmcomponist: zijn werk voor \"Phantom Thread\" werd genomineerd voor een Oscar.",
+      "category": "music"
+    },
+    {
+      "id": "tv_246",
+      "text": "Christopher Lee las \"In de Ban van de Ring\" elk jaar en was het enige castlid dat Tolkien persoonlijk had ontmoet.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_247",
+      "text": "Paramount in Hollywood is de enige grote studio die fysiek in Los Angeles is gebleven: alle andere zijn verhuisd.",
+      "category": "history"
+    },
+    {
+      "id": "tv_248",
+      "text": "In \"Past Lives\" van Celine Song werden de scènes in Seoul en New York opzettelijk met tegengestelde kleurpaletten opgenomen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_249",
+      "text": "\"Fallout\" van Amazon Prime bouwde een post-apocalyptisch Las Vegas na op een set in de woestijn van Namibië.",
+      "category": "series"
+    },
+    {
+      "id": "tv_250",
+      "text": "Het getal 2.39:1 duidt de panoramische beeldverhouding aan die het meest wordt gebruikt in moderne blockbusters, ook wel CinemaScope genoemd.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_251",
+      "text": "Al Pacino weigerde de rol van Han Solo in \"Star Wars\" omdat hij het script te verwarrend vond om te begrijpen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_252",
+      "text": "De set van \"Blade Runner 2049\" bevatte een vuilnisbelt van elektronisch afval, gebouwd met tonnen echt afval.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_253",
+      "text": "\"The Bear\" werd opgenomen in een echte restaurantkeuken in Chicago: de acteurs volgden professionele kookcursussen vóór de opnames.",
+      "category": "series"
+    },
+    {
+      "id": "tv_254",
+      "text": "Charlie Chaplin deed ooit mee aan een wedstrijd voor dubbelgangers van zichzelf en won niet.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_255",
+      "text": "De eerste animatiefilm in de geschiedenis was \"El Apóstol\", een Argentijnse film uit 1917 die inmiddels verloren is gegaan.",
+      "category": "history"
+    },
+    {
+      "id": "tv_256",
+      "text": "De soundtrack van \"Amélie\" van Yann Tiersen werd deels vóór de film gecomponeerd: Jeunet koos bestaande nummers van de muzikant.",
+      "category": "music"
+    },
+    {
+      "id": "tv_257",
+      "text": "Voor \"The Whale\" droeg Brendan Fraser een prothesepak van circa 130 kg dat zes uur aanbrengtijd vergde.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_258",
+      "text": "De eerste tv-serie uitgezonden in Italië was \"The Adventures of Rin Tin Tin\" in 1956, kort na de start van de RAI-uitzendingen.",
+      "category": "history"
+    },
+    {
+      "id": "tv_259",
+      "text": "\"Andor\" van Tony Gilroy werd eerst als roman geschreven voordat het een scenario werd: elke aflevering bestrijkt een zelfstandig verhaal.",
+      "category": "series"
+    },
+    {
+      "id": "tv_260",
+      "text": "Het geluid van de schuifdeur van de Enterprise in \"Star Trek\" was een papieren zak die over een gladde vloer werd gesleept.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_261",
+      "text": "Viggo Mortensen leerde paardrijden, schermen en Elfs spreken om Aragorn te spelen in \"The Lord of the Rings\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_262",
+      "text": "Ennio Morricone componeerde meer dan 500 soundtracks in zijn carrière, maar won zijn eerste competitieve Oscar pas in 2016.",
+      "category": "music"
+    },
+    {
+      "id": "tv_263",
+      "text": "\"Shōgun\" uit 2024 werd bijna volledig in het Japans opgenomen, een zeldzame keuze voor een Amerikaanse productie van die omvang.",
+      "category": "series"
+    },
+    {
+      "id": "tv_264",
+      "text": "De term \"blockbuster\" komt van rijen die rond het blok liepen: de menigte \"blokkeerde\" letterlijk de straten.",
+      "category": "history"
+    },
+    {
+      "id": "tv_265",
+      "text": "De eerste film met gesynchroniseerde dialogen was \"The Jazz Singer\" uit 1927, die het einde van het stomme-filmtijdperk inluidde.",
+      "category": "history"
+    },
+    {
+      "id": "tv_266",
+      "text": "Robert De Niro haalde echt zijn taxichauffeurlicentie en werkte enkele nachten in New York ter voorbereiding op \"Taxi Driver\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_267",
+      "text": "\"Silo\" van Apple TV+ bouwde een verticale set van tien verdiepingen om de centrale wenteltrap van de ondergrondse bunker na te bouwen.",
+      "category": "series"
+    },
+    {
+      "id": "tv_268",
+      "text": "Het geluid van de T-Rex in \"Jurassic Park\" is een mix van geluiden van een babyolifant, een alligator en een tijgerwelp.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_269",
+      "text": "Viola Davis is een van de weinige actrices die de zogenaamde Triple Crown heeft gewonnen: een Oscar, Emmy en Tony Award.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_270",
+      "text": "Voor \"Ratatouille\" volgde het Pixar-team maandenlang kooklessen in Parijse sterrenrestaurants.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_271",
+      "text": "\"Skam\" ontstond als Noorse tienerserie in 2015 en werd daarna in meer dan tien landen bewerkt, waaronder Italië.",
+      "category": "series"
+    },
+    {
+      "id": "tv_272",
+      "text": "De eerste permanente bioscoop was het Grand Café in Parijs, maar het eerste speciaal gebouwde bioscoopgebouw was de Eden in La Ciotat in 1899.",
+      "category": "history"
+    },
+    {
+      "id": "tv_273",
+      "text": "Het thema van \"Mission: Impossible\", gecomponeerd door Lalo Schifrin in 1966, staat in 5/4-maat, een zeldzame maatsoort in tv en film.",
+      "category": "music"
+    },
+    {
+      "id": "tv_274",
+      "text": "Heath Ledger isoleerde zich zes weken in een hotelkamer om de stem en gebaren van de Joker in \"The Dark Knight\" op te bouwen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_275",
+      "text": "De rotoscopietechniek, waarbij live bewegingen worden nagetekend in animatie, werd in 1917 gepatenteerd door Max Fleischer.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_276",
+      "text": "\"Only Murders in the Building\" ontstond nadat Steve Martin en Martin Short samen een comedytour deden.",
+      "category": "series"
+    },
+    {
+      "id": "tv_277",
+      "text": "Hayao Miyazaki kondigde minstens zeven keer zijn afscheid van de filmwereld aan, maar keerde telkens terug om te regisseren.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_278",
+      "text": "De eerste Oscar voor beste animatiefilm werd pas in 2002 ingesteld: \"Shrek\" van DreamWorks won de prijs.",
+      "category": "history"
+    },
+    {
+      "id": "tv_279",
+      "text": "John Williams heeft meer dan vijftig Oscarnominaties ontvangen, meer dan enig ander levend persoon.",
+      "category": "music"
+    },
+    {
+      "id": "tv_280",
+      "text": "Voor \"Tár\" leerde Cate Blanchett een orkest live te dirigeren en studeerde ze maandenlang intensief piano.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_281",
+      "text": "Het oorspronkelijke concept van \"Lost\" werd in slechts elf weken ontwikkeld door ABC, een record voor een serie van die complexiteit.",
+      "category": "series"
+    },
+    {
+      "id": "tv_282",
+      "text": "De iconische oranje lucht in \"Mad Max: Fury Road\" werd in postproductie gecreëerd door de verzadiging van de Namibische woestijn te verhogen.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_283",
+      "text": "Sophia Loren won de Oscar in 1962 voor \"La ciociara\", als eerste actrice die hem won voor een niet-Engelstalige film.",
+      "category": "history"
+    },
+    {
+      "id": "tv_284",
+      "text": "Het nummer \"As Time Goes By\" uit \"Casablanca\" was al in 1931 geschreven, elf jaar vóór de film.",
+      "category": "music"
+    },
+    {
+      "id": "tv_285",
+      "text": "Willem Dafoe speelde zowel een held (Jezus in \"The Last Temptation of Christ\") als de Green Goblin in \"Spider-Man\" in dezelfde carrière.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_286",
+      "text": "\"Disclaimer\" van Alfonso Cuarón voor Apple TV+ werd op 35mm-film opgenomen, een zeldzame keuze voor hedendaagse series.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_287",
+      "text": "Voor \"Philadelphia\" viel Tom Hanks 12 kg af en bezocht hij maandenlang ziekenhuisafdelingen ter voorbereiding op zijn rol.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_288",
+      "text": "\"Il commissario Montalbano\" is in meer dan 65 landen uitgezonden, waarmee het een van de meest geëxporteerde Italiaanse series is.",
+      "category": "series"
+    },
+    {
+      "id": "tv_289",
+      "text": "Het eerste filmfestival ter wereld was het filmfestival van Venetië, opgericht in 1932.",
+      "category": "history"
+    },
+    {
+      "id": "tv_290",
+      "text": "Philip Glass componeerde de soundtracktrilogie voor de documentaires \"Koyaanisqatsi\", \"Powaqqatsi\" en \"Naqoyqatsi\" in twintig jaar.",
+      "category": "music"
+    },
+    {
+      "id": "tv_291",
+      "text": "Ke Huy Quan keerde na twintig jaar pauze terug naar het acteren en won meteen een Oscar bij zijn eerste comebackfilm.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_292",
+      "text": "Voor \"Gladiator II\" vulde Ridley Scott het nagebouwde Colosseum met echt water voor de naumachie-scène.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_293",
+      "text": "\"Reacher\" van Amazon koos Alan Ritchson vanwege zijn fysiek, trouw aan de romans, nadat Tom Cruise in de film was bekritiseerd.",
+      "category": "series"
+    },
+    {
+      "id": "tv_294",
+      "text": "De originele IMAX gebruikte horizontaal georiënteerde 70mm-film: elk beeldje was tien keer groter dan standaard 35mm.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_295",
+      "text": "Anna Magnani won de Oscar in 1956 voor \"The Rose Tattoo\", als eerste Italiaanse actrice die de prijs ontving.",
+      "category": "history"
+    },
+    {
+      "id": "tv_296",
+      "text": "Het thema van \"The Sopranos\" werd op het laatste moment gekozen: David Chase hoorde \"Woke Up This Morning\" in de auto en besliste ter plekke.",
+      "category": "music"
+    },
+    {
+      "id": "tv_297",
+      "text": "Jeff Bridges hield de slonzige look van The Dude maandenlang aan na \"The Big Lebowski\" en zei dat het personage hem niet losliet.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_298",
+      "text": "\"The Zone of Interest\" van Jonathan Glazer gebruikte verborgen camera's op de set: de acteurs wisten nooit welk shot het definitieve was.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_299",
+      "text": "\"Midnight Diner\" is een Japanse serie die zich afspeelt in een eetgelegenheid met twaalf plaatsen, alleen open van middernacht tot 7 uur.",
+      "category": "series"
+    },
+    {
+      "id": "tv_300",
+      "text": "Voor \"Elvis\" bleef Austin Butler zo lang in zijn rol dat zijn natuurlijke accent na de opnames maandenlang veranderd bleef.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_301",
+      "text": "Sean Connery droeg een pruik in alle James Bond-films: hij was al kaal op zijn twintigste.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_302",
+      "text": "De eerste aflevering van \"Friends\" werd in 1994 opgenomen voor een live publiek van ongeveer 500 mensen.",
+      "category": "series"
+    },
+    {
+      "id": "tv_303",
+      "text": "Regen in films wordt van achteren belicht omdat het anders onzichtbaar is voor de camera.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_304",
+      "text": "Quentin Tarantino werkte als medewerker in een videotheek voordat hij \"Reservoir Dogs\" schreef.",
+      "category": "history"
+    },
+    {
+      "id": "tv_305",
+      "text": "Voor \"Oppenheimer\" recreëerde Nolan de Trinity Test-explosie met echte pyrotechnische ladingen, zonder CGI.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_306",
+      "text": "De openingstune van \"Game of Thrones\" veranderde elk seizoen, met een bijgewerkte kaart die de locaties van de afleveringen weergaf.",
+      "category": "series"
+    },
+    {
+      "id": "tv_307",
+      "text": "De eerste postume Oscar voor een acteerrol werd in 1977 toegekend aan Peter Finch voor \"Network\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_308",
+      "text": "Het geluid van automatische deuren in sciencefictionfilms komt vaak van blikken die over metalen oppervlakken worden gesleept.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_309",
+      "text": "Cillian Murphy viel meer dan tien kilo af voor \"Oppenheimer\" met een dieet van alleen amandelen en water tijdens de opnames.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_310",
+      "text": "\"Dark\" was de eerste Duitstalige serie geproduceerd door Netflix en wordt beschouwd als een van de beste sciencefictionseries.",
+      "category": "series"
+    },
+    {
+      "id": "tv_311",
+      "text": "Italiaanse nasynchronisatie geldt als een van de beste ter wereld: Italië kent een traditie van professionele stemacteurs sinds 1932.",
+      "category": "history"
+    },
+    {
+      "id": "tv_312",
+      "text": "De kabels waarmee acteurs hangen in vechtscènes worden digitaal verwijderd, beeld voor beeld.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_313",
+      "text": "Robin Williams improviseerde zoveel in \"Aladdin\" dat nasynchroniseerders in andere talen moeite hadden de grappen aan te passen.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_314",
+      "text": "Voor \"The Revenant\" wachtte de crew maanden op het juiste natuurlijke licht: er werd alleen bij zonsopgang en zonsondergang gefilmd.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_315",
+      "text": "\"Mare of Easttown\" werd opgenomen in Pennsylvania; Kate Winslet oefende maandenlang het accent van Philadelphia.",
+      "category": "series"
+    },
+    {
+      "id": "tv_316",
+      "text": "De eerste film uitgezonden op Italiaanse tv was \"I promessi sposi\" in 1941, op de experimentele RAI-zender in Rome.",
+      "category": "history"
+    },
+    {
+      "id": "tv_317",
+      "text": "Danny Elfman componeerde het thema van Tim Burtons \"Batman\" in twee weken, non-stop werkend in zijn studio.",
+      "category": "music"
+    },
+    {
+      "id": "tv_318",
+      "text": "De motion capture voor Gollum in \"The Lord of the Rings\" was baanbrekend: Andy Serkis speelde elke scène live mee met de acteurs.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_319",
+      "text": "Voor \"Joker\" viel Joaquin Phoenix meer dan twintig kilo af met een extreem dieet onder maandenlang medisch toezicht.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_320",
+      "text": "\"Fleabag\" begon als theatermonoloog van Phoebe Waller-Bridge in 2013 voordat het een BBC-serie werd.",
+      "category": "series"
+    },
+    {
+      "id": "tv_321",
+      "text": "De eerste bioscoop met airconditioning opende in 1925 in New York: bioscopen werden populaire zomerse toevluchtsoorden.",
+      "category": "history"
+    },
+    {
+      "id": "tv_322",
+      "text": "In filmmuziek worden Franse hoorns vaak gebruikt om heldhaftigheid op te roepen: een conventie die teruggaat tot Wagner.",
+      "category": "music"
+    },
+    {
+      "id": "tv_323",
+      "text": "Marlon Brando las zijn tekst van verborgen bordjes op de set: bij \"The Godfather\" waren ze op de andere acteurs geplakt.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_324",
+      "text": "\"Aftersun\" van Charlotte Wells werd met een minimaal budget in Turkije opgenomen en lanceerde de regiecarrière van de Schotse.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_325",
+      "text": "\"Arcane\" van Riot Games vergde zes jaar productie voor één seizoen, een recordtijd voor een animatieserie.",
+      "category": "series"
+    },
+    {
+      "id": "tv_326",
+      "text": "De multiplexbioscoop ontstond in 1963 in Kansas City: twee zalen in één gebouw, een absolute nieuwigheid.",
+      "category": "history"
+    },
+    {
+      "id": "tv_327",
+      "text": "De \"day for night\"-techniek simuleert nachtscènes die overdag zijn gefilmd met blauwe filters en onderbelichting.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_328",
+      "text": "Samuel L. Jackson heeft in meer dan 150 films gespeeld, een van de acteurs met de meeste rollen in de filmgeschiedenis.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_329",
+      "text": "Voor \"Arrival\" bestudeerde Amy Adams wekenlang taalkunde met een academisch adviseur vóór het begin van de opnames.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_330",
+      "text": "\"Wednesday\" van Tim Burton werd opgenomen in Roemenië, waar de productie de Nevermore Academy herbouwde in een gotisch kasteel.",
+      "category": "series"
+    },
+    {
+      "id": "tv_331",
+      "text": "Driestroken-Technicolor, geïntroduceerd in de jaren '30, vereiste enorme camera's en drie keer zoveel licht als normaal.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_332",
+      "text": "Morricone en Sergio Leone waren klasgenoten op de lagere school in Rome, decennia voordat ze in de film samenwerkten.",
+      "category": "history"
+    },
+    {
+      "id": "tv_333",
+      "text": "Hans Zimmer gebruikt vaak een enkele cello, opgenomen op extreem volume, om spanning te creëren in zijn filmmuziek.",
+      "category": "music"
+    },
+    {
+      "id": "tv_334",
+      "text": "\"Io Capitano\" van Matteo Garrone werd gefilmd in Senegal, Marokko, de Libische woestijn en op open zee met niet-professionele acteurs.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_335",
+      "text": "Het tweede seizoen van \"Squid Game\" werd pas aangekondigd nadat de serie de meest bekeken content ooit op Netflix was geworden.",
+      "category": "series"
+    },
+    {
+      "id": "tv_336",
+      "text": "Het oudste filmtruc is de jump cut: Georges Méliès ontdekte het per ongeluk toen zijn camera vastliep.",
+      "category": "history"
+    },
+    {
+      "id": "tv_337",
+      "text": "Regengeluid in films wordt vaak kunstmatig versterkt: in werkelijkheid zijn druppels bijna onhoorbaar voor microfoons.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_338",
+      "text": "Morgan Freeman kreeg zijn eerste belangrijke filmrol pas op zijn vijftigste, met \"Street Smart\" in 1987.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_339",
+      "text": "De soundtrack van \"Drive\" met synthwerk van Kavinsky en College bepaalde de hele retrowave-esthetiek van de jaren 2010.",
+      "category": "music"
+    },
+    {
+      "id": "tv_340",
+      "text": "Voor \"C'è ancora domani\" filmde Paola Cortellesi in zwart-wit, geïnspireerd door het neorealisme, en debuteerde als regisseur met een kasrecord.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_341",
+      "text": "\"Vinland Saga\" is een anime gebaseerd op echte historische gebeurtenissen uit de Vikingtijd, naar een manga die sinds 2005 verschijnt.",
+      "category": "series"
+    },
+    {
+      "id": "tv_342",
+      "text": "De eerste bioscooptrailer werd vertoond in 1913, ná de film en niet ervoor: de naam \"trailer\" komt daar precies vandaan.",
+      "category": "history"
+    },
+    {
+      "id": "tv_343",
+      "text": "In horrorfilms wordt infrageluid onder 20 Hz gebruikt om onbewust angst op te wekken bij de kijker.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_344",
+      "text": "Keanu Reeves gaf een deel van zijn salaris voor \"The Matrix\" op zodat het budget de kostuums en special effects kon dekken.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_345",
+      "text": "Hildur Guðnadóttir won de Oscar voor de filmmuziek van \"Joker\", als eerste IJslandse vrouw en eerste solocomponiste ooit.",
+      "category": "music"
+    },
+    {
+      "id": "tv_346",
+      "text": "Voor \"The Zone of Interest\" werd het geluid opgenomen met verborgen microfoons op de set: de regisseur was nooit aanwezig bij de opnames.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_347",
+      "text": "\"Severance\" gebruikt een symmetrische, steriele beeldtaal geïnspireerd door Jacques Tati en Stanley Kubrick.",
+      "category": "series"
+    },
+    {
+      "id": "tv_348",
+      "text": "Het eerste speciale effect in de filmgeschiedenis was \"L'homme à la tête de caoutchouc\" van Méliès in 1901.",
+      "category": "history"
+    },
+    {
+      "id": "tv_349",
+      "text": "Het laser-IMAX-formaat, geïntroduceerd in 2014, projecteert beelden met een dubbele helderheid ten opzichte van traditionele lampsystemen.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_350",
+      "text": "Isabelle Huppert is de actrice met de meeste César-nominaties in de Franse filmgeschiedenis, met meer dan zestien kandidaturen.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_351",
+      "text": "Anthony Hopkins speelde zijn beroemdste scène in \"The Silence of the Lambs\" in slechts zestien minuten schermtijd, genoeg om de Oscar te winnen.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_352",
+      "text": "\"Succession\" van HBO was geïnspireerd op de familie Murdoch, maar bedenker Jesse Armstrong heeft dat nooit officieel toegegeven.",
+      "category": "series"
+    },
+    {
+      "id": "tv_353",
+      "text": "De eerste volledig in CGI gemaakte speelfilm was \"Toy Story\" van Pixar in 1995, geproduceerd in vier jaar met inmiddels verouderde computers.",
+      "category": "history"
+    },
+    {
+      "id": "tv_354",
+      "text": "De steadicam werd in 1975 uitgevonden door Garrett Brown en voor het eerst gebruikt in \"Rocky\" tijdens de trapscène in Philadelphia.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_355",
+      "text": "Chadwick Boseman betaalde zelf voor een authentiek Afrikaans accent in \"Black Panther\" door een dialectcoach in te huren voor de hele cast.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_356",
+      "text": "\"Narcos\" gebruikte echt archiefmateriaal van Pablo Escobar, gemengd met scènes met Wagner Moura, waardoor de grens bijna onzichtbaar werd.",
+      "category": "series"
+    },
+    {
+      "id": "tv_357",
+      "text": "Nino Rota componeerde de wals van \"The Godfather\" in één nacht: Coppola koos het uit tientallen stukken die de componist had voorgesteld.",
+      "category": "music"
+    },
+    {
+      "id": "tv_358",
+      "text": "Voor \"Cast Away\" werd de productie een heel jaar stilgelegd zodat Tom Hanks kon afvallen en zijn baard en haar kon laten groeien.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_359",
+      "text": "De eerste film die wereldwijd meer dan een miljard dollar opbracht was \"Titanic\" van James Cameron in 1998.",
+      "category": "history"
+    },
+    {
+      "id": "tv_360",
+      "text": "Het Bullet Time-effect in \"The Matrix\" werd bereikt met 120 camera's in een cirkel die in snelle opeenvolging foto's namen.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_361",
+      "text": "Pedro Pascal droeg in het grootste deel van seizoen 1 van \"The Mandalorian\" de helm: twee stuntdubbels droegen het harnas in actiescènes.",
+      "category": "series"
+    },
+    {
+      "id": "tv_362",
+      "text": "Michelle Yeoh beoefende als kind in Maleisië vechtsporten en voerde op haar 60e zelf de stunts uit in \"Everything Everywhere All at Once\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_363",
+      "text": "De soundtrack van \"Interstellar\" werd opgebouwd rond een pijporgel uit 1926, opgenomen in een Londense kerk door Hans Zimmer.",
+      "category": "music"
+    },
+    {
+      "id": "tv_364",
+      "text": "Stanley Kubrick vernietigde bijna al het voorbereidingsmateriaal van zijn nooit gerealiseerde \"Napoleon\": het project nam jaren van zijn leven in beslag.",
+      "category": "history"
+    },
+    {
+      "id": "tv_365",
+      "text": "In \"Dune\" van Villeneuve werd het geluid van de zandwormen gemaakt door zand in metalen buizen te gieten met verschillende snelheden.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_366",
+      "text": "Robert Downey Jr. verstopte snacks op de set van \"Avengers\" en at ze tijdens scènes: de regisseurs besloten die momenten in de film te laten.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_367",
+      "text": "\"Gomorra - La serie\" werd opgenomen in de echte wijken van Napels, met beveiligingsescortes voor cast en crew tijdens de opnames.",
+      "category": "series"
+    },
+    {
+      "id": "tv_368",
+      "text": "De eerste niet-Engelstalige film die de Oscar voor beste film won was \"Parasite\" van Bong Joon-ho in 2020.",
+      "category": "history"
+    },
+    {
+      "id": "tv_369",
+      "text": "De onderwateropnames van \"Jaws\" waren zo problematisch dat Spielberg de haai zo min mogelijk liet zien, wat de spanning juist verhoogde.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_370",
+      "text": "De eerste televisie-uitzending in de geschiedenis werd verzorgd door John Logie Baird in 1926, in zijn laboratorium in Londen.",
+      "category": "history"
+    },
+    {
+      "id": "tv_371",
+      "text": "\"Peaky Blinders\" is vernoemd naar een echte bende uit Birmingham van rond 1890 die scheermesjes in de klep van hun petten verstopte.",
+      "category": "series"
+    },
+    {
+      "id": "tv_372",
+      "text": "Het geluid van Indiana Jones' zweep werd gemaakt door een leren riem tegen een houten oppervlak te slaan in de studio.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_373",
+      "text": "Denzel Washington leest nooit het volledige script voordat hij een rol aanneemt: hij baseert zich alleen op de eerste dertig pagina's.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_374",
+      "text": "De soundtrack van \"Blade Runner\" van Vangelis werd bijna geheel live gespeeld op Yamaha CS-80-synthesizers, tegenwoordig extreem zeldzaam.",
+      "category": "music"
+    },
+    {
+      "id": "tv_375",
+      "text": "Alfonso Cuarón filmde \"Children of Men\" met plansequenties van tot zes minuten, waarbij honderden figuranten werden gecoördineerd.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_376",
+      "text": "\"Terrifier 2\" werd gemaakt met een budget van circa 250.000 dollar en bracht alleen al in de VS meer dan 15 miljoen op.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_377",
+      "text": "\"Slow Horses\" van Apple TV+ is gebaseerd op de romans van Mick Herron, een Britse schrijver die op een advocatenkantoor werkte terwijl hij ze schreef.",
+      "category": "series"
+    },
+    {
+      "id": "tv_378",
+      "text": "Dolby Atmos, geïntroduceerd in 2012 met \"Brave\", plaatst geluiden op precieze punten in de zaal, onafhankelijk van de speakers.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_379",
+      "text": "Audrey Hepburn werkte als koerier voor het Nederlands verzet tijdens de Tweede Wereldoorlog, toen ze nog een tiener was.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_380",
+      "text": "\"Derry Girls\" was bij de première in 2018 de best bekeken serie in de geschiedenis van de Noord-Ierse televisie.",
+      "category": "series"
+    },
+    {
+      "id": "tv_381",
+      "text": "Ryuichi Sakamoto componeerde de soundtrack van \"The Last Emperor\" in slechts twee weken en won bij zijn eerste poging de Oscar.",
+      "category": "music"
+    },
+    {
+      "id": "tv_382",
+      "text": "Federico Fellini bedacht de term \"paparazzo\" via het personage van de fotograaf in \"La dolce vita\" uit 1960.",
+      "category": "history"
+    },
+    {
+      "id": "tv_383",
+      "text": "Voor \"Gravity\" acteerde Sandra Bullock maandenlang opgesloten in een kubus van anderhalve meter om gewichtloosheid te simuleren.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_384",
+      "text": "De eerste bewegende beelden in de geschiedenis werden vastgelegd door Eadweard Muybridge in 1878 om de galop van een paard te bewijzen.",
+      "category": "history"
+    },
+    {
+      "id": "tv_385",
+      "text": "\"Shōgun\" (2024) bouwde een compleet Japans dorp uit de 17e eeuw op een set in Vancouver, inclusief een haven met schepen op ware grootte.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_386",
+      "text": "Bong Joon-ho heeft een notitieboek waarin hij elk shot van zijn films met de hand tekent voordat de opnames beginnen.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_387",
+      "text": "\"The Last of Us\" van HBO nam de scène met het kapotte horloge van Sarah in één take op: Nico Parker huilde zonder onderbreking.",
+      "category": "series"
+    },
+    {
+      "id": "tv_388",
+      "text": "Het thema van \"Schindler's List\" werd gespeeld door Itzhak Perlman op een viool uit 1714: Spielberg huilde bij de eerste opname.",
+      "category": "music"
+    },
+    {
+      "id": "tv_389",
+      "text": "Voor \"There Will Be Blood\" leefde Daniel Day-Lewis maandenlang in een afgelegen hut zonder elektriciteit om in zijn personage te blijven.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_390",
+      "text": "De eerste kleurenfilm in de filmgeschiedenis was een experimentele kortfilm van Edward Turner uit 1902, pas herontdekt in 2012.",
+      "category": "history"
+    },
+    {
+      "id": "tv_391",
+      "text": "\"Monsters\" van Gareth Edwards werd opgenomen met een crew van slechts zeven personen door Guatemala, Mexico en Belize.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_392",
+      "text": "Gary Oldman is zo'n kameleon dat veel kijkers hem zonder zijn prosthetische make-up niet herkennen van film tot film.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_393",
+      "text": "\"Baby Reindeer\" op Netflix werd geschreven en gespeeld door Richard Gadd, gebaseerd op gebeurtenissen uit zijn eigen leven.",
+      "category": "series"
+    },
+    {
+      "id": "tv_394",
+      "text": "Trent Reznor en Atticus Ross componeerden de soundtrack van \"The Social Network\" met geluiden opgenomen van oude industriële machines.",
+      "category": "music"
+    },
+    {
+      "id": "tv_395",
+      "text": "Voor \"Tutto il mio folle amore\" filmden Ferro, Ferreri en Pupi Avati regelmatig in Kroatië met alleen natuurlijk licht, zonder kunstmatige belichting.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_396",
+      "text": "\"Mr. Robot\" verborg echte ASCII-codes in de achtergronden van scènes: fans ontcijferden ze en vonden hints over de verhaallijn.",
+      "category": "series"
+    },
+    {
+      "id": "tv_397",
+      "text": "Het 4:3-beeldformaat keert terug in de arthousecinema: regisseurs als Andrea Arnold en Robert Eggers kiezen het vanwege de visuele intimiteit.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_398",
+      "text": "Whoopi Goldberg is een van de weinige artiesten die een Oscar, Emmy, Grammy én Tony heeft gewonnen — de zogenaamde EGOT.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_399",
+      "text": "Lisa Gerrard van Dead Can Dance zong het thema van \"Gladiator\" in een door haarzelf verzonnen taal, zonder echte woorden.",
+      "category": "music"
+    },
+    {
+      "id": "tv_400",
+      "text": "Voor \"Perfect Days\" filmde Wim Wenders in slechts twee weken in Tokio en paste het script dagelijks aan op basis van zijn ontdekkingen.",
+      "category": "movies"
+    }
+  ]
+}

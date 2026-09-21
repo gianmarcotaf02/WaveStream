@@ -1,0 +1,1508 @@
+{
+  "_status": "partial",
+  "_generated_at": "2026-05-09T13:55:57.776104+00:00",
+  "_language": "sq",
+  "_count": 300,
+  "items": [
+    {
+      "id": "tv_001",
+      "text": "Filmi i parë në histori, \"L'uscita dalle officine Lumière\", zgjat vetëm 46 sekonda dhe u xhirua në 1895 në Lion.",
+      "category": "history"
+    },
+    {
+      "id": "tv_002",
+      "text": "Al Pacino dhe Robert De Niro luajtën të dy në \"Il Padrino - Parte II\" pa ndarë asnjëherë një skenë së bashku.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_003",
+      "text": "Tema e \"Star Wars\" e kompozuar nga John Williams është bërë një nga kolonat zanore më të njohura në botë.",
+      "category": "music"
+    },
+    {
+      "id": "tv_004",
+      "text": "Seria \"Friends\" fillimisht u titullua \"Insomnia Cafe\" para se të ndryshonte emrin gjatë zhvillimit.",
+      "category": "series"
+    },
+    {
+      "id": "tv_005",
+      "text": "Technicolor me tri ngjyra debutoi në 1935 me \"Becky Sharp\", duke revolucionarizuar kinematografinë me ngjyra.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_006",
+      "text": "Sean Connery mbante paruke në të gjithë filmat e James Bond sepse kishte filluar t'i binin flokët që në moshën 21 vjeç.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_007",
+      "text": "\"Toy Story\" i vitit 1995 ishte filmi i parë i gjatë i realizuar tërësisht me grafikë kompjuterike.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_008",
+      "text": "Viggo Mortensen theu dy gishta të këmbës duke shkelur një helmetë në \"Le due torri\". Britma në film është e vërtetë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_009",
+      "text": "HBO refuzoi pilotin origjinal të \"Game of Thrones\" sepse u konsiderua pothuajse i pakuptueshëm nga audienca testuese.",
+      "category": "series"
+    },
+    {
+      "id": "tv_010",
+      "text": "Alfred Hitchcock nuk fitoi kurrë Oscar si regjisor më i mirë, pavarësisht pesë nominimeve.",
+      "category": "history"
+    },
+    {
+      "id": "tv_011",
+      "text": "Ulërima e T-Rex në \"Jurassic Park\" është një përzierje tingujsh elefanti, aligatori dhe këlyshi tigri.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_012",
+      "text": "Will Smith refuzoi rolin e Neo në \"Matrix\" për të xhiruar \"Wild Wild West\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_013",
+      "text": "Siglatura e \"The Office\" u regjistrua nga The Scrantones, një grup i krijuar enkas për serinë.",
+      "category": "music"
+    },
+    {
+      "id": "tv_014",
+      "text": "Filmi i parë me zë në histori ishte \"Il cantante di jazz\" i vitit 1927, me Al Jolson.",
+      "category": "history"
+    },
+    {
+      "id": "tv_015",
+      "text": "Në \"Titanic\", qielli me yje në skenën e fundosjes ishte astronomikisht i gabuar. Cameron e korrigjoi në ribotimin 3D.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_016",
+      "text": "Bryan Cranston pranoi \"Breaking Bad\" pasi roli i ishte ofruar fillimisht John Cusack dhe Matthew Broderick.",
+      "category": "series"
+    },
+    {
+      "id": "tv_017",
+      "text": "Skena e famshme e dushit në \"Psyco\" kërkoi 7 ditë xhirime për vetëm 45 sekonda filmim.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_018",
+      "text": "Ennio Morricone kompozoi mbi 500 kolona zanore në një karrierë që zgjati më shumë se gjashtëdhjetë vjet.",
+      "category": "music"
+    },
+    {
+      "id": "tv_019",
+      "text": "Bullet time në \"Matrix\" u realizua me 120 kamera të vendosura në rreth që fotografonin në sekuencë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_020",
+      "text": "\"The Simpsons\" është seria e animuar më jetëgjatë në orarin e mbrëmjes në televizionin amerikan.",
+      "category": "series"
+    },
+    {
+      "id": "tv_021",
+      "text": "Stanley Kubrick e bëri Shelley Duvall ta përsëriste skenën e shkopitit të bejsbollit në \"Shining\" 127 herë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_022",
+      "text": "Britma e famshme e Wilhelm është një efekt zanor i regjistruar në 1951 dhe i përdorur në mbi 400 filma.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_023",
+      "text": "Transmetimi i parë televiziv publik u zhvillua në Londër në 1936 nëpërmjet BBC-së.",
+      "category": "history"
+    },
+    {
+      "id": "tv_024",
+      "text": "Heath Ledger u izolua në një dhomë hoteli për javë të tëra për të ndërtuar personazhin e Joker në \"Il cavaliere oscuro\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_025",
+      "text": "Hans Zimmer kompozoi temën e \"Inception\" duke ngadalësuar \"Non, je ne regrette rien\" të Edith Piaf.",
+      "category": "music"
+    },
+    {
+      "id": "tv_026",
+      "text": "Prodhimi i \"Mad Max: Fury Road\" zgjati gjithsej rreth pesëmbëdhjetë vjet mes zhvillimit dhe xhirimeve.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_027",
+      "text": "Motion capture i Andy Serkis për Gollum në \"Il Signore degli Anelli\" ripërcaktoi përdorimin e kësaj teknike në kinema.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_028",
+      "text": "\"Stranger Things\" u refuzua nga mbi 15 rrjete televizive para se të pranohej nga Netflix.",
+      "category": "series"
+    },
+    {
+      "id": "tv_029",
+      "text": "Charlie Chaplin mori pjesë një herë në një konkurs sosiash të vetvetes dhe nuk fitoi.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_030",
+      "text": "Fusha e misrit në \"Interstellar\" u mbjell vërtet nga produksioni dhe u rishit pas vjeljes.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_031",
+      "text": "Ceremonia e parë e Oscar në 1929 zgjati vetëm 15 minuta dhe fituesit ishin njoftuar muaj më parë.",
+      "category": "history"
+    },
+    {
+      "id": "tv_032",
+      "text": "Pedro Pascal u zgjodh si protagonist i \"The Last of Us\" pasi seria ishte tashmë në zhvillim prej vitesh.",
+      "category": "series"
+    },
+    {
+      "id": "tv_033",
+      "text": "Tingulli i shpatës lazer në \"Star Wars\" lindi nga kombinimi i zhurmës së një projektori dhe një televizori të vjetër.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_034",
+      "text": "Meryl Streep mban rekordin e nominimeve për Oscar si aktore, me njëzet e një kandidatura gjithsej.",
+      "category": "history"
+    },
+    {
+      "id": "tv_035",
+      "text": "Kolona zanore e \"Pulp Fiction\" nuk përmban muzikë të kompozuar enkas: është tërësisht e përbërë nga këngë ekzistuese.",
+      "category": "music"
+    },
+    {
+      "id": "tv_036",
+      "text": "\"Squid Game\" u bë seria jo-anglisht më e shikuar në historinë e Netflix.",
+      "category": "series"
+    },
+    {
+      "id": "tv_037",
+      "text": "Jim Carrey qëndroi në personazhin e Andy Kaufman gjatë gjithë kohëzgjatjes së xhirimeve të \"Man on the Moon\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_038",
+      "text": "Formati IMAX u prezantua për herë të parë në Expo të Osakës në 1970 me një film me shumë ekrane.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_039",
+      "text": "Robert Downey Jr. konsiderohej një rrezik i pasigurushëm para se të zgjidhej si Iron Man në 2008.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_040",
+      "text": "\"Chernobyl\" e HBO u xhirua pothuajse tërësisht në Lituani, në një ish-central bërthamor sovjetik të vërtetë.",
+      "category": "series"
+    },
+    {
+      "id": "tv_041",
+      "text": "Pianoja në temën e \"Il pianista\" u luajt vërtet nga Adrien Brody, i cili studioi për muaj të tërë.",
+      "category": "music"
+    },
+    {
+      "id": "tv_042",
+      "text": "Quentin Tarantino punoi në një videotekë para se të bëhej regjisor: atje zhvilloi kulturën e tij kinematografike.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_043",
+      "text": "Filmi i parë i gjatë i animuar në histori ishte \"El Apóstol\" i vitit 1917, një film argjentinas sot i humbur.",
+      "category": "history"
+    },
+    {
+      "id": "tv_044",
+      "text": "Në \"Inception\", rrotullimi në fund nuk është totemi i vërtetë i Cobb: totemi i tij origjinal është unaza e martesës.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_045",
+      "text": "\"The Bear\" u kërkoi aktorëve të ndiqnin kurse të vërteta gatimi profesional para xhirimeve.",
+      "category": "series"
+    },
+    {
+      "id": "tv_046",
+      "text": "THX Deep Note, tingulli që paraprin shumë filma në kinema, u krijua në 1983 nga një program kompjuterik.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_047",
+      "text": "Chadwick Boseman xhiroi disa filma Marvel ndërsa luftonte privatisht kundër një tumori në zorrën e trashë.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_048",
+      "text": "Fishkëllima ikonike në westernat e Sergio Leone ekzekutohej nga Alessandro Alessandroni, bashkëpunëtor i Morricone.",
+      "category": "music"
+    },
+    {
+      "id": "tv_049",
+      "text": "\"Parasite\" i Bong Joon-ho ishte filmi i parë jo në anglisht që fitoi Oscar si filmi më i mirë.",
+      "category": "history"
+    },
+    {
+      "id": "tv_050",
+      "text": "Bora në \"Il Trono di Spade\" shpesh ishte letër e ricikluar e trajtuar kimikisht për të dukur realistike.",
+      "category": "series"
+    },
+    {
+      "id": "tv_051",
+      "text": "Tom Hanks nuk u pagua me tarifë fikse për \"Forrest Gump\": zgjodhi një përqindje nga të ardhurat, duke fituar shumë më tepër.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_052",
+      "text": "Zëri i velociraptorëve në \"Jurassic Park\" u krijua duke regjistruar breshka gjatë çiftëzimit.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_053",
+      "text": "Keanu Reeves hoqi dorë nga një pjesë e madhe e pagës për \"Matrix\" për të rritur buxhetin e efekteve speciale.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_054",
+      "text": "\"Twin Peaks\" e David Lynch konsiderohet seriali që hapi rrugën për televizionin autoriale moderne.",
+      "category": "series"
+    },
+    {
+      "id": "tv_055",
+      "text": "Filmi i parë që kaloi miliard dollarë në arkën botërore ishte \"Titanic\" i James Cameron në 1998.",
+      "category": "history"
+    },
+    {
+      "id": "tv_056",
+      "text": "Danny DeVito dhe Arnold Schwarzenegger u bënë miq të ngushtë në setin e \"Twins\" të 1988-s dhe janë ende sot.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_057",
+      "text": "Muzika e \"Blade Runner\" nga Vangelis u kompozua kryesisht duke improvizuar në sintetizator përballë skenave të montuara.",
+      "category": "music"
+    },
+    {
+      "id": "tv_058",
+      "text": "\"La Casa de Papel\" u konceptua fillimisht si miniserial dy-pjesësh për TV-në spanjolle, para suksesit global në Netflix.",
+      "category": "series"
+    },
+    {
+      "id": "tv_059",
+      "text": "Dolby Atmos, i prezantuar në 2012 me \"Brave\", pozicionon tingujt në pika të sakta të sallës së kinemasë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_060",
+      "text": "Toshiro Mifune refuzoi rolet e Obi-Wan Kenobi dhe Darth Vader që George Lucas i ofroi për \"Star Wars\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_061",
+      "text": "Shfaqja e parë publike e vëllezërve Lumière u mbajt më 28 dhjetor 1895 në Grand Café të Parisit.",
+      "category": "history"
+    },
+    {
+      "id": "tv_062",
+      "text": "Jenna Ortega improvizoi kërcimin e Wednesday në serialin \"Wednesday\", duke u frymëzuar nga lëvizjet e skenës goth të viteve '80.",
+      "category": "series"
+    },
+    {
+      "id": "tv_063",
+      "text": "Tingulli i hapjes së komunikatorit në \"Star Trek\" u krijua me zhurmën e një çakmaku të hapur në të kundërt.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_064",
+      "text": "Morgan Freeman mori rolin e tij të parë të rëndësishëm në kinema në moshën 50 vjeç, me \"Street Smart\" në 1987.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_065",
+      "text": "Kolona zanore e \"Drive\" të Nicolas Winding Refn ndihmoi në shpërthimin e zhanrit synthwave në kulturën pop.",
+      "category": "music"
+    },
+    {
+      "id": "tv_066",
+      "text": "Gjatë xhirimeve të \"The Revenant\", ekipi duroi temperatura deri në -25 °C në pyjet kanadeze.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_067",
+      "text": "\"Fleabag\" lindi si monolog teatral i Phoebe Waller-Bridge në Festivalin e Edinburgut në 2013.",
+      "category": "series"
+    },
+    {
+      "id": "tv_068",
+      "text": "Formati CinemaScope u prezantua në 1953 për të konkurruar me televizionin, duke zgjeruar ekranin kinematografik.",
+      "category": "history"
+    },
+    {
+      "id": "tv_069",
+      "text": "Në \"Fight Club\", David Fincher futi një gotë Starbucks pothuajse në çdo kuadër të filmit.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_070",
+      "text": "Tingulli i frymëmarrjes së Darth Vader u mor duke regjistruar një rregullator zhytjeje brenda një mikrofoni.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_071",
+      "text": "Cate Blanchett fitoi Oscar-in duke interpretuar Katharine Hepburn në \"The Aviator\", një tjetër fituese e Oscar-it.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_072",
+      "text": "Sigla e \"Succession\" e kompozuar nga Nicholas Britell përzien hip-hop dhe muzikë klasike në mënyrë të qëllimshme.",
+      "category": "music"
+    },
+    {
+      "id": "tv_073",
+      "text": "\"Shogun\" i 2024-s ishte seriali me më shumë Emmy të fituara në një sezon të vetëm në historinë e televizionit.",
+      "category": "series"
+    },
+    {
+      "id": "tv_074",
+      "text": "Walt Disney mban rekordin e Oscar-eve të fituara nga një person i vetëm: mori njëzet e dy gjatë karrierës.",
+      "category": "history"
+    },
+    {
+      "id": "tv_075",
+      "text": "Samuel L. Jackson ka luajtur në mbi 150 filma, duke e bërë një nga aktorët më produktivë të Hollywood-it.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_076",
+      "text": "Shiu në filma shpesh përmban qumësht të përzier me ujë për ta bërë më të dukshëm para kamerës.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_077",
+      "text": "Christian Bale humbi mbi 25 kg për \"The Machinist\" dhe mori 45 kg pak muaj më vonë për \"Batman Begins\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_078",
+      "text": "Seriali \"Dark\" ishte prodhimi i parë gjerman origjinal i Netflix, duke debutuar në 2017.",
+      "category": "series"
+    },
+    {
+      "id": "tv_079",
+      "text": "Tema e \"Schindler's List\" u luajt në violinë nga Itzhak Perlman, të cilin Spielberg e zgjodhi personalisht.",
+      "category": "music"
+    },
+    {
+      "id": "tv_080",
+      "text": "Telekomanda e parë TV pa tel, Zenith Space Command e 1956-s, funksiononte me ultratinguj mekanikë.",
+      "category": "history"
+    },
+    {
+      "id": "tv_081",
+      "text": "Harrison Ford ishte një marangoz që punonte në studio kur George Lucas e vuri re për \"Star Wars\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_082",
+      "text": "Deep fake digjital i përdorur për të rinuar aktorët debutoi në shkallë të gjerë në \"The Irishman\" të Scorsese.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_083",
+      "text": "Natalie Portman studioi për një vit pranë një balerine profesioniste për të përgatitur \"Black Swan\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_084",
+      "text": "\"Mare of Easttown\" me Kate Winslet nxiti turizmin në Easttown Township të vërtetë në Pennsylvania.",
+      "category": "series"
+    },
+    {
+      "id": "tv_085",
+      "text": "Pink Floyd krijuan albumin \"The Dark Side of the Moon\" pjesërisht për të sonorizuar një film që nuk u realizua kurrë.",
+      "category": "music"
+    },
+    {
+      "id": "tv_086",
+      "text": "Oscar-i i parë postum iu dha Sidney Howard në 1940 për skenarin e \"Gone with the Wind\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_087",
+      "text": "Bill Murray pranoi \"Ghostbusters\" me kusht që Columbia të financonte filmin e tij \"The Razor's Edge\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_088",
+      "text": "Xhirimet nënujore të \"Avatar: The Way of Water\" u bënë në një pishinë me 3.4 milionë litra të ndërtuar enkas.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_089",
+      "text": "Joaquin Phoenix humbi mbi 23 kg për rolin e Arthur Fleck në \"Joker\" të 2019-s.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_090",
+      "text": "\"Arcane\" kërkoi gjashtë vjet prodhim para se të debutonte në Netflix në 2021.",
+      "category": "series"
+    },
+    {
+      "id": "tv_091",
+      "text": "Tema e \"The Godfather\" u kompozua nga Nino Rota, i cili e kishte përdorur pjesërisht në një film italian të 1958-s.",
+      "category": "music"
+    },
+    {
+      "id": "tv_092",
+      "text": "Moviola, pajisja e parë për montazhin kinematografik, u shpik në 1924 dhe mbeti në përdorim për dekada.",
+      "category": "history"
+    },
+    {
+      "id": "tv_093",
+      "text": "Robin Williams improvizonte aq shumë sa kontrata parashikonte faqe të tëra të lëna bosh për të.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_094",
+      "text": "Teknologjia LED Volume e përdorur në \"The Mandalorian\" projekton ambjente 3D në ekrane të mëdha pas aktorëve.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_095",
+      "text": "\"Oppenheimer\" i Christopher Nolan rikrijoi shpërthimin e testit Trinity pa CGI, duke përdorur efekte praktike reale.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_096",
+      "text": "\"Black Mirror\" merr titullin nga ekranet e fikura të telefonave dhe TV-ve, që pasqyrojnë si pasqyra të zeza.",
+      "category": "series"
+    },
+    {
+      "id": "tv_097",
+      "text": "Kënga \"Lose Yourself\" e Eminem për \"8 Mile\" ishte kënga e parë hip-hop që fitoi Oscar-in.",
+      "category": "music"
+    },
+    {
+      "id": "tv_098",
+      "text": "Kodachrome, filmi i parë me ngjyra për publikun e gjerë, u prezantua nga Kodak në 1935.",
+      "category": "history"
+    },
+    {
+      "id": "tv_099",
+      "text": "Michael Keaton u zgjodh si Batman në 1989 mes protestave të mëdha të fansave, por u lavdërua pas daljes së filmit.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_100",
+      "text": "\"Ted Lasso\" lindi nga një skeç reklamues i NBC për të promovuar Premier League në Shtetet e Bashkuara.",
+      "category": "series"
+    },
+    {
+      "id": "tv_101",
+      "text": "Steven Spielberg u refuzua tri herë nga USC School of Cinematic Arts para se të bëhej regjisori më i njohur i gjeneratës së tij.",
+      "category": "history"
+    },
+    {
+      "id": "tv_102",
+      "text": "Në \"Django Unchained\", Leonardo DiCaprio e preu vërtet dorën duke thyer një gotë dhe vazhdoi ta luante skenën.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_103",
+      "text": "E qeshura e regjistruar në sitkomet amerikane daton nga vitet '50: disa gjurmë përmbajnë të qeshura njerëzish tashmë të ndjerë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_104",
+      "text": "\"The Wire\" pati sukses të dobët shikueshmërie kur u transmetua, por sot konsiderohet ndër serialet më të mira të prodhuara ndonjëherë.",
+      "category": "series"
+    },
+    {
+      "id": "tv_105",
+      "text": "Pianoja e përdorur në temën e \"The Truman Show\" u luajt nga Burkhard Dallwitz, bashkë-kompozitor me Philip Glass.",
+      "category": "music"
+    },
+    {
+      "id": "tv_106",
+      "text": "Michelle Yeoh fitoi Oscar-in si aktore më e mirë në 2023 për \"Everything Everywhere All at Once\", e para aziatike në këtë kategori.",
+      "category": "history"
+    },
+    {
+      "id": "tv_107",
+      "text": "Për \"Cast Away\", prodhimi u ndal një vit të plotë që Tom Hanks të humbte peshë dhe të rritej mjekrën.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_108",
+      "text": "Kamera ARRI Alexa, e prezantuar në 2010, u bë kamera digjitale më e përdorur në prodhimet e Hollivudit.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_109",
+      "text": "\"Severance\" i Apple TV+ e shndërroi një ish-magazinë AT&T në New Jersey në setin e zyrave të Lumon Industries.",
+      "category": "series"
+    },
+    {
+      "id": "tv_110",
+      "text": "Kolona zanore e \"Interstellar\" u kompozua nga Hans Zimmer pa e ditur tregimin: Nolan i dha vetëm një letër personale.",
+      "category": "music"
+    },
+    {
+      "id": "tv_111",
+      "text": "Anthony Hopkins u shfaq vetëm 16 minuta në \"Heshtja e qengjave\", megjithatë fitoi Oscar-in si aktori më i mirë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_112",
+      "text": "Videoregjistruesi i parë shtëpiak, Sony Betamax, doli në treg në 1975, duke ndryshuar mënyrën e shikimit të TV-së.",
+      "category": "history"
+    },
+    {
+      "id": "tv_113",
+      "text": "Për të krijuar zërin e WALL·E, Ben Burtt manipuloi zërin e vet me një sintetizues vokal vintage të viteve '70.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_114",
+      "text": "\"Better Call Saul\" ishte në zhvillim për dy vjet para se Vince Gilligan të gjente tonin e duhur, të ndryshëm nga \"Breaking Bad\".",
+      "category": "series"
+    },
+    {
+      "id": "tv_115",
+      "text": "Kënga \"My Heart Will Go On\" u përfshi në \"Titanic\" kundër vullnetit fillestar të James Cameron.",
+      "category": "music"
+    },
+    {
+      "id": "tv_116",
+      "text": "Audrey Hepburn punoi si korrier për rezistencën holandeze gjatë Luftës së Dytë Botërore, para se të bëhej aktore.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_117",
+      "text": "\"Tutto chiede salvezza\" ishte një nga serialet e para italiane të Netflix bazuar në një roman fitues të Premio Strega Giovani.",
+      "category": "series"
+    },
+    {
+      "id": "tv_118",
+      "text": "Skena e korridorit rrotullues në \"Inception\" u ndërtua vërtet: një set cilindrik rrotullues tridhjetë metra i gjatë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_119",
+      "text": "\"Poor Things\" i Yorgos Lanthimos përdori lente fisheye dhe skenografi të pikturuara me dorë për të krijuar botën e vet surreale.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_120",
+      "text": "Sitkomi i parë në historinë e TV-së ishte \"Mary Kay and Johnny\", i transmetuar nga DuMont Network në 1947.",
+      "category": "history"
+    },
+    {
+      "id": "tv_121",
+      "text": "Denzel Washington ka fituar dy Oscar në karrierë: për \"Glory\" në 1990 dhe për \"Training Day\" në 2002.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_122",
+      "text": "Shpërthimet në hapësirë në filma janë shkencërisht të pamundura: në vakum nuk ka ajër për të përhapur valë goditjeje apo tinguj.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_123",
+      "text": "\"Succession\" frymëzohet lirisht nga dinamikat familjare të Murdoch, por krijuesi Jesse Armstrong nuk e ka konfirmuar plotësisht.",
+      "category": "series"
+    },
+    {
+      "id": "tv_124",
+      "text": "Ryuichi Sakamoto kompozoi kolonën zanore të \"L'ultimo imperatore\" dhe luajti gjithashtu në film si oficer japonez.",
+      "category": "music"
+    },
+    {
+      "id": "tv_125",
+      "text": "\"Nosferatu\" i 1922 pothuajse u shkatërrua: trashëgimtarët e Bram Stoker morën një vendim gjyqësor për të eliminuar të gjitha kopjet.",
+      "category": "history"
+    },
+    {
+      "id": "tv_126",
+      "text": "Për \"Alien\", Ridley Scott nuk ia zbuloi kastit skenën e chestburster: reagimet e tmerrit të aktorëve janë autentike.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_127",
+      "text": "Formati 4:3 dominoi TV-në për dekada. Kalimi në 16:9 u bë standard vetëm me ardhjen e definicionit të lartë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_128",
+      "text": "\"Gomorra - La serie\" u shit në mbi 190 vende, duke u bërë një nga produktet televizive italiane më të eksportuara.",
+      "category": "series"
+    },
+    {
+      "id": "tv_129",
+      "text": "Kolona zanore e \"Il buono, il brutto, il cattivo\" u regjistrua para xhirimeve: Leone i xhironte skenat duke ndjekur muzikën.",
+      "category": "music"
+    },
+    {
+      "id": "tv_130",
+      "text": "Spike Lee e financoi filmin e tij të parë, \"She's Gotta Have It\" të 1986, me një buxhet prej vetëm 175,000 dollarësh.",
+      "category": "history"
+    },
+    {
+      "id": "tv_131",
+      "text": "Në \"The Truman Show\", Jim Carrey improvizoi batutën para pasqyrës: \"mirëmëngjes, mirëdita dhe natën e mirë\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_132",
+      "text": "Sandra Bullock dhe George Clooney në \"Gravity\" luajtën pothuajse tërësisht brenda një strukture mekanike që simulonte mungesën e gravitetit.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_133",
+      "text": "\"Peaky Blinders\" merr emrin nga një bandë e vërtetë e Birmingham aktive mes fundit të '800 dhe fillimit të '900.",
+      "category": "series"
+    },
+    {
+      "id": "tv_134",
+      "text": "Kënga \"Stayin' Alive\" e Bee Gees për \"Saturday Night Fever\" mbetet një nga singëllt më të shitur në histori.",
+      "category": "music"
+    },
+    {
+      "id": "tv_135",
+      "text": "Greta Gerwig ishte gruaja e pestë në histori që mori nominim për Oscar si regjisore më e mirë, me \"Lady Bird\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_136",
+      "text": "Gary Oldman ishte pothuajse i panjohshëm si Winston Churchill në \"Darkest Hour\": grimi kërkonte mbi tri orë në ditë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_137",
+      "text": "Green screen u përdor për herë të parë në vitet '40, por u bë dominant vetëm me kinematografinë digjitale të viteve 2000.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_138",
+      "text": "\"Narcos\" angazhoi vëllanë e agjentit të vërtetë DEA Steve Murphy si konsulent për të garantuar saktësinë historike të serialit.",
+      "category": "series"
+    },
+    {
+      "id": "tv_139",
+      "text": "Trent Reznor dhe Atticus Ross të Nine Inch Nails fituan Oscar-in për kolonën zanore të \"The Social Network\" në 2011.",
+      "category": "music"
+    },
+    {
+      "id": "tv_140",
+      "text": "Filmi i parë me ngjyra i xhiruar në Itali ishte \"Totò a colori\" i 1952, me Ferraniacolor, një peliculë italiane.",
+      "category": "history"
+    },
+    {
+      "id": "tv_141",
+      "text": "Për \"Nope\", Jordan Peele ndërtoi një qytet të tërë western në shkretëtirën e Kalifornisë si set të përhershëm.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_142",
+      "text": "Ray Tracing në kohë reale, i përdorur sot në videolojëra dhe sete virtuale, simulon sjelljen fizike reale të dritës.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_143",
+      "text": "\"Baby Reindeer\" i Netflix bazohet në përvojën reale të krijuesit dhe protagonistit të saj, Richard Gadd.",
+      "category": "series"
+    },
+    {
+      "id": "tv_144",
+      "text": "Angelo Badalamenti kompozoi temën e \"Twin Peaks\" duke improvizuar në piano ndërsa David Lynch i përshkruante imazhe me zë.",
+      "category": "music"
+    },
+    {
+      "id": "tv_145",
+      "text": "Buster Keaton i kryente vetë të gjitha akrobacitë pa dublant, përfshirë fasadën e shtëpisë që i bie sipër në \"Steamboat Bill, Jr.\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_146",
+      "text": "\"Dune\" i Denis Villeneuve u xhirua në Jordani, në të njëjtat shkretëtira të përdorura nga David Lean për \"Lawrence of Arabia\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_147",
+      "text": "Steadicam u shpik nga Garrett Brown në 1975 dhe u përdor për herë të parë në mënyrë ikonike në \"Rocky\".",
+      "category": "tech"
+    },
+    {
+      "id": "tv_148",
+      "text": "\"Slow Horses\" me Gary Oldman bazohet në romanet e Mick Herron, pothuajse të panjohura deri në adaptimin e Apple TV+.",
+      "category": "series"
+    },
+    {
+      "id": "tv_149",
+      "text": "Wes Anderson përdor gjithmonë të njëjtën paletë kromatike simetrike: çdo kuadër është kompozuar si një pikturë.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_150",
+      "text": "Federico Fellini krijoi termin \"paparazzo\" në filmin \"La dolce vita\" të 1960, i frymëzuar nga një personazh i filmit.",
+      "category": "history"
+    },
+    {
+      "id": "tv_151",
+      "text": "Daniel Day-Lewis tërhiqej nga aktrimi midis filmave, duke punuar si këpucar në Firence midis \"Gangs of New York\" dhe \"There Will Be Blood\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_152",
+      "text": "Fjalia \"Frankly, my dear, I don't give a damn\" në \"Gone with the Wind\" u gjobit me 5,000 dollarë për shkelje të kodit të censurës Hays.",
+      "category": "history"
+    },
+    {
+      "id": "tv_153",
+      "text": "Në \"No Country for Old Men\", Javier Bardem duhej ta mbante flokën e tij ikonike me muaj jashtë xhirimeve sepse nuk mund ta priste.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_154",
+      "text": "Seria \"Mindhunter\" e David Fincher përdorte proteza fytyre mbi aktorë për të rikrijuar fytyrat e vrasësve serialë të vërtetë të intervistuar nga FBI.",
+      "category": "series"
+    },
+    {
+      "id": "tv_155",
+      "text": "Efekti i anijes që fundoset në \"Titanic\" u arrit duke anuar një set 240 metra të gjatë të ndërtuar në Meksikë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_156",
+      "text": "Jack Nicholson e improvizoi batutën \"Heeere's Johnny!\" në \"The Shining\". Kubrick e mbajti edhe pse nuk ishte në skenar.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_157",
+      "text": "\"Squid Game\" u shkrua në 2008 nga Hwang Dong-hyuk, por askush nuk deshi ta prodhonte për mbi dhjetë vjet.",
+      "category": "series"
+    },
+    {
+      "id": "tv_158",
+      "text": "Transmetimi i parë televiziv me ngjyra në SHBA ndodhi në 1951 në CBS, por pothuajse askush nuk zotëronte një televizor të përshtatshëm.",
+      "category": "history"
+    },
+    {
+      "id": "tv_159",
+      "text": "Florence Pugh e fitoi rolin në \"Midsommar\" me një audicion ku qau aq bindshëm sa Ari Aster e zgjodhi menjëherë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_160",
+      "text": "Tingulli i lightsaber që aktivizohet në \"Star Wars\" u zbulua rastësisht: Ben Burtt kaloi pranë një kablli të tensionit të lartë me mikrofon.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_161",
+      "text": "\"Gomorra\" e Matteo Garrone u xhirua në vendet reale të Scampias me shumë aktorë joprofesionistë banorë të lagjes.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_162",
+      "text": "Kolona zanore e \"Trainspotting\" ndihmoi të bënte të famshme këngë si \"Born Slippy\" të Underworld përtej skenës rave.",
+      "category": "music"
+    },
+    {
+      "id": "tv_163",
+      "text": "\"La grande bellezza\" fitoi Oscar-in si film i huaj më i mirë në 2014, filmi i parë italian që e arriti pas \"La vita è bella\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_164",
+      "text": "Në \"The Mandalorian\", kuklla fizike e Grogu kushtonte rreth 5 milionë dollarë dhe drejtohej nga dy kukullaxhinj.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_165",
+      "text": "Timothée Chalamet mësoi të luante piano për rolin e tij në \"Call Me by Your Name\", duke i ekzekutuar vetë pjesët në film.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_166",
+      "text": "\"Boris\" konsiderohet një nga seritë komike italiane më të mira: lindi me buxhet të kufizuar në Fox Italia në 2007.",
+      "category": "series"
+    },
+    {
+      "id": "tv_167",
+      "text": "Formati Panavision anamorphic, i prezantuar në vitet '50, mbetet sot i preferuari i shumë regjizorëve për bokeh-in e tij oval dallues.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_168",
+      "text": "Guillermo del Toro ndërtoi në shtëpinë e tij një muze të tërë objektesh horror dhe kinematografike të quajtur \"Bleak House\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_169",
+      "text": "Sigla e \"Stranger Things\" u kompozua nga Survive, një duo synthwave nga Austin, brenda pak javësh pas një takimi të vetëm me vëllezërit Duffer.",
+      "category": "music"
+    },
+    {
+      "id": "tv_170",
+      "text": "\"Roma\" e Alfonso Cuarón ishte filmi i parë i Netflix që mori nominimin si film më i mirë në Oscar në 2019.",
+      "category": "history"
+    },
+    {
+      "id": "tv_171",
+      "text": "Në \"Apocalypse Now\", Martin Sheen pësoi një infarkt gjatë xhirimeve në xhunglën filipinase, por u kthye në set pak javë më vonë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_172",
+      "text": "Zendaya ishte protagonistja më e re që fitoi Emmy-n për \"Euphoria\" në kategorinë e aktores më të mirë në seri dramatike.",
+      "category": "series"
+    },
+    {
+      "id": "tv_173",
+      "text": "\"Parasite\" u xhirua në një set të ndërtuar tërësisht në studio: shtëpia e Kim-ve dhe lagjja e varfër nuk ekzistojnë në realitet.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_174",
+      "text": "Sofia Coppola ishte gruaja e tretë në histori e nominuar për Oscar si regjisore më e mirë, për \"Lost in Translation\" në 2004.",
+      "category": "history"
+    },
+    {
+      "id": "tv_175",
+      "text": "Për \"The Batman\", Robert Pattinson u frymëzua nga Kurt Cobain për të ndërtuar Bruce Wayne-in e tij, me miratimin e regjizorit Matt Reeves.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_176",
+      "text": "Tema muzikore e \"Stranger Things\" bazohet në sintetizatorë analogë të viteve '70 e '80, veçanërisht Roland Juno dhe Sequential Prophet.",
+      "category": "music"
+    },
+    {
+      "id": "tv_177",
+      "text": "\"True Detective\" sezona e parë u xhirua në Louisiana në rend kronologjik, zgjedhje e rrallë për një prodhim televiziv modern.",
+      "category": "series"
+    },
+    {
+      "id": "tv_178",
+      "text": "Miyazaki vizaton me dorë shumicën e storyboard-eve të filmave të Studio Ghibli, edhe pasi ka kaluar të tetëdhjetat.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_179",
+      "text": "Pellikulat 70mm e përdorur në \"The Hateful Eight\" të Tarantino u projektua me lente Ultra Panavision, të papërdorura që nga vitet '60.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_180",
+      "text": "Sandra Oh ishte aktroja e parë me origjinë aziatike që mori nominim si aktore më e mirë protagoniste në Emmy.",
+      "category": "history"
+    },
+    {
+      "id": "tv_181",
+      "text": "Në \"Birdman\", Alejandro González Iñárritu e xhiroi filmin në mënyrë që të dukej si një plan-sekuencë e vetme e vazhdueshme.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_182",
+      "text": "\"Suburra\" ishte seria e parë origjinale italiane e prodhuar nga Netflix, duke debutuar në 2017.",
+      "category": "series"
+    },
+    {
+      "id": "tv_183",
+      "text": "Kolona zanore e \"Her\" të Spike Jonze u kompozua nga Arcade Fire së bashku me Owen Pallett, në një punë të rrallë për kinema.",
+      "category": "music"
+    },
+    {
+      "id": "tv_184",
+      "text": "Foley artist është personi që rikrijon në studio të gjitha tingujt ambientalë të një filmi: hapa, rroba, objekte, duke përdorur materiale të zakonshme.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_185",
+      "text": "Lady Gaga u zhyt në personazhin e Patrizia Reggiani për një vit e gjysmë gjatë prodhimit të \"House of Gucci\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_186",
+      "text": "\"The Lord of the Rings\" u xhirua tërësisht në Zelandën e Re në një bllok të vetëm xhirimesh që zgjati 438 ditë rresht.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_187",
+      "text": "\"Servant\" në Apple TV+ u drejtua pjesërisht nga M. Night Shyamalan, i cili xhiroi episodet kyçe në shtëpinë e tij në Philadelphia.",
+      "category": "series"
+    },
+    {
+      "id": "tv_188",
+      "text": "Academy Award quhet \"Oscar\" që nga 1939: origjina e emrit mbetet e pasigurt dhe e debatuar mes legjendave të ndryshme.",
+      "category": "history"
+    },
+    {
+      "id": "tv_189",
+      "text": "Për rolin në \"Monster\", Charlize Theron u bë e panjohshme me një grим protetik që kërkonte katër orë çdo mëngjes.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_190",
+      "text": "\"1883\" dhe \"1923\", spin-off të \"Yellowstone\", ishin ndër seritë më të kushtueshme të prodhuara ndonjëherë për Paramount+.",
+      "category": "series"
+    },
+    {
+      "id": "tv_191",
+      "text": "Alexandre Desplat ka kompozuar kolonat zanore të tetë filmave të nominuar për Oscar si film më i mirë, duke fituar dy herë.",
+      "category": "music"
+    },
+    {
+      "id": "tv_192",
+      "text": "CGI e fytyrës së Thanos në \"Avengers: Endgame\" përdorte 150 shënues fytyre mbi fytyrën e Josh Brolin në çdo skenë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_193",
+      "text": "Tilda Swinton është pothuajse e panjohshme në shumë role: në \"Suspiria\" të 2018 interpretoi tre personazhe, përfshirë një burrë të moshuar.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_194",
+      "text": "\"Cinema Paradiso\" i Giuseppe Tornatore fitoi Oscar-in si film i huaj më i mirë në 1990, duke lançuar regjizorin siçilian në botë.",
+      "category": "history"
+    },
+    {
+      "id": "tv_195",
+      "text": "Në \"Mad Max: Fury Road\", kitaristi Doof Warrior luante vërtet një kitarë flakëhedhëse funksionale të montuar mbi kamion.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_196",
+      "text": "\"Ripley\" në Netflix u xhirua tërësisht bardh e zi përgjatë bregdetit italian, midis Atranit, Romës dhe Venecias.",
+      "category": "series"
+    },
+    {
+      "id": "tv_197",
+      "text": "Marshi perandorak i Darth Vader nuk shfaqej në \"Star Wars\" e parë: John Williams e kompozoi vetëm për \"The Empire Strikes Back\".",
+      "category": "music"
+    },
+    {
+      "id": "tv_198",
+      "text": "Filmi i parë me audio Dolby Stereo ishte \"A Star is Born\" me Barbra Streisand në 1976, duke hapur rrugën për tingullin shumëkanalësh.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_199",
+      "text": "Denis Villeneuve hoqi dorë nga ekranet e gjelbra për \"Arrival\": guaska aliene u ndërtua si set fizik dymbëdhjetë metra i lartë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_200",
+      "text": "Marcello Mastroianni nuk fliste anglisht dhe i mësonte batikat fonetikisht për filmat e tij të rrallë në gjuhën angleze.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_201",
+      "text": "Matt Damon e shkroi skenarin e \"Will Hunting\" së bashku me Ben Affleck-un në peceta gjatë pushimeve nga puna.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_202",
+      "text": "Roli i Wolverine iu ofrua Russell Crowe, i cili e refuzoi dhe vetë sugjeroi emrin e Hugh Jackman.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_203",
+      "text": "\"The Crown\" rindërtonte sete të tëra të Pallatit Buckingham në studio: asnjë skenë nuk u xhirua në pallatin mbretëror.",
+      "category": "series"
+    },
+    {
+      "id": "tv_204",
+      "text": "Filmi i parë kinematografik në nitrat ishte jashtëzakonisht i ndezshëm: shumë filma pa zë u humbën nga zjarret aksidentale.",
+      "category": "history"
+    },
+    {
+      "id": "tv_205",
+      "text": "John Travolta e refuzoi rolin e Forrest Gump përpara se t'i ofrohej Tom Hanks.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_206",
+      "text": "Të qeshurat e rreme në sitcom shpesh miksohen me ato të një publiku të vërtetë për një efekt më natyral.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_207",
+      "text": "\"Fargo\" i vëllezërve Coen fillon me mbishkrimin \"bazuar në ngjarje të vërteta\", por është tërësisht i trilluar: një zgjedhje e qëllimshme narrative.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_208",
+      "text": "Gruaja e parë që fitoi Palmën e Artë në Kanë si regjisore ishte Jane Campion në 1993 me \"Lezioni di piano\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_209",
+      "text": "Edward Norton rishkroi një pjesë të madhe të skenarit të \"American History X\" pa miratimin e regjisorit Tony Kaye.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_210",
+      "text": "\"The Witcher\" i Netflix kërkoi qindra paruke të personalizuara, shumë prej të cilave të bëra me flokë të vërtetë të qepura me dorë.",
+      "category": "series"
+    },
+    {
+      "id": "tv_211",
+      "text": "Formati VHS e fitoi luftën kundër Betamax pavarësisht cilësisë më të ulët, falë kasetave më të gjata dhe kostove më të ulëta.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_212",
+      "text": "Sandra Bullock e ktheu çmimin Razzie që kishte fituar një ditë përpara se të merrte Oscar-in për \"The Blind Side\" në 2010.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_213",
+      "text": "Akira Kurosawa ndikoi thellësisht George Lucas: \"La fortezza nascosta\" frymëzoi drejtpërdrejt tregimin e \"Star Wars\".",
+      "category": "history"
+    },
+    {
+      "id": "tv_214",
+      "text": "\"Chernobyl\" i HBO ishte miniseria e parë që tejkaloi \"Breaking Bad\" si seria më e votuar në IMDb në momentin e debutimit.",
+      "category": "series"
+    },
+    {
+      "id": "tv_215",
+      "text": "Ngjyra portokalli dhe blu dominon posterët e Hollywood sepse janë ngjyra plotësuese që tërheqin syrin njerëzor.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_216",
+      "text": "Kate Winslet e mbajti frymën nën ujë për mbi shtatë minuta gjatë xhirimeve të \"Avatar: La via dell'acqua\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_217",
+      "text": "Alberto Sordi debutoi si dublues: i dha zërin italian Oliver Hardy-t të Stanlio e Ollio.",
+      "category": "history"
+    },
+    {
+      "id": "tv_218",
+      "text": "\"Beef\" i Netflix u shkrua nga Lee Sung Jin duke u nisur nga një episod i vërtetë tërbimi rrugor që i ndodhi në autostradë.",
+      "category": "series"
+    },
+    {
+      "id": "tv_219",
+      "text": "Tingulli i Millennium Falcon që nuk ndizet në \"Star Wars\" është zhurma reale e një projektori të vjetër 35mm të bllokuar.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_220",
+      "text": "Meryl Streep mësoi të luante violinë për \"La musica del cuore\" me mësime të përditshme për dy muaj përpara xhirimeve.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_221",
+      "text": "\"Shogun\" i vitit 1980 ishte aq popullor në Amerikë sa shitjet e salcës së sojës u rritën ndjeshëm pas transmetimit.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_222",
+      "text": "Filmi i parë i shfaqur në aeroplan ishte në 1921 në një fluturim të Aeromarine Airways, mbi një hidroplan.",
+      "category": "history"
+    },
+    {
+      "id": "tv_223",
+      "text": "Në \"Her\", Scarlett Johansson zëvendësoi Samantha Morton si zëri i Samantha-s pasi filmi ishte xhiruar tashmë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_224",
+      "text": "\"The White Lotus\" u xhirua gjatë pandemisë në Four Seasons të Maui, me aktorët dhe ekipin në karantinë në hotel.",
+      "category": "series"
+    },
+    {
+      "id": "tv_225",
+      "text": "Filmi i parë që përdori tingullin surround ishte \"Fantasia\" e Disney në 1940 me sistemin Fantasound me shumë altoparlantë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_226",
+      "text": "Woody Harrelson zbuloi vetëm si i rritur se babai i tij biologjik ishte një vrasës i dënuar, përvojë që ndikoi zgjedhjet e roleve.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_227",
+      "text": "Sergio Leone xhironte shumë pak kadra në ditë por i planifikonte me përpikmëri maniakale përpara çdo xhirimi.",
+      "category": "history"
+    },
+    {
+      "id": "tv_228",
+      "text": "\"Loki\" i Marvel prezantoi konceptin e multiversit që udhëhoqi të gjithë Fazën 4 dhe 5 të MCU.",
+      "category": "series"
+    },
+    {
+      "id": "tv_229",
+      "text": "Formati letterbox me shirita të zinj sipër e poshtë imazhit u urrye gjatë nga publiku televiziv i viteve '80 e '90.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_230",
+      "text": "Adele fillimisht refuzoi të shkruante temën e \"Skyfall\" për James Bond, pastaj ndërroi mendje pasi lexoi skenarin.",
+      "category": "music"
+    },
+    {
+      "id": "tv_231",
+      "text": "Kubrick e bëri Tom Cruise ta përsëriste skenën e ecjes në \"Eyes Wide Shut\" rreth 95 herë përpara se ta konsideronte të kënaqshme.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_232",
+      "text": "\"L'Amica Geniale\" e HBO u xhirua në Caserta në një lagje të rindërtuar besnikërisht nga vitet '50 për prodhimin.",
+      "category": "series"
+    },
+    {
+      "id": "tv_233",
+      "text": "Kamera dixhitale RED ONE e vitit 2007 e bëri cinemën dixhitale të arritshme për regjisorët e pavarur me një kosto të papërfytyrueshme më parë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_234",
+      "text": "Jackie Chan i kryen akrobacitë pa dublant dhe ka pësuar fraktura pothuajse në çdo asht të trupit gjatë karrierës.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_235",
+      "text": "\"Ladri di biciclette\" i Vittorio De Sica i vitit 1948 konsiderohet kryevepra e neorealizmit italian dhe u xhirua me aktorë joprofesionistë.",
+      "category": "history"
+    },
+    {
+      "id": "tv_236",
+      "text": "Për \"Anatomia di una caduta\", Justine Triet e shkroi rolin e qenit posaçërisht për Messi, një Border Collie tashmë aktor me përvojë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_237",
+      "text": "\"Yellowjackets\" përzien dy linja kohore me aktorë të ndryshëm: aktoret e rritura nuk i takuan të rejat deri në premierë.",
+      "category": "series"
+    },
+    {
+      "id": "tv_238",
+      "text": "Korrigjimi dixhital i ngjyrave ka zëvendësuar pothuajse tërësisht banjat kimike në laborator për përcaktimin e paletës kromatike të filmave.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_239",
+      "text": "Radiohead lejoi përdorimin e \"Exit Music (For a Film)\" në \"Romeo + Giulietta\" të Baz Luhrmann, një nga koncesionet e rralla të grupit.",
+      "category": "music"
+    },
+    {
+      "id": "tv_240",
+      "text": "Clint Eastwood drejton pothuajse gjithmonë me një ose dy xhirime për skenë: stili i tij i shpejtë është legjendar në industri.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_241",
+      "text": "Hedy Lamarr, yll i Hollywood-it të viteve '40, bashkë-shpiku një sistem komunikimi me frekuenca që parapriu Wi-Fi-n modern.",
+      "category": "history"
+    },
+    {
+      "id": "tv_242",
+      "text": "Për \"Killers of the Flower Moon\", Scorsese i kërkoi kombit Osage të mbikëqyrte çdo detaj kulturor të filmit.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_243",
+      "text": "\"Pachinko\" i Apple TV+ u xhirua në tri gjuhë — koreançe, japonçe dhe anglçe — duke përshkuar katër breza.",
+      "category": "series"
+    },
+    {
+      "id": "tv_244",
+      "text": "Dolby Vision HDR e dyfishon gamën dinamike të imazhit krahasuar me standardin, duke iu afruar mënyrës si syri njerëzor e përcepton dritën.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_245",
+      "text": "Jonny Greenwood i Radiohead është edhe kompozitor kolonash zanore: puna e tij për \"Il filo nascosto\" u nominua për Oscar.",
+      "category": "music"
+    },
+    {
+      "id": "tv_246",
+      "text": "Christopher Lee e lexonte \"Il Signore degli Anelli\" çdo vit dhe ishte i vetmi anëtar i kastit që kishte takuar Tolkien personalisht.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_247",
+      "text": "Paramount në Hollywood është i vetmi studio i madh që ka mbetur fizikisht në qytetin e Los Angeles: të gjithë të tjerët janë zhvendosur.",
+      "category": "history"
+    },
+    {
+      "id": "tv_248",
+      "text": "Në \"Past Lives\" të Celine Song, skenat në Seul dhe në Nju Jork u xhiruan me paleta kromatike qëllimisht të kundërta.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_249",
+      "text": "\"Fallout\" i Amazon Prime rikrijoi një Las Vegas post-apokaliptike në një set të ndërtuar në shkretëtirën e Namibisë.",
+      "category": "series"
+    },
+    {
+      "id": "tv_250",
+      "text": "Numri 2.39:1 tregon raportin e aspektit panoramik më të përdorur në blockbuster-at modernë, i njohur edhe si CinemaScope.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_251",
+      "text": "Al Pacino refuzoi rolin e Han Solo në \"Star Wars\" sepse e gjente skenarin shumë konfuz për ta kuptuar.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_252",
+      "text": "Seti i \"Blade Runner 2049\" përfshinte një deponi mbetjesh elektronike të ndërtuar me tonelata mbeturina të vërteta.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_253",
+      "text": "\"The Bear\" u xhirua në një kuzhinë të vërtetë restoranti në Chicago: aktorët ndoqën kurse profesionale gatimi para xhirimeve.",
+      "category": "series"
+    },
+    {
+      "id": "tv_254",
+      "text": "Charlie Chaplin mori pjesë një herë në një konkurs sosiash të vetvetes dhe nuk fitoi.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_255",
+      "text": "Filmi i parë i gjatë i animuar në histori ishte \"El Apóstol\", një film argjentinas i vitit 1917, sot i humbur.",
+      "category": "history"
+    },
+    {
+      "id": "tv_256",
+      "text": "Kolona zanore e \"Amélie\" nga Yann Tiersen u kompozua pjesërisht para filmit: Jeunet zgjodhi pjesë ekzistuese të muzikantit.",
+      "category": "music"
+    },
+    {
+      "id": "tv_257",
+      "text": "Për \"The Whale\", Brendan Fraser vishte një kostum prostetik që peshonte rreth 130 kg dhe kërkonte gjashtë orë aplikim.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_258",
+      "text": "Seriali i parë televiziv i transmetuar në Itali ishte \"Le avventure di Rin Tin Tin\" në 1956, pak muaj pas fillimit të transmetimeve RAI.",
+      "category": "history"
+    },
+    {
+      "id": "tv_259",
+      "text": "\"Andor\" e Tony Gilroy u shkrua si roman para se të bëhej skenar: çdo episod mbulon një hark narrativ autonom.",
+      "category": "series"
+    },
+    {
+      "id": "tv_260",
+      "text": "Tingulli i derës rrëshqitëse të Enterprise në \"Star Trek\" ishte një qese letre e tërhequr mbi një dysheme të lëmuar.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_261",
+      "text": "Viggo Mortensen mësoi të kalëronte, të luftonte me shpatë dhe të fliste elfisht për të luajtur Aragorn në \"Il Signore degli Anelli\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_262",
+      "text": "Ennio Morricone kompozoi mbi 500 kolona zanore në karrierën e tij, por fitoi Oscar-in e parë konkurrues vetëm në 2016.",
+      "category": "music"
+    },
+    {
+      "id": "tv_263",
+      "text": "\"Shōgun\" i 2024 u xhirua pothuajse tërësisht në japonisht, një zgjedhje e rrallë për një produksion amerikan të asaj shkalle.",
+      "category": "series"
+    },
+    {
+      "id": "tv_264",
+      "text": "Termi \"blockbuster\" lindi nga radhët që bënin xhiron e bllokut: turma \"bllokonte\" fjalë për fjalë rrugët.",
+      "category": "history"
+    },
+    {
+      "id": "tv_265",
+      "text": "Filmi i parë me dialogë të sinkronizuara ishte \"Il cantante di jazz\" i vitit 1927, që shënoi fundin e epokës së kinemasë së heshtur.",
+      "category": "history"
+    },
+    {
+      "id": "tv_266",
+      "text": "Robert De Niro mori vërtet patentën e taksistit dhe punoi disa net në New York për t'u përgatitur për \"Taxi Driver\".",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_267",
+      "text": "\"Silo\" i Apple TV+ ndërtoi një set vertikal dhjetë katësh për të rikrijuar shkallën spirale qendrore të bunkerit nëntokësor.",
+      "category": "series"
+    },
+    {
+      "id": "tv_268",
+      "text": "Tingulli i T-Rex në \"Jurassic Park\" përzien zërat e një elefanti të vogël, një aligatori dhe një këlyshi tigri.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_269",
+      "text": "Viola Davis është një nga pak aktoret që ka fituar të ashtuquajturën Triple Crown: Oscar, Emmy dhe Tony Award.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_270",
+      "text": "Për \"Ratatouille\", ekipi i Pixar ndoqi kurse gatimi në restorante me yje në Paris për muaj të tërë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_271",
+      "text": "\"Skam\" lindi si serial norvegjez për adoleshentë në 2015 dhe u adaptua më pas në mbi dhjetë vende, përfshirë Italinë.",
+      "category": "series"
+    },
+    {
+      "id": "tv_272",
+      "text": "Kinemaja e parë e përhershme në botë ishte Grand Café në Paris, por ndërtesa e parë e dedikuar ishte Eden në La Ciotat në 1899.",
+      "category": "history"
+    },
+    {
+      "id": "tv_273",
+      "text": "Tema e \"Mission: Impossible\" e kompozuar nga Lalo Schifrin në 1966 është në 5/4, një metrikë e rrallë në TV dhe kinema.",
+      "category": "music"
+    },
+    {
+      "id": "tv_274",
+      "text": "Heath Ledger u izolua në një dhomë hoteli për gjashtë javë për të ndërtuar zërin dhe gjestet e Joker në \"Il cavaliere oscuro\".",
+      "category": "movies"
+    },
+    {
+      "id": "tv_275",
+      "text": "Teknika e rotoscoping, që rikopjon lëvizjet reale në animacion, u patentua në 1917 nga Max Fleischer.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_276",
+      "text": "\"Only Murders in the Building\" u konceptua pasi Steve Martin dhe Martin Short bënë një turne komik së bashku.",
+      "category": "series"
+    },
+    {
+      "id": "tv_277",
+      "text": "Hayao Miyazaki njoftoi tërheqjen nga kinemaja të paktën shtatë herë gjatë karrierës, duke u kthyer çdo herë për të drejtuar.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_278",
+      "text": "Oscar-i i parë për filmin më të mirë të animuar u themelua vetëm në 2002: e fitoi \"Shrek\" i DreamWorks.",
+      "category": "history"
+    },
+    {
+      "id": "tv_279",
+      "text": "John Williams ka marrë mbi pesëdhjetë nominime për Oscar, më shumë se çdo person tjetër i gjallë.",
+      "category": "music"
+    },
+    {
+      "id": "tv_280",
+      "text": "Për \"Tár\", Cate Blanchett mësoi të drejtonte një orkestër live dhe studioi piano intensivisht për muaj të tërë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_281",
+      "text": "Propozimi origjinal i \"Lost\" u zhvillua në vetëm njëmbëdhjetë javë nga ABC, një rekord për një serial të asaj kompleksiteti.",
+      "category": "series"
+    },
+    {
+      "id": "tv_282",
+      "text": "Qielli portokalli ikonik i \"Mad Max: Fury Road\" u arrit në post-produksion duke rritur saturimin e shkretëtirës namibiane.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_283",
+      "text": "Sophia Loren fitoi Oscar-in në 1962 për \"La ciociara\", aktorja e parë që e fitoi për një film në gjuhë jo-angleze.",
+      "category": "history"
+    },
+    {
+      "id": "tv_284",
+      "text": "Kënga \"As Time Goes By\" e \"Casablanca\" ishte shkruar në 1931, njëmbëdhjetë vjet para filmit.",
+      "category": "music"
+    },
+    {
+      "id": "tv_285",
+      "text": "Willem Dafoe ka luajtur si hero (Jezusi në \"L'ultima tentazione di Cristo\") ashtu edhe Goblin në \"Spider-Man\" në të njëjtën karrierë.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_286",
+      "text": "\"Disclaimer\" e Alfonso Cuarón për Apple TV+ u xhirua në pelliculë 35mm, një zgjedhje e rrallë për serialet bashkëkohore.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_287",
+      "text": "Për \"Philadelphia\", Tom Hanks humbi 12 kg dhe vizitoi reparte spitalore për muaj për t'u përgatitur për rolin.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_288",
+      "text": "\"Il commissario Montalbano\" është transmetuar në mbi 65 vende, duke e bërë një nga serialet italiane më të eksportuara në histori.",
+      "category": "series"
+    },
+    {
+      "id": "tv_289",
+      "text": "Festivali i parë kinematografik në histori ishte Mostra del Cinema di Venezia, inauguruar në 1932.",
+      "category": "history"
+    },
+    {
+      "id": "tv_290",
+      "text": "Philip Glass kompozoi trilogjinë e kolonave zanore për dokumentarët \"Koyaanisqatsi\", \"Powaqqatsi\" dhe \"Naqoyqatsi\" në njëzet vjet.",
+      "category": "music"
+    },
+    {
+      "id": "tv_291",
+      "text": "Ke Huy Quan u kthye në aktrim pas njëzet vjetësh pauzë dhe fitoi Oscar-in me filmin e parë të kthimit të tij.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_292",
+      "text": "Për \"Gladiatore II\", Ridley Scott mbushi Koloseun e rindërtuar me ujë të vërtetë për skenën e naumakisë.",
+      "category": "movies"
+    },
+    {
+      "id": "tv_293",
+      "text": "\"Reacher\" i Amazon Prime zgjodhi Alan Ritchson për fizikun besnik ndaj romaneve, pasi Tom Cruise ishte kritikuar për filmin.",
+      "category": "series"
+    },
+    {
+      "id": "tv_294",
+      "text": "IMAX origjinal përdorte pelliculë 70mm të orientuar horizontalisht: çdo kuadër ishte dhjetë herë më i madh se 35mm standarde.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_295",
+      "text": "Anna Magnani fitoi Oscar-in në 1956 për \"La rosa tatuata\", aktorja e parë italiane që mori çmimin.",
+      "category": "history"
+    },
+    {
+      "id": "tv_296",
+      "text": "Tema e \"I Soprano\" u zgjodh në minutën e fundit: David Chase dëgjoi \"Woke Up This Morning\" në makinë dhe vendosi menjëherë.",
+      "category": "music"
+    },
+    {
+      "id": "tv_297",
+      "text": "Jeff Bridges mbajti pamjen e parregullt të Dude për muaj pas \"Il grande Lebowski\", duke thënë se personazhi nuk e linte.",
+      "category": "fun_fact"
+    },
+    {
+      "id": "tv_298",
+      "text": "\"Zone of Interest\" e Jonathan Glazer përdori kamera të fshehura në set: aktorët nuk dinin kurrë cila ishte marrja e mirë.",
+      "category": "tech"
+    },
+    {
+      "id": "tv_299",
+      "text": "\"Midnight Diner\" është një serial japonez i vendosur në një lokal me dymbëdhjetë vende, hapur vetëm nga ora 24 deri në 7 të mëngjesit.",
+      "category": "series"
+    },
+    {
+      "id": "tv_300",
+      "text": "Për \"Elvis\", Austin Butler qëndroi në personazh aq gjatë sa theksi i tij natyral ndryshoi për muaj pas përfundimit të xhirimeve.",
+      "category": "movies"
+    }
+  ]
+}

@@ -1,0 +1,3530 @@
+{
+  "playUpdate": {
+    "title": "আপডেট উপলভ্য",
+    "body": "KIPTV {{version}} Google Play-তে উপলভ্য। এখনই ডাউনলোড করবেন?",
+    "now": "এখনই আপডেট করুন",
+    "later": "পরে",
+    "settingsDescription": "Play Store-এ KIPTV-র নতুন সংস্করণ আছে কিনা দেখুন।"
+  },
+  "sideload": {
+    "update": {
+      "title": "আপডেট পাওয়া যাচ্ছে",
+      "body": "KIPTV {{version}} ইনস্টলের জন্য প্রস্তুত। এখনই আপডেট করবেন?",
+      "now": "এখনই আপডেট করুন",
+      "later": "পরে",
+      "downloading": "KIPTV {{version}} ডাউনলোড হচ্ছে…",
+      "verifying": "ফাইল যাচাই করা হচ্ছে…",
+      "install": "ইনস্টল করুন",
+      "readyBody": "ডাউনলোড সম্পন্ন। ইনস্টল করুন চাপুন এবং সিস্টেম স্ক্রিনে নিশ্চিত করুন।",
+      "failedBody": "ডাউনলোড ব্যর্থ হয়েছে। সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
+      "permissionTitle": "ইনস্টলের অনুমতি দিন",
+      "permissionBody": "টিভিকে KIPTV-কে অ্যাপ ইনস্টল করার অনুমতি দিতে হবে। সেটিংস খুলুন, KIPTV-এর সুইচ চালু করুন এবং এখানে ফিরে আসুন: ইনস্টল নিজে থেকেই চলতে থাকবে।",
+      "openSettings": "সেটিংস খুলুন",
+      "manualTitle": "Downloader দিয়ে আপডেট করুন",
+      "manualBody": "Downloader অ্যাপ খুলে ঠিকানা {{link}} লিখুন: এটি নতুন সংস্করণ ডাউনলোড করে এটির উপরে ইনস্টল করবে।",
+      "manualBodyWithCode": "Downloader অ্যাপ খুলে কোড {{code}} (অথবা ঠিকানা {{link}}) লিখুন: এটি নতুন সংস্করণ ডাউনলোড করে এটির উপরে ইনস্টল করবে।",
+      "openDownloader": "Downloader খুলুন",
+      "settingsRow": "আপডেট",
+      "settingsDescription": "KIPTV-এর নতুন সংস্করণ আছে কি না দেখুন এবং এখান থেকে ইনস্টল করুন।",
+      "statusAvailable": "{{version}} পাওয়া যাচ্ছে",
+      "statusUpToDate": "হালনাগাদ",
+      "statusChecking": "পরীক্ষা করা হচ্ছে…",
+      "statusUnknown": "এখনই পরীক্ষা করুন"
+    }
+  },
+  "ratings": {
+    "title": "রেটিং",
+    "critics": "সমালোচক",
+    "audience": "দর্শক",
+    "fromAge": "{{age}} বছর ও তার বেশি বয়সীদের জন্য"
+  },
+  "playback": {
+    "playWith": "দিয়ে চালান",
+    "externalPlayerSection": "বাহ্যিক অ্যাপে খুলুন"
+  },
+  "browser": {
+    "reload": "রিলোড করুন",
+    "stop": "লোডিং বন্ধ করুন",
+    "openInBrowser": "ব্রাউজারে খুলুন"
+  },
+  "quickAction": {
+    "chat": {
+      "title": "দাঁড়ান, আমাকে মুছবেন না!",
+      "subtitle": "আমাদের সাথে চ্যাট করুন, সমাধান করব"
+    }
+  },
+  "avatars": {
+    "group": {
+      "people": "মানুষ",
+      "animals": "প্রাণী",
+      "football": "ফুটবল"
+    }
+  },
+  "errors": {
+    "xtream": {
+      "networkNoCacheData": "নেটওয়ার্ক ত্রুটি এবং কোন ক্যাশড ডেটা নেই",
+      "serverRetrying": "IPTV সার্ভার ত্রুটি - পুনরায় চেষ্টা করছি...",
+      "serverHttp": "সার্ভার ত্রুটি (HTTP {{status}})",
+      "slowConnection": "ধীর সংযোগ - অনুরোধ সময় শেষ হয়েছে",
+      "rateLimitWait": "XTREAM সার্ভার রেট সীমাবদ্ধ। {{seconds}}s এ পুনরায় চেষ্টা করুন।",
+      "rateLimitBlocked": "XTREAM সার্ভার অস্থায়ীভাবে অনুরোধ ব্লক করেছে (HTTP 429)। {{seconds}}s অপেক্ষা করুন এবং পুনরায় চেষ্টা করুন।",
+      "serverNotFound": "XTREAM সার্ভার পাওয়া যায়নি - URL চেক করুন",
+      "staleCacheWarning": "ক্যাশ থেকে ডেটা ({{minutes}} মিনিট আগে) - নেটওয়ার্ক অনুপলব্ধ",
+      "noInternet": "ইন্টারনেট সংযোগ নেই - আপনার নেটওয়ার্ক চেক করুন",
+      "invalidRequest": "অবৈধ অনুরোধ - প্লেলিস্ট শংসাপত্র চেক করুন",
+      "credentialsExpired": "শংসাপত্র মেয়াদ শেষ - প্লেলিস্ট পুনরায় প্রমাণীকরণ করুন",
+      "accessDenied": "IPTV প্রদানকারী দ্বারা অ্যাক্সেস প্রত্যাখ্যাত",
+      "contentNotFound": "IPTV প্রদানকারীতে সামগ্রী পাওয়া যায়নি",
+      "tooManyRequests": "অনেক বেশি অনুরোধ - একটি মুহূর্ত অপেক্ষা করুন",
+      "serverMaintenance": "IPTV সার্ভার রক্ষণাবেক্ষণে - পরে আবার চেষ্টা করুন",
+      "serverTimeout": "IPTV সার্ভার সময় শেষ - ধীর সংযোগ",
+      "unauthorized": "অননুমোদিত শংসাপত্র",
+      "serverUnavailable": "সার্ভার অস্থায়ীভাবে অনুপলব্ধ",
+      "invalidCredentials": "অবৈধ শংসাপত্র বা মেয়াদ শেষ অ্যাকাউন্ট",
+      "connectionTimeout": "সংযোগ সময় শেষ - সার্ভার প্রতিক্রিয়াশীল নয়",
+      "networkError": "নেটওয়ার্ক ত্রুটি - ইন্টারনেট সংযোগ চেক করুন",
+      "invalidUrl": "অবৈধ URL বা সার্ভার অপহুঁছনীয়",
+      "unknownConnection": "অজানা সংযোগ ত্রুটি"
+    },
+    "boundaryTitle": "আফসোস! কিছু ভুল হয়েছে",
+    "boundaryMessage": "অ্যাপটি একটি অপ্রত্যাশিত ত্রুটির সম্মুখীন হয়েছে। আবার চেষ্টা করুন বা সমস্যা দূর না হলে অ্যাপটি পুনরায় চালু করুন।",
+    "limitsCheckFailed": "দেখার সীমা যাচাই করতে অক্ষম। পরে আবার চেষ্টা করুন।",
+    "limitsLoadError": "সীমা লোড করতে ত্রুটি। পরে আবার চেষ্টা করুন।",
+    "playlistSave": "প্লেলিস্ট সংরক্ষণ করতে ত্রুটি",
+    "playlistRemove": "প্লেলিস্ট সরাতে ত্রুটি",
+    "playlistUpdate": "প্লেলিস্ট আপডেট করতে ত্রুটি",
+    "unknown": "অজানা ত্রুটি",
+    "unifiedLoad": "একীভূত লোডিং-এ ত্রুটি",
+    "liveTVLoad": "Live লোড করতে ত্রুটি",
+    "logout": "লগআউট করার সময় ত্রুটি",
+    "loadError": "বিষয়বস্তু লোড করতে ত্রুটি",
+    "loadingFailed": "লোডিং ব্যর্থ। দয়া করে আবার চেষ্টা করুন।"
+  },
+  "auth": {
+    "errors": {
+      "invalid_credentials": "অবৈধ ইমেল বা পাসওয়ার্ড",
+      "invalid_email_or_password": "অবৈধ ইমেল বা পাসওয়ার্ড",
+      "user_not_found": "এই ইমেলের সাথে কোনো অ্যাকাউন্ট পাওয়া যায়নি",
+      "user_already_registered": "এই ইমেল ইতিমধ্যে নিবন্ধিত - লগইন করার চেষ্টা করুন",
+      "password_min_length": "পাসওয়ার্ড কমপক্ষে 6 অক্ষর হতে হবে",
+      "password_too_weak": "পাসওয়ার্ড খুব দুর্বল - অক্ষর, সংখ্যা এবং প্রতীক ব্যবহার করুন",
+      "same_password": "নতুন পাসওয়ার্ড আপনার বর্তমান পাসওয়ার্ড থেকে আলাদা হতে হবে",
+      "email_invalid_format": "অবৈধ ইমেল ঠিকানা",
+      "email_validation_failed": "অবৈধ ইমেল ফর্ম্যাট",
+      "email_invalid": "অবৈধ ইমেল",
+      "network_failed": "ইন্টারনেট সংযোগ নেই - আপনার নেটওয়ার্ক পরীক্ষা করুন",
+      "fetch_failed": "সংযোগ ত্রুটি - আবার চেষ্টা করুন",
+      "network_error": "নেটওয়ার্ক সমস্যা - আপনার সংযোগ পরীক্ষা করুন",
+      "jwt_expired": "সেশন মেয়াদ উত্তীর্ণ - দয়া করে আবার লগইন করুন",
+      "jwt_invalid": "অবৈধ সেশন - আবার লগইন করুন",
+      "refresh_token_not_found": "সেশন মেয়াদ উত্তীর্ণ - আবার লগইন করুন",
+      "oauth_cancelled": "লগইন বাতিল করা হয়েছে",
+      "oauth_access_denied": "লগইন বাতিল - আপনি অ্যাক্সেস অস্বীকার করেছেন",
+      "oauth_redirect_mismatch": "কনফিগারেশন ত্রুটি - সহায়তার সাথে যোগাযোগ করুন",
+      "oauth_unauthorized": "OAuth ত্রুটি - সহায়তার সাথে যোগাযোগ করুন",
+      "rate_limit_email": "অত্যধিক অনুরোধ - পুনরায় চেষ্টা করার আগে একটি মুহূর্ত অপেক্ষা করুন",
+      "rate_limit_general": "অত্যধিক অনুরোধ - কয়েক মিনিটে পুনরায় চেষ্টা করুন",
+      "password_invalid": "অবৈধ পাসওয়ার্ড",
+      "security_purposes": "নিরাপত্তার কারণে, পরে আবার চেষ্টা করুন",
+      "auth_failed": "প্রমাণীকরণ ব্যর্থ - আবার চেষ্টা করুন",
+      "bad_request": "অবৈধ অনুরোধ - আপনার ডেটা পরীক্ষা করুন",
+      "unauthorized": "অনুপ্রবেশ নিষিদ্ধ - আপনার শংসাপত্র পরীক্ষা করুন",
+      "rate_limit": "অত্যধিক অনুরোধ - কয়েক মিনিট অপেক্ষা করুন",
+      "server_error": "সেবা অস্থায়ীভাবে অনুপলব্ধ - পরে আবার চেষ্টা করুন",
+      "default": "প্রমাণীকরণ ত্রুটি - আবার চেষ্টা করুন",
+      "email_not_confirmed": "লগইন করার আগে আপনার ইমেল নিশ্চিত করুন"
+    },
+    "login": "লগইন",
+    "forgotPassword": "পাসওয়ার্ড ভুলে গেছেন?",
+    "forgotPasswordTitle": "পাসওয়ার্ড ভুলে গেছেন?",
+    "forgotPasswordSubtitle": "আপনার ইমেল প্রবেश করুন এবং আমরা আপনাকে পাসওয়ার্ড রিসেট করার জন্য একটি লিঙ্ক পাঠাব।",
+    "emailLabel": "ইমেল",
+    "sendResetEmail": "রিসেট ইমেল পাঠান",
+    "resetEmailSent": "✅ রিসেট লিঙ্কের জন্য আপনার ইমেল পরীক্ষা করুন",
+    "resetEmailError": "ইমেল পাঠাতে অক্ষম। দয়া করে আবার চেষ্টা করুন।",
+    "resetPasswordTitle": "পাসওয়ার্ড রিসেট করুন",
+    "resetPasswordSubtitle": "নীচে আপনার নতুন পাসওয়ার্ড প্রবেশ করুন",
+    "newPassword": "নতুন পাসওয়ার্ড",
+    "confirmPassword": "পাসওয়ার্ড নিশ্চিত করুন",
+    "resetPasswordButton": "পাসওয়ার্ড রিসেট করুন",
+    "resetPasswordSuccess": "✅ পাসওয়ার্ড সফলভাবে রিসেট হয়েছে!",
+    "passwordsDoNotMatch": "পাসওয়ার্ড মেলে না",
+    "backToLogin": "লগইনে ফিরে যান",
+    "loginTitle": "স্বাগতম",
+    "loginSubtitle": "প্লেলিস্ট, তালিকা এবং অগ্রগতি পুনরুদ্ধার করতে লগইন করুন।",
+    "emailPlaceholder": "mail@example.com",
+    "noAccountPrompt": "অ্যাকাউন্ট নেই?",
+    "registerCta": "এখনই নিবন্ধন করুন",
+    "createAccountTitle": "অ্যাকাউন্ট তৈরি করুন",
+    "createAccountSubtitle": "সমস্ত ডিভাইসে প্লেলিস্ট এবং পছন্দগুলি সিঙ্ক করুন।",
+    "createAccountButton": "অ্যাকাউন্ট তৈরি করুন",
+    "alreadyHaveAccountCta": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+    "tagline": "আপনার বিনোদন, সর্বত্র",
+    "continueWithGoogle": "Google দিয়ে চালিয়ে যান",
+    "continueWithApple": "Apple দিয়ে চালিয়ে যান",
+    "signInWithGoogle": "Google দিয়ে সাইন ইন করুন",
+    "continueWithEmail": "ইমেল দিয়ে চালিয়ে যান",
+    "termsPrefix": "চালিয়ে যাওয়ার মাধ্যমে, আপনি আমাদের গ্রহণ করেন",
+    "termsOfService": "সেবার শর্তাবলী",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "appleCredentialsInvalid": "অবৈধ Apple শংসাপত্র",
+    "appleSignInError": "Apple সাইন ইন ত্রুটি",
+    "googleComingSoon": "Google Sign In শীঘ্রই উপলব্ধ হবে",
+    "registerSubtitle": "নিবন্ধন করতে আপনার বিবরণ লিখুন",
+    "welcomeBack": "আবার স্বাগতম!",
+    "resetEmailSentMessage": "রিসেট ইমেল পাঠানো হয়েছে! আপনার ইনবক্স পরীক্ষা করুন।",
+    "register": "নিবন্ধন করুন",
+    "invalidEmailFirst": "প্রথমে একটি বৈধ ইমেল প্রবেश করুন",
+    "changePassword": "পাসওয়ার্ড পরিবর্তন করুন"
+  },
+  "common": {
+    "returnToHomeTitle": "হোম স্ক্রিনে ফিরতে চান?",
+    "on": "চালু",
+    "off": "বন্ধ",
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফল",
+    "retry": "পুনরায় চেষ্টা করুন",
+    "cancel": "বাতিল করুন",
+    "confirm": "নিশ্চিত করুন",
+    "delete": "মুছে দিন",
+    "save": "সংরক্ষণ করুন",
+    "close": "বন্ধ করুন",
+    "back": "ফিরে যান",
+    "next": "পরবর্তী",
+    "done": "সম্পন্ন",
+    "ok": "ঠিক আছে",
+    "edit": "সম্পাদনা করুন",
+    "name": "নাম",
+    "domain": "ডোমেইন",
+    "url": "URL",
+    "username": "ব্যবহারকারীর নাম",
+    "password": "পাসওয়ার্ড",
+    "or": "অথবা",
+    "saveChanges": "পরিবর্তন সংরক্ষণ করুন",
+    "resumeFrom": "{{time}} থেকে চালিয়ে যান",
+    "completed": "{{percent}}% সম্পন্ন",
+    "resume": "চালিয়ে যান",
+    "plot": "প্লট",
+    "cast": "কাস্ট",
+    "directedBy": "পরিচালনা করেছেন",
+    "genres": "ঘরানা",
+    "trailer": "ট্রেইলার",
+    "trailerComingSoon": "ট্রেলার শীঘ্রই আসছে",
+    "continue": "চালিয়ে যান",
+    "download": "ডাউনলোড",
+    "cancelDownload": "ডাউনলোড বাতিল করুন",
+    "downloaded": "ডাউনলোড করা হয়েছে",
+    "saving": "সংরক্ষণ করা হচ্ছে...",
+    "fillFields": "ক্ষেত্রগুলি সম্পূর্ণ করুন",
+    "contents": "সামগ্রী",
+    "noContent": "কোনো সামগ্রী নেই",
+    "addPlaylistToSeeContent": "সামগ্রী দেখতে একটি প্লেলিস্ট যোগ করুন",
+    "remove": "সরান",
+    "item": "আইটেম",
+    "items": "আইটেম",
+    "day": "দিন",
+    "days": "দিন",
+    "descriptionNotAvailable": "বর্ণনা উপলব্ধ নেই",
+    "titleNotAvailable": "শিরোনাম উপলব্ধ নেই",
+    "unknownTitle": "অজানা শিরোনাম",
+    "and": "এবং",
+    "search": "খোঁজ করুন",
+    "seeAll": "সব দেখুন",
+    "episodes": "এপিসোড"
+  },
+  "loading": {
+    "triviaTitle": "তুমি কি জানতে?"
+  },
+  "settings": {
+    "heroStyle": "ফিচার্ড স্টাইল",
+    "heroStyleSubtitle": "মুভি ও সিরিজের উপরে ফিচার্ড কনটেন্ট কেমন দেখায়",
+    "heroStyleFull": "পূর্ণ স্ক্রিন",
+    "heroStyleCard": "কার্ড",
+    "introSkip": {
+      "enabled": "ইন্ট্রো স্কিপ",
+      "subtitle": "এপিসোডের ইন্ট্রোর সময় একটি ‘ইন্ট্রো স্কিপ’ বোতাম দেখান।",
+      "autoEnabled": "স্বয়ংক্রিয় স্কিপ",
+      "autoSubtitle": "ট্যাপ না করেই রিক্যাপ ও ইন্ট্রো স্বয়ংক্রিয়ভাবে এড়িয়ে যায়।",
+      "defaultLength": "ডিফল্ট স্কিপ দৈর্ঘ্য",
+      "seconds": "{{seconds}}s",
+      "autoSkip": "স্বয়ংক্রিয় স্কিপ",
+      "autoSkipSubtitle": "ট্যাপ না করেই রিক্যাপ ও ইন্ট্রো স্বয়ংক্রিয়ভাবে এড়িয়ে যায়।"
+    },
+    "title": "সেটিংস",
+    "account": "অ্যাকাউন্ট",
+    "playlist": "প্লেলিস্ট",
+    "videoQuality": "ভিডিও গুণমান",
+    "downloads": "ডাউনলোড",
+    "cache": "ক্যাশ",
+    "auto": "স্বয়ংক্রিয়",
+    "changePlaylist": "প্লেলিস্ট পরিবর্তন করুন",
+    "sortHideCategories": "বিভাগ সাজান / লুকান",
+    "sortHideCategoriesSubtitle": "এই প্লেলিস্টের জন্য চলচ্চিত্র, সিরিজ এবং চ্যানেলগুলি কাস্টমাইজ করুন।",
+    "logout": "লগআউট",
+    "logoutConfirm": "আপনি কি সত্যিই লগআউট করতে চান?",
+    "language": "ভাষা",
+    "manageAccount": "অ্যাকাউন্ট পরিচালনা করুন",
+    "playlistComingSoon": "প্লেলিস্ট সেটিংস শীঘ্রই আসছে",
+    "playlistComingSoonSubtitle": "আমরা প্লেলিস্ট নিয়ন্ত্রণ পরিমার্জিত করছি। নজর রাখুন।",
+    "about": "সম্পর্কে",
+    "version": "সংস্করণ",
+    "support": "সহায়তা",
+    "supportDiscord": "আমাদের Discord কমিউনিটিতে যোগ দিন",
+    "followUs": "X-এ আমাদের ফলো করুন",
+    "followUsDescription": "সর্বশেষ আপডেট এবং খবর মিস করবেন না",
+    "followUsScanHint": "X-এ ফলো করতে স্ক্যান করুন",
+    "followUsInstagram": "Instagram-এ আমাদের ফলো করুন",
+    "followUsInstagramScanHint": "Instagram-এ ফলো করতে স্ক্যান করুন",
+    "feedback": {
+      "subtitle": "বাগ রিপোর্ট করুন, উন্নতির পরামর্শ দিন, নতুন ফিচার অনুরোধ করুন"
+    },
+    "termsOfService": "সেবার শর্তাবলী",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "termsDescription": "আমাদের সেবার শর্তাবলী পড়ুন",
+    "privacyDescription": "আমাদের গোপনীয়তা নীতি পড়ুন",
+    "supportQRTitle": "KIPTV সহায়তায় যোগ দিন",
+    "supportQRSubtitle": "আমাদের Discord কমিউনিটি খুলতে আপনার iPhone বা iPad দিয়ে এই QR কোডটি স্ক্যান করুন",
+    "myPlaylists": "আমার প্লেলিস্ট",
+    "appSection": "অ্যাপ",
+    "infoSection": "তথ্য",
+    "logoutWarning": "আপনাকে আবার লগ ইন করতে হবে",
+    "playlistManagement": "প্লেলিস্ট ব্যবস্থাপনা",
+    "contentManagement": "সামগ্রী ব্যবস্থাপনা",
+    "contentManagementSubtitle": "প্লেলিস্ট সামগ্রী সাজান, লুকান এবং লক করুন",
+    "deviceSection": "ডিভাইস",
+    "subtitleLanguage": "সাবটাইটেল ভাষা",
+    "subtitleOff": "বন্ধ",
+    "subtitleAuto": "ডিফল্ট",
+    "audioLanguage": "অডিও ভাষা",
+    "defaultLanguages": "ডিফল্ট ভাষা",
+    "audioOriginal": "মূল",
+    "autoplayNextEpisode": "পরবর্তী পর্ব স্বয়ংক্রিয়ভাবে চালান",
+    "backgroundPlayback": "ব্যাকগ্রাউন্ডে চালানো",
+    "backgroundPlaybackSubtitle": "অ্যাপ থেকে বেরিয়ে টিভির হোম স্ক্রিনে গেলেও অডিও চলতে থাকে। বন্ধ থাকলে চালানো থেমে যায় এবং KIPTV-তে ফিরে এলে আবার শুরু হয়।",
+    "skipForward": "এগিয়ে যান",
+    "skipBackward": "পিছিয়ে যান",
+    "seconds5": "5 সেকেন্ড",
+    "seconds10": "10 সেকেন্ড",
+    "seconds15": "15 সেকেন্ড",
+    "seconds30": "30 সেকেন্ড",
+    "playerEngine": "প্লেয়ার",
+    "playerSelectEngine": "প্লেয়ার ইঞ্জিন নির্বাচন করুন",
+    "playerAuto": "স্বয়ংক্রিয়",
+    "playerNative": "নেটিভ (AVPlayer)",
+    "playerExo": "ExoPlayer",
+    "playerMPV": "MPV",
+    "playerAether": "Aether",
+    "playerVLC": "VLC",
+    "playerKSPlayer": "KSPlayer",
+    "playerMoviesSeries": "চলচ্চিত্র এবং সিরিজের জন্য প্লেয়ার",
+    "playerLive": "লাইভের জন্য প্লেয়ার",
+    "playerFallbackOnFailure": "নির্বাচিত প্লেয়ার ব্যর্থ হলে অন্য প্লেয়ার ব্যবহার করুন",
+    "playerFallbackDescription": "নির্বাচিত প্লেয়ার ব্যর্থ হলে স্বয়ংক্রিয়ভাবে অন্য প্লেয়ার ইঞ্জিন চেষ্টা করুন",
+    "metadata": "মেটাডেটা",
+    "metadataSection": "মেটাডেটা",
+    "metadataSource": "মেটাডেটা উৎস",
+    "smartHide": "স্মার্ট লুকান",
+    "metadataWeb": "ওয়েব",
+    "metadataPlaylist": "প্লেলিস্ট",
+    "metadataSubtitle": "ওয়েব: ওয়েব থেকে পোস্টার, রেটিং এবং বর্ণনা। প্লেলিস্ট: শুধুমাত্র IPTV প্রদানকারীর ডেটা ব্যবহার করুন।",
+    "titleCleaning": "চলচ্চিত্র এবং সিরিজের শিরোনাম পরিষ্কার করুন",
+    "titleCleaningSubtitle": "স্ট্রিম শিরোনাম থেকে গুণমান ট্যাগ, ভাষা ট্যাগ এবং বছর সরান",
+    "includeAdultContent": "প্রাপ্তবয়স্ক সামগ্রী অন্তর্ভুক্ত করুন",
+    "hiddenCategories": "লুকানো বিভাগ",
+    "hiddenCategoriesCount": "{{count}} লুকানো",
+    "noHiddenCategories": "কোনো লুকানো বিভাগ নেই",
+    "languageAuto": "সিস্টেম ডিফল্ট",
+    "settingsCategories": "বিভাগ",
+    "general": "সাধারণ",
+    "playback": "প্লেব্যাক",
+    "playbackVodSection": "চলচ্চিত্র এবং সিরিজ",
+    "playbackLiveSection": "লাইভ",
+    "networkPerformance": "নেটওয়ার্ক এবং কর্মক্ষমতা",
+    "networkRequestsSection": "অনুরোধ",
+    "requestTimeout": "অনুরোধ সময়সীমা",
+    "retryAttempts": "পুনরায় চেষ্টা করার প্রচেষ্টা",
+    "cacheFallbackOnError": "নেটওয়ার্ক ত্রুটিতে স্টেল ক্যাশ ব্যবহার করুন",
+    "clearRuntimeCaches": "রানটাইম ক্যাশ সাফ করুন",
+    "localOnly": "এই সেটিংস শুধুমাত্র এই ডিভাইসে সংরক্ষিত হয়।",
+    "contentSection": "বিষয়বস্তু",
+    "parentalControl": "পিতামাতার নিয়ন্ত্রণ",
+    "contentControl": "বিষয়বস্তু নিয়ন্ত্রণ",
+    "contentControlDisabled": "নিয়ন্ত্রণ বন্ধ",
+    "contentControlEnabled": "নিয়ন্ত্রণ চালু",
+    "parentalControlEnabled": "পিতামাতার নিয়ন্ত্রণ সক্ষম করুন",
+    "parentalRequirePinForSettings": "সেটিংস খুলতে PIN প্রয়োজন",
+    "disableParentalTitle": "পিতামাতার নিয়ন্ত্রণ নিষ্ক্রিয় করুন?",
+    "disableParentalMessage": "সমস্ত বর্তমান লক করা বিষয়বস্তু এবং বিভাগ আনলক হবে।",
+    "disableParentalConfirm": "নিষ্ক্রিয় এবং আনলক করুন",
+    "parentalManageHint": "বিভাগ এবং আইটেম লক বা আনলক করতে, বিষয়বস্তু ব্যবস্থাপনায় যান",
+    "enterPin": "PIN প্রবেশ করুন",
+    "lockedContentSubtitle": "এই বিষয়বস্তু লক করা হয়েছে। চালিয়ে যেতে আপনার PIN প্রবেশ করুন।",
+    "hideAdultCategories": "প্রাপ্তবয়স্ক বিভাগ লুকান (XXX)",
+    "pinSection": "PIN",
+    "setPin": "PIN সেট করুন",
+    "changePin": "PIN পরিবর্তন করুন",
+    "removePin": "PIN সরান",
+    "parentalPin": "4-অঙ্কের PIN",
+    "parentalPinConfirm": "PIN নিশ্চিত করুন",
+    "pinMustBe4Digits": "PIN অবশ্যই 4 অঙ্ক হতে হবে।",
+    "pinMismatch": "PINগুলি মেলে না।",
+    "diagnostics": "ডায়াগনস্টিক্স",
+    "diagnosticsHealthy": "কোনো সমস্যা শনাক্ত হয়নি",
+    "diagnosticsIssueDetected": "মনোযোগ প্রয়োজন",
+    "diagnosticsPlaylistSection": "প্লেলিস্ট অবস্থা",
+    "diagnosticsEpgSection": "EPG অবস্থা",
+    "diagnosticsErrorsSection": "সাম্প্রতিক ত্রুটিগুলি",
+    "diagnosticsActionsSection": "পদক্ষেপগুলি",
+    "diagnosticsXmltvChannels": "XMLTV চ্যানেলগুলি",
+    "diagnosticsXmltvPrograms": "XMLTV প্রোগ্রামগুলি",
+    "diagnosticsEpgCache": "EPG ক্যাশ",
+    "diagnosticsXtreamError": "Xtream",
+    "diagnosticsPlaylistError": "প্লেলিস্ট",
+    "diagnosticsXmltvError": "XMLTV",
+    "noIssuesDetected": "কোনো ত্রুটি নেই",
+    "refreshDiagnostics": "ডায়াগনস্টিক্স রিফ্রেশ করুন",
+    "diagnosticsRefreshed": "ডায়াগনস্টিক্স রিফ্রেশ হয়েছে",
+    "runtimeCacheCleared": "রানটাইম ক্যাশ সাফ করা হয়েছে",
+    "clearPosterCache": "পোস্টার ক্যাশে সাফ করুন",
+    "clearPosterCacheSubtitle": "নেটওয়ার্ক থেকে পোস্টার আর্টওয়ার্ক পুনরায় ডাউনলোড করতে বাধ্য করে। কভার আর্টের পরিবর্তে প্লেসহোল্ডার দেখলে এটি ব্যবহার করুন।",
+    "clearPosterCacheDone": "পোস্টার ক্যাশে সাফ হয়েছে",
+    "statusIdle": "নিষ্ক্রিয়",
+    "statusReady": "প্রস্তুত",
+    "statusNever": "কখনো না",
+    "lastUpdate": "সর্বশেষ আপডেট",
+    "lastContentUpdate": "সর্বশেষ সামগ্রী আপডেট",
+    "xmltvStatus": "XMLTV অবস্থা",
+    "moviesLoaded": "চলচ্চিত্র লোড হয়েছে",
+    "seriesLoaded": "সিরিজ লোড হয়েছে",
+    "channelsLoaded": "চ্যানেলগুলি লোড হয়েছে",
+    "infoPlaylistSection": "প্লেলিস্ট বিবরণ",
+    "infoContentSection": "লোড করা সামগ্রী",
+    "infoAccountSection": "প্রদানকারী অ্যাকাউন্ট অবস্থা",
+    "activePlaylistSection": "সক্রিয় প্লেলিস্ট",
+    "savedPlaylistsSection": "সংরক্ষিত প্লেলিস্ট",
+    "active": "সক্রিয়",
+    "noSavedPlaylists": "কোনো সংরক্ষিত প্লেলিস্ট নেই",
+    "vodAskBeforeAutoplay": "পরবর্তী এপিসোড অটোপ্লে করার আগে জিজ্ঞাসা করুন",
+    "liveStartMuted": "লাইভ চ্যানেল নিঃশব্দে শুরু করুন",
+    "liveOpenEpgOnChannelChange": "চ্যানেল পরিবর্তনের সময় EPG খুলুন",
+    "livePreferLowLatency": "লাইভের জন্য কম লেটেন্সি পছন্দ করুন",
+    "epgPreviewMode": "EPG প্রিভিউ",
+    "epgPreviewModeDescription": "বেছে নিন EPG স্ক্রিনে চ্যানেলের প্রিভিউ শুরু করবেন কিনা।",
+    "epgPreviewModeOff": "বন্ধ",
+    "epgPreviewModeOnFocus": "ফোকাসে",
+    "epgPreviewModeOnTap": "ট্যাপে",
+    "epgPreviewModeLowMemoryWarning": "পুরোনো TV মডেলে এটি ধীরগতির কারণ হতে পারে।",
+    "liveTVPreviewMode": "লাইভ TV প্রিভিউ",
+    "liveTVPreviewModeDescription": "বেছে নিন লাইভ TV স্ক্রিন ব্রাউজ করার সময় চ্যানেল প্রিভিউ শুরু করবেন কিনা।",
+    "liveTVPreviewModeOff": "বন্ধ",
+    "liveTVPreviewModeOnFocus": "ফোকাসে",
+    "liveTVPreviewModeOnTap": "ট্যাপে",
+    "liveTabLayout": "লাইভ স্ক্রিনের লেআউট",
+    "liveTabLayoutDescription": "লাইভ স্ক্রিন কী দেখাবে তা চয়ন করুন।",
+    "liveTabLayoutChannelList": "চ্যানেল তালিকা",
+    "liveTabLayoutCarousel": "ক্যারোসেল",
+    "hideItem": "আইটেম লুকান",
+    "hideGroupedChannelTitle": "সমস্ত সংস্করণ লুকান",
+    "hideGroupedChannelMessage": "এটি এই চ্যানেলের সমস্ত {{count}} গুণমান সংস্করণ লুকাবে। আপনি কি চালিয়ে যেতে চান?",
+    "lockGroupedChannelTitle": "সমস্ত সংস্করণ লক করুন",
+    "lockGroupedChannelMessage": "এটি এই চ্যানেলের সমস্ত {{count}} গুণমান সংস্করণ লক করবে। আপনি কি চালিয়ে যেতে চান?",
+    "unlockGroupedChannelTitle": "সমস্ত সংস্করণ আনলক করুন",
+    "unlockGroupedChannelMessage": "এটি এই চ্যানেলের সমস্ত {{count}} গুণমান সংস্করণ আনলক করবে। আপনি কি চালিয়ে যেতে চান?",
+    "unhide": "দেখান",
+    "hiddenItems": "লুকানো আইটেমগুলি",
+    "noHiddenItems": "কোনো লুকানো আইটেম নেই",
+    "hiddenItemsCount": "{{count}} লুকানো",
+    "autoHideKeywords": "স্বয়ংক্রিয় লুকান কীওয়ার্ড",
+    "autoHideKeywordsHeader": "কীওয়ার্ড",
+    "autoHideKeywordsFooter": "এই কীওয়ার্ড ধারণকারী বিভাগ সমস্ত বিষয়বস্তু প্রকারে স্বয়ংক্রিয়ভাবে লুকানো হবে।",
+    "addKeywordPlaceholder": "যেমন 'xxx'",
+    "autoHidden": "স্বয়ংক্রিয় লুকানো",
+    "categoryOrder": "বিভাগ ক্রম",
+    "categoryOrderFooter": "বিভাগ পুনর্বিন্যাস করতে টেনে আনুন। এটি একটি কাস্টম সর্ট অর্ডার সেট করে।",
+    "reorderSearchDisabled": "পুনরায় সাজাতে অনুসন্ধান সাফ করুন",
+    "resetOrder": "অর্ডার রিসেট করুন",
+    "hiddenCategoriesFooter": "প্রতিটি বিভাগের জন্য দৃশ্যমানতা টগল করুন। স্বয়ংক্রিয় লুকানো বিভাগ কীওয়ার্ডের মাধ্যমে পরিচালিত হয়।",
+    "noCategoriesAvailable": "কোনো বিভাগ উপলব্ধ নেই",
+    "manageCategories": "বিভাগ পরিচালনা করুন",
+    "manageCategoriesHeader": "পুনর্বিন্যাস করতে টেনে আনুন। দৃশ্যমানতা দেখাতে বা লুকাতে চোখের আইকন ট্যাপ করুন।",
+    "manageCategoriesHeaderFull": "পুনর্বিন্যাস করতে টেনে আনুন। দেখাতে/লুকাতে চোখ ট্যাপ করুন। একটি বিভাগ পরিচালনা করতে ট্যাপ করুন।",
+    "autoHiddenSection": "কীওয়ার্ড দ্বারা স্বয়ংক্রিয় লুকানো",
+    "autoHideKeywordsFooterPerType": "এই কীওয়ার্ড ধারণকারী বিভাগ স্বয়ংক্রিয়ভাবে লুকানো হবে।",
+    "autoHiddenCategoriesSection": "কীওয়ার্ড দ্বারা লুকানো বিভাগ",
+    "allHiddenContent": "লুকানো বিষয়বস্তু",
+    "allLockedContent": "লক করা বিষয়বস্তু",
+    "hiddenCategoriesSection": "লুকানো বিভাগ",
+    "hiddenItemsSection": "লুকানো আইটেম",
+    "lockedCategoriesSection": "লক করা বিভাগ",
+    "lockedItemsSection": "লক করা আইটেম",
+    "showAll": "সব দেখান",
+    "unlockAllItems": "সব আনলক করুন",
+    "showAllConfirmTitle": "সমস্ত লুকানো বিষয়বস্তু দেখাবেন?",
+    "showAllConfirmMessage": "এটি সমস্ত {{count}} লুকানো বিভাগ এবং আইটেম প্রদর্শন করবে। আপনি চালিয়ে যেতে চান?",
+    "unlockAllConfirmTitle": "সমস্ত বিষয়বস্তু আনলক করুন?",
+    "unlockAllConfirmMessage": "এটি সমস্ত {{count}} লক করা বিভাগ এবং আইটেম আনলক করবে। আপনি চালিয়ে যেতে চান?",
+    "noItemsInCategory": "এই বিভাগে কোনো আইটেম নেই",
+    "contentType": "বিষয়বস্তুর ধরন",
+    "contentTypeDescription": "পরিচালনা করতে সামগ্রী ধরন নির্বাচন করুন",
+    "categorySortDescription": "বিভাগের তালিকায় সাজানোর পদ্ধতি পরিবর্তন করুন",
+    "allHiddenContentDescription": "সমস্ত লুকানো বিভাগ এবং আইটেম পর্যালোচনা এবং পুনরুদ্ধার করুন",
+    "allLockedContentDescription": "সমস্ত লক করা বিভাগ এবং আইটেম পর্যালোচনা এবং আনলক করুন",
+    "categoryTapDescription": "এই বিভাগের সামগ্রী পরিচালনা করতে টিপুন",
+    "categoryEyeDescription": "এই বিভাগ দেখাতে বা লুকাতে টিপুন",
+    "categoryLockDescription": "এই বিভাগ লক বা আনলক করতে টিপুন",
+    "categoryMoveDescription": "এই বিভাগটি উপরে বা নীচে সরাতে টিপুন",
+    "contentSortDescription": "এই বিভাগে আইটেম সাজানোর পদ্ধতি পরিবর্তন করুন",
+    "filterItemsDescription": "নাম অনুযায়ী আইটেম ফিল্টার করতে টাইপ করুন",
+    "itemEyeDescription": "এই আইটেম দেখাতে বা লুকাতে টিপুন",
+    "itemLockDescription": "এই আইটেম লক বা আনলক করতে টিপুন",
+    "categoryContentDescription": "এই বিভাগে স্বতন্ত্র আইটেম পরিচালনা করুন",
+    "addKeywordDescription": "স্বয়ংক্রিয়ভাবে মিলিত বিভাগ লুকাতে একটি কীওয়ার্ড লিখুন",
+    "removeKeywordDescription": "কীওয়ার্ড সরাতে দীর্ঘ চাপুন",
+    "unhideCategoryDescription": "এই বিভাগ দেখাতে বোতাম টিপুন",
+    "unhideItemDescription": "এই আইটেম দেখাতে বোতাম টিপুন",
+    "showAllDescription": "একবারে সমস্ত লুকানো বিভাগ এবং আইটেম দেখান",
+    "unlockCategoryDescription": "এই বিভাগ আনলক করতে বোতাম টিপুন",
+    "unlockItemDescription": "এই আইটেম আনলক করতে বোতাম টিপুন",
+    "unlockAllDescription": "একবারে সমস্ত লক করা বিভাগ এবং আইটেম আনলক করুন",
+    "showCategory": "বিভাগ দেখান",
+    "hideCategory": "বিভাগ লুকান",
+    "lockCategory": "বিভাগ লক করুন",
+    "unlockCategory": "বিভাগ আনলক করুন",
+    "renameCategory": "বিভাগের নাম পরিবর্তন করুন",
+    "moveCategoryToTop": "উপরে নিন",
+    "restoreCategoryName": "মূল নাম পুনরুদ্ধার করুন",
+    "renameChannel": "চ্যানেলের নাম পরিবর্তন করুন",
+    "moveChannelToTop": "উপরে নিন",
+    "restoreChannelName": "মূল নাম পুনরুদ্ধার করুন",
+    "showItem": "আইটেম দেখান",
+    "lockItem": "লক করুন",
+    "unlockItem": "আনলক করুন",
+    "removeKeyword": "কীওয়ার্ড সরান",
+    "removeKeywordConfirm": "\"{{keyword}}\" সরাবেন?",
+    "moveToTop": "শীর্ষে সরান",
+    "moveUp": "উপরে সরান",
+    "moveDown": "নীচে সরান",
+    "moveToBottom": "নীচে সরান",
+    "defaultStartScreen": "প্রারম্ভ পর্দা",
+    "defaultStartScreenSubtitle": "প্লেলিস্টে প্রবেশ করার সময় কোন ট্যাব খোলে তা চয়ন করুন",
+    "autoOpenPlaylist": "প্লেলিস্ট স্বয়ংক্রিয়ভাবে খুলুন",
+    "autoOpenPlaylistSubtitle": "অ্যাপ শুরু হলে কোন প্লেলিস্ট খোলা হবে",
+    "autoOpenPlaylistOff": "না",
+    "autoOpenPlaylistLast": "শেষ প্লেলিস্ট",
+    "startScreenMovies": "চলচ্চিত্র",
+    "startScreenSeries": "সিরিজ",
+    "startScreenLive": "লাইভ",
+    "startScreenGuide": "গাইড",
+    "incognitoMode": "গোপনীয় মোড",
+    "incognitoModeSubtitle": "এই ডিভাইসে অগ্রগতি বা ইতিহাস সংরক্ষণ ছাড়াই দেখুন",
+    "incognitoActive": "গোপনীয় মোড সক্রিয়",
+    "privacy": "গোপনীয়তা",
+    "recentlyWatchedLive": "'সম্প্রতি দেখা হয়েছে' দেখান",
+    "recentlyWatchedLiveSubtitle": "লাইভের শীর্ষে একটি \"সম্প্রতি দেখা\" বিভাগ দেখান",
+    "continueWatchingTapPlays": "একটি ট্যাপ দিয়ে চালান",
+    "continueWatchingTapPlaysSubtitle": "\"চলমান দেখা\" এ ট্যাপ করা সরাসরি চালায়। বন্ধ থাকলে, বিবরণ পর্দা খোলে।",
+    "metadataLanguage": "মেটাডেটা ভাষা",
+    "metadataLanguageSubtitle": "চলচ্চিত্র, সিরিজ এবং প্রোগ্রাম তথ্যের ভাষা (TMDB)",
+    "metadataLanguageAuto": "অ্যাপের মতো",
+    "subtitleStyling": "সাবটাইটেল উপস্থিতি",
+    "subtitleFontSize": "ফন্ট আকার",
+    "subtitleFontSizeSmall": "ছোট",
+    "subtitleFontSizeMedium": "মাঝারি",
+    "subtitleFontSizeLarge": "বড়",
+    "subtitleFontSizeXLarge": "অতিরিক্ত বড়",
+    "subtitleColor": "পাঠ্য রঙ",
+    "subtitleColorWhite": "সাদা",
+    "subtitleColorYellow": "হলুদ",
+    "subtitleColorGreen": "সবুজ",
+    "subtitleColorCyan": "সায়ান",
+    "subtitleColorOrange": "কমলা",
+    "subtitleBackground": "পটভূমি",
+    "subtitleBackgroundNone": "কোনো না",
+    "subtitleBackgroundSemiTransparent": "অর্ধ স্বচ্ছ",
+    "subtitleBackgroundOpaque": "অস্বচ্ছ",
+    "subtitlePosition": "অবস্থান",
+    "subtitlePositionBottom": "নীচে",
+    "subtitlePositionTop": "শীর্ষে",
+    "subtitleStyleSourceSystem": "সিস্টেম সেটিংস",
+    "subtitleStyleSourceCustom": "কাস্টম",
+    "subtitleFont": "ফন্ট",
+    "subtitleFontDefault": "ডিফল্ট",
+    "subtitleFontRounded": "গোলাকার",
+    "subtitleFontSerif": "সেরিফ",
+    "subtitleFontMono": "মনোস্পেস",
+    "subtitleBold": "বোল্ড",
+    "subtitleEdge": "প্রান্ত",
+    "subtitleEdgeNone": "কোনো না",
+    "subtitleEdgeShadow": "ছায়া",
+    "subtitleEdgeOutline": "রূপরেখা",
+    "subtitleStyleSource": "সাবটাইটেল স্টাইল",
+    "subtitleStyleSystemHint": "আপনার ডিভাইসের সিস্টেম ক্যাপশন সেটিংস ব্যবহার করা হচ্ছে",
+    "subtitlePreview": "পূর্বরূপ",
+    "subtitlePreviewText": "সাবটাইটেলগুলি এভাবে দেখাবে",
+    "networkBuffer": "নেটওয়ার্ক বাফার",
+    "networkBufferSubtitle": "কতটা ভিডিও পূর্বলোড করতে হবে। বড় মান ধীর সংযোগে সহায়তা করে।",
+    "networkBufferAuto": "স্বয়ংক্রিয়",
+    "hardwareAcceleration": "হার্ডওয়্যার ত্বরণ",
+    "hardwareAccelerationSubtitle": "ভিডিও ডিকোডিংয়ের জন্য GPU ব্যবহার করুন। ক্র্যাশ হলে অক্ষম করুন।",
+    "hardwareAccelerationOn": "চালু",
+    "hardwareAccelerationOff": "বন্ধ",
+    "hardwareAccelerationAuto": "স্বয়ংক্রিয়",
+    "deinterlacing": "ডিইনটারলেসিং",
+    "deinterlacingSubtitle": "ইন্টারলেসড ভিডিওকে প্রগতিশীল করে রূপান্তর করুন। লাইভ চ্যানেলের জন্য দরকারী।",
+    "deinterlacingAuto": "স্বয়ংক্রিয়",
+    "deinterlacingOff": "বন্ধ",
+    "liveStreamFormat": "লাইভ স্ট্রিম ফর্ম্যাট",
+    "liveStreamFormatSubtitle": "স্বয়ংক্রিয়ভাবে প্লেয়ার ইঞ্জিনের উপর ভিত্তি করে সেরা ফর্ম্যাট নির্বাচন করে: AVPlayer এর জন্য HLS, KSPlayer/VLC/MPV/Aether এর জন্য MPEG-TS",
+    "groupSimilarChannels": "একই রকম চ্যানেল গ্রুপ করুন",
+    "groupSimilarChannelsSubtitle": "একই চ্যানেলের HD, 4K, FHD রূপান্তরগুলি একটি প্রবেশে একত্রিত করুন",
+    "splitMyListByTag": "আমার তালিকা ট্যাগ অনুসারে ভাগ করুন",
+    "showTrending": "'ট্রেন্ডিং' দেখান",
+    "hideEmptyTabs": "খালি ট্যাব লুকান",
+    "hideEmptyTabsSubtitle": "প্লেলিস্টে সেই ধরনের কোনো কনটেন্ট না থাকলে মুভি, সিরিজ বা Live ট্যাব লুকান",
+    "showTrendingSubtitle": "হোম স্ক্রিনে ট্রেন্ডিং ব্যানার ও ক্যারোসেল দেখান",
+    "showRecentlyAdded": "'সম্প্রতি যোগ করা' দেখান",
+    "splitMyListByTagSubtitle": "একটি মিশ্র তালিকার পরিবর্তে প্রতিটি ট্যাগের জন্য একটি কারোসেল দেখান",
+    "showRecentlyAddedSubtitle": "গত 30 দিনে যোগ করা কনটেন্ট হাইলাইট করুন",
+    "chooseQuality": "গুণমান চয়ন করুন",
+    "contentRefreshFrequency": "সামগ্রী সতেজ করার ফ্রিকোয়েন্সি",
+    "contentRefreshEveryAccess": "প্রতিবার অ্যাক্সেসে",
+    "contentRefreshFrequencySubtitle": "সমস্ত প্লেলিস্ট সামগ্রী পুনরায় লোড করার ফ্রিকোয়েন্সি (বিভাগ, চলচ্চিত্র, সিরিজ, চ্যানেল)",
+    "epgRefreshFrequency": "EPG সতেজ করার ফ্রিকোয়েন্সি",
+    "epgRefreshFrequencySubtitle": "প্রোগ্রাম গাইড ডেটা পুনরায় লোড করার ফ্রিকোয়েন্সি",
+    "epgRefreshMinutes": "{{count}} মিনিট",
+    "epgRefreshHours": "{{count}} ঘন্টা",
+    "epgForceRefresh": "এখনই EPG সতেজ করুন",
+    "customUserAgent": "ব্যবহারকারী এজেন্ট",
+    "customUserAgentSubtitle": "স্ট্রিম অনুরোধের জন্য কাস্টম HTTP ব্যবহারকারী এজেন্ট। ডিফল্টের জন্য খালি রেখে দিন।",
+    "customUserAgentDefault": "ডিফল্ট",
+    "playerComparison": "প্লেয়ার তুলনা",
+    "playerComparisonSubtitle": "প্রতিটি প্লেয়ার ইঞ্জিনের বৈশিষ্ট্য তুলনা করুন",
+    "playerComparisonEngine": "ইঞ্জিন",
+    "playerComparisonFormats": "ফর্ম্যাট",
+    "playerComparisonPros": "শক্তিশালী দিক",
+    "playerComparisonCons": "দুর্বল দিক",
+    "playerAvplayerPro1": "সেরা ব্যাটারি জীবন এবং সিস্টেম একীকরণ",
+    "playerAvplayerPro2": "নেটিভ AirPlay এবং চিত্র-ইন-চিত্র সমর্থন",
+    "playerAvplayerPro3": "HLS স্ট্রিমের জন্য সবচেয়ে নির্ভরযোগ্য",
+    "playerAvplayerCon1": "সীমিত ফর্ম্যাট সমর্থন (কোনো MKV, AVI, RTSP নেই)",
+    "playerAvplayerCon2": "কোনো সফ্টওয়্যার ডিকোডিং ফলব্যাক নেই",
+    "playerKsplayerPro1": "সবচেয়ে বিস্তৃত ফর্ম্যাট এবং কোডেক সমর্থন",
+    "playerKsplayerPro2": "হার্ডওয়্যার এবং সফ্টওয়্যার ডিকোডিং",
+    "playerKsplayerPro3": "সাবটাইটেল এবং অডিও ট্র্যাক নির্বাচন",
+    "playerKsplayerCon1": "উচ্চতর ব্যাটারি খরচ",
+    "playerKsplayerCon2": "কিছু স্ট্রিমের সাথে মাঝে মাঝে স্থিতিশীলতা সমস্যা",
+    "playerVlcPro1": "চমৎকার ফর্ম্যাট সামঞ্জস্য",
+    "playerVlcPro2": "পরিপক্ক এবং যুদ্ধ পরীক্ষিত ইঞ্জিন",
+    "playerVlcPro3": "সমস্যাপূর্ণ স্ট্রিমের ভাল পরিচালনা",
+    "playerVlcCon1": "উচ্চতর মেমোরি ব্যবহার",
+    "playerVlcCon2": "কোনো নেটিভ iOS নিয়ন্ত্রণ একীকরণ নেই",
+    "liveTvSettings": "লাইভ",
+    "advancedSettings": "উন্নত",
+    "lockedCategories": "লক করা বিভাগ",
+    "lockedItems": "লক করা আইটেম",
+    "pinRequired": "PIN প্রয়োজন",
+    "pinRequiredMessage": "চালিয়ে যেতে আপনার 4-সংখ্যার PIN প্রবেশ করুন",
+    "pinIncorrect": "ভুল PIN",
+    "pinTryAgain": "আবার চেষ্টা করুন",
+    "pinSetSuccess": "PIN সফলভাবে সেট করা হয়েছে",
+    "pinRemovedSuccess": "PIN সরানো হয়েছে",
+    "pinChangedSuccess": "PIN পরিবর্তন করা হয়েছে",
+    "enterCurrentPin": "বর্তমান PIN প্রবেশ করুন",
+    "enterNewPin": "নতুন PIN প্রবেশ করুন",
+    "confirmNewPin": "নতুন PIN নিশ্চিত করুন",
+    "recentlyWatched": "সম্প্রতি দেখা",
+    "credits": "ক্রেডিট",
+    "creditsMovieData": "এই পণ্য TMDB API ব্যবহার করে কিন্তু TMDB দ্বারা অনুমোদিত বা প্রত্যয়িত নয়।",
+    "creditsOpenSource": "ওপেন সোর্স লাইসেন্স",
+    "creditsVLC": "ভিডিও প্লেব্যাক VLC দ্বারা চালিত — LGPLv2.1",
+    "creditsKSPlayer": "উন্নত প্লেব্যাক KSPlayer দ্বারা চালিত",
+    "creditsFFmpeg": "এই সফ্টওয়্যার FFmpeg প্রকল্প থেকে লাইব্রেরি ব্যবহার করে — LGPLv2.1",
+    "creditsMPV": "ফলব্যাক প্লেব্যাক MPV (libmpv) দ্বারা চালিত — LGPLv2.1+",
+    "devices": "ডিভাইস",
+    "linkTV": "একটি টিভি লিঙ্ক করুন",
+    "accountDescription": "অ্যাকাউন্ট বিবরণ এবং সাবস্ক্রিপশন স্থিতি দেখুন",
+    "premiumDescription": "আনলিমিটেড স্ট্রিমিং এবং প্রিমিয়াম বৈশিষ্ট্য আনলক করুন",
+    "generalDescription": "ভাষা এবং স্টার্টআপ পছন্দ",
+    "playbackDescription": "প্লেয়ার ইঞ্জিন, সাবটাইটেল, অডিও এবং উন্নত বিকল্প",
+    "parentalControlsDescription": "কন্টেন্ট ও সেটিংসে অ্যাক্সেস সীমিত করতে PIN সুরক্ষা",
+    "metadataDescription": "চলচ্চিত্র এবং টিভি সিরিজ তথ্যের ভাষা এবং উৎস সেটিংস",
+    "playlistInfoDescription": "সার্ভার বিবরণ, সামগ্রী গণনা এবং EPG স্থিতি",
+    "reloadPlaylistDescription": "সার্ভার থেকে সমস্ত প্লেলিস্ট সামগ্রী জোর করে পুনরায় লোড করুন",
+    "reloadEPGDescription": "সার্ভার থেকে প্রোগ্রাম গাইড ডেটা জোর করে পুনরায় লোড করুন",
+    "changePlaylistDescription": "একটি ভিন্ন IPTV প্লেলিস্টে স্যুইচ করুন",
+    "versionDescription": "বর্তমান অ্যাপ সংস্করণ এবং বিল্ড নম্বর",
+    "creditsDescription": "KIPTV ব্যবহার করে ওপেন সোর্স লাইব্রেরি এবং সেবা",
+    "services": "পরিষেবা",
+    "logoutDescription": "এই ডিভাইসে আপনার অ্যাকাউন্ট থেকে সাইন আউট করুন",
+    "defaultDescription": "KIPTV কে আপনার পছন্দ অনুযায়ী কনফিগার করুন",
+    "languageDescription": "অ্যাপ ইন্টারফেসের ভাষা চয়ন করুন",
+    "startScreenDescription": "প্লেলিস্ট প্রবেশের সময় প্রথম খোলার জন্য ট্যাব চয়ন করুন",
+    "autoOpenPlaylistDescription": "প্লেলিস্ট নির্বাচন এড়িয়ে যান এবং শুরুতে শেষ ব্যবহৃত বা নির্দিষ্ট একটি প্লেলিস্ট খুলুন",
+    "playerEngineDescription": "সামগ্রী প্লেব্যাক করার জন্য ভিডিও প্লেয়ার ইঞ্জিন চয়ন করুন",
+    "autoplayNextEpisodeDescription": "বর্তমান এপিসোড শেষ হলে পরবর্তী এপিসোড স্বয়ংক্রিয়ভাবে চালান",
+    "subtitleLanguageDescription": "সাবটাইটেলের জন্য ডিফল্ট ভাষা",
+    "audioLanguageDescription": "অডিও ট্র্যাকগুলির জন্য ডিফল্ট ভাষা",
+    "subtitleStylingDescription": "সাবটাইটেল ফন্ট সাইজ, রঙ, পটভূমি এবং অবস্থান কাস্টমাইজ করুন",
+    "metadataSourceDescription": "চলচ্চিত্র এবং সিরিজ তথ্য কোথায় পান তা চয়ন করুন",
+    "titleCleaningDescription": "শিরোনাম থেকে গুণমান ট্যাগ (HD, 4K, FHD, ইত্যাদি) এবং অন্যান্য শব্দ সরান",
+    "setPinDescription": "সেটিংস এবং সামগ্রী রক্ষা করার জন্য 4-অঙ্কের PIN সেট করুন",
+    "changePinDescription": "আপনার প্যারেন্টাল কন্ট্রোল PIN পরিবর্তন করুন",
+    "removePinDescription": "এই ডিভাইস থেকে PIN সুরক্ষা সরান",
+    "parentalEnabledDescription": "সক্ষম করলে, লক করা সামগ্রী প্রধান তালিকা থেকে লুকানো হয়",
+    "requirePinForSettingsDescription": "সেটিংস স্ক্রিন অ্যাক্সেস করার জন্য PIN প্রয়োজন",
+    "subtitleFontSizeDescription": "স্ক্রিনে সাবটাইটেল পাঠের আকার",
+    "subtitleBackgroundDescription": "ভাল পঠনযোগ্যতার জন্য সাবটাইটেল পাঠের পিছনে পটভূমি",
+    "subtitlePositionDescription": "স্ক্রিনে সাবটাইটেল কোথায় প্রদর্শিত হয়",
+    "subtitleColorDescription": "সাবটাইটেল পাঠের রঙ",
+    "accountPlanDescription": "আপনার বর্তমান সাবস্ক্রিপশন প্ল্যান",
+    "accountPlaylistLimitDescription": "আপনি যতগুলি প্লেলিস্ট সংরক্ষণ করতে পারেন তার সর্বোচ্চ সংখ্যা",
+    "accountSubscriptionDescription": "আপনার প্রিমিয়াম সাবস্ক্রিপশন পরিচালনা করুন",
+    "accountDailyUsageDescription": "আপনার দৈনিক স্ট্রিমিং ব্যবহার এবং অবশিষ্ট সময়",
+    "accountProfileDescription": "আপনার অ্যাকাউন্ট প্রোফাইল এবং লগইন তথ্য",
+    "dangerZone": "বিপদের অঞ্চল",
+    "resetProgressButton": "সমস্ত দেখার অগ্রগতি পুনরায় সেট করুন",
+    "resetProgressSubtitle": "সমস্ত চলচ্চিত্র এবং সিরিজ দেখার অগ্রগতি স্থায়ীভাবে মুছে দেয়",
+    "resetProgressTitle": "সমস্ত দেখার অগ্রগতি পুনরায় সেট করুন?",
+    "resetProgressMessage": "এটি এই প্লেলিস্টের সমস্ত দেখার অগ্রগতি স্থায়ীভাবে মুছে দেবে, চলচ্চিত্র অগ্রগতি, সিরিজ এপিসোড ট্র্যাকিং এবং সমাপ্তির অবস্থা সহ।\n\nএই পদক্ষেপটি অপরিবর্তনীয়।",
+    "resetProgressSuccess": "সমস্ত দেখার অগ্রগতি পুনরায় সেট করা হয়েছে",
+    "deleteAccount": "অ্যাকাউন্ট মুছুন",
+    "deleteAccountDescription": "আপনার অ্যাকাউন্ট এবং সমস্ত ডেটা স্থায়ীভাবে মুছুন",
+    "deleteAccountTitle": "অ্যাকাউন্ট মুছবেন?",
+    "deleteAccountMessage": "এটি আপনার অ্যাকাউন্ট এবং সমস্ত সম্পর্কিত ডেটা স্থায়ীভাবে মুছে ফেলবে, যার মধ্যে প্লেলিস্ট, দেখার ইতিহাস, তালিকা এবং সেটিংস রয়েছে।\n\nএই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।",
+    "deleteAccountConfirm": "আমার অ্যাকাউন্ট মুছুন",
+    "deleteAccountFinalTitle": "আপনি কি সম্পূর্ণরূপে নিশ্চিত?",
+    "deleteAccountFinalMessage": "এটি আপনার শেষ সুযোগ। আপনার অ্যাকাউন্ট এবং সমস্ত ডেটা স্থায়ীভাবে মুছে ফেলা হবে।",
+    "deletingAccount": "অ্যাকাউন্ট মুছে ফেলা হচ্ছে...",
+    "openSubtitles": {
+      "title": "OpenSubtitles",
+      "description": "OpenSubtitles থেকে সাবটাইটেল অনুসন্ধান এবং ডাউনলোড করুন",
+      "username": "ব্যবহারকারীর নাম",
+      "password": "পাসওয়ার্ড",
+      "logIn": "লগ ইন করুন",
+      "logOut": "লগ আউট করুন",
+      "loggedIn": "{{username}} হিসাবে লগ ইন করা হয়েছে",
+      "notLoggedIn": "অ্যাকাউন্ট ছাড়াই, আপনি প্রতিদিন 5টি সাবটাইটেল ডাউনলোড করতে পারেন। সীমা প্রতিদিন 20টিতে বৃদ্ধি করতে আপনার বিনামূল্যের OpenSubtitles.com অ্যাকাউন্টের সাথে লগ ইন করুন।",
+      "remainingDownloads": "আজ অবশিষ্ট ডাউনলোড: {{count}}",
+      "loginRequired": "আরও ডাউনলোডের জন্য লগ ইন করুন",
+      "clearCache": "সাবটাইটেল ক্যাশ সাফ করুন",
+      "usernameDescription": "আপনার OpenSubtitles ব্যবহারকারীর নাম প্রবেश করুন",
+      "passwordDescription": "আপনার OpenSubtitles পাসওয়ার্ড প্রবেশ করুন",
+      "loginDescription": "আপনার দৈনিক ডাউনলোড সীমা বৃদ্ধি করতে লগ ইন করুন",
+      "loggedInDescription": "আপনার OpenSubtitles অ্যাকাউন্ট সক্রিয়",
+      "logoutDescription": "আপনার OpenSubtitles অ্যাকাউন্ট থেকে লগ আউট করুন",
+      "clearCacheDescription": "স্থানীয় সংরক্ষণ থেকে সমস্ত ক্যাশড সাবটাইটেল সরান",
+      "multipleOptions": "একাধিক সাবটাইটেল বিকল্প",
+      "multipleOptionsDescription": "শুধু সেরাটির পরিবর্তে প্রতিটি ভাষার জন্য সমস্ত উপলব্ধ সাবটাইটেল রেটিং অনুসারে সাজিয়ে দেখান।"
+    },
+    "clearAllHidden": "সব মুছে ফেলুন",
+    "hiddenContinueWatching": "দেখা চালিয়ে যান থেকে লুকানো",
+    "epgSource": "EPG উৎস",
+    "epgLoadingStatus": "EPG লোডিং স্ট্যাটাস",
+    "epgSourceCustomUrl": "কাস্টম URL",
+    "epgSourceXtreamServer": "Xtream সার্ভার",
+    "epgSourceNone": "নেই",
+    "parentalControlsSection": "অভিভাবকীয় নিয়ন্ত্রণ",
+    "contentDisplaySection": "প্রদর্শন",
+    "contentOrganizationSection": "সংগঠন",
+    "contentDataSection": "ডেটা ও রিফ্রেশ",
+    "contentDescription": "কন্টেন্টের প্রদর্শন, সংগঠন ও রিফ্রেশ",
+    "autoQuality": "স্বয়ংক্রিয় মান (পরীক্ষামূলক)",
+    "autoQualitySubtitle": "গ্রুপ করা চ্যানেলগুলো আপনার সংযোগের জন্য সেরা মানে শুরু করে এবং স্ট্রিম বারবার বাফার করলে মান কমিয়ে দেয়। প্রতিটি পরিবর্তনে চ্যানেল পুনরায় লোড হয়, তাই স্ক্রিন কিছুক্ষণের জন্য কালো হতে পারে।",
+    "securitySection": "নিরাপত্তা",
+    "playbackEngineTitle": "প্লেয়ার ও ইঞ্জিন",
+    "playbackEngineSubtitle": "VOD ও Live TV ইঞ্জিন, উন্নত অপশন",
+    "playbackSubtitlesAudioTitle": "সাবটাইটেল ও অডিও",
+    "playbackSubtitlesAudioSubtitle": "ডিফল্ট ভাষা, সাবটাইটেল স্টাইল, OpenSubtitles",
+    "playbackViewingTitle": "দেখার সময়",
+    "playbackViewingSubtitle": "অটোপ্লে, ইন্ট্রো এড়িয়ে যান, দেখা চালিয়ে যান",
+    "scopeSynced": "সব ডিভাইস ও প্লেলিস্টে সিঙ্ক হয়",
+    "scopePlaylist": "শুধুমাত্র “{{name}}” প্লেলিস্টে",
+    "scopeDevice": "শুধুমাত্র এই {{device}}-এ",
+    "themeSection": "থিম",
+    "displayDescription": "স্ক্রিনে কী দেখানো হবে তা বেছে নিন: ক্যারাউজেল, ট্যাব ও চ্যানেল।",
+    "scopeDeviceTV": "শুধুমাত্র এই TV-তে",
+    "infoDescription": "শর্তাবলী, গোপনীয়তা, ক্রেডিট ও অ্যাপ সংস্করণ",
+    "showHome": "হোম দেখান",
+    "showHomeSubtitle": "হোম ট্যাব এক স্ক্রিনে আপনার দেখা কন্টেন্ট, চ্যানেল ও নতুন সবকিছু একত্র করে",
+    "startScreenHome": "হোম"
+  },
+  "feedback": {
+    "title": "ফিডব্যাক পাঠান",
+    "submit": "পাঠান",
+    "picker": {
+      "header": "আপনি কী পাঠাতে চান?",
+      "footer": "KIPTV টিম প্রতিটি রিপোর্ট পড়ে। আপনি যদি যোগাযোগের তথ্য দিয়ে থাকেন তবে আমরা ইমেলে উত্তর দেব।"
+    },
+    "bug": {
+      "title": "বাগ রিপোর্ট করুন",
+      "subtitle": "কিছু আশানুরূপ কাজ করছে না",
+      "titleField": "সংক্ষিপ্ত শিরোনাম",
+      "descriptionField": "বিস্তারিত বিবরণ",
+      "stepsFieldPlaceholder": "উদাহরণ:\n1. Live TV খুলুন\n2. RAI 1 এ ট্যাপ করুন\n3. অ্যাপ ক্র্যাশ করে",
+      "expectedField": "প্রত্যাশিত আচরণ",
+      "actualField": "আসলে কী হয়েছিল",
+      "frequencyField": "ফ্রিকোয়েন্সি",
+      "screenField": "প্রভাবিত স্ক্রিন",
+      "contactField": "যোগাযোগের ইমেল",
+      "screenshotAdd": "স্ক্রিনশট যোগ করুন",
+      "screenshotChange": "স্ক্রিনশট পরিবর্তন করুন",
+      "screenshotRemove": "স্ক্রিনশট সরান",
+      "diagnosticsLink": "আমরা রিপোর্টে কী অন্তর্ভুক্ত করি",
+      "section": {
+        "what": "কী হয়েছিল",
+        "whatFooter": "যতটা সম্ভব নির্দিষ্ট হোন — এটি সমস্যাটি পুনরুৎপাদন করতে আমাদের সাহায্য করে।",
+        "steps": "পুনরুৎপাদনের ধাপগুলি",
+        "stepsFooter": "প্রতি লাইনে একটি ধাপ।",
+        "expectedActual": "প্রত্যাশিত বনাম প্রকৃত",
+        "context": "প্রসঙ্গ",
+        "attachment": "সংযুক্তি",
+        "attachmentFooter": "একটি স্ক্রিনশট ঐচ্ছিক তবে অত্যন্ত সহায়ক।",
+        "contact": "যোগাযোগ",
+        "contactFooter": "ঐচ্ছিক তবে প্রস্তাবিত — যোগাযোগের ইমেল ছাড়া আমরা স্পষ্টীকরণ বা আপডেটের জন্য আপনার সাথে যোগাযোগ করতে পারি না।"
+      }
+    },
+    "improvement": {
+      "title": "একটি উন্নতির পরামর্শ দিন",
+      "subtitle": "কিছু আরও ভালো কাজ করতে পারে",
+      "titleField": "উন্নতির সংক্ষিপ্ত সারাংশ",
+      "descriptionField": "বিবরণ",
+      "screenField": "অ্যাপের কোথায়?",
+      "contactField": "যোগাযোগের ইমেল",
+      "section": {
+        "what": "আপনার পরামর্শ",
+        "whatFooter": "আমাদের বলুন কী অভিজ্ঞতাকে আরও ভালো করবে।",
+        "where": "এটি কোথায় প্রযোজ্য",
+        "contact": "যোগাযোগ",
+        "contactFooter": "ঐচ্ছিক তবে প্রস্তাবিত — যোগাযোগের ইমেল ছাড়া আমরা স্পষ্টীকরণের জন্য আপনার সাথে যোগাযোগ করতে পারি না।"
+      }
+    },
+    "feature": {
+      "title": "একটি নতুন ফিচার অনুরোধ করুন",
+      "subtitle": "KIPTV-তে আপনি যা দেখতে চান",
+      "titleField": "ফিচারের নাম",
+      "descriptionField": "বিবরণ",
+      "useCaseField": "কেন আপনার এটি প্রয়োজন / আপনি কীভাবে এটি ব্যবহার করবেন",
+      "contactField": "যোগাযোগের ইমেল",
+      "section": {
+        "what": "আপনি যে ফিচারটি চান",
+        "whatFooter": "আপনি যত বেশি প্রসঙ্গ দেবেন, আমাদের এটি তৈরি করার সম্ভাবনা তত বেশি।",
+        "contact": "যোগাযোগ",
+        "contactFooter": "ঐচ্ছিক তবে প্রস্তাবিত — যোগাযোগের ইমেল ছাড়া ফিচারটি চালু হলে আমরা আপনাকে জানাতে পারি না।"
+      }
+    },
+    "frequency": {
+      "unspecified": "— উল্লেখ করা হয়নি —",
+      "always": "সর্বদা",
+      "sometimes": "কখনও কখনও",
+      "once": "শুধু একবার",
+      "cannotReproduce": "পুনরুৎপাদন করা যাচ্ছে না"
+    },
+    "screen": {
+      "unspecified": "— উল্লেখ করা হয়নি —",
+      "auth": "লগইন / সাইন আপ",
+      "playlist": "প্লেলিস্ট সেটআপ",
+      "home": "হোম",
+      "movies": "চলচ্চিত্র",
+      "series": "টিভি সিরিজ",
+      "live": "Live TV",
+      "search": "অনুসন্ধান",
+      "downloads": "ডাউনলোড",
+      "settings": "সেটিংস",
+      "player": "ভিডিও প্লেয়ার",
+      "parental": "অভিভাবকীয় নিয়ন্ত্রণ",
+      "other": "অন্যান্য"
+    },
+    "disclosure": {
+      "title": "আমরা যা অন্তর্ভুক্ত করি",
+      "attachedHeader": "রিপোর্টের সাথে সংযুক্ত ডেটা",
+      "attachedFooter": "আমরা এই ডেটা শুধুমাত্র বাগটি পুনরুৎপাদন করতে ব্যবহার করি। এটি 12 মাস পরে মুছে ফেলা হয়।",
+      "notSentHeader": "আমরা যা পাঠাই না",
+      "device": {
+        "title": "মডেল এবং সংস্করণ",
+        "body": "ডিভাইস টাইপ, OS সংস্করণ, ভাষা, টাইমজোন।"
+      },
+      "app": {
+        "title": "অ্যাপ সংস্করণ",
+        "body": "KIPTV সংস্করণ এবং বিল্ড নম্বর।"
+      },
+      "network": {
+        "title": "সংযোগের ধরন",
+        "body": "WiFi বা সেলুলার। কোনো IP ঠিকানা নয়, কোনো নেটওয়ার্ক নাম নয়।"
+      },
+      "playlist": {
+        "title": "প্লেলিস্ট প্রদানকারী",
+        "body": "শুধুমাত্র IPTV সার্ভারের হোস্ট (যেমন iptv.example.com), প্রদানকারী-নির্দিষ্ট সমস্যা চিহ্নিত করতে।"
+      },
+      "logs": {
+        "title": "সাম্প্রতিক ডায়াগনস্টিক লগ",
+        "body": "সাম্প্রতিক অ্যাপ ইভেন্ট (ত্রুটি, লোডিং, নেভিগেশন)। ক্রিডেনশিয়াল স্বয়ংক্রিয়ভাবে মাস্ক করা হয়।"
+      },
+      "notSent": {
+        "credentialsTitle": "প্লেলিস্ট ক্রিডেনশিয়াল",
+        "credentialsBody": "আপনার প্লেলিস্ট ব্যবহারকারীর নাম এবং পাসওয়ার্ড কখনই ডিভাইস ছেড়ে যায় না।",
+        "contactsTitle": "পরিচিতি এবং ঠিকানা বই",
+        "contactsBody": "অ্যাপটি আপনার ফোন পরিচিতিতে অ্যাক্সেস বা পাঠায় না।"
+      },
+      "retention": {
+        "title": "আমরা কতদিন ডেটা রাখি",
+        "body": "রিপোর্টগুলি 12 মাস পরে স্বয়ংক্রিয়ভাবে মুছে ফেলা হয়। আপনি ইমেলের মাধ্যমে আগে মুছে ফেলার অনুরোধ করতে পারেন।"
+      }
+    },
+    "tv": {
+      "subtitle": "আপনার TV থেকে সমস্যা কীভাবে রিপোর্ট করবেন তা বেছে নিন",
+      "qr": {
+        "title": "আপনার ফোনে সম্পূর্ণ করুন",
+        "subtitle": "আপনার iPhone বা Android দিয়ে QR কোড স্ক্যান করুন: ফর্মটি আপনার TV থেকে ডেটা সহ পূর্ব-পূরিত খুলবে।",
+        "urlLabel": "অথবা এই URL-এ যান:",
+        "expiry": "কোডটি 30 মিনিটে মেয়াদ শেষ হয়।"
+      },
+      "quick": {
+        "title": "দ্রুত রিপোর্ট",
+        "subtitle": "কিছু না লিখেই এখনই TV ডায়াগনস্টিক ডেটা পাঠান। আমরা বিস্তারিত জানার জন্য আপনাকে ইমেল করব।",
+        "send": "এখনই পাঠান",
+        "sent": "পাঠানো হয়েছে!",
+        "sentDetail": "আমরা সমস্ত ডায়াগনস্টিক ডেটা পেয়েছি। আরও কিছু প্রয়োজন হলে আমরা আপনাকে ইমেল করব।",
+        "disclaimer": "আমরা এই ডেটা শুধুমাত্র বাগটি পুনরুত্পাদন করতে ব্যবহার করি। আপনার প্লেলিস্ট শংসাপত্রগুলি কখনই পাঠানো হয় না।",
+        "autoDescription": "TV থেকে দ্রুত রিপোর্ট পাঠানো হয়েছে: ব্যবহারকারী একটি সাধারণ সমস্যার রিপোর্ট করছেন। বিস্তারিত জানার জন্য যোগাযোগ করুন।"
+      }
+    },
+    "error": {
+      "title": "ত্রুটি",
+      "notAuthenticated": "ফিডব্যাক পাঠাতে আপনাকে সাইন ইন থাকতে হবে।",
+      "missingTitle": "অনুগ্রহ করে একটি শিরোনাম লিখুন।",
+      "uploadFailed": "স্ক্রিনশট আপলোড ব্যর্থ হয়েছে",
+      "insertFailed": "জমা দেওয়া ব্যর্থ হয়েছে"
+    },
+    "success": {
+      "title": "ধন্যবাদ!",
+      "message": "ফিডব্যাক পাঠানো হয়েছে। আমাদের আরও তথ্যের প্রয়োজন হলে আমরা যোগাযোগ করব।"
+    }
+  },
+  "playlist": {
+    "noPlaylist": "কোনো প্লেলিস্ট নেই",
+    "noPlaylistMessage": "শুরু করতে একটি IPTV প্লেলিস্ট যোগ করুন",
+    "noPlaylistMessageLiveTV": "TV চ্যানেল দেখতে একটি IPTV প্লেলিস্ট যোগ করুন",
+    "addPlaylist": "প্লেলিস্ট যোগ করুন",
+    "changePlaylist": "প্লেলিস্ট পরিবর্তন করুন",
+    "noPlaylists": "কোনো সংরক্ষিত প্লেলিস্ট নেই",
+    "noPlaylistsMessage": "দেখা শুরু করতে আপনার প্রথম Xtream প্লেলিস্ট যোগ করুন।",
+    "addFirstPlaylist": "প্লেলিস্ট যোগ করুন",
+    "playlistWithoutName": "নামহীন প্লেলিস্ট",
+    "unableToLoadDetails": "প্লেলিস্ট বিবরণ লোড করতে অক্ষম",
+    "unableToConnect": "প্লেলিস্টে সংযোগ করতে অক্ষম।",
+    "unableToSave": "প্লেলিস্ট সংরক্ষণ করতে অক্ষম।",
+    "unableToLoad": "প্লেলিস্ট লোড করতে অক্ষম।",
+    "addXtreamPlaylist": "একটি Xtream প্লেলিস্ট যোগ করুন",
+    "removePlaylistTitle": "প্লেলিস্ট সরান",
+    "removePlaylistMessage": "প্লেলিস্ট মুছে ফেলা সমস্ত সম্পর্কিত অগ্রগতি, তালিকা এবং সেটিংস সরিয়ে দেবে। আপনি কি এগিয়ে যেতে চান?",
+    "deleteConfirmTitle": "স্থায়ীভাবে মুছুন",
+    "deleteConfirmMessage": "এটি এই প্লেলিস্টের জন্য সমস্ত দেখার অগ্রগতি, পর্ব ট্র্যাকিং, কাস্টম সেটিংস এবং পছন্দগুলি স্থায়ীভাবে মুছে ফেলবে।\n\nএই পদক্ষেপ অপরিবর্তনীয় - এই ডেটা পুনরুদ্ধার করার কোনো উপায় নেই।",
+    "playlistType": "প্লেলিস্ট ধরন",
+    "editPlaylist": "প্লেলিস্ট সম্পাদনা করুন",
+    "editPlaylistSubtitle": "ডোমেইন, শংসাপত্র এবং অবতার আপডেট করুন।",
+    "limitReached": "প্লেলিস্ট সীমা পৌঁছেছে",
+    "limitReachedMessage": "আপনার সর্বাধিক 5টি সংরক্ষিত প্লেলিস্ট থাকতে পারে। অন্যটি যোগ করতে একটি বিদ্যমান সরান।",
+    "limitReachedMessageDynamic": "আপনার বর্তমান পরিকল্পনা {{limit}} প্লেলিস্ট অনুমতি দেয়। 5টি পর্যন্ত প্লেলিস্ট পরিচালনা করতে Premium Plus আপগ্রেড করুন।",
+    "limitBullet1": "• আপনি যে প্লেলিস্টগুলি আর ব্যবহার করেন না তা মুছুন",
+    "limitBullet2": "• শুধুমাত্র সক্রিয় থাকার জন্য প্রয়োজনীয়গুলি রাখুন",
+    "openPlaylist": "প্লেলিস্ট খুলুন",
+    "canModifyInSettings": "আপনি সেটিংসে প্লেলিস্টগুলি পরিবর্তন করতে এবং একটি অ্যাকাউন্ট লিঙ্ক করতে পারেন।",
+    "verifyingCredentials": "শংসাপত্র যাচাই করা হচ্ছে...",
+    "saving": "সংযোগ সফল, প্লেলিস্ট সংরক্ষণ করা হচ্ছে...",
+    "loadingContent": "প্লেলিস্ট সামগ্রী লোড করা হচ্ছে...",
+    "preparingContent": "সুপারিশকৃত সামগ্রী প্রস্তুত করা হচ্ছে...",
+    "finalizingExperience": "অভিজ্ঞতা চূড়ান্তকরণ করা হচ্ছে...",
+    "preparing": "প্লেলিস্ট প্রস্তুত করা হচ্ছে...",
+    "newPlaylist": "নতুন প্লেলিস্ট",
+    "loginToRecover": "ক্লাউডে সংরক্ষিত প্লেলিস্ট, বিভাগ এবং সেটিংস পুনরুদ্ধার করতে লগ ইন করুন।",
+    "enterNameAndDomain": "অনুগ্রহ করে কমপক্ষে প্লেলিস্ট নাম এবং ডোমেইন প্রবেश করুন।",
+    "orEnterXtream": "অথবা আপনার Xtream প্লেলিস্ট প্রবেশ করুন",
+    "playerOnlyNoContent": "KIPTV একটি মিডিয়া প্লেয়ার এবং কোনো সামগ্রী প্রদান করে না।",
+    "playlistName": "প্লেলিস্ট নাম",
+    "playlistNamePlaceholder": "যেমন মূল প্লেলিস্ট",
+    "domainXtream": "ডোমেইন (Xtream)",
+    "savePlaylist": "প্লেলিস্ট সংরক্ষণ করুন",
+    "syncedToAccount": "এটি যেকোনো জায়গা থেকে অ্যাক্সেস করতে আপনার অ্যাকাউন্টে সিঙ্ক করা হবে।",
+    "loadingIPTVContent": "IPTV সামগ্রী লোড করা হচ্ছে...",
+    "connectingToPlaylist": "প্লেলিস্টে সংযোগ করা হচ্ছে...",
+    "playlistAdded": "প্লেলিস্ট যোগ করা হয়েছে",
+    "sourceReady": "আপনার উৎস প্রস্তুত। এখানে একটি দ্রুত সারসংক্ষেপ।",
+    "unnamedPlaylist": "নামহীন প্লেলিস্ট",
+    "tierLimitMessage": "{{tier}} পরিকল্পনা: সীমা {{limit}} প্লেলিস্ট। {{upgradeMessage}}",
+    "upgradeToFamily": "5টি প্লেলিস্টের জন্য Plus আপগ্রেড করুন।",
+    "upgradeToPremium": "আনলিমিটেড সময় এবং আরও প্লেলিস্টের জন্য প্রিমিয়ামে আপগ্রেড করুন।",
+    "loginRequiredToAdd": "প্লেলিস্ট যোগ করতে আপনাকে লগ ইন করতে হবে।",
+    "noPlaylistSelected": "কোনো প্লেলিস্ট নির্বাচিত নেই",
+    "chooseAvatar": "একটি অবতার চয়ন করুন",
+    "changeAvatar": "অবতার পরিবর্তন করুন",
+    "noAvatar": "কোনো অবতার নেই",
+    "whoIsWatching": "কে দেখছেন?",
+    "add": "যোগ করুন",
+    "connectionError": "প্লেলিস্ট সংযোগে ত্রুটি",
+    "xtreamRecommended": "Xtream (সুপারিশকৃত)",
+    "usernamePlaceholder": "আপনার ব্যবহারকারীর নাম",
+    "passwordPlaceholder": "আপনার পাসওয়ার্ড",
+    "m3uUrl": "প্লেলিস্ট URL",
+    "securityNote": "আপনার ডেটা নিরাপদে সংরক্ষিত হয়",
+    "epgOptional": "ঐচ্ছিক - প্রয়োজনে শুধুমাত্র পরিবর্তন করুন",
+    "connectionFailed": "সংযোগ করতে অক্ষম। আপনার ডেটা যাচাই করুন।",
+    "saveError": "সংরক্ষণ ত্রুটি",
+    "nameDuplicate": "এই নামের একটি প্লেলিস্ট ইতিমধ্যে বিদ্যমান",
+    "premiumRequired": "প্রিমিয়াম প্রয়োজন",
+    "upgradeToAccess": "এই প্লেলিস্ট অ্যাক্সেস করতে আপগ্রেড করুন",
+    "forceReloadPlaylist": "প্লেলিস্ট জোর করে পুনরায় লোড করুন",
+    "forceReloadEPG": "EPG জোর করে পুনরায় লোড করুন",
+    "m3uConfirmTitle": "M3U URL ব্যবহার করুন?",
+    "m3uConfirmMessage": "M3U প্লেলিস্টগুলি মৌলিক দেখার জন্য কাজ করে, তবে ক্যাচআপ, অ্যাকাউন্ট তথ্য এবং সমৃদ্ধ মেটাডেটার মতো কিছু বৈশিষ্ট্য শুধুমাত্র Xtream শংসাপত্রের সাথে উপলব্ধ। যদি সম্ভব হয় Xtream ব্যবহার করার পরামর্শ দিই।",
+    "m3uConfirmContinue": "M3U দিয়ে চালিয়ে যান",
+    "m3uHint": "Xtream শংসাপত্র নেই? M3U URL চেষ্টা করুন",
+    "useXtream": "Xtream শংসাপত্র আছে? Xtream Codes ব্যবহার করুন",
+    "m3uInvalidURL": "অবৈধ M3U URL। URL পরীক্ষা করুন এবং আবার চেষ্টা করুন।",
+    "m3uDownloading": "প্লেলিস্ট ডাউনলোড করা হচ্ছে...",
+    "m3uParsing": "সামগ্রী পার্সিং করা হচ্ছে...",
+    "xtreamDetectedTitle": "Xtream উপলব্ধ",
+    "xtreamDetectedMessage": "আপনার সার্ভার Xtream Codes সমর্থন করে, যা দ্রুত লোডিং, ক্যাচআপ/রিপ্লে এবং সমৃদ্ধ মেটাডেটা প্রদান করে। M3U এর পরিবর্তে এটি ব্যবহার করতে চান?",
+    "xtreamDetectedUseXtream": "Xtream ব্যবহার করুন",
+    "xtreamDetectedKeepM3U": "M3U রাখুন",
+    "epgUrlLabel": "EPG URL",
+    "epgUrlHint": "ঐচ্ছিক - উপলব্ধ হলে প্লেলিস্ট থেকে স্বয়ংক্রিয়ভাবে সনাক্ত করা হয়",
+    "error": {
+      "timeout": {
+        "title": "সংযোগ সময়সীমা",
+        "message": "IPTV সার্ভার থেকে সামগ্রী লোড করতে অক্ষম। সার্ভার ধীর বা অস্থায়ীভাবে অনুপলব্ধ হতে পারে।"
+      },
+      "server": {
+        "title": "সার্ভার ত্রুটি",
+        "message": "IPTV সার্ভার একটি ত্রুটি ফেরত দিয়েছে। সার্ভার রক্ষণাবেক্ষণ বা সমস্যার মধ্যে থাকতে পারে।"
+      },
+      "network": {
+        "title": "কোনো সংযোগ নেই",
+        "message": "ইন্টারনেটে সংযোগ করতে অক্ষম। আপনার নেটওয়ার্ক সংযোগ পরীক্ষা করুন।"
+      },
+      "auth": {
+        "title": "প্রমাণীকরণ ব্যর্থ",
+        "message": "প্লেলিস্ট শংসাপত্র অবৈধ বা অ্যাকাউন্ট সমাপ্ত হয়েছে।"
+      },
+      "expired": {
+        "title": "সাবস্ক্রিপশন মেয়াদ শেষ",
+        "message": "আপনার IPTV সাবস্ক্রিপশনের মেয়াদ শেষ হয়ে গেছে। এটি নবায়ন করতে আপনার প্রদানকারীর সাথে যোগাযোগ করুন।"
+      },
+      "solutions": "সম্ভাব্য সমাধান",
+      "solution": {
+        "checkServer": "IPTV সার্ভার অনলাইন রয়েছে তা যাচাই করুন",
+        "tryLater": "কয়েক মিনিটের পরে আবার চেষ্টা করুন",
+        "checkInternet": "আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন",
+        "serverMaintenance": "সার্ভার রক্ষণাবেক্ষণ হতে পারে",
+        "contactProvider": "আপনার IPTV প্রদানকারীর সাথে যোগাযোগ করুন",
+        "checkWifi": "আপনার WiFi বা মোবাইল ডেটা সংযোগ পরীক্ষা করুন",
+        "checkCellular": "WiFi এবং সেলুলার মধ্যে স্যুইচ করার চেষ্টা করুন",
+        "disableVPN": "সক্রিয় থাকলে VPN অক্ষম করুন",
+        "toggleVPN": "আপনার VPN সক্ষম/অক্ষম করার চেষ্টা করুন",
+        "checkCredentials": "ব্যবহারকারীর নাম এবং পাসওয়ার্ড যাচাই করুন",
+        "checkExpiration": "আপনার অ্যাকাউন্ট সমাপ্ত না হয়েছে তা যাচাই করুন"
+      }
+    },
+    "connection": "সংযোগ"
+  },
+  "movies": {
+    "markWatched": "দেখা হিসাবে চিহ্নিত করুন",
+    "markUnwatched": "দেখা হয়নি হিসাবে চিহ্নিত করুন",
+    "title": "চলচ্চিত্র",
+    "noMovies": "কোনো চলচ্চিত্র পাওয়া যায়নি",
+    "noMoviesMessage": "নির্বাচিত প্লেলিস্টে কোনো চলচ্চিত্র নেই",
+    "contentNotLoaded": "বিষয়বস্তু লোড করা যায়নি",
+    "contentNotLoadedMessage": "চলচ্চিত্র লোড করা যায়নি। আপনার সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।",
+    "otherMovies": "অন্যান্য চলচ্চিত্র",
+    "top20Trending": "শীর্ষ 20 ট্রেন্ডিং চলচ্চিত্র",
+    "categoriesRemaining": "{{count}} বিভাগ বাকি...",
+    "noPlaylistSelected": "কোনো প্লেলিস্ট নির্বাচিত নেই",
+    "loadingMovies": "চলচ্চিত্র লোড করা হচ্ছে...",
+    "movieNotAvailable": "চলচ্চিত্র উপলব্ধ নেই",
+    "movieNotAvailableMessage": "আপনার প্লেলিস্টে কোনো মিল পাওয়া যায়নি। সামগ্রী ম্যানুয়ালি অনুসন্ধান করার চেষ্টা করুন।",
+    "movieNotAvailableInPlaylist": "আপনার প্লেলিস্টে চলচ্চিত্র উপলব্ধ নেই",
+    "popularMovies": "জনপ্রিয় চলচ্চিত্র",
+    "newArrivals": "নতুন আগমন"
+  },
+  "series": {
+    "title": "সিরিজ",
+    "noSeries": "কোনো সিরিজ পাওয়া যায়নি",
+    "noSeriesMessage": "নির্বাচিত প্লেলিস্টে কোনো সিরিজ নেই",
+    "otherSeries": "অন্যান্য সিরিজ",
+    "top20Trending": "শীর্ষ 20 ট্রেন্ডিং সিরিজ",
+    "categoriesRemaining": "{{count}} বিভাগ বাকি...",
+    "seriesNotAvailableInPlaylist": "আপনার প্লেলিস্টে সিরিজ উপলব্ধ নেই",
+    "notAvailable": "সিরিজ উপলব্ধ নেই",
+    "notAvailableMessage": "আপনার প্লেলিস্টে কোনো মিল পাওয়া যায়নি। সামগ্রী ম্যানুয়ালি অনুসন্ধান করার চেষ্টা করুন।",
+    "playlistAttaching": "প্লেলিস্ট সংযুক্ত হচ্ছে। শীঘ্রই আবার চেষ্টা করুন।",
+    "episodeNotAvailable": "পর্ব উপলব্ধ নেই",
+    "attachingPlaylist": "প্লেলিস্ট সংযুক্ত করা হচ্ছে...",
+    "loadingSeries": "সিরিজ লোড করা হচ্ছে...",
+    "popularSeries": "জনপ্রিয় সিরিজ",
+    "engagingTvSeries": "একটি আকর্ষণীয় সিরিজ",
+    "season": "সিজন",
+    "seasonCount": "{{count}} সিজন",
+    "seasonsCount": "{{count}} সিজন",
+    "noEpisodes": "কোনো পর্ব নেই",
+    "noEpisodesMessage": "এই সিজনের জন্য কোনো পর্ব উপলব্ধ নেই",
+    "resumeFrom": "থেকে শুরু করুন",
+    "lastWatchedPoint": "শেষ দেখা বিন্দু",
+    "watchNow": "এখনই দেখুন",
+    "startSeason": "সিজন {{season}} শুরু করুন",
+    "resume": "চালিয়ে যান",
+    "goBack": "ফিরে যান",
+    "loadError": "সিরিজ বিবরণ লোড করতে অক্ষম",
+    "loadErrorMessage": "লোডিং ত্রুটি: {{message}}",
+    "episode": "পর্ব {{number}}",
+    "markWatched": "দেখা হিসাবে চিহ্নিত করুন",
+    "markUnwatched": "দেখা হয়নি হিসাবে চিহ্নিত করুন",
+    "markWatchedUpTo": "এখানে পর্যন্ত দেখেছেন",
+    "markAllWatched": "সম্পূর্ণ সিরিজ দেখা হিসেবে চিহ্নিত করুন",
+    "markAllUnwatched": "সম্পূর্ণ সিরিজ অদেখা হিসেবে চিহ্নিত করুন",
+    "resetEpisodeProgress": "পর্বের অগ্রগতি রিসেট করুন",
+    "resetProgress": "সিরিজ অগ্রগতি পুনরায় সেট করুন",
+    "resetProgressTitle": "অগ্রগতি পুনরায় সেট করুন",
+    "resetProgressMessage": "এটি এই সিরিজের জন্য সমস্ত দেখার অগ্রগতি সরিয়ে দেবে। এই পদক্ষেপ পূর্ববত করা যায় না।",
+    "resetProgressConfirm": "পুনরায় সেট করুন",
+    "episodeInfo": "পর্ব তথ্য",
+    "downloadEpisode": "পর্ব ডাউনলোড করুন"
+  },
+  "multiview": {
+    "title": "Multiview",
+    "openInMultiview": "Multiview-এ খুলুন",
+    "addToMultiview": "Multiview-এ যোগ করুন",
+    "empty": "একসাথে একাধিক স্ট্রিম দেখতে একটি চ্যানেল যোগ করুন",
+    "addChannel": "চ্যানেল যোগ করুন",
+    "maxReached": "সর্বাধিক ৪টি চ্যানেলে পৌঁছেছে",
+    "removeTile": "Multiview থেকে সরান",
+    "audioTracks": "অডিও",
+    "subtitles": "সাবটাইটেল",
+    "settings": "সেটিংস",
+    "layout": {
+      "auto": "অটো",
+      "stack": "স্ট্যাক",
+      "grid": "গ্রিড",
+      "strip": "স্ট্রিপ",
+      "focus": "ফোকাস"
+    },
+    "tile": {
+      "loading": "লোড হচ্ছে…",
+      "error": "প্লেব্যাক ত্রুটি",
+      "retry": "আবার চেষ্টা করুন",
+      "noProgram": "কোনো প্রোগ্রাম তথ্য নেই"
+    },
+    "close": "Multiview বন্ধ করুন",
+    "vodBlocked": "মুভি ও সিরিজ খুলতে Multiview বন্ধ করুন",
+    "confirmDismiss": "বন্ধ করতে আবার Back চাপুন",
+    "minimizedHint": "Multiview-এ যোগ করতে আরেকটি চ্যানেল নির্বাচন করুন"
+  },
+  "livetv": {
+    "startSection": "লাইভ টিভি শুরুর বিভাগ",
+    "startSectionSubtitle": "লাইভ টিভি কোন তালিকায় খুলবে তা বেছে নিন",
+    "title": "লাইভ",
+    "noChannels": "কোনো চ্যানেল পাওয়া যায়নি",
+    "noChannelsMessage": "নির্বাচিত প্লেলিস্টে কোনো টিভি চ্যানেল নেই",
+    "otherChannels": "অন্যান্য চ্যানেল",
+    "selectChannel": "একটি চ্যানেল নির্বাচন করুন",
+    "selectChannelMessage": "শুরু করতে একটি চ্যানেল নির্বাচন করুন",
+    "channels": "চ্যানেল",
+    "epg": "EPG",
+    "noDescription": "কোনো বর্ণনা উপলব্ধ নেই",
+    "watchNow": "এখনই দেখুন",
+    "epgLoadError": "EPG লোডিং ত্রুটি",
+    "epgNotAvailable": "প্রোগ্রাম গাইড উপলব্ধ নেই",
+    "epgNotAvailableMessage": "এই চ্যানেলের জন্য EPG ডেটা এই মুহূর্তে উপলব্ধ নেই",
+    "infoChannel": "তথ্য চ্যানেল",
+    "streamNotAvailable": "স্ট্রিম উপলব্ধ নেই",
+    "streamUnavailable": "স্ট্রিম অনুপলব্ধ। পরে আবার চেষ্টা করুন বা অন্য চ্যানেল নির্বাচন করুন।",
+    "limitReachedLiveMessage": "Live প্লেব্যাকের সময় আপনি দৈনিক দেখার সীমা পৌঁছেছেন। সীমাহীন দেখার জন্য Premium এ আপগ্রেড করুন।",
+    "popularChannels": "জনপ্রিয় চ্যানেল",
+    "tvProgram": "টিভি প্রোগ্রাম",
+    "tapForFullscreen": "পূর্ণপর্দার জন্য ট্যাপ করুন",
+    "noChannelSelected": "কোনো চ্যানেল নির্বাচিত নেই",
+    "selectChannelToSeeGuide": "প্রোগ্রাম গাইড দেখতে একটি চ্যানেল নির্বাচন করুন",
+    "inProgress": "চলমান",
+    "inHoursMinutes": "{{hours}}ঘ {{minutes}}মিতে",
+    "inMinutes": "{{minutes}}মিতে",
+    "startingSoon": "শীঘ্রই শুরু হবে",
+    "now": "এখন",
+    "next": "পরবর্তী",
+    "loadingEpg": "প্রোগ্রাম তথ্য লোড হচ্ছে...",
+    "epgRateLimited": "খুব বেশি অনুরোধ - পরে চেষ্টা করুন",
+    "epgDataNotAvailable": "এই চ্যানেলের জন্য EPG ডেটা বর্তমানে উপলব্ধ নয়",
+    "unknownChannel": "অজানা চ্যানেল",
+    "noProgram": "কোনো প্রোগ্রাম নেই",
+    "loadingChannels": "চ্যানেলগুলি লোড হচ্ছে...",
+    "viewModeList": "তালিকা",
+    "viewModeEPG": "টিভি গাইড",
+    "viewModeCarousel": "ক্যারোসেল",
+    "viewModeLabel": "ভিউ মোড",
+    "sortOrderLabel": "সাজানোর ক্রম",
+    "allChannels": "সমস্ত চ্যানেল",
+    "recentlyWatched": "সম্প্রতি দেখা হয়েছে",
+    "recentlyAdded": "সম্প্রতি যোগ করা",
+    "removeFromRecentlyWatched": "\"সম্প্রতি দেখা হয়েছে\" থেকে সরান",
+    "favorites": "প্রিয়",
+    "categoriesSection": "বিভাগগুলি",
+    "nextProgram": "পরবর্তী: ",
+    "upNext": "পরবর্তী",
+    "today": "আজ",
+    "tomorrow": "আগামীকাল",
+    "selectQuality": "গুণমান নির্বাচন করুন",
+    "qualityVariants": "গুণমান উপলব্ধ",
+    "replay": "পুনরায় চালান",
+    "yesterday": "গতকাল",
+    "replaySelectQuality": "পুনরায় চালানোর জন্য গুণমান নির্বাচন করুন",
+    "startsIn": "{{time}} এ শুরু হবে",
+    "searchChannels": "চ্যানেল খুঁজুন...",
+    "viewModeGrid": "গ্রিড",
+    "customizeLogo": "লোগো কাস্টমাইজ করুন",
+    "renameChannelFooter": "একই নামের সংস্করণগুলি একসাথে গোষ্ঠীভুক্ত হয়।",
+    "renameChannelSelected": "নির্বাচিত চ্যানেল",
+    "renameChannelOthers": "অন্যান্য গোষ্ঠীভুক্ত সংস্করণ",
+    "restoreAllChannelNames": "সমস্ত মূল নাম পুনরুদ্ধার করুন",
+    "customizeEPG": "EPG কাস্টমাইজ করুন",
+    "overrideAppliesTo": "প্রযোজ্য",
+    "overrideAppliesToCount": "%d চ্যানেল",
+    "epgSheet": {
+      "search": "নাম বা EPG আইডি দিয়ে খুঁজুন",
+      "sources": "EPG উৎস",
+      "useProviderDefault": "স্বয়ংক্রিয়",
+      "loading": "EPG গাইড লোড হচ্ছে…",
+      "loadingHint": "প্রোগ্রাম গাইড ডাউনলোড হচ্ছে — বড় গাইডে কিছুটা সময় লাগতে পারে।",
+      "epgNotLoaded": "EPG গাইড এখনও লোড হয়নি",
+      "refineSearch": "আরও ফলাফল দেখতে অনুসন্ধান পরিশোধন করুন",
+      "source": "EPG উৎস",
+      "programCount": "%dটি অনুষ্ঠান"
+    },
+    "logoSheet": {
+      "search": "লোগো খুঁজুন",
+      "title": "চ্যানেল লোগো",
+      "suggested": "প্রস্তাবিত",
+      "customURL": "কাস্টম URL",
+      "restore": "ডিফল্টে রিসেট করুন",
+      "invalidURL": "অবৈধ URL",
+      "loadFailed": "ছবি লোড করা যায়নি"
+    },
+    "epgOffset": "EPG অফসেট",
+    "epgOffsetMinutesShort": "মিনিট",
+    "epgOffsetChannelHint": "0 = প্লেলিস্ট অফসেট ব্যবহার করুন",
+    "epgOffsetPlaylistHint": "এই প্লেলিস্টের সব অনুষ্ঠানের সময় সরিয়ে দেয়।",
+    "epgGuide": "EPG গাইড",
+    "qualityAuto": "অটো",
+    "qualityAutoExperimental": "অটো (পরীক্ষামূলক)"
+  },
+  "epg": {
+    "title": "গাইড",
+    "movie": "চলচ্চিত্র",
+    "tvShow": "সিরিজ",
+    "cast": "অভিনয়",
+    "rating": "রেটিং",
+    "loadingMetadata": "তথ্য লোড হচ্ছে...",
+    "identifiedAs": "হিসাবে চিহ্নিত",
+    "remindMe": "আমাকে মনে করিয়ে দিন",
+    "reminderSet": "রিমাইন্ডার সেট করা হয়েছে",
+    "remind10min": "10 মিনিট আগে",
+    "remind30min": "30 মিনিট আগে",
+    "remind1hour": "1 ঘণ্টা আগে",
+    "reminderRemove": "রিমাইন্ডার সরান",
+    "reminderTitle": "{{playlist}}, পপকর্ন প্রস্তুত করুন! 🍿",
+    "reminderBody": "{{title}} {{time}} এ {{channel}} এ শুরু হয়",
+    "reminderTime10": "10 মিনিট",
+    "reminderTime30": "30 মিনিট",
+    "reminderTime60": "1 ঘন্টা",
+    "reminderTooSoon": "Program is too close to set a reminder",
+    "reminderNeedsIOSDevice": "রিমাইন্ডার আপনার iPhone বা iPad-এ পৌঁছায়। একটি iOS ডিভাইসে KIPTV খুলুন এবং নোটিফিকেশন চালু করুন, তারপর আবার চেষ্টা করুন।"
+  },
+  "trending": {
+    "movies": "ট্রেন্ডিং চলচ্চিত্র",
+    "series": "ট্রেন্ডিং সিরিজ",
+    "all": "ট্রেন্ডিং সামগ্রী",
+    "loadingTrending": "ট্রেন্ডিং সামগ্রী লোড করা হচ্ছে...",
+    "inPlaylist": "প্লেলিস্টে উপলব্ধ",
+    "notInPlaylist": "প্লেলিস্টে নেই",
+    "checkingPlaylist": "প্লেলিস্ট পরীক্ষা করা হচ্ছে..."
+  },
+  "search": {
+    "title": "খোঁজ করুন",
+    "placeholder": "চলচ্চিত্র, সিরিজ, চ্যানেল, প্রোগ্রাম বা ব্যক্তি অনুসন্ধান করুন...",
+    "searchContent": "সামগ্রী অনুসন্ধান করুন",
+    "searchMessage": "শুরু করতে সার্চ বার ব্যবহার করুন",
+    "typeAtLeast": "অনুসন্ধান করতে কমপক্ষে 2 টি অক্ষর টাইপ করুন...",
+    "noResults": "কোনো ফলাফল নেই",
+    "noResultsMessage": "\"{{query}}\" এর জন্য কোনো সামগ্রী পাওয়া যায়নি",
+    "resultsFor": "\"{{query}}\" এর জন্য {{count}} ফলাফল",
+    "resultsForQuery": "\"{{query}}\" এর ফলাফল",
+    "movies": "চলচ্চিত্র ({{count}})",
+    "series": "সিরিজ ({{count}})",
+    "liveChannels": "লাইভ চ্যানেল ({{count}})",
+    "initializingSearch": "অনুসন্ধান শুরু করা হচ্ছে...",
+    "indexingInProgress": "ইনডেক্সিং চলছে",
+    "indexingMessage": "আমরা সামগ্রী ইনডেক্স করার সময় অপেক্ষা করুন...",
+    "indexingHint": "এই সময়ে আপনি অ্যাপটি অবাধে নেভিগেট করতে পারেন",
+    "searchError": "অনুসন্ধান ত্রুটি",
+    "selectPlaylistFirst": "অনুসন্ধানের আগে একটি প্লেলিস্ট নির্বাচন করুন",
+    "noPlaylistMessage": "সামগ্রী অনুসন্ধান করতে একটি IPTV প্লেলিস্ট যোগ করুন",
+    "noResultsHint": "ভিন্ন অনুসন্ধানের চেষ্টা করুন",
+    "moviesSeriesChannels": "চলচ্চিত্র, সিরিজ এবং লাইভ চ্যানেল",
+    "indexingTitle": "সামগ্রী ইনডেক্স করা হচ্ছে...",
+    "indexingSubtitle": "আরও সামগ্রী ইনডেক্স করা হওয়ার সাথে সাথে ফলাফলগুলি আপডেট হবে",
+    "filterAll": "সব",
+    "filterMovies": "চলচ্চিত্র",
+    "filterSeries": "সিরিজ",
+    "filterChannels": "চ্যানেল",
+    "sectionChannels": "চ্যানেল",
+    "sectionMovies": "চলচ্চিত্র",
+    "sectionSeries": "সিরিজ",
+    "noInfoAvailable": "কোনো তথ্য উপলব্ধ নেই",
+    "filterPeople": "মানুষ",
+    "filterPrograms": "টিভি প্রোগ্রাম",
+    "sectionPeople": "মানুষ",
+    "sectionPrograms": "টিভি প্রোগ্রাম",
+    "clearHistory": "মুছে ফেলুন",
+    "recentSearches": "সাম্প্রতিক অনুসন্ধান",
+    "collectionFilms": "{{count}}টি সিনেমা",
+    "collectionAvailable": "প্লেলিস্টে {{total}}টির মধ্যে {{available}}টি",
+    "collectionSpine": "সংগ্রহ",
+    "collectionFilmNumber": "চলচ্চিত্র {{number}}"
+  },
+  "premium": {
+    "title": "প্রিমিয়াম",
+    "kiptvPremium": "KIPTV প্রিমিয়াম",
+    "streamingUnlimited": "আনলিমিটেড স্ট্রিমিং",
+    "unlimitedViewing": "আনলিমিটেড দেখা",
+    "multiplePlaylists": "একাধিক প্লেলিস্ট (5 পর্যন্ত)",
+    "simplePlaylist": "ব্যক্তিগত প্লেলিস্ট",
+    "cloudSync": "ক্লাউড সিঙ্ক",
+    "earlyAccess": "প্রাথমিক অ্যাক্সেস বৈশিষ্ট্য",
+    "perYear": "/বছর",
+    "perMonth": "শুধুমাত্র €1.67/মাস • মাসিক এ €22 বাঁচান",
+    "upgradeToPremium": "প্রিমিয়ামে আপগ্রেড করুন",
+    "upgrade": "আপগ্রেড করুন",
+    "unlockAllBenefits": "সমস্ত সুবিধা আনলক করুন",
+    "restorePurchases": "ক্রয় পুনরুদ্ধার করুন",
+    "continueFree": "বিনামূল্যে চালিয়ে যান",
+    "upgradeAlert": "প্রিমিয়াম আপগ্রেড কার্যকারিতা আসন্ন সংস্করণগুলিতে RevenueCat দিয়ে প্রয়োগ করা হবে।",
+    "restoreAlert": "ক্রয় পুনরুদ্ধার কার্যকারিতা RevenueCat দিয়ে প্রয়োগ করা হবে।",
+    "goBack": "ফিরে যান",
+    "subscribeAnnual": "সাবস্ক্রাইব করুন - {{price}}/বছর",
+    "subscribeMonthly": "সাবস্ক্রাইব করুন - {{price}}/মাস",
+    "startFreeTrial": "ফ্রি ট্রায়াল শুরু করুন",
+    "freeTrialBadge": "{{days}} দিন বিনামূল্যে",
+    "trialDisclaimer": "{{days}} দিনের জন্য বিনামূল্যে, তারপরে {{price}}/{{period}}। ট্রায়াল শেষ হওয়ার কমপক্ষে ২৪ ঘণ্টা আগে বাতিল না করা হলে স্বয়ংক্রিয়ভাবে নবায়ন হবে। {{storeName}} সেটিংসে পরিচালনা করুন।",
+    "disclaimer": "ক্রয় নিশ্চিতকরণ পেলে পেমেন্ট আপনার {{storeName}} অ্যাকাউন্টে চার্জ করা হবে। সাবস্ক্রিপশন স্বয়ংক্রিয়ভাবে পুনর্নবীকরণ হয় যদি না বর্তমান সময়ের শেষের অন্তত 24 ঘন্টা আগে বাতিল করা হয়।",
+    "storeNameIOS": "অ্যাপ স্টোর",
+    "storeNameAndroid": "Google Play",
+    "familyServiceIOS": "Apple এর পারিবারিক ভাগাভাগি",
+    "familyServiceAndroid": "Google Play পারিবারিক লাইব্রেরি",
+    "contentDisclaimer": "KIPTV একটি ভিডিও প্লেয়ার এবং কোনো সামগ্রী প্রদান করে না। দেখানো চিত্রগুলি শুধুমাত্র চিত্রমূলক উদ্দেশ্যের জন্য।",
+    "deviceShowcase": "একটি সাবস্ক্রিপশন, আপনার সমস্ত ডিভাইস",
+    "comingSoon": "শীঘ্রই আসছে",
+    "planOneSubtitle": "সমস্ত বৈশিষ্ট্য অন্তর্ভুক্ত। ১টি প্লেলিস্ট।",
+    "planPlusSubtitle": "সমস্ত বৈশিষ্ট্য অন্তর্ভুক্ত। ৫টি প্লেলিস্ট পর্যন্ত।",
+    "termsOfService": "সেবার শর্তাবলী",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "planFree": "বিনামূল্যে",
+    "monthly": "মাসিক",
+    "annual": "বার্ষিক",
+    "monthShort": "মাস",
+    "yearShort": "বছর",
+    "savePercent": "{{percent}}% বাঁচান",
+    "selectPlan": "আপনার পরিকল্পনা নির্বাচন করুন",
+    "mostPopular": "সবচেয়ে জনপ্রিয়",
+    "bestValue": "সেরা মূল্য",
+    "currentPlan": "বর্তমান পরিকল্পনা",
+    "subscribing": "প্রক্রিয়াকরণ...",
+    "restoring": "পুনরুদ্ধার করা হচ্ছে...",
+    "purchaseSuccess": "প্রিমিয়ামে স্বাগতম!",
+    "purchaseSuccessMessage": "আপনার সাবস্ক্রিপশন এখন সক্রিয়। আনলিমিটেড স্ট্রিমিং উপভোগ করুন!",
+    "restoreSuccess": "ক্রয় সফলভাবে পুনরুদ্ধার করা হয়েছে!",
+    "restoreNotFound": "কোনো পূর্ববর্তী ক্রয় পাওয়া যায়নি",
+    "manageSubscription": "সাবস্ক্রিপশন পরিচালনা করুন",
+    "managedByAppStore": "অ্যাপ স্টোরের মাধ্যমে পরিচালিত",
+    "managedByPlayStore": "Google Play এর মাধ্যমে পরিচালিত",
+    "renewsOn": "নবীকরণ হবে",
+    "expiresOn": "সমাপ্ত হবে",
+    "manageInAppStore": "অ্যাপ স্টোরে পরিচালনা করুন",
+    "manageInPlayStore": "Play Store এ পরিচালনা করুন",
+    "errors": {
+      "cancelled": "ক্রয় বাতিল করা হয়েছে",
+      "network": "নেটওয়ার্ক ত্রুটি। আপনার সংযোগ পরীক্ষা করুন।",
+      "notAllowed": "এই ডিভাইসে ক্রয় অনুমোদিত নয়",
+      "alreadyOwned": "আপনার ইতিমধ্যে একটি সক্রিয় সাবস্ক্রিপশন রয়েছে",
+      "generic": "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।",
+      "storeUnavailable": "স্টোর অস্থায়ীভাবে অনুপলব্ধ"
+    },
+    "features": {
+      "unlimited": "আনলিমিটেড স্ট্রিমিং",
+      "noAds": "কোনো বিজ্ঞাপন নেই",
+      "singlePlaylist": "1 প্লেলিস্ট",
+      "multiplePlaylists": "5 পর্যন্ত প্লেলিস্ট",
+      "cloudSync": "ডিভাইস জুড়ে ক্লাউড সিঙ্ক",
+      "prioritySupport": "অগ্রাধিকার সমর্থন"
+    },
+    "categories": {
+      "discover": "আবিষ্কার করুন",
+      "watchYourWay": "আপনার উপায়ে দেখুন",
+      "yourSpace": "আপনার স্থান, আপনার নিয়ম",
+      "plus": "পুরো পরিবারের জন্য তৈরি"
+    },
+    "benefits": {
+      "recentlyAdded": {
+        "title": "সম্প্রতি যোগ করা হয়েছে",
+        "subtitle": "KIPTV নতুন চলচ্চিত্র, সিরিজ, পর্ব এবং লাইভ চ্যানেল ট্র্যাক করে"
+      },
+      "trailers": {
+        "title": "ট্রেলার এবং আরও অনেক কিছু",
+        "subtitle": "ট্রেলার, পর্দার পিছনে এবং বোনাস সামগ্রী দেখুন"
+      },
+      "recommended": {
+        "title": "সুপারিশকৃত",
+        "subtitle": "আপনি যা দেখেন তার উপর ভিত্তি করে ব্যক্তিগত পরামর্শ"
+      },
+      "trending": {
+        "title": "ট্রেন্ডিং",
+        "subtitle": "এখন সবচেয়ে জনপ্রিয় সামগ্রী আবিষ্কার করুন"
+      },
+      "advancedSearch": {
+        "title": "উন্নত অনুসন্ধান",
+        "subtitle": "চলচ্চিত্র, সিরিজ, চ্যানেল, প্রোগ্রাম এবং অভিনেতা অনুসন্ধান করুন"
+      },
+      "continueWatching": {
+        "title": "দেখা চালিয়ে যান",
+        "subtitle": "আপনি যেখানে ছেড়েছিলেন সেখানে চালিয়ে যান"
+      },
+      "offlineDownload": {
+        "title": "ডাউনলোড এবং অফলাইন",
+        "subtitle": "সংযোগ ছাড়াই দেখার জন্য সামগ্রী ডাউনলোড করুন"
+      },
+      "pip": {
+        "title": "ছবিতে ছবি",
+        "subtitle": "অন্যান্য অ্যাপ ব্যবহার করার সময় দেখতে থাকুন"
+      },
+      "casting": {
+        "title": "AirPlay এবং Chromecast",
+        "subtitle": "আপনার টিভিতে ভিডিও কাস্ট করুন"
+      },
+      "audioSubtitles": {
+        "title": "অডিও এবং সাবটাইটেল",
+        "subtitle": "অডিও ট্র্যাক এবং সাবটাইটেল ভাষা চয়ন করুন"
+      },
+      "tvArchive": {
+        "title": "টিভি সংরক্ষণাগার",
+        "subtitle": "ক্যাচআপ/রিপ্লে দিয়ে অতীতের লাইভ প্রোগ্রাম দেখুন"
+      },
+      "multiplePlaylists": {
+        "title": "5টি পর্যন্ত প্লেলিস্ট",
+        "subtitle": "একই অ্যাকাউন্টে একাধিক প্লেলিস্ট পরিচালনা করুন"
+      },
+      "favorites": {
+        "title": "প্রিয় এবং ট্যাগ",
+        "subtitle": "কাস্টম ট্যাগ দিয়ে আপনার প্রিয়গুলি সংগঠিত করুন"
+      },
+      "customOrdering": {
+        "title": "কাস্টম অর্ডারিং",
+        "subtitle": "বিভাগ এবং সামগ্রী আপনার উপায়ে সাজান"
+      },
+      "liveLastWatched": {
+        "title": "সম্প্রতি দেখা",
+        "subtitle": "আপনার শেষ দেখা লাইভ চ্যানেলগুলিতে দ্রুত অ্যাক্সেস"
+      },
+      "cloudSync": {
+        "title": "স্বয়ংক্রিয় ক্লাউড সিঙ্ক",
+        "subtitle": "সমস্ত ডিভাইস জুড়ে সেটিংস, প্রিয় এবং অগ্রগতি সিঙ্ক করুন"
+      },
+      "parentalControls": {
+        "title": "প্যারেন্টাল কন্ট্রোল",
+        "subtitle": "সংবেদনশীল সামগ্রী ব্লক করতে একটি PIN সেট করুন"
+      },
+      "hideContent": {
+        "title": "সামগ্রী লুকান",
+        "subtitle": "আপনি যে বিভাগগুলি এবং আইটেমগুলি দেখতে চান না তা লুকান"
+      },
+      "multiplatform": {
+        "title": "মাল্টিপ্ল্যাটফর্ম",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV, Mac"
+      },
+      "unlimitedViewing": {
+        "title": "আনলিমিটেড দেখা",
+        "subtitle": "দৈনিক সময় সীমা ছাড়াই স্ট্রিম করুন"
+      },
+      "andMoreComing": "এবং আরও অনেক কিছু আসছে!"
+    },
+    "swipeForMore": "আরও জন্য সোয়াইপ করুন",
+    "dailyLimitReached": "দৈনিক দেখার সীমা পৌঁছেছে",
+    "one": "One",
+    "plus": "Plus",
+    "planOne": "Premium One",
+    "planPlus": "Premium Plus",
+    "external": {
+      "title": "Premium কীভাবে নেবেন",
+      "body": "এই ডিভাইসে সাবস্ক্রিপশন কেনা বা পরিচালনা করা যায় না। অন্য কোনও ডিভাইসে KIPTV Premium নিন, তারপর একই KIPTV অ্যাকাউন্ট দিয়ে এখানে সাইন ইন করুন: Premium আপনার সব ডিভাইসে কাজ করবে।",
+      "appleDevices": "iPhone, iPad, Apple TV, Mac",
+      "googleDevices": "Android ফোন, ট্যাবলেট, Android TV ও Fire TV",
+      "alreadySubscribed": "আমার ইতিমধ্যে সাবস্ক্রিপশন আছে",
+      "managedElsewhere": "যে স্টোর থেকে সাবস্ক্রাইব করেছেন সেখান থেকেই পরিচালিত"
+    }
+  },
+  "account": {
+    "connectedAccount": "সংযুক্ত অ্যাকাউন্ট",
+    "memberFree": "বিনামূল্যে সদস্য",
+    "memberPremium": "প্রিমিয়াম সদস্য",
+    "syncActive": "সিঙ্ক সক্রিয়",
+    "syncActiveSubtitle": "প্লেলিস্ট, তালিকা এবং সেটিংস ক্লাউডে সিঙ্ক করা হয়েছে।",
+    "autoBackup": "স্বয়ংক্রিয় ব্যাকআপ এবং দেখা পুনরায় শুরু করুন",
+    "syncAllDevices": "সমস্ত ডিভাইসে প্লেলিস্ট এবং তালিকা সিঙ্ক করুন",
+    "streamingPerDay": "প্রতিদিন 30 মিনিটের বিনামূল্যে স্ট্রিমিং",
+    "upgradeToPremium": "Premium এ আপগ্রেড করুন",
+    "premiumActive": "Premium সক্রিয়",
+    "premiumActiveSubtitle": "সমস্ত বৈশিষ্ট্য আনলক, সীমাহীন স্ট্রিমিং।",
+    "unlimitedPlaylists": "সীমাহীন এবং সিঙ্ক করা প্লেলিস্ট",
+    "unlimitedStreaming": "সীমাহীন স্ট্রিমিং সময়",
+    "prioritySupport": "অগ্রাধিকার সহায়তা এবং নতুন বৈশিষ্ট্যে প্রাথমিক অ্যাক্সেস",
+    "manageSubscription": "সাবস্ক্রিপশন পরিচালনা করুন",
+    "logoutFromAccount": "অ্যাকাউন্ট থেকে লগআউট করুন",
+    "logoutSecure": "এই ডিভাইস থেকে নিরাপদে লগআউট করুন",
+    "unlockCloud": "সমস্ত ক্লাউড বৈশিষ্ট্য আনলক করুন",
+    "syncAcrossDevices": "আপনার সমস্ত ডিভাইসে প্লেলিস্ট, তালিকা এবং সেটিংস সিঙ্ক করুন। এটি বিনামূল্যে এবং কয়েক সেকেন্ড সময় নেয়।",
+    "playlistsAndFavoritesSynced": "প্লেলিস্ট এবং তালিকা সবসময় সিঙ্ক-এ",
+    "resumeWatching": "যেখানে আপনি থামিয়েছিলেন সেখান থেকে দেখা পুনরায় শুরু করুন",
+    "autoBackupAndSecureAccess": "স্বয়ংক্রিয় ব্যাকআপ এবং নিরাপদ অ্যাক্সেস",
+    "continueWithoutAccount": "অ্যাকাউন্ট ছাড়াই চালিয়ে যান",
+    "plan": "পরিকল্পনা",
+    "free": "বিনামূল্যে",
+    "dailyUsage": "দৈনিক ব্যবহার",
+    "playlistLimit": "প্লেলিস্ট সীমা",
+    "minutesUsed": "আজ {{used}}/{{total}} মিনিট",
+    "playlistsAllowed": "{{count}} প্লেলিস্ট",
+    "playlistsUnlimited": "সীমাহীন প্লেলিস্ট"
+  },
+  "usage": {
+    "limitReached": "সীমা পৌঁছেছে",
+    "usedToday": "আপনি আজ {{minutes}} মিনিট ব্যবহার করেছেন",
+    "usedTodayShort": "আজ {{minutes}}মিনিট ব্যবহার করা হয়েছে",
+    "remaining": "{{time}} অবশিষ্ট",
+    "remainingHoursMinutes": "{{hours}}ঘ {{minutes}}মি অবশিষ্ট",
+    "remainingMinutes": "{{minutes}}মি অবশিষ্ট",
+    "nearLimit": "আপনি দৈনিক সীমায় পৌঁছাতে চলেছেন",
+    "premium": "প্রিমিয়াম",
+    "unlimited": "সীমাহীন",
+    "upgradeToPremium": "প্রিমিয়ামে আপগ্রেড করুন",
+    "discoverPremium": "প্রিমিয়াম আবিষ্কার করুন",
+    "usageInfo": "আপনি আপনার {{total}} দৈনিক মিনিটের {{used}} ব্যবহার করেছেন"
+  },
+  "language": {
+    "selectLanguage": "ভাষা নির্বাচন করুন / Seleziona Lingua",
+    "reloadNote": "ভাষা পরিবর্তনের পরে অ্যাপটি স্বয়ংক্রিয়ভাবে পুনরায় লোড হবে",
+    "reloadNoteEn": "L'app ricaricherà automaticamente dopo il cambio lingua",
+    "useDeviceLanguage": "ডিভাইসের ভাষা ব্যবহার করুন",
+    "confirmChangeTitle": "ভাষা পরিবর্তন নিশ্চিত করুন",
+    "confirmChangeMessage": "ভাষা পরিবর্তন করলে {{language}} এ সামগ্রী লোড করার জন্য সমস্ত ক্যাশড মেটাডেটা (পোস্টার, বর্ণনা, লোগো) সাফ হয়ে যাবে। চালিয়ে যান?",
+    "changeError": "ভাষা পরিবর্তন করতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+    "restartRequired": "পুনরায় চালু করা প্রয়োজন",
+    "restartMessage": "ভাষা পরিবর্তন সম্পূর্ণ করতে, নতুন ভাষায় মেটাডেটা লোড করার জন্য অ্যাপটি ম্যানুয়ালি বন্ধ এবং পুনরায় খুলুন।"
+  },
+  "categories": {
+    "title": "বিভাগগুলি",
+    "subtitle": "প্লেলিস্টে দৃশ্যমান বিভাগগুলি সাজান বা লুকান। পরিবর্তনগুলি অবিলম্বে প্রভাব ফেলে।",
+    "customizeMovies": "চলচ্চিত্র কাস্টমাইজ করুন",
+    "customizeSeries": "সিরিজ কাস্টমাইজ করুন",
+    "movies": "চলচ্চিত্র",
+    "series": "সিরিজ",
+    "liveTV": "চ্যানেল",
+    "customizeLiveTV": "লাইভ কাস্টমাইজ করুন",
+    "sortSubtitle": "ক্রম চয়ন করুন এবং আপনি যে বিভাগগুলিতে আগ্রহী নন তা লুকান। আপনি পরে সেটিংসে সেগুলি পরিবর্তন করতে পারেন।",
+    "loading": "বিভাগগুলি লোড হচ্ছে...",
+    "retrieving": "বিভাগগুলি পুনরুদ্ধার করছি..."
+  },
+  "detail": {
+    "rewatch": "আবার দেখুন",
+    "alreadyWatched": {
+      "movieTitle": "ইতিমধ্যে দেখা হয়েছে",
+      "episodeTitle": "ইতিমধ্যে দেখা হয়েছে",
+      "message": "শুরু থেকে আবার চালু করতে চান?",
+      "restart": "আবার শুরু করুন"
+    },
+    "lastAccess": "সর্বশেষ অ্যাক্সেস",
+    "expiresAt": "সমাপ্ত হয়",
+    "maxConnections": "সর্বাধিক সংযোগ",
+    "activeConnections": "সক্রিয় সংযোগ",
+    "totalContent": "মোট সামগ্রী",
+    "liveTV": "লাইভ চ্যানেল",
+    "movies": "চলচ্চিত্র",
+    "series": "সিরিজ",
+    "title": "প্লেলিস্ট বিবরণ",
+    "loading": "তথ্য পুনরুদ্ধার করা হচ্ছে...",
+    "play": "চালান",
+    "alsoOn": "এছাড়াও:",
+    "chooseVersion": "সংস্করণ বেছে নিন",
+    "otherVersions": "অন্যান্য সংস্করণ",
+    "otherVersionsCount": "অন্যান্য সংস্করণ ({{count}})",
+    "trailers": "ট্রেলার এবং আরও অনেক কিছু",
+    "addToFavorites": "আমার তালিকা",
+    "download": "ডাউনলোড করুন",
+    "recommended": "এর মত আরও",
+    "collection": "সংগ্রহ থেকে",
+    "more": "আরও",
+    "less": "কম",
+    "comingSoon": "শীঘ্রই আসছে",
+    "ageRating": "বয়স রেটিং",
+    "watchNow": "এখন দেখুন",
+    "info": {
+      "title": "তথ্য",
+      "status": "অবস্থা",
+      "country": "দেশ",
+      "production": "প্রযোজনা",
+      "director": "পরিচালক",
+      "creator": "নির্মাতা",
+      "originalTitle": "মূল শিরোনাম",
+      "originalLanguage": "মূল ভাষা",
+      "network": "নেটওয়ার্ক",
+      "episodes": "পর্ব",
+      "budget": "বাজেট",
+      "revenue": "আয়",
+      "screenplay": "চিত্রনাট্য",
+      "music": "সঙ্গীত",
+      "airingPeriod": "সম্প্রচারকাল",
+      "ongoing": "চলমান",
+      "statusValue": {
+        "released": "মুক্তিপ্রাপ্ত",
+        "returningSeries": "চলমান সিরিজ",
+        "ended": "সমাপ্ত",
+        "canceled": "বাতিল",
+        "inProduction": "প্রযোজনাধীন",
+        "postProduction": "পোস্ট-প্রোডাকশন",
+        "planned": "পরিকল্পিত",
+        "rumored": "গুজব",
+        "pilot": "পাইলট"
+      }
+    },
+    "privateSearch": "ব্যক্তিগত অনুসন্ধান",
+    "searchGoogle": "Google-এ খুঁজুন"
+  },
+  "onboarding": {
+    "subtitle": "একটি পরিষ্কার এবং দ্রুত ইন্টারফেস সহ লাইভ, চলচ্চিত্র এবং সিরিজ।",
+    "slides": {
+      "multiplatform": {
+        "title": "আপনি যেখানেই থাকুন",
+        "subtitle": "iPhone, iPad, Apple TV, Android TV, Fire TV এবং Mac। সমস্ত ডিভাইসের জন্য একটি অ্যাপ।"
+      },
+      "explore": {
+        "title": "আপনার সামগ্রী অন্বেষণ করুন",
+        "subtitle": "একটি পরিষ্কার এবং দ্রুত ইন্টারফেস সহ লাইভ, চলচ্চিত্র এবং সিরিজ।"
+      },
+      "sync": {
+        "title": "একটি অ্যাকাউন্ট, সমস্ত ডিভাইস",
+        "subtitle": "ক্লাউডে প্লেলিস্ট সংরক্ষণ করুন এবং আপনি যেখানে ছেড়েছিলেন সেখানে চালিয়ে যান।"
+      }
+    },
+    "disclaimer": "KIPTV একটি মিডিয়া প্লেয়ার: এটি সামগ্রী প্রদান করে না।",
+    "getStarted": "শুরু করুন"
+  },
+  "setup": {
+    "skip": "এড়িয়ে যান",
+    "back": "পিছনে",
+    "useDefaults": "ডিফল্ট ব্যবহার করুন",
+    "welcome": {
+      "title": "এই আপনার প্লেলিস্ট",
+      "subtitleXtream": "{{name}} · Xtream · {{date}} পর্যন্ত সক্রিয়",
+      "subtitleGeneric": "{{name}} · {{type}}",
+      "movies": "সিনেমা",
+      "series": "সিরিজ",
+      "channels": "চ্যানেল",
+      "withGuide": "গাইডসহ চ্যানেল",
+      "cta": "১ মিনিটে নিজের মতো সাজান"
+    },
+    "start": {
+      "title": "কোথা থেকে শুরু করতে চান?",
+      "subtitle": "চালু হলে যে স্ক্রিনটি খোলে।",
+      "home": "হোম",
+      "homeSub": "এক নজরে সব",
+      "movies": "সিনেমা",
+      "moviesSub": "সিনেমায় ফোকাস",
+      "series": "সিরিজ",
+      "seriesSub": "নতুন পর্ব সবার আগে",
+      "live": "লাইভ",
+      "liveSub": "চ্যানেল ও টিভি গাইড"
+    },
+    "playback": {
+      "title": "প্লেয়ারে সবচেয়ে গুরুত্বপূর্ণ কী?",
+      "subtitle": "আপনার জন্য সঠিক ইঞ্জিন বেছে নিন। যেকোনো সময় বদলাতে পারবেন।",
+      "quality": "ফিচার ও মান",
+      "qualitySub": "আপনার ডিভাইস যা যা পারে",
+      "qualityEngine": "স্বয়ংক্রিয় ইঞ্জিন · Aether",
+      "stability": "স্থিতিশীলতা ও গতি",
+      "stabilitySub": "সঙ্গে সঙ্গে চালু হয়, কঠিন স্ট্রিমও সামলায়",
+      "stabilityEngine": "VLC ইঞ্জিন · স্বয়ংক্রিয় ব্যাকআপসহ",
+      "pillFastStart": "দ্রুত শুরু ও সিক",
+      "pillReconnect": "মজবুত পুনঃসংযোগ",
+      "pillFormats": "সব ফরম্যাট",
+      "pillProven": "পরীক্ষিত ইঞ্জিন",
+      "synced": "আপনার অ্যাকাউন্টের সাথে সিঙ্ক: প্রতিটি ডিভাইস তার সেরা ইঞ্জিন ব্যবহার করে।"
+    },
+    "channels": {
+      "title": "চ্যানেলগুলো কীভাবে চান?",
+      "subtitle": "একই চ্যানেলের HD, FHD ও 4K সংস্করণ।",
+      "before": "আগে",
+      "after": "পরে",
+      "group": "গ্রুপ করুন",
+      "groupSub": "একটি চ্যানেল, মানের ব্যাজ",
+      "separate": "আলাদা রাখুন",
+      "separateSub": "প্রতি সংস্করণে একটি সারি",
+      "recommended": "প্রস্তাবিত",
+      "sampleProgram": "সন্ধ্যার খবর",
+      "sampleNext": "এরপর: সন্ধ্যার সিনেমা",
+      "sampleProgramShort": "সন্ধ্যার খবর · সন্ধ্যার সিনেমা",
+      "fallbackChannel": "চ্যানেল ১"
+    },
+    "adults": {
+      "title": "প্রাপ্তবয়স্ক কনটেন্ট?",
+      "subtitle": "এই প্লেলিস্টে কী দেখা যাবে তা আপনিই ঠিক করেন।",
+      "showAll": "সব দেখান",
+      "showAllSub": "কোনো ফিল্টার নেই",
+      "hide": "প্রাপ্তবয়স্ক বিভাগ লুকান",
+      "hideSub": "কীওয়ার্ড অনুযায়ী: XXX, Adult, 18+",
+      "hidePin": "লুকান ও PIN দিয়ে সুরক্ষিত করুন",
+      "hidePinSub": "বিভাগগুলো PIN দিয়ে লক থাকে",
+      "hidePinExistingSub": "আপনার বর্তমান PIN ব্যবহার হবে",
+      "pinPrompt": "৪ অঙ্কের একটি PIN বেছে নিন",
+      "pinConfirm": "PIN আবার লিখুন",
+      "pinMismatch": "PIN মিলছে না, আবার চেষ্টা করুন",
+      "pinSet": "PIN সেট হয়েছে"
+    },
+    "color": {
+      "title": "আপনার রং",
+      "subtitle": "আপনি বাছাই করতে করতেই অ্যাপের রং বদলে যায়।",
+      "background": "ব্যাকগ্রাউন্ড",
+      "premiumTitle": "Premium-এ আরও রং",
+      "premiumCta": "আনলক করুন"
+    },
+    "done": {
+      "title": "সব প্রস্তুত",
+      "subtitle": "এই আপনার পছন্দগুলো।",
+      "autoOpen": "চালু হলেই {{name}} খুলুন",
+      "autoOpenSub": "প্লেলিস্ট বাছাই এড়িয়ে যায়",
+      "hint": "সেটিংসে গিয়ে সব বদলাতে পারবেন।",
+      "cta": "হোমে যান"
+    },
+    "recap": {
+      "start": "শুরু: {{screen}}",
+      "playbackQuality": "প্লেয়ার: মান",
+      "playbackStability": "প্লেয়ার: স্থিতিশীলতা",
+      "channelsGrouped": "চ্যানেল গ্রুপ করা",
+      "channelsSeparate": "চ্যানেল আলাদা",
+      "adultsShown": "প্রাপ্তবয়স্ক: দৃশ্যমান",
+      "adultsHidden": "প্রাপ্তবয়স্ক: লুকানো",
+      "adultsHiddenPin": "প্রাপ্তবয়স্ক: লুকানো + PIN",
+      "color": "{{color}} · {{background}}"
+    }
+  },
+  "continueWatching": {
+    "title": "চলতে থাকুন",
+    "removeConfirm": "আপনি \"চলমান দেখা\" থেকে \"{{title}}\" সরাতে চান?",
+    "remove": "সরান",
+    "contentNotAvailable": "সামগ্রী উপলব্ধ নেই",
+    "contentNotInPlaylist": "এই সামগ্রী আর বর্তমান প্লেলিস্টে উপস্থিত নেই।",
+    "actions": "পদক্ষেপ",
+    "removeFromContinueWatching": "\"চলমান দেখা\" থেকে সরান",
+    "markAsWatched": "দেখা হিসাবে চিহ্নিত করুন",
+    "remaining": "বাকি",
+    "goToMovie": "চলচ্চিত্রে যান",
+    "goToSeries": "সিরিজে যান",
+    "addToFavorites": "আমার তালিকায় যোগ করুন",
+    "download": "ডাউনলোড করুন",
+    "comingSoon": "শীঘ্রই আসছে",
+    "resetSeriesProgress": "সিরিজ অগ্রগতি পুনরায় সেট করুন",
+    "resetMovieProgress": "চলচ্চিত্র অগ্রগতি পুনরায় সেট করুন",
+    "resetProgressConfirm": "এটি \"{{title}}\" এর জন্য সমস্ত দেখার অগ্রগতি স্থায়ীভাবে মুছে ফেলবে। এই পদক্ষেপ পূর্ববত করা যায় না।",
+    "resetProgress": "পুনরায় সেট করুন"
+  },
+  "player": {
+    "shortcuts": {
+      "seekForward": "এগিয়ে যান",
+      "seekBackward": "পিছিয়ে যান",
+      "playPause": "চালান/বিরতি",
+      "close": "বন্ধ করুন"
+    },
+    "pip": {
+      "active": "চিত্রে চিত্র চলছে",
+      "expandHintPrefix": "চাপুন",
+      "expandHintSuffix": "ফুল স্ক্রিনে ফিরতে"
+    },
+    "info": "তথ্য",
+    "videoDataUnavailable": "ভিডিও ডেটা অনুপলব্ধ",
+    "streamUrlError": "স্ট্রিম URL উৎপন্ন করতে অক্ষম",
+    "closePlayer": "প্লেয়ার বন্ধ করুন",
+    "playbackError": "প্লেব্যাক ত্রুটি",
+    "dailyLimitMessage": "আপনি দৈনিক দেখার সীমা পৌঁছেছেন।",
+    "continueWatching": "চলমান দেখা",
+    "upgradePremium": "প্রিমিয়াম আপগ্রেড করুন",
+    "timeUsed": "সময় ব্যবহার: {{minutes}} মিনিট।",
+    "livePlayerClosed": "প্লেয়ার বন্ধ হবে। আনলিমিটেড দেখার জন্য প্রিমিয়ামে আপগ্রেড করুন।",
+    "audio": "অডিও",
+    "audioTrack": "অডিও ট্র্যাক",
+    "subtitles": "সাবটাইটেল",
+    "subtitlesOff": "বন্ধ",
+    "speed": "গতি",
+    "playbackSpeed": "প্লেব্যাক গতি",
+    "information": "তথ্য",
+    "fromStart": "শুরু থেকে",
+    "goToMovie": "চলচ্চিত্রে যান",
+    "goToSeries": "সিরিজে যান",
+    "noAudioTracks": "কোনো অডিও ট্র্যাক উপলব্ধ নেই",
+    "progress": "অগ্রগতি",
+    "remainingTime": "%@ বাকি",
+    "restartFromBeginning": "শুরু থেকে",
+    "backToVideo": "ভিডিওতে ফিরে যান",
+    "noDescriptionAvailable": "এই সামগ্রীর জন্য কোনো বর্ণনা উপলব্ধ নেই।",
+    "noPlotAvailable": "কোনো প্লট উপলব্ধ নেই।",
+    "more": "আরও",
+    "liveStreamNoDescription": "লাইভ স্ট্রিম - কোনো বর্ণনা উপলব্ধ নেই।",
+    "loading": "লোড হচ্ছে...",
+    "usingEngine": "ইঞ্জিন:",
+    "engine": "ইঞ্জিন",
+    "enginePicker": "প্লেয়ার ইঞ্জিন",
+    "track": {
+      "audio": "অডিও",
+      "subtitle": "সাবটাইটেল",
+      "off": "বন্ধ"
+    },
+    "rate": {
+      "normal": "স্বাভাবিক"
+    },
+    "error": {
+      "title": "প্লেব্যাক ত্রুটি",
+      "invalidURL": "অবৈধ স্ট্রিম URL",
+      "unsupportedFormat": "অসমর্থিত ফর্ম্যাট",
+      "allEnginesFailed": "এই সামগ্রী চালাতে অক্ষম। সমস্ত প্লেয়ার ইঞ্জিন ব্যর্থ হয়েছে।",
+      "tryAnotherPlayer": "অন্য একটি প্লেয়ার ব্যবহার করুন",
+      "engineSwitchFailedRestored": "{{failed}} শুরু করা যায়নি। {{previous}} পুনরুদ্ধার করা হয়েছে।",
+      "unknown": "অজানা প্লেব্যাক ত্রুটি",
+      "close": "বন্ধ করুন",
+      "engineCrash": "প্লেয়ার ক্র্যাশ করেছে। অন্য ইঞ্জিন চেষ্টা করুন।",
+      "loadFailed": "এই কনটেন্ট লোড করা যাচ্ছে না।",
+      "network": "নেটওয়ার্ক ত্রুটি। আপনার সংযোগ পরীক্ষা করুন।",
+      "playbackFailed": "প্লেব্যাক ব্যর্থ হয়েছে।",
+      "timeout": "স্ট্রিম সাড়া দিতে অনেক সময় নিয়েছে।"
+    },
+    "returnToLive": "লাইভে ফিরে যান",
+    "retry": "পুনরায় চেষ্টা করুন",
+    "playNow": "এখনই চালান",
+    "playingIn": "{{seconds}}s এ চলছে",
+    "dailyLimitWarning": "আপনার আজ {{minutes}} মিনিট বাকি রয়েছে",
+    "formatNotSupported": "এই ফর্ম্যাট এই TV তে সমর্থিত নয়",
+    "nextEpisode": "পরবর্তী এপিসোড",
+    "upNext": "পরবর্তী",
+    "skipIntro": "ইন্ট্রো এড়িয়ে যান",
+    "skipRecap": "রিক্যাপ এড়িয়ে যান",
+    "skipCredits": "ক্রেডিট এড়িয়ে যান",
+    "holdToUnlock": "আনলক করতে ধরে রাখুন",
+    "epg": "সময়সূচী",
+    "retryStream": "পুনরায় চেষ্টা করুন",
+    "streamDropped": "স্ট্রিম সংযোগ হারিয়েছে",
+    "loadEarlierPrograms": "আগের প্রোগ্রাম লোড করুন",
+    "replay": "পুনরায় চালান",
+    "playReplay": "চালান",
+    "cancelReplay": "বাতিল করুন",
+    "noReplayData": "কোনো রিপ্লে ডেটা উপলব্ধ নেই",
+    "favorites": "প্রিয়",
+    "recent": "সম্প্রতি",
+    "noFavorites": "কোনো প্রিয় চ্যানেল নেই",
+    "noRecentChannels": "কোনো সম্প্রতি দেখা চ্যানেল নেই",
+    "archiveDays": "{{count}} দিনের সংরক্ষণাগার",
+    "liveIndicator": "লাইভ",
+    "openSubtitles": {
+      "external": "OpenSubtitles",
+      "searchOnline": "অনলাইন সাবটাইটেল অনুসন্ধান করুন",
+      "loading": "সাবটাইটেল লোড করা হচ্ছে...",
+      "searching": "সাবটাইটেল অনুসন্ধান করা হচ্ছে...",
+      "downloading": "সাবটাইটেল ডাউনলোড করা হচ্ছে...",
+      "downloaded": "সাবটাইটেল লোড করা হয়েছে",
+      "noResults": "কোনো সাবটাইটেল পাওয়া যায়নি",
+      "quotaExceeded": "ডাউনলোড সীমা পৌঁছেছে। আগামীকাল আবার চেষ্টা করুন।",
+      "loginForMore": "আরও ডাউনলোডের জন্য লগ ইন করুন",
+      "hearingImpaired": "CC",
+      "downloads": "ডাউনলোড",
+      "remainingDownloads": "আজ ডাউনলোড বাকি: {{count}}",
+      "selectLanguage": "ভাষা নির্বাচন করুন",
+      "searchError": "সাবটাইটেল অনুসন্ধানে ব্যর্থ",
+      "downloadError": "সাবটাইটেল ডাউনলোডে ব্যর্থ",
+      "results": "ফলাফল",
+      "cached": "ক্যাশ করা",
+      "searchAgain": "আবার অনুসন্ধান করুন"
+    },
+    "openSubtitlesError": {
+      "invalidKey": "অবৈধ API কী",
+      "invalidCredentials": "অবৈধ ব্যবহারকারীর নাম বা পাসওয়ার্ড",
+      "forbidden": "অ্যাক্সেস অনুমোদিত নয়",
+      "invalidFile": "অবৈধ সাবটাইটেল ফাইল",
+      "invalidToken": "সেশন সমাপ্ত। আবার লগ ইন করুন।",
+      "linkExpired": "ডাউনলোড লিঙ্ক সমাপ্ত। আবার চেষ্টা করুন।",
+      "rateLimit": "অনেক অনুরোধ। অপেক্ষা করুন।",
+      "serverError": "সার্ভার ত্রুটি। পরে আবার চেষ্টা করুন।",
+      "network": "নেটওয়ার্ক ত্রুটি। আপনার সংযোগ পরীক্ষা করুন।",
+      "invalidResponse": "অবৈধ সার্ভার প্রতিক্রিয়া",
+      "parseFailed": "সাবটাইটেল ফাইল পার্সিং করতে ব্যর্থ"
+    },
+    "chromecast": {
+      "castingTo": "%@-এ কাস্ট করা হচ্ছে",
+      "stopCasting": "কাস্ট বন্ধ করুন",
+      "castTo": "কাস্ট করুন",
+      "disconnect": "সংযোগ বিচ্ছিন্ন করুন",
+      "error": {
+        "title": "Chromecast ত্রুটি",
+        "incompatibleStream": "এই স্ট্রিমটি Chromecast-এর সাথে সামঞ্জস্যপূর্ণ নয়। প্লেব্যাক আপনার ডিভাইসে চলছে।",
+        "cleartextHTTP": "আপনার IPTV প্রদানকারী একটি অনিরাপদ সংযোগ (HTTP) ব্যবহার করে, যা Chromecast গ্রহণ করে না। নিরাপদ সংযোগ (HTTPS) সহ একটি প্রদানকারী প্রয়োজন। প্লেব্যাক আপনার ডিভাইসে চলতে থাকবে।"
+      }
+    },
+    "airplay": {
+      "videoActive": "AirPlay-তে চলছে",
+      "tapToManage": "ডিভাইস পরিবর্তন বা সংযোগ বিচ্ছিন্ন করতে ট্যাপ করুন",
+      "warning": {
+        "titleBridge": "AirPlay-তে ভিডিও",
+        "messageBridge": "এই ফরম্যাট স্থানীয়ভাবে ভিডিওসহ AirPlay সমর্থন করে না, তবে KIPTV তবুও এটি টিভিতে পাঠাতে পারে। নিয়ন্ত্রণ সীমিত (চালু/বিরতি ও ±10s, প্রোগ্রেস বার ছাড়া)।",
+        "streamVideo": "টিভিতে ভিডিও পাঠান",
+        "title": "AirPlay: শুধু অডিও",
+        "messagePlayer": "AirPlay শুধু অডিও পাঠাচ্ছে। ভিডিওও পাঠাতে AVPlayer বা Aether ব্যবহার করুন।",
+        "messageAether": "AirPlay শুধু অডিও পাঠাচ্ছে। ভিডিওও পাঠাতে Aether ব্যবহার করুন।",
+        "messageContent": "এই কনটেন্ট AirPlay-এর মাধ্যমে শুধু অডিও হিসেবে পাঠানো যায় — ভিডিও এই ডিভাইসেই থাকে।",
+        "useVideoEngine": "AVPlayer ব্যবহার করুন",
+        "useAether": "Aether ব্যবহার করুন",
+        "continueAudioOnly": "শুধু অডিও দিয়ে চালিয়ে যান"
+      },
+      "error": {
+        "title": "AirPlay ত্রুটি",
+        "liveBridgeFailed": "ভিডিওটি টিভিতে পাঠানো যায়নি। আবার চেষ্টা করুন।"
+      }
+    },
+    "subtitleDelay": "সাবটাইটেল বিলম্ব",
+    "audioDelay": "অডিও বিলম্ব",
+    "resetDelay": "রিসেট",
+    "nowPlaying": "এখন চলছে"
+  },
+  "startup": {
+    "loadingIPTV": "IPTV সামগ্রী লোড করা হচ্ছে...",
+    "enhancingQuality": "সামগ্রী গুণমান উন্নতি করা হচ্ছে...",
+    "preparationComplete": "প্রস্তুতি সম্পূর্ণ",
+    "connectingPlaylist": "প্লেলিস্টে সংযোগ করা হচ্ছে...",
+    "enhancementContinues": "উন্নতি পটভূমিতে চলতে থাকবে...",
+    "systemReady": "সিস্টেম প্রস্তুত",
+    "contentEnhanced": "{{count}} সামগ্রী উন্নত",
+    "smartMode": "স্মার্ট মোড: জনপ্রিয় সামগ্রী",
+    "poweredByTMDB": "TMDB দ্বারা চালিত • বড় প্লেলিস্টের জন্য অপ্টিমাইজ করা",
+    "contents": "সামগ্রী"
+  },
+  "tmdb": {
+    "completed": "সম্পূর্ণ! {{count}} সামগ্রী উন্নত",
+    "enhancingMovies": "চলচ্চিত্র উন্নত করা হচ্ছে...",
+    "enhancingSeries": "সিরিজ উন্নত করা হচ্ছে...",
+    "waiting": "অপেক্ষা করা হচ্ছে...",
+    "secondsRemaining": "{{seconds}}s বাকি",
+    "minutesRemaining": "{{minutes}}মিনিট বাকি",
+    "hoursRemaining": "{{hours}}ঘ {{minutes}}মিনিট বাকি"
+  },
+  "poster": {
+    "notAvailable": "{{type}} আপনার প্লেলিস্টে উপলব্ধ নেই"
+  },
+  "sorting": {
+    "categoryOrder": "বিভাগ ক্রম",
+    "contentOrder": "সামগ্রী ক্রম",
+    "default": "ডিফল্ট",
+    "mostPopular": "সবচেয়ে জনপ্রিয়",
+    "mostVoted": "সর্বোচ্চ রেটেড",
+    "oldest": "সবচেয়ে পুরনো",
+    "mostRecent": "সবচেয়ে সম্প্রতি",
+    "alphabeticalAsc": "A → Z",
+    "alphabeticalDesc": "Z → A",
+    "custom": "কাস্টম",
+    "goToCategory": "বিভাগে যান"
+  },
+  "genres": {
+    "animation": "অ্যানিমেশন",
+    "action": "অ্যাকশন",
+    "comedy": "কমেডি",
+    "crime": "অপরাধ",
+    "adventure": "অ্যাডভেঞ্চার",
+    "documentary": "ডকুমেন্টারি",
+    "thriller": "থ্রিলার",
+    "fantasy": "ফ্যান্টাসি",
+    "romance": "রোমান্স",
+    "drama": "নাটক",
+    "sciFi": "বিজ্ঞান কল্পকাহিনী",
+    "horror": "ভয়",
+    "family": "পরিবার",
+    "mystery": "রহস্য",
+    "music": "সঙ্গীত",
+    "war": "যুদ্ধ",
+    "history": "ইতিহাস",
+    "western": "পশ্চিমী"
+  },
+  "downloads": {
+    "cancelAllTitle": "সব ডাউনলোড বাতিল করবেন?",
+    "cancelAllMessage": "চলমান, সারিতে থাকা বা বিরতি দেওয়া {{count}}টি ডাউনলোড বাতিল হবে। ইতিমধ্যে ডাউনলোড করা কনটেন্ট থেকে যাবে।",
+    "season": {
+      "confirmTitle": "সিজন {{season}} ডাউনলোড করুন",
+      "confirmToDownload": "ডাউনলোড করার এপিসোড: {{count}}",
+      "confirmSkipped": "আগেই ডাউনলোড হয়েছে বা সারিতে আছে: {{count}}",
+      "confirmQueueNote": "এগুলো সারি ও একসাথে ডাউনলোডের সীমা মেনে ডাউনলোড হবে।",
+      "downloadRemaining": "বাকি {{count}}টি ডাউনলোড করুন",
+      "pauseAll": "সিজন বিরতি দিন",
+      "resumeAll": "সিজন চালিয়ে যান",
+      "cancelAll": "সিজনের ডাউনলোড বাতিল করুন",
+      "progressA11y": "সিজন {{season}}: {{total}}টির মধ্যে {{done}}টি এপিসোড ডাউনলোড হয়েছে"
+    },
+    "title": "ডাউনলোড",
+    "storageUsed": "ব্যবহৃত স্টোরেজ",
+    "free": "বিনামূল্যে",
+    "cellularDownloads": "মোবাইল ডাউনলোড",
+    "cellularDownloadsSubtitle": "মোবাইল ডেটার উপর ডাউনলোড অনুমতি দিন",
+    "active": "ডাউনলোড করছি",
+    "completed": "সম্পন্ন",
+    "failed": "ব্যর্থ",
+    "downloadFailed": "ডাউনলোড ব্যর্থ",
+    "episodes": "এপিসোড",
+    "movie": "চলচ্চিত্র",
+    "episode": "এপিসোড",
+    "movies": "চলচ্চিত্র",
+    "series": "সিরিজ",
+    "emptyTitle": "কোনো ডাউনলোড নেই",
+    "emptyMessage": "অফলাইনে দেখতে চলচ্চিত্র এবং এপিসোড ডাউনলোড করুন",
+    "deleteAll": "সমস্ত ডাউনলোড মুছে দিন",
+    "deleteAllTitle": "সমস্ত ডাউনলোড মুছে দিন?",
+    "deleteAllMessage": "এটি সমস্ত ডাউনলোড করা সামগ্রী সরিয়ে দেবে এবং স্টোরেজ স্থান মুক্ত করবে।",
+    "downloadSeason": "সিজন ডাউনলোড করুন",
+    "downloading": "ডাউনলোড হচ্ছে...",
+    "downloaded": "ডাউনলোড হয়েছে",
+    "notEnoughSpace": "পর্যাপ্ত স্টোরেজ স্থান নেই",
+    "wifiOnly": "ডাউনলোড করতে Wi-Fi সংযোগ করুন",
+    "streamWarningTitle": "ডাউনলোড চলছে",
+    "streamWarningMessage": "একটি ডাউনলোড চলছে। বেশিরভাগ IPTV প্রদানকারী একবারে শুধুমাত্র একটি সংযোগ অনুমতি দেয়। স্ট্রিমিং এবং ডাউনলোড বাধাগ্রস্ত হতে পারে।",
+    "queued": "সারিবদ্ধ",
+    "cancelAll": "সবকিছু বাতিল করুন",
+    "cellularAlertTitle": "মোবাইল ডাউনলোড নিষ্ক্রিয়",
+    "cellularAlertMessage": "মোবাইল ডেটার মাধ্যমে ডাউনলোড বর্তমানে নিষ্ক্রিয়। আপনি কি এটি সক্রিয় করতে চান?",
+    "cellularAlertEnable": "সক্রিয় করুন",
+    "allSeasons": "সব সিজন",
+    "cancel": "বাতিল করুন",
+    "deleteSeason": "সিজন মুছে দিন",
+    "notFound": "ডাউনলোড পাওয়া যায়নি",
+    "pause": "বিরতি",
+    "paused": "বিরতি দেওয়া হয়েছে",
+    "remove": "সরান",
+    "resume": "চালিয়ে যান",
+    "subtitle": "অফলাইনে উপলব্ধ চলচ্চিত্র এবং পর্ব",
+    "multipleDownloads": "একসাথে ডাউনলোড",
+    "multipleDownloadsSubtitle": "একাধিক ডাউনলোড একসাথে এগিয়ে নিন",
+    "multipleTitle": "একসাথে ডাউনলোড",
+    "multipleConnectionsOne": "আপনার প্রোভাইডার একসাথে মাত্র একটি সংযোগের অনুমতি দেয়।",
+    "multipleConnections": "আপনার প্রোভাইডার একসাথে সর্বোচ্চ %d টি সংযোগের অনুমতি দেয়।",
+    "multipleConnectionsUnknown": "আপনার প্রোভাইডার একসাথে কতগুলি সংযোগের অনুমতি দেয় তা জানা যায়নি।",
+    "multipleLimit": "KIPTV একসাথে সর্বোচ্চ %d টি ডাউনলোড এগিয়ে নেবে; বাকিগুলি সারিতে থাকবে।",
+    "multipleRisk": "একসাথে ডাউনলোড আপনার প্রোভাইডার ব্লক করতে পারে।",
+    "multipleDontShowAgain": "আর দেখাবেন না",
+    "multipleRefusedTitle": "একসাথে ডাউনলোড সমর্থিত নয়",
+    "multipleRefusedMessage": "আপনার প্রোভাইডার একসাথে ডাউনলোড প্রত্যাখ্যান করেছে। ডাউনলোড একটি একটি করে চলবে।"
+  },
+  "offline": {
+    "title": "অফলাইন মোড",
+    "goOnline": "অনলাইনে যান",
+    "yourPlaylists": "আপনার প্লেলিস্ট",
+    "selectPlaylist": "ব্রাউজ করার জন্য একটি প্লেলিস্ট নির্বাচন করুন",
+    "items": "আইটেম",
+    "offlineMode": "অফলাইন মোড",
+    "offlineModeDescription": "শুধুমাত্র ডাউনলোড করা সামগ্রী ব্রাউজ করা হচ্ছে",
+    "stillOffline": "কোনো সংযোগ উপলব্ধ নেই",
+    "noDownloads": "কোনো ডাউনলোড করা সামগ্রী নেই",
+    "noDownloadsMessage": "অফলাইনে সেগুলি দেখতে অনলাইনে থাকার সময় চলচ্চিত্র এবং এপিসোড ডাউনলোড করুন।",
+    "noConnection": "ইন্টারনেট সংযোগ নেই",
+    "downloadsAvailable": "ডাউনলোড করা সামগ্রী উপলব্ধ",
+    "useOffline": "অফলাইন ব্যবহার করুন",
+    "syncProgressTitle": "অফলাইন অগ্রগতি পাওয়া গেছে",
+    "syncProgressMessage": "অফলাইনে থাকাকালীন সংরক্ষিত {{count}}টি দেখার অবস্থান পাওয়া গেছে। আপনার অ্যাকাউন্টে সিঙ্ক করবেন?",
+    "syncProgressConfirm": "সিঙ্ক করুন",
+    "syncProgressLater": "না"
+  },
+  "contextMenu": {
+    "removeFromFavorites": "আমার তালিকা থেকে সরান",
+    "expandCategory": "বিভাগ প্রসারিত করুন",
+    "alreadyDownloaded": "ইতিমধ্যে ডাউনলোড হয়েছে",
+    "downloading": "ডাউনলোড হচ্ছে…",
+    "notAvailableInPlaylist": "আপনার প্লেলিস্টে উপলব্ধ নয়"
+  },
+  "myList": {
+    "title": "আমার তালিকা",
+    "addToMyList": "আমার তালিকা",
+    "createNewTag": "নতুন ট্যাগ তৈরি করুন",
+    "manageTags": "ট্যাগ পরিচালনা করুন",
+    "editTags": "সম্পাদনা করুন",
+    "tagNamePlaceholder": "ট্যাগ নাম",
+    "saveTag": "ট্যাগ সংরক্ষণ করুন",
+    "cancel": "বাতিল করুন",
+    "done": "সম্পন্ন",
+    "noItems": "আপনার তালিকা খালি",
+    "noItemsMessage": "আপনার তালিকায় চলচ্চিত্র, সিরিজ বা চ্যানেল যোগ করুন সেখানে সেগুলি খুঁজতে।",
+    "all": "সব",
+    "deleteTagTitle": "ট্যাগ মুছবেন?",
+    "deleteTag": "মুছে দিন",
+    "deleteTagMessage": "\"%@\" এর সমস্ত আইটেম আমার তালিকা থেকে সরানো হবে।",
+    "tags": {
+      "myMovies": "আমার চলচ্চিত্র",
+      "mySeries": "আমার সিরিজ",
+      "myChannels": "আমার চ্যানেল",
+      "mustWatch": "অবশ্য দেখতে হবে",
+      "rewatch": "পুনরায় দেখুন",
+      "classics": "ক্লাসিক",
+      "family": "পরিবার",
+      "kids": "শিশু",
+      "liveSports": "লাইভ ক্রীড়া",
+      "news": "খবর",
+      "cartoons": "কার্টুন",
+      "international": "আন্তর্জাতিক",
+      "traktWatchlist": "Trakt Watchlist"
+    },
+    "verifyingAvailability": "উপলব্ধতা যাচাই করা হচ্ছে…",
+    "notAvailableYet": "আপনার প্লেলিস্টে এখনও উপলব্ধ নয়",
+    "picker": {
+      "chooseVersion": "সংরক্ষণের সংস্করণ নির্বাচন করুন",
+      "chooseVersionMessage": "এই কনটেন্টটি আপনার প্লেলিস্টে একাধিক সংস্করণে উপলব্ধ। আপনার তালিকায় কোনটি রাখতে চান তা বেছে নিন।"
+    },
+    "availability": {
+      "popup": {
+        "title": "আপনার প্লেলিস্টে উপলব্ধ",
+        "message": "\"%@\" যা আপনি \"%@\" তালিকায় সংরক্ষণ করেছিলেন এখন উপলব্ধ।"
+      }
+    },
+    "tmdbOnlyAdded": {
+      "title": "আপনার তালিকায় যোগ করা হয়েছে",
+      "message": "\"%@\" এখনো আপনার প্লেলিস্টে নেই। আপনার সরবরাহকারী এটি যোগ করলে আমরা আপনাকে জানাব।"
+    }
+  },
+  "person": {
+    "biography": "জীবনী",
+    "personalInfo": "ব্যক্তিগত তথ্য",
+    "knownFor": "পরিচিত",
+    "knownForMale": "পরিচিত",
+    "knownForFemale": "পরিচিত",
+    "knownCredits": "পরিচিত ক্রেডিট",
+    "gender": "লিঙ্গ",
+    "birthday": "জন্মদিন",
+    "deathday": "মৃত্যুর দিন",
+    "placeOfBirth": "জন্মস্থান",
+    "alsoKnownAs": "যা নামেও পরিচিত",
+    "alsoKnownAsMale": "যা নামেও পরিচিত",
+    "alsoKnownAsFemale": "যা নামেও পরিচিত",
+    "male": "পুরুষ",
+    "female": "মহিলা",
+    "nonBinary": "অ-বাইনারি",
+    "filmography": "চলচ্চিত্রতালিকা",
+    "movies": "চলচ্চিত্র",
+    "series": "সিরিজ",
+    "showAll": "সব দেখান",
+    "acting": "অভিনয়",
+    "directing": "পরিচালনা",
+    "writing": "লেখা",
+    "production": "উৎপাদন",
+    "noBiography": "কোনো জীবনী উপলব্ধ নেই।",
+    "noCredits": "কোনো ক্রেডিট উপলব্ধ নেই।"
+  },
+  "tvpairing": {
+    "title": "আপনার টিভি সংযুক্ত করুন",
+    "instructions": "আপনার ফোনে KIPTV অ্যাপ খুলুন, সেটিংস → অ্যাকাউন্ট → একটি টিভি লিঙ্ক করুন যান এবং নীচে দেখানো কোড প্রবেশ করুন।",
+    "generating": "কোড তৈরি করা হচ্ছে",
+    "regenerate": "নতুন কোড",
+    "waiting": "নিশ্চিতকরণের জন্য অপেক্ষা করছে",
+    "retry": "আবার চেষ্টা করুন",
+    "success": "টিভি সংযুক্ত!",
+    "successSubtitle": "আপনার প্লেলিস্ট লোড করা হচ্ছে...",
+    "withApp": "অ্যাপ আগে থেকেই আছে?\nসেটিংস → অ্যাকাউন্ট → একটি টিভি লিঙ্ক করুন এ যান",
+    "qrCaption": "ফোনের ক্যামেরা দিয়ে QR কোড স্ক্যান করুন",
+    "lead": "সাইন ইন করুন বা KIPTV অ্যাকাউন্ট তৈরি করুন",
+    "manual": "অথবা kiptv.app/pair খুলুন\nএবং কোডটি লিখুন"
+  },
+  "linkTV": {
+    "title": "একটি টিভি লিঙ্ক করুন",
+    "instructions": "আপনার টিভি স্ক্রিনে দেখানো 6-অঙ্কের কোড প্রবেশ করুন এটি আপনার অ্যাকাউন্টের সাথে সংযুক্ত করতে।",
+    "enterCode": "কোড প্রবেশ করুন",
+    "confirm": "টিভি লিঙ্ক করুন",
+    "success": "টিভি লিঙ্ক করা হয়েছে!",
+    "connectedTo": "{{device}} এর সাথে সংযুক্ত",
+    "error": "অবৈধ বা সমাপ্ত কোড। আবার চেষ্টা করুন।",
+    "autoConfirming": "আপনার টিভি লিঙ্ক করা হচ্ছে...",
+    "notAuthenticated": "সাইন ইন প্রয়োজন",
+    "notAuthenticatedMessage": "একটি টিভি লিঙ্ক করার আগে অনুগ্রহ করে আপনার অ্যাকাউন্টে সাইন ইন করুন।"
+  },
+  "badges": {
+    "new": "নতুন",
+    "newMovie": "নতুন চলচ্চিত্র",
+    "newSeries": "নতুন সিরিজ",
+    "newSeason": "নতুন সিজন",
+    "newEpisode": "নতুন এপিসোড",
+    "newEpisodes": "নতুন এপিসোড"
+  },
+  "topshelf": {
+    "continueWatchingMovies": "{{name}}, চলচ্চিত্র দেখা চালিয়ে যান",
+    "continueWatchingSeries": "{{name}}, সিরিজ দেখা চালিয়ে যান",
+    "recentlyWatchedLive": "{{name}}, সম্প্রতি দেখা চ্যানেল"
+  },
+  "update": {
+    "title": "আপডেট উপলব্ধ",
+    "subtitle": "সংস্করণ {{version}} অ্যাপ স্টোরে উপলব্ধ",
+    "description": "সর্বশেষ ফিচার ও সংশোধনী পেতে এখনই আপডেট করুন।",
+    "releaseNotesHeading": "এই সংস্করণে নতুন কী",
+    "action": {
+      "update": "এখনই আপডেট করুন",
+      "later": "পরে"
+    }
+  },
+  "whatsNew": {
+    "title": "নতুন কী",
+    "subtitle": "সংস্করণ {{version}} — উন্নতি ও সংশোধন",
+    "pageSubtitle": "উন্নতি ও সংশোধন",
+    "v3_0": {
+      "homeTab": {
+        "title": "নতুন হোম ট্যাব",
+        "desc": "iPhone, iPad ও Apple TV-তে আপনার নিজের হোম: আবার শুরু করার মতো শিরোনাম দেখানো স্মার্ট হিরো, ডায়নামিক সারি, \"আজ রাতে টিভিতে\" এবং নিজের ফিড। হোম নিজের মতো সাজানো বা লুকানো যায়, আর সেটিংস থেকে আবার চালু করা যায়"
+      },
+      "traktIntegration": {
+        "title": "Trakt সংযুক্তি",
+        "desc": "আপনার Trakt অ্যাকাউন্ট যুক্ত করুন: অগ্রগতি ও দেখা-হয়েছে অবস্থা সিঙ্ক থাকে, সিনেমা বা পর্ব শেষে রেটিং দিতে পারেন, ইতিহাস আমদানি করতে পারেন এবং কোন প্লেলিস্টে সংযুক্তি প্রযোজ্য হবে তা বেছে নিতে পারেন।"
+      },
+      "externalRatings": {
+        "title": "IMDb, Rotten Tomatoes ও Metacritic রেটিং",
+        "desc": "সিনেমা ও সিরিজের পাতায় IMDb, Rotten Tomatoes ও Trakt-এর রেটিং সরাসরি হিরোতে দেখা যায়। TMDB এখনও প্রধান উৎস।"
+      },
+      "dynamicBackground": {
+        "title": "ডায়নামিক পটভূমি",
+        "desc": "সেটিংস > থিম-এ নতুন পটভূমি নির্বাচক এসেছে: কালো, থিমের রং, বা ডায়নামিক, যা নির্বাচিত পোস্টারকে ইন্টারফেসের পিছনে ঝাপসা করে বসায়। আপনার পছন্দ ডিভাইসের মধ্যে সিঙ্ক হয়, আর iOS-এ আইকন ও উইজেটও তা অনুসরণ করে।"
+      },
+      "setupWizard": {
+        "title": "নির্দেশিত সেটআপ",
+        "desc": "প্রথম প্লেলিস্টের পরে একটি সংক্ষিপ্ত ধাপ জরুরি বিষয়গুলো ঠিক করতে সাহায্য করে: প্লেব্যাক প্রোফাইল, PIN, স্বয়ংক্রিয়ভাবে খোলা। এক প্লেলিস্টের সেটিংস অন্যটিতে কপিও করতে পারেন।"
+      },
+      "sagaNextPill": {
+        "title": "চলচ্চিত্র সিরিজ যেন ধারাবাহিক",
+        "desc": "প্লেয়ারের \"Next\" বোতাম একই সিরিজের পরের সিনেমাগুলোও প্রস্তাব করে, আর সংগ্রহের পাতায় ধারাবাহিকের মতোই চালান, আবার শুরু করুন ও আবার দেখুন থাকে।"
+      },
+      "tvPlaylistPeek": {
+        "title": "Apple TV-তে দ্রুত প্লেলিস্ট বদল",
+        "desc": "ট্যাব বার থেকে Menu চাপলে বেরোনোর আগে প্লেলিস্ট নির্বাচক দেখা যায়: এক ইশারাতেই প্রোফাইল বদলে যায়।"
+      },
+      "aetherUpdate": {
+        "title": "Aether ইঞ্জিন হালনাগাদ",
+        "desc": "Aether ইঞ্জিন 6.75.0-তে হালনাগাদ হয়েছে: এখন সব অডিও ও সাবটাইটেল ট্র্যাক দেখায় এবং VOD দ্রুত শুরু করে।"
+      },
+      "chromecastAirplayImprovements": {
+        "title": "Chromecast ও AirPlay আরও নির্ভরযোগ্য",
+        "desc": "AirPlay-তে সরাসরি চ্যানেল এখন Apple ছাড়া টিভিতেও পৌঁছায়। Chromecast-এর কয়েকটি ত্রুটি সারানো হয়েছে।"
+      },
+      "epgSourcePicker": {
+        "title": "EPG উৎস খুঁজে পাওয়া সহজ",
+        "desc": "EPG উৎস নির্বাচক এখন গাইডে ঘোষণা না-করা আইডিগুলোও খুঁজে পায়, ফলে আরও বেশি চ্যানেল সঠিক অনুষ্ঠানসূচি পায়।"
+      },
+      "performance": {
+        "title": "আরও দ্রুত সাড়া",
+        "desc": "হোম ও বিস্তারিত পাতা দ্রুত খোলে।"
+      },
+      "playerFixes": {
+        "title": "প্লেয়ারে সংশোধন",
+        "desc": "ভাষার ট্র্যাক আরও স্পষ্ট, আর ট্র্যাকের নাম অদ্ভুত হলেও আপনার পছন্দের ভাষা আরও বুদ্ধিমানভাবে প্রয়োগ হয়; MPV-তে ভিডিও পিক্সেলে সারিবদ্ধ থাকে, ঝাপসা লোগো আর নেই; ইঞ্জিন বদলের সময় প্লেয়ার বন্ধ করলে আর পিছনে শব্দ থাকে না; সরাসরি চ্যানেল আবার লোড করলে হাতে বেছে নেওয়া ইঞ্জিন বজায় থাকে।"
+      },
+      "continueWatchingFixes": {
+        "title": "দেখা চালিয়ে যান-এ সংশোধন",
+        "desc": "প্লেয়ার বন্ধ করার সঙ্গে সঙ্গে সারিটি হালনাগাদ হয়, সিরিজের ক্ষেত্রেও ডিভাইসের মধ্যে আবার শুরু করা কাজ করে, আর নতুন পর্ব এলে \"আবার দেখুন\"-এর বদলে \"SxEy থেকে চালিয়ে যান\" দেখায়।"
+      },
+      "metadataFixes": {
+        "title": "মেটাডেটায় সংশোধন",
+        "desc": "দেশের উপসর্গ বা শেষে সাল থাকা শিরোনামও সঠিক মেটাডেটা খুঁজে পায়, আর হাতে বেছে নেওয়া পোস্টার পুনরায় চালুর পরেও থাকে।"
+      },
+      "arabicRtlFixes": {
+        "title": "আরবির জন্য সংশোধন",
+        "desc": "প্লেয়ারে অনুভূমিক অঙ্গভঙ্গি, তথ্য ট্যাবের মধ্যে সোয়াইপ এবং সিক তীরগুলো সঠিক দিকে চলে, বোতামে আরবি-ভারতীয় অঙ্ক দেখায়।"
+      },
+      "tvosFixes": {
+        "title": "Apple TV-তে সংশোধন",
+        "desc": "চ্যানেলের প্রিভিউ আবার লোড না করেই পূর্ণ পর্দায় যায়, আর \"সেটিংস খুলতে PIN চান\" এখন কার্যকর।"
+      },
+      "accountFixes": {
+        "title": "অন্যান্য সংশোধন",
+        "desc": "পাসওয়ার্ড রিসেটের লিঙ্ক অ্যাপ ইনস্টল না থাকলেও কাজ করে, আর ছদ্মবেশী মোডের অনুসন্ধান আর সংরক্ষিত হয় না।"
+      },
+      "headline": {
+        "title": "হোম এসে গেছে।",
+        "sub1": "এখন Trakt-সহ: আপনি যা দেখেন, তা আপনার সঙ্গে চলে।",
+        "sub2": "IMDb, Rotten Tomatoes ও Metacritic-এর রেটিং।",
+        "sub3": "আর এমন একটি পটভূমি, যা পর্দায় থাকা জিনিস থেকে রং নেয়।"
+      }
+    },
+    "v2_9": {
+      "aetherEngine": {
+        "title": "Aether, নতুন প্লেব্যাক ইঞ্জিন",
+        "desc": "একটি নতুন ভিডিও ইঞ্জিন, যা এখন iPhone, iPad ও Apple TV-তে ডিফল্ট: দ্রুত শুরু, প্রায় এক সেকেন্ডে চ্যানেল বদল এবং ব্যাকগ্রাউন্ড, Picture in Picture, AirPlay ও Chromecast-এর পূর্ণ সমর্থন।"
+      },
+      "playerNextTab": {
+        "title": "পরের পর্বগুলো প্লেয়ারের ভেতরেই",
+        "desc": "প্লেয়ারে নতুন \"Next\" ট্যাব এসেছে, যেখানে বাকি সিজন থাকে: প্লেব্যাক না ছেড়েই পরের পর্বে যান।"
+      },
+      "downloadsSeasonAndOffline": {
+        "title": "পুরো সিজন ডাউনলোড, অফলাইনে আরও কিছু",
+        "desc": "একটি বোতামেই পুরো সিজন ডাউনলোড করুন এবং চলমান ও সারিতে থাকা সব ডাউনলোড একসঙ্গে বাতিল করুন। এখন ডাউনলোড করা পর্বেও ইন্ট্রো এড়িয়ে যেতে পারবেন।"
+      },
+      "searchSagaFolders": {
+        "title": "সার্চে সিরিজগুলো ফোল্ডার হয়ে যায়",
+        "desc": "একই সিরিজের সিনেমাগুলো ফলাফলে বইয়ের মতো একটি ফোল্ডারে জড়ো হয়: খুলুন এবং সব পর্ব ক্রমানুসারে পান, একটি একটি করে খোঁজার দরকার নেই।"
+      },
+      "mpvEngine": {
+        "title": "mpv, আরও একটি প্লেব্যাক ইঞ্জিন",
+        "desc": "iPhone, iPad ও Apple TV-তে উপলব্ধ ইঞ্জিনের তালিকায় MPV যুক্ত হলো: কোনো স্ট্রিম ঝামেলা করলে আরও একটি বিকল্প।"
+      },
+      "ipadCategoriesPanel": {
+        "title": "iPad-এ ল্যান্ডস্কেপে ক্যাটাগরি প্যানেল",
+        "desc": "iPad ল্যান্ডস্কেপে থাকলে Live TV-র ক্যাটাগরিগুলো সবসময় পাশে থেকে যায়, চ্যানেল তালিকাতেও এবং প্রোগ্রাম গাইডেও।"
+      },
+      "UXUIImprovements": {
+        "title": "UX ও UI-তে উন্নতি",
+        "desc": "চোখেরও নিজের চাহিদা আছে, আর বরাবরের মতো খুঁটিনাটির যত্নই পার্থক্য গড়ে দেয়। নিজেই দেখে নিন।"
+      },
+      "tvosNavigationFixes": {
+        "title": "Apple TV-তে নেভিগেশনের সংশোধন",
+        "desc": "সংস্করণ বেছে নেওয়ার পর সঠিক শিরোনামই খোলে, শেষ সিজনের পরে ডান বোতাম আর অন্য কোথাও লাফায় না, আর কলাম আকারের Live ভিউয়ে গাইড কার্ডগুলো আবার পড়ার মতো হয়েছে।"
+      },
+      "searchFixes": {
+        "title": "সার্চের সংশোধন",
+        "desc": "Apple TV-তে সত্যিই টাইপ করা থামানোর পরেই সার্চ শুরু হয়। আর কোনো আটকে যাওয়া বা ধীরগতি নেই।"
+      },
+      "contentFixes": {
+        "title": "কনটেন্টের সংশোধন",
+        "desc": "শেষ উপলব্ধ পর্বের পরে সিরিজটি 'দেখা চালিয়ে যান' থেকে সরে যায় এবং নতুন পর্ব এলে আবার উপরে ফিরে আসে; লুকানো কনটেন্ট সংস্করণ ও মানের নির্বাচকেও লুকানো থাকে; একাধিক ভূমিকার অভিনেতা থাকলে Apple TV-তে অ্যাপ আর ক্র্যাশ করে না।"
+      },
+      "dutchTranslationFix": {
+        "title": "কিছু অনুবাদে সংশোধন"
+      }
+    },
+    "v2_8": {
+      "dolbyAtmosReliableAudio": {
+        "title": "Dolby Atmos, যেমন হওয়া উচিত",
+        "desc": "KIPTV আরও নির্ভুলভাবে Dolby Atmos ট্র্যাক শনাক্ত করে এবং Dolby Vision HLS স্ট্রিমের জন্য উপযুক্ত প্লেয়ার বেছে নেয়, ফলে অডিও ও ভিডিও আরও নির্ভরযোগ্য হয়।"
+      },
+      "uxUiImprovements": {
+        "title": "UX/UI উন্নতি",
+        "desc": "ইন্টিগ্রেটেড ব্রাউজার, সহায়তা কেন্দ্র এবং নেভিগেশনের নানা খুঁটিনাটি উন্নত করা হয়েছে, যাতে অ্যাপ ব্যবহার আরও আনন্দদায়ক হয়।"
+      },
+      "providerResponseReliability": {
+        "title": "আরও নির্ভরযোগ্য IPTV প্রোভাইডার",
+        "desc": "ক্যাটালগ আরও নির্ভরযোগ্যভাবে পুনরুদ্ধারের জন্য IPTV প্রোভাইডারের অসম্পূর্ণ বা ভুল প্রতিক্রিয়া সামলানো উন্নত করা হয়েছে।"
+      },
+      "tvosSessionRestore": {
+        "title": "Apple TV সেশন সংরক্ষিত",
+        "desc": "অ্যাপ পুনরুদ্ধার করলে Apple TV-তে সক্রিয় সেশন আর বাধাগ্রস্ত হবে না।"
+      }
+    },
+    "v2_7": {
+      "detailAltreVersioniLeAltre": {
+        "title": "একটি টাইটেলের সব সংস্করণ এক জায়গায়",
+        "desc": "সিনেমা বা সিরিজের পাতায় নতুন “অন্যান্য সংস্করণ” বিভাগে আপনার playlist-এর বাকি কপিগুলো দেখুন: পছন্দমতো মান বা ভাষা সঙ্গে সঙ্গে বেছে নিন।"
+      },
+      "offlineProgressoSincronizzato": {
+        "title": "অফলাইনে দেখলেও যেখানে ছিলেন সেখান থেকেই চালু",
+        "desc": "ডাউনলোড করা কনটেন্টে আপনি যেখানে থামেন তা ডিভাইসে সংরক্ষিত হয় এবং অনলাইনে ফিরলেই আপনার অ্যাকাউন্টে চলে যায়, তাই অন্য ডিভাইসেও জায়গাটি পাবেন।"
+      },
+      "liveMettiInCimaDal": {
+        "title": "চ্যানেল ও বিভাগের জন্য “উপরে রাখুন”",
+        "desc": "কোনো চ্যানেল বা বিভাগ চেপে ধরে তালিকার শুরুতে নিয়ে আসুন: যা বেশি দেখেন তা সবসময় হাতের কাছে থাকবে।"
+      },
+      "playerRiproduzioneInBackgroundOpzionale": {
+        "title": "Apple TV-তে ব্যাকগ্রাউন্ড অডিও",
+        "desc": "সেটিংস থেকে বেছে নিতে পারেন যে প্লেয়ার থেকে বেরোলে বা অ্যাপ ব্যাকগ্রাউন্ডে গেলে অডিও চলতে থাকবে। ডিফল্টে বন্ধ।"
+      },
+      "detailRicercaGoogleDalDettaglio": {
+        "title": "এক ট্যাপে Google-এ টাইটেল খুঁজুন",
+        "desc": "সিনেমা বা সিরিজের পাতা থেকেই Google সার্চ খুলুন — রিভিউ, কলাকুশলী ও মজার তথ্যের জন্য।"
+      },
+      "rtlInterfacciaArabaSuTvos": {
+        "title": "Apple TV-তে উন্নত RTL ইন্টারফেস",
+        "desc": "আরবি বেছে নিলে iPhone, iPad ও Apple TV-তে মেনু, ক্যারোসেল, TV গাইড ও প্লেয়ার ঠিকভাবে ডান থেকে বাঁয়ে সাজে।"
+      },
+      "uiRifinitureInterfaccia": {
+        "title": "ইন্টারফেসে পরিমার্জন",
+        "desc": "গ্রাফিক বিবরণ ও নানা অ্যানিমেশন উন্নত করা হয়েছে।"
+      },
+      "tvosRiordinareInGestioneContenuti": {
+        "title": "বিভাগ সাজাতে গিয়ে অ্যাপ আর আটকে যায় না",
+        "desc": "Apple TV-তে কনটেন্ট ম্যানেজমেন্টে বিভাগ ও কনটেন্ট সরানো খুব বড় playlist-এও মসৃণ থাকে।"
+      }
+    },
+    "v2_6": {
+      "downloadsReliableAndParallel": {
+        "title": "আরও নির্ভরযোগ্য ডাউনলোড, চাইলে একসাথেও",
+        "desc": "থেমে যাওয়া ডাউনলোড অ্যাপ আবার খুললেই নিজে থেকে শুরু হয়, আর ব্যর্থ চেষ্টাগুলো স্বয়ংক্রিয়ভাবে আবার করা হয়। এছাড়া একসাথে একাধিক শিরোনাম নামাতে যুগপৎ ডাউনলোড চালু করতে পারেন।"
+      },
+      "downloadsLiveActivity": {
+        "title": "আপনার ডাউনলোড লক স্ক্রিনে",
+        "desc": "লক স্ক্রিন আর Dynamic Island থেকেই ডাউনলোডের অগ্রগতি দেখুন, প্রতিটি চলচ্চিত্র বা সিরিজের জন্য আলাদা কার্ডসহ।"
+      },
+      "tvPairingViaWeb": {
+        "title": "ফোন থেকেই টিভি যুক্ত করুন, অ্যাপ ছাড়াও",
+        "desc": "ক্যামেরা দিয়ে QR কোডটি স্ক্যান করুন: ফোনে এখনও KIPTV না থাকলে ওয়েবসাইট থেকেই সাইন ইন বা রেজিস্টার করে সেখান থেকেই সংযোগ নিশ্চিত করতে পারেন। থাকলে কোডটি সরাসরি অ্যাপে খুলে যায়।"
+      },
+      "bulkCategoryControls": {
+        "title": "এক ছোঁয়ায় সব বিভাগ দেখান বা আনলক করুন",
+        "desc": "সামগ্রী ব্যবস্থাপনায় দ্রুত কমান্ড পাবেন, যা লুকানো সব বিভাগ আবার দেখায় বা সুরক্ষিত বিভাগগুলোর লক খুলে দেয়।"
+      },
+      "instantSearchLargePlaylists": {
+        "title": "তাৎক্ষণিক অনুসন্ধান, বিশাল প্লেলিস্টেও",
+        "desc": "নেটওয়ার্কের অপেক্ষা ছাড়াই টাইপ করার সময়েই ফলাফল আসে, আর খুব বড় ক্যাটালগেও আর ফাঁকা থাকে না।"
+      },
+      "tvosLiveImageQuality": {
+        "title": "লাইভ চ্যানেলে আরও পরিষ্কার ছবি",
+        "desc": "Apple TV-তে ইন্টারলেসড চ্যানেলে এখন সত্যিই ডিইন্টারলেসিং প্রয়োগ হয়, আর বাকিগুলোতে হার্ডওয়্যার ডিকোডিং চালু থাকে: নড়াচড়ায় আর চিরুনির মতো দাগ পড়ে না।"
+      },
+      "contentManagementStability": {
+        "title": "সামগ্রী ব্যবস্থাপনায় আর অপ্রত্যাশিত বন্ধ নয়",
+        "desc": "খুব বড় প্লেলিস্টে বিভাগ লুকালে বা লক করলে অ্যাপ আর বন্ধ হয়ে যায় না।"
+      },
+      "minorBugfixes": {
+        "title": "ছোটখাটো ত্রুটি সংশোধন"
+      }
+    },
+    "v2_5": {
+      "iosLivePlayerChannelZap": {
+        "title": "দ্রুত চ্যানেল বদল, এখন iOS-এ",
+        "desc": "Live প্লেয়ারে আগের বা পরের চ্যানেলে যেতে এবং স্ট্রিম দ্রুত রিফ্রেশ করতে পারেন।"
+      },
+      "continueWatchingLocalizedTitles": {
+        "title": "দেখা চালিয়ে যান-এ স্থানীয় শিরোনাম",
+        "desc": "এখন চলচ্চিত্র ও সিরিজ অ্যাপের ভাষায় TMDB শিরোনাম দেখায়, কার্ডে আরও সামঞ্জস্যপূর্ণ তথ্যসহ।"
+      },
+      "minorBugfixes": {
+        "title": "ছোটখাটো বাগ সংশোধন"
+      }
+    },
+    "v2_4": {
+      "ipadRedesign": {
+        "title": "নতুন করে ডিজাইন করা iPad অভিজ্ঞতা",
+        "desc": "পোস্টার প্যানেল সহ ল্যান্ডস্কেপ বিবরণ, split view-তে সাইডবার সহ সেটিংস এবং একাধিক কলামে Live TV চ্যানেল তালিকা: iPad-এ অ্যাপটি বড় স্ক্রিন অনেক ভালোভাবে ব্যবহার করে।"
+      },
+      "detailInfoFooter": {
+        "title": "কন্টেন্ট সম্পর্কে আরও তথ্য",
+        "desc": "মুভি ও টিভি সিরিজের পেজে একটি নতুন প্যানেল দেখা যায় যাতে স্ট্যাটাস, প্রযোজনার দেশ, প্রযোজনা সংস্থা এবং অন্যান্য বিবরণ থাকে।"
+      },
+      "homeCardHero": {
+        "title": "কার্ড স্টাইলে ফিচার্ড কন্টেন্ট",
+        "desc": "মুভি ও টিভি সিরিজের উপরে এখন ফিচার্ড কন্টেন্ট পূর্ণ স্ক্রিনের বদলে আরও কমপ্যাক্ট কার্ড স্টাইলে দেখানোর বিকল্প বেছে নিতে পারেন।"
+      },
+      "tvosEpgReminders": {
+        "title": "প্রোগ্রামের রিমাইন্ডার, এখন Apple TV-তেও",
+        "desc": "Apple TV থেকে কোনো প্রোগ্রামের জন্য রিমাইন্ডার সেট করুন এবং সেটি শুরু হওয়ার ঠিক আগে আপনার iPhone বা iPad-এ নোটিফিকেশন পান।"
+      },
+      "settingsReorg": {
+        "title": "সেটিংস পুনর্বিন্যস্ত",
+        "desc": "সেটিংস আরও পরিষ্কার সেকশনে পুনর্বিন্যাস করা হয়েছে এবং অ্যাপ কাস্টমাইজ করার জন্য আরও অপশন যোগ করা হয়েছে।"
+      },
+      "widgetsEfficiency": {
+        "title": "Widget ও Top Shelf আরও দক্ষ",
+        "desc": "Widget ও Top Shelf-এর রিসোর্স ব্যবহার কমানো হয়েছে, আপডেটগুলো আরও হালকা ও দ্রুত।"
+      },
+      "foregroundResponsiveness": {
+        "title": "ল্যাগ ছাড়াই ফোরগ্রাউন্ডে ফেরা",
+        "desc": "অ্যাপ পুনরায় খোলার সময় হতে পারে এমন একটি ধীরগতি ঠিক করা হয়েছে: এখন অ্যাপ তাৎক্ষণিকভাবে এবং আটকে না গিয়ে ফিরে আসে।"
+      }
+    },
+    "v2_3": {
+      "epgChannelColoredCards": {
+        "title": "নতুন রূপে TV গাইড",
+        "desc": "চ্যানেলের রঙে প্রোগ্রাম কার্ড, নতুন হেডার, আরও মার্জিত ট্রানজিশন এবং iOS ও Apple TV-তে উন্নত নেভিগেশন।"
+      },
+      "tvosChannelLogoInLive": {
+        "title": "Apple TV-তে আরও তথ্যবহুল লাইভ প্লেয়ার",
+        "desc": "চ্যানেলের লোগো এখন প্লেয়ারে দেখা যায় এবং Info প্যানেল চলমান প্রোগ্রামের ছবি তুলে ধরে।"
+      },
+      "iosTabBarMinimize": {
+        "title": "নেভিগেট করার সময় ছোট হয়ে যাওয়া ট্যাব বার (iOS 26)",
+        "desc": "ডিটেইল স্ক্রিনে ট্যাব বার স্বয়ংক্রিয়ভাবে ছোট হয়ে যায়, ফলে কনটেন্টের জন্য বেশি জায়গা থাকে।"
+      },
+      "subtitlesSystemEdgeStyles": {
+        "title": "সিস্টেম স্টাইলের সাথে মানানসই সাবটাইটেল",
+        "desc": "সিস্টেম মোডে সাবটাইটেলের \"উঁচু\" ও \"নিচু\" প্রান্ত এখন iOS সেটিংসের স্টাইল হুবহু অনুসরণ করে।"
+      },
+      "myListMultiTag": {
+        "title": "আমার তালিকা: একাধিক ট্যাগ ও পুনর্বিন্যাস",
+        "desc": "এখন একই কনটেন্টে একাধিক ট্যাগ দেওয়া যায় এবং সেগুলো ইচ্ছেমতো সাজানো যায়। নাম বদলালেও চ্যানেলের কাস্টমাইজেশন থেকে যায়, আর \"দেখা চালিয়ে যান\" কার্ডে আরও নির্ভুল তথ্য দেখা যায়।"
+      },
+      "catalogLoadingPerformance": {
+        "title": "ক্যাটালগ আরও দ্রুত ও মসৃণভাবে লোড হয়",
+        "desc": "ক্যাটালগ ব্যাকগ্রাউন্ডে প্রসেস হয় এবং লোডিংয়ের সময় নেভিগেশন সচল থাকে: খুব বড় প্লেলিস্ট খোলার সময় আর আটকে যায় না, বিশেষ করে Apple TV-তে।"
+      },
+      "tvosStabilityFixes": {
+        "title": "Apple TV-তে স্থিতিশীলতা ও নেভিগেশন",
+        "desc": "কনটেন্ট লোডের সময় দুটি ক্র্যাশ, অ্যাপ সুইচার থেকে ফেরার পর ফোকাস হারানো এবং কনটেন্টের প্রান্তে ট্যাব বদলের সমস্যা ঠিক করা হয়েছে।"
+      },
+      "playerSmoothness": {
+        "title": "50 fps এবং/অথবা HDR চ্যানেলে আরও মসৃণ প্লেব্যাক",
+        "desc": "Apple TV-তে প্লেয়ার কন্ট্রোল ব্যবহারের সময় আটকে যাওয়া দূর হয়েছে এবং iPhone/iPad/Mac-এ 50 fps লাইভ প্লেব্যাক আরও মসৃণ।"
+      },
+      "minorBugFixes": {
+        "title": "ছোটখাটো বাগ সংশোধন",
+        "desc": "বিভিন্ন ব্যবহারিক পরিস্থিতিতে স্থিতিশীলতা ও পারফরম্যান্সের নানা সমস্যা সমাধান করা হয়েছে।"
+      }
+    },
+    "v2_2": {
+      "UIUXImprovements": {
+        "title": "UI/UX উন্নতি",
+        "desc": "আরও উপভোগ্য ব্যবহারকারীর অভিজ্ঞতার জন্য লেআউট ও ইন্টারঅ্যাকশন উন্নত করা হয়েছে।"
+      },
+      "richLiveReplayInfo": {
+        "title": "Live ও Replay-এর আরও সমৃদ্ধ তথ্য",
+        "desc": "Info প্যানেল এখন EPG গাইড ও TMDB মেটাডেটা একত্র করে Live বা Replay অনুষ্ঠানের উন্নত ছবি ও আরও বিস্তারিত তথ্য দেখায়।"
+      },
+      "smootherPlayer": {
+        "title": "iOS-এ আরও মসৃণ ও দ্রুত Player",
+        "desc": "অ্যানিমেশন, জেসচার ও কন্ট্রোল এখন আরও মসৃণ, সঙ্গে সামঞ্জস্যপূর্ণ ডিভাইসে সম্পূর্ণ ProMotion সমর্থন রয়েছে।"
+      },
+      "epgReplayAccuracy": {
+        "title": "EPG ও Replay সবসময় সিঙ্কে",
+        "desc": "প্রোগ্রাম প্যানেল এখন Live, আগের ও আসন্ন কনটেন্ট আরও নির্ভুলভাবে আলাদা করে এবং Replay সঠিক অনুষ্ঠানের তথ্য দেখায়।"
+      },
+      "minorBugFixes": {
+        "title": "ছোটখাটো বাগ সংশোধন",
+        "desc": "অ্যাপের স্থিতিশীলতা ও কর্মক্ষমতা উন্নত করতে কয়েকটি বাগ সংশোধন করা হয়েছে।"
+      }
+    },
+    "v2_1": {
+      "accountConnectedDevices": {
+        "title": "সংযুক্ত ডিভাইস",
+        "desc": "আপনি যে সমস্ত ডিভাইসে সাইন ইন করেছেন তা দেখুন এবং যখন খুশি দূর থেকে সাইন আউট করুন।"
+      },
+      "recentlyWatchedLiveToggle": {
+        "title": "সম্প্রতি দেখা চ্যানেল লুকান",
+        "desc": "সম্প্রতি দেখা Live চ্যানেলগুলি দেখান বা লুকান।"
+      },
+      "tvosLiveCarouselRedesign": {
+        "title": "Apple TV-তে উন্নত Live ক্যারুসেল ভিউ",
+        "desc": "Apple TV-তে Live বিভাগটি সিনেমা ও সিরিজের ধাঁচে নতুন চেহারা পেয়েছে: 16:9 প্রিভিউ সহ ক্যারুসেল, পূর্ণ-স্ক্রিন ব্যাকগ্রাউন্ড, কাচের মতো প্রোগ্রাম গাইড এবং সাইডবার থেকে খুলে যাওয়া বিভাগ।"
+      },
+      "topShelfChannelLogo": {
+        "title": "Top Shelf-এ সঠিক চ্যানেল লোগো (Apple TV)",
+        "desc": "কোনো Live চ্যানেলের জন্য আপনার বেছে নেওয়া কাস্টম লোগো এখন Apple TV-এর Top Shelf-এও দেখা যায়।"
+      },
+      "playerWhiteThemeChips": {
+        "title": "প্লেয়ারে আরও পাঠযোগ্য সাদা থিম",
+        "desc": "সাদা থিমে, প্লেয়ার নিয়ন্ত্রণের নির্বাচিত বোতামগুলিতে এখন সঠিক কনট্রাস্ট রয়েছে।"
+      }
+    },
+    "v2_0": {
+      "playerPlayWithEnginePicker": {
+        "title": "পছন্দের প্লেয়ারে সঙ্গে সঙ্গে চালান",
+        "desc": "প্রতিবার শুরুর সময় বেছে নিন কোন ইঞ্জিনে (KSPlayer, VLC বা AVPlayer) প্লেব্যাক শুরু হবে। আর Premium থাকলে সিনেমা ও চ্যানেল সরাসরি বাইরের প্লেয়ারে (VLC বা Infuse) খুলতে পারবেন।"
+      },
+      "metadataManualTmdbOverridePersonalizza": {
+        "title": "সিনেমা ও সিরিজের মেটাডেটা কাস্টমাইজ করুন",
+        "desc": "কোনো শিরোনাম ভুল তথ্যের সঙ্গে মিলে গেলে সঠিক TMDB ফলাফল বেছে হাতে ঠিক করতে পারেন, অথবা মিল সম্পূর্ণ সরিয়ে দিতে পারেন।"
+      },
+      "playerOpensubtitlesAlwaysVisibleAudio": {
+        "title": "সাবটাইটেল ও অডিওতে আরও নিয়ন্ত্রণ",
+        "desc": "OpenSubtitles-এ আরও সাবটাইটেল বিকল্প খুঁজুন (OpenSubtitles সেটিংসে চালু করুন) এবং অডিও ও সাবটাইটেলের বিলম্ব সমন্বয় করুন। আপনার পছন্দ প্রতিটি কনটেন্টের জন্য মনে রাখা হয়।"
+      },
+      "livetvCarouselLayoutForThe": {
+        "title": "Live TV-র জন্য নতুন ক্যারোসেল লেআউট",
+        "desc": "Live TV বিভাগ এখন সিনেমা ও সিরিজের মতো চ্যানেলগুলোকে অনুভূমিক ক্যারোসেলে দেখাতে পারে। সেটিংসে আপনার পছন্দের লেআউট বেছে নিন।"
+      },
+      "themeWhiteTheme4thAdaptive": {
+        "title": "নতুন সাদা থিম",
+        "desc": "নতুন সাদা থিম দেখুন: মার্জিত, পরিচ্ছন্ন ও ক্লাসিক।"
+      },
+      "tabsNascondiSchedeFilmSerie": {
+        "title": "খালি ট্যাব লুকান",
+        "desc": "কোনো প্লেলিস্টে সিনেমা, সিরিজ বা লাইভ চ্যানেল না থাকলে সংশ্লিষ্ট ট্যাব স্বয়ংক্রিয়ভাবে লুকিয়ে যায়। সেটিংস থেকে বিকল্পটি বন্ধ করতে পারেন।"
+      },
+      "subtitlesSelfRenderCaptionsTo": {
+        "title": "আপনার স্টাইলের সঙ্গে মানানসই সাবটাইটেল",
+        "desc": "সাবটাইটেল এখন রঙসহ সিস্টেম সেটিংস যেকোনো প্লেব্যাক ইঞ্জিনে আরও ভালোভাবে মেনে চলে।"
+      },
+      "cwSelfHealContinueWatching": {
+        "title": "‘দেখা চালিয়ে যান’ ও ‘আমার তালিকা’ নিজে থেকেই ঠিক হয়",
+        "desc": "আপনার প্লেলিস্ট সরবরাহকারী কনটেন্ট ID পুনরায় বরাদ্দ করলে ‘দেখা চালিয়ে যান’ ও ‘আমার তালিকা’-র আইটেমগুলো আর ভুল সিনেমা বা কভার দেখায় না: এগুলো হালনাগাদ ক্যাটালগের সঙ্গে নিজে থেকেই মিলে যায়।"
+      },
+      "epgInstantLoadViaStale": {
+        "title": "শুরুতে দ্রুত TV গাইড",
+        "desc": "প্রোগ্রাম গাইড (EPG) এখন সংরক্ষিত ডেটা পুনরায় ব্যবহার করে ও পটভূমিতে রিফ্রেশ করে সঙ্গে সঙ্গে লোড হয়, প্রতিবার খোলার সময় কয়েক সেকেন্ড অপেক্ষা ছাড়াই।"
+      },
+      "playerNoFalseCompletionOn": {
+        "title": "বিচ্ছিন্ন স্ট্রিমে ভুল ‘দেখা হয়েছে’ নয়",
+        "desc": "কিছু ত্রুটিপূর্ণ স্ট্রিম অ্যাপকে ভাবিয়ে তুলত যে সিনেমা শেষ হয়ে গেছে, ফলে সেটি দেখা হয়েছে চিহ্নিত হতো বা পরেরটিতে চলে যেত। এখন আর তা হয় না।"
+      },
+      "playerCatchupDoubleLiveBadge": {
+        "title": "আরও নির্ভরযোগ্য Catch-up/Replay",
+        "desc": "catch-up চলাকালীন দ্বৈত ‘LIVE’ ব্যাজ ঠিক করা হয়েছে, অডিও ও সাবটাইটেল নিয়ন্ত্রণ ফিরিয়ে আনা হয়েছে এবং Replay অভিজ্ঞতা উন্নত করা হয়েছে।"
+      },
+      "resolve9RegressionsFound": {
+        "title": "স্থিতিশীলতার সংশোধন",
+        "desc": "অভ্যন্তরীণ পরীক্ষায় পাওয়া বেশ কিছু সমস্যা ঠিক করা হয়েছে, আরও স্থিতিশীল ও নির্ভরযোগ্য অ্যাপের জন্য।"
+      }
+    },
+    "v1_9": {
+      "epgShowEpgFanartOn": {
+        "title": "EPG Fanart",
+        "desc": "চ্যানেলে চলমান প্রোগ্রামগুলো এখন EPG থেকে নেওয়া নিজস্ব ছবি দেখায় (যদি থাকে), অন্যথায় আগের মতো TMDB বা চ্যানেলের লোগোতে চলে যায়।"
+      },
+      "playerUnifiedSubtitleStylingApple": {
+        "title": "সাবটাইটেলের চেহারা কাস্টমাইজ করুন",
+        "desc": "সাবটাইটেলের ফন্ট, আকার, বোল্ড ও বর্ডার বেছে নিন, অথবা Apple-এর সিস্টেম স্টাইল ব্যবহার করুন। আপনি সেটিংস থেকে বা সরাসরি প্লেয়ারে আপনার পছন্দ পরিবর্তন করতে পারেন।"
+      },
+      "playerUnifyFallbackChainTo": {
+        "title": "আরও নির্ভরযোগ্য প্লেব্যাক",
+        "desc": "iOS ও Apple TV-তে প্লেয়ারের স্বয়ংক্রিয় নির্বাচন অ্যালগরিদম উন্নত করা হয়েছে।"
+      },
+      "epgEpgEmptyOnFirst": {
+        "title": "চালু করার সঙ্গে সঙ্গেই TV গাইড দৃশ্যমান",
+        "desc": "কাস্টমাইজ করা প্রোগ্রাম গাইড (EPG) এখন অ্যাপের প্রথম খোলাতেই দেখা যায়, বন্ধ করে আবার খোলার প্রয়োজন ছাড়াই।"
+      }
+    },
+    "v1_8": {
+      "playerSkipIntroRecapCredits": {
+        "title": "ইন্ট্রো, রিক্যাপ ও শেষের ক্রেডিট এড়িয়ে যান",
+        "desc": "এক ট্যাপে সিনেমা ও সিরিজের শুরুর টাইটেল, আগের পর্বের সংক্ষিপ্তসার এবং শেষের ক্রেডিট এড়িয়ে যান।"
+      },
+      "watchedMarkMoviesWholeSeries": {
+        "title": "সিনেমা ও পুরো সিরিজ দেখা হিসেবে চিহ্নিত করুন",
+        "desc": "আপনি কী দেখেছেন তার হিসাব রাখুন: দেখা টাইটেলের পোস্টার ম্লান হয়ে যায় এবং একটি টিক দেখায়।"
+      },
+      "iosAvatarMenuCompactIcon": {
+        "title": "iOS-এ আরও সংক্ষিপ্ত প্লেলিস্ট মেনু",
+        "desc": "প্লেলিস্ট মেনু সুবিধাজনক দ্রুত আইকনের সারি দিয়ে নতুন করে ডিজাইন করা হয়েছে, ব্যবহার করা আরও সহজ।"
+      },
+      "settingsMoveDefaultAudioSubtitle": {
+        "title": "ডিফল্ট অডিও ও সাবটাইটেল ভাষা, লাইভেও",
+        "desc": "সেটিংসের একটি আলাদা বিভাগ থেকে আপনার পছন্দের অডিও ও সাবটাইটেল ভাষা নির্বাচন করুন। এটি এখন শুধু সিনেমা ও সিরিজ নয়, লাইভ চ্যানেলেও প্রযোজ্য।"
+      },
+      "tvosLiveReplayNoEngine": {
+        "title": "আরও মসৃণ লাইভ রিপ্লে",
+        "desc": "লাইভ TV সঙ্গে সঙ্গে রিওয়াইন্ড ও স্ক্রাব করুন, সিনেমা ও সিরিজের মতো প্রোগ্রেস বার এবং আরও নির্ভরযোগ্য গতি নিয়ন্ত্রণসহ।"
+      },
+      "playerDefaultVodToHardware": {
+        "title": "সিনেমা ও সিরিজ আরও মসৃণ ও কার্যকর",
+        "desc": "অটোমেটিক মোডে সিনেমা ও সিরিজ এখন হার্ডওয়্যার ডিকোডিং ব্যবহার করে, ফলে প্লেব্যাক আরও মসৃণ এবং ব্যাটারি খরচ কম হয়।"
+      },
+      "playerAccurateSeekForVod": {
+        "title": "±10 সেকেন্ডের স্ক্রাব ও স্কিপ আরও নিখুঁত",
+        "desc": "KSPlayer দিয়ে সিনেমা, সিরিজ ও ক্যাচ-আপে স্ক্রাবিং এবং সামনে-পিছনে স্কিপ এখন ঠিক সঠিক জায়গায় পৌঁছায়।"
+      }
+    },
+    "v1_7": {
+      "tvosLivePlayerOverhaulKsme": {
+        "title": "KSPlayer উন্নত হয়েছে",
+        "desc": "আমরা KSPlayer ইন্টিগ্রেশন সম্পূর্ণ নতুন করে লিখেছি: এখন এটি সিনেমা, সিরিজ ও লাইভ চ্যানেলে প্রতিটি পরিস্থিতিতে আরও অপ্টিমাইজড ও মসৃণ।"
+      },
+      "iosNativeAirplayNowPlaying": {
+        "title": "যেকোনো ফরম্যাটে ভিডিও সহ AirPlay",
+        "desc": "AirPlay দিয়ে শুধু অডিও নয়, ভিডিওও পাঠান—যেকোনো ফাইল ফরম্যাটে, এমনকি সবচেয়ে অস্বাভাবিকগুলোতেও।"
+      },
+      "tvosHomogeneousCustomCornerPip": {
+        "title": "Apple TV-তে প্রতিটি প্লেয়ারে Picture-in-Picture",
+        "desc": "যেকোনো প্লেব্যাক ইঞ্জিন দিয়ে আপনার কনটেন্ট স্ক্রিনের এক কোণে দেখুন।"
+      },
+      "tvosMultiviewFromSingleIs": {
+        "title": "Multiview আরও মসৃণ",
+        "desc": "একই স্ক্রিনে একাধিক চ্যানেল খুলুন এবং রিলোড ছাড়াই আরও দ্রুত সেগুলোর মধ্যে পাল্টান।"
+      },
+      "tvosKill4sDismissFreeze": {
+        "title": "Apple TV-তে দ্রুততর ও আরও সাড়াদায়ী Live TV",
+        "desc": "প্লেয়ার থেকে বেরোনোর সময় কয়েক সেকেন্ডের আটকে যাওয়া দূর করা হয়েছে; চ্যানেল স্ক্রলিং ও চ্যানেল পাল্টানো আরও মসৃণ।"
+      },
+      "tvosHeaderClockRespectsSystem": {
+        "title": "উপরের ঘড়ি Apple TV-তে সিস্টেমের 12/24-ঘণ্টা ফরম্যাট অনুসরণ করে"
+      },
+      "tvosCwCardPlaceholderLogo": {
+        "title": "‘দেখা চালিয়ে যান’-এ কভারের উপর থেকে যাওয়া প্লেসহোল্ডার লোগো ঠিক করা হয়েছে"
+      },
+      "tvosAutoPlayerFallbackChain": {
+        "title": "আরও নির্ভরযোগ্য স্বয়ংক্রিয় প্লেয়ার নির্বাচন"
+      }
+    },
+    "v1_6_1": {
+      "liveLogoFromEpg": {
+        "title": "আরও সম্পূর্ণ Live TV চ্যানেল লোগো",
+        "desc": "কোনো চ্যানেলের লোগো কাস্টমাইজ করার সময় এখন আপনি EPG থেকে দেওয়া লোগোটিও বেছে নিতে পারবেন এবং নতুন সার্চ ফিল্ড দিয়ে খুঁজতে পারবেন।"
+      },
+      "liveAutoQuality": {
+        "title": "লাইভের জন্য “অটো” কোয়ালিটি (পরীক্ষামূলক)",
+        "desc": "Settings → Player-এ একটি নতুন পরীক্ষামূলক অপশন প্লেব্যাকের সময় Live চ্যানেলের কোয়ালিটি স্বয়ংক্রিয়ভাবে নির্বাচন ও সমন্বয় করে। ডিফল্টভাবে বন্ধ।"
+      },
+      "tvosLiveReloadFix": {
+        "title": "Apple TV-তে অপ্রত্যাশিত লাইভ রিলোড ঠিক করা হয়েছে",
+        "desc": "1.6-এ আসা একটি বাগ ঠিক করা হয়েছে যা Apple TV-তে অপ্রত্যাশিত লাইভ রিলোডের কারণ হচ্ছিল।"
+      }
+    },
+    "v1_6": {
+      "categoryManagement": {
+        "title": "বিভাগের নাম পরিবর্তন",
+        "desc": "বিভাগের নাম চেপে ধরে রেখে সিনেমা, সিরিজ ও চ্যানেলের বিভাগের নাম পরিবর্তন করুন, PIN দিয়ে লক করুন বা লুকান।"
+      },
+      "liveChannelRename": {
+        "title": "চ্যানেলের নাম পরিবর্তন",
+        "desc": "কনটেক্সট মেনু থেকে যেকোনো লাইভ চ্যানেলে নিজের পছন্দের নাম দিন। একটি সংস্করণ বা সব কোয়ালিটি ভ্যারিয়েন্ট একসাথে পরিবর্তন করুন: একই নামের চ্যানেলগুলো একত্রে গোষ্ঠীবদ্ধ থাকে।"
+      },
+      "channelCustomEpgLogo": {
+        "title": "প্রতি চ্যানেলে কাস্টম EPG",
+        "desc": "প্রতিটি চ্যানেলের জন্য সঠিক প্রোগ্রাম গাইড নিজে বেছে নিন এবং EPG-এর সময়ের পার্থক্য ঠিক করুন।"
+      },
+      "fasterHugeEpg": {
+        "title": "দ্রুত ও হালকা প্রোগ্রাম গাইড",
+        "desc": "খুব বড় EPG গাইড এখন দ্রুত লোড হয় এবং কম মেমরি ব্যবহার করে।"
+      },
+      "smootherLiveTv": {
+        "title": "আরও মসৃণ Live TV",
+        "desc": "iPhone ও Apple TV-তে চ্যানেল খোলা ও গাইডে নেভিগেট করা দ্রুততর হয়েছে, আর আটকে যাওয়া লাইভ চ্যানেল স্বয়ংক্রিয়ভাবে ঠিক হয়ে যায়।"
+      },
+      "tvosMovieArtwork": {
+        "title": "Apple TV-তে সিনেমার পোস্টার ও বিবরণ",
+        "desc": "Apple TV-তে, প্রোভাইডার শনাক্তকারী না দিলেও এখন সিনেমার পোস্টার ও বিবরণ TMDB থেকে আনা হয়।"
+      },
+      "tvosRecentlyAddedPosters": {
+        "title": "Apple TV-তে সম্প্রতি যোগ করা-তে খালি পোস্টার",
+        "desc": "একটি সমস্যা ঠিক করা হয়েছে যেখানে Apple TV-তে চালু করার সময় সম্প্রতি যোগ করা বিভাগের প্রথম পোস্টারগুলো খালি দেখা যেত।"
+      },
+      "myListSync": {
+        "title": "My List-এর ডিফল্ট ট্যাগ",
+        "desc": "একটি সমস্যা ঠিক করা হয়েছে যেখানে My List-এর ডিফল্ট ট্যাগ লুকানো থাকলেও পুনরায় ইনস্টলের পর আবার দেখা যেত।"
+      },
+      "tvosPinPrompt": {
+        "title": "Apple TV-তে PIN-এর অনুরোধ",
+        "desc": "Apple TV-তে অভিভাবকীয় PIN লেখার স্ক্রিনের চেহারা ঠিক করা হয়েছে।"
+      }
+    },
+    "v1_5": {
+      "avatarPickerRenewed": {
+        "title": "নতুন অবতার",
+        "desc": "সিনেমা, সিরিজ, অ্যানিমে ও খেলাধুলার সবচেয়ে আইকনিক চরিত্র থেকে অনুপ্রাণিত ২৫০টিরও বেশি নতুন অবতার থেকে বেছে নিয়ে আপনার অভিজ্ঞতা ব্যক্তিগত করুন।"
+      },
+      "livetvPerPlaylistStartSection": {
+        "title": "Live TV খোলার বিভাগ",
+        "desc": "প্রতিটি প্লেলিস্টের জন্য Live TV কোন চ্যানেল বিভাগ দিয়ে খুলবে তা বেছে নিন: প্লেলিস্টের প্রথম বিভাগ, প্রিয় বা সম্প্রতি দেখা।"
+      },
+      "playerHardwareKeyboardControls": {
+        "title": "Mac ও iPad-এ কীবোর্ড নিয়ন্ত্রণ",
+        "desc": "প্লে/পজ, সামনে ও পেছনে যাওয়া এবং প্লেয়ারের অন্যান্য নিয়ন্ত্রণ এখন Mac ও iPad-এ হার্ডওয়্যার কীবোর্ডে সাড়া দেয়।"
+      },
+      "livetvSmarterChannelGrouping": {
+        "title": "আরও স্মার্ট চ্যানেল গ্রুপিং",
+        "desc": "KIPTV একই চ্যানেলের আরও ভ্যারিয়েন্ট ও মান শনাক্ত করে, বিভিন্ন প্রোভাইডারের মধ্যে অনেক বিস্তৃত সামঞ্জস্যসহ।"
+      },
+      "playerSubtitleAppearanceMenu": {
+        "title": "পরিচ্ছন্ন সাবটাইটেল চেহারা মেনু",
+        "desc": "সাবটাইটেলের চেহারা কাস্টমাইজ করার মেনু এখন কেবল বাহ্যিক সাবটাইটেল সক্রিয় থাকলে দেখা যায়।"
+      },
+      "playerAudioSubtitleTracksAllEngines": {
+        "title": "প্রতিটি প্লেয়ারে অডিও ও সাবটাইটেল ট্র্যাক",
+        "desc": "অডিও ও সাবটাইটেল ট্র্যাক এখন যেকোনো প্লেব্যাক ইঞ্জিনে সঠিকভাবে দেখা যায়।"
+      },
+      "minorBugFixes": {
+        "title": "ছোটখাটো বাগ সংশোধন"
+      }
+    },
+    "v1_4": {
+      "customPerCategoryOrder": {
+        "title": "প্রতিটি ক্যাটাগরিতে কনটেন্ট আপনার মতো সাজান",
+        "desc": "Film, Serie TV এবং Live TV-র প্রতিটি ক্যাটাগরির জন্য কনটেন্টের কাস্টম ক্রম সেট করুন: KIPTV সেটি মনে রাখবে এবং সবসময় আপনার সাজানো অনুযায়ী দেখাবে।"
+      },
+      "playlistAvatarActionsMenu": {
+        "title": "Playlist অ্যাভাটার থেকে দ্রুত অ্যাকশন",
+        "desc": "আপনার playlist-এর অ্যাভাটারে ট্যাপ করে দ্রুত অ্যাকশন মেনু বা সেটিংস খুলুন।"
+      },
+      "contentSettingsSplit": {
+        "title": "আরও স্পষ্ট সেটিংস: কনটেন্ট ও প্যারেন্টাল কন্ট্রোল",
+        "desc": "কনটেন্ট সেটিংস এখন দুটি আলাদা সেকশনে ভাগ করা হয়েছে — কনটেন্ট এবং প্যারেন্টাল কন্ট্রোল — যাতে আপনি যা খুঁজছেন তা সহজেই পান।"
+      },
+      "perPlaylistTrendingToggle": {
+        "title": "প্রতিটি playlist-এ ট্রেন্ডিং চালু/বন্ধ করুন",
+        "desc": "একটি নতুন অপশন দিয়ে প্রতিটি playlist-এ ট্রেন্ডিং সেকশন দেখানো হবে কি না তা আপনি ঠিক করতে পারবেন।"
+      },
+      "playlistCompatibility": {
+        "title": "আরও দ্রুত ও সামঞ্জস্যপূর্ণ playlist",
+        "desc": "Xtream প্যানেল থেকে আসা M3U playlist এখন স্বয়ংক্রিয়ভাবে নেটিভ Xtream সংস্করণে আপগ্রেড হয় — আরও দ্রুত, সম্পূর্ণ ক্যাটাগরিসহ এবং আরও বেশি provider-এর সাথে সামঞ্জস্যপূর্ণ।"
+      },
+      "supportChatPolish": {
+        "title": "আরও সুবিধাজনক সাপোর্ট চ্যাট",
+        "desc": "কথোপকথন সরাসরি শেষ মেসেজে খোলে, অটো-স্ক্রল ও পঠন নিশ্চিতকরণসহ। মেসেজ পড়লে নোটিফিকেশন ও ব্যাজ সঠিকভাবে রিসেট হয়।"
+      },
+      "categoryLockUsability": {
+        "title": "ক্যাটাগরি লক আরও সহজ",
+        "desc": "Live TV গ্রিড ও প্রোগ্রাম গাইড থেকে এক ট্যাপে পুরো ক্যাটাগরি লক বা আনলক করুন, এবং কনটেন্ট ক্যাটাগরি পর্যায়ে সুরক্ষিত থাকলে কনটেক্সট মেনু আনলকের অপশন দেখায়।"
+      }
+    },
+    "v1_3": {
+      "contentAggiuntiDiRecenteSection": {
+        "title": "\"সম্প্রতি যোগ করা\": নতুন কনটেন্ট সাথে সাথে দেখুন",
+        "desc": "Film, Serie TV এবং Live TV-তে একটি নতুন সেকশন আপনার playlist-এ সম্প্রতি যোগ করা কনটেন্ট হাইলাইট করে, যাতে নতুন কিছু খুঁজে পেতে সার্চ করতে না হয়।"
+      },
+      "playerMediaInfoBadgesHdr": {
+        "title": "Player-এ HDR, Dolby Vision, 4K ও FPS ব্যাজ",
+        "desc": "প্লেব্যাকের সময় স্ট্রিমের মান — HDR, Dolby Vision, 4K এবং frame rate — এক নজরে দেখুন, HDR মোড স্বয়ংক্রিয়ভাবে সক্রিয় হয়। iPhone, iPad এবং Apple TV-তে একই অভিজ্ঞতা।"
+      },
+      "playerPerEngineAdvancedSettings": {
+        "title": "Player-এ প্রতিটি ইঞ্জিনের জন্য উন্নত সেটিংস",
+        "desc": "Player-এর ইঞ্জিন সিলেক্টর থেকে এখন প্রতিটি ইঞ্জিনের নির্দিষ্ট উন্নত অপশন সামঞ্জস্য করতে পারবেন, প্রতিটি স্ট্রিমের জন্য প্লেব্যাক মানানসই করতে।"
+      },
+      "settingsAddOptionForContent": {
+        "title": "প্রতিবার অ্যাক্সেসে কনটেন্ট আপডেট করুন",
+        "desc": "সেটিংসে একটি নতুন অপশন প্রতিবার অ্যাপ খোলার সময় আপনার playlist-এর কনটেন্ট স্বয়ংক্রিয়ভাবে রিলোড করে, যাতে ক্যাটালগ সবসময় আপডেট থাকে।"
+      },
+      "epgGzipXmltvSupportDecoupled": {
+        "title": "প্রোগ্রাম গাইড (EPG) আরও দ্রুত ও সামঞ্জস্যপূর্ণ",
+        "desc": "কম্প্রেসড (gzip) EPG গাইডের সাপোর্ট যোগ করা হয়েছে, কনটেন্ট থেকে স্বাধীনভাবে লোড হয় এবং সোর্সের ডায়াগনস্টিক আরও স্পষ্ট।"
+      },
+      "playerTvosCutMainThreadContention": {
+        "title": "Apple TV-তে আরও মসৃণ লাইভ TV",
+        "desc": "লাইভ প্লেব্যাকের সময় ল্যাগ কমানোর অপ্টিমাইজেশন, সাথে VLC ইঞ্জিনের বিভিন্ন সংশোধন।"
+      },
+      "parentalCategoryAwareGateClose": {
+        "title": "আরও শক্তিশালী প্যারেন্টাল কন্ট্রোল, ক্যাটেগরি সহ",
+        "desc": "PIN লক এখন সম্পূর্ণ ক্যাটেগরিতে সঠিকভাবে প্রয়োগ হয় এবং আর বাইপাস করা যায় না।"
+      },
+      "epgRenderCachedEpgWhen": {
+        "title": "স্ক্রল করার সময় প্রোগ্রাম গাইড সবসময় দৃশ্যমান",
+        "desc": "একটি সমস্যা সমাধান করা হয়েছে যেখানে গ্রিডের সারি স্ক্রল করার সময় পুনরায় ব্যবহৃত হলে EPG তথ্য অদৃশ্য হয়ে যেত।"
+      }
+    },
+    "v1_2": {
+      "premiumThemes": {
+        "title": "KIPTV কে নিজের মতো সাজান: iOS ও Apple TV-তে প্রিমিয়াম থিম",
+        "desc": "অ্যাপের রং এবং হোম আইকন বেছে নিন একটি যত্নসহকারে তৈরি সংগ্রহ থেকে।"
+      },
+      "tvosDetailRewrite": {
+        "title": "Apple TV-তে সিনেমা ও সিরিজ: সম্পূর্ণ নতুন ডিটেইল স্ক্রিন",
+        "desc": "ডিটেইল পেজগুলো শূন্য থেকে নতুন করে লেখা হয়েছে মসৃণতার জন্য: সিনেমাটিক ট্রানজিশন, তাৎক্ষণিক স্ক্রলিং, বিশাল ক্যাটালগেও কোনো আটকানো নেই।"
+      },
+      "tagsFromAnywhere": {
+        "title": "অ্যাপের যেকোনো জায়গা থেকে ট্যাগ দিয়ে সাজান",
+        "desc": "যেকোনো সিনেমা, সিরিজ বা চ্যানেলের কনটেক্সট মেনু থেকে সরাসরি আপনার কাস্টম ট্যাগ তৈরি, নাম পরিবর্তন, পুনর্বিন্যাস ও মুছে ফেলুন।"
+      },
+      "fixMoviesTabEmptyOnSomePlaylists": {
+        "title": "কিছু playlist-এ সিনেমা না দেখানোর বাগ সমাধান হয়েছে",
+        "desc": "কিছু playlist-এ প্রোভাইডারের অপ্রত্যাশিত ডেটা ফরম্যাটের কারণে সিনেমা বিভাগ কালো স্ক্রিনে আটকে থাকত। এখন KIPTV এই ক্ষেত্রেও সঠিকভাবে কন্টেন্ট দেখায়।"
+      },
+      "fix4kChannels": {
+        "title": "4K চ্যানেল: এখন ভিডিও সবসময় চলে",
+        "desc": "AVPlayer/KSPlayer ব্যবহারে কিছু 4K চ্যানেল শুধু অডিও চালাত—এই সমস্যা সমাধান হয়েছে। সব player-এ নিখুঁত প্লেব্যাক।"
+      },
+      "recentSearches": {
+        "title": "সাম্প্রতিক সার্চ সবসময় হাতের কাছে",
+        "desc": "আপনার শেষ সার্চগুলো iPhone, iPad ও Apple TV-তে সার্চ স্ক্রিনের উপরে দেখা যায়: এক ট্যাপে আগের জায়গা থেকে শুরু করুন।"
+      },
+      "customChannelLogos": {
+        "title": "চ্যানেল লোগো ঠিক আপনার পছন্দমতো",
+        "desc": "প্রতিটি চ্যানেলের নিজস্ব লোগো থাকতে পারে: কমিউনিটি লাইব্রেরি থেকে বেছে নিন বা ওয়েবে খুঁজুন। SVG ও স্বচ্ছতার পূর্ণ সমর্থন।"
+      },
+      "fixThirdPartyEpgUrls": {
+        "title": "যেকোনো উৎস থেকে প্রোগ্রাম গাইড (EPG), এখন নির্ভরযোগ্য",
+        "desc": "এখন KIPTV তৃতীয় পক্ষের EPG URL সম্পূর্ণভাবে সঠিকভাবে পরিচালনা করে: আপনার পছন্দের প্রোগ্রাম গাইড যোগ করুন, বাকিটা KIPTV-এর উপর ছেড়ে দিন।"
+      }
+    },
+    "v1_1_0": {
+      "multiview": {
+        "title": "Multiview: একসাথে ৪টি চ্যানেল",
+        "desc": "নতুন Multiview অভিজ্ঞতায় একসাথে ৪টি Live চ্যানেল দেখুন। প্রসারণযোগ্য টাইল, সবসময় হাতের কাছে মিনি প্লেয়ার, কোয়ালিটি পিকার এবং ভিডিও থেকে রঙ নেওয়া অ্যাম্বিয়েন্ট লাইট। iPhone, iPad এবং Apple TV-তে উপলব্ধ।\n\nদ্রষ্টব্য: এই ফিচারের জন্য provider-কে একাধিক একযোগে সংযোগ সমর্থন করতে হবে।"
+      },
+      "audioNoInterruptOtherApps": {
+        "title": "অ্যাপটি আর অন্য অ্যাপের মিউজিক বন্ধ করে না",
+        "desc": "KIPTV খুললে আর অন্য অ্যাপে চলমান মিউজিক বা অডিও পজ হয় না: অডিও সেশন শুধুমাত্র তখনই সক্রিয় হয় যখন আপনি সত্যিই কোনো কন্টেন্ট চালু করেন।"
+      },
+      "vodPlaybackMoreStable": {
+        "title": "VOD প্লেব্যাক আরও স্থিতিশীল",
+        "desc": "ফিল্ম ও সিরিজের প্লেব্যাক উন্নত করা হয়েছে: আরও নির্ভরযোগ্য buffering ব্যবস্থাপনা, KSPlayer ইঞ্জিন আরও অপ্টিমাইজ করা হয়েছে।"
+      },
+      "playerEngineFallback": {
+        "title": "প্লেব্যাক ইঞ্জিন পরিবর্তন আরও নির্ভরযোগ্য",
+        "desc": "আপনার ম্যানুয়ালি বেছে নেওয়া প্লেব্যাক ইঞ্জিন স্ট্রিম শুরু করতে না পারলে, KIPTV স্বয়ংক্রিয়ভাবে আগের কার্যকর ইঞ্জিনে ফিরে যায়, কোনো বাধা ছাড়াই।"
+      },
+      "mylistAvailabilityCheck": {
+        "title": "আমার তালিকা: উপলব্ধতা শনাক্তকরণ আরও নির্ভরযোগ্য",
+        "desc": "Playlist লোড হওয়ার পর, KIPTV সেভ করা ফিল্ম ও সিরিজ TMDB-এর মাধ্যমে পুনরায় যাচাই করে এবং নতুন উপলব্ধ হওয়াগুলো সাথে সাথে জানায়।"
+      },
+      "playlistRebuildOnPartialCache": {
+        "title": "বিঘ্নিত লোডিংয়ের পর ফিল্ম ট্যাব খালি",
+        "desc": "একটি সমস্যা সমাধান করা হয়েছে যেখানে বিঘ্নিত playlist লোডিংয়ের পর ফিল্ম ট্যাব খালি থাকতো।"
+      },
+      "tvosCatalogDuringPlayback": {
+        "title": "Apple TV: প্লেব্যাকের সময় আরও মসৃণ নেভিগেশন",
+        "desc": "Apple TV-তে ক্যাটালগ আপডেট আর চলমান প্লেব্যাকে প্রভাব ফেলে না, Live চ্যানেল বা সিরিজের এপিসোড দেখার সময় বিঘ্ন বা ধীরগতি এড়ানো হয়।"
+      },
+      "tvosLiveAndCatchup": {
+        "title": "Apple TV: Live TV ও catchup আরও নির্ভরযোগ্য",
+        "desc": "একটি সমস্যা সমাধান করা হয়েছে যা freeze ও buffering সৃষ্টি করতে পারতো।"
+      }
+    },
+    "v1_0_9": {
+      "playerInPlayerChannelLists": {
+        "title": "প্লেয়ারে চ্যানেল তালিকা Live TV-র সাথে সামঞ্জস্যপূর্ণ",
+        "desc": "এখন প্লেয়ারের ভেতরেও চ্যানেলগুলো Live TV-র মতো একই ক্রমে দেখা যায়, বিশেষ বিভাগগুলো (পছন্দসই, ইতিহাস) সবসময় হাতের কাছে থাকে।"
+      },
+      "epgAutoRewriteDropboxDrive": {
+        "title": "Dropbox ও Google Drive থেকে EPG লিঙ্ক",
+        "desc": "Dropbox ও Google Drive-এর শেয়ার লিঙ্কগুলো এখন সরাসরি EPG উৎস হিসেবে কাজ করে, কোনো ম্যানুয়াল পরিবর্তন ছাড়াই।"
+      },
+      "mylistTmdbOnlyItemsAvailability": {
+        "title": "playlist-এ নেই এমন কনটেন্টও আমার তালিকায় যোগ করুন",
+        "desc": "TMDB-র মাধ্যমে আবিষ্কৃত সিনেমা ও সিরিজ আপনার playlist-এ না থাকলেও সেভ করতে পারবেন: উপলব্ধ হলে KIPTV আপনাকে জানাবে।"
+      },
+      "playlistTolerateDuplicateXtreamIds": {
+        "title": "ডুপ্লিকেট ID যুক্ত playlist",
+        "desc": "ডুপ্লিকেট চ্যানেল বা সিনেমার ID আছে এমন Xtream playlist খোলার সময় একটি ক্র্যাশ সমস্যা সমাধান করা হয়েছে।"
+      },
+      "tvosPlayerControlsNotAuto": {
+        "title": "Apple TV-তে প্লেয়ার নিয়ন্ত্রণ",
+        "desc": "tvOS-এ প্রথমবার ফুলস্ক্রিনে চালু হলে প্লেয়ার নিয়ন্ত্রণগুলো স্বয়ংক্রিয়ভাবে লুকাত না—এই সমস্যাটি সমাধান করা হয়েছে।"
+      }
+    },
+    "v1_0_8": {
+      "tvosPlayButtonNonResponsive": {
+        "title": "Apple TV: অনুসন্ধান থেকে Play বোতাম",
+        "desc": "অনুসন্ধান ফলাফল থেকে কিছু শিরোনাম খোলার সময় Play বোতাম সাড়া না দেওয়ার সমস্যা সমাধান করা হয়েছে।"
+      },
+      "tvosSearchBreakQualityPickerLoop": {
+        "title": "Apple TV: গ্রুপ করা চ্যানেলের মান নির্বাচন",
+        "desc": "অনুসন্ধান স্ক্রিনে চ্যানেলের মান নির্বাচকে একটি বাগ সমাধান করা হয়েছে যা চ্যানেল অন্যদের সাথে গ্রুপ করা থাকলে অসীম লুপ সৃষ্টি করত।"
+      },
+      "minorBugFixes": {
+        "title": "ছোটখাটো বাগ সংশোধন"
+      }
+    },
+    "v1_0_7": {
+      "supportCenterInApp": {
+        "title": "নতুন ইন-অ্যাপ সাপোর্ট সেন্টার",
+        "desc": "টিকেট খুলুন, স্ক্রিনশট সংযুক্ত করুন এবং iPhone, iPad ও Apple TV-তে সরাসরি অ্যাপ থেকে রিয়েল-টাইমে উত্তর পান।"
+      },
+      "triviaLoadingScreen": {
+        "title": "ধীর সংযোগ? ট্রিভিয়া উপভোগ করুন!",
+        "desc": "সংযোগ ধীর থাকলে এবং playlist লোড হওয়ার অপেক্ষায় থাকলে, সিনেমা, সিরিজ ও অ্যানিমে সম্পর্কে মজার তথ্য জানুন (স্পয়লার নেই, প্রতিশ্রুতি!)।"
+      },
+      "tvosRefocusChannelAfterPlayer": {
+        "title": "Apple TV: ফোকাস দেখা চ্যানেলে ফিরে আসে",
+        "desc": "Player-এর মধ্যে চ্যানেল পরিবর্তন করার পর, player বন্ধ করলে চ্যানেল তালিকা আপনাকে ঠিক আগের জায়গায় নিয়ে যায়।"
+      }
+    },
+    "v1_0_6": {
+      "premiumFreeTrialAllPlans": {
+        "title": "সব Premium প্ল্যানে বিনামূল্যে ট্রায়াল",
+        "desc": "সব সাবস্ক্রিপশন প্ল্যানে এখন পেমেন্টের আগে বিনামূল্যে ট্রায়াল পাওয়া যায়।"
+      },
+      "tvosInPlayerChannelGuide": {
+        "title": "Apple TV-তে player-এ ক্যাটাগরি ও চ্যানেল ব্রাউজ করুন",
+        "desc": "Live player থেকে সরাসরি চ্যানেল ও ক্যাটাগরি ব্রাউজ করুন, player থেকে বের না হয়েই ক্যারোসেলে মসৃণভাবে স্ক্রল করুন।"
+      },
+      "playerBrightnessControl": {
+        "title": "iOS player-এ উজ্জ্বলতা নিয়ন্ত্রণ",
+        "desc": "Player থেকে সরাসরি স্ক্রিনের উজ্জ্বলতা সামঞ্জস্য করুন।"
+      },
+      "playerPinchToFill": {
+        "title": "iOS-এ দুই আঙুলে পিঞ্চ করে স্ক্রিন পূর্ণ করুন",
+        "desc": "স্বাভাবিক জেসচারে ভিডিও মানানসই করুন, পিঞ্চ করে জুম করুন এবং স্ক্রিন পূর্ণ করুন।"
+      },
+      "settingsFollowOnInstagram": {
+        "title": "Instagram-এ আমাদের ফলো করুন",
+        "desc": "সেটিংসে নতুন বোতাম যোগ হয়েছে, Instagram-এ KIPTV ফলো করে আপডেট থাকুন।"
+      },
+      "tvosFocusSkipFix": {
+        "title": "Apple TV-তে আরও সুনির্দিষ্ট ফোকাস নেভিগেশন",
+        "desc": "Apple TV player-এর গোলাকার বোতানগুলোতে নেভিগেশন আর অনিচ্ছাকৃতভাবে লাফ দেয় না।"
+      }
+    },
+    "v1_0_5": {
+      "continueWatchingWidgets": {
+        "title": "iPhone ও iPad-এ দেখা চালিয়ে যান উইজেট",
+        "desc": "একটি ট্যাপে চলচ্চিত্র ও সিরিজ আবার শুরু করতে নতুন হোম স্ক্রিন উইজেট যোগ করুন। সব আকারে উপলব্ধ।"
+      },
+      "inPlayerVolumeControl": {
+        "title": "প্লেয়ারের মধ্যে ভলিউম নিয়ন্ত্রণ",
+        "desc": "iOS-এ সরাসরি প্লেয়ারে নতুন ভলিউম স্লাইডার।"
+      },
+      "subtitleAppearanceInPlayer": {
+        "title": "প্লেয়ার থেকেই সাবটাইটেলের চেহারা পরিবর্তন",
+        "desc": "সাবটাইটেলের ফন্ট, আকার ও রঙের সেটিংস এখন প্লেয়ারে আছে, চালানোর সময়ই অ্যাক্সেস করা যায়।"
+      },
+      "myListPerTagCarousels": {
+        "title": "আমার তালিকা ট্যাগ অনুযায়ী ভাগ করা",
+        "desc": "এখন আপনার আমার তালিকাকে প্রতিটি নির্ধারিত ট্যাগের জন্য আলাদা ক্যারোসেলে ভাগ করতে পারেন। সেটিংস > বিষয়বস্তু থেকে মোড সক্রিয় করুন।"
+      },
+      "systemTimeFormat": {
+        "title": "আপনার সিস্টেমের সময় ফরম্যাটে সময়",
+        "desc": "EPG ও প্লেয়ার এখন সিস্টেম পছন্দে সেট করা 12h/24h ফরম্যাট অনুসরণ করে।"
+      },
+      "tvosPipRestored": {
+        "title": "Apple TV-তে Picture in Picture পুনরুদ্ধার",
+        "desc": "পূর্ববর্তী সংস্করণে দেখা দেওয়া সমস্যার পর tvOS-এ Picture in Picture আবার সঠিকভাবে কাজ করছে।"
+      },
+      "premiumPlaylistsCap": {
+        "title": "Premium Plus ব্যবহারকারীদের playlist সীমা সংশোধন",
+        "desc": "একটি বাগ সমাধান করা হয়েছে যেখানে কিছু Premium Plus ব্যবহারকারী ভুলভাবে একটি মাত্র playlist-এ সীমাবদ্ধ ছিলেন।"
+      }
+    },
+    "v1_0_4": {
+      "manualRotationButton": {
+        "title": "প্লেয়ার নিজের ইচ্ছামতো ঘোরান",
+        "desc": "iPhone প্লেয়ারে নতুন রোটেশন বোতাম: একটি ট্যাপে landscape বা portrait বেছে নিন, এমনকি রোটেশন লক চালু থাকলেও।"
+      },
+      "followOnX": {
+        "title": "X-এ আমাদের অনুসরণ করুন",
+        "desc": "এখন আপনি KIPTV থেকে সরাসরি X (Twitter)-এ আমাদের অনুসরণ করতে পারেন: লিঙ্কটি সেটিংসে পাবেন।"
+      },
+      "playerDragDismiss": {
+        "title": "iOS-এ প্লেয়ার বন্ধ করা আরও মসৃণ",
+        "desc": "প্লেয়ার বন্ধের অ্যানিমেশনে ছোট উন্নতি করা হয়েছে যাতে এটি আরও স্বাভাবিক মনে হয়।"
+      },
+      "subsResetBetweenEpisodes": {
+        "title": "OpenSubtitles সাবটাইটেলে উন্নতি",
+        "desc": "OpenSubtitles সাবটাইটেল পরিচালনা উন্নত করা হয়েছে যাতে এক পর্ব থেকে অন্য পর্বে অভিজ্ঞতা আরও সামঞ্জস্যপূর্ণ হয়।"
+      },
+      "tmdbResilience": {
+        "title": "মেটাডেটা দ্রুত লোড হচ্ছে",
+        "desc": "ফিল্ম ও সিরিজের মেটাডেটা লোডিং অপ্টিমাইজ করা হয়েছে যাতে ব্রাউজিং আরও মসৃণ হয়।"
+      },
+      "pipFixes": {
+        "title": "Picture in Picture উন্নত হয়েছে",
+        "desc": "iPhone ও Mac-এ Picture in Picture অভিজ্ঞতা উন্নত করা হয়েছে, আরও প্রতিক্রিয়াশীল নিয়ন্ত্রণ সহ।"
+      }
+    },
+    "v1_0_3": {
+      "inAppFeedback": {
+        "title": "ইন-অ্যাপ ফিডব্যাকের মাধ্যমে KIPTV উন্নত করতে সাহায্য করুন",
+        "desc": "এখন থেকে আপনি অ্যাপ থেকে সরাসরি কয়েকটি ট্যাপে পরামর্শ, সমস্যার রিপোর্ট এবং আইডিয়া পাঠাতে পারবেন। আমরা প্রতিটি বার্তা পড়ি এবং আপনার সাথে মিলে KIPTV উন্নত করতে ব্যবহার করি।"
+      },
+      "playerQualityPicker": {
+        "title": "প্লেয়ার থেকে চ্যানেলের কোয়ালিটি পরিবর্তন করুন",
+        "desc": "যখন একটি Live চ্যানেলে একাধিক কোয়ালিটি (HD, FHD, 4K...) থাকে, তখন তালিকায় ফিরে না গিয়ে সরাসরি প্লেয়ার থেকে পছন্দের কোয়ালিটি বেছে নিতে পারবেন। iPhone, iPad এবং Apple TV-তে উপলব্ধ।"
+      },
+      "liveInlinePreview": {
+        "title": "Apple TV-তে ইনলাইন লাইভ প্রিভিউ",
+        "desc": "সেটিংস > প্লেব্যাক থেকে সক্রিয় করা যায়: Apple TV-তে ফুলস্ক্রিন খোলার আগে Live TV ও EPG স্ক্রিনে সরাসরি হাইলাইট করা চ্যানেলের লাইভ প্রিভিউ দেখতে পারবেন।"
+      }
+    },
+    "versionHeader": "সংস্করণ {{version}}",
+    "continue": "চালিয়ে যান",
+    "section": {
+      "new": "নতুন",
+      "improvement": "উন্নতি",
+      "bugfix": "বাগ ফিক্স"
+    },
+    "v1_0_2": {
+      "tmdbAmbiguousMatchPicker": {
+        "title": "একাধিক মিলের জন্য ম্যানুয়াল নির্বাচক",
+        "desc": "যখন একটি শিরোনামের TMDB-তে একাধিক সম্ভাব্য মিল থাকে, তখন আপনি সঠিকটি বেছে নিতে পারবেন।"
+      },
+      "liveTvQualityVariantsGrouping": {
+        "title": "আরও সঠিক Live TV চ্যানেল গ্রুপিং",
+        "desc": "চ্যানেলের নামে কোয়ালিটি ভেরিয়েন্ট শনাক্তকরণ উন্নত করা হয়েছে, যা আরও নির্ভরযোগ্য গ্রুপিং নিশ্চিত করে।"
+      },
+      "memoryOomCrashFix": {
+        "title": "অনেক বড় playlist-এ স্থিতিশীলতা",
+        "desc": "বিশাল playlist-এ মেমরি অপর্যাপ্ততার কারণে ক্র্যাশ এবং বিভিন্ন playlist-এর মধ্যে EPG মিশে যাওয়ার সমস্যা সমাধান করা হয়েছে।"
+      }
+    },
+    "v1_0_1": {
+      "memory": {
+        "title": "ক্র্যাশ সংশোধন",
+        "desc": "কিছু ডিভাইসে RAM মেমরি পূর্ণ হয়ে যাওয়ার সমস্যা ঠিক করা হয়েছে, যা অ্যাপ ক্র্যাশের কারণ হতে পারত।"
+      },
+      "player": {
+        "title": "আরও স্থিতিশীল প্লেয়ার",
+        "desc": "AVFoundation/VLC সর্বোত্তম অনুশীলন অনুসরণ করে লাইভ ও VOD-এ বাফারিং কমানো হয়েছে।"
+      },
+      "infoPanel": {
+        "title": "প্লেয়ার তথ্য প্যানেল",
+        "desc": "ল্যান্ডস্কেপ মোডে, প্যানেলের উপরে ভিডিও এলাকায় ট্যাপ করে বন্ধ করুন।"
+      },
+      "tvosFocus": {
+        "title": "আরও দ্রুত Apple TV",
+        "desc": "বিভাগগুলির মধ্যে নেভিগেট করার সময় আরও মসৃণ ট্যাব বার।"
+      },
+      "badges": {
+        "title": "সঙ্গতিপূর্ণ \"নতুন\" ব্যাজ",
+        "desc": "iOS এবং Apple TV-তে চলচ্চিত্র ও সিরিজে নতুন বিষয়বস্তু নির্দেশক।"
+      }
+    }
+  },
+  "widget": {
+    "resume": "চালিয়ে যান",
+    "noMoviesInProgress": "কোনো চলমান সিনেমা নেই",
+    "noEpisodesInProgress": "কোনো চলমান এপিসোড নেই",
+    "openApp": "KIPTV খুলুন"
+  },
+  "support": {
+    "centerTitle": "সহায়তা কেন্দ্র",
+    "centerEmpty": "এখনো কোনো কথোপকথন নেই",
+    "centerEmptyHint": "সমস্যা জানাতে, উন্নতির পরামর্শ দিতে বা নতুন ফিচার অনুরোধ করতে KIPTV সহায়তার সাথে কথোপকথন শুরু করুন।",
+    "newTicket": "নতুন কথোপকথন",
+    "you": "আপনি",
+    "supportTeam": "KIPTV সহায়তা",
+    "send": "পাঠান",
+    "replyPlaceholder": "একটি বার্তা লিখুন…",
+    "closedHint": "কথোপকথন বন্ধ",
+    "closedComposer": "এই কথোপকথনটি বন্ধ করা হয়েছে। আরও সাহায্যের প্রয়োজন হলে নতুনটি শুরু করুন।",
+    "resolvedHint": "এই কথোপকথন পুনরায় খুলতে একটি বার্তা পাঠান",
+    "openFollowUp": "ফলো-আপ খুলুন",
+    "followUpDraftHeader": "Re: %@ (#%@)",
+    "newMessageOne": "নতুন বার্তা",
+    "newMessageMany": "%d নতুন বার্তা",
+    "typing": "সহায়তা টাইপ করছে…",
+    "unreadBadge": "%d নতুন",
+    "status": {
+      "open": "খোলা",
+      "triaged": "মূল্যায়নাধীন",
+      "in_progress": "চলমান",
+      "awaiting_user": "আপনার উত্তরের অপেক্ষায়",
+      "resolved": "সমাধান হয়েছে",
+      "closed": "বন্ধ",
+      "duplicate": "ডুপ্লিকেট",
+      "on_hold": "স্থগিত"
+    },
+    "new": {
+      "type": "ধরন",
+      "typeHeader": "এটি কী সম্পর্কে?",
+      "deviceHeader": "ডিভাইস",
+      "deviceFooter": "আবশ্যক। যে ডিভাইসে সমস্যাটি হচ্ছে সেটি বেছে নিন, এমনকি আপনি অন্য ডিভাইস থেকে লিখলেও।",
+      "titleHeader": "বিষয়",
+      "titlePlaceholder": "বিষয়",
+      "titleFooter": "একটি ছোট বাক্য যা সমস্যা বা অনুরোধের সারসংক্ষেপ।",
+      "messageHeader": "বার্তা",
+      "messagePlaceholder": "কী ঘটে, আপনি কী আশা করেন এবং কোন পরিস্থিতিতে ঘটে তা বর্ণনা করুন।",
+      "messageFooter": "পরে সহায়তার সাথে চ্যাট করে আরও বিস্তারিত যোগ করতে পারেন।",
+      "submit": "কথোপকথন খুলুন",
+      "successTitle": "কথোপকথন খোলা হয়েছে",
+      "successMessage": "আমরা যত তাড়াতাড়ি সম্ভব অ্যাপে এখানে উত্তর দেব।",
+      "attachmentHeader": "সংযুক্তি",
+      "attachmentFooter": "ঐচ্ছিক। JPEG, PNG বা HEIC, ৭ MB পর্যন্ত।",
+      "attachmentFooterCount": "ঐচ্ছিক, %d পর্যন্ত ছবি। প্রতিটি JPEG, PNG বা HEIC, ৭ MB পর্যন্ত।",
+      "attachmentAdd": "একটি ছবি যোগ করুন"
+    },
+    "attachmentReady": "ছবি পাঠানোর জন্য প্রস্তুত",
+    "attachmentPreview": "📷 ছবি",
+    "category": {
+      "crash": "ক্র্যাশ",
+      "playback": "প্লেব্যাক",
+      "playlist": "প্লেলিস্ট",
+      "epg": "EPG / টিভি গাইড",
+      "subscription": "সাবস্ক্রিপশন",
+      "auth": "সাইন-ইন",
+      "ui": "ইন্টারফেস",
+      "account": "অ্যাকাউন্ট",
+      "other": "অন্যান্য"
+    },
+    "device": {
+      "all": "সব ডিভাইস",
+      "iphone": "iPhone",
+      "ipad": "iPad",
+      "appleTV": "Apple TV",
+      "androidTV": "Android TV",
+      "fireTV": "Fire TV",
+      "mac": "Mac",
+      "visionPro": "Vision Pro"
+    },
+    "error": {
+      "title": "ত্রুটি",
+      "notAuthenticated": "সহায়তা কেন্দ্র ব্যবহার করতে আপনাকে সাইন ইন করতে হবে",
+      "missingTitle": "অনুগ্রহ করে একটি শিরোনাম লিখুন",
+      "messageEmpty": "বার্তা খালি হতে পারে না",
+      "insertFailed": "পাঠানো ব্যর্থ হয়েছে",
+      "fetchFailed": "লোড করা ব্যর্থ হয়েছে",
+      "updateFailed": "আপডেট ব্যর্থ হয়েছে",
+      "uploadFailed": "সংযুক্তি আপলোড ব্যর্থ হয়েছে",
+      "attachmentTooLarge": "ছবিটি ৭ MB-এর বেশি। অনুগ্রহ করে একটি ছোট ছবি নির্বাচন করুন।",
+      "rateLimited": "আপনি সম্প্রতি বেশ কয়েকটি কথোপকথন খুলেছেন। অন্যটি খোলার আগে একটু অপেক্ষা করুন।"
+    },
+    "admin": {
+      "analytics": {
+        "chart": {
+          "byCategory": "বিভাগ অনুসারে",
+          "byStatus": "অবস্থা অনুসারে",
+          "perDay": "দৈনিক টিকিট"
+        },
+        "empty": "এই সময়ে কোনো তথ্য নেই",
+        "kpi": {
+          "firstResponse": "গড় প্রথম উত্তর",
+          "open": "খোলা টিকিট",
+          "resolution": "গড় সমাধানের সময়"
+        },
+        "noOpenTickets": "কোনো খোলা টিকিট নেই",
+        "oldestOpen": "সবচেয়ে পুরোনো খোলা টিকিট",
+        "range": {
+          "30d": "৩০ দিন",
+          "7d": "৭ দিন",
+          "all": "সর্বকাল"
+        },
+        "title": "পরিসংখ্যান"
+      },
+      "bulk": {
+        "assignMe": "আমাকে বরাদ্দ করুন",
+        "confirm": {
+          "assignMe": "%@-কে বরাদ্দ করুন।",
+          "label": "\"%@\" লেবেল যোগ করুন।",
+          "status": "অবস্থা %@-এ পরিবর্তন করুন।",
+          "title": "%d টিকিটে প্রয়োগ করবেন?"
+        },
+        "label": "লেবেল",
+        "labelPlaceholder": "লেবেলের নাম",
+        "labelPrompt": "লেবেল যোগ করুন",
+        "selected": "নির্বাচিত",
+        "status": "অবস্থা"
+      },
+      "details": {
+        "assigneeSection": "দায়িত্বপ্রাপ্ত",
+        "auditSection": "কার্যকলাপ",
+        "categorySection": "বিভাগ",
+        "diagnosticsSection": "ডায়াগনস্টিকস",
+        "labelsSection": "লেবেল",
+        "notesPlaceholder": "অভ্যন্তরীণ নোট — শুধু অ্যাডমিনরা দেখতে পান।",
+        "notesSection": "অভ্যন্তরীণ নোট",
+        "otherTicketsLabel": "ব্যবহারকারীর অন্য টিকিট",
+        "priorityHigh": "P1 (সর্বোচ্চ)",
+        "priorityLow": "P5 (সর্বনিম্ন)",
+        "priorityNone": "—",
+        "prioritySection": "অগ্রাধিকার",
+        "statusSection": "অবস্থা",
+        "ticketsOpenOfTotal": "%1$d খোলা · মোট %2$d",
+        "title": "বিবরণ",
+        "triageSection": "ট্রায়াজ"
+      },
+      "split": {
+        "noDetails": "বিবরণ দেখতে একটি টিকিট খুলুন",
+        "noTicketSelected": "কথোপকথন পড়তে একটি টিকিট বেছে নিন"
+      },
+      "sub": {
+        "active": "সক্রিয়",
+        "endsOn": "%@-এ শেষ হবে",
+        "expired": "মেয়াদোত্তীর্ণ",
+        "expiredOn": "%@-এ মেয়াদ শেষ হয়েছে",
+        "expiry": "মেয়াদ",
+        "free": "কোনো সাবস্ক্রিপশন নেই",
+        "lapsing": "বাতিল — নবায়ন হবে না",
+        "manage": "সাবস্ক্রিপশন পরিচালনা",
+        "neverSynced": "RevenueCat-এর সঙ্গে কখনও সিঙ্ক হয়নি",
+        "renewing": "সক্রিয়, নবায়ন হবে",
+        "renewsOn": "%@-এ নবায়ন",
+        "section": "সাবস্ক্রিপশন",
+        "syncedAt": "তথ্য হালনাগাদ %@",
+        "since": "প্রিমিয়াম কবে থেকে"
+      },
+      "user": {
+        "activitySection": "কার্যকলাপ",
+        "id": "ব্যবহারকারীর আইডি",
+        "lastPlayback": "সর্বশেষ প্লেব্যাক",
+        "lastSignIn": "সর্বশেষ সাইন-ইন",
+        "noOtherTickets": "অন্য কোনো টিকিট নেই",
+        "noTickets": "কোনো টিকিট নেই",
+        "playlists": "প্লেলিস্ট",
+        "provider": "সাইন-ইন পদ্ধতি",
+        "registered": "নিবন্ধনের তারিখ",
+        "ticketsFooter": "%d এখনও খোলা।",
+        "ticketsSection": "টিকিট",
+        "watchTime": "দেখার সময়"
+      }
+    }
+  },
+  "appearance": {
+    "title": "চেহারা",
+    "subtitle": "অ্যাপের চেহারা কাস্টমাইজ করুন।",
+    "premiumUpsell": "Premium-এর মাধ্যমে থিম কাস্টমাইজেশন আনলক করুন।",
+    "unlockCTA": "Premium দিয়ে আনলক করুন",
+    "iconChangeNotice": "আইকন পরিবর্তন করলে iOS সংক্ষিপ্ত সিস্টেম সতর্কতা দেখাবে।",
+    "section": {
+      "color": "মূল রঙ",
+      "icon": "অ্যাপ আইকন",
+      "theme": "থিম",
+      "ambient": "পটভূমি"
+    },
+    "color": {
+      "red": "লাল",
+      "brown": "বাদামী",
+      "fuchsia": "ফুকশিয়া",
+      "gold": "সোনালী",
+      "green": "সবুজ",
+      "indigo": "নীল",
+      "lime": "চুন",
+      "orange": "কমলা",
+      "purple": "বেগুনি",
+      "silver": "রূপালী",
+      "teal": "টিল",
+      "white": "সাদা"
+    },
+    "icon": {
+      "red": "লাল",
+      "brown": "বাদামী",
+      "fuchsia": "ফুকশিয়া",
+      "gold": "সোনালী",
+      "green": "সবুজ",
+      "indigo": "নীল",
+      "lime": "চুন",
+      "orange": "কমলা",
+      "purple": "বেগুনি",
+      "silver": "রূপালী",
+      "teal": "টিল",
+      "white": "সাদা"
+    },
+    "background": {
+      "title": "পটভূমি",
+      "black": "কালো",
+      "dynamic": "ডাইনামিক"
+    },
+    "ambient": {
+      "title": "ডায়নামিক পটভূমি",
+      "subtitle": "স্ক্রিনে থাকা ছবির রং দিয়ে পটভূমি রাঙান।"
+    }
+  },
+  "recentlyAdded": {
+    "title": "সম্প্রতি যোগ করা"
+  },
+  "metadata": {
+    "customize": "মেটাডেটা কাস্টমাইজ করুন",
+    "sheet": {
+      "title": "মেটাডেটা কাস্টমাইজ করুন",
+      "search": "একটি সিনেমা বা সিরিজ খুঁজুন",
+      "results": "ফলাফল",
+      "automatic": "স্বয়ংক্রিয়",
+      "noTMDB": "কোনো TMDB নেই (শুধু প্রদানকারী)",
+      "current": "বর্তমান মিল",
+      "searchHint": "TMDB-তে খুঁজতে একটি শিরোনাম লিখুন",
+      "noResults": "কোনো ফলাফল নেই"
+    }
+  },
+  "devices": {
+    "connectedTitle": "সংযুক্ত ডিভাইস",
+    "description": "আপনার অ্যাকাউন্টে বর্তমানে সাইন ইন করা ডিভাইস। যেগুলো চিনতে পারছেন না সেগুলো সাইন আউট করুন।",
+    "thisDevice": "এই ডিভাইস",
+    "lastActive": "সর্বশেষ সক্রিয় {{time}}",
+    "signOut": "সাইন আউট",
+    "signOutConfirmTitle": "ডিভাইস সাইন আউট করবেন?",
+    "signOutConfirmMessage": "এই ডিভাইসটি সাইন আউট হয়ে যাবে এবং আবার লগ ইন করতে হবে।",
+    "signOutError": "সেই ডিভাইসটি সাইন আউট করা যায়নি। আবার চেষ্টা করুন।",
+    "empty": "অন্য কোনো ডিভাইস নেই",
+    "loading": "ডিভাইস লোড হচ্ছে…",
+    "activeNow": "এখন সক্রিয়"
+  },
+  "home": {
+    "title": "হোম",
+    "customize": "কাস্টমাইজ",
+    "customizeTitle": "হোম কাস্টমাইজ করুন",
+    "hide": "হোম লুকান",
+    "hideConfirm": "লুকান",
+    "hideMessage": "হোম ট্যাব সরে যাবে এবং অ্যাপটি সেটিংসে বেছে নেওয়া স্টার্ট স্ক্রিনে খুলবে। সেটিংস → কন্টেন্ট থেকে আবার চালু করতে পারবেন।",
+    "hideFooter": "হোম লুকালে আগের স্টার্ট স্ক্রিনে ফিরে যাবেন।",
+    "sections": "সেকশন",
+    "sectionsActive": "{{count}}টি সক্রিয়",
+    "sectionsFooter": "ক্রম বদলাতে টেনে আনুন। কন্টেন্ট ছাড়া সেকশন স্বয়ংক্রিয়ভাবে লুকানো থাকে।",
+    "addSection": "সেকশন যোগ করুন",
+    "addSectionFooter": "প্ল্যাটফর্ম ও ফিড আপনার প্লেলিস্টে থাকা টাইটেল দেখায়।",
+    "addPlatform": "স্ট্রিমিং প্ল্যাটফর্ম",
+    "addFeed": "কাস্টম ফিড",
+    "reset": "লেআউট রিসেট করুন",
+    "resetConfirm": "রিসেট",
+    "resetMessage": "ডিফল্ট ক্রম ও সেকশনে ফিরে যাবেন। প্ল্যাটফর্ম ও কাস্টম ফিড মুছে যাবে।",
+    "applyToAll": "সব প্লেলিস্টে প্রয়োগ করুন",
+    "applyToAllConfirm": "প্রয়োগ",
+    "applyToAllMessage": "এই লেআউট আপনার সব প্লেলিস্টের হোম প্রতিস্থাপন করবে।",
+    "moveUp": "উপরে সরান",
+    "moveDown": "নিচে সরান",
+    "hideSection": "সেকশন লুকান",
+    "sectionSettings": "সেকশন অপশন",
+    "emptyLayoutTitle": "খালি হোম",
+    "emptyLayoutMessage": "আপনি সব সেকশন বন্ধ করেছেন। ফিরিয়ে আনতে হোম কাস্টমাইজ করুন।",
+    "section": {
+      "hero": "ফিচার্ড",
+      "nowOnTV": "এখন টিভিতে",
+      "newEpisodes": "আপনার জন্য নতুন পর্ব",
+      "recommended": "আপনার জন্য প্রস্তাবিত",
+      "tonightOnTV": "আজ রাতে টিভিতে",
+      "recentlyAddedMovies": "সম্প্রতি যোগ করা সিনেমা",
+      "recentlyAddedSeries": "সম্প্রতি যোগ করা সিরিজ",
+      "recentlyAddedLive": "সম্প্রতি যোগ করা চ্যানেল",
+      "platform": "প্ল্যাটফর্ম",
+      "customFeed": "কাস্টম ফিড",
+      "traktList": "Trakt তালিকা"
+    },
+    "nowOnTVSubtitle": "আপনার চ্যানেলে এখন চলছে",
+    "newEpisodesSubtitle": "আপনার অনুসরণ করা সিরিজে নতুন কিছু আছে",
+    "recommendedSubtitle": "আপনার দেখার ভিত্তিতে",
+    "tonightSubtitle": "আপনার চ্যানেলে প্রাইম টাইম",
+    "reason": {
+      "resume": "চালিয়ে যান",
+      "newEpisode": "নতুন পর্ব",
+      "trending": "ট্রেন্ডিং",
+      "recentlyAdded": "এইমাত্র যোগ হয়েছে"
+    },
+    "params": {
+      "both": "উভয়",
+      "mediaType": "কন্টেন্টের ধরন",
+      "channels": "চ্যানেল",
+      "channelsFooter": "কোন চ্যানেল দেখাবে: আমার তালিকার, সম্প্রতি দেখা, বা উভয়।",
+      "window": "সময়কাল",
+      "lastDays": "শেষ {{days}} দিন",
+      "thisWeek": "এই সপ্তাহে",
+      "today": "আজ"
+    },
+    "feed": {
+      "name": "ফিডের নাম",
+      "namePlaceholder": "যেমন ৮০-র দশকের হরর",
+      "sortBy": "সাজানোর ভিত্তি",
+      "sort": {
+        "popularityDesc": "জনপ্রিয়তা (নিম্নক্রম)",
+        "popularityAsc": "জনপ্রিয়তা (ঊর্ধ্বক্রম)",
+        "ratingDesc": "সর্বোচ্চ রেটিং",
+        "votesDesc": "সবচেয়ে বেশি ভোট",
+        "newest": "নতুনতম",
+        "oldest": "পুরোনোতম",
+        "revenueDesc": "সর্বোচ্চ আয়"
+      },
+      "genres": "ধরন",
+      "excludedGenres": "বাদ দেওয়া ধরন",
+      "year": "মুক্তির বছর",
+      "yearFrom": "থেকে",
+      "yearTo": "পর্যন্ত",
+      "anyYear": "যেকোনো বছর",
+      "language": "মূল ভাষা",
+      "anyLanguage": "যেকোনো ভাষা",
+      "platforms": "প্ল্যাটফর্ম",
+      "platformsFooter": "এই প্ল্যাটফর্মে পাওয়া টাইটেলে ফিড সীমাবদ্ধ রাখুন।",
+      "minVotes": "ন্যূনতম ভোট",
+      "noMinimum": "ন্যূনতম নেই",
+      "filters": "ফিল্টার",
+      "customParams": "অতিরিক্ত প্যারামিটার",
+      "customParamsPlaceholder": "with_companies=420&vote_average.gte=7",
+      "customParamsFooter": "TMDB Discover API-এর প্যারামিটার key=value আকারে, & দিয়ে আলাদা। AND-এর জন্য কমা, OR-এর জন্য পাইপ (|)।",
+      "none": "কিছু নেই",
+      "create": "ফিড তৈরি করুন",
+      "edit": "ফিড সম্পাদনা",
+      "lang": {
+        "en": "ইংরেজি",
+        "it": "ইতালীয়",
+        "es": "স্প্যানিশ",
+        "fr": "ফরাসি",
+        "de": "জার্মান",
+        "pt": "পর্তুগিজ",
+        "ja": "জাপানি",
+        "ko": "কোরিয়ান",
+        "zh": "চীনা",
+        "hi": "হিন্দি",
+        "tr": "তুর্কি",
+        "ar": "আরবি",
+        "ru": "রুশ",
+        "nl": "ডাচ",
+        "sv": "সুইডিশ",
+        "da": "ডেনিশ",
+        "nb": "নরওয়েজীয়",
+        "pl": "পোলিশ",
+        "el": "গ্রিক",
+        "fi": "ফিনিশ"
+      }
+    },
+    "platform": {
+      "pickTitle": "প্ল্যাটফর্ম বেছে নিন",
+      "search": "প্ল্যাটফর্ম খুঁজুন",
+      "add": "যোগ করুন",
+      "added": "যোগ হয়েছে"
+    },
+    "platformMovies": "{{name}} সিনেমা",
+    "platformSeries": "{{name}} সিরিজ",
+    "customizeHint": "খুলতে নিচে চাপুন",
+    "addPlatformSubtitle": "একটি পরিষেবার শিরোনাম নিয়ে একটি সারি যোগ করুন",
+    "addFeedSubtitle": "আপনার নিজের শর্তে একটি সারি তৈরি করুন",
+    "addTraktList": "Trakt তালিকা",
+    "addTraktListSubtitle": "ওয়াচলিস্ট, সুপারিশ, আপনার তালিকা ও কমিউনিটির তালিকা",
+    "trakt": {
+      "pickTitle": "Trakt তালিকা যোগ করুন",
+      "yours": "আপনার Trakt",
+      "recommendations": "Trakt-এর সুপারিশ",
+      "recommendationsDesc": "Trakt-এ আপনি যা দেখেছেন ও রেট করেছেন তার ভিত্তিতে",
+      "watchlist": "Trakt ওয়াচলিস্ট",
+      "watchlistDesc": "আপনার পুরো ওয়াচলিস্ট, প্লেলিস্টে নেই এমন শিরোনামসহ",
+      "myLists": "আমার তালিকা",
+      "likedLists": "আমার পছন্দের তালিকা",
+      "likedListsFooter": "trakt.tv-তে কোনো তালিকা লাইক করুন, সেটি এখানে দেখা যাবে।",
+      "community": "Trakt কমিউনিটি থেকে",
+      "popular": "জনপ্রিয়",
+      "trending": "ট্রেন্ডিং",
+      "official": "অফিসিয়াল",
+      "search": "তালিকা খুঁজুন, বা লিংক বা ID পেস্ট করুন",
+      "searchResults": "ফলাফল",
+      "items": "{{count}}টি শিরোনাম",
+      "by": "{{user}} দ্বারা",
+      "none": "কোনো তালিকা নেই",
+      "loadMore": "আরও দেখান",
+      "inactive": "এই সারি দেখতে এই প্লেলিস্টে Trakt সংযুক্ত করুন",
+      "loadFailed": "Trakt তালিকা লোড করা যায়নি। আবার চেষ্টা করতে ট্যাপ করুন",
+      "notFound": "কোনো তালিকা পাওয়া যায়নি",
+      "sort": {
+        "listOrder": "তালিকার ক্রম",
+        "added": "সম্প্রতি যোগ করা",
+        "released": "মুক্তির তারিখ",
+        "title": "শিরোনাম",
+        "rating": "রেটিং",
+        "popularity": "জনপ্রিয়তা"
+      }
+    }
+  },
+  "trakt": {
+    "title": "Trakt",
+    "description": "দেখা হয়েছে, পুনরায় শুরুর অবস্থান ও ওয়াচলিস্ট আপনার Trakt অ্যাকাউন্টের সাথে সিঙ্ক করুন।",
+    "intro": "Trakt অ্যাকাউন্ট যুক্ত করুন যাতে দেখার ইতিহাস এক জায়গায় থাকে: KIPTV-তে যা দেখেন তা Trakt-এ যায়, আর Trakt-এর ইতিহাস আপনার সব ডিভাইসে KIPTV-তে দেখা যায়।",
+    "introFooter": "ঐচ্ছিক: যুক্ত না করলে কিছুই বদলায় না।",
+    "notConfigured": "এই বিল্ডে Trakt ইন্টিগ্রেশন নেই।",
+    "link": "Trakt যুক্ত করুন",
+    "linkedAs": "{{username}} হিসেবে যুক্ত",
+    "vip": "VIP",
+    "linkedFooter": "সংযোগটি পুরো অ্যাকাউন্টের জন্য: এই KIPTV অ্যাকাউন্টের প্রতিটি ডিভাইসও যুক্ত থাকে।",
+    "relinkNeeded": "Trakt সংযোগের মেয়াদ শেষ: অ্যাকাউন্ট আবার যুক্ত করুন।",
+    "linkRequesting": "কোড চাওয়া হচ্ছে…",
+    "linkInstructions": "trakt.tv/activate খুলে এই কোড দিন।",
+    "linkInstructionsTV": "QR কোড স্ক্যান করুন বা ফোনে trakt.tv/activate খুলে কোড দিন।",
+    "openActivate": "trakt.tv/activate খুলুন",
+    "codeCopied": "কোড ক্লিপবোর্ডে কপি হয়েছে।",
+    "codeExpires": "কোডের মেয়াদ শেষ হবে {{time}} পরে",
+    "regenerate": "নতুন কোড",
+    "linkWaiting": "Trakt-এ নিশ্চিতকরণের অপেক্ষায়…",
+    "linkSuccess": "Trakt যুক্ত হয়েছে",
+    "linkSuccessSubtitle": "প্রথম সিঙ্ক এখন শুরু হচ্ছে।",
+    "linkDenied": "Trakt-এ অনুরোধ প্রত্যাখ্যাত।",
+    "linkExpired": "কোডের মেয়াদ শেষ: নতুন কোড তৈরি করুন।",
+    "syncSection": "কী সিঙ্ক হবে",
+    "scrobble": "যা দেখছেন তা Trakt-এ পাঠান",
+    "scrobbleDesc": "KIPTV-তে চালানো সিনেমা ও পর্ব আপনার Trakt ইতিহাসে যোগ হয়।",
+    "pullWatched": "Trakt থেকে দেখা হয়েছে আনুন",
+    "pullWatchedDesc": "Trakt-এ যা দেখা হয়েছে তা KIPTV-তেও দেখা হয়েছে দেখাবে, তবে এখানে চালানোর আগে \"দেখা চালিয়ে যান\"-এ আসবে না।",
+    "pullPlayback": "Trakt-এর অবস্থান থেকে শুরু করুন",
+    "pullPlaybackDesc": "অন্য কোথাও থামিয়ে থাকলে এবং Trakt-এর অবস্থান নতুন হলে KIPTV সেখান থেকে শুরু করে।",
+    "syncWatchlist": "ওয়াচলিস্ট সিঙ্ক করুন",
+    "syncWatchlistDesc": "Trakt ওয়াচলিস্ট আমার তালিকায় \"Trakt Watchlist\" ট্যাগ হয়, দুই দিকেই।",
+    "syncNow": "এখনই সিঙ্ক করুন",
+    "syncing": "সিঙ্ক হচ্ছে…",
+    "lastSync": "শেষ সিঙ্ক: {{date}}",
+    "neverSynced": "এখনও সিঙ্ক হয়নি।",
+    "unlink": "Trakt সরান",
+    "unlinkConfirm": "Trakt থেকে আনা দেখা হয়েছে ও Trakt Watchlist ট্যাগ মুছে যাবে। KIPTV-তে যা দেখেছেন তা থাকবে।",
+    "watchlistFullTitle": "ওয়াচলিস্ট পূর্ণ",
+    "watchlistFull": "Trakt ওয়াচলিস্ট বিনামূল্যের অ্যাকাউন্টের সীমায় পৌঁছেছে: শিরোনামটি শুধু KIPTV-তে থাকবে।",
+    "linkDescription": "trakt.tv-তে দেওয়ার কোড দেখায়।",
+    "accountDescription": "আপনার Trakt অ্যাকাউন্ট।",
+    "syncNowDescription": "দেখা হয়েছে, পুনরায় শুরুর অবস্থান ও ওয়াচলিস্ট Trakt থেকে এখনই হালনাগাদ করে।",
+    "unlinkDescription": "সংযোগ ও Trakt থেকে আনা তথ্য সরায়; KIPTV-র দেখা হয়েছে থাকে।",
+    "error": {
+      "notConfigured": "এই বিল্ডে Trakt কনফিগার করা নেই।",
+      "unauthorized": "Trakt সংযোগ প্রত্যাখ্যান করেছে: অ্যাকাউন্ট আবার যুক্ত করুন।",
+      "rateLimited": "Trakt-এ অনেক বেশি অনুরোধ: একটু পরে আবার চেষ্টা করুন।",
+      "network": "Trakt-এ পৌঁছানো যাচ্ছে না।",
+      "generic": "Trakt-এর সাথে যোগাযোগে ত্রুটি।"
+    },
+    "oneAppNotice": "বিনামূল্যের Trakt অ্যাকাউন্টে কেবল একটি অ্যাপ যুক্ত থাকতে পারে: আগে থেকে একটি যুক্ত থাকলে, এগোনোর আগে trakt.tv-তে সেটি সরিয়ে দিন।",
+    "askRatings": "রেটিং জিজ্ঞাসা করুন",
+    "askRatingsDesc": "সিনেমা বা পর্ব শেষ হলে ১ থেকে ১০ এর রেটিং জিজ্ঞাসা করে Trakt-এ পাঠায়।",
+    "playlists": "প্লেলিস্ট",
+    "playlistsDesc": "কোন প্লেলিস্টে ইন্টিগ্রেশন প্রযোজ্য",
+    "playlistsAll": "সব প্লেলিস্ট",
+    "playlistsAllValue": "সব",
+    "playlistsCount": "{{count}}টি প্লেলিস্ট",
+    "playlistsFooter": "বাদ দেওয়া প্লেলিস্টে KIPTV Trakt-এ কিছু পাঠায় না এবং Trakt থেকে আনা ডেটা মুছে ফেলা হয়। KIPTV-তে যা দেখেছেন তা থাকবে।",
+    "playlistExcluded": "এই প্লেলিস্ট Trakt ইন্টিগ্রেশন থেকে বাদ দেওয়া আছে।",
+    "rateTitle": "{{title}}-কে কত রেটিং দেবেন?",
+    "rateSubtitle": "রেটিং আপনার Trakt অ্যাকাউন্টে যায়।",
+    "rateSkip": "এখন নয়",
+    "rateEpisode": "পর্ব মূল্যায়ন করুন",
+    "rateSent": "রেটিং Trakt-এ পাঠানো হয়েছে"
+  }
+}

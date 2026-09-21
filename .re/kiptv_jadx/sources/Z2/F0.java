@@ -1,0 +1,106 @@
+package Z2;
+
+/* JADX INFO: loaded from: classes.dex */
+public abstract class F0 {
+
+    /* JADX INFO: renamed from: a, reason: collision with root package name */
+    public static final java.util.HashMap f12670a;
+
+    static {
+        java.util.HashMap map = new java.util.HashMap(47);
+        f12670a = map;
+        Y6.f.z(-984833, map, "aliceblue", -332841, "antiquewhite");
+        map.put("aqua", -16711681);
+        map.put("aquamarine", -8388652);
+        Y6.f.z(-983041, map, "azure", -657956, "beige");
+        Y6.f.z(-6972, map, "bisque", -16777216, "black");
+        Y6.f.z(-5171, map, "blanchedalmond", -16776961, "blue");
+        Y6.f.z(-7722014, map, "blueviolet", -5952982, "brown");
+        Y6.f.z(-2180985, map, "burlywood", -10510688, "cadetblue");
+        Y6.f.z(-8388864, map, "chartreuse", -2987746, "chocolate");
+        Y6.f.z(-32944, map, "coral", -10185235, "cornflowerblue");
+        Y6.f.z(-1828, map, "cornsilk", -2354116, "crimson");
+        map.put("cyan", -16711681);
+        map.put("darkblue", -16777077);
+        Y6.f.z(-16741493, map, "darkcyan", -4684277, "darkgoldenrod");
+        map.put("darkgray", -5658199);
+        map.put("darkgreen", -16751616);
+        map.put("darkgrey", -5658199);
+        map.put("darkkhaki", -4343957);
+        Y6.f.z(-7667573, map, "darkmagenta", -11179217, "darkolivegreen");
+        Y6.f.z(-29696, map, "darkorange", -6737204, "darkorchid");
+        Y6.f.z(-7667712, map, "darkred", -1468806, "darksalmon");
+        Y6.f.z(-7357297, map, "darkseagreen", -12042869, "darkslateblue");
+        map.put("darkslategray", -13676721);
+        map.put("darkslategrey", -13676721);
+        map.put("darkturquoise", -16724271);
+        map.put("darkviolet", -7077677);
+        Y6.f.z(-60269, map, "deeppink", -16728065, "deepskyblue");
+        map.put("dimgray", -9868951);
+        map.put("dimgrey", -9868951);
+        map.put("dodgerblue", -14774017);
+        map.put("firebrick", -5103070);
+        Y6.f.z(-1296, map, "floralwhite", -14513374, "forestgreen");
+        map.put("fuchsia", -65281);
+        map.put("gainsboro", -2302756);
+        Y6.f.z(-460545, map, "ghostwhite", -10496, "gold");
+        map.put("goldenrod", -2448096);
+        map.put("gray", -8355712);
+        Y6.f.z(-16744448, map, "green", -5374161, "greenyellow");
+        map.put("grey", -8355712);
+        map.put("honeydew", -983056);
+        Y6.f.z(-38476, map, "hotpink", -3318692, "indianred");
+        Y6.f.z(-11861886, map, "indigo", -16, "ivory");
+        Y6.f.z(-989556, map, "khaki", -1644806, "lavender");
+        Y6.f.z(-3851, map, "lavenderblush", -8586240, "lawngreen");
+        Y6.f.z(-1331, map, "lemonchiffon", -5383962, "lightblue");
+        Y6.f.z(-1015680, map, "lightcoral", -2031617, "lightcyan");
+        map.put("lightgoldenrodyellow", -329006);
+        map.put("lightgray", -2894893);
+        map.put("lightgreen", -7278960);
+        map.put("lightgrey", -2894893);
+        Y6.f.z(-18751, map, "lightpink", -24454, "lightsalmon");
+        Y6.f.z(-14634326, map, "lightseagreen", -7876870, "lightskyblue");
+        map.put("lightslategray", -8943463);
+        map.put("lightslategrey", -8943463);
+        map.put("lightsteelblue", -5192482);
+        map.put("lightyellow", -32);
+        Y6.f.z(-16711936, map, "lime", -13447886, "limegreen");
+        map.put("linen", -331546);
+        map.put("magenta", -65281);
+        Y6.f.z(-8388608, map, "maroon", -10039894, "mediumaquamarine");
+        Y6.f.z(-16777011, map, "mediumblue", -4565549, "mediumorchid");
+        Y6.f.z(-7114533, map, "mediumpurple", -12799119, "mediumseagreen");
+        Y6.f.z(-8689426, map, "mediumslateblue", -16713062, "mediumspringgreen");
+        Y6.f.z(-12004916, map, "mediumturquoise", -3730043, "mediumvioletred");
+        Y6.f.z(-15132304, map, "midnightblue", -655366, "mintcream");
+        Y6.f.z(-6943, map, "mistyrose", -6987, "moccasin");
+        Y6.f.z(-8531, map, "navajowhite", -16777088, "navy");
+        Y6.f.z(-133658, map, "oldlace", -8355840, "olive");
+        Y6.f.z(-9728477, map, "olivedrab", -23296, "orange");
+        Y6.f.z(-47872, map, "orangered", -2461482, "orchid");
+        Y6.f.z(-1120086, map, "palegoldenrod", -6751336, "palegreen");
+        Y6.f.z(-5247250, map, "paleturquoise", -2396013, "palevioletred");
+        Y6.f.z(-4139, map, "papayawhip", -9543, "peachpuff");
+        Y6.f.z(-3308225, map, "peru", -16181, "pink");
+        Y6.f.z(-2252579, map, "plum", -5185306, "powderblue");
+        Y6.f.z(-8388480, map, "purple", -10079335, "rebeccapurple");
+        Y6.f.z(-65536, map, "red", -4419697, "rosybrown");
+        Y6.f.z(-12490271, map, "royalblue", -7650029, "saddlebrown");
+        Y6.f.z(-360334, map, "salmon", -744352, "sandybrown");
+        Y6.f.z(-13726889, map, "seagreen", -2578, "seashell");
+        Y6.f.z(-6270419, map, "sienna", -4144960, "silver");
+        Y6.f.z(-7876885, map, "skyblue", -9807155, "slateblue");
+        map.put("slategray", -9404272);
+        map.put("slategrey", -9404272);
+        map.put("snow", -1286);
+        map.put("springgreen", -16711809);
+        Y6.f.z(-12156236, map, "steelblue", -2968436, "tan");
+        Y6.f.z(-16744320, map, "teal", -2572328, "thistle");
+        Y6.f.z(-40121, map, "tomato", -12525360, "turquoise");
+        Y6.f.z(-1146130, map, "violet", -663885, "wheat");
+        Y6.f.z(-1, map, "white", -657931, "whitesmoke");
+        Y6.f.z(-256, map, "yellow", -6632142, "yellowgreen");
+        map.put("transparent", 0);
+    }
+}

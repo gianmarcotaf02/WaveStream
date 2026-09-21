@@ -1,0 +1,352 @@
+package androidx.media3.container;
+
+/* JADX INFO: loaded from: classes.dex */
+public final class ObuParser {
+    public static final int OBU_FRAME = 6;
+    public static final int OBU_FRAME_HEADER = 3;
+    public static final int OBU_METADATA = 5;
+    public static final int OBU_PADDING = 15;
+    public static final int OBU_SEQUENCE_HEADER = 1;
+    public static final int OBU_TEMPORAL_DELIMITER = 2;
+
+    public static final class FrameHeader {
+        private static final int FRAME_TYPE_INTRA_ONLY_FRAME = 2;
+        private static final int FRAME_TYPE_KEY_FRAME = 0;
+        private static final int FRAME_TYPE_SWITCH_FRAME = 3;
+        private static final int PROBE_BYTES = 4;
+        private final boolean isDependedOn;
+
+        private FrameHeader(androidx.media3.container.ObuParser.SequenceHeader sequenceHeader, androidx.media3.container.ObuParser.Obu obu) throws androidx.media3.container.ObuParser.NotYetImplementedException {
+            int i3 = obu.type;
+            com.google.android.gms.internal.play_billing.AbstractC1864o0.L(i3 == 6 || i3 == 3);
+            byte[] bArr = new byte[java.lang.Math.min(4, obu.payload.remaining())];
+            obu.payload.asReadOnlyBuffer().get(bArr);
+            androidx.media3.common.util.ParsableBitArray parsableBitArray = new androidx.media3.common.util.ParsableBitArray(bArr);
+            androidx.media3.container.ObuParser.throwWhenFeatureRequired(sequenceHeader.reducedStillPictureHeader);
+            if (parsableBitArray.readBit()) {
+                this.isDependedOn = false;
+                return;
+            }
+            int bits = parsableBitArray.readBits(2);
+            boolean bit = parsableBitArray.readBit();
+            androidx.media3.container.ObuParser.throwWhenFeatureRequired(sequenceHeader.decoderModelInfoPresentFlag);
+            if (!bit) {
+                this.isDependedOn = true;
+                return;
+            }
+            boolean bit2 = (bits == 3 || bits == 0) ? true : parsableBitArray.readBit();
+            parsableBitArray.skipBit();
+            androidx.media3.container.ObuParser.throwWhenFeatureRequired(!sequenceHeader.seqForceScreenContentTools);
+            if (parsableBitArray.readBit()) {
+                androidx.media3.container.ObuParser.throwWhenFeatureRequired(!sequenceHeader.seqForceIntegerMv);
+                parsableBitArray.skipBit();
+            }
+            androidx.media3.container.ObuParser.throwWhenFeatureRequired(sequenceHeader.frameIdNumbersPresentFlag);
+            if (bits != 3) {
+                parsableBitArray.skipBit();
+            }
+            parsableBitArray.skipBits(sequenceHeader.orderHintBits);
+            if (bits != 2 && bits != 0 && !bit2) {
+                parsableBitArray.skipBits(3);
+            }
+            this.isDependedOn = ((bits == 3 || bits == 0) ? 255 : parsableBitArray.readBits(8)) != 0;
+        }
+
+        public static androidx.media3.container.ObuParser.FrameHeader parse(androidx.media3.container.ObuParser.SequenceHeader sequenceHeader, androidx.media3.container.ObuParser.Obu obu) {
+            try {
+                return new androidx.media3.container.ObuParser.FrameHeader(sequenceHeader, obu);
+            } catch (androidx.media3.container.ObuParser.NotYetImplementedException unused) {
+                return null;
+            }
+        }
+
+        public boolean isDependedOn() {
+            return this.isDependedOn;
+        }
+    }
+
+    public static class NotYetImplementedException extends java.lang.Exception {
+        private NotYetImplementedException() {
+        }
+    }
+
+    public static final class Obu {
+        public final java.nio.ByteBuffer payload;
+        public final int type;
+
+        private Obu(int i3, java.nio.ByteBuffer byteBuffer) {
+            this.type = i3;
+            this.payload = byteBuffer;
+        }
+    }
+
+    public static final class SequenceHeader {
+        public final int chromaSamplePosition;
+        public final byte colorPrimaries;
+        public final boolean decoderModelInfoPresentFlag;
+        public final boolean frameIdNumbersPresentFlag;
+        public final boolean highBitdepth;
+        public final int initialDisplayDelayMinus1;
+        public final boolean initialDisplayDelayPresentFlag;
+        public final byte matrixCoefficients;
+        public final boolean monochrome;
+        public final int orderHintBits;
+        public final boolean reducedStillPictureHeader;
+        public final boolean seqForceIntegerMv;
+        public final boolean seqForceScreenContentTools;
+        public final int seqLevelIdx0;
+        public final int seqProfile;
+        public final int seqTier0;
+        public final boolean subsamplingX;
+        public final boolean subsamplingY;
+        public final byte transferCharacteristics;
+        public final boolean twelveBit;
+
+        /* JADX WARN: Multi-variable type inference failed */
+        /* JADX WARN: Type inference failed for: r8v4, types: [int] */
+        /* JADX WARN: Type inference failed for: r8v5 */
+        /* JADX WARN: Type inference failed for: r8v6 */
+        private SequenceHeader(androidx.media3.container.ObuParser.Obu obu) {
+            int bits;
+            int bits2;
+            boolean bit;
+            ?? r9;
+            com.google.android.gms.internal.play_billing.AbstractC1864o0.L(obu.type == 1);
+            byte[] bArr = new byte[obu.payload.remaining()];
+            obu.payload.asReadOnlyBuffer().get(bArr);
+            androidx.media3.common.util.ParsableBitArray parsableBitArray = new androidx.media3.common.util.ParsableBitArray(bArr);
+            this.seqProfile = parsableBitArray.readBits(3);
+            parsableBitArray.skipBit();
+            boolean bit2 = parsableBitArray.readBit();
+            this.reducedStillPictureHeader = bit2;
+            if (bit2) {
+                bits2 = parsableBitArray.readBits(5);
+                this.decoderModelInfoPresentFlag = false;
+                this.initialDisplayDelayPresentFlag = false;
+                r9 = 0;
+                bits = 0;
+            } else {
+                if (parsableBitArray.readBit()) {
+                    skipTimingInfo(parsableBitArray);
+                    boolean bit3 = parsableBitArray.readBit();
+                    this.decoderModelInfoPresentFlag = bit3;
+                    if (bit3) {
+                        parsableBitArray.skipBits(47);
+                    }
+                } else {
+                    this.decoderModelInfoPresentFlag = false;
+                }
+                this.initialDisplayDelayPresentFlag = parsableBitArray.readBit();
+                int bits3 = parsableBitArray.readBits(5);
+                int bits4 = 0;
+                int i3 = 0;
+                boolean z6 = false;
+                bits = 0;
+                while (i3 <= bits3) {
+                    parsableBitArray.skipBits(12);
+                    if (i3 == 0) {
+                        bits4 = parsableBitArray.readBits(5);
+                        if (bits4 > 7) {
+                            bit = z6;
+                            bit = parsableBitArray.readBit();
+                        }
+                    } else if (parsableBitArray.readBits(5) > 7) {
+                        bit = z6;
+                        parsableBitArray.skipBit();
+                        bit = z6;
+                    }
+                    bit = z6;
+                    bit = z6;
+                    if (this.decoderModelInfoPresentFlag) {
+                        parsableBitArray.skipBit();
+                    }
+                    if (this.initialDisplayDelayPresentFlag && parsableBitArray.readBit()) {
+                        if (i3 == 0) {
+                            bits = parsableBitArray.readBits(4);
+                        } else {
+                            parsableBitArray.skipBits(4);
+                        }
+                    }
+                    i3++;
+                    z6 = bit;
+                }
+                bits2 = bits4;
+                r9 = z6;
+            }
+            int bits5 = parsableBitArray.readBits(4);
+            int bits6 = parsableBitArray.readBits(4);
+            parsableBitArray.skipBits(bits5 + 1);
+            parsableBitArray.skipBits(bits6 + 1);
+            if (this.reducedStillPictureHeader) {
+                this.frameIdNumbersPresentFlag = false;
+            } else {
+                this.frameIdNumbersPresentFlag = parsableBitArray.readBit();
+            }
+            if (this.frameIdNumbersPresentFlag) {
+                parsableBitArray.skipBits(4);
+                parsableBitArray.skipBits(3);
+            }
+            parsableBitArray.skipBits(3);
+            if (this.reducedStillPictureHeader) {
+                this.seqForceIntegerMv = true;
+                this.seqForceScreenContentTools = true;
+                this.orderHintBits = 0;
+            } else {
+                parsableBitArray.skipBits(4);
+                boolean bit4 = parsableBitArray.readBit();
+                if (bit4) {
+                    parsableBitArray.skipBits(2);
+                }
+                if (parsableBitArray.readBit()) {
+                    this.seqForceScreenContentTools = true;
+                } else {
+                    this.seqForceScreenContentTools = parsableBitArray.readBit();
+                }
+                if (!this.seqForceScreenContentTools || parsableBitArray.readBit()) {
+                    this.seqForceIntegerMv = true;
+                } else {
+                    this.seqForceIntegerMv = parsableBitArray.readBit();
+                }
+                if (bit4) {
+                    this.orderHintBits = parsableBitArray.readBits(3) + 1;
+                } else {
+                    this.orderHintBits = 0;
+                }
+            }
+            this.seqLevelIdx0 = bits2;
+            this.seqTier0 = r9;
+            this.initialDisplayDelayMinus1 = bits;
+            parsableBitArray.skipBits(3);
+            boolean bit5 = parsableBitArray.readBit();
+            this.highBitdepth = bit5;
+            if (this.seqProfile == 2 && bit5) {
+                this.twelveBit = parsableBitArray.readBit();
+            } else {
+                this.twelveBit = false;
+            }
+            if (this.seqProfile != 1) {
+                this.monochrome = parsableBitArray.readBit();
+            } else {
+                this.monochrome = false;
+            }
+            if (parsableBitArray.readBit()) {
+                this.colorPrimaries = (byte) parsableBitArray.readBits(8);
+                this.transferCharacteristics = (byte) parsableBitArray.readBits(8);
+                this.matrixCoefficients = (byte) parsableBitArray.readBits(8);
+            } else {
+                this.colorPrimaries = (byte) 0;
+                this.transferCharacteristics = (byte) 0;
+                this.matrixCoefficients = (byte) 0;
+            }
+            if (this.monochrome) {
+                parsableBitArray.skipBit();
+                this.subsamplingX = false;
+                this.subsamplingY = false;
+                this.chromaSamplePosition = 0;
+            } else if (this.colorPrimaries == 1 && this.transferCharacteristics == 13 && this.matrixCoefficients == 0) {
+                this.subsamplingX = false;
+                this.subsamplingY = false;
+                this.chromaSamplePosition = 0;
+            } else {
+                parsableBitArray.skipBit();
+                int i9 = this.seqProfile;
+                if (i9 == 0) {
+                    this.subsamplingX = true;
+                    this.subsamplingY = true;
+                } else if (i9 == 1) {
+                    this.subsamplingX = false;
+                    this.subsamplingY = false;
+                } else if (this.twelveBit) {
+                    boolean bit6 = parsableBitArray.readBit();
+                    this.subsamplingX = bit6;
+                    if (bit6) {
+                        this.subsamplingY = parsableBitArray.readBit();
+                    } else {
+                        this.subsamplingY = false;
+                    }
+                } else {
+                    this.subsamplingX = true;
+                    this.subsamplingY = false;
+                }
+                if (this.subsamplingX && this.subsamplingY) {
+                    this.chromaSamplePosition = parsableBitArray.readBits(2);
+                } else {
+                    this.chromaSamplePosition = 0;
+                }
+            }
+            parsableBitArray.skipBit();
+        }
+
+        public static androidx.media3.container.ObuParser.SequenceHeader parse(androidx.media3.container.ObuParser.Obu obu) {
+            try {
+                return new androidx.media3.container.ObuParser.SequenceHeader(obu);
+            } catch (androidx.media3.container.ObuParser.NotYetImplementedException unused) {
+                return null;
+            }
+        }
+
+        private static void skipTimingInfo(androidx.media3.common.util.ParsableBitArray parsableBitArray) {
+            parsableBitArray.skipBits(64);
+            if (parsableBitArray.readBit()) {
+                androidx.media3.container.ObuParser.skipUvlc(parsableBitArray);
+            }
+        }
+    }
+
+    private ObuParser() {
+    }
+
+    private static int leb128(java.nio.ByteBuffer byteBuffer) {
+        int i3 = 0;
+        for (int i9 = 0; i9 < 8; i9++) {
+            byte b9 = byteBuffer.get();
+            i3 |= (b9 & 127) << (i9 * 7);
+            if ((b9 & 128) == 0) {
+                return i3;
+            }
+        }
+        return i3;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static void skipUvlc(androidx.media3.common.util.ParsableBitArray parsableBitArray) {
+        int i3 = 0;
+        while (!parsableBitArray.readBit()) {
+            i3++;
+        }
+        if (i3 < 32) {
+            parsableBitArray.skipBits(i3);
+        }
+    }
+
+    public static java.util.List<androidx.media3.container.ObuParser.Obu> split(java.nio.ByteBuffer byteBuffer) {
+        java.nio.ByteBuffer byteBufferAsReadOnlyBuffer = byteBuffer.asReadOnlyBuffer();
+        java.util.ArrayList arrayList = new java.util.ArrayList();
+        while (byteBufferAsReadOnlyBuffer.hasRemaining()) {
+            try {
+                byte b9 = byteBufferAsReadOnlyBuffer.get();
+                int i3 = (b9 >> 3) & 15;
+                if (((b9 >> 2) & 1) != 0) {
+                    byteBufferAsReadOnlyBuffer.get();
+                }
+                int iLeb128 = ((b9 >> 1) & 1) != 0 ? leb128(byteBufferAsReadOnlyBuffer) : byteBufferAsReadOnlyBuffer.remaining();
+                if (byteBufferAsReadOnlyBuffer.position() + iLeb128 > byteBufferAsReadOnlyBuffer.limit()) {
+                    break;
+                }
+                java.nio.ByteBuffer byteBufferDuplicate = byteBufferAsReadOnlyBuffer.duplicate();
+                byteBufferDuplicate.limit(byteBufferAsReadOnlyBuffer.position() + iLeb128);
+                arrayList.add(new androidx.media3.container.ObuParser.Obu(i3, byteBufferDuplicate));
+                byteBufferAsReadOnlyBuffer.position(byteBufferAsReadOnlyBuffer.position() + iLeb128);
+            } catch (java.nio.BufferUnderflowException unused) {
+            }
+        }
+        return arrayList;
+    }
+
+    /* JADX INFO: Access modifiers changed from: private */
+    public static void throwWhenFeatureRequired(boolean z6) throws androidx.media3.container.ObuParser.NotYetImplementedException {
+        if (z6) {
+            throw new androidx.media3.container.ObuParser.NotYetImplementedException();
+        }
+    }
+}

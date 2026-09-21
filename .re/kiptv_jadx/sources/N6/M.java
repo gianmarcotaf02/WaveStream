@@ -1,0 +1,5 @@
+package N6;
+
+/* JADX INFO: loaded from: classes4.dex */
+public interface M extends N6.InterfaceC0706u {
+}

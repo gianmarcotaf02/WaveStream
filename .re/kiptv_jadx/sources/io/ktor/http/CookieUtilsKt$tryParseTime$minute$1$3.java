@@ -1,0 +1,16 @@
+package io.ktor.http;
+
+/* JADX INFO: loaded from: classes4.dex */
+@kotlin.Metadata(k = 3, mv = {2, 1, 0}, xi = 176)
+public final class CookieUtilsKt$tryParseTime$minute$1$3 implements p194x6.j {
+    public static final io.ktor.http.CookieUtilsKt$tryParseTime$minute$1$3 INSTANCE = new io.ktor.http.CookieUtilsKt$tryParseTime$minute$1$3();
+
+    public final java.lang.Boolean invoke(char c9) {
+        return java.lang.Boolean.valueOf(io.ktor.http.CookieUtilsKt.isDigit(c9));
+    }
+
+    @Override // p194x6.j
+    public /* bridge */ /* synthetic */ java.lang.Object invoke(java.lang.Object obj) {
+        return invoke(((java.lang.Character) obj).charValue());
+    }
+}
