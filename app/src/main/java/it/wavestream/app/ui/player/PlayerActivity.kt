@@ -103,6 +103,7 @@ class PlayerActivity : ComponentActivity() {
     private var seriesIntroReference: MediaSegment? = null
     private var introFingerprintActive = false
     private val _showSkipIntro = mutableStateOf(false)
+    private val _showSkipCredits = mutableStateOf(false)
     // Fase 2: esito del monitor audio, passato al watchdog come corroborazione.
     private val _audioCandidate = mutableStateOf(false)
     // Generazione di sessione: si incrementa ad ogni salto indietro e fa ripartire/re-armare
@@ -623,6 +624,8 @@ class PlayerActivity : ComponentActivity() {
                     onMarkIntro = { markIntroNow() },
                     showSkipIntro = _showSkipIntro.value,
                     onSkipIntro = { skipIntro() },
+                    showSkipCredits = _showSkipCredits.value,
+                    onSkipCredits = { skipCredits() },
                     audioCandidate = _audioCandidate.value,
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
@@ -1328,6 +1331,17 @@ class PlayerActivity : ComponentActivity() {
                         _showSkipIntro.value = false
                     }
 
+                    // Titoli di coda: mostra "Salta titoli di coda" mentre si è dentro
+                    // la finestra nota (IntroDB/marker). Indipendente dall'autoplay.
+                    val cStart = creditsMarkerStartMs
+                    val cEnd = creditsMarkerEndMs
+                    if (cStart != null && cEnd != null && cEnd > cStart) {
+                        val p = player.currentPosition
+                        _showSkipCredits.value = p >= cStart && p < cEnd - 1_500
+                    } else if (_showSkipCredits.value) {
+                        _showSkipCredits.value = false
+                    }
+
                     // Fase 2: arma il monitor audio solo nella finestra finale del VOD.
                     val inCreditsWindow = contentType != ContentType.CHANNEL &&
                         (player.duration - player.currentPosition) <= CreditsDetector.WINDOW_MS
@@ -1433,6 +1447,7 @@ class PlayerActivity : ComponentActivity() {
         // Tornando indietro il meccanismo si ri-arma: l'eventuale "ignora" decade.
         creditsDismissed = false
         nextEpisodeUnavailable = false
+        _showSkipCredits.value = false
         creditsAudioMonitor.reset()
         _audioCandidate.value = false
         hideNextEpisodeOverlay() // resetta nextEpisodeTriggered e creditsDetected
@@ -1469,6 +1484,7 @@ class PlayerActivity : ComponentActivity() {
         introFingerprintActive = false
         creditsAudioMonitor.setIntroReference(null)
         _showSkipIntro.value = false
+        _showSkipCredits.value = false
         creditsAudioMonitor.reset()
         creditsAudioMonitor.windowActive = false
         _audioCandidate.value = false
@@ -1701,6 +1717,23 @@ class PlayerActivity : ComponentActivity() {
             player.seekTo(end)
         }
         _showSkipIntro.value = false
+    }
+
+    /**
+     * "Salta titoli di coda": se la fine dei credits è nota salta lì, altrimenti passa
+     * direttamente all'episodio successivo.
+     */
+    private fun skipCredits() {
+        resetAutoPlayCounter()
+        val end = creditsMarkerEndMs
+        if (end != null && ::player.isInitialized && player.duration > 0) {
+            android.util.Log.i("CreditsDiag", "skipCredits to=$end")
+            player.seekTo(end.coerceAtMost(player.duration))
+        } else {
+            android.util.Log.i("CreditsDiag", "skipCredits -> next episode (end unknown)")
+            triggerNextEpisode(fromCredits = true)
+        }
+        _showSkipCredits.value = false
     }
 
     /**

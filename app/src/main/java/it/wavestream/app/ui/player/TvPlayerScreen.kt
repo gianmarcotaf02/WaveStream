@@ -127,6 +127,9 @@ fun TvPlayerScreen(
     onMarkIntro: () -> Unit = {},
     showSkipIntro: Boolean = false,
     onSkipIntro: () -> Unit = {},
+    /** Pulsante "Salta titoli di coda": mostrato mentre si è dentro i credits noti. */
+    showSkipCredits: Boolean = false,
+    onSkipCredits: () -> Unit = {},
     /** Segnale di corroborazione dal monitor audio (Fase 2). */
     audioCandidate: Boolean = false,
     cumulativeSeekSeconds: Int = 0,
@@ -413,6 +416,17 @@ fun TvPlayerScreen(
         if (showSkipIntro && !isMiniPlayer && !isLiveChannel) {
             SkipIntroOverlay(
                 onClick = onSkipIntro,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(32.dp)
+            )
+        }
+
+        // Skip credits overlay (titoli di coda noti da marker/IntroDB)
+        if (showSkipCredits && !isMiniPlayer && !isLiveChannel) {
+            SkipIntroOverlay(
+                onClick = onSkipCredits,
+                label = "Salta titoli di coda",
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(32.dp)
@@ -2384,7 +2398,8 @@ private fun ModernLoadingIndicator() {
 @Composable
 private fun SkipIntroOverlay(
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    label: String = "Salta sigla"
 ) {
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
@@ -2412,7 +2427,7 @@ private fun SkipIntroOverlay(
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text("Salta sigla", fontWeight = FontWeight.SemiBold)
+        Text(label, fontWeight = FontWeight.SemiBold)
     }
 }
 
