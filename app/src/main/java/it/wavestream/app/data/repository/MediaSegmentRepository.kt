@@ -106,7 +106,7 @@ class MediaSegmentRepository @Inject constructor(
         val isEpisode = season != null && episode != null && season >= 1 && episode >= 1
         if (!isMovie && !isEpisode) return null
 
-        val remote: IntroDbSegment? = try {
+        val remote = try {
             val response = introDbService.getSegments(
                 imdbId = imdb,
                 season = if (isMovie) null else season,
