@@ -527,10 +527,11 @@ private fun MainActivityScreen(
     // ---------------------------------------------------------------------
     // Fase 1b — backdrop immersivo a TUTTO schermo.
     // L'hero non è più ritagliato in una fascia alta 340dp: l'immagine copre anche
-    // rail e top bar (che sono resi traslucidi). Attivo solo sulla Home, perché è
-    // l'unica tab con un hero a cui agganciarsi.
+    // rail e top bar (che sono resi traslucidi).
+    // FIX — attivo su TUTTI i tab con un hero, non solo sulla Home: da Fase 1b la
+    // fascia hero di TvHomeScreen non disegna più l'immagine, quindi limitarlo a Home
+    // lasciava senza backdrop i tab Film / Serie / Preferiti / Liste / Cronologia.
     // ---------------------------------------------------------------------
-    val immersiveHome = homeState.isHomeTab && !homeState.isGridMode && !homeState.isLoading
     val ambientHero = remember(
         homeState.heroItems,
         homeState.serieAMatchHeroes,
@@ -539,9 +540,11 @@ private fun MainActivityScreen(
     ) {
         resolveCurrentHero(homeState)
     }
-    // Su Home lo sfondo radice deve essere trasparente, altrimenti il gradiente
-    // opaco coprirebbe il backdrop.
-    val rootBackground: Brush = if (immersiveHome) {
+    val ambientHeroActive = ambientHero != null &&
+        !homeState.isGridMode && !homeState.isLoading
+    // Sfondo radice trasparente quando c'è il backdrop, altrimenti il gradiente
+    // opaco coprirebbe l'immagine.
+    val rootBackground: Brush = if (ambientHeroActive) {
         Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
     } else {
         Brush.verticalGradient(
@@ -555,7 +558,7 @@ private fun MainActivityScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        if (immersiveHome && ambientHero != null) {
+        if (ambientHeroActive && ambientHero != null) {
             HeroAmbientBackdrop(
                 hero = ambientHero,
                 serieAMatch = homeState.serieAMatches.firstOrNull {

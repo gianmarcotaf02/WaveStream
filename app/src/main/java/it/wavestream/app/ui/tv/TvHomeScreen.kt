@@ -216,10 +216,15 @@ private fun TvHomeScreenContent(
         List(state.carouselRows.size) { FocusRequester() }
     }
     
-    // Su Home il backdrop è disegnato a TUTTO schermo da MainActivity, dietro la
-    // rail e la top bar: qui lo sfondo deve restare trasparente per lasciarlo
-    // vedere. Sugli altri tab (e in griglia) resta il nero pieno di prima.
-    val screenBackground = if (state.isHomeTab && !state.isGridMode && !state.isLoading) {
+    // Il backdrop dell'hero è disegnato a TUTTO schermo da MainActivity su ogni tab
+    // che ha un hero (FIX): qui lo sfondo deve restare trasparente per lasciarlo
+    // vedere. Senza hero (o in griglia) resta il nero pieno di prima.
+    val hasHero = if (state.isHomeTab) {
+        state.heroItems.isNotEmpty() || state.serieAMatchHeroes.isNotEmpty()
+    } else {
+        state.heroItems.isNotEmpty()
+    }
+    val screenBackground = if (hasHero && !state.isGridMode && !state.isLoading) {
         Color.Transparent
     } else {
         Color.Black
