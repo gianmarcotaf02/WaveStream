@@ -100,6 +100,9 @@ xtream_checker.py
 
 # Signing credentials (do not commit)
 keystore.properties
+# Keystore di firma release — MAI versionare (repo pubblico: il keystore e' gia' stato
+# esposto su origin/main fino al 2026-09-21; vedi wavestream_kiptv_teardown.md)
+/key
 
 # google-services.json della variante android7 (chiavi) — non deve MAI finire in git
 app/src/android7/google-services.json
