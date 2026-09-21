@@ -1781,7 +1781,7 @@ private fun ModernSleepTimerButton(
 
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isFocused -> WaveStreamColors.Accent
+            isFocused -> GlassTokens.SurfaceFillFocused
             isActive -> Color.White.copy(alpha = 0.25f)
             else -> Color.Transparent
         },
@@ -1790,6 +1790,7 @@ private fun ModernSleepTimerButton(
 
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.05f else 1f,
+        animationSpec = AppAnimations.SpringGlass,
         label = "sleepScale"
     )
 
@@ -1811,6 +1812,11 @@ private fun ModernSleepTimerButton(
             }
             .clip(RoundedCornerShape(18.dp))
             .background(backgroundColor)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = RoundedCornerShape(18.dp)
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1901,13 +1907,15 @@ private fun SleepTimerDialog(
                 },
             contentAlignment = Alignment.Center
         ) {
+            GlassSurface(
+                shape = RoundedCornerShape(20.dp),
+                fill = GlassTokens.SurfaceFillStrong,
+                stroke = GlassTokens.StrokeGradient,
+                strokeWidth = 1.dp,
+                modifier = Modifier.width(380.dp)
+            ) {
             Column(
-                modifier = Modifier
-                    .width(380.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color(0xF20D0D0D))
-                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
-                    .padding(20.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Row(
@@ -1943,6 +1951,7 @@ private fun SleepTimerDialog(
                     )
                 }
             }
+            }
         }
     }
 
@@ -1977,7 +1986,7 @@ private fun SleepTimerOptionRow(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.06f),
+        targetValue = if (isFocused) GlassTokens.SurfaceFillFocused else Color.White.copy(alpha = 0.06f),
         label = "sleepOptionBg"
     )
 
@@ -1987,6 +1996,11 @@ private fun SleepTimerOptionRow(
             .height(48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
