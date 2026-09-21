@@ -10,6 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import it.wavestream.app.ai.OpenRouterService
 import it.wavestream.app.ai.WikipediaService
 import it.wavestream.app.data.api.FootballDataService
+import it.wavestream.app.data.api.IntroDbService
 import it.wavestream.app.data.api.SofascoreService
 import it.wavestream.app.data.api.TMDBApiService
 import okhttp3.Cache
@@ -85,6 +86,21 @@ object NetworkModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(TMDBApiService::class.java)
+    }
+
+    /**
+     * IntroDB: letture anonime (nessuna API key). Client condiviso, cache HTTP standard
+     * già fornita da [provideOkHttpClient].
+     */
+    @Provides
+    @Singleton
+    fun provideIntroDbService(okHttpClient: OkHttpClient, moshi: Moshi): IntroDbService {
+        return Retrofit.Builder()
+            .baseUrl(IntroDbService.BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(IntroDbService::class.java)
     }
 
     @Provides
