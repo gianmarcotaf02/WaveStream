@@ -76,6 +76,8 @@ import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -294,7 +296,7 @@ class SearchActivity : ComponentActivity() {
     private fun SearchScreenContent() {
         var query by remember { mutableStateOf("") }
         var results by remember { mutableStateOf<List<SearchResultItem>>(emptyList()) }
-        var suggestions by remember { mutableStateOf<List<SearchResultItem>>(emptyList()) }
+        var results by remember { mutableStateOf<List<SearchResultItem>>(emptyList()) }
         var isLoading by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
         val context = LocalContext.current
@@ -333,27 +335,18 @@ class SearchActivity : ComponentActivity() {
         // schermata, e il limit non rendeva la query da 6 più veloce perché le
         // searchMovies/searchSeries/searchChannels restituiscono comunque tutti i
         // match e il limit agisce solo sul truncate finale.
+        // S0 — rimossa la computazione fuzzy: alimentava solo i suggerimenti, che
+        // non esistono più. Girava a ogni tasto e scansionava l'intero DB.
         LaunchedEffect(query) {
             val trimmed = query.trim()
             if (trimmed.length < 2) {
-                suggestions = emptyList()
                 results = emptyList()
                 isLoading = false
                 return@LaunchedEffect
             }
             isLoading = true
             delay(220)
-            val all = performSearch(trimmed, limit = 60)
-            val exact = all.take(6)
-            // Se i suggerimenti esatti sono pochi (o nulli, tipico di un typo),
-            // il "correttore" fuzzy li riempie con i titoli più vicini alla query,
-            // scartando quelli già presenti tra i risultati.
-            suggestions = if (exact.size < 6) {
-                (exact + findFuzzySuggestions(trimmed, already = all)).take(6)
-            } else {
-                exact
-            }
-            results = all
+            results = performSearch(trimmed, limit = 60)
             isLoading = false
         }
         
@@ -362,7 +355,7 @@ class SearchActivity : ComponentActivity() {
             onQueryChange = { query = it },
             onVoiceSearch = { startVoiceSearch() },
             results = results,
-            suggestions = suggestions,
+            results = results,
             isLoading = isLoading,
             focusRequester = focusRequester,
             onBackClick = { finish() },
@@ -394,9 +387,7 @@ class SearchActivity : ComponentActivity() {
                     toggleFavorite(item)
                     // Refresh results to update favorite status
                     if (query.trim().length >= 2) {
-                        val refreshed = performSearch(query.trim(), limit = 60)
-                        results = refreshed
-                        suggestions = refreshed.take(6)
+                        results = performSearch(query.trim(), limit = 60)
                     }
                     val message = if (!item.isFavorite) "Aggiunto ai preferiti" else "Rimosso dai preferiti"
                     android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show()
