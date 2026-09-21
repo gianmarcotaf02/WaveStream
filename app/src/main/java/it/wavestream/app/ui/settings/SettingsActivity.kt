@@ -161,7 +161,18 @@ class SettingsActivity : ComponentActivity() {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .background(WaveStreamColors.BackgroundPrimary)
+                .background(
+                    // Passo 1 — fondale coerente con la Home (MainActivity): stesso
+                    // gradiente. Prima era BackgroundPrimary a tinta piena, che rendeva
+                    // Impostazioni una schermata "piatta" rispetto al resto dell'app.
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            WaveStreamColors.Accent.copy(alpha = 0.045f),
+                            WaveStreamColors.GradientMiddle,
+                            WaveStreamColors.GradientBottom
+                        )
+                    )
+                )
         ) {
             // Sidebar
             SettingsSidebar(
@@ -264,10 +275,16 @@ private fun SettingsSidebar(
     Column(
         modifier = modifier
             .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        WaveStreamColors.BackgroundSecondary,
-                        WaveStreamColors.BackgroundDark
+                // Passo 1 — sidebar in vetro con BORDO MORBIDO.
+                // Prima: gradiente OPACO (BackgroundSecondary → BackgroundDark) con un
+                // limite netto a 350dp, che la faceva sembrare un pannello appoggiato
+                // sopra. Ora sfuma a trasparente sul bordo destro, come la rail della
+                // Home: nessun limite geometrico visibile.
+                Brush.horizontalGradient(
+                    colorStops = arrayOf(
+                        0.00f to WaveStreamColors.BackgroundSecondary.copy(alpha = 0.72f),
+                        0.60f to WaveStreamColors.BackgroundDark.copy(alpha = 0.45f),
+                        1.00f to Color.Transparent
                     )
                 )
             )
