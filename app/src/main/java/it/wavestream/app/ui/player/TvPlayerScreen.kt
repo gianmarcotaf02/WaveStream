@@ -1418,12 +1418,6 @@ private fun NetflixPlayPauseButton(
         label = "scale"
     )
     
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White,
-        animationSpec = tween(150),
-        label = "bg"
-    )
-    
     Box(
         modifier = Modifier
             .size(48.dp)
@@ -1432,7 +1426,12 @@ private fun NetflixPlayPauseButton(
                 scaleY = scale
             }
             .clip(CircleShape)
-            .background(backgroundColor)
+            .background(Color.White)
+            .border(
+                width = if (isFocused) 3.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = CircleShape
+            )
             .focusRequester(focusRequester)
             .focusable(interactionSource = interactionSource)
             .clickable(
@@ -1620,15 +1619,14 @@ private fun ModernPlayPauseButton(
         label = "scale"
     )
     
-    // Transparent by default, accent only on focus
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+        targetValue = if (isFocused) GlassTokens.SurfaceFillFocused else GlassTokens.SurfaceFill,
         animationSpec = tween(150),
         label = "bg"
     )
-    
+
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.4f),
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.25f),
         animationSpec = tween(150),
         label = "border"
     )
@@ -1681,14 +1679,10 @@ private fun ModernIconButton(
     
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.1f else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "scale"
     )
-    
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "bg"
-    )
-    
+
     Box(
         modifier = Modifier
             .size(size)
@@ -1697,7 +1691,12 @@ private fun ModernIconButton(
                 scaleY = scale
             }
             .clip(CircleShape)
-            .background(backgroundColor)
+            .background(if (isFocused) GlassTokens.SurfaceFillFocused else Color.Transparent)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = CircleShape
+            )
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .focusable(interactionSource = interactionSource)
             .clickable(
@@ -1987,9 +1986,9 @@ private fun ModernPillButton(
 
     GlassSurface(
         shape = RoundedCornerShape(20.dp),
-        fill = if (isFocused) GlassTokens.SurfaceFillStrong else GlassTokens.SurfaceFill,
-        stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
-        strokeWidth = if (isFocused) 2.dp else 1.dp,
+        fill = if (isFocused) GlassTokens.SurfaceFillFocused else Color.Transparent,
+        stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else SolidColor(Color.Transparent),
+        strokeWidth = if (isFocused) 1.5.dp else 0.dp,
         modifier = Modifier
             .graphicsLayer {
                 scaleX = scale
@@ -2026,16 +2025,16 @@ private fun ModernAudioButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.15f),
-        label = "bg"
-    )
-    
     Box {
         Row(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
-                .background(backgroundColor)
+                .background(if (isFocused) GlassTokens.SurfaceFillFocused else Color.Transparent)
+                .border(
+                    width = if (isFocused) 1.5.dp else 0.dp,
+                    color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                    shape = RoundedCornerShape(20.dp)
+                )
                 .focusable(interactionSource = interactionSource)
                 .clickable(
                     interactionSource = interactionSource,
@@ -2094,17 +2093,13 @@ private fun ModernAudioButton(
 private fun ModernPreviousButton(onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.15f),
-        label = "bg"
-    )
-    
+
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.05f else 1f,
+        animationSpec = AppAnimations.SpringGlass,
         label = "scale"
     )
-    
+
     Row(
         modifier = Modifier
             .graphicsLayer {
@@ -2112,7 +2107,12 @@ private fun ModernPreviousButton(onClick: () -> Unit) {
                 scaleY = scale
             }
             .clip(RoundedCornerShape(20.dp))
-            .background(backgroundColor)
+            .background(if (isFocused) GlassTokens.SurfaceFillFocused else Color.Transparent)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = RoundedCornerShape(20.dp)
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -2145,17 +2145,13 @@ private fun ModernPreviousButton(onClick: () -> Unit) {
 private fun ModernNextButton(onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.15f),
-        label = "bg"
-    )
-    
+
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.05f else 1f,
+        animationSpec = AppAnimations.SpringGlass,
         label = "scale"
     )
-    
+
     Row(
         modifier = Modifier
             .graphicsLayer {
@@ -2163,7 +2159,12 @@ private fun ModernNextButton(onClick: () -> Unit) {
                 scaleY = scale
             }
             .clip(RoundedCornerShape(20.dp))
-            .background(backgroundColor)
+            .background(if (isFocused) GlassTokens.SurfaceFillFocused else Color.Transparent)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = RoundedCornerShape(20.dp)
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
