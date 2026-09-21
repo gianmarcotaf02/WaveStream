@@ -1,0 +1,185 @@
+package com.revenuecat.purchases;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+import androidx.media3.container.NalUnitUtil;
+import kotlin.Metadata;
+import kotlin.jvm.internal.AbstractC2541f;
+import kotlin.jvm.internal.m;
+import p121o0.p;
+import v5.L;
+
+@Metadata(d1 = {"\u0000(\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0010\u000b\n\u0002\b\t\n\u0002\u0010\b\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\b\u000e\b\u0007\u0018\u0000 \u001f2\u00020\u0001:\u0001\u001fBE\b\u0000\u0012\b\b\u0002\u0010\u0003\u001a\u00020\u0002\u0012\b\b\u0002\u0010\u0004\u001a\u00020\u0002\u0012\b\b\u0002\u0010\u0005\u001a\u00020\u0002\u0012\b\b\u0002\u0010\u0006\u001a\u00020\u0002\u0012\b\b\u0002\u0010\u0007\u001a\u00020\u0002\u0012\b\b\u0002\u0010\b\u001a\u00020\u0002¢\u0006\u0004\b\t\u0010\nB\u0013\b\u0016\u0012\b\b\u0002\u0010\u0003\u001a\u00020\u0002¢\u0006\u0004\b\t\u0010\u000bJ\u0010\u0010\r\u001a\u00020\fHÖ\u0001¢\u0006\u0004\b\r\u0010\u000eJ \u0010\u0013\u001a\u00020\u00122\u0006\u0010\u0010\u001a\u00020\u000f2\u0006\u0010\u0011\u001a\u00020\fHÖ\u0001¢\u0006\u0004\b\u0013\u0010\u0014R\u0017\u0010\u0003\u001a\u00020\u00028\u0006¢\u0006\f\n\u0004\b\u0003\u0010\u0015\u001a\u0004\b\u0016\u0010\u0017R\u001a\u0010\u0004\u001a\u00020\u00028\u0000X\u0080\u0004¢\u0006\f\n\u0004\b\u0004\u0010\u0015\u001a\u0004\b\u0018\u0010\u0017R\u001a\u0010\u0005\u001a\u00020\u00028\u0000X\u0080\u0004¢\u0006\f\n\u0004\b\u0005\u0010\u0015\u001a\u0004\b\u0019\u0010\u0017R\u001a\u0010\u0006\u001a\u00020\u00028\u0000X\u0080\u0004¢\u0006\f\n\u0004\b\u0006\u0010\u0015\u001a\u0004\b\u001a\u0010\u0017R\u001a\u0010\u0007\u001a\u00020\u00028\u0000X\u0080\u0004¢\u0006\f\n\u0004\b\u0007\u0010\u0015\u001a\u0004\b\u001b\u0010\u0017R \u0010\b\u001a\u00020\u00028\u0006X\u0087\u0004¢\u0006\u0012\n\u0004\b\b\u0010\u0015\u0012\u0004\b\u001d\u0010\u001e\u001a\u0004\b\u001c\u0010\u0017¨\u0006 "}, d2 = {"Lcom/revenuecat/purchases/DangerousSettings;", "Landroid/os/Parcelable;", "", "autoSyncPurchases", "customEntitlementComputation", "uiPreviewMode", "applyObfuscatedAccountIdToSubscriptionChanges", "usesRemoteConfigAPISources", "useWorkflows", "<init>", "(ZZZZZZ)V", "(Z)V", "", "describeContents", "()I", "Landroid/os/Parcel;", "parcel", "flags", "Lh6/A;", "writeToParcel", "(Landroid/os/Parcel;I)V", "Z", "getAutoSyncPurchases", "()Z", "getCustomEntitlementComputation$purchases_defaultsRelease", "getUiPreviewMode$purchases_defaultsRelease", "getApplyObfuscatedAccountIdToSubscriptionChanges$purchases_defaultsRelease", "getUsesRemoteConfigAPISources$purchases_defaultsRelease", "getUseWorkflows", "getUseWorkflows$annotations", "()V", "Companion", "purchases_defaultsRelease"}, k = 1, mv = {1, 8, 0}, xi = NalUnitUtil.H265_NAL_UNIT_TYPE_UNSPECIFIED)
+public final class DangerousSettings implements Parcelable {
+    private final boolean applyObfuscatedAccountIdToSubscriptionChanges;
+    private final boolean autoSyncPurchases;
+    private final boolean customEntitlementComputation;
+    private final boolean uiPreviewMode;
+    private final boolean useWorkflows;
+    private final boolean usesRemoteConfigAPISources;
+
+    public static final Companion INSTANCE = new Companion(null);
+    public static final Parcelable.Creator<DangerousSettings> CREATOR = new Creator();
+
+    @Metadata(d1 = {"\u0000\u001a\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\u000b\n\u0000\b\u0086\u0003\u0018\u00002\u00020\u0001B\u0007\b\u0002¢\u0006\u0002\u0010\u0002J\b\u0010\u0003\u001a\u00020\u0004H\u0007J\u0012\u0010\u0005\u001a\u00020\u00042\b\b\u0002\u0010\u0006\u001a\u00020\u0007H\u0007¨\u0006\b"}, d2 = {"Lcom/revenuecat/purchases/DangerousSettings$Companion;", "", "()V", "forPreviewMode", "Lcom/revenuecat/purchases/DangerousSettings;", "forWorkflows", "autoSyncPurchases", "", "purchases_defaultsRelease"}, k = 1, mv = {1, 8, 0}, xi = NalUnitUtil.H265_NAL_UNIT_TYPE_UNSPECIFIED)
+    public static final class Companion {
+        public Companion(AbstractC2541f abstractC2541f) {
+            this();
+        }
+
+        public static DangerousSettings forWorkflows$default(Companion companion, boolean z6, int i3, Object obj) {
+            if ((i3 & 1) != 0) {
+                z6 = true;
+            }
+            return companion.forWorkflows(z6);
+        }
+
+        public final DangerousSettings forPreviewMode() {
+            return new DangerousSettings(false, false, true, false, false, false, 48, null);
+        }
+
+        public final DangerousSettings forWorkflows(boolean autoSyncPurchases) {
+            return new DangerousSettings(autoSyncPurchases, false, false, false, false, true, 16, null);
+        }
+
+        private Companion() {
+        }
+    }
+
+    @Metadata(k = 3, mv = {1, 8, 0}, xi = NalUnitUtil.H265_NAL_UNIT_TYPE_UNSPECIFIED)
+    public static final class Creator implements Parcelable.Creator<DangerousSettings> {
+        @Override
+        public final DangerousSettings createFromParcel(Parcel parcel) {
+            m.e(parcel, "parcel");
+            boolean z6 = false;
+            boolean z9 = true;
+            if (parcel.readInt() != 0) {
+                z6 = true;
+            }
+            if (parcel.readInt() == 0) {
+                z9 = z6;
+            }
+            if (parcel.readInt() == 0) {
+                z9 = z6;
+            }
+            if (parcel.readInt() == 0) {
+                z9 = z6;
+            }
+            if (parcel.readInt() == 0) {
+                z9 = z6;
+            }
+            return new DangerousSettings(z6, z9, z9, z9, z9, parcel.readInt() != 0);
+        }
+
+        @Override
+        public final DangerousSettings[] newArray(int i3) {
+            return new DangerousSettings[i3];
+        }
+    }
+
+    public DangerousSettings() {
+        this(false, false, false, false, false, false, 63, null);
+    }
+
+    public static final DangerousSettings forPreviewMode() {
+        return INSTANCE.forPreviewMode();
+    }
+
+    public static final DangerousSettings forWorkflows(boolean z6) {
+        return INSTANCE.forWorkflows(z6);
+    }
+
+    public static void getUseWorkflows$annotations() {
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof DangerousSettings)) {
+            return false;
+        }
+        DangerousSettings dangerousSettings = (DangerousSettings) obj;
+        return this.autoSyncPurchases == dangerousSettings.autoSyncPurchases && this.customEntitlementComputation == dangerousSettings.customEntitlementComputation && this.uiPreviewMode == dangerousSettings.uiPreviewMode && this.applyObfuscatedAccountIdToSubscriptionChanges == dangerousSettings.applyObfuscatedAccountIdToSubscriptionChanges && this.usesRemoteConfigAPISources == dangerousSettings.usesRemoteConfigAPISources && this.useWorkflows == dangerousSettings.useWorkflows;
+    }
+
+    public final boolean getApplyObfuscatedAccountIdToSubscriptionChanges() {
+        return this.applyObfuscatedAccountIdToSubscriptionChanges;
+    }
+
+    public final boolean getAutoSyncPurchases() {
+        return this.autoSyncPurchases;
+    }
+
+    public final boolean getCustomEntitlementComputation() {
+        return this.customEntitlementComputation;
+    }
+
+    public final boolean getUiPreviewMode() {
+        return this.uiPreviewMode;
+    }
+
+    public final boolean getUseWorkflows() {
+        return this.useWorkflows;
+    }
+
+    public final boolean getUsesRemoteConfigAPISources() {
+        return this.usesRemoteConfigAPISources;
+    }
+
+    public int hashCode() {
+        return Boolean.hashCode(this.useWorkflows) + p.f(p.f(p.f(p.f(Boolean.hashCode(this.autoSyncPurchases) * 31, 31, this.customEntitlementComputation), 31, this.uiPreviewMode), 31, this.applyObfuscatedAccountIdToSubscriptionChanges), 31, this.usesRemoteConfigAPISources);
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder("DangerousSettings(autoSyncPurchases=");
+        sb.append(this.autoSyncPurchases);
+        sb.append(", customEntitlementComputation=");
+        sb.append(this.customEntitlementComputation);
+        sb.append(", uiPreviewMode=");
+        sb.append(this.uiPreviewMode);
+        sb.append(", applyObfuscatedAccountIdToSubscriptionChanges=");
+        sb.append(this.applyObfuscatedAccountIdToSubscriptionChanges);
+        sb.append(", usesRemoteConfigAPISources=");
+        sb.append(this.usesRemoteConfigAPISources);
+        sb.append(", useWorkflows=");
+        return L.a(sb, this.useWorkflows, ')');
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int flags) {
+        m.e(parcel, "out");
+        parcel.writeInt(this.autoSyncPurchases ? 1 : 0);
+        parcel.writeInt(this.customEntitlementComputation ? 1 : 0);
+        parcel.writeInt(this.uiPreviewMode ? 1 : 0);
+        parcel.writeInt(this.applyObfuscatedAccountIdToSubscriptionChanges ? 1 : 0);
+        parcel.writeInt(this.usesRemoteConfigAPISources ? 1 : 0);
+        parcel.writeInt(this.useWorkflows ? 1 : 0);
+    }
+
+    public DangerousSettings(boolean z6, boolean z9, boolean z10, boolean z11, boolean z12, boolean z13) {
+        this.autoSyncPurchases = z6;
+        this.customEntitlementComputation = z9;
+        this.uiPreviewMode = z10;
+        this.applyObfuscatedAccountIdToSubscriptionChanges = z11;
+        this.usesRemoteConfigAPISources = z12;
+        this.useWorkflows = z13;
+    }
+
+    public DangerousSettings(boolean z6, boolean z9, boolean z10, boolean z11, boolean z12, boolean z13, int i3, AbstractC2541f abstractC2541f) {
+        this((i3 & 1) != 0 ? true : z6, (i3 & 2) != 0 ? false : z9, (i3 & 4) != 0 ? false : z10, (i3 & 8) != 0 ? false : z11, (i3 & 16) != 0 ? false : z12, (i3 & 32) != 0 ? false : z13);
+    }
+
+    public DangerousSettings(boolean z6) {
+        this(z6, false, false, false, false, false);
+    }
+
+    public DangerousSettings(boolean z6, int i3, AbstractC2541f abstractC2541f) {
+        this((i3 & 1) != 0 ? true : z6);
+    }
+}

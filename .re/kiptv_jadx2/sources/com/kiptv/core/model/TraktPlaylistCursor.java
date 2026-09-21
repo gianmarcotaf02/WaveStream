@@ -1,0 +1,138 @@
+package com.kiptv.core.model;
+
+import androidx.media3.container.NalUnitUtil;
+import kotlin.Metadata;
+import kotlinx.serialization.KSerializer;
+
+@Metadata(d1 = {"\u0000\f\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\b\u0003\b\u0087\b\u0018\u0000 \u00022\u00020\u0001:\u0002\u0003\u0002¨\u0006\u0004"}, d2 = {"Lcom/kiptv/core/model/TraktPlaylistCursor;", "", "Companion", "$serializer", "core_release"}, k = 1, mv = {2, 1, 0}, xi = NalUnitUtil.H265_NAL_UNIT_TYPE_UNSPECIFIED)
+@p119n8.i
+public final class TraktPlaylistCursor {
+
+    public static final Companion INSTANCE = new Companion();
+
+    public final String f20481a;
+
+    public final String f20482b;
+
+    public final String f20483c;
+
+    public final String f20484d;
+
+    public final String f20485e;
+
+    @Metadata(d1 = {"\u0000\u0014\n\u0002\u0018\u0002\n\u0002\u0010\u0000\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0003\b\u0086\u0003\u0018\u00002\u00020\u0001J\u0013\u0010\u0004\u001a\b\u0012\u0004\u0012\u00020\u00030\u0002¢\u0006\u0004\b\u0004\u0010\u0005¨\u0006\u0006"}, d2 = {"Lcom/kiptv/core/model/TraktPlaylistCursor$Companion;", "", "Lkotlinx/serialization/KSerializer;", "Lcom/kiptv/core/model/TraktPlaylistCursor;", "serializer", "()Lkotlinx/serialization/KSerializer;", "core_release"}, k = 1, mv = {2, 1, 0}, xi = NalUnitUtil.H265_NAL_UNIT_TYPE_UNSPECIFIED)
+    public static final class Companion {
+        public final KSerializer serializer() {
+            return TraktPlaylistCursor$$serializer.INSTANCE;
+        }
+    }
+
+    public TraktPlaylistCursor(int i3, String str, String str2, String str3, String str4, String str5) {
+        if ((i3 & 1) == 0) {
+            this.f20481a = null;
+        } else {
+            this.f20481a = str;
+        }
+        if ((i3 & 2) == 0) {
+            this.f20482b = null;
+        } else {
+            this.f20482b = str2;
+        }
+        if ((i3 & 4) == 0) {
+            this.f20483c = null;
+        } else {
+            this.f20483c = str3;
+        }
+        if ((i3 & 8) == 0) {
+            this.f20484d = null;
+        } else {
+            this.f20484d = str4;
+        }
+        if ((i3 & 16) == 0) {
+            this.f20485e = null;
+        } else {
+            this.f20485e = str5;
+        }
+    }
+
+    public static TraktPlaylistCursor a(TraktPlaylistCursor traktPlaylistCursor, String str, String str2, String str3, String str4, String str5, int i3) {
+        if ((i3 & 1) != 0) {
+            str = traktPlaylistCursor.f20481a;
+        }
+        String str6 = str;
+        if ((i3 & 2) != 0) {
+            str2 = traktPlaylistCursor.f20482b;
+        }
+        String str7 = str2;
+        if ((i3 & 4) != 0) {
+            str3 = traktPlaylistCursor.f20483c;
+        }
+        String str8 = str3;
+        if ((i3 & 8) != 0) {
+            str4 = traktPlaylistCursor.f20484d;
+        }
+        String str9 = str4;
+        if ((i3 & 16) != 0) {
+            str5 = traktPlaylistCursor.f20485e;
+        }
+        traktPlaylistCursor.getClass();
+        return new TraktPlaylistCursor(str6, str7, str8, str9, str5);
+    }
+
+    public final String getF20481a() {
+        return this.f20481a;
+    }
+
+    public final String getF20485e() {
+        return this.f20485e;
+    }
+
+    public final boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof TraktPlaylistCursor)) {
+            return false;
+        }
+        TraktPlaylistCursor traktPlaylistCursor = (TraktPlaylistCursor) obj;
+        return kotlin.jvm.internal.m.a(this.f20481a, traktPlaylistCursor.f20481a) && kotlin.jvm.internal.m.a(this.f20482b, traktPlaylistCursor.f20482b) && kotlin.jvm.internal.m.a(this.f20483c, traktPlaylistCursor.f20483c) && kotlin.jvm.internal.m.a(this.f20484d, traktPlaylistCursor.f20484d) && kotlin.jvm.internal.m.a(this.f20485e, traktPlaylistCursor.f20485e);
+    }
+
+    public final int hashCode() {
+        String str = this.f20481a;
+        int iHashCode = (str == null ? 0 : str.hashCode()) * 31;
+        String str2 = this.f20482b;
+        int iHashCode2 = (iHashCode + (str2 == null ? 0 : str2.hashCode())) * 31;
+        String str3 = this.f20483c;
+        int iHashCode3 = (iHashCode2 + (str3 == null ? 0 : str3.hashCode())) * 31;
+        String str4 = this.f20484d;
+        int iHashCode4 = (iHashCode3 + (str4 == null ? 0 : str4.hashCode())) * 31;
+        String str5 = this.f20485e;
+        return iHashCode4 + (str5 != null ? str5.hashCode() : 0);
+    }
+
+    public final String toString() {
+        StringBuilder sb = new StringBuilder("TraktPlaylistCursor(moviesWatchedAt=");
+        sb.append(this.f20481a);
+        sb.append(", episodesWatchedAt=");
+        sb.append(this.f20482b);
+        sb.append(", moviesPausedAt=");
+        sb.append(this.f20483c);
+        sb.append(", episodesPausedAt=");
+        sb.append(this.f20484d);
+        sb.append(", watchlistUpdatedAt=");
+        return Y6.f.m(sb, this.f20485e, ")");
+    }
+
+    public TraktPlaylistCursor() {
+        this(null, null, null, null, null);
+    }
+
+    public TraktPlaylistCursor(String str, String str2, String str3, String str4, String str5) {
+        this.f20481a = str;
+        this.f20482b = str2;
+        this.f20483c = str3;
+        this.f20484d = str4;
+        this.f20485e = str5;
+    }
+}

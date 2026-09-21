@@ -1,0 +1,36 @@
+package io.sentry.android.replay;
+
+import androidx.media3.container.NalUnitUtil;
+import kotlin.Metadata;
+import kotlin.jvm.internal.A;
+import kotlin.jvm.internal.m;
+import kotlin.jvm.internal.o;
+import p194x6.j;
+
+@Metadata(d1 = {"\u0000\u0010\n\u0000\n\u0002\u0010\u000b\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\u0010\u0000\u001a\u00020\u00012\u0006\u0010\u0002\u001a\u00020\u0003H\n¢\u0006\u0004\b\u0004\u0010\u0005"}, d2 = {"<anonymous>", "", "it", "Lio/sentry/android/replay/ReplayFrame;", "invoke", "(Lio/sentry/android/replay/ReplayFrame;)Ljava/lang/Boolean;"}, k = 3, mv = {1, 6, 0}, xi = NalUnitUtil.H265_NAL_UNIT_TYPE_UNSPECIFIED)
+public final class ReplayCache$rotate$1 extends o implements j {
+    final A $screen;
+    final long $until;
+    final ReplayCache this$0;
+
+    public ReplayCache$rotate$1(long j, ReplayCache replayCache, A a2) {
+        super(1);
+        this.$until = j;
+        this.this$0 = replayCache;
+        this.$screen = a2;
+    }
+
+    @Override
+    public final Boolean invoke(ReplayFrame it) {
+        m.e(it, "it");
+        if (it.getTimestamp() < this.$until) {
+            this.this$0.deleteFile(it.getScreenshot());
+            return Boolean.TRUE;
+        }
+        A a2 = this.$screen;
+        if (a2.f24539h == null) {
+            a2.f24539h = it.getScreen();
+        }
+        return Boolean.FALSE;
+    }
+}
