@@ -39,6 +39,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -94,6 +96,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import it.wavestream.app.data.database.entity.ContentType
+import it.wavestream.app.data.database.entity.CustomGroup
 import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.HeroItem
@@ -264,6 +267,8 @@ private fun MainActivityScreen(
     var selectedTab by remember { mutableStateOf(initialTab) }
     var railExpanded by remember { mutableStateOf(false) }
     var showCreateListDialog by remember { mutableStateOf(false) }
+    // Hero per cui è aperto il selettore liste (null = chiuso)
+    var heroListPicker by remember { mutableStateOf<HeroItem?>(null) }
     
     // Handle back press to exit grid mode (See All view) - restore previous scroll position
     androidx.activity.compose.BackHandler(enabled = homeState.isGridMode) {
@@ -623,14 +628,10 @@ private fun MainActivityScreen(
                         onNextHero = { homeViewModel.nextHero() },
                         onPrevHero = { homeViewModel.prevHero() },
                         onToggleHeroFavorite = { homeViewModel.toggleHeroFavorite(it) },
-                        onAddHeroToPlaylist = {
-                            homeViewModel.toggleHeroInWatchLater(it) { added ->
-                                android.widget.Toast.makeText(
-                                    context,
-                                    if (added) "Aggiunto a Da guardare" else "Rimosso da Da guardare",
-                                    android.widget.Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                        onAddHeroToPlaylist = { hero ->
+                            // Apre il selettore liste: niente più aggiunta automatica
+                            // alla lista "Da guardare".
+                            heroListPicker = hero
                         },
                         onToggleCategoryFilter = { category -> homeViewModel.toggleCategoryFilter(category) },
                         onSelectAllCategories = { homeViewModel.selectAllCategories() },
@@ -688,6 +689,15 @@ private fun MainActivityScreen(
                         homeViewModel.loadContent(HomeContentType.LISTS)
                     }
                 }
+            )
+        }
+
+        // Selettore liste dell'hero (scelta lista esistente o creazione)
+        heroListPicker?.let { hero ->
+            HeroListPickerDialog(
+                hero = hero,
+                viewModel = homeViewModel,
+                onDismiss = { heroListPicker = null }
             )
         }
     }
