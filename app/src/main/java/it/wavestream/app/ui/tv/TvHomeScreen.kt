@@ -489,6 +489,15 @@ private fun TvHomeScreenContent(
                     label = "createButtonScale"
                 )
                 
+                val createButtonBackground by animateColorAsState(
+                    targetValue = if (isCreateFocused) WaveStreamColors.AccentLight else WaveStreamColors.Accent,
+                    label = "createButtonBackground"
+                )
+                val createButtonBorder by animateColorAsState(
+                    targetValue = if (isCreateFocused) Color.White else Color.Transparent,
+                    label = "createButtonBorder"
+                )
+
                 Box(
                     modifier = Modifier
                         .graphicsLayer {
@@ -496,7 +505,12 @@ private fun TvHomeScreenContent(
                             scaleY = buttonScale
                         }
                         .clip(RoundedCornerShape(12.dp))
-                        .background(if (isCreateFocused) WaveStreamColors.AccentLight else WaveStreamColors.Accent)
+                        .background(createButtonBackground)
+                        .border(
+                            width = 2.dp,
+                            color = createButtonBorder,
+                            shape = RoundedCornerShape(12.dp)
+                        )
                         .focusable(interactionSource = createButtonInteractionSource)
                         .clickable(
                             interactionSource = createButtonInteractionSource,
