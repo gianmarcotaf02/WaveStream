@@ -296,7 +296,6 @@ class SearchActivity : ComponentActivity() {
     private fun SearchScreenContent() {
         var query by remember { mutableStateOf("") }
         var results by remember { mutableStateOf<List<SearchResultItem>>(emptyList()) }
-        var results by remember { mutableStateOf<List<SearchResultItem>>(emptyList()) }
         var isLoading by remember { mutableStateOf(false) }
         val coroutineScope = rememberCoroutineScope()
         val context = LocalContext.current
@@ -354,7 +353,6 @@ class SearchActivity : ComponentActivity() {
             query = query,
             onQueryChange = { query = it },
             onVoiceSearch = { startVoiceSearch() },
-            results = results,
             results = results,
             isLoading = isLoading,
             focusRequester = focusRequester,
