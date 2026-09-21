@@ -2811,7 +2811,11 @@ private fun CreditsWatchdog(
                     // Debug fuori finestra: si mostrano i valori ma non si accumulano hit
                     detector.clearAccumulator()
                 }
-                val result = detector.analyze(bitmap, relaxed = latestAudioCandidate)
+                val result = detector.analyze(
+                    bitmap,
+                    relaxed = latestAudioCandidate,
+                    lateWindow = remaining <= 20_000L
+                )
                 val line = detector.describe(result)
 
                 sampleCount++

@@ -105,8 +105,11 @@ class CreditsDetector {
     /**
      * @param relaxed quando true (corroborazione audio attiva) richiede un hit in meno
      * nella finestra: la fusione audio+video riduce i falsi negativi sui credits "difficili".
+     * @param lateWindow quando true (ultimi secondi del file) il requisito di persistenza scende:
+     * un trigger a ridosso della fine è comunque utile e un falso positivo non ha conseguenze
+     * pratiche (l'episodio finirebbe comunque).
      */
-    fun analyze(source: Bitmap, @Suppress("UNUSED_PARAMETER") relaxed: Boolean = false): Result {
+    fun analyze(source: Bitmap, @Suppress("UNUSED_PARAMETER") relaxed: Boolean = false, lateWindow: Boolean = false): Result {
         if (source.width <= 0 || source.height <= 0) return neutral()
 
         val work = prepareWork(source) ?: return neutral()
@@ -192,9 +195,10 @@ class CreditsDetector {
         val windowHits = hitHistory.count { it }
 
         sampleCount++
-        // Persistenza NON rilassata: con i falsi positivi visti su serie scure, l'audio
-        // non deve abbassare la soglia. Meglio un trigger pi\u00f9 tardi che uno sbagliato.
-        val requiredHits = MIN_HITS_IN_WINDOW
+        // Persistenza NON rilassata con l'audio: con i falsi positivi visti su serie scure,
+        // l'audio non deve abbassare la soglia. Verso la fine del file, invece, si accetta
+        // una conferma più rapida (lateWindow) perché il costo di un errore è nullo.
+        val requiredHits = if (lateWindow) LATE_MIN_HITS_IN_WINDOW else MIN_HITS_IN_WINDOW
         var triggered = false
         if (!isTriggered && windowHits >= requiredHits) {
             isTriggered = true
@@ -393,6 +397,8 @@ class CreditsDetector {
         // schermata possono produrre campioni "vuoti" isolati.
         private const val HIT_WINDOW = 8
         private const val MIN_HITS_IN_WINDOW = 5
+        /** Requisito ridotto negli ultimi ~20s del file. */
+        private const val LATE_MIN_HITS_IN_WINDOW = 2
         private const val TEXT_DENSITY_REFERENCE = 0.08f
         private const val MAX_SHIFT = 8
         private const val STATIC_DIFF_SCALE = 60f
