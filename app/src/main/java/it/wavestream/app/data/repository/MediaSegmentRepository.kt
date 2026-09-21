@@ -1,6 +1,5 @@
 package it.wavestream.app.data.repository
 
-import it.wavestream.app.data.api.IntroDbSegment
 import it.wavestream.app.data.api.IntroDbService
 import it.wavestream.app.data.database.dao.MediaSegmentDao
 import it.wavestream.app.data.database.entity.ContentType

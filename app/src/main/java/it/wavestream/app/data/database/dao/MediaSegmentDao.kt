@@ -61,14 +61,6 @@ interface MediaSegmentDao {
         type: SegmentType
     ): MediaSegment?
 
-    @Query("DELETE FROM media_segments WHERE imdbId = :imdbId AND seasonNumber = :seasonNumber AND episodeNumber = :episodeNumber AND type = :type AND source = 'EXTERNAL_DB'")
-    suspend fun deleteExternalForImdbEpisode(
-        imdbId: String,
-        seasonNumber: Int,
-        episodeNumber: Int,
-        type: SegmentType
-    )
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(segment: MediaSegment): Long
 
