@@ -851,54 +851,81 @@ private fun CloseButton(
 @Composable
 private fun ChannelPickCard(
     channel: Channel,
+    currentProgram: EpgProgram?,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = modifier
-            .graphicsLayer {
-                val s = if (isFocused) 1.05f else 1f
-                scaleX = s
-                scaleY = s
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .graphicsLayer {
+                    val s = if (isFocused) 1.05f else 1f
+                    scaleX = s
+                    scaleY = s
+                }
+                .fillMaxWidth()
+                .background(
+                    color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.BackgroundTertiary,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .border(
+                    width = if (isFocused) 2.dp else 0.dp,
+                    color = if (isFocused) Color.White else Color.Transparent,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+                .focusable(interactionSource = interactionSource)
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            AsyncImage(
+                model = channel.logoUrl,
+                contentDescription = null,
+                modifier = Modifier.size(44.dp)
+            )
+            Text(
+                text = channel.name,
+                color = Color.White,
+                fontWeight = if (isFocused) FontWeight.Bold else FontWeight.Medium,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = Icons.Filled.PlayArrow,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.9f)
+            )
+        }
+
+        // EPG fuori dalla card (sotto), mostrato solo se disponibile.
+        if (currentProgram != null) {
+            val timeRange = remember(currentProgram) {
+                val fmt = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                "${fmt.format(java.util.Date(currentProgram.start))} - ${fmt.format(java.util.Date(currentProgram.end))}"
             }
-            .fillMaxWidth()
-            .background(
-                color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.BackgroundTertiary,
-                shape = RoundedCornerShape(12.dp)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = currentProgram.title,
+                style = MaterialTheme.typography.labelMedium,
+                color = WaveStreamColors.TextSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 6.dp)
             )
-            .border(
-                width = if (isFocused) 2.dp else 0.dp,
-                color = if (isFocused) Color.White else Color.Transparent,
-                shape = RoundedCornerShape(12.dp)
+            Text(
+                text = timeRange,
+                style = MaterialTheme.typography.labelSmall,
+                color = WaveStreamColors.TextTertiary,
+                maxLines = 1,
+                modifier = Modifier.padding(horizontal = 6.dp)
             )
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .focusable(interactionSource = interactionSource)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        AsyncImage(
-            model = channel.logoUrl,
-            contentDescription = null,
-            modifier = Modifier.size(44.dp)
-        )
-        Text(
-            text = channel.name,
-            color = Color.White,
-            fontWeight = if (isFocused) FontWeight.Bold else FontWeight.Medium,
-            style = MaterialTheme.typography.bodyLarge,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = Icons.Filled.PlayArrow,
-            contentDescription = null,
-            tint = Color.White.copy(alpha = 0.9f)
-        )
+        }
     }
 }

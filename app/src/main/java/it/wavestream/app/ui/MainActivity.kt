@@ -651,6 +651,7 @@ private fun MainActivityScreen(
                 channels = picker.channels,
                 isLoading = picker.isLoading,
                 tabellinoState = homeState.serieATabellino,
+                epg = picker.epg,
                 onDismiss = { homeViewModel.dismissSerieAChannelPicker() },
                 onChannelClick = { channel ->
                     // Niente dismiss: il dialog resta aperto sotto il player,
