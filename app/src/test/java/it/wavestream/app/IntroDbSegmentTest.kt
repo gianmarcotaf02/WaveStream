@@ -5,7 +5,7 @@ import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.MediaSegment
 import it.wavestream.app.data.database.entity.SegmentSource
 import it.wavestream.app.data.database.entity.SegmentType
-import it.wavestream.app.data.repository.MediaSegmentRepository
+import it.wavestream.app.data.repository.CreditsSegmentEstimator
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -45,15 +45,15 @@ class IntroDbSegmentTest {
             durationMs = 40 * 60_000L
         )
         // Episodio corrente di 45 min -> credits stimati a 43 min.
-        val estimated = MediaSegmentRepository.estimateCreditsStart(reference, 45 * 60_000L)
+        val estimated = CreditsSegmentEstimator.estimateCreditsStart(reference, 45 * 60_000L)
         assertEquals(43 * 60_000L, estimated)
     }
 
     @Test
     fun `estimateCreditsStart returns null with invalid durations`() {
         val reference = mediaSegment(startMs = 1000L, durationMs = 0L)
-        assertNull(MediaSegmentRepository.estimateCreditsStart(reference, 60_000L))
-        assertNull(MediaSegmentRepository.estimateCreditsStart(reference, 0L))
+        assertNull(CreditsSegmentEstimator.estimateCreditsStart(reference, 60_000L))
+        assertNull(CreditsSegmentEstimator.estimateCreditsStart(reference, 0L))
     }
 
     private fun mediaSegment(startMs: Long, durationMs: Long) = MediaSegment(
