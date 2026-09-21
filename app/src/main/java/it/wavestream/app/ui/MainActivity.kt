@@ -1060,7 +1060,9 @@ private fun MiniTopBar(
 ) {
     Row(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.8f))
+            // Fase 2.3 — top bar in vetro: prima 0.8 di nero copriva quasi del tutto
+            // il backdrop immersivo (Fase 1b). Ora l'immagine traspare.
+            .background(Color.Black.copy(alpha = 0.35f))
             .padding(horizontal = 24.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

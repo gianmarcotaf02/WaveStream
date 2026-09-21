@@ -1114,7 +1114,9 @@ fun HeroBanner(
                         }
                         Text(
                             text = hero.title,
-                            style = MaterialTheme.typography.headlineLarge,
+                            // Fase 3.1 — titolo hero più grande, per riequilibrare la
+                            // gerarchia: la riga dei 5 rating resta invariata.
+                            style = MaterialTheme.typography.displaySmall,
                             color = WaveStreamColors.TextPrimary,
                             fontWeight = FontWeight.Bold,
                             maxLines = 2,
