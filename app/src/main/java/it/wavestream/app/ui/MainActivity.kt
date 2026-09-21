@@ -819,8 +819,6 @@ private fun MainNavPill(
     onDownPress: () -> Unit = {},
     selectedFocusRequester: FocusRequester? = null,
     onSearchClick: () -> Unit = {},
-    onDownloadsClick: () -> Unit = {},
-    onSettingsClick: () -> Unit = {},
     searchButtonFocusRequester: FocusRequester? = null,
     modifier: Modifier = Modifier
 ) {
@@ -842,7 +840,8 @@ private fun MainNavPill(
             focusRequester = searchButtonFocusRequester
         )
 
-        MainTab.entries.forEach { tab ->
+        // Prima pillola: solo la navigazione fino a Live.
+        FIRST_PILL_TABS.forEach { tab ->
             val isSelected = tab == selectedTab
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
@@ -889,8 +888,63 @@ private fun MainNavPill(
                     .padding(horizontal = 14.dp, vertical = 7.dp)
             )
         }
+    }
+}
 
-        // Separatore fra navigazione e azioni.
+/** Tab nella prima pillola (navigazione principale, fino a Live). */
+private val FIRST_PILL_TABS = listOf(
+    MainTab.HOME, MainTab.MOVIES, MainTab.SERIES, MainTab.LIVE
+)
+
+/**
+ * Seconda pillola, allineata a destra (Fase 2.3b).
+ *
+ * Contiene Preferiti, Liste e Cronologia in versione SOLO ICONA (con stato di
+ * selezione, altrimenti il tab attivo non sarebbe riconoscibile) più download,
+ * impostazioni e orario.
+ */
+@Composable
+private fun MainActionsPill(
+    selectedTab: MainTab,
+    onTabSelected: (MainTab) -> Unit,
+    onDownPress: () -> Unit = {},
+    onDownloadsClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.Black.copy(alpha = 0.42f))
+            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(50))
+            .padding(horizontal = 6.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        // Tab secondari: solo icona.
+        PillIcon(
+            icon = Icons.Default.FavoriteBorder,
+            contentDescription = "Preferiti",
+            onClick = { onTabSelected(MainTab.FAVORITES) },
+            onDownPress = onDownPress,
+            selected = selectedTab == MainTab.FAVORITES
+        )
+        PillIcon(
+            icon = Icons.Default.BookmarkBorder,
+            contentDescription = "Liste",
+            onClick = { onTabSelected(MainTab.LISTS) },
+            onDownPress = onDownPress,
+            selected = selectedTab == MainTab.LISTS
+        )
+        PillIcon(
+            icon = Icons.Default.Restore,
+            contentDescription = "Cronologia",
+            onClick = { onTabSelected(MainTab.HISTORY) },
+            onDownPress = onDownPress,
+            selected = selectedTab == MainTab.HISTORY
+        )
+
+        // Separatore fra tab e azioni.
         Box(
             modifier = Modifier
                 .padding(horizontal = 6.dp)
@@ -898,7 +952,6 @@ private fun MainNavPill(
                 .background(Color.White.copy(alpha = 0.18f))
         )
 
-        // A destra: download, impostazioni e orario — sempre dentro la barra.
         PillIcon(
             icon = Icons.Default.Download,
             contentDescription = "Download",
@@ -932,12 +985,17 @@ private fun PillIcon(
     contentDescription: String,
     onClick: () -> Unit,
     onDownPress: () -> Unit,
-    focusRequester: FocusRequester? = null
+    focusRequester: FocusRequester? = null,
+    selected: Boolean = false
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val bg by animateColorAsState(
-        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
+        targetValue = when {
+            selected -> WaveStreamColors.Accent.copy(alpha = 0.85f)
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            else -> Color.Transparent
+        },
         label = "pillIconBg"
     )
     Box(
@@ -963,7 +1021,7 @@ private fun PillIcon(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
+            tint = if (isFocused || selected) Color.White else WaveStreamColors.TextSecondary,
             modifier = Modifier.size(22.dp)
         )
     }
@@ -1275,12 +1333,19 @@ private fun MiniTopBar(
             onDownPress = onContentFocusRequest,
             selectedFocusRequester = navFocusRequester,
             onSearchClick = onSearchClick,
-            onDownloadsClick = onDownloadsClick,
-            onSettingsClick = onSettingsClick,
             searchButtonFocusRequester = searchButtonFocusRequester
         )
 
         Spacer(modifier = Modifier.weight(1f))
+
+        // Seconda pillola, a destra.
+        MainActionsPill(
+            selectedTab = selectedTab,
+            onTabSelected = onTabSelected,
+            onDownPress = onContentFocusRequest,
+            onDownloadsClick = onDownloadsClick,
+            onSettingsClick = onSettingsClick
+        )
     }
 }
 
