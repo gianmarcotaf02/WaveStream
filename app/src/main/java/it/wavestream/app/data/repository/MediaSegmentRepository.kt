@@ -292,12 +292,8 @@ class MediaSegmentRepository @Inject constructor(
      * tail = durationRef - startRef; stima = durationCorrente - tail.
      * Non è un marker esatto: va usata come hint/inviluppo, non come trigger diretto.
      */
-    fun estimateCreditsStart(reference: MediaSegment, currentDurationMs: Long): Long? {
-        if (reference.durationMs <= 0 || currentDurationMs <= 0) return null
-        val tail = reference.durationMs - reference.startMs
-        if (tail <= 0) return null
-        return (currentDurationMs - tail).coerceAtLeast(0)
-    }
+    fun estimateCreditsStart(reference: MediaSegment, currentDurationMs: Long): Long? =
+        CreditsSegmentEstimator.estimateCreditsStart(reference, currentDurationMs)
 
     /**
      * Riferimento INTRO (con inizio E fine) di un episodio della stessa serie, usato per
