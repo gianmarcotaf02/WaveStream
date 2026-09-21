@@ -166,6 +166,14 @@ class PlayerActivity : ComponentActivity() {
     private val _hiddenSeekSeconds = mutableIntStateOf(0)
     private val hiddenSeekHandler = Handler(Looper.getMainLooper())
     private val hiddenSeekClearRunnable = Runnable { _hiddenSeekSeconds.intValue = 0 }
+
+    // Seek a barra nascosta con long-press (D-pad L/R tenuto premuto):
+    // la ripetizione è gestita esplicitamente, così il seek continua avanti/indietro
+    // senza dipendere dal key-repeat del framework (inaffidabile su Android TV).
+    private val hiddenSeekRepeatHandler = Handler(Looper.getMainLooper())
+    private var hiddenSeekRepeatRunnable: Runnable? = null
+    private var hiddenSeekRepeatSeconds = 0
+    private var hiddenSeekAccumulatedSeconds = 0
     
     // Countdown overlay "Prossimo episodio" (uniforme: 10s)
     private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 10
@@ -216,6 +224,10 @@ class PlayerActivity : ComponentActivity() {
 
     // Passo del seek rapido con la barra dei controlli nascosta (D-pad L/R)
     private val HIDDEN_SEEK_STEP_SECONDS = 10
+
+    // Long-press: attesa iniziale e intervallo tra un passo e l'altro del seek rapido.
+    private val HIDDEN_SEEK_REPEAT_INITIAL_DELAY_MS = 400L
+    private val HIDDEN_SEEK_REPEAT_INTERVAL_MS = 250L
 
     // Sotto questa differenza (ms) un seek non è considerato un "salto indietro"
     // (evita reset inutili su micro-aggiustamenti del player).
@@ -1143,7 +1155,7 @@ class PlayerActivity : ComponentActivity() {
      * Applica subito lo spostamento e mostra per ~1s l'indicatore "+N s / -N s",
      * senza riaprire la barra (modalità di visione pulita).
      */
-    private fun hiddenBarSeek(seconds: Int) {
+    private fun hiddenBarSeek(seconds: Int, displaySeconds: Int = seconds) {
         if (!::player.isInitialized) return
         if (contentType == ContentType.CHANNEL) {
             updateLiveState()
@@ -1158,10 +1170,45 @@ class PlayerActivity : ComponentActivity() {
         }
         seekBy(seconds * 1000L, fromLiveControls = true)
 
-        // Feedback visivo transitorio (l'overlay appare solo a barra chiusa)
-        _hiddenSeekSeconds.intValue = seconds
+        // Feedback visivo transitorio (l'overlay appare solo a barra chiusa).
+        // NON si tocca la visibilità dei controlli: il seek a barra nascosta
+        // deve restare pulito.
+        _hiddenSeekSeconds.intValue = displaySeconds
         hiddenSeekHandler.removeCallbacks(hiddenSeekClearRunnable)
         hiddenSeekHandler.postDelayed(hiddenSeekClearRunnable, 1_000L)
+    }
+
+    /**
+     * Avvia il seek rapido con la barra nascosta e lo ripete finché il tasto
+     * resta premuto. La prima iterazione è immediata; le successive seguono
+     * [HIDDEN_SEEK_REPEAT_INITIAL_DELAY_MS] e poi [HIDDEN_SEEK_REPEAT_INTERVAL_MS].
+     */
+    private fun startHiddenSeekRepeat(stepSeconds: Int) {
+        stopHiddenSeekRepeat()
+        hiddenSeekRepeatSeconds = stepSeconds
+        hiddenSeekAccumulatedSeconds = stepSeconds
+        hiddenBarSeek(stepSeconds, hiddenSeekAccumulatedSeconds)
+
+        val runnable = object : Runnable {
+            override fun run() {
+                if (_controlsVisible.value || _isMiniPlayer.value) {
+                    stopHiddenSeekRepeat()
+                    return
+                }
+                hiddenSeekAccumulatedSeconds += hiddenSeekRepeatSeconds
+                hiddenBarSeek(hiddenSeekRepeatSeconds, hiddenSeekAccumulatedSeconds)
+                hiddenSeekRepeatHandler.postDelayed(this, HIDDEN_SEEK_REPEAT_INTERVAL_MS)
+            }
+        }
+        hiddenSeekRepeatRunnable = runnable
+        hiddenSeekRepeatHandler.postDelayed(runnable, HIDDEN_SEEK_REPEAT_INITIAL_DELAY_MS)
+    }
+
+    /** Ferma la ripetizione del seek a barra nascosta (rilascio del tasto o cambio modalità). */
+    private fun stopHiddenSeekRepeat() {
+        hiddenSeekRepeatRunnable?.let { hiddenSeekRepeatHandler.removeCallbacks(it) }
+        hiddenSeekRepeatRunnable = null
+        hiddenSeekAccumulatedSeconds = 0
     }
 
     private fun seekBy(ms: Long, fromLiveControls: Boolean = false) {
