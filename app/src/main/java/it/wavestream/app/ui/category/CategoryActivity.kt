@@ -23,6 +23,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -47,6 +48,9 @@ import it.wavestream.app.ui.components.ContentSortField
 import it.wavestream.app.ui.components.SortDirection
 import it.wavestream.app.ui.components.SortFilterState
 import it.wavestream.app.ui.player.PlayerActivity
+import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.ui.tv.TvContentCard
@@ -398,36 +402,55 @@ private fun CategoryScreen(
         }
     }
     
+    // Fondale coerente con la Home (Fase C1).
+    val screenBackground = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                WaveStreamColors.Accent.copy(alpha = 0.045f),
+                WaveStreamColors.GradientMiddle,
+                WaveStreamColors.GradientBottom
+            )
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(screenBackground)
             .padding(horizontal = 16.dp)
     ) {
-        // Compact Header - minimal height
+        // Header FLOTTANTE in vetro (Fase C1): capsula con back + titolo, non più
+        // una riga full-width. A destra, il toggle griglia/EPG.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 2.dp),
+                .padding(top = 12.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            GlassSurface(
+                shape = RoundedCornerShape(20.dp),
+                fill = GlassTokens.SurfaceFill
             ) {
-                // Compact back button (bianco con focus accent)
-                CategoryBackButton(onClick = onBack)
-                
-                // Title
-                Text(
-                    text = categoryName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = WaveStreamColors.TextPrimary,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Back button in vetro
+                    CategoryBackButton(onClick = onBack)
+
+                    // Title
+                    Text(
+                        text = categoryName,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = WaveStreamColors.TextPrimary,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1
+                    )
+                }
             }
-            
+
             // View toggle (only for Live categories)
             if (isLiveCategory) {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -470,9 +493,9 @@ private fun CategoryScreen(
             TvLazyVerticalGrid(
                 columns = TvGridCells.Adaptive(minSize = gridMinSize),
                 state = gridState,
-                contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp, start = 4.dp, end = 4.dp),  // Reduced top padding
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(top = 12.dp, bottom = 64.dp, start = 4.dp, end = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(displayItems, key = { "${it.contentType}_${it.id}" }) { item ->
@@ -503,12 +526,13 @@ private fun CategoryBackButton(onClick: () -> Unit) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "catBackScale"
     )
-    val border by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "catBackBorder"
+    val background by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
+        label = "catBackBg"
     )
 
     Box(
@@ -519,8 +543,7 @@ private fun CategoryBackButton(onClick: () -> Unit) {
                 scaleY = scale
             }
             .clip(RoundedCornerShape(50))
-            .background(Color.White)
-            .border(2.dp, border, RoundedCornerShape(50))
+            .background(background)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -532,12 +555,18 @@ private fun CategoryBackButton(onClick: () -> Unit) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Indietro",
-            tint = Color.Black,
+            tint = WaveStreamColors.TextPrimary,
             modifier = Modifier.size(24.dp)
         )
     }
 }
 
+/**
+ * Toggle griglia/EPG a segmenti in vetro (Fase C4).
+ *
+ * La selezione è un accent SOFT (alpha bassa), non un fondo accent pieno: così la
+ * capsula resta vetro anche quando un segmento è attivo.
+ */
 @Composable
 private fun ViewToggleButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -547,18 +576,30 @@ private fun ViewToggleButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val backgroundColor = when {
-        isSelected -> WaveStreamColors.Accent
-        isFocused -> WaveStreamColors.BackgroundTertiary
-        else -> Color.Transparent
-    }
-    
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "viewToggleScale"
+    )
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            isSelected -> WaveStreamColors.Accent.copy(alpha = 0.22f)
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            else -> Color.Transparent
+        },
+        label = "viewToggleBg"
+    )
+
     val contentColor = if (isSelected || isFocused) Color.White else WaveStreamColors.TextSecondary
-    
+
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(50))
             .background(backgroundColor)
             .focusable(interactionSource = interactionSource)
             .clickable(
