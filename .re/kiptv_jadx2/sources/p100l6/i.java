@@ -1,0 +1,40 @@
+package p100l6;
+
+import java.io.Serializable;
+import kotlin.jvm.internal.m;
+
+public final class i implements h, Serializable {
+
+    public static final i f24820h = new i();
+
+    @Override
+    public final f get(g key) {
+        m.e(key, "key");
+        return null;
+    }
+
+    public final int hashCode() {
+        return 0;
+    }
+
+    @Override
+    public final h minusKey(g key) {
+        m.e(key, "key");
+        return this;
+    }
+
+    @Override
+    public final h plus(h context) {
+        m.e(context, "context");
+        return context;
+    }
+
+    public final String toString() {
+        return "EmptyCoroutineContext";
+    }
+
+    @Override
+    public final Object fold(Object obj, p194x6.m mVar) {
+        return obj;
+    }
+}

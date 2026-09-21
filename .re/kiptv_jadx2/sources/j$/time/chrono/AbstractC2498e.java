@@ -1,0 +1,39 @@
+package j$.time.chrono;
+
+public abstract class AbstractC2498e {
+
+    public static final int[] f23601a;
+
+    static {
+        int[] iArr = new int[j$.time.temporal.b.values().length];
+        f23601a = iArr;
+        try {
+            iArr[j$.time.temporal.b.NANOS.ordinal()] = 1;
+        } catch (NoSuchFieldError unused) {
+        }
+        try {
+            f23601a[j$.time.temporal.b.MICROS.ordinal()] = 2;
+        } catch (NoSuchFieldError unused2) {
+        }
+        try {
+            f23601a[j$.time.temporal.b.MILLIS.ordinal()] = 3;
+        } catch (NoSuchFieldError unused3) {
+        }
+        try {
+            f23601a[j$.time.temporal.b.SECONDS.ordinal()] = 4;
+        } catch (NoSuchFieldError unused4) {
+        }
+        try {
+            f23601a[j$.time.temporal.b.MINUTES.ordinal()] = 5;
+        } catch (NoSuchFieldError unused5) {
+        }
+        try {
+            f23601a[j$.time.temporal.b.HOURS.ordinal()] = 6;
+        } catch (NoSuchFieldError unused6) {
+        }
+        try {
+            f23601a[j$.time.temporal.b.HALF_DAYS.ordinal()] = 7;
+        } catch (NoSuchFieldError unused7) {
+        }
+    }
+}
