@@ -164,13 +164,16 @@ fun ExpandableNavRail(
             .animatedRailWidth(expansion)
             .fillMaxHeight()
             .background(
-                // Fase 2.3 — rail in vetro. Prima era un gradiente OPACO
-                // (BackgroundSecondary → nero) che copriva il backdrop immersivo;
-                // ora è traslucido e l'immagine dell'hero passa dietro.
+                // Fase 2.3 (rev) — rail in vetro con BORDO MORBIDO.
+                // Prima era traslucida ma a bordo NETTO: l'immagine dell'hero finiva
+                // contro un rettangolo scuro e si vedeva la cucitura verticale (la
+                // rail sembrava un pannello appoggiato sopra). Ora il gradiente sfuma
+                // a trasparente sul bordo destro, quindi non c'e' limite geometrico.
                 Brush.horizontalGradient(
-                    colors = listOf(
-                        WaveStreamColors.BackgroundSecondary.copy(alpha = 0.62f),
-                        Color.Black.copy(alpha = 0.38f)
+                    colorStops = arrayOf(
+                        0.00f to WaveStreamColors.BackgroundSecondary.copy(alpha = 0.72f),
+                        0.55f to Color.Black.copy(alpha = 0.42f),
+                        1.00f to Color.Transparent
                     )
                 )
             )

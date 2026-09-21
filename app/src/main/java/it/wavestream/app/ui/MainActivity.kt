@@ -779,31 +779,23 @@ private fun HeroAmbientBackdrop(
         }
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.horizontalGradient(
-                    colorStops = arrayOf(
-                        0.00f to Color.Black.copy(alpha = 0.50f),
-                        0.12f to Color.Black.copy(alpha = 0.34f),
-                        0.24f to Color.Black.copy(alpha = 0.12f),
-                        0.38f to Color.Transparent,
-                        1.00f to Color.Transparent
-                    )
-                )
-            )
-    )
+    // Fase 2.3 (rev) — la scrim orizzontale globale è stata RIMOSSA.
+    // Serviva a dare contrasto alla rail, ma la rail ora ha un proprio gradiente che
+    // sfuma a trasparente: sommando le due si otteneva una doppia scuritura proprio
+    // sulla fascia della rail, cioè la cucitura verticale che si vedeva.
+
+    // Scrim verticale: serve SOLO a dissolvere l'immagine verso il nero nella parte
+    // bassa, dove scorrono le righe. In alto non serve più: la top bar ha il suo
+    // gradiente e un doppio scurimento creava un gradino a metà schermo.
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
                     colorStops = arrayOf(
-                        0.00f to Color.Black.copy(alpha = 0.30f),
-                        0.14f to Color.Transparent,
-                        0.52f to Color.Transparent,
-                        0.84f to Color.Black.copy(alpha = 0.86f),
+                        0.00f to Color.Transparent,
+                        0.50f to Color.Transparent,
+                        0.78f to Color.Black.copy(alpha = 0.80f),
                         1.00f to Color.Black
                     )
                 )
@@ -1060,9 +1052,19 @@ private fun MiniTopBar(
 ) {
     Row(
         modifier = modifier
-            // Fase 2.3 — top bar in vetro: prima 0.8 di nero copriva quasi del tutto
-            // il backdrop immersivo (Fase 1b). Ora l'immagine traspare.
-            .background(Color.Black.copy(alpha = 0.35f))
+            // Fase 2.3 (rev) — top bar in vetro con BORDO MORBIDO.
+            // Traslucida ma a bordo netto creava una cucitura orizzontale visibile
+            // con l'immagine sotto (l'hero sembrava un rettangolo incollato).
+            // Ora il fondo sfuma a trasparente: nessun gradino alla base.
+            .background(
+                Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0.00f to Color.Black.copy(alpha = 0.55f),
+                        0.55f to Color.Black.copy(alpha = 0.26f),
+                        1.00f to Color.Transparent
+                    )
+                )
+            )
             .padding(horizontal = 24.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically

@@ -989,13 +989,17 @@ fun HeroBanner(
     // alpha BlendMode.DstIn, che rendevano l'immagine invisibile sotto il 52% a
     // sinistra e oltre il 90% a destra (da li' il bordo netto, effetto "rettangolo
     // incollato") e costavano un buffer offscreen a piena schermata per frame.
+    // Fase 2.3 (rev) — rampa allungata: la trama e la riga del cast arrivano fino al
+    // ~70% della fascia, e con la rampa precedente (debole già al 60%) finivano su
+    // immagine chiara, poco leggibili. Ora il buio tiene fino al 70% e sfuma dopo.
     val scrimHorizontal = remember {
         Brush.horizontalGradient(colorStops = arrayOf(
             0.00f to Color.Black.copy(alpha = 0.97f),
-            0.34f to Color.Black.copy(alpha = 0.90f),
-            0.52f to Color.Black.copy(alpha = 0.58f),
-            0.66f to Color.Black.copy(alpha = 0.24f),
-            0.80f to Color.Transparent,
+            0.42f to Color.Black.copy(alpha = 0.92f),
+            0.58f to Color.Black.copy(alpha = 0.74f),
+            0.70f to Color.Black.copy(alpha = 0.42f),
+            0.82f to Color.Black.copy(alpha = 0.12f),
+            0.92f to Color.Transparent,
             1.00f to Color.Transparent
         ))
     }
