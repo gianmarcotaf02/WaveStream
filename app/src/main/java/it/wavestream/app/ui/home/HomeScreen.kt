@@ -295,7 +295,7 @@ private fun HeroBanner(
             // Title
             Text(
                 text = item.title,
-                style = MaterialTheme.typography.headlineMedium,  // Smaller font
+                style = MaterialTheme.typography.displaySmall,  // Fase 3.1: più grande
                 color = WaveStreamColors.TextPrimary,
                 fontWeight = FontWeight.Bold
             )
