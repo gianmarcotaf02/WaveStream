@@ -62,12 +62,15 @@ import it.wavestream.app.data.api.SofascoreLineupPlayer
 import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.data.repository.SerieATabellino
+import it.wavestream.app.ui.epg.EpgProgram
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 data class SerieAChannelPickerState(
     val match: SerieAMatchEntity,
     val channels: List<Channel>,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    // EPG del canale (programma in onda), best-effort: se assente non si mostra nulla.
+    val epg: Map<Long, EpgProgram?> = emptyMap()
 )
 
 /** Stato del tabellino (incidents + formazioni) mostrato nel match center. */
@@ -126,6 +129,7 @@ fun SerieAChannelPickerDialog(
     channels: List<Channel>,
     isLoading: Boolean,
     tabellinoState: SerieATabellinoState,
+    epg: Map<Long, EpgProgram?> = emptyMap(),
     onDismiss: () -> Unit,
     onChannelClick: (Channel) -> Unit,
     modifier: Modifier = Modifier
@@ -228,6 +232,7 @@ fun SerieAChannelPickerDialog(
                     match = match,
                     channels = channels,
                     isLoading = isLoading,
+                    epg = epg,
                     onChannelClick = onChannelClick
                 )
                 SerieAMatchTab.TABELLINO -> TabellinoTab(
@@ -250,6 +255,7 @@ private fun ChannelsTab(
     match: SerieAMatchEntity,
     channels: List<Channel>,
     isLoading: Boolean,
+    epg: Map<Long, EpgProgram?>,
     onChannelClick: (Channel) -> Unit
 ) {
     val grouped: List<Pair<String, List<Channel>>> = remember(channels) {
@@ -329,7 +335,10 @@ private fun ChannelsTab(
                                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                                     rowChans.forEach { channel ->
                                         Box(Modifier.weight(1f)) {
-                                            ChannelPickCard(channel = channel) {
+                                            ChannelPickCard(
+                                                channel = channel,
+                                                currentProgram = epg[channel.id]
+                                            ) {
                                                 onChannelClick(channel)
                                             }
                                         }
