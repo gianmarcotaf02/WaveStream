@@ -855,10 +855,44 @@ fun SearchScreen(
             ) {
                 when {
                     isLoading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = WaveStreamColors.Accent
+                        // Fase S5 — skeleton coerente con lo stile finale (card in vetro).
+                        val shimmer = rememberInfiniteTransition(label = "searchSkeleton")
+                        val skeletonAlpha by shimmer.animateFloat(
+                            initialValue = 0.5f,
+                            targetValue = 0.95f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(900),
+                                repeatMode = RepeatMode.Reverse
+                            ),
+                            label = "searchSkeletonAlpha"
                         )
+                        TvLazyVerticalGrid(
+                            columns = TvGridCells.Adaptive(minSize = 140.dp),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp),
+                            contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            tvGridItems((1..8).toList(), key = { it }) { _ ->
+                                Column {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(210.dp)
+                                            .clip(RoundedCornerShape(14.dp))
+                                            .background(Color.White.copy(alpha = 0.06f * skeletonAlpha))
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(0.8f)
+                                            .height(12.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color.White.copy(alpha = 0.06f * skeletonAlpha))
+                                    )
+                                }
+                            }
+                        }
                     }
                     query.trim().length >= 2 && results.isEmpty() -> {
                         Column(
