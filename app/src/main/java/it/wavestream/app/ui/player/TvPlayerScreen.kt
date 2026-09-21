@@ -702,12 +702,21 @@ private fun ModernPlayerControls(
             }
         }
         
-        // Bottom controls - Netflix style layout
-        Column(
+        // Bottom dock: play, tempo, progresso e controlli secondari
+        // raggruppati in un'unica capsula in vetro (floating), coerente
+        // con Home/Impostazioni. Fill + bordo gradiente, nessun blur.
+        GlassSurface(
+            shape = RoundedCornerShape(28.dp),
+            fill = GlassTokens.SurfaceFill,
+            stroke = GlassTokens.StrokeGradient,
+            strokeWidth = 1.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(horizontal = 40.dp, vertical = 24.dp)
+                .padding(horizontal = 32.dp, vertical = 24.dp)
+        ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
         ) {
             // Main row: Restart + Play/Pause button + Time + Progress bar + Duration
             Row(
@@ -883,6 +892,7 @@ private fun ModernPlayerControls(
                     }
                 }
             }
+        }
         }
     }
 }
