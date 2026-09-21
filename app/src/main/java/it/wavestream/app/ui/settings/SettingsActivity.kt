@@ -1423,6 +1423,7 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
     val creditsDetectionEnabled by userPreferences.getCreditsDetectionEnabledFlow().collectAsState(initial = true)
     val creditsDebugEnabled by userPreferences.getCreditsDebugEnabledFlow().collectAsState(initial = false)
     val creditsAudioEnabled by userPreferences.getCreditsAudioEnabledFlow().collectAsState(initial = true)
+    val introDbEnabled by userPreferences.getIntroDbEnabledFlow().collectAsState(initial = true)
     
     SettingsSection(title = "Player") {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -1462,6 +1463,12 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
                 label = "Rilevamento audio e sigle (sperimentale)",
                 checked = creditsAudioEnabled,
                 onCheckedChange = { coroutineScope.launch { userPreferences.setCreditsAudioEnabled(it) } }
+            )
+
+            SettingsSwitch(
+                label = "IntroDB: sigle e titoli di coda dal database comunitario (online)",
+                checked = introDbEnabled,
+                onCheckedChange = { coroutineScope.launch { userPreferences.setIntroDbEnabled(it) } }
             )
             
             // Seek settings
