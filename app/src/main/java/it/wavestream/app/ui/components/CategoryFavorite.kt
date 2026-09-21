@@ -10,10 +10,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +34,17 @@ const val CATEGORY_FAVORITE_LONG_PRESS_MS = 1500L
 val CategoryFavoriteRed = Color(0xFFFF1744)
 
 /**
+ * Stato del long-press tenuto fuori dal sistema osservabile di Compose: cosi'
+ * le ricomposizioni (es. l'animazione della scala al focus) non rimpiazzano il
+ * nodo di input mentre l'utente tiene premuto OK, che era la causa del
+ * long-press che non scattava piu'.
+ */
+private class CategoryLongPressTracker {
+    var job: Job? = null
+    var fired: Boolean = false
+}
+
+/**
  * Rileva la pressione prolungata (~1.5s) del tasto OK/Enter del telecomando.
  *
  * Va applicato a un elemento focusabile, prima di `.clickable`.
@@ -48,8 +58,8 @@ fun Modifier.categoryLongPress(
     durationMs: Long = CATEGORY_FAVORITE_LONG_PRESS_MS
 ): Modifier {
     val scope = rememberCoroutineScope()
-    var job by remember { mutableStateOf<Job?>(null) }
-    var fired by remember { mutableStateOf(false) }
+    val tracker = remember { CategoryLongPressTracker() }
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
 
     return this.onPreviewKeyEvent { event ->
         val isConfirm = event.key == Key.Enter ||
@@ -59,20 +69,21 @@ fun Modifier.categoryLongPress(
 
         when (event.type) {
             KeyEventType.KeyDown -> {
-                if (job == null) {
-                    job = scope.launch {
+                // Auto-repeat del telecomando: avvia il timer solo al primo KeyDown.
+                if (tracker.job == null && !tracker.fired) {
+                    tracker.job = scope.launch {
                         delay(durationMs)
-                        fired = true
-                        onLongPress()
+                        tracker.fired = true
+                        currentOnLongPress()
                     }
                 }
                 false
             }
             KeyEventType.KeyUp -> {
-                job?.cancel()
-                job = null
-                if (fired) {
-                    fired = false
+                tracker.job?.cancel()
+                tracker.job = null
+                if (tracker.fired) {
+                    tracker.fired = false
                     true // consuma il rilascio per non far scattare anche il click
                 } else {
                     false
