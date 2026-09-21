@@ -882,6 +882,7 @@ private fun MainNavPill(
     selectedFocusRequester: FocusRequester? = null,
     onSearchClick: () -> Unit = {},
     searchButtonFocusRequester: FocusRequester? = null,
+    onTabLongPress: (MainTab, Offset, FocusRequester) -> Unit = { _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -905,8 +906,32 @@ private fun MainNavPill(
         // Prima pillola: solo la navigazione fino a Live.
         FIRST_PILL_TABS.forEach { tab ->
             val isSelected = tab == selectedTab
+            // Fase C0 — Film e Serie hanno un sottomenu (tutte le categorie / tutti i
+            // contenuti). Il gesto è OK prolungato, ma NON basta da solo: su un
+            // telecomando niente lo suggerisce, quindi accanto all'etichetta va un
+            // chevron visibile (§2.2 del piano).
+            val hasSubmenu = tab == MainTab.MOVIES || tab == MainTab.SERIES
             val interactionSource = remember { MutableInteractionSource() }
             val isFocused by interactionSource.collectIsFocusedAsState()
+            // Requester dedicato al tab: serve a riportare il focus QUI alla chiusura
+            // della tendina, anche se il tab non è quello selezionato.
+            val tabFocusRequester = remember { FocusRequester() }
+            var tabOrigin by remember { mutableStateOf(Offset.Zero) }
+            var tabHeight by remember { mutableStateOf(0f) }
+
+            // Long press: in Compose TV non esiste l'evento, va costruito con un timer
+            // su KeyDown annullato su KeyUp.
+            var isLongPressing by remember { mutableStateOf(false) }
+            var longPressTriggered by remember { mutableStateOf(false) }
+            var longPressJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+            val tabCoroutineScope = rememberCoroutineScope()
+
+            // Alla chiusura della tendina si torna qui: se il tab è selezionato si usa
+            // il requester condiviso (già agganciato dal contenuto), altrimenti il suo.
+            val returnRequester: FocusRequester =
+                if (isSelected && selectedFocusRequester != null) selectedFocusRequester
+                else tabFocusRequester
+
             val bg by animateColorAsState(
                 targetValue = when {
                     isSelected -> WaveStreamColors.Accent.copy(alpha = 0.85f)
@@ -919,26 +944,13 @@ private fun MainNavPill(
                 targetValue = if (isSelected || isFocused) Color.White else WaveStreamColors.TextSecondary,
                 label = "navPillLabel"
             )
-            Text(
-                text = mainTabLabel(tab),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                color = label,
-                maxLines = 1,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
                     .background(bg)
-                    .clickable(interactionSource = interactionSource, indication = null) {
-                        onTabSelected(tab)
-                    }
+                    .then(Modifier.focusRequester(returnRequester))
                     .focusable(interactionSource = interactionSource)
-                    .then(
-                        if (isSelected && selectedFocusRequester != null) {
-                            Modifier.focusRequester(selectedFocusRequester)
-                        } else {
-                            Modifier
-                        }
-                    )
                     .onPreviewKeyEvent { ev ->
                         if (ev.type == KeyEventType.KeyDown && ev.key == Key.DirectionDown) {
                             onDownPress()
@@ -947,8 +959,71 @@ private fun MainNavPill(
                             false
                         }
                     }
+                    // OK breve = cambia tab; OK prolungato (solo Film/Serie) = apre la
+                    // tendina. I due rami sono esclusivi: il key event viene consumato,
+                    // quindi al rilascio NON scatta anche il click (bug tipico di §2.4.2).
+                    .onKeyEvent { event ->
+                        val isEnter = event.key == Key.Enter ||
+                            event.key == Key.DirectionCenter ||
+                            event.key == Key.NumPadEnter
+                        if (isEnter && hasSubmenu) {
+                            when (event.type) {
+                                KeyEventType.KeyDown -> {
+                                    if (!isLongPressing) {
+                                        isLongPressing = true
+                                        longPressTriggered = false
+                                        longPressJob?.cancel()
+                                        longPressJob = tabCoroutineScope.launch {
+                                            kotlinx.coroutines.delay(450L)
+                                            longPressTriggered = true
+                                            onTabLongPress(
+                                                tab,
+                                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 8f),
+                                                returnRequester
+                                            )
+                                        }
+                                    }
+                                    true
+                                }
+                                KeyEventType.KeyUp -> {
+                                    isLongPressing = false
+                                    longPressJob?.cancel()
+                                    if (!longPressTriggered) onTabSelected(tab)
+                                    true
+                                }
+                                else -> false
+                            }
+                        } else {
+                            false
+                        }
+                    }
+                    .clickable(interactionSource = interactionSource, indication = null) {
+                        onTabSelected(tab)
+                    }
+                    .onGloballyPositioned { coords ->
+                        tabOrigin = coords.positionInRoot()
+                        tabHeight = coords.size.height.toFloat()
+                    }
                     .padding(horizontal = 14.dp, vertical = 7.dp)
-            )
+            ) {
+                Text(
+                    text = mainTabLabel(tab),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                    color = label,
+                    maxLines = 1
+                )
+                if (hasSubmenu) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Altre categorie",
+                        tint = label,
+                        modifier = Modifier
+                            .padding(start = 2.dp)
+                            .size(16.dp)
+                    )
+                }
+            }
         }
     }
 }
