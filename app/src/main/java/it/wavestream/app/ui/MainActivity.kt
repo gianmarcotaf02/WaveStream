@@ -1034,6 +1034,134 @@ private val FIRST_PILL_TABS = listOf(
 )
 
 /**
+ * Fase C0 — tendina in vetro ancorata sotto il tab Film/Serie.
+ *
+ * Ripristina l'ingresso a [it.wavestream.app.ui.category.AllCategoriesActivity]
+ * (e, come scorciatoia, a FilmActivity/SeriesActivity), perso con la rimozione della
+ * rail verticale. È disegnata nell'ultimo figlio della Box radice: dentro la top bar
+ * finirebbe dietro l'hero e le righe.
+ */
+@Composable
+private fun NavTabDropdownMenu(
+    state: NavDropdownState,
+    onDismiss: () -> Unit,
+    onOpenAllCategories: () -> Unit,
+    onOpenAllContent: () -> Unit
+) {
+    androidx.activity.compose.BackHandler { onDismiss() }
+
+    val firstRequester = remember { FocusRequester() }
+    LaunchedEffect(state.tab) {
+        withFrameNanos { }
+        try {
+            firstRequester.requestFocus()
+        } catch (_: Exception) {
+            // Nodo non ancora collegato: nessun problema.
+        }
+    }
+
+    // Comparsa breve: solo un'invalidazione di layer (niente cambi di layout).
+    var appeared by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { appeared = true }
+    val enterAnim by animateFloatAsState(
+        targetValue = if (appeared) 1f else 0f,
+        animationSpec = AppAnimations.SpringGlass,
+        label = "navDropdownEnter"
+    )
+
+    GlassSurface(
+        shape = RoundedCornerShape(18.dp),
+        fill = GlassTokens.SurfaceFillStrong,
+        modifier = Modifier
+            .offset { IntOffset(state.x.roundToInt(), state.y.roundToInt()) }
+            .width(260.dp)
+            .graphicsLayer {
+                alpha = enterAnim
+                val s = 0.96f + 0.04f * enterAnim
+                scaleX = s
+                scaleY = s
+                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0f)
+            }
+    ) {
+        Column(modifier = Modifier.padding(6.dp)) {
+            NavDropdownItem(
+                label = "Tutte le categorie",
+                isFirst = true,
+                isLast = false,
+                focusRequester = firstRequester,
+                onClick = onOpenAllCategories
+            )
+            NavDropdownItem(
+                label = if (state.tab == MainTab.SERIES) "Tutte le serie" else "Tutti i film",
+                isFirst = false,
+                isLast = true,
+                focusRequester = null,
+                onClick = onOpenAllContent
+            )
+        }
+    }
+}
+
+/** Voce focusabile della tendina: alone chiaro, non fondo accent pieno. */
+@Composable
+private fun NavDropdownItem(
+    label: String,
+    isFirst: Boolean,
+    isLast: Boolean,
+    focusRequester: FocusRequester?,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val bg by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
+        label = "navDropdownItemBg"
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "navDropdownItemScale"
+    )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(12.dp))
+            .background(bg)
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .focusable(interactionSource = interactionSource)
+            // Trappola sul focus: SU dal primo e GIÙ dall'ultimo restano dentro la
+            // tendina; altrimenti il contenuto dietro ruba il focus (§2.4.4).
+            .onPreviewKeyEvent { ev ->
+                if (ev.type == KeyEventType.KeyDown) {
+                    when (ev.key) {
+                        Key.DirectionUp -> isFirst
+                        Key.DirectionDown -> isLast
+                        Key.DirectionLeft, Key.DirectionRight -> true
+                        else -> false
+                    }
+                } else {
+                    false
+                }
+            }
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 10.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
+            fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal,
+            maxLines = 1
+        )
+    }
+}
+
+/**
  * Seconda pillola, allineata a destra (Fase 2.3b).
  *
  * Contiene Preferiti, Liste e Cronologia in versione SOLO ICONA (con stato di
