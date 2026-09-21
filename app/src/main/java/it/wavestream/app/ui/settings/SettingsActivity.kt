@@ -61,6 +61,7 @@ import it.wavestream.app.data.repository.PlaylistRepository
 import it.wavestream.app.ui.loading.LoadingActivity
 import it.wavestream.app.ui.MainActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
+import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
