@@ -64,22 +64,17 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import it.wavestream.app.ui.util.requestFocusSafely
-import it.wavestream.app.util.isLowRamDevice
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -951,8 +946,11 @@ fun HeroBanner(
     // Skipped 30-70 frames" every 7 s), which makes the whole UI feel frozen while
     // navigating. There we keep the hero static; the user still changes it with
     // the arrows/buttons.
-    val context = LocalContext.current
-    val autoRotateEnabled = remember(context) { !isLowRamDevice(context) }
+    // Rotazione automatica dell'hero: SEMPRE attiva (Fase 1).
+    // Era disattivata sui device low-RAM perche' la transizione animava l'intero
+    // blocco (backdrop + testo + bottoni) con maschere offscreen, arrivando a ~1 s
+    // di main thread bloccato per ciclo ("Skipped 30-70 frames" ogni 7 s).
+    // Ora il backdrop fa solo un fade e il testo uno slide di 120dp.
     var isPaused by remember { mutableStateOf(false) }
     // Track slide direction
     var slideDirection by remember { mutableIntStateOf(1) }
@@ -964,144 +962,97 @@ fun HeroBanner(
         onFocusChanged(isPaused)
     }
     
-    LaunchedEffect(currentIndex, isPaused, autoRotateEnabled) {
-        if (autoRotateEnabled && !isPaused && totalCount > 1) {
+    LaunchedEffect(currentIndex, isPaused, totalCount) {
+        if (!isPaused && totalCount > 1) {
             delay(7000)
             slideDirection = 1
             onAutoNext()
         }
     }
     
+    // Fase 1 - altezza adattiva. Prima 340dp fissi: su schermi a bassa densita'
+    // risultava una banda bassa e "incollata" sul nero. Ora ~62% dello schermo.
+    val heroHeight = (LocalConfiguration.current.screenHeightDp * 0.62f).dp
+
+    // Scrim statiche (SrcOver): raccordano il backdrop a tutta fascia con lo sfondo
+    // nero del contenitore e danno contrasto al testo. Sostituiscono le maschere
+    // alpha BlendMode.DstIn, che rendevano l'immagine invisibile sotto il 52% a
+    // sinistra e oltre il 90% a destra (da li' il bordo netto, effetto "rettangolo
+    // incollato") e costavano un buffer offscreen a piena schermata per frame.
+    val scrimHorizontal = remember {
+        Brush.horizontalGradient(colorStops = arrayOf(
+            0.00f to Color.Black.copy(alpha = 0.97f),
+            0.34f to Color.Black.copy(alpha = 0.90f),
+            0.52f to Color.Black.copy(alpha = 0.58f),
+            0.66f to Color.Black.copy(alpha = 0.24f),
+            0.80f to Color.Transparent,
+            1.00f to Color.Transparent
+        ))
+    }
+    val scrimVertical = remember {
+        Brush.verticalGradient(colorStops = arrayOf(
+            0.00f to Color.Black.copy(alpha = 0.35f),
+            0.14f to Color.Transparent,
+            0.44f to Color.Transparent,
+            0.72f to Color.Black.copy(alpha = 0.72f),
+            1.00f to Color.Black
+        ))
+    }
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(340.dp)
+            .height(heroHeight)
     ) {
-        // NOTA: niente overlay ambientali (aurora) né scrim sinistri — la zona testo
-        // deve mostrare SOLO lo sfondo nero dell'app. Il backdrop è reso invisibile
-        // lì dalla maschera alpha (imageFadeH, trasparente fino al 52%).
-        
-        // Animated content with slide transition - ENTIRE HERO BLOCK slides
+        // ---- Layer 1: backdrop a tutto schermo ---------------------------------
+        // Copre l'intera fascia da bordo a bordo, senza maschere: la fusione con lo
+        // sfondo e' affidata alle scrim statiche del layer 2.
+        AnimatedContent(
+            targetState = heroItem,
+            contentKey = { it.id },
+            transitionSpec = { fadeIn(tween(450)) togetherWith fadeOut(tween(450)) },
+            label = "heroBackdrop"
+        ) { backdropHero ->
+            if (backdropHero.contentType == "SERIEA_MATCH" && serieAMatch != null) {
+                SerieAMatchHeroBackdrop(
+                    match = serieAMatch,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                AsyncImage(
+                    model = backdropHero.backdropUrl ?: backdropHero.posterUrl,
+                    contentDescription = backdropHero.title,
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+
+        // ---- Layer 2: scrim statiche (SrcOver, nessun blend mode) --------------
+        Box(modifier = Modifier.fillMaxSize().background(scrimHorizontal))
+        Box(modifier = Modifier.fillMaxSize().background(scrimVertical))
+
+        // ---- Layer 3: contenuto (slide breve + fade) ---------------------------
+        // Lo slide e' applicato SOLO al testo e limitato a 120dp: prima muoveva di
+        // 300dp l'intero blocco (backdrop compreso), con due copie complete in scena.
         AnimatedContent(
             targetState = heroItem,
             contentKey = { it.id },
             transitionSpec = {
-                val enterOffset = if (slideDirection > 0) 300 else -300
-                val exitOffset = if (slideDirection > 0) -300 else 300
-                
-                slideInHorizontally(
+                val enterOffset = if (slideDirection > 0) 120 else -120
+                val exitOffset = if (slideDirection > 0) -120 else 120
+                (slideInHorizontally(
                     initialOffsetX = { enterOffset },
-                    animationSpec = tween(500)
-                ) + fadeIn(tween(300)) togetherWith
-                slideOutHorizontally(
-                    targetOffsetX = { exitOffset },
-                    animationSpec = tween(500)
-                ) + fadeOut(tween(300))
+                    animationSpec = tween(380)
+                ) + fadeIn(animationSpec = tween(380))) togetherWith
+                    (slideOutHorizontally(
+                        targetOffsetX = { exitOffset },
+                        animationSpec = tween(280)
+                    ) + fadeOut(animationSpec = tween(200)))
             },
-            label = "heroSlide"
+            label = "heroForeground"
         ) { hero ->
-            // Static gradient brushes - created once and reused for every recompose/frame
-            // Aurora: ambient Obsidian (#050608) al posto del nero puro — sfondo e
-            // contenuto si fondono senza il taglio netto del #000.
-            // Tutti e quattro i bordi sfumano verso BackgroundDark: l'hero non deve
-            // mai presentare un limite geometrico visibile (effetto "rettangolo incollato").
-            // Nessun overlay: la zona testo mostra SOLO lo sfondo nero dell'app.
-            // Tutta la dissolvenza è fatta dalla maschera alpha imageFadeH sull'immagine.
-
-            // Maschere di feathering (BlendMode.DstIn): l'ALPHA dell'immagine va a zero
-            // sui bordi con rampa STRETTA, così l'immagine arriva brillante fin quasi al
-            // bordo e poi si fonde nello sfondo — nessuna banda scura intermedia.
-            val imageFadeH = remember {
-                // Rampa sinistra lunga ed "eased" (curva dolce, non lineare): su backdrop
-                // brillanti una rampa lineare corta si percepisce comunque come un bordo.
-                // L'immagine emerge su ~metà larghezza, senza punto di inizio visibile.
-                Brush.horizontalGradient(colorStops = arrayOf(
-                    0f to Color.Transparent,
-                    0.52f to Color.Transparent, // nero su tutta la zona testo (titolo → cast)
-                    0.60f to Color.Black.copy(alpha = 0.30f),
-                    0.68f to Color.Black.copy(alpha = 0.60f),
-                    0.76f to Color.Black.copy(alpha = 0.85f),
-                    0.84f to Color.Black,
-                    0.90f to Color.Black,
-                    1f to Color.Transparent
-                ))
-            }
-            val imageFadeV = remember {
-                Brush.verticalGradient(colorStops = arrayOf(
-                    0f to Color.Transparent,
-                    0.12f to Color.Black,
-                    0.78f to Color.Black,
-                    1f to Color.Transparent
-                ))
-            }
-
-            Box(modifier = Modifier.fillMaxSize()) {
                 val isMatchHero = hero.contentType == "SERIEA_MATCH" && serieAMatch != null
-                if (isMatchHero) {
-                    // Backdrop partita: split diagonale + crests, con le STESSE maschere
-                    // alpha dei backdrop film/serie (nero verso sinistra dove sta il testo,
-                    // feathering ai quattro bordi — nessun limite geometrico visibile).
-                    val matchBackdrop = serieAMatch!!
-            val matchImageFadeH = remember {
-                // Per il match il colore si espande oltre la metà dell'hero verso sx:
-                // sfumatura morbida che comincia prima rispetto ai backdrop film/serie.
-                Brush.horizontalGradient(colorStops = arrayOf(
-                    0f to Color.Transparent,
-                    0.14f to Color.Black.copy(alpha = 0.08f),
-                    0.30f to Color.Black.copy(alpha = 0.40f),
-                    0.44f to Color.Black.copy(alpha = 0.80f),
-                    0.58f to Color.Black,
-                    0.90f to Color.Black,
-                    1f to Color.Transparent
-                ))
-            }
-            Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                            .drawWithContent {
-                                val content = this
-                                clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-                                    content.drawContent()
-                                }
-                                drawRect(brush = matchImageFadeH, blendMode = BlendMode.DstIn)
-                                drawRect(brush = imageFadeV, blendMode = BlendMode.DstIn)
-                            }
-                    ) {
-                        SerieAMatchHeroBackdrop(
-                            match = matchBackdrop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                } else AsyncImage(
-                    model = hero.backdropUrl ?: hero.posterUrl,
-                    contentDescription = hero.title,
-                    contentScale = ContentScale.Crop,  // Maintain aspect ratio
-                    alignment = Alignment.CenterEnd,  // Align right side of image content
-                    alpha = 0.90f,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                        .drawWithContent {
-                            // Shift a destra: il soggetto del backdrop (di solito al centro
-                            // dell'immagine originale) cade nella zona visibile dell'hero,
-                            // anziché a metà sotto il nero della colonna testo.
-                            // 0.15f = 15% della larghezza hero — alzare/abbassare per regolare.
-                            val backdropShift = size.width * 0.15f
-                            val content = this
-                            clipRect(left = 0f, top = 0f, right = size.width, bottom = size.height) {
-                                translate(left = backdropShift) {
-                                    content.drawContent()
-                                }
-                            }
-                            drawRect(brush = imageFadeH, blendMode = BlendMode.DstIn)
-                            drawRect(brush = imageFadeV, blendMode = BlendMode.DstIn)
-                        }
-                )
-
-                // Nessun overlay sopra l'immagine — solo sfondo dell'app dove l'immagine è mascherata
-                
-                // Content - inside animation block for full slide effect
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterStart)
@@ -1598,10 +1549,8 @@ fun HeroBanner(
                                 modifier = Modifier.padding(start = 4.dp)
                             )
                         }
-                    // Removed inner Column closing brace
-                }  // Close outer Column
-            }
-        }
+                }  // Close Column
+        }  // Close heroForeground AnimatedContent
         
         // Mark as watched confirmation dialog
         if (showMarkAsWatchedDialog) {
