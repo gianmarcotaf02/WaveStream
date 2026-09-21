@@ -62,6 +62,15 @@ data class EpgProgram(
     val category: String? = null
 )
 
+// Timeline EPG: la larghezza di un blocco è durata(min) * EPG_PIXELS_PER_MINUTE.
+// La riglia oraria e la linea dell'ora corrente usano la STESSA scala, così restano
+// allineate tra loro.
+private const val EPG_PIXELS_PER_MINUTE = 3
+private const val EPG_TIMELINE_HOURS = 6
+
+// Inizio della colonna programmi: padding orizzontale della riga (8dp) + colonna canale (200dp).
+private val EPG_TIMELINE_START = 208.dp
+
 /**
  * EPG Activity - Electronic Program Guide
  * Now using Jetpack Compose for UI
@@ -206,7 +215,111 @@ fun EPGScreen(
                     )
                 }
             }
+
+            // Linea dell'ora corrente: attraversa tutte le righe canale.
+            EPGCurrentTimeLine(currentTime = currentTime)
+            }
         }
+    }
+}
+
+/**
+ * Riglia oraria (00:00, 01:00, ...) allineata all'inizio della colonna programmi,
+ * cioè dopo la colonna del canale (200dp) più il padding orizzontale della riga (8dp).
+ */
+@Composable
+private fun EPGTimeHeader(
+    currentTime: Long,
+    timeFormat: SimpleDateFormat
+) {
+    val calendar = remember(currentTime) {
+        Calendar.getInstance().apply {
+            timeInMillis = currentTime
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .background(Color.White.copy(alpha = 0.04f))
+            .padding(start = EPG_TIMELINE_START, end = 12.dp)
+            .horizontalScroll(rememberScrollState())
+    ) {
+        for (i in 0 until EPG_TIMELINE_HOURS) {
+            val slotCalendar = calendar.clone() as Calendar
+            slotCalendar.add(Calendar.HOUR_OF_DAY, i)
+
+            Box(
+                modifier = Modifier
+                    .width((EPG_PIXELS_PER_MINUTE * 60).dp)
+                    .fillMaxHeight()
+                    .background(
+                        if (i == 0) WaveStreamColors.Accent.copy(alpha = 0.15f)
+                        else Color.Transparent
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = if (i == 0) WaveStreamColors.Accent.copy(alpha = 0.5f)
+                        else Color.White.copy(alpha = 0.06f)
+                    ),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = timeFormat.format(slotCalendar.time),
+                    color = if (i == 0) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Linea verticale dell'ora corrente: alone a gradiente + filo pieno, zero blur.
+ */
+@Composable
+private fun EPGCurrentTimeLine(currentTime: Long) {
+    val calendar = remember(currentTime) {
+        Calendar.getInstance().apply { timeInMillis = currentTime }
+    }
+    val minuteOffset = calendar.get(Calendar.MINUTE) * EPG_PIXELS_PER_MINUTE
+
+    Box(
+        modifier = Modifier
+            .offset(x = EPG_TIMELINE_START + minuteOffset.dp - 3.dp)
+            .width(6.dp)
+            .fillMaxHeight()
+    ) {
+        // Alone (gradiente orizzontale, zero blur)
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(6.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(
+                            Color.Transparent,
+                            WaveStreamColors.Error.copy(alpha = 0.4f),
+                            Color.Transparent
+                        )
+                    )
+                )
+        )
+        // Filo pieno
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(2.dp)
+                .align(Alignment.CenterStart)
+                .offset(x = 2.dp)
+                .background(WaveStreamColors.Error)
+        )
     }
 }
 
@@ -419,9 +532,11 @@ private fun EPGProgramBlock(
         label = "programBorder"
     )
     
-    // Width based on duration (min 120dp, max 400dp)
+    // Width based on duration (min 60dp, max 540dp). Tenere il clamp largo permette
+    // a riglia oraria e linea dell'ora corrente (scala lineare) di restare allineate
+    // ai blocchi per la quasi totalità dei programmi reali (20 min - 3 h).
     val durationMinutes = ((program.end - program.start) / 60_000).toInt()
-    val width = (durationMinutes * 3).coerceIn(120, 400).dp
+    val width = (durationMinutes * EPG_PIXELS_PER_MINUTE).coerceIn(60, 540).dp
     
     Box(
         modifier = Modifier
