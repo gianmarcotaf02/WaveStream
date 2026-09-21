@@ -883,26 +883,10 @@ fun SearchScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Suggerimenti istantanei sotto la tastiera (lato sinistro):
-                // così non vengono coperti dalla griglia dei risultati a destra
-                if (suggestions.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    SuggestionPills(
-                        suggestions = suggestions,
-                        onItemClick = onItemClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    )
-                } else if (query.trim().length >= 2) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "Nessun suggerimento",
-                        color = WaveStreamColors.TextTertiary,
-                        fontSize = 13.sp,
-                        modifier = Modifier.padding(start = 6.dp)
-                    )
-                }
+                // Suggerimenti sotto la tastiera RIMOSSI su richiesta: il pannello
+                // sinistro ora contiene solo la tastiera, i risultati restano a destra.
+                // (La computazione fuzzy è ancora attiva perché il fallback "nessun
+                // risultato" la usa — va rimossa anche quella per il guadagno pieno.)
             }
 
             Spacer(modifier = Modifier.width(28.dp))
