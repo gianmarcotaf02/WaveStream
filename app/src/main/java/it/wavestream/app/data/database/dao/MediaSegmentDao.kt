@@ -43,6 +43,32 @@ interface MediaSegmentDao {
     @Query("SELECT * FROM media_segments WHERE imdbId = :imdbId AND type = :type LIMIT 1")
     suspend fun getByImdb(imdbId: String, type: SegmentType): MediaSegment?
 
+    /**
+     * Marker di un episodio identificato in modo stabile: IMDb della serie + stagione + episodio.
+     * È la chiave giusta per i segmenti remoti (IntroDB), perché non dipende dagli id locali
+     * (che cambiano al re-import della playlist) e non collidono tra episodi della stessa serie
+     * come accade con [getByTmdb] (dove tmdbId è l'id della SERIE, non dell'episodio).
+     */
+    @Query(
+        "SELECT * FROM media_segments WHERE imdbId = :imdbId AND seasonNumber = :seasonNumber " +
+            "AND episodeNumber = :episodeNumber AND type = :type " +
+            "ORDER BY confidence DESC, updatedAt DESC LIMIT 1"
+    )
+    suspend fun getByImdbEpisode(
+        imdbId: String,
+        seasonNumber: Int,
+        episodeNumber: Int,
+        type: SegmentType
+    ): MediaSegment?
+
+    @Query("DELETE FROM media_segments WHERE imdbId = :imdbId AND seasonNumber = :seasonNumber AND episodeNumber = :episodeNumber AND type = :type AND source = 'EXTERNAL_DB'")
+    suspend fun deleteExternalForImdbEpisode(
+        imdbId: String,
+        seasonNumber: Int,
+        episodeNumber: Int,
+        type: SegmentType
+    )
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(segment: MediaSegment): Long
 
