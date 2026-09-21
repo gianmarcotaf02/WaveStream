@@ -65,6 +65,8 @@ import it.wavestream.app.ui.multiscreen.MultiscreenActivity
 import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -404,6 +406,7 @@ fun LiveScreen(
     onSearchClose: () -> Unit = {},
     onBackClick: () -> Unit,
     onMultiscreenClick: () -> Unit = {},
+    onOpenEpg: () -> Unit = {},
     favoriteCategories: Set<String> = emptySet(),
     onToggleFavorite: (String) -> Unit = {},
     channelCounts: Map<String, Int> = emptyMap()
@@ -465,10 +468,19 @@ fun LiveScreen(
     }
 
     // Category selected — show channels directly (no sidebar)
+    val screenBackground = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                WaveStreamColors.Accent.copy(alpha = 0.045f),
+                WaveStreamColors.GradientMiddle,
+                WaveStreamColors.GradientBottom
+            )
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(screenBackground)
     ) {
         // Header with back button, category name, search, toggle
         LiveHeader(
@@ -477,6 +489,7 @@ fun LiveScreen(
             isGridMode = isGridMode,
             onToggleMode = onToggleMode,
             onSearchClick = onSearchClick,
+            onOpenEpg = onOpenEpg,
             onBackClick = onBackClick,
             searchButtonFocusRequester = searchButtonFocusRequester,
             toggleButtonFocusRequester = toggleButtonFocusRequester
@@ -892,6 +905,7 @@ private fun LiveHeader(
     isGridMode: Boolean,
     onToggleMode: () -> Unit,
     onSearchClick: () -> Unit,
+    onOpenEpg: () -> Unit = {},
     onBackClick: () -> Unit,
     searchButtonFocusRequester: FocusRequester,
     toggleButtonFocusRequester: FocusRequester
@@ -899,23 +913,46 @@ private fun LiveHeader(
     val searchInteractionSource = remember { MutableInteractionSource() }
     val toggleInteractionSource = remember { MutableInteractionSource() }
     val backInteractionSource = remember { MutableInteractionSource() }
+    val epgInteractionSource = remember { MutableInteractionSource() }
     val isSearchFocused by searchInteractionSource.collectIsFocusedAsState()
     val isToggleFocused by toggleInteractionSource.collectIsFocusedAsState()
     val isBackFocused by backInteractionSource.collectIsFocusedAsState()
-    
-    val searchBorderColor by animateColorAsState(
-        targetValue = if (isSearchFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "searchBorder"
+    val isEpgFocused by epgInteractionSource.collectIsFocusedAsState()
+
+    // Fase L1 — header flottante in vetro: nessuna barra piena, solo pulsanti vetro
+    // con focus ad alone (stessa lingua della floating bar di Home).
+    val backFill by animateColorAsState(
+        targetValue = if (isBackFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        label = "backFill"
     )
-    val toggleBorderColor by animateColorAsState(
-        targetValue = if (isToggleFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "toggleBorder"
+    val searchFill by animateColorAsState(
+        targetValue = if (isSearchFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        label = "searchFill"
     )
-    val backBorderColor by animateColorAsState(
-        targetValue = if (isBackFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "backBorder"
+    val toggleFill by animateColorAsState(
+        targetValue = if (isToggleFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        label = "toggleFill"
     )
-    
+    val epgFill by animateColorAsState(
+        targetValue = if (isEpgFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        label = "epgFill"
+    )
+    val backScale by animateFloatAsState(
+        targetValue = if (isBackFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "backScale"
+    )
+    val searchScale by animateFloatAsState(
+        targetValue = if (isSearchFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "searchScale"
+    )
+    val epgScale by animateFloatAsState(
+        targetValue = if (isEpgFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "epgScale"
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -924,25 +961,26 @@ private fun LiveHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Back button
-        Box(
+        GlassSurface(
+            shape = CircleShape,
+            fill = backFill,
             modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .border(2.dp, backBorderColor, CircleShape)
-                .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f))
+                .graphicsLayer { scaleX = backScale; scaleY = backScale }
+                .size(44.dp)
                 .focusable(interactionSource = backInteractionSource)
                 .clickable(
                     interactionSource = backInteractionSource,
                     indication = null,
                     onClick = onBackClick
-                ),
-            contentAlignment = Alignment.Center
+                )
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Indietro",
-                tint = if (isBackFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary
-            )
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Indietro",
+                    tint = WaveStreamColors.TextPrimary
+                )
+            }
         }
         
         // Category info
@@ -962,62 +1000,89 @@ private fun LiveHeader(
         
         // Actions
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Search button
-            Box(
+            GlassSurface(
+                shape = CircleShape,
+                fill = searchFill,
                 modifier = Modifier
-                    .size(48.dp)
+                    .graphicsLayer { scaleX = searchScale; scaleY = searchScale }
+                    .size(44.dp)
                     .focusRequester(searchButtonFocusRequester)
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(2.dp, searchBorderColor, RoundedCornerShape(8.dp))
-                    .background(if (isSearchFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f))
                     .focusable(interactionSource = searchInteractionSource)
                     .clickable(
                         interactionSource = searchInteractionSource,
                         indication = null,
                         onClick = onSearchClick
-                    ),
-                contentAlignment = Alignment.Center
+                    )
             ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Cerca",
-                    tint = WaveStreamColors.TextPrimary
-                )
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Cerca",
+                        tint = WaveStreamColors.TextPrimary
+                    )
+                }
+            }
+
+            // Fase L0 — ingresso alla guida EPG a schermo intero (EPGActivity era orfana)
+            GlassSurface(
+                shape = CircleShape,
+                fill = epgFill,
+                modifier = Modifier
+                    .graphicsLayer { scaleX = epgScale; scaleY = epgScale }
+                    .size(44.dp)
+                    .focusable(interactionSource = epgInteractionSource)
+                    .clickable(
+                        interactionSource = epgInteractionSource,
+                        indication = null,
+                        onClick = onOpenEpg
+                    )
+            ) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.List,
+                        contentDescription = "Guida TV (EPG)",
+                        tint = WaveStreamColors.TextPrimary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
             
             // Toggle button (Griglia / EPG) - labeled so it's discoverable
-            Row(
+            GlassSurface(
+                shape = RoundedCornerShape(50),
+                fill = toggleFill,
                 modifier = Modifier
-                    .height(48.dp)
+                    .height(44.dp)
                     .focusRequester(toggleButtonFocusRequester)
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(2.dp, toggleBorderColor, RoundedCornerShape(8.dp))
-                    .background(if (isToggleFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.5f))
                     .focusable(interactionSource = toggleInteractionSource)
                     .clickable(
                         interactionSource = toggleInteractionSource,
                         indication = null,
                         onClick = onToggleMode
                     )
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(
-                    imageVector = if (isGridMode) Icons.AutoMirrored.Filled.List else Icons.Default.GridView,
-                    contentDescription = null,
-                    tint = if (isToggleFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
-                    modifier = Modifier.size(20.dp)
-                )
-                Text(
-                    text = if (isGridMode) "EPG" else "Griglia",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isToggleFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Row(
+                    modifier = Modifier.fillMaxHeight().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isGridMode) Icons.AutoMirrored.Filled.List else Icons.Default.GridView,
+                        contentDescription = null,
+                        tint = WaveStreamColors.TextPrimary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Text(
+                        text = if (isGridMode) "EPG" else "Griglia",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = WaveStreamColors.TextPrimary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
