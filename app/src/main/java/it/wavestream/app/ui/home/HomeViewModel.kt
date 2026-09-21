@@ -2978,23 +2978,25 @@ class HomeViewModel @Inject constructor(
                     return@withContext
                 }
                 
-                // Load each group as a carousel row
+                // Load each group as a carousel row. Anche le liste vuote vengono
+                // mostrate (con un placeholder): appena creata una lista l'utente
+                // deve vederla comparire, altrimenti la schermata resta vuota.
                 groups.forEach { group ->
                     val items = customGroupDao.getItemsForGroupList(group.id)
-                    if (items.isNotEmpty()) {
-                        val carouselItems = items.map { item ->
-                            CarouselItem(
-                                id = item.contentId,
-                                title = item.title,
-                                posterUrl = item.posterUrl,
-                                contentType = item.contentType.name
-                            )
-                        }
-                        rows.add(CarouselRow(
-                            title = group.name,
-                            items = carouselItems
-                        ))
+                    val carouselItems = items.map { item ->
+                        CarouselItem(
+                            id = item.contentId,
+                            title = item.title,
+                            posterUrl = item.posterUrl,
+                            contentType = item.contentType.name
+                        )
                     }
+                    rows.add(CarouselRow(
+                        title = group.name,
+                        items = carouselItems,
+                        // Niente "Vedi tutto" su una lista vuota
+                        showSeeAll = carouselItems.isNotEmpty()
+                    ))
                 }
             } catch (e: Exception) {
                 // Ignore errors
@@ -3005,7 +3007,7 @@ class HomeViewModel @Inject constructor(
     /**
      * Create a new custom list
      */
-    fun createList(name: String) {
+    fun createList(name: String, onCreated: () -> Unit = {}) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
@@ -3019,6 +3021,9 @@ class HomeViewModel @Inject constructor(
                     Log.e("HomeViewModel", "Error creating list: ${e.message}")
                 }
             }
+            // Chiamata SOLO dopo l'insert: ricaricare prima del commit lasciava il tab
+            // Liste con i dati vecchi (lista appena creata invisibile).
+            onCreated()
         }
     }
 

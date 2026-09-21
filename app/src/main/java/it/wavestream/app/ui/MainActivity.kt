@@ -672,9 +672,12 @@ private fun MainActivityScreen(
             CreateListDialog(
                 onDismiss = { showCreateListDialog = false },
                 onCreate = { listName ->
-                    homeViewModel.createList(listName)
                     showCreateListDialog = false
-                    homeViewModel.loadContent(HomeContentType.LISTS)
+                    // Ricarica il tab Liste solo dopo l'inserimento nel DB, così la
+                    // nuova lista compare immediatamente anche se è vuota.
+                    homeViewModel.createList(listName) {
+                        homeViewModel.loadContent(HomeContentType.LISTS)
+                    }
                 }
             )
         }
