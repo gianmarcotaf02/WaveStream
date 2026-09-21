@@ -59,7 +59,8 @@ class HomeViewModel @Inject constructor(
     private val episodeDao: EpisodeDao,
     private val profileDao: ProfileDao,
     private val recommendationEngine: it.wavestream.app.data.tmdb.RecommendationEngine,
-    private val serieAMatchRepository: it.wavestream.app.data.repository.SerieAMatchRepository
+    private val serieAMatchRepository: it.wavestream.app.data.repository.SerieAMatchRepository,
+    private val epgRepository: it.wavestream.app.data.repository.EpgRepository
 ) : ViewModel() {
 
     companion object {
@@ -353,6 +354,8 @@ class HomeViewModel @Inject constructor(
                         isLoading = false
                     ))
                 }
+                // EPG (programma in onda) per i canali mostrati subito.
+                loadSerieAEpgFor(saved)
             }
             // 2. Ricerca aggiornata (auto-aggiorna il mapping salvato: nuovi canali
             //    col nome squadra entrano, quelli spariti con la playlist escono).
@@ -369,6 +372,7 @@ class HomeViewModel @Inject constructor(
             } else {
                 emptyList()
             }
+            var epgChannels: List<it.wavestream.app.data.database.entity.Channel> = emptyList()
             _uiState.update { s ->
                 val current = s.serieAChannelPicker ?: return@update s
                 val updated = when {
@@ -376,7 +380,12 @@ class HomeViewModel @Inject constructor(
                     saved.isNotEmpty() -> saved   // fallback: niente aggiornamento, tieni i salvati
                     else -> current.channels
                 }
+                epgChannels = updated
                 s.copy(serieAChannelPicker = current.copy(channels = updated, isLoading = false))
+            }
+            // Se la lista è cambiata con la ricerca aggiornata, ricarica l'EPG.
+            if (epgChannels.isNotEmpty() && (fresh.isNotEmpty())) {
+                loadSerieAEpgFor(epgChannels)
             }
         }
         // Tabellino in parallelo (gol, cartellini, sostituzioni, formazioni)
@@ -396,6 +405,42 @@ class HomeViewModel @Inject constructor(
     fun dismissSerieAChannelPicker() {
         _uiState.update {
             it.copy(serieAChannelPicker = null, serieATabellino = SerieATabellinoState())
+        }
+    }
+
+    /**
+     * Carica l'EPG (programma attualmente in onda) per i canali del match e lo
+     * pubblica nello stato del picker. Best-effort: i canali senza EPG restano
+     * senza (l'EPG viene mostrato solo "se disponibile").
+     *
+     * La lettura passa da [EpgRepository.getProgramsForChannel], che se la cache
+     * in memoria è vuota la ripesca da Room (FASE 4).
+     */
+    private suspend fun loadSerieAEpgFor(channels: List<it.wavestream.app.data.database.entity.Channel>) {
+        if (channels.isEmpty()) return
+        val now = System.currentTimeMillis()
+        val result = java.util.concurrent.ConcurrentHashMap<Long, it.wavestream.app.ui.epg.EpgProgram>()
+        coroutineScope {
+            channels.map { channel ->
+                async(Dispatchers.IO) {
+                    val ids = listOfNotNull(
+                        channel.xtreamEpgChannelId,
+                        channel.name,
+                        channel.xtreamStreamId?.toString()
+                    )
+                    val programs = ids.asSequence()
+                        .mapNotNull { id -> runCatching { epgRepository.getProgramsForChannel(id) }.getOrNull() }
+                        .firstOrNull { it.isNotEmpty() }
+                        ?: emptyList()
+                    programs.firstOrNull { it.start <= now && it.end > now }
+                        ?.let { result[channel.id] = it }
+                }
+            }.awaitAll()
+        }
+        if (result.isEmpty()) return
+        _uiState.update { s ->
+            val current = s.serieAChannelPicker ?: return@update s
+            s.copy(serieAChannelPicker = current.copy(epg = result.toMap()))
         }
     }
 
