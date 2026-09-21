@@ -43,6 +43,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -930,14 +931,14 @@ private fun MainActionsPill(
             selected = selectedTab == MainTab.FAVORITES
         )
         PillIcon(
-            icon = Icons.Default.BookmarkBorder,
+            icon = Icons.AutoMirrored.Filled.FormatListBulleted,
             contentDescription = "Liste",
             onClick = { onTabSelected(MainTab.LISTS) },
             onDownPress = onDownPress,
             selected = selectedTab == MainTab.LISTS
         )
         PillIcon(
-            icon = Icons.Default.Restore,
+            icon = Icons.Default.History,
             contentDescription = "Cronologia",
             onClick = { onTabSelected(MainTab.HISTORY) },
             onDownPress = onDownPress,
