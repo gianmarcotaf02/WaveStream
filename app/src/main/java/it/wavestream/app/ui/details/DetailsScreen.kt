@@ -1284,10 +1284,11 @@ private fun EndingDialog(
     }
 
     Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            color = WaveStreamColors.BackgroundSecondary,
+        // Fase D6 — pannello in vetro (fill semitrasparente + bordo a gradiente),
+        // niente rettangolo a tinta piena col bordo netto.
+        GlassSurface(
             shape = RoundedCornerShape(20.dp),
-            border = BorderStroke(1.dp, WaveStreamColors.TextSecondary.copy(alpha = 0.3f)),
+            fill = GlassTokens.SurfaceFillStrong,
             modifier = Modifier.width(760.dp)
         ) {
             Column(modifier = Modifier.padding(28.dp)) {
