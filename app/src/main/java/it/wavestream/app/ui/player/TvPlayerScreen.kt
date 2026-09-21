@@ -422,8 +422,9 @@ fun TvPlayerScreen(
             )
         }
 
-        // Skip credits overlay (titoli di coda noti da marker/IntroDB)
-        if (showSkipCredits && !isMiniPlayer && !isLiveChannel) {
+        // Skip credits overlay (titoli di coda noti da marker/IntroDB). Nascosto quando è
+        // già visibile l'overlay "Prossimo episodio" (stessa posizione, eviterebbe overlap).
+        if (showSkipCredits && nextEpisode == null && !isMiniPlayer && !isLiveChannel) {
             SkipIntroOverlay(
                 onClick = onSkipCredits,
                 label = "Salta titoli di coda",
