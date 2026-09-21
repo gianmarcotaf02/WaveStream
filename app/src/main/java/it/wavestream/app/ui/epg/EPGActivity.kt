@@ -178,6 +178,17 @@ fun EPGScreen(
                 CircularProgressIndicator(color = WaveStreamColors.Accent)
             }
         } else {
+            // Riglia oraria sopra i canali + linea dell'ora corrente che li taglia
+            // tutti (stessa timeline della modalità EPG della Live).
+            EPGTimeHeader(
+                currentTime = currentTime,
+                timeFormat = timeFormat
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
             // Channel list with programs using TvLazyColumn for proper D-pad navigation
             TvLazyColumn(
                 modifier = Modifier.fillMaxSize(),
