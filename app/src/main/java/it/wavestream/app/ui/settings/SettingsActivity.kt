@@ -2553,14 +2553,45 @@ private fun SettingsSection(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        // Passo 2 — titolo in stile editoriale, come la Home: eyebrow in accent maiuscolo
+        // + titolo grande. Prima era un singolo Text headlineSmall, identico in ogni
+        // sezione: nessuna gerarchia, nessun carattere.
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            color = WaveStreamColors.Accent,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp
+        )
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = title,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineMedium,
             color = WaveStreamColors.TextPrimary,
             fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.height(24.dp))
-        content()
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Contenuto dentro una superficie in vetro: la sezione smette di essere un
+        // pannello piatto e diventa una scheda flottante, coerente con il resto
+        // dell'app. Gli spazi tra le righe sono gestiti qui, così le sezioni restano
+        // uniformi senza dover toccare le singole righe.
+        //
+        // blurEnabled resta false (default): nessun RenderEffect, costo per frame
+        // nullo — la resa "vetro" è affidata a fill semitrasparente + bordo gradiente.
+        GlassSurface(
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                content()
+            }
+        }
     }
 }
 
