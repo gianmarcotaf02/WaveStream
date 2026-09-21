@@ -779,14 +779,30 @@ private fun HeroAmbientBackdrop(
         }
     }
 
-    // Fase 2.3 (rev) — la scrim orizzontale globale è stata RIMOSSA.
-    // Serviva a dare contrasto alla rail, ma la rail ora ha un proprio gradiente che
-    // sfuma a trasparente: sommando le due si otteneva una doppia scuritura proprio
-    // sulla fascia della rail, cioè la cucitura verticale che si vedeva.
-
-    // Scrim verticale: serve SOLO a dissolvere l'immagine verso il nero nella parte
-    // bassa, dove scorrono le righe. In alto non serve più: la top bar ha il suo
-    // gradiente e un doppio scurimento creava un gradino a metà schermo.
+    // ---- Scrim a TUTTO schermo (Fase 2.3b) -------------------------------------
+    // Stanno qui e non nella fascia dell'hero perché partono dal bordo x=0. Dentro
+    // la fascia il bordo sinistro cadeva a x = larghezza rail e quello superiore a
+    // y = altezza top bar, creando due cuciture visibili.
+    // Orizzontale: tiene scuri rail e colonna testo (fino al ~58%) e lascia libera la
+    // parte destra, dove l'immagine resta brillante.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.horizontalGradient(
+                    colorStops = arrayOf(
+                        0.00f to Color.Black.copy(alpha = 0.92f),
+                        0.34f to Color.Black.copy(alpha = 0.88f),
+                        0.48f to Color.Black.copy(alpha = 0.70f),
+                        0.60f to Color.Black.copy(alpha = 0.38f),
+                        0.72f to Color.Black.copy(alpha = 0.10f),
+                        0.82f to Color.Transparent,
+                        1.00f to Color.Transparent
+                    )
+                )
+            )
+    )
+    // Verticale: dissolvenza verso il nero in basso, dove scorrono le righe.
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -794,7 +810,7 @@ private fun HeroAmbientBackdrop(
                 Brush.verticalGradient(
                     colorStops = arrayOf(
                         0.00f to Color.Transparent,
-                        0.50f to Color.Transparent,
+                        0.46f to Color.Transparent,
                         0.78f to Color.Black.copy(alpha = 0.80f),
                         1.00f to Color.Black
                     )
@@ -1059,8 +1075,8 @@ private fun MiniTopBar(
             .background(
                 Brush.verticalGradient(
                     colorStops = arrayOf(
-                        0.00f to Color.Black.copy(alpha = 0.55f),
-                        0.55f to Color.Black.copy(alpha = 0.26f),
+                        0.00f to Color.Black.copy(alpha = 0.65f),
+                        0.55f to Color.Black.copy(alpha = 0.32f),
                         1.00f to Color.Transparent
                     )
                 )

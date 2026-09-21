@@ -163,20 +163,12 @@ fun ExpandableNavRail(
         modifier = modifier
             .animatedRailWidth(expansion)
             .fillMaxHeight()
-            .background(
-                // Fase 2.3 (rev) — rail in vetro con BORDO MORBIDO.
-                // Prima era traslucida ma a bordo NETTO: l'immagine dell'hero finiva
-                // contro un rettangolo scuro e si vedeva la cucitura verticale (la
-                // rail sembrava un pannello appoggiato sopra). Ora il gradiente sfuma
-                // a trasparente sul bordo destro, quindi non c'e' limite geometrico.
-                Brush.horizontalGradient(
-                    colorStops = arrayOf(
-                        0.00f to WaveStreamColors.BackgroundSecondary.copy(alpha = 0.72f),
-                        0.55f to Color.Black.copy(alpha = 0.42f),
-                        1.00f to Color.Transparent
-                    )
-                )
-            )
+            // Fase 2.3b — niente più sfondo proprio.
+            // La rail diventa una superficie "galleggiante": la leggibilità degli
+            // iconi la garantisce la scrim orizzontale a tutto schermo disegnata sul
+            // backdrop (HeroAmbientBackdrop), che parte da x=0. Uno sfondo dedicato
+            // era ridondante e riportava un bordo netto. Sui tab senza backdrop resta
+            // il gradiente radice di MainActivity a fare da fondo.
             .onPreviewKeyEvent { keyEvent ->
                 if (keyEvent.type != KeyEventType.KeyDown) {
                     false

@@ -989,29 +989,6 @@ fun HeroBanner(
     // alpha BlendMode.DstIn, che rendevano l'immagine invisibile sotto il 52% a
     // sinistra e oltre il 90% a destra (da li' il bordo netto, effetto "rettangolo
     // incollato") e costavano un buffer offscreen a piena schermata per frame.
-    // Fase 2.3 (rev) — rampa allungata: la trama e la riga del cast arrivano fino al
-    // ~70% della fascia, e con la rampa precedente (debole già al 60%) finivano su
-    // immagine chiara, poco leggibili. Ora il buio tiene fino al 70% e sfuma dopo.
-    val scrimHorizontal = remember {
-        Brush.horizontalGradient(colorStops = arrayOf(
-            0.00f to Color.Black.copy(alpha = 0.97f),
-            0.42f to Color.Black.copy(alpha = 0.92f),
-            0.58f to Color.Black.copy(alpha = 0.74f),
-            0.70f to Color.Black.copy(alpha = 0.42f),
-            0.82f to Color.Black.copy(alpha = 0.12f),
-            0.92f to Color.Transparent,
-            1.00f to Color.Transparent
-        ))
-    }
-    val scrimVertical = remember {
-        Brush.verticalGradient(colorStops = arrayOf(
-            0.00f to Color.Black.copy(alpha = 0.35f),
-            0.14f to Color.Transparent,
-            0.44f to Color.Transparent,
-            0.72f to Color.Black.copy(alpha = 0.72f),
-            1.00f to Color.Black
-        ))
-    }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -1022,13 +999,11 @@ fun HeroBanner(
         // l'immagine è una sola e copre anche rail e top bar: qui non va disegnata
         // di nuovo, altrimenti se ne vedrebbero due sovrapposte.
 
-        // ---- Scrim statiche (SrcOver, nessun blend mode) -----------------------
-        // Il backdrop NON è più disegnato qui: è a TUTTO schermo in MainActivity,
-        // dietro rail e top bar (Fase 1b). Così l'immagine è una sola, immersiva e
-        // non più ritagliata in una fascia. Qui restano solo le scrim che danno
-        // contrasto al testo dell'hero.
-        Box(modifier = Modifier.fillMaxSize().background(scrimHorizontal))
-        Box(modifier = Modifier.fillMaxSize().background(scrimVertical))
+        // ---- Scrim: spostate sul backdrop a tutto schermo (Fase 2.3b) ----------
+        // Erano qui, quindi il bordo SINISTRO della rampa cadeva a x = larghezza
+        // rail e quello SUPERIORE a y = altezza top bar: due cuciture perfettamente
+        // visibili (verificato su emulatore). Ora stanno in HeroAmbientBackdrop, dove
+        // partono dal bordo 0 dello schermo: nessun limite geometrico.
 
         // ---- Layer 3: contenuto (slide breve + fade) ---------------------------
         // Lo slide e' applicato SOLO al testo e limitato a 120dp: prima muoveva di
