@@ -54,6 +54,8 @@ import it.wavestream.app.data.database.entity.FavoriteCategory
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.components.CategoryFavoriteHeart
 import it.wavestream.app.ui.components.categoryLongPress
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
@@ -218,39 +220,62 @@ private fun AllCategoriesScreen(
     
     val title = if (contentType == "movies") "Categorie Film" else "Categorie Serie TV"
     val itemLabel = if (contentType == "movies") "film" else "serie"
-    
+
+    // Fondale coerente con la Home: gradiente accent soft → tinte di fondo.
+    val screenBackground = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                WaveStreamColors.Accent.copy(alpha = 0.045f),
+                WaveStreamColors.GradientMiddle,
+                WaveStreamColors.GradientBottom
+            )
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(screenBackground)
             .padding(horizontal = 24.dp)
     ) {
-        // Header
+        // Header FLOTTANTE in vetro: capsula con back + icona + titolo, non più una
+        // barra piena a bordo netto. Il conteggio resta fuori, a destra.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(top = 12.dp, bottom = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Back button con focus accent (bordo + alone quando selezionato)
-            FocusedBackButton(onClick = onBack)
-            
-            // Icon (4 squares)
-            FourSquaresIcon(
-                modifier = Modifier.size(32.dp)
-            )
-            
-            // Title
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                color = WaveStreamColors.TextPrimary,
-                fontWeight = FontWeight.Bold
-            )
-            
+            GlassSurface(
+                shape = RoundedCornerShape(20.dp),
+                fill = GlassTokens.SurfaceFill
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Back button in vetro, focus ad alone
+                    FocusedBackButton(onClick = onBack)
+
+                    // Icon (4 squares)
+                    FourSquaresIcon(
+                        modifier = Modifier.size(28.dp)
+                    )
+
+                    // Title
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = WaveStreamColors.TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             // Count (esclude la card "Tutti i film"/"Tutte le serie TV")
             Text(
                 text = "${filteredCategories.count { !it.isViewAll }} categorie",
@@ -521,7 +546,11 @@ private fun CategorySearchBar(
 }
 
 /**
- * Bottone indietro con focus accent (bordo accent + alone quando selezionato)
+ * Bottone indietro in vetro, focus ad alone (Fase C1).
+ *
+ * Prima era una capsula col bordo accent acceso sul focus: dentro un header
+ * flottante risultava troppo pesante. Ora il focus è solo un alone chiaro, coerente
+ * con la floating bar della Home.
  */
 @Composable
 private fun FocusedBackButton(onClick: () -> Unit) {
@@ -529,28 +558,24 @@ private fun FocusedBackButton(onClick: () -> Unit) {
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.1f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "backScale"
     )
     val background by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.25f) else Color.Transparent,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
         label = "backBg"
-    )
-    val border by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "backBorder"
     )
 
     Box(
         modifier = Modifier
-            .size(44.dp)
+            .size(40.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(50))
             .background(background)
-            .border(2.dp, border, RoundedCornerShape(10.dp))
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -563,7 +588,7 @@ private fun FocusedBackButton(onClick: () -> Unit) {
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Indietro",
             tint = WaveStreamColors.TextPrimary,
-            modifier = Modifier.size(26.dp)
+            modifier = Modifier.size(24.dp)
         )
     }
 }
