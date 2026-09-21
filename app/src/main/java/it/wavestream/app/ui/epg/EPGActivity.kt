@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +39,8 @@ import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.repository.EpgRepository
 import it.wavestream.app.ui.player.PlayerActivity
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
@@ -150,7 +153,15 @@ fun EPGScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        WaveStreamColors.Accent.copy(alpha = 0.045f),
+                        WaveStreamColors.GradientMiddle,
+                        WaveStreamColors.GradientBottom
+                    )
+                )
+            )
     ) {
         // Header with time
         EPGHeader(
@@ -197,37 +208,49 @@ private fun EPGHeader(
     timeFormat: SimpleDateFormat,
     dateFormat: SimpleDateFormat
 ) {
+    // Fase L6 — header flottante in vetro: capsula traslucida, non barra a tinta piena.
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(WaveStreamColors.BackgroundSecondary)
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .padding(horizontal = 24.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "Guida TV",
-            style = MaterialTheme.typography.headlineSmall,
-            color = WaveStreamColors.TextPrimary,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        GlassSurface(
+            shape = RoundedCornerShape(20.dp),
+            fill = GlassTokens.SurfaceFill
         ) {
             Text(
-                text = dateFormat.format(Date(currentTime)),
-                style = MaterialTheme.typography.bodyMedium,
-                color = WaveStreamColors.TextSecondary
+                text = "Guida TV",
+                style = MaterialTheme.typography.headlineSmall,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp)
             )
-            
-            Text(
-                text = timeFormat.format(Date(currentTime)),
-                style = MaterialTheme.typography.headlineMedium,
-                color = WaveStreamColors.Accent,
-                fontWeight = FontWeight.Bold
-            )
+        }
+        
+        GlassSurface(
+            shape = RoundedCornerShape(20.dp),
+            fill = GlassTokens.SurfaceFill
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = dateFormat.format(Date(currentTime)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = WaveStreamColors.TextSecondary
+                )
+                
+                Text(
+                    text = timeFormat.format(Date(currentTime)),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = WaveStreamColors.Accent,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -248,7 +271,8 @@ private fun EPGChannelRow(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary,
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "rowBg"
     )
     
@@ -256,6 +280,8 @@ private fun EPGChannelRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(80.dp)
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .focusable(interactionSource = interactionSource)
             .clickable(
@@ -278,7 +304,7 @@ private fun EPGChannelRow(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(WaveStreamColors.CardBackground),
+                    .background(Color.Black.copy(alpha = 0.35f)),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -318,7 +344,7 @@ private fun EPGChannelRow(
                         .width(200.dp)
                         .padding(vertical = 8.dp)
                         .clip(RoundedCornerShape(6.dp))
-                        .background(WaveStreamColors.CardBackground),
+                        .background(Color.White.copy(alpha = 0.03f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -356,25 +382,29 @@ private fun EPGProgramBlock(
     val isCurrent = program.start <= currentTime && program.end > currentTime
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.05f else 1f,
+        targetValue = if (isFocused) 1.02f else 1f,  // timeline densa: scala minima
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "programScale"
     )
     
+    // Fase L6 — in onda = accent SOFT, futuro = velatura minima, focus = alone.
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.3f)
-            isFocused -> WaveStreamColors.BackgroundTertiary
-            else -> WaveStreamColors.CardBackground
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.22f)
+            else -> Color.White.copy(alpha = 0.07f)
         },
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "programBg"
     )
     
     val borderColor by animateColorAsState(
         targetValue = when {
-            isFocused -> WaveStreamColors.Accent
-            isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.5f)
-            else -> WaveStreamColors.SurfaceBorder
+            isFocused -> Color.White.copy(alpha = 0.30f)
+            isCurrent -> WaveStreamColors.Accent.copy(alpha = 0.6f)
+            else -> Color.White.copy(alpha = 0.06f)
         },
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "programBorder"
     )
     
