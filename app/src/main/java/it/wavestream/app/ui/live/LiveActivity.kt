@@ -1411,7 +1411,6 @@ private fun LiveCategoryItem(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val coroutineScope = rememberCoroutineScope()
     
     val backgroundColor by animateColorAsState(
         targetValue = when {
@@ -1427,10 +1426,8 @@ private fun LiveCategoryItem(
         label = "catBorder"
     )
     
-    // Long press detection
-    var isLongPressing by remember { mutableStateOf(false) }
-    var longPressJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
-    
+    // Long press (~1.5s su OK) = toggle preferito, stesso meccanismo della
+    // griglia (categoryLongPress) così aggiunta e rimozione sono simmetriche.
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1439,28 +1436,14 @@ private fun LiveCategoryItem(
             .border(2.dp, borderColor, RoundedCornerShape(8.dp))
             .background(backgroundColor)
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .categoryLongPress(onLongPress)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-            .onKeyEvent { event ->
-                if (event.key == androidx.compose.ui.input.key.Key.Enter || event.key == androidx.compose.ui.input.key.Key.DirectionCenter) {
-                    if (event.type == androidx.compose.ui.input.key.KeyEventType.KeyDown && !isLongPressing) {
-                        isLongPressing = true
-                        longPressJob = coroutineScope.launch {
-                            delay(CATEGORY_FAVORITE_LONG_PRESS_MS)
-                            onLongPress()
-                        }
-                    } else if (event.type == androidx.compose.ui.input.key.KeyEventType.KeyUp) {
-                        isLongPressing = false
-                        longPressJob?.cancel()
-                    }
-                    false
-                } else false
-            },
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
