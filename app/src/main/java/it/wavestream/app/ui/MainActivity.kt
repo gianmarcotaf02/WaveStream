@@ -39,7 +39,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
@@ -1939,6 +1938,283 @@ private fun CreateListDialog(
                 }
             }
         }
+    }
+}
+
+/**
+ * Selettore liste aperto dal pulsante "Aggiungi alla lista" dell'hero.
+ *
+ * Permette di scegliere una lista esistente (toggle) oppure di crearne una
+ * nuova, esattamente come dal dettaglio contenuto. Sostituisce il vecchio
+ * toggle automatico che inseriva sempre in "Da guardare".
+ */
+@Composable
+private fun HeroListPickerDialog(
+    hero: HeroItem,
+    viewModel: HomeViewModel,
+    onDismiss: () -> Unit
+) {
+    var lists by remember { mutableStateOf<List<CustomGroup>>(emptyList()) }
+    var selectedIds by remember { mutableStateOf<Set<Long>>(emptySet()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var showCreate by remember { mutableStateOf(false) }
+    var newListName by remember { mutableStateOf("") }
+    val newListFocusRequester = remember { FocusRequester() }
+
+    fun reload() {
+        viewModel.loadListsForHero(hero) { loadedLists, ids ->
+            lists = loadedLists
+            selectedIds = ids
+            isLoading = false
+        }
+    }
+
+    LaunchedEffect(hero) { reload() }
+
+    LaunchedEffect(showCreate) {
+        if (showCreate) newListFocusRequester.requestFocusWhenReady()
+    }
+
+    fun createNewList() {
+        if (newListName.isBlank()) return
+        val name = newListName.trim()
+        newListName = ""
+        showCreate = false
+        viewModel.createListWithHero(hero, name) { reload() }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .width(420.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(WaveStreamColors.BackgroundSecondary)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = if (showCreate) "Nuova lista" else "Aggiungi a lista",
+                style = MaterialTheme.typography.titleLarge,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (showCreate) {
+                val fieldInteraction = remember { MutableInteractionSource() }
+                val fieldFocused by fieldInteraction.collectIsFocusedAsState()
+                val fieldBorder by animateColorAsState(
+                    targetValue = if (fieldFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
+                    label = "newListBorder"
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(WaveStreamColors.BackgroundTertiary)
+                        .border(if (fieldFocused) 2.dp else 1.dp, fieldBorder, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    BasicTextField(
+                        value = newListName,
+                        onValueChange = { newListName = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(newListFocusRequester)
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        textStyle = TextStyle(
+                            color = WaveStreamColors.TextPrimary,
+                            fontSize = 16.sp
+                        ),
+                        cursorBrush = SolidColor(WaveStreamColors.Accent),
+                        singleLine = true,
+                        interactionSource = fieldInteraction,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { createNewList() }),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                contentAlignment = Alignment.CenterStart,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                if (newListName.isEmpty()) {
+                                    Text(
+                                        text = "Nome della lista",
+                                        color = WaveStreamColors.TextTertiary,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    DialogActionButton(text = "Annulla", primary = false) {
+                        newListName = ""
+                        showCreate = false
+                    }
+                    DialogActionButton(text = "Crea", primary = true) { createNewList() }
+                }
+            } else {
+                when {
+                    isLoading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(72.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Caricamento...",
+                                color = WaveStreamColors.TextSecondary
+                            )
+                        }
+                    }
+                    lists.isEmpty() -> {
+                        Text(
+                            text = "Nessuna lista creata",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = WaveStreamColors.TextSecondary
+                        )
+                    }
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 320.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(lists, key = { it.id }) { list ->
+                                ListPickerRow(
+                                    name = list.name,
+                                    isSelected = selectedIds.contains(list.id),
+                                    onClick = {
+                                        viewModel.toggleHeroInList(hero, list.id) { added ->
+                                            selectedIds = if (added) selectedIds + list.id else selectedIds - list.id
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    DialogActionButton(text = "Nuova lista", primary = false) { showCreate = true }
+                    DialogActionButton(text = "Chiudi", primary = true, onClick = onDismiss)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Riga selezionabile del selettore liste: mostra il nome e la spunta se il
+ * contenuto è già presente. Con bordo bianco quando è focalizzata dal D-pad.
+ */
+@Composable
+private fun ListPickerRow(
+    name: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val background by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else Color.Transparent,
+        label = "listRowBg"
+    )
+    val border by animateColorAsState(
+        targetValue = if (isFocused) Color.White else WaveStreamColors.TextTertiary.copy(alpha = 0.5f),
+        label = "listRowBorder"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(background)
+            .border(if (isFocused) 2.dp else 1.dp, border, RoundedCornerShape(10.dp))
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.bodyLarge,
+            color = WaveStreamColors.TextPrimary,
+            modifier = Modifier.weight(1f)
+        )
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = WaveStreamColors.Accent,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Bottone dei dialog TV: bordo bianco quando focalizzato, pieno per l'azione
+ * primaria. Riusabile da CreateListDialog e dal selettore liste.
+ */
+@Composable
+private fun DialogActionButton(
+    text: String,
+    primary: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val background by animateColorAsState(
+        targetValue = when {
+            primary && isFocused -> WaveStreamColors.AccentLight
+            primary -> WaveStreamColors.Accent
+            isFocused -> WaveStreamColors.BackgroundTertiary
+            else -> Color.Transparent
+        },
+        label = "dialogActionBg"
+    )
+    val border by animateColorAsState(
+        targetValue = if (isFocused) Color.White else WaveStreamColors.TextTertiary,
+        label = "dialogActionBorder"
+    )
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(background)
+            .border(if (isFocused) 2.dp else 1.dp, border, RoundedCornerShape(8.dp))
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 24.dp, vertical = 12.dp)
+    ) {
+        Text(
+            text = text,
+            color = if (primary) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+            fontWeight = if (primary) FontWeight.SemiBold else FontWeight.Normal
+        )
     }
 }
 
