@@ -869,7 +869,7 @@ private fun CastPersonCard(
     // Card persona in vetro (Fase D5): cerchio foto + focus ad alone.
     val cardFill by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "castFill"
     )
 
@@ -1226,17 +1226,17 @@ private fun ExplainEndingButton(onClick: () -> Unit) {
     )
     val backgroundColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "endingBg"
     )
     val borderColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "endingBorder"
     )
     val iconColor by animateColorAsState(
         targetValue = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "endingIcon"
     )
 
@@ -1489,7 +1489,7 @@ private fun FavoriteButton(
             isFocused -> Color.White.copy(alpha = 0.30f)  // Alone di focus
             else -> Color.White.copy(alpha = 0.10f)
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "favBorder"
     )
     
@@ -1500,7 +1500,7 @@ private fun FavoriteButton(
             isFocused -> Color.White.copy(alpha = 0.16f)
             else -> GlassTokens.SurfaceFill
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "favBg"
     )
     
@@ -1556,21 +1556,21 @@ private fun MarkAsWatchedButton(
     // Border color - animated based on state
     val borderColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "eyeBorder"
     )
     
     // Background
     val backgroundColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "eyeBg"
     )
     
     // Icon tint
     val iconTint by animateColorAsState(
         targetValue = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "eyeColor"
     )
     
@@ -1629,7 +1629,7 @@ private fun DownloadButton(
             isFocused -> Color.White.copy(alpha = 0.30f)
             else -> Color.White.copy(alpha = 0.10f)
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "downloadBorder"
     )
     
@@ -1640,7 +1640,7 @@ private fun DownloadButton(
             isFocused -> Color.White.copy(alpha = 0.16f)
             else -> GlassTokens.SurfaceFill
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "downloadBg"
     )
     
@@ -1651,7 +1651,7 @@ private fun DownloadButton(
             isFocused -> WaveStreamColors.TextPrimary
             else -> WaveStreamColors.TextSecondary
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "downloadColor"
     )
     
@@ -1768,7 +1768,7 @@ private fun EpisodesSectionHeader(
             )
             val seasonDownloadBg by animateColorAsState(
                 targetValue = if (isSeasonDownloadFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
-                animationSpec = AppAnimations.SpringCardFocus,
+                animationSpec = AppAnimations.SpringCardFocusColor,
                 label = "seasonDownloadBg"
             )
             
@@ -1884,7 +1884,7 @@ private fun SeasonTab(
             isFocused -> Color.White.copy(alpha = 0.16f)
             else -> GlassTokens.SurfaceFill
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "seasonBg"
     )
     
@@ -1954,13 +1954,13 @@ private fun EpisodeCard(
     
     val borderColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.06f),
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "episodeBorder"
     )
     
     val backgroundColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "episodeBg"
     )
     
@@ -2294,13 +2294,13 @@ private fun TrailerButton(
     
     val backgroundColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "trailerBtnBg"
     )
     
     val borderColor by animateColorAsState(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "trailerBtnBorder"
     )
 
@@ -2368,7 +2368,7 @@ private fun AddToListButton(
             isFocused -> Color.White.copy(alpha = 0.16f)
             else -> GlassTokens.SurfaceFill
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "listBtnBg"
     )
     
@@ -2379,7 +2379,7 @@ private fun AddToListButton(
             isFocused -> Color.White.copy(alpha = 0.30f)
             else -> Color.White.copy(alpha = 0.10f)
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "listBtnBorder"
     )
     
@@ -2390,7 +2390,7 @@ private fun AddToListButton(
             isFocused -> WaveStreamColors.TextPrimary
             else -> WaveStreamColors.TextSecondary
         },
-        animationSpec = AppAnimations.SpringCardFocus,
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "listBtnIcon"
     )
 

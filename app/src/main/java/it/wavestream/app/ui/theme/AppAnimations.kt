@@ -134,6 +134,16 @@ object AppAnimations {
         stiffness = 500f
     )
 
+    /**
+     * Spring per le animazioni di COLORE (fill/bordo su focus).
+     * `animateColorAsState` richiede `AnimationSpec<Color>`, non `SpringSpec<Float>`:
+     * stessi parametri di [SpringCardFocus] per restare coerenti.
+     */
+    val SpringCardFocusColor = spring<androidx.compose.ui.graphics.Color>(
+        dampingRatio = 0.75f,
+        stiffness = 500f
+    )
+
     // ============== Pre-built Enter/Exit Specs ==============
     
     /** Fade in animation */
