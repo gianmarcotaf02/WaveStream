@@ -74,6 +74,7 @@ class UserPreferences @Inject constructor(
         private val CREDITS_DETECTION_ENABLED = booleanPreferencesKey("credits_detection_enabled")
         private val CREDITS_DETECTION_DEBUG = booleanPreferencesKey("credits_detection_debug")
         private val CREDITS_AUDIO_ENABLED = booleanPreferencesKey("credits_audio_enabled")
+        private val INTRODB_ENABLED = booleanPreferencesKey("introdb_enabled")
         private val YOUTUBE_PLAYER_PACKAGE = stringPreferencesKey("youtube_player_package")
         
         // Playback
@@ -384,6 +385,23 @@ class UserPreferences @Inject constructor(
 
     fun getCreditsAudioEnabledFlow(): Flow<Boolean> {
         return dataStore.data.map { it[CREDITS_AUDIO_ENABLED] ?: true }
+    }
+
+    /**
+     * IntroDB (introdb.app): database comunitario di marker sigla/recap/titoli di coda.
+     * Letture anonime e gratuite. Se attivo, i marker vengono cercati anche online
+     * (con cache locale) prima di ricadere sulla stima per serie e sul rilevamento video.
+     */
+    suspend fun setIntroDbEnabled(enabled: Boolean) {
+        dataStore.edit { it[INTRODB_ENABLED] = enabled }
+    }
+
+    suspend fun getIntroDbEnabled(): Boolean {
+        return dataStore.data.first()[INTRODB_ENABLED] ?: true
+    }
+
+    fun getIntroDbEnabledFlow(): Flow<Boolean> {
+        return dataStore.data.map { it[INTRODB_ENABLED] ?: true }
     }
     
     suspend fun setYoutubePlayerPackage(packageName: String?) {

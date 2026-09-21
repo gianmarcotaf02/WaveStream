@@ -1,5 +1,7 @@
 package it.wavestream.app.data.repository
 
+import it.wavestream.app.data.api.IntroDbSegment
+import it.wavestream.app.data.api.IntroDbService
 import it.wavestream.app.data.database.dao.MediaSegmentDao
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.MediaSegment
@@ -17,12 +19,16 @@ import javax.inject.Singleton
  */
 @Singleton
 class MediaSegmentRepository @Inject constructor(
-    private val dao: MediaSegmentDao
+    private val dao: MediaSegmentDao,
+    private val introDbService: IntroDbService
 ) {
 
     /**
      * Risolve un segmento esatto per il contenuto corrente provando, in ordine,
-     * tutte le chiavi disponibili (id locale, serie+stagione+episodio, tmdb, imdb).
+     * tutte le chiavi disponibili (id locale, serie+stagione+episodio, imdb, tmdb).
+     *
+     * Con [allowRemote] = true, se nulla è in cache, interroga IntroDB (lettura anonima)
+     * e salva il risultato in Room per gli accessi successivi.
      */
     suspend fun getExact(
         contentType: ContentType,
@@ -32,23 +38,141 @@ class MediaSegmentRepository @Inject constructor(
         episode: Int? = null,
         tmdbId: Int? = null,
         imdbId: String? = null,
-        type: SegmentType
+        type: SegmentType,
+        allowRemote: Boolean = false,
+        durationMs: Long = 0L
     ): MediaSegment? {
-        // 1) id locale (match più diretto)
-        dao.getForContent(contentId, contentType, type)?.let { return it }
+        // 1) id locale (match più diretto; per gli episodi verifica anche stagione/episodio)
+        dao.getForContent(contentId, contentType, type)?.let {
+            if (season == null || episode == null ||
+                (it.seasonNumber == season && it.episodeNumber == episode)
+            ) return it
+        }
         // 2) serie + stagione + episodio
         if (seriesId != null && season != null && episode != null) {
             dao.getForEpisode(seriesId, season, episode, type)?.let { return it }
         }
-        // 3) tmdb id
-        if (tmdbId != null) {
+        // 3) imdb (stabile al re-import della playlist). Per gli episodi serve
+        //    anche stagione/episodio, altrimenti gli episodi della serie collidono.
+        if (!imdbId.isNullOrBlank()) {
+            if (season != null && episode != null) {
+                dao.getByImdbEpisode(imdbId, season, episode, type)?.let { return it }
+            } else {
+                dao.getByImdb(imdbId, type)?.let { return it }
+            }
+        }
+        // 4) tmdb: solo per i film. Per gli episodi tmdbId è l'id della SERIE e
+        //    farebbe combaciare il marker di un episodio qualsiasi.
+        if (tmdbId != null && season == null && episode == null) {
             dao.getByTmdb(contentType, tmdbId, type)?.let { return it }
         }
-        // 4) imdb id
-        if (!imdbId.isNullOrBlank()) {
-            dao.getByImdb(imdbId, type)?.let { return it }
+        // 5) database comunitario IntroDB (rete, opzionale)
+        if (allowRemote) {
+            fetchRemoteSegment(
+                contentType = contentType,
+                contentId = contentId,
+                seriesId = seriesId,
+                season = season,
+                episode = episode,
+                tmdbId = tmdbId,
+                imdbId = imdbId,
+                type = type,
+                durationMs = durationMs
+            )?.let { return it }
         }
         return null
+    }
+
+    /**
+     * Interroga IntroDB per il segmento richiesto, lo mappa su [MediaSegment] e lo salva
+     * in cache. Best-effort: qualunque errore (rete assente, 4xx/5xx, JSON inatteso)
+     * restituisce `null` senza propagare eccezioni.
+     */
+    private suspend fun fetchRemoteSegment(
+        contentType: ContentType,
+        contentId: Long,
+        seriesId: Long?,
+        season: Int?,
+        episode: Int?,
+        tmdbId: Int?,
+        imdbId: String?,
+        type: SegmentType,
+        durationMs: Long
+    ): MediaSegment? {
+        val imdb = imdbId?.trim().orEmpty()
+        if (!imdb.startsWith("tt")) return null
+
+        val isMovie = contentType == ContentType.MOVIE
+        val isEpisode = season != null && episode != null && season >= 1 && episode >= 1
+        if (!isMovie && !isEpisode) return null
+
+        val remote: IntroDbSegment? = try {
+            val response = introDbService.getSegments(
+                imdbId = imdb,
+                season = if (isMovie) null else season,
+                episode = if (isMovie) null else episode,
+                isMovie = if (isMovie) true else null
+            )
+            if (!response.isSuccessful) return null
+            val body = response.body() ?: return null
+            when (type) {
+                SegmentType.INTRO -> body.intro
+                SegmentType.RECAP -> body.recap
+                SegmentType.CREDITS -> body.outro
+                SegmentType.PREVIEW -> body.post_credits
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("IntroDB", "fetch failed for $imdb s=$season e=$episode type=$type: ${e.message}")
+            return null
+        } ?: return null
+
+        val startMs = remote.resolvedStartMs ?: return null
+        val endMs = remote.resolvedEndMs
+        val segment = MediaSegment(
+            contentType = contentType,
+            type = type,
+            contentId = contentId,
+            seriesId = if (isMovie) null else seriesId,
+            seasonNumber = if (isMovie) null else season,
+            episodeNumber = if (isMovie) null else episode,
+            tmdbId = tmdbId,
+            imdbId = imdb,
+            startMs = startMs.coerceAtLeast(0),
+            endMs = endMs?.takeIf { it > startMs },
+            durationMs = durationMs.coerceAtLeast(0),
+            source = SegmentSource.EXTERNAL_DB,
+            confidence = (remote.confidence ?: 1f).coerceIn(0f, 1f)
+        )
+        cacheRemoteSegment(segment)
+        android.util.Log.i(
+            "CreditsDiag",
+            "introdbHit imdb=$imdb s=$season e=$episode type=$type startMs=$startMs endMs=$endMs " +
+                "confidence=${segment.confidence} submissions=${remote.submission_count}"
+        )
+        return segment
+    }
+
+    /**
+     * Scrive in cache il segmento remoto evitando duplicati: aggiorna la riga esistente
+     * (stessa chiave stabile imdb + stagione/episodio) se presente, altrimenti la inserisce.
+     */
+    private suspend fun cacheRemoteSegment(segment: MediaSegment) {
+        val existing = if (!segment.imdbId.isNullOrBlank() &&
+            segment.seasonNumber != null && segment.episodeNumber != null
+        ) {
+            dao.getByImdbEpisode(segment.imdbId, segment.seasonNumber, segment.episodeNumber, segment.type)
+        } else if (!segment.imdbId.isNullOrBlank()) {
+            dao.getByImdb(segment.imdbId, segment.type)
+        } else {
+            null
+        }
+        if (existing != null && existing.source == SegmentSource.EXTERNAL_DB) {
+            dao.update(segment.copy(id = existing.id, createdAt = existing.createdAt))
+        } else if (existing == null) {
+            dao.insert(segment)
+        } else {
+            // Esiste un marker locale (USER_MARK/DETECTOR): ha priorità, non lo sovrascriviamo.
+        }
     }
 
     /**
