@@ -498,7 +498,14 @@ private fun StillWatchingOverlay(
             .background(Color.Black.copy(alpha = 0.85f)),
         contentAlignment = Alignment.Center
     ) {
+        GlassSurface(
+            shape = RoundedCornerShape(24.dp),
+            fill = GlassTokens.SurfaceFillStrong,
+            stroke = GlassTokens.StrokeGradient,
+            strokeWidth = 1.dp
+        ) {
         Column(
+            modifier = Modifier.padding(horizontal = 40.dp, vertical = 36.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
@@ -541,6 +548,7 @@ private fun StillWatchingOverlay(
                     Text("Esci")
                 }
             }
+        }
         }
     }
     }
@@ -907,12 +915,13 @@ private fun RestartButton(onClick: () -> Unit) {
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.2f),
+        targetValue = if (isFocused) GlassTokens.SurfaceFillFocused else Color.White.copy(alpha = 0.2f),
         label = "bg"
     )
     
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.05f else 1f,
+        animationSpec = AppAnimations.SpringGlass,
         label = "scale"
     )
 
@@ -925,6 +934,11 @@ private fun RestartButton(onClick: () -> Unit) {
             .height(48.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(backgroundColor)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = RoundedCornerShape(24.dp)
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -978,7 +992,7 @@ private fun LiveButton(
     val backgroundColor by animateColorAsState(
         targetValue = when {
             isFocused && !isAtLiveEdge -> LiveRed
-            isFocused -> Color.White.copy(alpha = 0.25f)
+            isFocused -> GlassTokens.SurfaceFillFocused
             isAtLiveEdge -> Color.Transparent
             else -> Color.White.copy(alpha = 0.2f)
         },
@@ -987,6 +1001,7 @@ private fun LiveButton(
 
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.05f else 1f,
+        animationSpec = AppAnimations.SpringGlass,
         label = "scale"
     )
 
@@ -999,6 +1014,11 @@ private fun LiveButton(
             .height(48.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(backgroundColor)
+            .border(
+                width = if (isFocused && isAtLiveEdge) 1.5.dp else 0.dp,
+                color = if (isFocused && isAtLiveEdge) WaveStreamColors.Accent else Color.Transparent,
+                shape = RoundedCornerShape(24.dp)
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1048,11 +1068,12 @@ private fun LiveSkipButton(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.2f),
+        targetValue = if (isFocused) GlassTokens.SurfaceFillFocused else Color.White.copy(alpha = 0.2f),
         label = "skipBg"
     )
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.1f else 1f,
+        animationSpec = AppAnimations.SpringGlass,
         label = "skipScale"
     )
 
@@ -1065,6 +1086,11 @@ private fun LiveSkipButton(
             }
             .clip(CircleShape)
             .background(backgroundColor)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = CircleShape
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1223,7 +1249,22 @@ private fun LiveMiniPanel(
     
     Column(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.92f))
+            .background(Color(0xF2101418))
+            .drawBehind {
+                // Limite sinistro sfumato: nessun bordo netto (design language).
+                val w = 1.5.dp.toPx()
+                drawRect(
+                    brush = Brush.verticalGradient(
+                        listOf(
+                            Color.Transparent,
+                            Color.White.copy(alpha = 0.16f),
+                            Color.Transparent
+                        )
+                    ),
+                    topLeft = Offset(0f, 0f),
+                    size = Size(w, size.height)
+                )
+            }
             .padding(horizontal = 28.dp, vertical = 24.dp)
     ) {
         // Header: espandi + switch categoria con frecce
@@ -1329,7 +1370,7 @@ private fun MiniChannelRow(
     
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isFocused -> WaveStreamColors.Accent
+            isFocused -> GlassTokens.SurfaceFillFocused
             selected -> Color.White.copy(alpha = 0.14f)
             else -> Color.Transparent
         },
@@ -1342,6 +1383,11 @@ private fun MiniChannelRow(
             .height(60.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -2438,14 +2484,25 @@ private fun SkipIntroOverlay(
         runCatching { focusRequester.requestFocus() }
     }
 
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.06f else 1f,
+        animationSpec = AppAnimations.SpringGlass,
+        label = "skipScale"
+    )
+
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.92f),
-            contentColor = if (isFocused) Color.White else Color.Black
+            containerColor = Color.White.copy(alpha = if (isFocused) 1f else 0.92f),
+            contentColor = Color.Black
         ),
+        border = if (isFocused) BorderStroke(2.dp, WaveStreamColors.Accent) else null,
         shape = RoundedCornerShape(24.dp),
         modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .focusRequester(focusRequester)
             .focusable(interactionSource = interactionSource)
     ) {
