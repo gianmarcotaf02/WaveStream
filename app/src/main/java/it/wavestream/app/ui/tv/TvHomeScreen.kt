@@ -571,6 +571,19 @@ private fun TvHomeScreenContent(
             val serieAHeroes = if (state.isHomeTab) state.serieAMatchHeroes else emptyList()
             val hasHero = (state.heroItems.isNotEmpty() || serieAHeroes.isNotEmpty()) && !state.isListsTab && !state.isHistoryTab
 
+            // Primo caricamento senza cache: i caroselli (fast rows) vengono mostrati
+            // subito mentre gli hero arrivano dopo, aggiunti in testa alla lista. La
+            // LazyColumn mantiene l'ancoraggio sull'item già visibile, quindi l'hero
+            // inserito sopra finisce fuori dalla viewport (bug "hero non caricato" al
+            // primo passaggio sul tab). Quando gli hero diventano disponibili riportiamo
+            // la lista in cima, ma solo se l'utente non ha già scrollato oltre il primo
+            // carosello (indice 0 = hero, 1 = primo carosello).
+            LaunchedEffect(hasHero) {
+                if (hasHero && columnListState.firstVisibleItemIndex <= 1) {
+                    columnListState.scrollToItem(0)
+                }
+            }
+
             // Single sealed class for hero focus state - avoids triple mutableStateOf thrash
             var heroFocusState by remember { mutableStateOf<HeroFocusState>(HeroFocusState.None) }
 
