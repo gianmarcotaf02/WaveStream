@@ -367,7 +367,9 @@ class CreditsDetector {
         // e dalle scene scure con un filo di testo.
         private const val MIN_TEXT_ROWS = 12
         // I credits sono statici (o con scroll compensato): una scena in movimento
-        // non deve far scattare il trigger.
+        // non deve far scattare il trigger. NB: il primo campione di una sessione non ha
+        // un frame precedente; un valore neutro sopra soglia evita che sia SEMPRE un miss
+        // (riduce la latenza all'ingresso nella finestra e dopo un seek).
         private const val MIN_STATIC_SCORE = 0.55f
         private const val TEXT_ROW_THRESHOLD = 0.12f
 
@@ -383,7 +385,7 @@ class CreditsDetector {
         private const val TEXT_DENSITY_REFERENCE = 0.08f
         private const val MAX_SHIFT = 8
         private const val STATIC_DIFF_SCALE = 60f
-        private const val NEUTRAL_STATIC = 0.5f
+        private const val NEUTRAL_STATIC = 0.7f
     }
 }
 
