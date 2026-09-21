@@ -103,7 +103,26 @@ fun TvCarouselRow(
         }
         
         Spacer(modifier = Modifier.height(10.dp))
-        
+
+        if (row.items.isEmpty()) {
+            // Lista personalizzata appena creata (o svuotata): senza questo placeholder
+            // la riga non comparirebbe affatto e l'utente resterebbe sulla schermata vuota.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .border(1.dp, WaveStreamColors.SurfaceBorderStrong, RoundedCornerShape(12.dp))
+                    .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.6f))
+                    .padding(horizontal = 20.dp, vertical = 22.dp)
+            ) {
+                Text(
+                    text = "Lista vuota — aggiungi film o serie dalla loro scheda",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = WaveStreamColors.TextSecondary
+                )
+            }
+        } else {
         TvLazyRow(
             state = listState,
             contentPadding = PaddingValues(start = 40.dp, end = 40.dp),
@@ -181,6 +200,7 @@ fun TvCarouselRow(
                     TvSeeAllCard(onClick = onSeeAllClick)
                 }
             }
+        }
         }
     }
 }
