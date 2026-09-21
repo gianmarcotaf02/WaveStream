@@ -25,6 +25,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -38,6 +39,9 @@ import it.wavestream.app.data.api.TMDBPersonDetails
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.Movie
 import it.wavestream.app.data.database.entity.Series
+import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 @Composable
@@ -50,10 +54,21 @@ fun PersonScreen(
     onBackClick: () -> Unit,
     onContentClick: (Long, ContentType) -> Unit
 ) {
+    // Fondale coerente con il redesign (stesso gradiente di Home/categorie).
+    val screenBackground = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                WaveStreamColors.Accent.copy(alpha = 0.045f),
+                WaveStreamColors.GradientMiddle,
+                WaveStreamColors.GradientBottom
+            )
+        )
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(screenBackground)
     ) {
         AnimatedVisibility(
             visible = isLoading,
@@ -83,12 +98,45 @@ fun PersonScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(bottom = 24.dp)
                 ) {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Indietro",
-                            tint = WaveStreamColors.TextPrimary
-                        )
+                    // Fase D7 — back in vetro, focus ad alone.
+                    val backInteraction = remember { MutableInteractionSource() }
+                    val backFocused by backInteraction.collectIsFocusedAsState()
+                    val backScale by animateFloatAsState(
+                        targetValue = if (backFocused) AppAnimations.GlassPillFocusScale else 1f,
+                        animationSpec = AppAnimations.SpringCardFocus,
+                        label = "personBackScale"
+                    )
+                    val backFill by androidx.compose.animation.animateColorAsState(
+                        targetValue = if (backFocused) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+                        label = "personBackFill"
+                    )
+                    GlassSurface(
+                        shape = CircleShape,
+                        fill = backFill,
+                        modifier = Modifier
+                            .graphicsLayer {
+                                scaleX = backScale
+                                scaleY = backScale
+                            }
+                            .size(40.dp)
+                            .focusable(interactionSource = backInteraction)
+                            .clickable(
+                                interactionSource = backInteraction,
+                                indication = null,
+                                onClick = onBackClick
+                            )
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Indietro",
+                                tint = WaveStreamColors.TextPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
@@ -277,8 +325,15 @@ private fun LibraryContentCard(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.05f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "cardScale"
+    )
+
+    // Card in vetro: alone di focus, nessun fondo accent (Fase D7).
+    val cardFill by androidx.compose.animation.animateColorAsState(
+        targetValue = if (isFocused) androidx.compose.ui.graphics.Color.White.copy(alpha = 0.16f) else androidx.compose.ui.graphics.Color.Transparent,
+        label = "libraryCardFill"
     )
 
     Column(
@@ -286,7 +341,8 @@ private fun LibraryContentCard(
         modifier = Modifier
             .width(140.dp)
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(14.dp))
+            .background(cardFill)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .focusable()
     ) {
@@ -294,7 +350,7 @@ private fun LibraryContentCard(
             modifier = Modifier
                 .width(140.dp)
                 .height(210.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(14.dp))
                 .background(WaveStreamColors.BackgroundTertiary),
             contentAlignment = Alignment.Center
         ) {

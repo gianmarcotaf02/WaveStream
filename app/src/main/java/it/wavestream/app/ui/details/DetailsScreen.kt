@@ -2587,11 +2587,13 @@ fun DetailsSkeletonLoader(modifier: Modifier = Modifier) {
         label = "pulseAlpha_details"
     )
     
+    // Shimmer in vetro: velature bianche semitrasparenti invece delle tinte piene
+    // del tema (Fase D8), coerenti con le superfici finali.
     val shimmerBrush = Brush.linearGradient(
         colors = listOf(
-            WaveStreamColors.BackgroundSecondary.copy(alpha = pulseAlpha),
-            WaveStreamColors.BackgroundTertiary.copy(alpha = pulseAlpha),
-            WaveStreamColors.BackgroundSecondary.copy(alpha = pulseAlpha)
+            Color.White.copy(alpha = 0.05f * pulseAlpha),
+            Color.White.copy(alpha = 0.14f * pulseAlpha),
+            Color.White.copy(alpha = 0.05f * pulseAlpha)
         ),
         start = Offset(shimmerOffset * 1000f, 0f),
         end = Offset((shimmerOffset + 1f) * 1000f, 0f)
@@ -2609,7 +2611,7 @@ fun DetailsSkeletonLoader(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .width(150.dp)
                     .height(225.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(shimmerBrush)
             )
             
