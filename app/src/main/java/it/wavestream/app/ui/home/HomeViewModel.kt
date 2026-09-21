@@ -428,10 +428,14 @@ class HomeViewModel @Inject constructor(
                         channel.name,
                         channel.xtreamStreamId?.toString()
                     )
-                    val programs = ids.asSequence()
-                        .mapNotNull { id -> runCatching { epgRepository.getProgramsForChannel(id) }.getOrNull() }
-                        .firstOrNull { it.isNotEmpty() }
-                        ?: emptyList()
+                    var programs: List<it.wavestream.app.ui.epg.EpgProgram> = emptyList()
+                    for (id in ids) {
+                        val found = runCatching { epgRepository.getProgramsForChannel(id) }.getOrNull()
+                        if (!found.isNullOrEmpty()) {
+                            programs = found
+                            break
+                        }
+                    }
                     programs.firstOrNull { it.start <= now && it.end > now }
                         ?.let { result[channel.id] = it }
                 }
