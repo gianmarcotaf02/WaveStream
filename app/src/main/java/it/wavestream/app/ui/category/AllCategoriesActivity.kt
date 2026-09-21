@@ -313,9 +313,9 @@ private fun AllCategoriesScreen(
         } else {
             TvLazyVerticalGrid(
                 columns = TvGridCells.Adaptive(minSize = 200.dp),
-                contentPadding = PaddingValues(top = 8.dp, bottom = 32.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(top = 12.dp, bottom = 40.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
                 itemsIndexed(filteredCategories, key = { _, it -> it.name }) { index, category ->
@@ -368,13 +368,17 @@ private fun CategoryCard(
     val isFocused by interactionSource.collectIsFocusedAsState()
     
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.05f else 1f,
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
         label = "categoryScale"
     )
-    
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "categoryBorder"
+
+    // Alone di focus (Fase C2): il focus è una velatura chiara, non un bordo accent
+    // accesso. Derivato da UNA sola animazione.
+    val focusOverlay by animateFloatAsState(
+        targetValue = if (isFocused) 1f else 0f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "categoryFocusOverlay"
     )
     
     // Generate unique gradient colors for fallback
@@ -393,15 +397,16 @@ private fun CategoryCard(
         Color.Black.copy(alpha = 0.85f)
     )
 
-    Box(
+    GlassSurface(
+        shape = RoundedCornerShape(14.dp),
+        fill = Color.Transparent,
+        stroke = GlassTokens.StrokeGradient,
         modifier = Modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
             .height(150.dp)  // Increased from 120dp
-            .clip(RoundedCornerShape(16.dp))
-            .border(3.dp, borderColor, RoundedCornerShape(16.dp))
             .then(
                 if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier
             )
@@ -411,9 +416,9 @@ private fun CategoryCard(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
-            ),
-        contentAlignment = Alignment.BottomStart
+            )
     ) {
+     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomStart) {
         // Background: Image or gradient fallback
         if (isViewAll) {
             // Card "Tutti i film"/"Tutte le serie TV": gradiente accent dedicato
@@ -463,7 +468,7 @@ private fun CategoryCard(
             )
         }
         
-        // Dark gradient overlay for text readability
+        // Dark gradient overlay for text readability (SrcOver, mai DstIn)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -473,6 +478,15 @@ private fun CategoryCard(
                     )
                 )
         )
+
+        // Alone di focus (sotto testo e cuoricino, così restano leggibili)
+        if (focusOverlay > 0f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White.copy(alpha = 0.16f * focusOverlay))
+            )
+        }
 
         Column(
             modifier = Modifier.padding(16.dp)
@@ -503,6 +517,7 @@ private fun CategoryCard(
                     .padding(12.dp)
             )
         }
+     }
     }
 }
 
@@ -533,12 +548,14 @@ private fun CategorySearchBar(
             }
         } else null,
         singleLine = true,
-        shape = RoundedCornerShape(10.dp),
+        // Capsula in vetro: fill semitrasparente + bordo appena visibile (Fase C3).
+        // Niente più rettangolo a bordo netto su fondo tinta piena.
+        shape = RoundedCornerShape(50),
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = WaveStreamColors.Accent,
-            unfocusedBorderColor = WaveStreamColors.BackgroundTertiary,
-            focusedContainerColor = WaveStreamColors.BackgroundSecondary,
-            unfocusedContainerColor = WaveStreamColors.BackgroundSecondary,
+            focusedBorderColor = Color.White.copy(alpha = 0.22f),
+            unfocusedBorderColor = Color.White.copy(alpha = 0.10f),
+            focusedContainerColor = GlassTokens.SurfaceFill,
+            unfocusedContainerColor = GlassTokens.SurfaceFill,
             cursorColor = WaveStreamColors.Accent
         ),
         textStyle = MaterialTheme.typography.bodyMedium.copy(color = WaveStreamColors.TextPrimary)
