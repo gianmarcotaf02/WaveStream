@@ -3,8 +3,6 @@ package it.wavestream.app.ui.components
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,17 +10,15 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -45,11 +41,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import java.util.Calendar
 
@@ -103,6 +104,10 @@ data class SortFilterState(
  * - Tre chip per il criterio (data di uscita, alfabetico, voto TMDB)
  * - Toggle crescente/decrescente
  * - Pulsante "Filtri" che espande un pannello con stepper per anni (da/a) e voto minimo
+ *
+ * Redesign "liquid glass": chip e pannello usano [GlassSurface] con fill semitrasparente
+ * e bordo gradiente, focus ad alone bianco 16%, selezione accent soft. Stessa lingua
+ * delle schermate Categorie (vedi `categorie redesign.md`).
  */
 @Composable
 fun ContentSortFilterBar(
@@ -177,47 +182,88 @@ fun ContentSortFilterBar(
     }
 }
 
+/**
+ * Superficie di controllo in vetro riusabile per i chip della barra filtri.
+ *
+ * Gestisce in un unico punto focus + scala + fill; il colore del bordo cambia
+ * (neutro ↔ accent) quando il controllo è focalizzato o attivo. Le animazioni
+ * passano da [graphicsLayer] per non innescare ricomposizioni di layout nelle
+ * liste lunghe.
+ */
+@Composable
+private fun GlassControlSurface(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    expanded: Boolean = false,
+    enabled: Boolean = true,
+    shape: Shape = RoundedCornerShape(50),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+    content: @Composable RowScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "glassControlScale"
+    )
+    val active = selected || expanded
+    val fill by animateColorAsState(
+        targetValue = when {
+            !enabled -> Color.Transparent
+            active -> WaveStreamColors.Accent.copy(alpha = 0.22f)
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            else -> GlassTokens.SurfaceFill
+        },
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "glassControlFill"
+    )
+    val stroke = if (isFocused || active) {
+        GlassTokens.accentStroke(WaveStreamColors.Accent)
+    } else {
+        GlassTokens.StrokeGradient
+    }
+
+    GlassSurface(
+        shape = shape,
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused || active) 1.5.dp else 1.dp,
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                alpha = if (enabled) 1f else 0.4f
+            }
+            .focusable(enabled = enabled, interactionSource = interactionSource)
+            .clickable(
+                enabled = enabled,
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+    ) {
+        Row(
+            modifier = Modifier.padding(contentPadding),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            content = content
+        )
+    }
+}
+
 @Composable
 private fun SortChip(
     label: String,
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val scale by animateFloatAsState(if (isFocused) 1.05f else 1f, label = "sortChipScale")
-
-    val background by animateColorAsState(
-        targetValue = when {
-            selected -> WaveStreamColors.Accent.copy(alpha = 0.30f)
-            isFocused -> WaveStreamColors.BackgroundTertiary
-            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f)
-        },
-        label = "sortChipBg"
-    )
-    val border by animateColorAsState(
-        targetValue = when {
-            isFocused -> WaveStreamColors.Accent
-            selected -> WaveStreamColors.Accent.copy(alpha = 0.6f)
-            else -> Color.Transparent
-        },
-        label = "sortChipBorder"
-    )
-
-    Box(
-        modifier = Modifier
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, border, RoundedCornerShape(8.dp))
-            .background(background)
-            .focusable(interactionSource = interactionSource)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
-    ) {
+    GlassControlSurface(onClick = onClick, selected = selected) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = if (selected || isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+            color = if (selected) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
         )
     }
@@ -228,25 +274,9 @@ private fun DirectionToggle(
     direction: SortDirection,
     onToggle: () -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val scale by animateFloatAsState(if (isFocused) 1.05f else 1f, label = "dirToggleScale")
-    val background by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f),
-        label = "dirToggleBg"
-    )
-
-    Row(
-        modifier = Modifier
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, if (isFocused) WaveStreamColors.Accent else Color.Transparent, RoundedCornerShape(8.dp))
-            .background(background)
-            .focusable(interactionSource = interactionSource)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onToggle)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    GlassControlSurface(
+        onClick = onToggle,
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Icon(
             imageVector = if (direction == SortDirection.ASC) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
@@ -269,38 +299,15 @@ private fun FilterToggleButton(
     expanded: Boolean,
     onClick: () -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val scale by animateFloatAsState(if (isFocused) 1.05f else 1f, label = "filterToggleScale")
-    val background by animateColorAsState(
-        targetValue = when {
-            expanded -> WaveStreamColors.Accent.copy(alpha = 0.30f)
-            isFocused -> WaveStreamColors.BackgroundTertiary
-            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f)
-        },
-        label = "filterToggleBg"
-    )
-
-    Row(
-        modifier = Modifier
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(8.dp))
-            .border(
-                2.dp,
-                if (isFocused || expanded) WaveStreamColors.Accent else Color.Transparent,
-                RoundedCornerShape(8.dp)
-            )
-            .background(background)
-            .focusable(interactionSource = interactionSource)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    GlassControlSurface(
+        onClick = onClick,
+        expanded = expanded,
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Icon(
             imageVector = Icons.Default.FilterList,
             contentDescription = "Filtri",
-            tint = if (activeCount > 0 || isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
+            tint = if (activeCount > 0 || expanded) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
             modifier = Modifier.size(18.dp)
         )
         Text(
@@ -322,16 +329,18 @@ private fun FilterPanel(
 ) {
     val currentYear = remember { Calendar.getInstance().get(Calendar.YEAR) }
 
-    Box(
+    GlassSurface(
+        shape = GlassTokens.RadiusMedium,
+        fill = GlassTokens.SurfaceFillStrong,
+        stroke = GlassTokens.StrokeGradient,
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .border(1.dp, WaveStreamColors.SurfaceBorder, RoundedCornerShape(12.dp))
-            .background(WaveStreamColors.BackgroundElevated.copy(alpha = 0.94f))
-            .padding(16.dp)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             Text(
                 text = "Filtra risultati",
                 style = MaterialTheme.typography.titleSmall,
@@ -429,79 +438,55 @@ private fun CategoryFilterDropdown(
     onToggle: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
 
-    val background by animateColorAsState(
-        targetValue = when {
-            expanded -> WaveStreamColors.Accent.copy(alpha = 0.30f)
-            isFocused -> WaveStreamColors.BackgroundTertiary
-            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.7f)
-        },
-        label = "catDropdownBg"
-    )
-    val border by animateColorAsState(
-        targetValue = if (isFocused || expanded) WaveStreamColors.Accent else Color.Transparent,
-        label = "catDropdownBorder"
-    )
+    GlassControlSurface(
+        onClick = { expanded = !expanded },
+        expanded = expanded || selected.isNotEmpty(),
+        shape = GlassTokens.RadiusSmall,
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.FilterList,
+            contentDescription = null,
+            tint = if (selected.isNotEmpty() || expanded) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
+            modifier = Modifier.size(18.dp)
+        )
+        Text(
+            text = if (selected.isEmpty()) "Categorie" else "Categorie (${selected.size})",
+            style = MaterialTheme.typography.labelLarge,
+            color = WaveStreamColors.TextPrimary,
+            fontWeight = FontWeight.Medium
+        )
+        Icon(
+            imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+            contentDescription = null,
+            tint = WaveStreamColors.TextSecondary,
+            modifier = Modifier.size(18.dp)
+        )
+    }
 
-    Column {
-        Row(
+    AnimatedVisibility(visible = expanded) {
+        GlassSurface(
+            shape = GlassTokens.RadiusMedium,
+            fill = GlassTokens.SurfaceFillStrong,
+            stroke = GlassTokens.StrokeGradient,
             modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .border(2.dp, border, RoundedCornerShape(8.dp))
-                .background(background)
-                .focusable(interactionSource = interactionSource)
-                .clickable(interactionSource = interactionSource, indication = null) {
-                    expanded = !expanded
-                }
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                .padding(top = 8.dp)
+                .fillMaxWidth()
         ) {
-            Icon(
-                imageVector = Icons.Default.FilterList,
-                contentDescription = null,
-                tint = if (selected.isNotEmpty() || isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary,
-                modifier = Modifier.size(18.dp)
-            )
-            Text(
-                text = if (selected.isEmpty()) "Categorie" else "Categorie (${selected.size})",
-                style = MaterialTheme.typography.labelLarge,
-                color = WaveStreamColors.TextPrimary,
-                fontWeight = FontWeight.Medium
-            )
-            Icon(
-                imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                contentDescription = null,
-                tint = WaveStreamColors.TextSecondary,
-                modifier = Modifier.size(18.dp)
-            )
-        }
-
-        AnimatedVisibility(visible = expanded) {
-            Box(
+            LazyColumn(
                 modifier = Modifier
-                    .padding(top = 8.dp)
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, WaveStreamColors.SurfaceBorder, RoundedCornerShape(12.dp))
-                    .background(WaveStreamColors.BackgroundElevated.copy(alpha = 0.98f))
+                    .heightIn(max = 260.dp),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 260.dp),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    items(availableCategories) { cat ->
-                        CategoryCheckboxRow(
-                            label = cat,
-                            checked = cat in selected,
-                            onToggle = { onToggle(cat) }
-                        )
-                    }
+                items(availableCategories) { cat ->
+                    CategoryCheckboxRow(
+                        label = cat,
+                        checked = cat in selected,
+                        onToggle = { onToggle(cat) }
+                    )
                 }
             }
         }
@@ -517,45 +502,51 @@ private fun CategoryCheckboxRow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val background by animateColorAsState(
+    val fill by animateColorAsState(
         targetValue = when {
-            isFocused -> WaveStreamColors.BackgroundTertiary
+            isFocused -> Color.White.copy(alpha = 0.16f)
             checked -> WaveStreamColors.Accent.copy(alpha = 0.18f)
             else -> Color.Transparent
         },
-        label = "catRowBg"
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "catRowFill"
     )
-    val border by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "catRowBorder"
-    )
+    val stroke = if (isFocused) {
+        GlassTokens.accentStroke(WaveStreamColors.Accent)
+    } else {
+        GlassTokens.StrokeGradient
+    }
 
-    Row(
+    GlassSurface(
+        shape = GlassTokens.RadiusSmall,
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused) 1.5.dp else 0.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, border, RoundedCornerShape(8.dp))
-            .background(background)
             .focusable(interactionSource = interactionSource)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onToggle)
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Icon(
-            imageVector = if (checked) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank,
-            contentDescription = null,
-            tint = if (checked || isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
-            modifier = Modifier.size(20.dp)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = WaveStreamColors.TextPrimary,
-            fontWeight = if (checked) FontWeight.Bold else FontWeight.Medium,
-            maxLines = 1,
-            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Icon(
+                imageVector = if (checked) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank,
+                contentDescription = null,
+                tint = if (checked || isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = if (checked) FontWeight.Bold else FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 
@@ -593,54 +584,57 @@ private fun StepperControl(
 private fun StepButton(symbol: String, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val background by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.BackgroundSecondary,
-        label = "stepBg"
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "stepButtonScale"
+    )
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.22f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "stepButtonFill"
     )
 
-    Box(
+    GlassSurface(
+        shape = RoundedCornerShape(50),
+        fill = fill,
+        stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
         modifier = Modifier
             .size(34.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(background)
-            .border(2.dp, if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder, RoundedCornerShape(8.dp))
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .focusable(interactionSource = interactionSource)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
-        contentAlignment = Alignment.Center
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
     ) {
-        Text(
-            text = symbol,
-            style = MaterialTheme.typography.titleMedium,
-            color = if (isFocused) Color.White else WaveStreamColors.TextPrimary,
-            fontWeight = FontWeight.Bold
-        )
+        Box(
+            modifier = Modifier.size(34.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = symbol,
+                style = MaterialTheme.typography.titleMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
 @Composable
 private fun SmallActionButton(
     label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val background by animateColorAsState(
-        targetValue = if (isFocused && enabled) WaveStreamColors.Accent.copy(alpha = 0.25f) else Color.Transparent,
-        label = "smallActionBg"
-    )
-
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .border(1.dp, if (isFocused && enabled) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder, RoundedCornerShape(8.dp))
-            .background(background)
-            .focusable(enabled = enabled, interactionSource = interactionSource)
-            .clickable(enabled = enabled, interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    GlassControlSurface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = GlassTokens.RadiusSmall,
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Icon(
             imageVector = icon,
