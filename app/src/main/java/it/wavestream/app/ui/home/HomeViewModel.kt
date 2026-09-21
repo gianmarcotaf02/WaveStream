@@ -2583,7 +2583,8 @@ class HomeViewModel @Inject constructor(
             if (movies.isNotEmpty()) {
                 rows.add(CarouselRow(
                     title = "Film popolari",
-                    items = movies.map { it.toCarouselItem() }
+                    items = movies.map { it.toCarouselItem() },
+                    isRanked = true
                 ))
             }
         }
@@ -2748,7 +2749,8 @@ class HomeViewModel @Inject constructor(
             if (series.isNotEmpty()) {
                 rows.add(CarouselRow(
                     title = "Serie TV popolari",
-                    items = series.map { it.toCarouselItem() }
+                    items = series.map { it.toCarouselItem() },
+                    isRanked = true
                 ))
             }
         }

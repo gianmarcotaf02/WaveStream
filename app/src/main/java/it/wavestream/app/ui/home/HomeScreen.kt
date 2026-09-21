@@ -132,7 +132,10 @@ data class CarouselRow(
     val title: String,
     val items: List<CarouselItem>,
     val showSeeAll: Boolean = true,
-    val isSectionHeader: Boolean = false  // True for section headers (Categorie, Film, Serie, etc.)
+    val isSectionHeader: Boolean = false,  // True for section headers (Categorie, Film, Serie, etc.)
+    // Riga in stile "Top 10": numeri di classifica in outline a sinistra delle card
+    // (solo per le righe popolari/trending). Default false = comportamento invariato.
+    val isRanked: Boolean = false
 )
 
 /**

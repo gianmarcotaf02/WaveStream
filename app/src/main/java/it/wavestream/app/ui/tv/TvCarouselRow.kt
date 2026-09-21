@@ -21,10 +21,14 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.TvLazyListScope
 import androidx.tv.foundation.lazy.list.items
@@ -39,6 +43,15 @@ import it.wavestream.app.ui.components.CategoryCard
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import kotlinx.coroutines.delay
+
+/**
+ * Numero massimo di posizioni classificate nelle righe "Top 10".
+ * Oltre questo indice la riga prosegue senza numero.
+ */
+private const val RANK_MAX = 10
+
+/** Fascia a sinistra della card riservata al numero di classifica. */
+private val RANK_GUTTER = 56.dp
 
 /**
  * TV-optimized carousel row using TvLazyRow
@@ -133,7 +146,14 @@ fun TvCarouselRow(
         ) {
             itemsIndexed(
                 items = row.items,
-                key = { index, item -> "${item.contentType}_${item.id}" }
+                key = { index, item -> "${item.contentType}_${item.id}" },
+                // contentType abilita il RIUSO delle composition durante lo scroll:
+                // senza, Compose ricrea i nodi di ogni item che entra ed esce dal
+                // viewport. Card di contenuto e card di categoria hanno layout
+                // diversi, quindi due tipi distinti.
+                contentType = { _, item ->
+                    if (item.contentType.startsWith("CATEGORY_")) "category" else "content"
+                }
             ) { index, item ->
                 val isFocused = remember { mutableStateOf(false) }
                 val isFirst = index == 0
@@ -157,8 +177,18 @@ fun TvCarouselRow(
                         translationY = (1f - entranceAlpha.value) * 40f
                     }
                 ) {
+                // Top classifica (righe popolari): numero in outline nella fascia a
+                // sinistra della card, fino a RANK_MAX. Decorativo, non focusable:
+                // non intercetta il D-pad.
+                if (row.isRanked && index < RANK_MAX) {
+                    TvRankNumber(
+                        rank = index + 1,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                }
                 Box(
                     modifier = Modifier
+                        .padding(start = if (row.isRanked && index < RANK_MAX) RANK_GUTTER else 0.dp)
                         .onFocusChanged { focusState ->
                             isFocused.value = focusState.isFocused
                             if (isFirst) {
@@ -306,5 +336,33 @@ private fun TvSeeAllCard(onClick: () -> Unit) {
             )
         }
     }
+}
+
+/**
+ * Numero di classifica in stile "Top 10": solo outline, alto quanto la card,
+ * a sinistra del poster (idea ripresa da KIPTV, vedi
+ * wavestream_kiptv_teardown.md §4.4).
+ *
+ * Puramente decorativo: non è focusable e non intercetta il D-pad, quindi non
+ * entra nel percorso di navigazione delle righe.
+ */
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun TvRankNumber(rank: Int, modifier: Modifier = Modifier) {
+    Text(
+        text = rank.toString(),
+        style = MaterialTheme.typography.displayLarge.copy(
+            fontSize = 50.sp,
+            fontWeight = FontWeight.Black,
+            drawStyle = Stroke(width = 2.5f, join = StrokeJoin.Round)
+        ),
+        color = WaveStreamColors.TextPrimary.copy(alpha = 0.85f),
+        textAlign = TextAlign.End,
+        maxLines = 1,
+        softWrap = false,
+        modifier = modifier
+            .width(RANK_GUTTER)
+            .padding(end = 10.dp)
+    )
 }
 
