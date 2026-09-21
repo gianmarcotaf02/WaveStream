@@ -268,7 +268,6 @@ private fun MainActivityScreen(
     
     // State
     var selectedTab by remember { mutableStateOf(initialTab) }
-    var railExpanded by remember { mutableStateOf(false) }
     var showCreateListDialog by remember { mutableStateOf(false) }
     // Hero per cui è aperto il selettore liste (null = chiuso)
     var heroListPicker by remember { mutableStateOf<HeroItem?>(null) }
@@ -289,6 +288,10 @@ private fun MainActivityScreen(
     
     // Focus requester for top bar (Film tab)
     val topBarFocusRequester = remember { FocusRequester() }
+
+    // Fase 2.3b — focus sulla pillola di navigazione, che sostituisce la rail.
+    // È agganciato al tab selezionato: "sinistra" dall'hero ci porta lì.
+    val navPillFocusRequester = remember { FocusRequester() }
     
     // Focus requester for search button (for long press back)
     val searchButtonFocusRequester = remember { FocusRequester() }
@@ -535,48 +538,23 @@ private fun MainActivityScreen(
             )
         }
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .background(rootBackground)
     ) {
-        // Navigation Rail (expandable)
-        ExpandableNavRail(
-            selectedTab = selectedTab,
-            onTabSelected = { selectTab(it) },
-            isExpanded = railExpanded,
-            onExpandedChange = { railExpanded = it },
-            onSettingsClick = {
-                startActivityWithTransition(Intent(context, SettingsActivity::class.java))
-            },
-            onAssistantClick = {
-                startActivityWithTransition(Intent(context, it.wavestream.app.ui.assistant.AssistantActivity::class.java))
-            },
-            onCollapseRequest = { railExpanded = false },
-            onContentFocusRequest = { moveFocusToContent(FocusDirection.Right) },
-            onExploreCategoriesClick = { isMovies ->
-                val contentType = if (isMovies) "movies" else "series"
-                startActivityWithTransition(Intent(context, it.wavestream.app.ui.category.AllCategoriesActivity::class.java).apply {
-                    putExtra("contentType", contentType)
-                })
-            },
-            onViewAllClick = { isMovies ->
-                val intent = if (isMovies) {
-                    Intent(context, it.wavestream.app.ui.film.FilmActivity::class.java)
-                } else {
-                    Intent(context, it.wavestream.app.ui.series.SeriesActivity::class.java)
-                }
-                startActivityWithTransition(intent)
-            },
-            modifier = Modifier.fillMaxHeight()
-        )
-        
         // Main content area
         Column(modifier = Modifier.fillMaxSize()) {
             // Mini Top Bar (clock + actions only)
             val profileName by homeViewModel.profileName.collectAsStateWithLifecycle()
             MiniTopBar(
                 profileName = profileName,
+                selectedTab = selectedTab,
+                onTabSelected = { selectTab(it) },
+                navFocusRequester = navPillFocusRequester,
+                onSettingsClick = {
+                    startActivityWithTransition(Intent(context, SettingsActivity::class.java))
+                },
                 onProfileClick = { 
                     startActivityWithTransition(Intent(context, it.wavestream.app.ui.profile.ProfileSelectionActivity::class.java))
                 },
@@ -676,8 +654,12 @@ private fun MainActivityScreen(
                             android.widget.Toast.makeText(context, "Rimosso da Continua a guardare", android.widget.Toast.LENGTH_SHORT).show()
                         },
                         onRailFocusRequest = {
-                            // Focus on rail when LEFT is pressed from content
-                            railExpanded = true
+                            // Fase 2.3b — "sinistra" dal contenuto porta alla pillola di
+                            // navigazione. try/catch: se il nodo non è ancora attachato
+                            // requestFocus lancerebbe IllegalStateException.
+                            try {
+                                navPillFocusRequester.requestFocus()
+                            } catch (_: IllegalStateException) { /* noop */ }
                         },
                         onManageHistoryClick = {
                             startActivityWithTransition(
@@ -817,6 +799,95 @@ private fun HeroAmbientBackdrop(
                 )
             )
     )
+}
+
+/**
+ * Fase 2.3b — navigazione principale come pillola in vetro orizzontale.
+ *
+ * Sostituisce la rail verticale: sta dentro la top bar e galleggia sull'immagine del
+ * backdrop invece di occupare una fascia laterale. Il D-pad si muove con
+ * sinistra/destra fra i tab; GIÙ entra nel contenuto.
+ *
+ * [selectedFocusRequester] viene agganciato SOLO al tab selezionato, così chi chiama
+ * (l'hero con "sinistra") può portare il focus sulla voce attiva senza dover
+ * conoscere la lista dei tab.
+ */
+@Composable
+private fun MainNavPill(
+    selectedTab: MainTab,
+    onTabSelected: (MainTab) -> Unit,
+    onDownPress: () -> Unit = {},
+    selectedFocusRequester: FocusRequester? = null,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.Black.copy(alpha = 0.42f))
+            .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(50))
+            .padding(horizontal = 6.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        MainTab.entries.forEach { tab ->
+            val isSelected = tab == selectedTab
+            val interactionSource = remember { MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+            val bg by animateColorAsState(
+                targetValue = when {
+                    isSelected -> WaveStreamColors.Accent.copy(alpha = 0.85f)
+                    isFocused -> Color.White.copy(alpha = 0.14f)
+                    else -> Color.Transparent
+                },
+                label = "navPillBg"
+            )
+            val label by animateColorAsState(
+                targetValue = if (isSelected || isFocused) Color.White else WaveStreamColors.TextSecondary,
+                label = "navPillLabel"
+            )
+            Text(
+                text = mainTabLabel(tab),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                color = label,
+                maxLines = 1,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(bg)
+                    .clickable(interactionSource = interactionSource, indication = null) {
+                        onTabSelected(tab)
+                    }
+                    .focusable(interactionSource = interactionSource)
+                    .then(
+                        if (isSelected && selectedFocusRequester != null) {
+                            Modifier.focusRequester(selectedFocusRequester)
+                        } else {
+                            Modifier
+                        }
+                    )
+                    .onPreviewKeyEvent { ev ->
+                        if (ev.type == KeyEventType.KeyDown && ev.key == Key.DirectionDown) {
+                            onDownPress()
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    .padding(horizontal = 14.dp, vertical = 7.dp)
+            )
+        }
+    }
+}
+
+/** Etichetta breve di un tab per la pillola di navigazione (Fase 2.3b). */
+private fun mainTabLabel(tab: MainTab): String = when (tab) {
+    MainTab.HOME -> "Home"
+    MainTab.MOVIES -> "Film"
+    MainTab.SERIES -> "Serie"
+    MainTab.LIVE -> "Live"
+    MainTab.FAVORITES -> "Preferiti"
+    MainTab.LISTS -> "Liste"
+    MainTab.HISTORY -> "Cronologia"
 }
 
 /**
@@ -1057,6 +1128,10 @@ private fun timeBasedGreeting(): String {
 @Composable
 private fun MiniTopBar(
     profileName: String = "",
+    selectedTab: MainTab = MainTab.HOME,
+    onTabSelected: (MainTab) -> Unit = {},
+    navFocusRequester: FocusRequester? = null,
+    onSettingsClick: () -> Unit = {},
     onProfileClick: () -> Unit,
     onSearchClick: () -> Unit,
     onRandomClick: () -> Unit = {},
@@ -1098,8 +1173,27 @@ private fun MiniTopBar(
                     fontWeight = FontWeight.SemiBold
                 )
             }
+            // Fase 2.3b — l'ingranaggio stava nella rail (rimossa): va riportato qui,
+            // altrimenti Impostazioni diventa irraggiungibile.
+            TopBarIconButton(
+                icon = Icons.Default.Settings,
+                contentDescription = "Impostazioni",
+                onClick = onSettingsClick,
+                onDownPress = onContentFocusRequest
+            )
         }
-        
+
+        // Fase 2.3b — navigazione principale: pillola in vetro orizzontale.
+        // Sostituisce la rail verticale: galleggia sull'immagine e non occupa più una
+        // fascia laterale. Sinistra/destra fra i tab, GiÙ entra nel contenuto.
+        MainNavPill(
+            selectedTab = selectedTab,
+            onTabSelected = onTabSelected,
+            onDownPress = onContentFocusRequest,
+            selectedFocusRequester = navFocusRequester,
+            modifier = Modifier.padding(start = 12.dp)
+        )
+
         // Right: clock + actions
         Row(
             verticalAlignment = Alignment.CenterVertically,
