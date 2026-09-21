@@ -604,19 +604,44 @@ private fun ModernPlayerControls(
     bottomFirstFocusRequester: FocusRequester
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
+        // ====================================================================
+        // P1 — Guscio: scrim verticali coerenti (SrcOver, una sola passata).
+        // NIENTE blur/Offscreen sopra il video (vincolo di performance 2.2).
+        // Sfumano fino a trasparente: nessun bordo orizzontale netto.
+        // ====================================================================
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .fillMaxHeight(0.34f)
+                .background(
+                    Brush.verticalGradient(
+                        0.00f to Color.Black.copy(alpha = 0.80f),
+                        0.40f to Color.Black.copy(alpha = 0.42f),
+                        0.72f to Color.Black.copy(alpha = 0.12f),
+                        1.00f to Color.Transparent
+                    )
+                )
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .fillMaxHeight(0.52f)
+                .background(
+                    Brush.verticalGradient(
+                        0.00f to Color.Transparent,
+                        0.32f to Color.Black.copy(alpha = 0.26f),
+                        0.62f to Color.Black.copy(alpha = 0.72f),
+                        1.00f to Color.Black.copy(alpha = 0.94f)
+                    )
+                )
+        )
+
         // Top area with floating title (no opaque bar - modern floating style)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.7f),
-                            Color.Black.copy(alpha = 0.3f),
-                            Color.Transparent
-                        )
-                    )
-                )
                 .padding(horizontal = 32.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -682,15 +707,6 @@ private fun ModernPlayerControls(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.5f),
-                            Color.Black.copy(alpha = 0.9f)
-                        )
-                    )
-                )
                 .padding(horizontal = 40.dp, vertical = 24.dp)
         ) {
             // Main row: Restart + Play/Pause button + Time + Progress bar + Duration
