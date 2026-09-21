@@ -1,7 +1,6 @@
 package it.wavestream.app.ui.loading
 
 import android.content.Intent
-import android.app.ActivityManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -292,26 +291,20 @@ class LoadingActivity : ComponentActivity() {
      * We poll isReadyForTab() until all are ready or timeout.
      */
     /**
-     * Tabs to prepare before showing the Home.
+     * Tabs da preparare prima di mostrare la Home.
      *
-     * On low-RAM devices (TV sticks, 1 GB set-top boxes) preloading all three
-     * tabs at once enqueues tens of MB of decoded bitmaps before the Home is even
-     * visible - enough for the low memory killer to kill the process while it is
-     * still loading (observed: +165 MB in 2s on a 1 GB TIM box). There we prepare
-     * only HOME and let the other tabs load when the user switches to them.
+     * I tab FILM e SERIE TV vanno SEMPRE caricati — e SOLO qui, nella LoadingActivity,
+     * prima della navigazione a MainActivity. In passato sui dispositivi low-RAM
+     * (TV stick, set-top box da 1 GB) si precaricava il solo HOME e gli altri due tab
+     * restavano da caricare "dopo", quando l'utente ci passava sopra, con conseguente
+     * skeleton/attesa in background. Comportamento voluto: nessuna eccezione, tutti e
+     * tre i tab vengono preparati e attesi in questa fase di caricamento.
      */
-    private fun tabsToPreload(): List<HomeContentType> {
-        val am = getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        // 256 MB is the usual memoryClass of devices with > 1 GB of RAM; anything
-        // below that is a low-RAM TV box.
-        val lowRam = am.isLowRamDevice || am.memoryClass < 256
-        return if (lowRam) {
-            Log.d("LoadingActivity", "Low-RAM device (memoryClass=${am.memoryClass}MB): preloading HOME only")
-            listOf(HomeContentType.HOME)
-        } else {
-            listOf(HomeContentType.HOME, HomeContentType.MOVIES, HomeContentType.SERIES)
-        }
-    }
+    private fun tabsToPreload(): List<HomeContentType> = listOf(
+        HomeContentType.HOME,
+        HomeContentType.MOVIES,
+        HomeContentType.SERIES
+    )
 
     private suspend fun waitForAllTabsReady(timeoutMs: Long = 120_000): Boolean {
         val tabs = tabsToPreload()
