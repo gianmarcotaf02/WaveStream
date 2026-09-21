@@ -702,21 +702,14 @@ private fun ModernPlayerControls(
             }
         }
         
-        // Bottom dock: play, tempo, progresso e controlli secondari
-        // raggruppati in un'unica capsula in vetro (floating), coerente
-        // con Home/Impostazioni. Fill + bordo gradiente, nessun blur.
-        GlassSurface(
-            shape = RoundedCornerShape(28.dp),
-            fill = GlassTokens.SurfaceFill,
-            stroke = GlassTokens.StrokeGradient,
-            strokeWidth = 1.dp,
+        // Bottom controls - Netflix style layout.
+        // La barra principale (play, tempo, progresso) resta libera sullo scrim;
+        // solo i comandi secondari stanno in una capsula floating in basso a destra.
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(horizontal = 32.dp, vertical = 24.dp)
-        ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp)
+                .padding(horizontal = 40.dp, vertical = 24.dp)
         ) {
             // Main row: Restart + Play/Pause button + Time + Progress bar + Duration
             Row(
@@ -814,13 +807,20 @@ private fun ModernPlayerControls(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Secondary row: Additional controls at RIGHT (below progress bar)
+            // Secondary row: comandi in basso a destra, dentro una capsula in vetro
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                GlassSurface(
+                    shape = RoundedCornerShape(22.dp),
+                    fill = GlassTokens.SurfaceFill,
+                    stroke = GlassTokens.StrokeGradient,
+                    strokeWidth = 1.dp
+                ) {
                 Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -891,8 +891,8 @@ private fun ModernPlayerControls(
                         ModernNextButton(onClick = onPlayNext)
                     }
                 }
+                }
             }
-        }
         }
     }
 }
