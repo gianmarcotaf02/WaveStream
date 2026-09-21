@@ -703,19 +703,6 @@ private fun MainActivityScreen(
 }
 
 /**
- * Extension to handle clicks without ripple effect
- */
-@Composable
-private fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
-    val interactionSource = remember { MutableInteractionSource() }
-    return this.clickable(
-        interactionSource = interactionSource,
-        indication = null,
-        onClick = onClick
-    )
-}
-
-/**
  * Main Top Bar with tabs and action buttons
  */
 @Composable
