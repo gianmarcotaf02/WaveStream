@@ -281,7 +281,7 @@
                 libertà fondamentali dell’utente.[web:1][web:3][web:10]
             </li>
             <li>
-                <strong>Consenso</strong> (art. 6.1.a GDPR): utilizzo di API opzionali (TMDB, OMDb, OpenSubtitles) e
+                <strong>Consenso</strong> (art. 6.1.a GDPR): utilizzo di API opzionali (TMDB, OMDb, OpenSubtitles, IntroDB) e
                 memorizzazione delle relative API keys/credenziali, che l’utente può scegliere liberamente di non
                 fornire.[web:1][web:3][web:10]
             </li>
@@ -303,7 +303,7 @@
                 freedoms.[web:1][web:3][web:10]
             </li>
             <li>
-                <strong>Consent</strong> (Art. 6.1.a GDPR): use of optional APIs (TMDB, OMDb, OpenSubtitles) and storage
+                <strong>Consent</strong> (Art. 6.1.a GDPR): use of optional APIs (TMDB, OMDb, OpenSubtitles, IntroDB) and storage
                 of related API keys/credentials, which the user can freely choose not to provide.[web:1][web:3][web:10]
             </li>
         </ul>
@@ -318,7 +318,7 @@
         </p>
         <p>
             L’eventuale trasferimento di dati verso server di terze parti (provider IPTV, TMDB, OMDb, OpenSubtitles,
-            servizi di hosting o aggiornamento) avviene esclusivamente nell’ambito delle funzionalità tecniche descritte
+            IntroDB, servizi di hosting o aggiornamento) avviene esclusivamente nell’ambito delle funzionalità tecniche descritte
             di seguito.
         </p>
 
@@ -328,7 +328,7 @@
             controller’s own servers.
         </p>
         <p>
-            Any transfer of data to third-party servers (IPTV providers, TMDB, OMDb, OpenSubtitles, hosting or update
+            Any transfer of data to third-party servers (IPTV providers, TMDB, OMDb, OpenSubtitles, IntroDB, hosting or update
             services) occurs solely within the scope of the technical features described below.
         </p>
 
@@ -358,6 +358,12 @@
             <li>
                 <strong>OpenSubtitles</strong> (<code>api.opensubtitles.com</code>): invio di titolo e lingua, ed
                 eventualmente credenziali dell’account OpenSubtitles, per scaricare sottotitoli.
+            </li>
+            <li>
+                <strong>IntroDB</strong> (<code>api.introdb.app</code>): invio dell’identificativo IMDb e, per le serie,
+                di stagione ed episodio del contenuto, per recuperare in modo anonimo i timestamp di sigla, riassunto e
+                titoli di coda (nessuna credenziale IPTV né dato personale dell’utente). La funzione è disattivabile
+                dalle Impostazioni dell’app.
             </li>
             <li>
                 <strong>Firebase Realtime Database</strong> (<code>wavestream-d3972-default-rtdb.europe-west1</code>):
@@ -391,6 +397,12 @@
             <li>
                 <strong>OpenSubtitles</strong> (<code>api.opensubtitles.com</code>): sending titles and language, and
                 optionally OpenSubtitles account credentials, to download subtitles.
+            </li>
+            <li>
+                <strong>IntroDB</strong> (<code>api.introdb.app</code>): sending the IMDb identifier and, for TV series,
+                the content’s season and episode number, to anonymously retrieve intro, recap and end-credits
+                timestamps (no IPTV credentials or personal user data are sent). The feature can be disabled in the
+                app’s Settings.
             </li>
             <li>
                 <strong>Firebase Realtime Database</strong> (<code>wavestream-d3972-default-rtdb.europe-west1</code>):
