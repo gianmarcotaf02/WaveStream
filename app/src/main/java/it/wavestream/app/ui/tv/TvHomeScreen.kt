@@ -1013,30 +1013,10 @@ fun HeroBanner(
             .fillMaxWidth()
             .height(heroHeight)
     ) {
-        // ---- Layer 1: backdrop a tutto schermo ---------------------------------
-        // Copre l'intera fascia da bordo a bordo, senza maschere: la fusione con lo
-        // sfondo e' affidata alle scrim statiche del layer 2.
-        AnimatedContent(
-            targetState = heroItem,
-            contentKey = { it.id },
-            transitionSpec = { fadeIn(tween(450)) togetherWith fadeOut(tween(450)) },
-            label = "heroBackdrop"
-        ) { backdropHero ->
-            if (backdropHero.contentType == "SERIEA_MATCH" && serieAMatch != null) {
-                SerieAMatchHeroBackdrop(
-                    match = serieAMatch,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                AsyncImage(
-                    model = backdropHero.backdropUrl ?: backdropHero.posterUrl,
-                    contentDescription = backdropHero.title,
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
+        // ---- Backdrop: disegnato a tutto schermo da MainActivity (Fase 1b) -----
+        // Prima era qui, ritagliato nella fascia dell'hero con maschere alpha. Ora
+        // l'immagine è una sola e copre anche rail e top bar: qui non va disegnata
+        // di nuovo, altrimenti se ne vedrebbero due sovrapposte.
 
         // ---- Scrim statiche (SrcOver, nessun blend mode) -----------------------
         // Il backdrop NON è più disegnato qui: è a TUTTO schermo in MainActivity,
