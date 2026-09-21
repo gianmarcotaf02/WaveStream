@@ -175,6 +175,29 @@ data class HomeScreenState(
 )
 
 /**
+ * Lista degli hero che il carosello della Home può mostrare: slide Serie A (solo su
+ * Home) in testa, poi gli hero di contenuto.
+ */
+fun resolveHeroes(state: HomeScreenState): List<HeroItem> {
+    val serieA = if (state.isHomeTab) state.serieAMatchHeroes else emptyList()
+    return serieA + state.heroItems
+}
+
+/**
+ * Hero attualmente in scena, con l'indice normalizzato (modulo) per non uscire mai
+ * dai limiti della lista.
+ *
+ * Unica fonte di verità: la usano sia il banner dell'hero (`TvHomeScreen`) sia il
+ * backdrop full-bleed dietro rail e top bar (`MainActivity`). Averne una sola
+ * impedisce che le due superfici mostrino immagini diverse durante la rotazione.
+ */
+fun resolveCurrentHero(state: HomeScreenState): HeroItem? {
+    val all = resolveHeroes(state)
+    if (all.isEmpty()) return null
+    return all[((state.currentHeroIndex % all.size) + all.size) % all.size]
+}
+
+/**
  * Netflix-style Home Screen with horizontal carousels
  * Optimized for TV D-pad navigation
  */
