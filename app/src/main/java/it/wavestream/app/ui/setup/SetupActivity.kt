@@ -123,7 +123,9 @@ fun ProfileConfigScreen(
 ) {
     OnboardingBackground {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding(),
             contentAlignment = Alignment.Center
         ) {
             AnimatedGradientBackground()
@@ -154,6 +156,79 @@ fun ProfileConfigScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
+
+                // Name input (prima dell'avatar: così la tastiera non copre il campo)
+                var nameValue by remember(profileName) { mutableStateOf(profileName) }
+                val focusManager = LocalFocusManager.current
+                val continueFocusRequester = remember { FocusRequester() }
+
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Nome profilo",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = WaveStreamColors.Accent,
+                        modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(WaveStreamColors.BackgroundTertiary.copy(alpha = 0.5f))
+                            .border(
+                                width = 1.dp,
+                                color = WaveStreamColors.Accent.copy(alpha = 0.3f),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            tint = WaveStreamColors.Accent,
+                            modifier = Modifier.size(20.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        BasicTextField(
+                            value = nameValue,
+                            onValueChange = {
+                                nameValue = it
+                                onProfileNameChange(it)
+                            },
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = WaveStreamColors.TextPrimary
+                            ),
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            decorationBox = { innerTextField ->
+                                Box {
+                                    if (nameValue.isEmpty()) {
+                                        Text(
+                                            text = "Il tuo nome",
+                                            color = WaveStreamColors.TextTertiary,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            },
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Text,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = { continueFocusRequester.requestFocusSafely() }
+                            )
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 // Avatar selection grid
                 Text(
@@ -234,79 +309,6 @@ fun ProfileConfigScreen(
                                 )
                             }
                         }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Name input
-                var nameValue by remember(profileName) { mutableStateOf(profileName) }
-                val focusManager = LocalFocusManager.current
-                val continueFocusRequester = remember { FocusRequester() }
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Nome profilo",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = WaveStreamColors.Accent,
-                        modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-
-                            .height(56.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(WaveStreamColors.BackgroundTertiary.copy(alpha = 0.5f))
-                            .border(
-                                width = 1.dp,
-                                color = WaveStreamColors.Accent.copy(alpha = 0.3f),
-                                shape = RoundedCornerShape(16.dp)
-                            )
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            tint = WaveStreamColors.Accent,
-                            modifier = Modifier.size(20.dp)
-                        )
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        BasicTextField(
-                            value = nameValue,
-                            onValueChange = {
-                                nameValue = it
-                                onProfileNameChange(it)
-                            },
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                color = WaveStreamColors.TextPrimary
-                            ),
-                            singleLine = true,
-                            modifier = Modifier.weight(1f),
-                            decorationBox = { innerTextField ->
-                                Box {
-                                    if (nameValue.isEmpty()) {
-                                        Text(
-                                            text = "Il tuo nome",
-                                            color = WaveStreamColors.TextTertiary,
-                                            style = MaterialTheme.typography.bodyLarge
-                                        )
-                                    }
-                                    innerTextField()
-                                }
-                            },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Text,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(
-                                onDone = { continueFocusRequester.requestFocusSafely() }
-                            )
-                        )
                     }
                 }
 
