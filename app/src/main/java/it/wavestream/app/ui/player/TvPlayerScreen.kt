@@ -202,9 +202,19 @@ fun TvPlayerScreen(
         }
     }
     
-    // Show controls when paused
+    // Seek rapido a barra nascosta: durante (e poco dopo) il seek il player può
+    // andare in buffering (isPlaying=false) e far ricomparire la barra. Non deve:
+    // la modalità "visione pulita" resta pulita.
+    var hiddenSeekGuardUntil by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(hiddenSeekSeconds) {
+        if (hiddenSeekSeconds != 0) {
+            hiddenSeekGuardUntil = System.currentTimeMillis() + 1_200L
+        }
+    }
+
+    // Show controls when paused (ma non durante un seek a barra nascosta)
     LaunchedEffect(isPlaying) {
-        if (!isPlaying) {
+        if (!isPlaying && System.currentTimeMillis() >= hiddenSeekGuardUntil) {
             onControlsVisibilityChanged(true)
         }
     }

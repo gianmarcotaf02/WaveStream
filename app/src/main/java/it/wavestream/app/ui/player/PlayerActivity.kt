@@ -2357,12 +2357,14 @@ class PlayerActivity : ComponentActivity() {
     
     override fun onPause() {
         super.onPause()
+        stopHiddenSeekRepeat()
         player.pause()
         saveProgress()
     }
     
     override fun onStop() {
         super.onStop()
+        stopHiddenSeekRepeat()
         // Double-save on stop for extra safety when app goes to background
         saveProgress()
     }
@@ -2395,6 +2397,8 @@ class PlayerActivity : ComponentActivity() {
         nextEpisodeHandler.removeCallbacksAndMessages(null)
         bufferingHandler.removeCallbacksAndMessages(null)
         hiddenSeekHandler.removeCallbacksAndMessages(null)
+        hiddenSeekRepeatHandler.removeCallbacksAndMessages(null)
+        hiddenSeekRepeatRunnable = null
         creditsAudioMonitor.windowActive = false
         creditsAudioMonitor.introActive = false
         creditsAudioMonitor.setIntroReference(null)
