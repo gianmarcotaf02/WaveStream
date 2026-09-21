@@ -818,6 +818,10 @@ private fun MainNavPill(
     onTabSelected: (MainTab) -> Unit,
     onDownPress: () -> Unit = {},
     selectedFocusRequester: FocusRequester? = null,
+    onSearchClick: () -> Unit = {},
+    onDownloadsClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
+    searchButtonFocusRequester: FocusRequester? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -829,6 +833,15 @@ private fun MainNavPill(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
+        // Ricerca: a SINISTRA della Home, dentro la barra.
+        PillIcon(
+            icon = Icons.Default.Search,
+            contentDescription = "Cerca",
+            onClick = onSearchClick,
+            onDownPress = onDownPress,
+            focusRequester = searchButtonFocusRequester
+        )
+
         MainTab.entries.forEach { tab ->
             val isSelected = tab == selectedTab
             val interactionSource = remember { MutableInteractionSource() }
@@ -876,6 +889,83 @@ private fun MainNavPill(
                     .padding(horizontal = 14.dp, vertical = 7.dp)
             )
         }
+
+        // Separatore fra navigazione e azioni.
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 6.dp)
+                .size(width = 1.dp, height = 22.dp)
+                .background(Color.White.copy(alpha = 0.18f))
+        )
+
+        // A destra: download, impostazioni e orario — sempre dentro la barra.
+        PillIcon(
+            icon = Icons.Default.Download,
+            contentDescription = "Download",
+            onClick = onDownloadsClick,
+            onDownPress = onDownPress
+        )
+        PillIcon(
+            icon = Icons.Default.Settings,
+            contentDescription = "Impostazioni",
+            onClick = onSettingsClick,
+            onDownPress = onDownPress
+        )
+        DigitalClock(
+            textStyle = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(start = 10.dp, end = 8.dp)
+        )
+    }
+}
+
+/**
+ * Icona compatta focusable in stile pillola (Fase 2.3b).
+ *
+ * Il vecchio [TopBarIconButton] ha uno stile di focus pensato per una barra piena
+ * (fondo accent pieno + scala): dentro una capsula in vetro risulterebbe troppo
+ * pesante e andava fuori misura. Qui il focus è solo un alone chiaro, coerente con
+ * l'altezza dei tab.
+ */
+@Composable
+private fun PillIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    onDownPress: () -> Unit,
+    focusRequester: FocusRequester? = null
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val bg by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
+        label = "pillIconBg"
+    )
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(bg)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .focusable(interactionSource = interactionSource)
+            .then(
+                if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier
+            )
+            .onPreviewKeyEvent { ev ->
+                if (ev.type == KeyEventType.KeyDown && ev.key == Key.DirectionDown) {
+                    onDownPress()
+                    true
+                } else {
+                    false
+                }
+            }
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
 
@@ -1157,11 +1247,15 @@ private fun MiniTopBar(
                 )
             )
             .padding(horizontal = 24.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Left: greeting + profile name
+        // Fase 2.3b — floating bar UNICA. Il greeting resta a sinistra come testo nudo
+        // sull'immagine; dentro la pillola di vetro ci sta tutto il resto (ricerca,
+        // tab, azioni, orario). Con i due Spacer di pari peso la pillola risulta
+        // centrata orizzontalmente.
+        // Rimossi su richiesta: dadi (contenuto casuale) e profilo.
         Row(
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -1175,68 +1269,18 @@ private fun MiniTopBar(
             }
         }
 
-        // Fase 2.3b — navigazione principale: pillola in vetro orizzontale.
-        // Sostituisce la rail verticale: galleggia sull'immagine e non occupa più una
-        // fascia laterale. Sinistra/destra fra i tab, GiÙ entra nel contenuto.
         MainNavPill(
             selectedTab = selectedTab,
             onTabSelected = onTabSelected,
             onDownPress = onContentFocusRequest,
             selectedFocusRequester = navFocusRequester,
-            modifier = Modifier.padding(start = 12.dp)
+            onSearchClick = onSearchClick,
+            onDownloadsClick = onDownloadsClick,
+            onSettingsClick = onSettingsClick,
+            searchButtonFocusRequester = searchButtonFocusRequester
         )
 
-        // Right: clock + actions
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            DigitalClock()
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            // Random content button
-            TopBarIconButton(
-                painter = androidx.compose.ui.res.painterResource(it.wavestream.app.R.drawable.dadi),
-                contentDescription = "Contenuto casuale",
-                onClick = onRandomClick,
-                onDownPress = onContentFocusRequest,
-                focusRequester = firstButtonFocusRequester
-            )
-            
-            TopBarIconButton(
-                icon = Icons.Default.Download,
-                contentDescription = "Download",
-                onClick = onDownloadsClick,
-                onDownPress = onContentFocusRequest
-            )
-            
-            TopBarIconButton(
-                icon = Icons.Default.Search,
-                contentDescription = "Cerca",
-                onClick = onSearchClick,
-                onDownPress = onContentFocusRequest,
-                focusRequester = searchButtonFocusRequester
-            )
-            
-            TopBarIconButton(
-                icon = Icons.Default.Person,
-                contentDescription = "Profilo",
-                onClick = onProfileClick,
-                onDownPress = onContentFocusRequest
-            )
-
-            // Fase 2.3b — Impostazioni (prima stava nella rail, rimossa).
-            // Sta nel gruppo azioni a destra e non a sinistra: lì era il PRIMO
-            // focusable della schermata e al lancio il focus iniziale finiva
-            // sull'ingranaggio invece che sul contenuto.
-            TopBarIconButton(
-                icon = Icons.Default.Settings,
-                contentDescription = "Impostazioni",
-                onClick = onSettingsClick,
-                onDownPress = onContentFocusRequest
-            )
-        }
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
