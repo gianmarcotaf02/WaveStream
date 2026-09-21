@@ -149,7 +149,7 @@ data class HomeScreenState(
     val isFavoritesTab: Boolean = false,  // True when viewing the Favorites tab (for empty state)
     val isHistoryTab: Boolean = false,    // True when viewing the History tab (for empty state)
     val isHomeTab: Boolean = false,       // True when viewing the Home tab
-    // Chiavi "CONTENTTYPE:id" dei contenuti presenti nella lista "Da guardare" del profilo.
+    // Chiavi "CONTENTTYPE:id" dei contenuti presenti in QUALSIASI lista del profilo.
     // Usate dall'hero per mostrare lo stato del pulsante lista (+ ↔ spunta).
     val watchLaterKeys: Set<String> = emptySet(),
     // Hero banner fields
