@@ -81,6 +81,17 @@ class CreditsDetector {
         isTriggered = false
     }
 
+    /**
+     * Ri-arma il watchdog dopo un seek senza buttare via il frame precedente: la
+     * compensazione di scroll resta valida, quindi il primo campione dopo il salto
+     * non è un miss garantito (riduce la latenza di rilevamento).
+     */
+    fun rearm() {
+        hitHistory.clear()
+        sampleCount = 0
+        isTriggered = false
+    }
+
     /** Azzera solo l'accumulo dei campioni, senza perdere la storia dei frame (debug). */
     fun clearAccumulator() {
         hitHistory.clear()
