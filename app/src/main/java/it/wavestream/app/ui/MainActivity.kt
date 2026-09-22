@@ -1070,7 +1070,7 @@ private fun MainNavPill(
                                             longPressTriggered = true
                                             onTabLongPress(
                                                 tab,
-                                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 8f),
+                                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 6f),
                                                 returnRequester
                                             )
                                         }
@@ -1086,7 +1086,7 @@ private fun MainNavPill(
                                             // ancorata sotto il tab.
                                             onTabLongPress(
                                                 tab,
-                                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 8f),
+                                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 6f),
                                                 returnRequester
                                             )
                                         } else {
@@ -1108,7 +1108,7 @@ private fun MainNavPill(
                         if (isSelected && hasSubmenu) {
                             onTabLongPress(
                                 tab,
-                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 8f),
+                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 6f),
                                 returnRequester
                             )
                         } else {
@@ -1194,7 +1194,7 @@ private fun NavTabDropdownMenu(
     )
 
     GlassSurface(
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(12.dp),
         // Vetro SCURO: sopra un hero luminoso il fill bianco 18% risultava slavato
         // e il testo poco leggibile. Lo scuro resta coerente con la top bar
         // (Color.Black) e mantiene il bordo gradiente del vetro.
@@ -1213,7 +1213,7 @@ private fun NavTabDropdownMenu(
                 transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0f)
             }
     ) {
-        Column(modifier = Modifier.padding(5.dp)) {
+        Column(modifier = Modifier.padding(4.dp)) {
             NavDropdownItem(
                 label = "Categorie",
                 isFirst = true,
@@ -1270,7 +1270,7 @@ private fun NavDropdownItem(
                 }
             }
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 13.dp, vertical = 9.dp)
+            .padding(horizontal = 12.dp, vertical = 7.dp)
     ) {
         Text(
             text = label,
