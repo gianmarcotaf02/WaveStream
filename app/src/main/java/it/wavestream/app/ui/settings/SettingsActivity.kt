@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
@@ -45,6 +47,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
@@ -124,6 +127,8 @@ class SettingsActivity : ComponentActivity() {
     @Composable
     private fun SettingsScreenContent() {
         var selectedMenuId by remember { mutableStateOf<String?>(null) }
+        // Ultima sezione aperta: al ritorno all'hub il focus torna sulla sua tile.
+        var lastOpenedId by remember { mutableStateOf<String?>(null) }
         
         // Focus requester for content area - to focus on first interactive element when section changes
         val contentFocusRequester = remember { FocusRequester() }
@@ -161,13 +166,19 @@ class SettingsActivity : ComponentActivity() {
             (NovaFeature.ENABLED || it.id != "assistant")
         }
         
-        Row(
+        // Passo 4 — Impostazioni a due viste: HUB a griglia (4 colonne) e sezione a
+        // tutto schermo. Prima la sezione viveva in ~1000px accanto a una sidebar di
+        // 350px: era quello a renderla "schiacciata".
+        // BACK dalla sezione riporta all'hub (prima usciva dalle Impostazioni).
+        BackHandler(enabled = selectedMenuId != null) {
+            selectedMenuId = null
+        }
+
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    // Passo 1 — fondale coerente con la Home (MainActivity): stesso
-                    // gradiente. Prima era BackgroundPrimary a tinta piena, che rendeva
-                    // Impostazioni una schermata "piatta" rispetto al resto dell'app.
+                    // Fondale coerente con la Home (MainActivity): stesso gradiente.
                     Brush.verticalGradient(
                         colors = listOf(
                             WaveStreamColors.Accent.copy(alpha = 0.045f),
@@ -177,28 +188,22 @@ class SettingsActivity : ComponentActivity() {
                     )
                 )
         ) {
-            // Sidebar
-            SettingsSidebar(
-                menuItems = menuItems,
-                selectedItem = selectedMenuId,
-                onItemClick = { item ->
-                    when (item.id) {
-                        "logout" -> logout()
-                        else -> selectedMenuId = item.id
+            if (selectedMenuId == null) {
+                SettingsHub(
+                    menuItems = menuItems,
+                    initialFocusId = lastOpenedId,
+                    onItemClick = { item ->
+                        when (item.id) {
+                            "logout" -> logout()
+                            else -> {
+                                lastOpenedId = item.id
+                                selectedMenuId = item.id
+                            }
+                        }
                     }
-                },
-                modifier = Modifier
-                    .width(350.dp)
-                    .fillMaxHeight()
-            )
-            
-            // Content area
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(40.dp)
-            ) {
+                )
+            } else {
+                SettingsDetail(onBack = { selectedMenuId = null }) {
                 when (selectedMenuId) {
                     "profile" -> ProfileSettings(profileDao, userPreferences, contentFocusRequester)
                     "account" -> AccountSettings(playlistDao, playlistRepository, contentFocusRequester)
@@ -219,25 +224,17 @@ class SettingsActivity : ComponentActivity() {
                     "updates" -> UpdateSettings(appUpdateManager, contentFocusRequester)
                     "about" -> AboutSettings()
                     else -> {
-                        Column {
-                            Text(
-                                text = "Impostazioni",
-                                style = MaterialTheme.typography.headlineLarge,
-                                color = WaveStreamColors.TextPrimary,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Seleziona una categoria dal menu a sinistra",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = WaveStreamColors.TextSecondary
-                            )
-                        }
+                        Text(
+                            text = "Sezione non disponibile",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = WaveStreamColors.TextSecondary
+                        )
                     }
                 }
             }
         }
     }
+}
     
     private fun logout() {
         lifecycleScope.launch {
