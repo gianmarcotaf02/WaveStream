@@ -108,17 +108,23 @@ object ContentQueryBuilder {
         val selectedCategories = state.filter.categories.toList()
         when {
             selectedCategories.size == 1 -> {
-                sql.append(" AND category = ?")
+                // Il film può comparire nella categoria primaria (colonna) oppure
+                // come appartenenza aggiuntiva (movie_categories).
+                sql.append(" AND (category = ? OR id IN (SELECT movieId FROM movie_categories WHERE category = ?))")
+                args.add(selectedCategories[0])
                 args.add(selectedCategories[0])
             }
             selectedCategories.size > 1 -> {
-                sql.append(" AND category IN (")
-                sql.append(selectedCategories.joinToString(",") { "?" })
-                sql.append(")")
+                val placeholders = selectedCategories.joinToString(",") { "?" }
+                sql.append(" AND (category IN (").append(placeholders)
+                    .append(") OR id IN (SELECT movieId FROM movie_categories WHERE category IN (")
+                    .append(placeholders).append(")))")
+                selectedCategories.forEach { args.add(it) }
                 selectedCategories.forEach { args.add(it) }
             }
             category != null -> {
-                sql.append(" AND category = ?")
+                sql.append(" AND (category = ? OR id IN (SELECT movieId FROM movie_categories WHERE category = ?))")
+                args.add(category)
                 args.add(category)
             }
         }

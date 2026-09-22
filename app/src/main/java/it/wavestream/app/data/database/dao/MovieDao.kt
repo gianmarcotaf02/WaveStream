@@ -31,23 +31,27 @@ interface MovieDao {
     @Query("SELECT * FROM movies WHERE playlistId = :playlistId AND isHidden = 0 ORDER BY name")
     fun getMoviesByPlaylist(playlistId: Long): Flow<List<Movie>>
     
-    @Query("SELECT * FROM movies WHERE category = :category AND isHidden = 0 ORDER BY name")
+    @Query("SELECT * FROM movies WHERE isHidden = 0 AND (category = :category OR id IN (SELECT movieId FROM movie_categories WHERE category = :category)) ORDER BY name")
     fun getMoviesByCategory(category: String): Flow<List<Movie>>
     
-    @Query("SELECT * FROM movies WHERE category = :category AND isHidden = 0 ORDER BY name")
+    @Query("SELECT * FROM movies WHERE isHidden = 0 AND (category = :category OR id IN (SELECT movieId FROM movie_categories WHERE category = :category)) ORDER BY name")
     suspend fun getMoviesByCategoryList(category: String): List<Movie>
 
-    @Query("SELECT * FROM movies WHERE category = :category AND isHidden = 0 ORDER BY name LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM movies WHERE isHidden = 0 AND (category = :category OR id IN (SELECT movieId FROM movie_categories WHERE category = :category)) ORDER BY name LIMIT :limit OFFSET :offset")
     suspend fun getMoviesByCategoryListPaged(category: String, limit: Int, offset: Int): List<Movie>
 
-    @Query("SELECT COUNT(*) FROM movies WHERE category = :category AND isHidden = 0")
+    @Query("SELECT COUNT(*) FROM movies WHERE isHidden = 0 AND (category = :category OR id IN (SELECT movieId FROM movie_categories WHERE category = :category))")
     suspend fun getMoviesCountByCategory(category: String): Int
 
     
-    @Query("SELECT DISTINCT category FROM movies WHERE category IS NOT NULL AND isHidden = 0 ORDER BY category")
+    @Query("SELECT DISTINCT category FROM movies WHERE category IS NOT NULL AND isHidden = 0 " +
+        "UNION SELECT DISTINCT mc.category FROM movie_categories mc INNER JOIN movies m ON m.id = mc.movieId " +
+        "WHERE m.isHidden = 0 ORDER BY category")
     fun getCategories(): Flow<List<String>>
     
-    @Query("SELECT DISTINCT category FROM movies WHERE category IS NOT NULL AND isHidden = 0 ORDER BY category")
+    @Query("SELECT DISTINCT category FROM movies WHERE category IS NOT NULL AND isHidden = 0 " +
+        "UNION SELECT DISTINCT mc.category FROM movie_categories mc INNER JOIN movies m ON m.id = mc.movieId " +
+        "WHERE m.isHidden = 0 ORDER BY category")
     suspend fun getCategoriesList(): List<String>
     
     @Query("SELECT * FROM movies WHERE id = :id")
@@ -58,7 +62,11 @@ interface MovieDao {
     suspend fun getMoviesByIds(ids: List<Long>): List<Movie>
 
     // Batch count query — replaces N+1 getCountByCategory calls in loadFavoritesContent
-    @Query("SELECT category as name, COUNT(*) as count FROM movies WHERE category IN (:categories) AND isHidden = 0 GROUP BY category")
+    @Query("SELECT category as name, COUNT(DISTINCT movieId) as count FROM (" +
+        "SELECT id as movieId, category FROM movies WHERE category IN (:categories) AND isHidden = 0 " +
+        "UNION SELECT m.id as movieId, mc.category as category FROM movie_categories mc " +
+        "INNER JOIN movies m ON m.id = mc.movieId WHERE mc.category IN (:categories) AND m.isHidden = 0) " +
+        "GROUP BY category")
     suspend fun getCountByCategories(categories: List<String>): List<CategoryWithCount>
     
     @Query("SELECT * FROM movies WHERE tmdbId = :tmdbId LIMIT 1")
@@ -76,7 +84,7 @@ interface MovieDao {
     @Query("SELECT * FROM movies WHERE isHidden = 0 ORDER BY name")
     fun pagingMovies(): androidx.paging.PagingSource<Int, Movie>
     
-    @Query("SELECT * FROM movies WHERE category = :category AND isHidden = 0 ORDER BY name LIMIT :limit")
+    @Query("SELECT * FROM movies WHERE isHidden = 0 AND (category = :category OR id IN (SELECT movieId FROM movie_categories WHERE category = :category)) ORDER BY name LIMIT :limit")
     fun getMoviesByCategory(category: String, limit: Int): Flow<List<Movie>>
     
     // Popular movies - sorts by TMDB popularity when available, random otherwise
@@ -191,7 +199,7 @@ interface MovieDao {
     @Query("SELECT COUNT(*) FROM movies WHERE playlistId = :playlistId")
     suspend fun getCountByPlaylist(playlistId: Long): Int
     
-    @Query("SELECT COUNT(*) FROM movies WHERE category = :category AND isHidden = 0")
+    @Query("SELECT COUNT(*) FROM movies WHERE isHidden = 0 AND (category = :category OR id IN (SELECT movieId FROM movie_categories WHERE category = :category))")
     suspend fun getMovieCountByCategory(category: String): Int
     
     // Trending categories
@@ -201,15 +209,21 @@ interface MovieDao {
     @Query("UPDATE movies SET trendingCategory = NULL WHERE trendingCategory = :category")
     suspend fun clearTrendingCategory(category: String)
     
-    // Categories with count
+    // Categories with count (include le appartenenze multiple)
     @Query("""
-        SELECT category as name, COUNT(*) as count 
-        FROM movies 
-        WHERE category IS NOT NULL AND isHidden = 0 
-        GROUP BY category 
-        ORDER BY category
+        SELECT category as name, COUNT(DISTINCT movieId) as count FROM (
+            SELECT id as movieId, category FROM movies
+            WHERE category IS NOT NULL AND category != '' AND isHidden = 0
+            UNION
+            SELECT m.id as movieId, mc.category as category FROM movie_categories mc
+            INNER JOIN movies m ON m.id = mc.movieId
+            WHERE mc.category IS NOT NULL AND mc.category != '' AND m.isHidden = 0
+        ) GROUP BY category ORDER BY category
     """)
     suspend fun getCategoriesWithCount(): List<CategoryWithCount>
+
+    @Query("SELECT * FROM movies WHERE playlistId = :playlistId")
+    suspend fun getAllByPlaylistIncludingHidden(playlistId: Long): List<Movie>
 
     /**
      * Backfill dell'anno di uscita dal nome per i contenuti importati prima che
