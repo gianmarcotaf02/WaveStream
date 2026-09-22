@@ -922,25 +922,36 @@ private fun AccountDetailRow(
     value: String,
     valueColor: Color = WaveStreamColors.TextPrimary
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+    // Passo 3 — riga informativa in vetro tenue. Non è focusabile (nessun clickable/
+    // focusable, per non aggiungere fermate di focus al D-pad): la resa "vetro" è solo
+    // una fascia leggermente più chiara che dà struttura alla lista di dettagli.
+    // Gerarchia: etichetta TextSecondary (prima TextTertiary, troppo spenta), valore primary.
+    GlassSurface(
+        shape = RoundedCornerShape(10.dp),
+        fill = Color.White.copy(alpha = 0.04f),
+        strokeWidth = 0.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = WaveStreamColors.TextTertiary,
-            modifier = Modifier.weight(0.4f)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = valueColor,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(0.6f)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = WaveStreamColors.TextSecondary,
+                modifier = Modifier.weight(0.4f)
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium,
+                color = valueColor,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.weight(0.6f)
+            )
+        }
     }
 }
 
