@@ -122,6 +122,14 @@ class MovieUnificationService @Inject constructor(
 
             syncProviders(playlistId, movieId, group, primary)
             syncCategories(playlistId, movieId, group)
+
+            // Allinea il badge "N versioni" al numero effettivo di sorgenti
+            // (mergeDuplicatesInto può averlo toccato prima del sync).
+            movieDao.getMovieById(movieId)?.let { fresh ->
+                if (fresh.streamCount != group.size) {
+                    movieDao.update(fresh.copy(streamCount = group.size))
+                }
+            }
         }
 
         // Elimina i film della playlist scomparsi dal provider (i duplicati sono
