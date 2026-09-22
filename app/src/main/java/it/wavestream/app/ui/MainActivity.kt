@@ -1194,11 +1194,15 @@ private fun NavTabDropdownMenu(
     )
 
     GlassSurface(
-        shape = RoundedCornerShape(18.dp),
-        fill = GlassTokens.SurfaceFillStrong,
+        shape = RoundedCornerShape(14.dp),
+        // Vetro SCURO: sopra un hero luminoso il fill bianco 18% risultava slavato
+        // e il testo poco leggibile. Lo scuro resta coerente con la top bar
+        // (Color.Black) e mantiene il bordo gradiente del vetro.
+        fill = Color.Black.copy(alpha = 0.80f),
+        stroke = GlassTokens.StrokeGradient,
         modifier = Modifier
             .offset { IntOffset(state.x.roundToInt(), state.y.roundToInt()) }
-            .width(260.dp)
+            .width(200.dp)
             .graphicsLayer {
                 alpha = enterAnim
                 val s = 0.96f + 0.04f * enterAnim
@@ -1207,7 +1211,7 @@ private fun NavTabDropdownMenu(
                 transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0f)
             }
     ) {
-        Column(modifier = Modifier.padding(6.dp)) {
+        Column(modifier = Modifier.padding(5.dp)) {
             NavDropdownItem(
                 label = "Categorie",
                 isFirst = true,
