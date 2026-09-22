@@ -1245,20 +1245,11 @@ private fun NavDropdownItem(
         targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
         label = "navDropdownItemBg"
     )
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
-        animationSpec = AppAnimations.SpringCardFocus,
-        label = "navDropdownItemScale"
-    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(10.dp))
             .background(bg)
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .focusable(interactionSource = interactionSource)
@@ -1277,11 +1268,11 @@ private fun NavDropdownItem(
                 }
             }
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .padding(horizontal = 13.dp, vertical = 9.dp)
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = if (isFocused) Color.White else WaveStreamColors.TextSecondary,
             fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal,
             maxLines = 1
