@@ -6,8 +6,16 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 /**
- * Represents a single stream source for a Movie or Series
- * Multiple StreamProviders can exist for the same TMDB content (different providers/quality)
+ * Sorgente fisica (stream) di un contenuto unificato.
+ *
+ * Un film può essere pubblicato dal provider in più versioni/doppioni
+ * ("Inception (2010) HD", "Inception 2010 4K", "Inception FHD ITA"): tutte
+ * appartengono allo **stesso** [Movie] canonico e vengono salvate qui, una riga
+ * per stream. La schermata di dettaglio/menu "Riproduci" le elenca in modo che
+ * l'utente possa scegliere qualità/categoria/durata.
+ *
+ * Nota: la durata per sorgente non è disponibile in `get_vod_streams`; viene
+ * popolata in modo lazy da `get_vod_info` (campo [durationSeconds]).
  */
 @Entity(
     tableName = "stream_providers",
@@ -35,38 +43,50 @@ import androidx.room.PrimaryKey
         Index("movieId"),
         Index("seriesId"),
         Index("playlistId"),
-        Index("tmdbId")
+        Index("tmdbId"),
+        Index(value = ["playlistId", "xtreamStreamId"], unique = true)
     ]
 )
 data class StreamProvider(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    
-    // Reference to content (one of these should be set)
+
+    // Contenuto unificato a cui appartiene la sorgente (uno dei due valorizzato)
     val movieId: Long? = null,
     val seriesId: Long? = null,
-    
-    // TMDB ID for grouping same content from different sources
+
+    // TMDB ID per raggruppare lo stesso contenuto da fonti diverse
     val tmdbId: Int? = null,
-    
-    // Source playlist
+
+    // Playlist/provider di origine
     val playlistId: Long,
-    
-    // Stream info
+
+    // Stream
     val streamUrl: String,
-    val originalName: String,      // Original name from playlist (e.g., "C'era una volta in America - Vers. Integrale")
-    val category: String? = null,  // e.g., "Film Drammatici", "Film d'autore"
-    
-    // Quality indicators
+    val originalName: String,        // Nome grezzo dal provider (es. "Inception 2010 4K")
+    val category: String? = null,    // Categoria di appartenenza della sorgente
+    val categoryId: String? = null,
+    val xtreamStreamId: Int? = null,
+    val containerExtension: String? = null,
+    val logoUrl: String? = null,
+    val year: Int? = null,
+
+    // Qualità rilevata dal VOD (nome/estensione)
     val quality: StreamQuality = StreamQuality.UNKNOWN,
-    val language: String? = null,  // e.g., "ITA", "ENG", "GER"
-    val isExtended: Boolean = false,  // Extended/Director's cut
+    val resolution: String? = null,  // es. "1080p", "2160p"
+    val language: String? = null,    // es. "ITA", "ENG"
+    val isExtended: Boolean = false,
     val isHdr: Boolean = false,
     val is4K: Boolean = false,
-    
-    // Provider info (from playlist)
-    val providerName: String? = null,  // e.g., "GIANMARCO"
-    
+
+    // Durata per sorgente (lazy da get_vod_info), in secondi
+    val durationSeconds: Long? = null,
+
+    // Provider / ordinamento
+    val providerName: String? = null,
+    val playlistOrder: Int = 0,
+    val isPrimary: Boolean = false,  // Sorgente usata come streamUrl del Movie canonico
+
     // Metadata
     val addedAt: Long = System.currentTimeMillis(),
     val lastUsedAt: Long? = null

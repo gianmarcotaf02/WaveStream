@@ -28,6 +28,8 @@ import androidx.room.PrimaryKey
         Index("isHidden"),
         Index("addedAt"),
         Index("playlistOrder"),
+        Index("groupKey"),
+        Index("tmdbImdbId"),
         Index(value = ["playlistId", "category", "isHidden"]),
         Index(value = ["trendingCategory", "isHidden"]),
         // Composite index for FilmActivity: WHERE category = ? AND isHidden = 0 ORDER BY name
@@ -43,6 +45,15 @@ data class Movie(
     
     // Basic info from playlist
     val name: String,
+    // Titolo pulito (senza tag HD/FHD/4K/720/1080/codice/lingua...), usato per
+    // la visualizzazione e per la ricerca. `name` resta il titolo unificato ma
+    // può conservare parte del testo originale del provider.
+    val cleanName: String? = null,
+    // Chiave canonica di unificazione (titolo normalizzato + anno) usata per
+    // raggruppare i doppioni di uno stesso film all'interno della playlist.
+    val groupKey: String? = null,
+    // Numero di sorgenti/versioni unificate in questo film (badge "N versioni").
+    val streamCount: Int = 1,
     val streamUrl: String,
     val logoUrl: String? = null,
     val category: String? = null,
@@ -114,7 +125,9 @@ data class Movie(
     val cast: String? get() = xtreamCast?.takeIf { it.isNotBlank() } ?: tmdbCast
     val director: String? get() = xtreamDirector?.takeIf { it.isNotBlank() } ?: tmdbDirector
     val imdbId: String? get() = tmdbImdbId
-    val title: String get() = tmdbTitle?.takeIf { it.isNotEmpty() } ?: name
+    val title: String get() = tmdbTitle?.takeIf { it.isNotEmpty() }
+        ?: cleanName?.takeIf { it.isNotBlank() }
+        ?: name
 }
 
 
