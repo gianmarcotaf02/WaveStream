@@ -1309,6 +1309,12 @@ private fun PlaylistSettings(
             
             // Refresh all playlists button - always visible right after settings
             if (playlists.isNotEmpty()) {
+                val refreshInteraction = remember { MutableInteractionSource() }
+                val isRefreshFocused by refreshInteraction.collectIsFocusedAsState()
+                val refreshScale by animateFloatAsState(
+                    targetValue = if (isRefreshFocused) 1.02f else 1f,
+                    label = "refreshAllScale"
+                )
                 Button(
                     onClick = {
                         if (!isRefreshing) {
@@ -1339,7 +1345,15 @@ private fun PlaylistSettings(
                         containerColor = WaveStreamColors.BackgroundTertiary,
                         contentColor = WaveStreamColors.TextPrimary
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    interactionSource = refreshInteraction,
+                    // Bordo focus accent: rende visibile dove si trova il focus D-pad
+                    border = if (isRefreshFocused) BorderStroke(2.dp, WaveStreamColors.Accent) else null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer {
+                            scaleX = refreshScale
+                            scaleY = refreshScale
+                        }
                 ) {
                     if (isRefreshing) {
                         CircularProgressIndicator(
@@ -1358,10 +1372,24 @@ private fun PlaylistSettings(
             }
             
             // Add new playlist button
+            val addInteraction = remember { MutableInteractionSource() }
+            val isAddFocused by addInteraction.collectIsFocusedAsState()
+            val addScale by animateFloatAsState(
+                targetValue = if (isAddFocused) 1.02f else 1f,
+                label = "addPlaylistScale"
+            )
             Button(
                 onClick = { showAddDialog = true },
                 colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent),
-                modifier = Modifier.fillMaxWidth()
+                interactionSource = addInteraction,
+                // Bordo bianco su focus: contrasta con il riempimento accent del pulsante
+                border = if (isAddFocused) BorderStroke(2.dp, Color.White) else null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        scaleX = addScale
+                        scaleY = addScale
+                    }
             ) {
                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
