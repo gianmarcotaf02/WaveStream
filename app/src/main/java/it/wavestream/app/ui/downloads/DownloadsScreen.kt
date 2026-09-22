@@ -276,36 +276,40 @@ private fun DownloadedContentCard(
     val playAreaFocusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
     val deleteButtonFocusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
 
-    // Parent container - Layout only, handles base background
-    Row(
+    // Restyle — card in vetro (prima: pannello a tinta piena BackgroundSecondary).
+    GlassSurface(
+        shape = RoundedCornerShape(14.dp),
+        fill = Color.White.copy(alpha = 0.05f),
         modifier = modifier
             .fillMaxWidth()
             .height(120.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(WaveStreamColors.BackgroundSecondary),
-        verticalAlignment = Alignment.CenterVertically
     ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         // 1. Play Interaction Area (Poster + Info)
         val playInteractionSource = remember { MutableInteractionSource() }
         val isPlayFocused by playInteractionSource.collectIsFocusedAsState()
-        
-        val playBorderColor by animateColorAsState(
-            targetValue = if (isPlayFocused) WaveStreamColors.Accent else Color.Transparent,
-            label = "playBorder"
-        )
-        
+
+        // Restyle — focus ad alone chiaro + bordo accent (prima: BackgroundTertiary + 2dp netto)
         val playBackgroundColor by animateColorAsState(
-            targetValue = if (isPlayFocused) WaveStreamColors.BackgroundTertiary else Color.Transparent,
+            targetValue = if (isPlayFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
+            animationSpec = AppAnimations.SpringCardFocusColor,
             label = "playBg"
         )
-        
+
         Row(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .border(2.dp, playBorderColor, RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+                .clip(RoundedCornerShape(topStart = 14.dp, bottomStart = 14.dp))
                 .background(playBackgroundColor)
-                .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+                .border(
+                    width = if (isPlayFocused) 1.5.dp else 0.dp,
+                    brush = GlassTokens.accentStroke(WaveStreamColors.Accent),
+                    shape = RoundedCornerShape(topStart = 14.dp, bottomStart = 14.dp)
+                )
                 .focusRequester(playAreaFocusRequester)
                 .focusProperties {
                     right = deleteButtonFocusRequester
@@ -334,7 +338,7 @@ private fun DownloadedContentCard(
                 modifier = Modifier
                     .width(85.dp)
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+                    .clip(RoundedCornerShape(topStart = 14.dp, bottomStart = 14.dp))
             ) {
                 AsyncImage(
                     model = download.posterUrl,
@@ -416,16 +420,17 @@ private fun DownloadedContentCard(
             }
         }
         
-        // 2. Delete button (Separate focus target)
-        DeleteButton(
-            onClick = onDeleteClick,
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .focusRequester(deleteButtonFocusRequester)
-                .focusProperties {
-                    left = playAreaFocusRequester
-                }
-        )
+            // 2. Delete button (Separate focus target)
+            DeleteButton(
+                onClick = onDeleteClick,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .focusRequester(deleteButtonFocusRequester)
+                    .focusProperties {
+                        left = playAreaFocusRequester
+                    }
+            )
+        }
     }
 }
 
