@@ -51,11 +51,47 @@ class ContentNameParser @Inject constructor() {
     
     // Quality patterns
     private val qualityPatterns = mapOf(
-        StreamQuality.UHD to listOf("4k", "uhd", "2160p"),
-        StreamQuality.FHD to listOf("1080p", "fhd", "fullhd", "full hd"),
-        StreamQuality.HD to listOf("720p", "hd", "hdtv"),
-        StreamQuality.SD to listOf("sd", "480p", "dvdrip")
+        StreamQuality.UHD to listOf("4k", "uhd", "2160p", "2160", "8k"),
+        StreamQuality.FHD to listOf("1080p", "1080", "fhd", "fullhd", "full hd", "hd+"),
+        StreamQuality.HD to listOf("720p", "720", "hd", "hdtv"),
+        StreamQuality.SD to listOf("sd", "480p", "480", "360p", "dvdrip")
     )
+
+    /**
+     * Qualità rilevata dal nome della sorgente VOD (word-boundary, così "hd"
+     * non viene trovato dentro parole come "childhood").
+     */
+    fun detectQuality(name: String): StreamQuality {
+        for ((quality, patterns) in qualityPatterns) {
+            if (patterns.any { Regex("""\b$it\b""", RegexOption.IGNORE_CASE).containsMatchIn(name) }) {
+                return quality
+            }
+        }
+        return StreamQuality.UNKNOWN
+    }
+
+    /** Risoluzione normalizzata rilevata dal nome, es. "1080p"/"2160p" (null se ignota). */
+    fun detectResolution(name: String): String? {
+        val lower = name.lowercase()
+        return when {
+            Regex("""\b(2160p|2160|4k|uhd|8k)\b""").containsMatchIn(lower) -> "2160p"
+            Regex("""\b(1080p|1080|fhd|full ?hd)\b""").containsMatchIn(lower) -> "1080p"
+            Regex("""\b(720p|720|hdtv)\b""").containsMatchIn(lower) -> "720p"
+            Regex("""\b(480p|480|360p|dvdrip)\b""").containsMatchIn(lower) -> "480p"
+            else -> null
+        }
+    }
+
+    /** Rank numerico della qualità per l'ordinamento SQL (più alto = migliore). */
+    fun qualityRank(quality: StreamQuality): Int = when (quality) {
+        StreamQuality.UNKNOWN -> 0
+        StreamQuality.AUTO -> 1
+        StreamQuality.SD -> 2
+        StreamQuality.HD -> 3
+        StreamQuality.FHD -> 4
+        StreamQuality.UHD -> 5
+        StreamQuality.UHD_4K -> 6
+    }
     
     // Language patterns
     private val languagePatterns = mapOf(
@@ -316,7 +352,9 @@ class ContentNameParser @Inject constructor() {
         
         // Remove common codec/format tags
         val codecTags = listOf("HEVC", "H264", "H265", "H.264", "H.265", "x264", "x265", "AAC", "AC3", "DTS", "ATMOS",
-            "WEB-DL", "WEBDL", "WEBRIP", "BLURAY", "BLU-RAY", "BDRIP", "BRRIP", "DVDRIP", "CAM", "TS", "TC")
+            "WEB-DL", "WEBDL", "WEBRIP", "BLURAY", "BLU-RAY", "BDRIP", "BRRIP", "DVDRIP", "CAM", "TS", "TC",
+            "BDMUX", "REMUX", "MUX", "WEB", "HDTS", "HQ", "VIP", "MULTI", "DUAL", "DUAL AUDIO",
+            "10BIT", "8BIT", "SDR", "HDR10+", "HDR10", "DOLBY VISION", "EAC3", "DD5.1")
         for (tag in codecTags) {
             result = result.replace(Regex("""\b$tag\b""", RegexOption.IGNORE_CASE), "")
         }
