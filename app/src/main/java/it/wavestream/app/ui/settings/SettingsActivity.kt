@@ -148,7 +148,7 @@ class SettingsActivity : ComponentActivity() {
         val menuItems = listOf(
             SettingsMenuItem("profile", "Profilo", "Modifica nome e avatar", Icons.Default.Person),
             SettingsMenuItem("account", "Account", "Dettagli account Xtream", Icons.Default.Lock),
-            SettingsMenuItem("playlist", "Playlist", "Aggiornamento e sincronizzazione", Icons.AutoMirrored.Filled.List),
+            SettingsMenuItem("playlist", "Playlist", "Aggiornamento e sync", Icons.AutoMirrored.Filled.List),
             SettingsMenuItem("preferences", "Preferenze", "Impostazioni generali", Icons.Default.Settings),
             SettingsMenuItem("player", "Player", "Impostazioni riproduzione", Icons.Default.PlayArrow),
             SettingsMenuItem("subtitles", "Sottotitoli", "OpenSubtitles e lingua", Icons.Default.Subtitles),
@@ -3462,7 +3462,7 @@ private fun MovieEndingSettings(
         existingKey = userPreferences.getOpenRouterApiKey()
     }
 
-    SettingsSection(title = "Finale dei film") {
+    SettingsSection(title = "Finale dei film (AI)") {
         var firstModifier: Modifier = Modifier
         if (contentFocusRequester != null) firstModifier = firstModifier.focusRequester(contentFocusRequester)
 
