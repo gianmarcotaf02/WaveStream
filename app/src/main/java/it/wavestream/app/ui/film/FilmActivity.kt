@@ -429,7 +429,7 @@ fun FilmScreen(
                     
                     // Movie grid using TV Compose for proper D-pad navigation
                     TvLazyVerticalGrid(
-                        columns = TvGridCells.Fixed(4),
+                        columns = TvGridCells.Adaptive(minSize = 150.dp),
                         state = gridState,
                         contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),

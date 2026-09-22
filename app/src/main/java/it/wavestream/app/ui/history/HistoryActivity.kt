@@ -396,7 +396,7 @@ private fun HistoryScreen(
             }
             else -> {
                 TvLazyVerticalGrid(
-                    columns = TvGridCells.Fixed(4),
+                    columns = TvGridCells.Adaptive(minSize = 180.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                     modifier = Modifier.fillMaxSize()

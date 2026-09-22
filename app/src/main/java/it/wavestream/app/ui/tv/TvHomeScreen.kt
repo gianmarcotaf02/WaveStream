@@ -330,7 +330,7 @@ private fun TvHomeScreenContent(
                 
                 // Grid of posters using TV Compose grid for proper D-pad navigation
                 TvLazyVerticalGrid(
-                    columns = TvGridCells.Fixed(4),
+                    columns = TvGridCells.Adaptive(minSize = 130.dp),
                     contentPadding = PaddingValues(start = 40.dp, end = 40.dp, bottom = 80.dp, top = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),  // More space for titles

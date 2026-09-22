@@ -491,7 +491,7 @@ private fun CategoryScreen(
             // Grid view - use smaller cells for Live channels
             val gridMinSize = if (isLiveCategory) 100.dp else 150.dp
             TvLazyVerticalGrid(
-                columns = if (isLiveCategory) TvGridCells.Adaptive(minSize = gridMinSize) else TvGridCells.Fixed(4),
+                columns = TvGridCells.Adaptive(minSize = gridMinSize),
                 state = gridState,
                 contentPadding = PaddingValues(top = 12.dp, bottom = 64.dp, start = 4.dp, end = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
