@@ -386,22 +386,16 @@ private fun MainActivityScreen(
         }
     }
 
-    // Al ritorno da un'altra Activity il contenuto viene ricomposto (forceRefresh):
-    // l'elemento che aveva il focus può non esistere più e, senza nessun target
-    // focusato, la finestra perde il focus e i tasti del telecomando vengono
-    // scartati (ANR "no focused window"). Se dopo qualche frame non c'è più
-    // nessun elemento focusato, riportiamo il focus sulla top bar.
+    // Al ritorno da un'altra Activity il contenuto viene ricomposto (forceRefresh)
+    // e il focus può finire di default sulla prima cosa focusabile (l'icona Cerca).
+    // Riportiamo invece il focus sulla TAB attualmente selezionata (Home/Film/
+    // Serie/Live), così dopo "Categorie" o un player si resta dove si era.
     LaunchedEffect(resumeTick) {
         if (resumeTick == 0) return@LaunchedEffect
         repeat(3) { withFrameNanos { } }
         kotlinx.coroutines.delay(250)
-        if (rootView.findFocus() == null) {
-            try {
-                topBarFocusRequester.requestFocus()
-            } catch (e: Exception) {
-                // Requester non ancora collegato: nessun problema.
-            }
-        }
+        // `navPillFocusRequester` è agganciato proprio al tab selezionato.
+        navPillFocusRequester.requestFocusWhenReady()
     }
     
     // Sposta il focus sul contenuto aspettando un frame, così la ricerca
