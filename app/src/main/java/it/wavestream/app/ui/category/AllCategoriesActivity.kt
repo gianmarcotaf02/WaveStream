@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
@@ -34,6 +35,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -530,39 +532,74 @@ private fun CategorySearchBar(
     onQueryChange: (String) -> Unit,
     onClear: () -> Unit
 ) {
-    OutlinedTextField(
-        value = query,
-        onValueChange = onQueryChange,
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    // Barra custom (non OutlinedTextField): così l'altezza è compatta (42dp) senza che
+    // bordo e placeholder vengano tagliati. Vetro + capsula, focus ad alone accent.
+    GlassSurface(
+        shape = RoundedCornerShape(50),
+        fill = GlassTokens.SurfaceFill,
+        stroke = if (isFocused) {
+            GlassTokens.accentStroke(WaveStreamColors.Accent)
+        } else {
+            GlassTokens.StrokeGradient
+        },
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
         modifier = Modifier
             .fillMaxWidth()
-            // Più aria sopra (fra titolo sezione e barra) e altezza ridotta: prima
-            // occupava ~56dp pieni ed era troppo ingombrante.
             .padding(top = 12.dp, bottom = 10.dp)
-            .height(44.dp),
-        placeholder = { Text("Cerca categoria...", color = WaveStreamColors.TextTertiary) },
-        leadingIcon = {
-            Icon(Icons.Default.Search, contentDescription = null, tint = WaveStreamColors.TextSecondary)
-        },
-        trailingIcon = if (query.isNotEmpty()) {
-            {
-                IconButton(onClick = onClear) {
-                    Icon(Icons.Default.Close, contentDescription = "Cancella", tint = WaveStreamColors.TextSecondary)
+    ) {
+        Row(
+            modifier = Modifier
+                .height(42.dp)
+                .padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = WaveStreamColors.TextSecondary,
+                modifier = Modifier.size(20.dp)
+            )
+            Box(modifier = Modifier.weight(1f)) {
+                if (query.isEmpty()) {
+                    Text(
+                        text = "Cerca categoria...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = WaveStreamColors.TextTertiary
+                    )
+                }
+                BasicTextField(
+                    value = query,
+                    onValueChange = onQueryChange,
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = WaveStreamColors.TextPrimary),
+                    cursorBrush = SolidColor(WaveStreamColors.Accent),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusable(interactionSource = interactionSource)
+                )
+            }
+            if (query.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(RoundedCornerShape(50))
+                        .clickable { onClear() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Cancella",
+                        tint = WaveStreamColors.TextSecondary,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
-        } else null,
-        singleLine = true,
-        // Capsula in vetro: fill semitrasparente + bordo appena visibile (Fase C3).
-        // Niente più rettangolo a bordo netto su fondo tinta piena.
-        shape = RoundedCornerShape(50),
-        colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.White.copy(alpha = 0.22f),
-            unfocusedBorderColor = Color.White.copy(alpha = 0.10f),
-            focusedContainerColor = GlassTokens.SurfaceFill,
-            unfocusedContainerColor = GlassTokens.SurfaceFill,
-            cursorColor = WaveStreamColors.Accent
-        ),
-        textStyle = MaterialTheme.typography.bodyMedium.copy(color = WaveStreamColors.TextPrimary)
-    )
+        }
+    }
 }
 
 /**
