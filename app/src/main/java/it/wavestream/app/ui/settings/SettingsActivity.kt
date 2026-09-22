@@ -351,7 +351,7 @@ private fun SettingsSidebar(
                     Brush.horizontalGradient(
                         colors = listOf(
                             Color.Transparent,
-                            WaveStreamColors.TextTertiary.copy(alpha = 0.3f),
+                            Color.White.copy(alpha = 0.08f),
                             Color.Transparent
                         )
                     )
@@ -385,7 +385,7 @@ private fun SettingsSidebar(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 16.dp)
                 .height(1.dp)
-                .background(WaveStreamColors.TextTertiary.copy(alpha = 0.2f))
+                .background(Color.White.copy(alpha = 0.06f))
         )
         
         // Destructive items (logout, etc.)
@@ -410,113 +410,124 @@ private fun SettingsMenuItemRow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
+
+    // Passo 3 — riga della sidebar in vetro. Il focus è un ALONE CHIARO, la selezione
+    // è la tinta accent: prima il focus usava lo stesso accent della selezione (accento
+    // bordo viola identico), quindi era impossibile distinguere "dove sono" da
+    // "quale sezione è aperta". Ora la voce attiva e quella focusata sono due stati
+    // visivamente diversi, come nel resto dell'app.
+    val fill by animateColorAsState(
+        targetValue = when {
+            item.isDestructive && (isFocused || isSelected) -> WaveStreamColors.Error.copy(alpha = 0.16f)
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            isSelected -> WaveStreamColors.Accent.copy(alpha = 0.16f)
+            else -> Color.White.copy(alpha = 0.04f)
+        },
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "menuRowFill"
+    )
+
+    val stroke = when {
+        isFocused -> GlassTokens.accentStroke(WaveStreamColors.Accent)
+        isSelected -> GlassTokens.accentStroke(WaveStreamColors.Accent)
+        else -> GlassTokens.StrokeGradient
+    }
+
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.02f else 1f,
-        animationSpec = spring(dampingRatio = 0.7f, stiffness = 400f),
-        label = "menuScale"
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "menuRowScale"
     )
-    
-    val backgroundColor by animateColorAsState(
-        targetValue = when {
-            isSelected -> WaveStreamColors.Accent.copy(alpha = 0.15f)
-            isFocused -> WaveStreamColors.BackgroundTertiary.copy(alpha = 0.8f)
-            else -> Color.Transparent
-        },
-        animationSpec = tween(200),
-        label = "menuBg"
-    )
-    
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            isFocused -> WaveStreamColors.Accent
-            isSelected -> WaveStreamColors.Accent.copy(alpha = 0.5f)
-            else -> WaveStreamColors.SurfaceBorder
-        },
-        animationSpec = tween(200),
-        label = "menuBorder"
-    )
-    
+
     val iconBackgroundColor by animateColorAsState(
         targetValue = when {
-            item.isDestructive -> Color.Red.copy(alpha = 0.15f)
+            item.isDestructive -> WaveStreamColors.Error.copy(alpha = 0.15f)
             isSelected || isFocused -> WaveStreamColors.Accent.copy(alpha = 0.2f)
-            else -> WaveStreamColors.BackgroundTertiary.copy(alpha = 0.5f)
+            else -> Color.White.copy(alpha = 0.06f)
         },
-        animationSpec = tween(200),
-        label = "iconBg"
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "menuIconBg"
     )
-    
+
     val contentColor = when {
         item.isDestructive -> WaveStreamColors.Error
         isSelected || isFocused -> WaveStreamColors.TextPrimary
         else -> WaveStreamColors.TextSecondary
     }
-    
+
     val iconColor = when {
         item.isDestructive -> WaveStreamColors.Error
         isSelected || isFocused -> WaveStreamColors.Accent
         else -> WaveStreamColors.TextSecondary
     }
-    
-    Row(
+
+    GlassSurface(
+        shape = RoundedCornerShape(14.dp),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused || isSelected) 1.5.dp else 1.dp,
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 2.dp)
-            .graphicsLayer { scaleX = scale; scaleY = scale }
-            .clip(RoundedCornerShape(14.dp))
-            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
-            .background(backgroundColor)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = onClick
             )
-            .focusable(interactionSource = interactionSource)
-            .padding(horizontal = 14.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Modern icon container with subtle gradient
-        Box(
+        Row(
             modifier = Modifier
-                .size(42.dp)
-                .clip(RoundedCornerShape(11.dp))
-                .background(iconBackgroundColor),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Icon(
-                imageVector = item.icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(22.dp)
-            )
-        }
-        
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = item.title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = contentColor,
-                fontWeight = if (isSelected || isFocused) FontWeight.SemiBold else FontWeight.Medium
-            )
-            item.subtitle?.let { subtitle ->
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = WaveStreamColors.TextTertiary,
-                    fontSize = 11.sp
+            // Modern icon container with subtle gradient
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(iconBackgroundColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(22.dp)
                 )
             }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = contentColor,
+                    fontWeight = if (isSelected || isFocused) FontWeight.SemiBold else FontWeight.Medium
+                )
+                item.subtitle?.let { subtitle ->
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = WaveStreamColors.TextTertiary,
+                        fontSize = 11.sp
+                    )
+                }
+            }
+
+            // Animated chevron
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = if (isFocused || isSelected) WaveStreamColors.Accent else WaveStreamColors.TextTertiary.copy(alpha = 0.5f),
+                modifier = Modifier.size(18.dp)
+            )
         }
-        
-        // Animated chevron
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = if (isFocused || isSelected) WaveStreamColors.Accent else WaveStreamColors.TextTertiary.copy(alpha = 0.5f),
-            modifier = Modifier.size(18.dp)
-        )
     }
 }
 
