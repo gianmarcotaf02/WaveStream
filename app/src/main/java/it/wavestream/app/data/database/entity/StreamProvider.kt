@@ -44,6 +44,7 @@ import androidx.room.PrimaryKey
         Index("seriesId"),
         Index("playlistId"),
         Index("tmdbId"),
+        Index(value = ["movieId", "qualityRank"]),
         Index(value = ["playlistId", "xtreamStreamId"], unique = true)
     ]
 )
@@ -73,6 +74,9 @@ data class StreamProvider(
 
     // Qualità rilevata dal VOD (nome/estensione)
     val quality: StreamQuality = StreamQuality.UNKNOWN,
+    // Rank numerico della qualità per l'ordinamento SQL (l'enum è salvato come
+    // testo: l'ordine alfabetico dei nomi sarebbe sbagliato). Più alto = migliore.
+    val qualityRank: Int = 0,
     val resolution: String? = null,  // es. "1080p", "2160p"
     val language: String? = null,    // es. "ITA", "ENG"
     val isExtended: Boolean = false,
