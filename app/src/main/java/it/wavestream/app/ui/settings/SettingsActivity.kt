@@ -818,7 +818,7 @@ private fun AccountSettings(
                 }
 
                 HorizontalDivider(
-                    color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
+                    color = Color.White.copy(alpha = 0.06f),
                     thickness = 0.5.dp
                 )
 
@@ -3044,7 +3044,7 @@ private fun VpnSettings(
             }
 
             HorizontalDivider(
-                color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
+                color = Color.White.copy(alpha = 0.06f),
                 thickness = 0.5.dp
             )
 
@@ -3151,7 +3151,7 @@ private fun VpnSettings(
             // I server sono gestiti centralmente via Firebase: qui sotto restano solo
             // strategia di scelta, rotazione automatica e attivazione.
             HorizontalDivider(
-                color = WaveStreamColors.BackgroundTertiary.copy(alpha = 0.3f),
+                color = Color.White.copy(alpha = 0.06f),
                 thickness = 0.5.dp
             )
 
