@@ -62,8 +62,8 @@ class ContentNameParser @Inject constructor() {
      * non viene trovato dentro parole come "childhood").
      */
     fun detectQuality(name: String): StreamQuality {
-        for ((quality, patterns) in qualityPatterns) {
-            if (patterns.any { Regex("""\b$it\b""", RegexOption.IGNORE_CASE).containsMatchIn(name) }) {
+        for ((quality, regexes) in qualityRegexes) {
+            if (regexes.any { it.containsMatchIn(name) }) {
                 return quality
             }
         }
@@ -74,10 +74,10 @@ class ContentNameParser @Inject constructor() {
     fun detectResolution(name: String): String? {
         val lower = name.lowercase()
         return when {
-            Regex("""\b(2160p|2160|4k|uhd|8k)\b""").containsMatchIn(lower) -> "2160p"
-            Regex("""\b(1080p|1080|fhd|full ?hd)\b""").containsMatchIn(lower) -> "1080p"
-            Regex("""\b(720p|720|hdtv)\b""").containsMatchIn(lower) -> "720p"
-            Regex("""\b(480p|480|360p|dvdrip)\b""").containsMatchIn(lower) -> "480p"
+            resolutionUhdRegex.containsMatchIn(lower) -> "2160p"
+            resolutionFhdRegex.containsMatchIn(lower) -> "1080p"
+            resolutionHdRegex.containsMatchIn(lower) -> "720p"
+            resolutionSdRegex.containsMatchIn(lower) -> "480p"
             else -> null
         }
     }
@@ -120,6 +120,32 @@ class ContentNameParser @Inject constructor() {
         """\s*[-|]\s*$""".toRegex(),  // Trailing separators
         """\s{2,}""".toRegex()        // Multiple spaces
     )
+
+    // --- Regex precompilate -------------------------------------------------
+    // Evita di ricompilare le regex ad ogni chiamata (enorme risparmio durante
+    // l'unificazione e la ricerca su librerie grandi).
+    private fun wb(s: String) = Regex("""\b${Regex.escape(s)}\b""", RegexOption.IGNORE_CASE)
+
+    private val qualityRegexes: List<Pair<StreamQuality, List<Regex>>> =
+        qualityPatterns.map { (q, pats) -> q to pats.map { wb(it) } }
+    private val qualityRegexesFlat: List<Regex> = qualityRegexes.flatMap { it.second }
+
+    private val languageRegexes: Map<String, List<Regex>> =
+        languagePatterns.mapValues { (_, pats) -> pats.map { wb(it) } }
+
+    private val extendedRegexes: List<Regex> = extendedPatterns.map { wb(it) }
+    private val hdrRegexes: List<Regex> = hdrPatterns.map { wb(it) }
+
+    private val resolutionUhdRegex = Regex("""\b(2160p|2160|4k|uhd|8k)\b""")
+    private val resolutionFhdRegex = Regex("""\b(1080p|1080|fhd|full ?hd)\b""")
+    private val resolutionHdRegex = Regex("""\b(720p|720|hdtv)\b""")
+    private val resolutionSdRegex = Regex("""\b(480p|480|360p|dvdrip)\b""")
+
+    private val codecTags = listOf("HEVC", "H264", "H265", "H.264", "H.265", "x264", "x265", "AAC", "AC3", "DTS", "ATMOS",
+        "WEB-DL", "WEBDL", "WEBRIP", "BLURAY", "BLU-RAY", "BDRIP", "BRRIP", "DVDRIP", "CAM", "TS", "TC",
+        "BDMUX", "REMUX", "MUX", "WEB", "HDTS", "HQ", "VIP", "MULTI", "DUAL", "DUAL AUDIO",
+        "10BIT", "8BIT", "SDR", "HDR10+", "HDR10", "DOLBY VISION", "EAC3", "DD5.1")
+    private val codecRegexes: List<Regex> = codecTags.map { wb(it) }
     
     // Live TV indicators in category names
     private val liveTvCategories = listOf(
@@ -283,24 +309,11 @@ class ContentNameParser @Inject constructor() {
         return Pair(null, null)
     }
     
-    private fun extractQuality(name: String): StreamQuality {
-        val nameLower = name.lowercase()
-        for ((quality, patterns) in qualityPatterns) {
-            if (patterns.any { nameLower.contains(it) }) {
-                return quality
-            }
-        }
-        return StreamQuality.UNKNOWN
-    }
+    private fun extractQuality(name: String): StreamQuality = detectQuality(name)
     
     private fun extractLanguage(name: String): String? {
-        @Suppress("UNUSED_VARIABLE") // nameLower prepared for future locale-specific matching
-        val nameLower = name.lowercase()
-        for ((lang, patterns) in languagePatterns) {
-            // Check with word boundaries to avoid false positives
-            if (patterns.any { pattern -> 
-                Regex("""\b$pattern\b""", RegexOption.IGNORE_CASE).containsMatchIn(name) 
-            }) {
+        for ((lang, regexes) in languageRegexes) {
+            if (regexes.any { it.containsMatchIn(name) }) {
                 return lang
             }
         }
@@ -327,36 +340,30 @@ class ContentNameParser @Inject constructor() {
         result = result.replace(Regex("""\s*\(\d{4}\)\s*"""), " ")
         
         // Remove quality indicators
-        for ((_, patterns) in qualityPatterns) {
-            for (pattern in patterns) {
-                result = result.replace(Regex("""\b$pattern\b""", RegexOption.IGNORE_CASE), "")
-            }
+        for (regex in qualityRegexesFlat) {
+            result = regex.replace(result, "")
         }
         
         // Remove language indicators
-        for ((_, patterns) in languagePatterns) {
-            for (pattern in patterns) {
-                result = result.replace(Regex("""\b$pattern\b""", RegexOption.IGNORE_CASE), "")
+        for (regexes in languageRegexes.values) {
+            for (regex in regexes) {
+                result = regex.replace(result, "")
             }
         }
         
         // Remove extended edition indicators
-        for (pattern in extendedPatterns) {
-            result = result.replace(Regex("""\b$pattern\b""", RegexOption.IGNORE_CASE), "")
+        for (regex in extendedRegexes) {
+            result = regex.replace(result, "")
         }
         
         // Remove HDR indicators
-        for (pattern in hdrPatterns) {
-            result = result.replace(Regex("""\b$pattern\b""", RegexOption.IGNORE_CASE), "")
+        for (regex in hdrRegexes) {
+            result = regex.replace(result, "")
         }
         
         // Remove common codec/format tags
-        val codecTags = listOf("HEVC", "H264", "H265", "H.264", "H.265", "x264", "x265", "AAC", "AC3", "DTS", "ATMOS",
-            "WEB-DL", "WEBDL", "WEBRIP", "BLURAY", "BLU-RAY", "BDRIP", "BRRIP", "DVDRIP", "CAM", "TS", "TC",
-            "BDMUX", "REMUX", "MUX", "WEB", "HDTS", "HQ", "VIP", "MULTI", "DUAL", "DUAL AUDIO",
-            "10BIT", "8BIT", "SDR", "HDR10+", "HDR10", "DOLBY VISION", "EAC3", "DD5.1")
-        for (tag in codecTags) {
-            result = result.replace(Regex("""\b$tag\b""", RegexOption.IGNORE_CASE), "")
+        for (regex in codecRegexes) {
+            result = regex.replace(result, "")
         }
         
         // Apply generic cleanup patterns
