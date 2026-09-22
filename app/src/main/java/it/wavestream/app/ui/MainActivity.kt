@@ -218,6 +218,14 @@ class MainActivity : FragmentActivity() {
     
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        // PRIMA di tutto dai la precedenza ai callback Compose registrati sul
+        // dispatcher (BackHandler della tendina Film/Serie, uscita dalla griglia).
+        // Senza questo, l'override intercettava il BACK e la tendina non si chiudeva.
+        if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+            onBackPressedDispatcher.onBackPressed()
+            return
+        }
+
         // Double-back to exit on all tabs
         val currentTime = System.currentTimeMillis()
         
