@@ -32,9 +32,11 @@ import it.wavestream.app.data.database.entity.*
         EPGProgram::class,
         SerieAMatchEntity::class,
         SerieATeamChannelEntity::class,
-        MediaSegment::class
+        MediaSegment::class,
+        StreamProvider::class,
+        MovieCategory::class
     ],
-    version = 31,
+    version = 32,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -63,6 +65,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun serieAMatchDao(): SerieAMatchDao
     abstract fun serieATeamChannelDao(): SerieATeamChannelDao
     abstract fun mediaSegmentDao(): MediaSegmentDao
+    abstract fun streamProviderDao(): StreamProviderDao
+    abstract fun movieCategoryDao(): MovieCategoryDao
     
     companion object {
         const val DATABASE_NAME = "wavestream_database"

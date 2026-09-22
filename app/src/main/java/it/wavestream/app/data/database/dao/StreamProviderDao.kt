@@ -32,9 +32,6 @@ interface StreamProviderDao {
     @Query("SELECT * FROM stream_providers WHERE playlistId = :playlistId")
     suspend fun getAllByPlaylist(playlistId: Long): List<StreamProvider>
 
-    @Query("SELECT * FROM stream_providers WHERE moovie_marker")
-    suspend fun placeholderUnused(): List<StreamProvider>
-
     @Query("SELECT * FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId = :xtreamStreamId LIMIT 1")
     suspend fun getByXtreamId(playlistId: Long, xtreamStreamId: Int): StreamProvider?
 
@@ -56,9 +53,6 @@ interface StreamProviderDao {
     @Query("UPDATE stream_providers SET movieId = :toMovieId WHERE movieId = :fromMovieId")
     suspend fun reassignToMovie(fromMovieId: Long, toMovieId: Long): Int
 
-    @Query("SELECT * FROM stream_providers WHERE movieId IS NULL AND seriesId IS NULL AND playlistId = :playlistId")
-    suspend fun getOrphansForPlaylist(playlistId: Long): List<StreamProvider>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(provider: StreamProvider): Long
 
@@ -76,9 +70,6 @@ interface StreamProviderDao {
 
     @Query("DELETE FROM stream_providers WHERE movieId = :movieId")
     suspend fun deleteByMovie(movieId: Long)
-
-    @Query("DELETE FROM stream_providers WHERE movieId = :movieId AND movieId != seriesId")
-    suspend fun deleteByMovieUnused(movieId: Long)
 
     @Query("DELETE FROM stream_providers WHERE playlistId = :playlistId")
     suspend fun deleteByPlaylist(playlistId: Long)
