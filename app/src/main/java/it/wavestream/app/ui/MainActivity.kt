@@ -796,8 +796,13 @@ private fun MainActivityScreen(
                 onDismiss = { dismissNavDropdown() },
                 onOpenAllCategories = {
                     navDropdown = null
+                    // Passa il tipo: senza extra AllCategoriesActivity va di default
+                    // su "movies", quindi dal tab Serie si aprivano le categorie Film.
+                    val type = if (st.tab == MainTab.SERIES) "series" else "movies"
                     startActivityWithTransition(
-                        Intent(context, it.wavestream.app.ui.category.AllCategoriesActivity::class.java)
+                        Intent(context, it.wavestream.app.ui.category.AllCategoriesActivity::class.java).apply {
+                            putExtra("contentType", type)
+                        }
                     )
                 },
                 onOpenAllContent = {
