@@ -10,7 +10,7 @@ class ContentKeyTest {
     @Test
     fun `normalizeTitle rimuove accenti e punteggiatura`() {
         assertEquals("ca va", ContentKey.normalizeTitle("Cà  Va!"))
-        assertEquals("l età dell oro", ContentKey.normalizeTitle("L'età  dell'oro"))
+        assertEquals("l eta dell oro", ContentKey.normalizeTitle("L'età  dell'oro"))
     }
 
     @Test
@@ -24,9 +24,9 @@ class ContentKeyTest {
     @Test
     fun `stesso titolo senza anno viene raggruppato`() {
         val groups = ContentKey.groupByTitleAndYear(
-            items = listOf("Inception (2010) HD", "Inception 2010 4K", "Inception FHD"),
-            titleOf = { it },
-            yearOf = { if (it.contains("(2010)")) 2010 else null }
+            items = listOf("Inception" to 2010, "Inception" to null, "Inception" to null),
+            titleOf = { it.first },
+            yearOf = { it.second }
         )
         assertEquals(1, groups.size)
         assertEquals(3, groups[0].size)

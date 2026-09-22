@@ -52,7 +52,7 @@ class ContentNameParser @Inject constructor() {
     // Quality patterns
     private val qualityPatterns = mapOf(
         StreamQuality.UHD to listOf("4k", "uhd", "2160p", "2160", "8k"),
-        StreamQuality.FHD to listOf("1080p", "1080", "fhd", "fullhd", "full hd", "hd+"),
+        StreamQuality.FHD to listOf("1080p", "1080", "fhd", "fullhd", "full hd"),
         StreamQuality.HD to listOf("720p", "720", "hd", "hdtv"),
         StreamQuality.SD to listOf("sd", "480p", "480", "360p", "dvdrip")
     )

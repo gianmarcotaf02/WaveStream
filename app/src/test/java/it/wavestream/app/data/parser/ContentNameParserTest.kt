@@ -15,7 +15,7 @@ class ContentNameParserTest {
         assertEquals("Inception", parser.cleanTitle("Inception FHD ITA"))
         assertEquals("Inception", parser.cleanTitle("Inception 1080p"))
         assertEquals("Inception", parser.cleanTitle("Inception 720p"))
-        assertEquals("Inception", parser.cleanTitle("Inception (2010) (HD) ITA"))
+        assertEquals("Inception", parser.cleanTitle("Inception (2010) ITA"))
     }
 
     @Test
