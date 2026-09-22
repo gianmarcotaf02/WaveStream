@@ -330,7 +330,7 @@ private fun TvHomeScreenContent(
                 
                 // Grid of posters using TV Compose grid for proper D-pad navigation
                 TvLazyVerticalGrid(
-                    columns = TvGridCells.Adaptive(minSize = 130.dp),
+                    columns = TvGridCells.Fixed(4),
                     contentPadding = PaddingValues(start = 40.dp, end = 40.dp, bottom = 80.dp, top = 24.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(24.dp),  // More space for titles
@@ -356,11 +356,10 @@ private fun TvHomeScreenContent(
                     tvGridItems(items, key = { "${it.contentType}_${it.id}" }) { item ->
                         var isFocused by remember { mutableStateOf(false) }
                         
-                        // Grid item with fixed heights to guarantee title visibility
+                        // Grid item: poster verticale 2:3 che riempie la cella
                         Column(
                             modifier = Modifier
-                                .width(140.dp)
-                                .height(260.dp)  // Fixed total height: 200dp poster + 60dp for title area
+                                .fillMaxWidth()
                                 .onFocusChanged { focusState ->
                                     isFocused = focusState.isFocused
                                 }
@@ -372,11 +371,11 @@ private fun TvHomeScreenContent(
                                 }
                                 .clickable { onItemClick(item) }
                         ) {
-                            // Poster image with fixed height
+                            // Poster image (2:3)
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(200.dp)
+                                    .aspectRatio(2f / 3f)
                                     .clip(RoundedCornerShape(6.dp))
                                     .then(
                                         if (isFocused) {

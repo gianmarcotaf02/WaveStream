@@ -396,7 +396,7 @@ private fun HistoryScreen(
             }
             else -> {
                 TvLazyVerticalGrid(
-                    columns = TvGridCells.Adaptive(minSize = 180.dp),
+                    columns = TvGridCells.Fixed(4),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                     modifier = Modifier.fillMaxSize()
@@ -482,14 +482,14 @@ private fun HistoryCard(
     Column(
         modifier = Modifier
             .graphicsLayer { scaleX = scale; scaleY = scale }
-            .width(180.dp)
+            .fillMaxWidth()
             .focusable(interactionSource = interactionSource)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(250.dp)
+                .aspectRatio(2f / 3f)
                 .clip(RoundedCornerShape(8.dp))
                 .border(if (isSelected) 3.dp else 2.dp, borderColor, RoundedCornerShape(8.dp))
                 .background(WaveStreamColors.CardBackground)
