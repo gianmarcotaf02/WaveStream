@@ -1113,6 +1113,7 @@ private fun MainNavPill(
                     )
                 }
             }
+        }
             } // close inner Row (tab)
         } // close Box (bolla indicatore)
     }
