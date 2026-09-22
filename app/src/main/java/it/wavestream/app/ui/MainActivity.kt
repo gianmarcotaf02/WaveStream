@@ -763,11 +763,13 @@ private fun MainActivityScreen(
                 onDismiss = { heroListPicker = null }
             )
         }
+    } // chiude la Column principale
 
-        // Fase C0 — tendina in vetro "Tutte le categorie / Tutti i film / Tutte le serie".
-        // Disegnata come ULTIMO figlio della Box radice: se stesse nella barra in alto
-        // finirebbe dietro l'hero e le righe di contenuto.
-        navDropdown?.let { st ->
+    // Fase C0 — tendina in vetro "Categorie / Tutti i film / Tutte le serie".
+    // Disegnata come ULTIMO figlio della Box radice, FUORI dalla Column: dentro la
+    // Column, dopo il contenuto fillMaxSize(), finiva sotto il bordo inferiore dello
+    // schermo e non si vedeva (sembrava coperta dall'hero).
+    navDropdown?.let { st ->
             NavTabDropdownMenu(
                 state = st,
                 onDismiss = {
@@ -795,7 +797,6 @@ private fun MainActivityScreen(
                 }
             )
         }
-    }
     }
 }
 
