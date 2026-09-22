@@ -53,6 +53,7 @@ data class Movie(
     // raggruppare i doppioni di uno stesso film all'interno della playlist.
     val groupKey: String? = null,
     // Numero di sorgenti/versioni unificate in questo film (badge "N versioni").
+    @ColumnInfo(defaultValue = "1")
     val streamCount: Int = 1,
     val streamUrl: String,
     val logoUrl: String? = null,

@@ -456,6 +456,90 @@ object DatabaseModule {
         }
     }
 
+    /**
+     * Migration from version 31 to 32 (film unificati + sorgenti multiple):
+     * - Add cleanName / groupKey / streamCount to movies (+ indici)
+     * - Create stream_providers (una riga per stream fisico di un film unificato)
+     * - Create movie_categories (appartenenza molti-a-molti film→categorie)
+     * - Backfill movie_categories dalla category primaria dei film esistenti
+     */
+    private val MIGRATION_31_32 = object : Migration(31, 32) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            // --- movies: nuove colonne ---
+            db.execSQL("ALTER TABLE movies ADD COLUMN cleanName TEXT DEFAULT NULL")
+            db.execSQL("ALTER TABLE movies ADD COLUMN groupKey TEXT DEFAULT NULL")
+            db.execSQL("ALTER TABLE movies ADD COLUMN streamCount INTEGER NOT NULL DEFAULT 1")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_groupKey ON movies(groupKey)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movies_tmdbImdbId ON movies(tmdbImdbId)")
+
+            // --- stream_providers ---
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS stream_providers (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    movieId INTEGER,
+                    seriesId INTEGER,
+                    tmdbId INTEGER,
+                    playlistId INTEGER NOT NULL,
+                    streamUrl TEXT NOT NULL,
+                    originalName TEXT NOT NULL,
+                    category TEXT,
+                    categoryId TEXT,
+                    xtreamStreamId INTEGER,
+                    containerExtension TEXT,
+                    logoUrl TEXT,
+                    year INTEGER,
+                    quality TEXT NOT NULL,
+                    qualityRank INTEGER NOT NULL,
+                    resolution TEXT,
+                    language TEXT,
+                    isExtended INTEGER NOT NULL,
+                    isHdr INTEGER NOT NULL,
+                    is4K INTEGER NOT NULL,
+                    durationSeconds INTEGER,
+                    providerName TEXT,
+                    playlistOrder INTEGER NOT NULL,
+                    isPrimary INTEGER NOT NULL,
+                    addedAt INTEGER NOT NULL,
+                    lastUsedAt INTEGER,
+                    FOREIGN KEY(movieId) REFERENCES movies(id) ON UPDATE NO ACTION ON DELETE CASCADE,
+                    FOREIGN KEY(seriesId) REFERENCES series(id) ON UPDATE NO ACTION ON DELETE CASCADE,
+                    FOREIGN KEY(playlistId) REFERENCES playlists(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                )
+            """)
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_stream_providers_movieId ON stream_providers(movieId)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_stream_providers_seriesId ON stream_providers(seriesId)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_stream_providers_playlistId ON stream_providers(playlistId)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_stream_providers_tmdbId ON stream_providers(tmdbId)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_stream_providers_movieId_qualityRank ON stream_providers(movieId, qualityRank)")
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_stream_providers_playlistId_xtreamStreamId ON stream_providers(playlistId, xtreamStreamId)")
+
+            // --- movie_categories ---
+            db.execSQL("""
+                CREATE TABLE IF NOT EXISTS movie_categories (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    movieId INTEGER NOT NULL,
+                    playlistId INTEGER NOT NULL,
+                    category TEXT NOT NULL,
+                    categoryId TEXT,
+                    addedAt INTEGER NOT NULL,
+                    FOREIGN KEY(movieId) REFERENCES movies(id) ON UPDATE NO ACTION ON DELETE CASCADE
+                )
+            """)
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movie_categories_movieId ON movie_categories(movieId)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movie_categories_category ON movie_categories(category)")
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_movie_categories_movieId_category ON movie_categories(movieId, category)")
+            db.execSQL("CREATE INDEX IF NOT EXISTS index_movie_categories_playlistId_category ON movie_categories(playlistId, category)")
+
+            // --- backfill: ogni film esistente entra nella sua categoria primaria ---
+            db.execSQL("""
+                INSERT OR IGNORE INTO movie_categories (movieId, playlistId, category, categoryId, addedAt)
+                SELECT id, playlistId, category, categoryId, addedAt
+                FROM movies
+                WHERE category IS NOT NULL AND category != ''
+            """)
+        }
+    }
+
     private val MIGRATION_29_30 = object : Migration(29, 30) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("""
@@ -496,7 +580,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -567,6 +651,12 @@ object DatabaseModule {
     @Provides
     fun provideMediaSegmentDao(db: AppDatabase): it.wavestream.app.data.database.dao.MediaSegmentDao =
         db.mediaSegmentDao()
+
+    @Provides
+    fun provideStreamProviderDao(db: AppDatabase): StreamProviderDao = db.streamProviderDao()
+
+    @Provides
+    fun provideMovieCategoryDao(db: AppDatabase): MovieCategoryDao = db.movieCategoryDao()
     
     @Provides
     @Singleton
