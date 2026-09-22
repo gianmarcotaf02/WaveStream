@@ -1,7 +1,7 @@
 package it.wavestream.app.ui.downloads
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
@@ -39,6 +40,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.DownloadedContent
+import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 /**
@@ -58,7 +62,17 @@ fun DownloadsScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark)
+            .background(
+                // Fondale coerente con Home/Impostazioni: stesso gradiente, invece del
+                // BackgroundDark piatto che staccava la schermata dal resto dell'app.
+                Brush.verticalGradient(
+                    colors = listOf(
+                        WaveStreamColors.Accent.copy(alpha = 0.045f),
+                        WaveStreamColors.GradientMiddle,
+                        WaveStreamColors.GradientBottom
+                    )
+                )
+            )
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -135,16 +149,23 @@ private fun DownloadsTopBar(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "backButtonBorder"
+
+    // Restyle — top bar in vetro: via il nero pieno (alpha 0.9) e il bordo netto 2dp.
+    // Il pulsante indietro usa la stessa ricetta dell'header delle Impostazioni.
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "dlBackScale"
     )
-    
+    val backBackground by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.04f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "dlBackBg"
+    )
+
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .background(Color.Black.copy(alpha = 0.9f))
             .padding(horizontal = 24.dp, vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -157,9 +178,12 @@ private fun DownloadsTopBar(
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-                    .background(if (isFocused) WaveStreamColors.BackgroundTertiary else Color.Transparent)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
+                    .clip(RoundedCornerShape(50))
+                    .background(backBackground)
                     .focusable(interactionSource = interactionSource)
                     .onKeyEvent { keyEvent ->
                         if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Enter) {
@@ -175,9 +199,9 @@ private fun DownloadsTopBar(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Indietro",
-                    tint = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
+                    tint = WaveStreamColors.TextPrimary,
                     modifier = Modifier.size(24.dp)
                 )
             }
