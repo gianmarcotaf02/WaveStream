@@ -77,6 +77,7 @@ fun MovieSourceDialog(
 
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(vertical = 4.dp),
                     modifier = Modifier.heightIn(max = 420.dp)
                 ) {
                     itemsIndexed(sources, key = { _, p -> p.id }) { index, provider ->
@@ -113,11 +114,6 @@ private fun SourceItem(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
-        animationSpec = AppAnimations.SpringCardFocus,
-        label = "sourceScale"
-    )
     // Vetro che si "accende" al focus: riempimento accent translucido + alone.
     val fill by animateColorAsState(
         targetValue = if (isFocused) GlassTokens.accentFill(WaveStreamColors.Accent) else GlassTokens.SurfaceFill,
@@ -133,10 +129,6 @@ private fun SourceItem(
         strokeWidth = if (isFocused) 1.5.dp else 1.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .focusable(interactionSource = interactionSource)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
