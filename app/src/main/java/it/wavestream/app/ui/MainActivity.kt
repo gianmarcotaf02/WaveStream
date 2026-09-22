@@ -1269,9 +1269,10 @@ private fun NavDropdownItem(
             .clip(RoundedCornerShape(10.dp))
             .background(bg)
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
-            .focusable(interactionSource = interactionSource)
             // Trappola sul focus: SU dal primo e GIÙ dall'ultimo restano dentro la
             // tendina; altrimenti il contenuto dietro ruba il focus (§2.4.4).
+            // Il gestore di tasto sta PRIMA di `focusable()` (pattern TvCarouselRow),
+            // altrimenti i tasti direzione vengono consumati dal nodo focusable.
             .onPreviewKeyEvent { ev ->
                 if (ev.type == KeyEventType.KeyDown) {
                     when (ev.key) {
@@ -1293,6 +1294,7 @@ private fun NavDropdownItem(
                     false
                 }
             }
+            .focusable(interactionSource = interactionSource)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 7.dp)
     ) {
