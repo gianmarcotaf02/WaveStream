@@ -2622,11 +2622,22 @@ private fun SettingsSection(
 
 @Composable
 private fun SettingsInfo(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyMedium,
-        color = WaveStreamColors.TextSecondary
-    )
+    // Passo 3 — testo informativo in vetro tenue: non più una riga sciolta sul fondo
+    // della scheda, ma un richiamo coerente con le altre superfici (stessa ricetta di
+    // AccountDetailRow). Non focusabile: solo lettura.
+    GlassSurface(
+        shape = RoundedCornerShape(10.dp),
+        fill = Color.White.copy(alpha = 0.04f),
+        strokeWidth = 0.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = WaveStreamColors.TextSecondary,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+        )
+    }
 }
 
 @Composable
@@ -2796,34 +2807,56 @@ private fun SettingsSwitch(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        animationSpec = tween(150),
-        label = "switchBorder"
+
+    // Passo 3 — riga in vetro come SettingsDropdown: fill animato + bordo accent su
+    // focus, niente più pannello opaco (SurfaceDark) con bordo netto.
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "switchFill"
     )
-    
-    Row(
+    val stroke = if (isFocused) {
+        GlassTokens.accentStroke(WaveStreamColors.Accent)
+    } else {
+        GlassTokens.StrokeGradient
+    }
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "switchScale"
+    )
+
+    GlassSurface(
+        shape = RoundedCornerShape(12.dp),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-            .background(WaveStreamColors.SurfaceDark)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
             ) { onCheckedChange(!checked) }
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary
-        )
-        Switch(
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+                fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal
+            )
+            Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
