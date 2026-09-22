@@ -225,6 +225,11 @@ class LoadingActivity : ComponentActivity() {
                 loadEpgIfNeeded(playlists, forceRefresh, onStateUpdate)
                 refreshTrendingCategoriesIfNeeded(onStateUpdate)
                 enrichHeroContent(onStateUpdate)
+
+                // Dopo l'arricchimento TMDB molti film hanno ora un tmdbId: unifica le
+                // eventuali varianti di titolo che puntano allo stesso contenuto.
+                runCatching { movieUnificationService.unifyByTmdbIdAllPlaylists() }
+                    .onFailure { Log.e("LoadingActivity", "TMDB-based movie unification failed", it) }
                 
                 // Calendario Serie A (football-data.org) per l'hero live — sync in
                 // parallelo ai preload, con timeout: mai un blocco duro se l'API

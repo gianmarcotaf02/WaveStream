@@ -146,33 +146,43 @@ class MovieUnificationService @Inject constructor(
     /** Unisce i duplicati di una playlist (per titolo+anno e per tmdbId) e
      *  ripristina l'integrità di sorgenti/categorie/streamCount. */
     suspend fun unifyPlaylist(playlistId: Long) = withContext(Dispatchers.IO) {
-        var movies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
+        mergeByTitleAndYear(playlistId)
+        unifyByTmdbId(playlistId)
+        movieDao.getAllByPlaylistIncludingHidden(playlistId).forEach { ensureMovieIntegrity(it) }
+    }
 
-        // 1) Titolo + anno
-        for (group in ContentKey.groupByTitleAndYear(movies, { it.cleanName ?: it.name }, { it.year })) {
-            if (group.size > 1) {
-                val canonical = group.minByOrNull { it.id } ?: continue
-                mergeDuplicatesInto(canonical.id, group.filter { it.id != canonical.id })
-            }
-        }
-
-        // 2) Stesso tmdbId (cattura le varianti di titolo risolte da TMDB)
-        movies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
+    /** Unisce solo le righe che condividono lo stesso `tmdbId` (leggero, adatto
+     *  a girare dopo l'arricchimento TMDB). */
+    suspend fun unifyByTmdbId(playlistId: Long) = withContext(Dispatchers.IO) {
+        val movies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
         for ((_, group) in movies.filter { it.tmdbId != null }.groupBy { it.tmdbId!! }) {
             if (group.size > 1) {
                 val canonical = group.minByOrNull { it.id } ?: continue
                 mergeDuplicatesInto(canonical.id, group.filter { it.id != canonical.id })
             }
         }
-
-        // 3) Integrità
-        movieDao.getAllByPlaylistIncludingHidden(playlistId).forEach { ensureMovieIntegrity(it) }
     }
 
-    /** Unifica tutte le playlist (usato dopo un refresh). */
+    private suspend fun mergeByTitleAndYear(playlistId: Long) {
+        val movies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
+        for (group in ContentKey.groupByTitleAndYear(movies, { it.cleanName ?: it.name }, { it.year })) {
+            if (group.size > 1) {
+                val canonical = group.minByOrNull { it.id } ?: continue
+                mergeDuplicatesInto(canonical.id, group.filter { it.id != canonical.id })
+            }
+        }
+    }
+
+    /** Unifica tutte le playlist (usato dopo un refresh completo). */
     suspend fun unifyAllPlaylists() = withContext(Dispatchers.IO) {
         movieDao.getAllMoviesIncludingHidden().map { it.playlistId }.distinct()
             .forEach { unifyPlaylist(it) }
+    }
+
+    /** Unifica per `tmdbId` tutte le playlist (leggero, post-arricchimento). */
+    suspend fun unifyByTmdbIdAllPlaylists() = withContext(Dispatchers.IO) {
+        movieDao.getAllMoviesIncludingHidden().map { it.playlistId }.distinct()
+            .forEach { unifyByTmdbId(it) }
     }
 
     // ---------------------------------------------------------------------
