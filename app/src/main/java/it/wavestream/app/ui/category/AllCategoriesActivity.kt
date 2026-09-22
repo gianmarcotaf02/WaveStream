@@ -535,7 +535,10 @@ private fun CategorySearchBar(
         onValueChange = onQueryChange,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp),
+            // Più aria sopra (fra titolo sezione e barra) e altezza ridotta: prima
+            // occupava ~56dp pieni ed era troppo ingombrante.
+            .padding(top = 12.dp, bottom = 10.dp)
+            .height(44.dp),
         placeholder = { Text("Cerca categoria...", color = WaveStreamColors.TextTertiary) },
         leadingIcon = {
             Icon(Icons.Default.Search, contentDescription = null, tint = WaveStreamColors.TextSecondary)
