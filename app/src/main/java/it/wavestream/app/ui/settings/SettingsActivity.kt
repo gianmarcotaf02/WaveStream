@@ -286,16 +286,19 @@ private fun SettingsHub(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 40.dp, vertical = 28.dp)
+            // 8dp di "respiro" in più: la scala di focus allarga la tile di ~6dp per
+            // lato e al primo elemento/colonna il clip dello scroll taglierebbe il bordo.
+            .padding(horizontal = 32.dp, vertical = 20.dp)
     ) {
-        SettingsHubHeader()
+        SettingsHubHeader(modifier = Modifier.padding(horizontal = 8.dp))
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Column(
             modifier = Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             regularItems.chunked(4).forEach { rowItems ->
@@ -342,8 +345,9 @@ private fun SettingsHub(
 }
 
 @Composable
-private fun SettingsHubHeader() {
+private fun SettingsHubHeader(modifier: Modifier = Modifier) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -592,11 +596,9 @@ private fun SettingsMenuItemRow(
         else -> GlassTokens.StrokeGradient
     }
 
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
-        animationSpec = AppAnimations.SpringCardFocus,
-        label = "menuRowScale"
-    )
+    // Nessuna scala: la riga è a tutta larghezza, scalarla farebbe uscire il bordo
+    // dal contenitore (il clip dello scroll lo taglierebbe). Il focus resta evidente
+    // grazie ad alone + bordo accent.
 
     val iconBackgroundColor by animateColorAsState(
         targetValue = when {
@@ -627,11 +629,7 @@ private fun SettingsMenuItemRow(
         strokeWidth = if (isFocused || isSelected) 1.5.dp else 1.dp,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 2.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
+            .padding(horizontal = 8.dp, vertical = 2.dp)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -716,7 +714,7 @@ private fun ProfileSettings(
         }
     }
     
-    SettingsSection(title = "Profilo") {
+    SettingsSection {
         currentProfile?.let { profile ->
             Column(
                 verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -914,7 +912,7 @@ private fun AccountSettings(
         }
     }
 
-    SettingsSection(title = "Account") {
+    SettingsSection {
         val playlist = xtreamPlaylist
         if (playlist?.type == "xtream") {
             Column(
@@ -1151,7 +1149,7 @@ private fun PlaylistSettings(
         updateInterval = userPreferences.getPlaylistUpdateInterval()
     }
     
-    SettingsSection(title = "Playlist") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             // Auto-update settings
             SettingsDropdown(
@@ -1622,7 +1620,7 @@ private fun PreferencesSettings(userPreferences: UserPreferences, contentFocusRe
         liveLayoutMode = userPreferences.getLiveLayoutMode()
     }
     
-    SettingsSection(title = "Preferenze") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             // Live TV Layout
             SettingsDropdown(
@@ -1653,7 +1651,7 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
     val creditsAudioEnabled by userPreferences.getCreditsAudioEnabledFlow().collectAsState(initial = true)
     val introDbEnabled by userPreferences.getIntroDbEnabledFlow().collectAsState(initial = true)
     
-    SettingsSection(title = "Player") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             SettingsDropdown(
                 label = "Lingua audio predefinita",
@@ -1779,7 +1777,7 @@ private fun SubtitlesSettings(
         preferredLanguage = userPreferences.getSubtitleLanguage()
     }
     
-    SettingsSection(title = "Sottotitoli") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
             
             // OpenSubtitles section
@@ -2020,7 +2018,7 @@ private fun EpgSettings(
         timezone = userPreferences.getEpgTimezone()
     }
     
-    SettingsSection(title = "Guida TV (EPG)") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             // Update Mode
             SettingsDropdown(
@@ -2234,7 +2232,7 @@ private fun AppearanceSettings(userPreferences: UserPreferences) {
     val currentAccentId by userPreferences.getAccentColorFlow().collectAsState(initial = "violet")
     val scope = rememberCoroutineScope()
     
-    SettingsSection(title = "Aspetto") {
+    SettingsSection {
         Text(
             text = "Colore Accento",
             style = MaterialTheme.typography.titleMedium,
@@ -2307,7 +2305,7 @@ private fun StorageSettings(
     val coroutineScope = rememberCoroutineScope()
     var showClearConfirm by remember { mutableStateOf(false) }
 
-    SettingsSection(title = "Archiviazione") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 text = "Cache e dati dell'app",
@@ -2415,7 +2413,7 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
         }
     }
     
-    SettingsSection(title = "Aggiornamenti") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             // Current version info
             Row(
@@ -2693,7 +2691,7 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
 @Composable
 private fun AboutSettings() {
     val context = LocalContext.current
-    SettingsSection(title = "Informazioni") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
                 text = "WaveStream",
@@ -3167,7 +3165,7 @@ private fun VpnSettings(
         rotateInterval = userPreferences.getVpnRotateInterval()
     }
 
-    SettingsSection(title = "VPN in-app") {
+    SettingsSection {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             // ---- Stato VPN ----
             val isRunning = vpnState == Tunnel.State.UP
@@ -3462,7 +3460,7 @@ private fun MovieEndingSettings(
         existingKey = userPreferences.getOpenRouterApiKey()
     }
 
-    SettingsSection(title = "Finale dei film (AI)") {
+    SettingsSection {
         var firstModifier: Modifier = Modifier
         if (contentFocusRequester != null) firstModifier = firstModifier.focusRequester(contentFocusRequester)
 
@@ -3579,7 +3577,7 @@ private fun AssistantSettings(
         existingKey = userPreferences.getGeminiApiKey()
     }
 
-    SettingsSection(title = "Assistente AI") {
+    SettingsSection {
         var firstModifier: Modifier = Modifier
         if (contentFocusRequester != null) firstModifier = firstModifier.focusRequester(contentFocusRequester)
 
