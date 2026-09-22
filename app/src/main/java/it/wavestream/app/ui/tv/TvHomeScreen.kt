@@ -4,6 +4,7 @@ import android.util.Log
 import android.view.KeyEvent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -1603,21 +1604,60 @@ fun HeroBanner(
         
         // Pagination indicator (OUTSIDE animation - stay stable)
         if (totalCount > 1) {
-            Box(
+            HeroPageIndicator(
+                currentIndex = currentIndex,
+                totalCount = totalCount,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(end = 40.dp, bottom = 24.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(WaveStreamColors.BackgroundSecondary.copy(alpha = 0.8f))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "${currentIndex + 1}/$totalCount",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = WaveStreamColors.TextPrimary,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+            )
+        }
+    }
+}
+
+/**
+ * Indicatore di pagina moderno al posto del vecchio contatore "N/M".
+ *
+ * Riprende il mock (`image.png`): pillola bianca per la pagina attiva e pallini
+ * grigi per le altre. Al cambio pagina la pillola si allarga in avanti mentre il
+ * pallino precedente si restringe: l'effetto percepito è uno slide verso destra
+ * (o sinistra se si torna indietro). Le animazioni passano da `graphicsLayer`
+ * (larghezza/colore), senza toccare il layer del backdrop.
+ */
+@Composable
+private fun HeroPageIndicator(
+    currentIndex: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier
+) {
+    if (totalCount <= 1) return
+    val safeTotal = totalCount
+    val activeIndex = ((currentIndex % safeTotal) + safeTotal) % safeTotal
+
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
+        repeat(safeTotal) { index ->
+            val isActive = index == activeIndex
+            val width by animateDpAsState(
+                targetValue = if (isActive) 24.dp else 7.dp,
+                animationSpec = spring(dampingRatio = 0.8f, stiffness = 500f),
+                label = "heroIndicatorWidth"
+            )
+            val color by animateColorAsState(
+                targetValue = if (isActive) Color.White else Color.White.copy(alpha = 0.32f),
+                animationSpec = AppAnimations.SpringCardFocusColor,
+                label = "heroIndicatorColor"
+            )
+            Box(
+                modifier = Modifier
+                    .height(7.dp)
+                    .width(width)
+                    .clip(RoundedCornerShape(50))
+                    .background(color)
+            )
         }
     }
 }
