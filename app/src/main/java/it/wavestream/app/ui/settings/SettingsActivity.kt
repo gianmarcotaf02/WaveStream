@@ -203,7 +203,10 @@ class SettingsActivity : ComponentActivity() {
                     }
                 )
             } else {
-                SettingsDetail(onBack = { selectedMenuId = null }) {
+                SettingsDetail(
+                    title = menuItems.firstOrNull { it.id == selectedMenuId }?.title ?: "Impostazioni",
+                    onBack = { selectedMenuId = null }
+                ) {
                 when (selectedMenuId) {
                     "profile" -> ProfileSettings(profileDao, userPreferences, contentFocusRequester)
                     "account" -> AccountSettings(playlistDao, playlistRepository, contentFocusRequester)
@@ -542,6 +545,7 @@ private fun SettingsBackButton(onClick: () -> Unit) {
  */
 @Composable
 private fun SettingsDetail(
+    title: String,
     onBack: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -557,8 +561,29 @@ private fun SettingsDetail(
                 .fillMaxWidth()
                 .fillMaxHeight()
         ) {
-            SettingsBackButton(onClick = onBack)
-            Spacer(modifier = Modifier.height(16.dp))
+            // Header fisso: freccia di ritorno + barretta accent + titolo della sezione.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                SettingsBackButton(onClick = onBack)
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(28.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(WaveStreamColors.Accent)
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = WaveStreamColors.TextPrimary,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(modifier = Modifier.height(20.dp))
             content()
         }
     }
@@ -2758,38 +2783,15 @@ private fun AboutSettings() {
 
 @Composable
 private fun SettingsSection(
-    title: String,
     content: @Composable () -> Unit
 ) {
+    // Passo 4 — il titolo non è più qui: vive nell'header della vista sezione
+    // (accanto alla freccia indietro), così non scrolla e non viene troncato.
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Passo 3 — niente più eyebrow testuale: era `title.uppercase()`, cioè il
-        // titolo ripetuto due volte in ogni sezione ("GUIDA TV (EPG)" + "Guida TV (EPG)").
-        // Il carattere editoriale resta affidato a un elemento accent non testuale
-        // (barretta verticale), così la sezione ha una gerarchia senza ridondanza.
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(28.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(WaveStreamColors.Accent)
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                color = WaveStreamColors.TextPrimary,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-
         // Contenuto dentro una superficie in vetro: la sezione smette di essere un
         // pannello piatto e diventa una scheda flottante, coerente con il resto
         // dell'app. Gli spazi tra le righe sono gestiti qui, così le sezioni restano
