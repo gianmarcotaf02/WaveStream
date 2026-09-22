@@ -247,26 +247,26 @@ private fun AllCategoriesScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             GlassSurface(
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(18.dp),
                 fill = GlassTokens.SurfaceFill
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // Back button in vetro, focus ad alone
                     FocusedBackButton(onClick = onBack)
 
                     // Icon (4 squares)
                     FourSquaresIcon(
-                        modifier = Modifier.size(28.dp)
+                        modifier = Modifier.size(22.dp)
                     )
 
                     // Title
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         color = WaveStreamColors.TextPrimary,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1
@@ -589,7 +589,7 @@ private fun FocusedBackButton(onClick: () -> Unit) {
 
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(34.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -608,7 +608,7 @@ private fun FocusedBackButton(onClick: () -> Unit) {
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Indietro",
             tint = WaveStreamColors.TextPrimary,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(20.dp)
         )
     }
 }
