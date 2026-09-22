@@ -1011,11 +1011,10 @@ private fun MainNavPill(
             var longPressJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
             val tabCoroutineScope = rememberCoroutineScope()
 
-            // Alla chiusura della tendina si torna qui: se il tab è selezionato si usa
-            // il requester condiviso (già agganciato dal contenuto), altrimenti il suo.
-            val returnRequester: FocusRequester =
-                if (isSelected && selectedFocusRequester != null) selectedFocusRequester
-                else tabFocusRequester
+            // Requester SEMPRE agganciato al nodo del tab: è il ritorno del focus
+            // quando si chiude la tendina. Il requester condiviso (per "sinistra"
+            // dall'hero) viene agganciato IN PIÙ al solo tab selezionato.
+            val returnRequester: FocusRequester = tabFocusRequester
 
             // Lo sfondo accent della selezione non è più per-tab: lo disegna la bolla
             // condivisa che scivola. Qui resta solo l'alone bianco sul focus quando il
@@ -1037,7 +1036,12 @@ private fun MainNavPill(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
                     .background(bg)
-                    .then(Modifier.focusRequester(returnRequester))
+                    .focusRequester(returnRequester)
+                    .then(
+                        if (isSelected && selectedFocusRequester != null)
+                            Modifier.focusRequester(selectedFocusRequester)
+                        else Modifier
+                    )
                     .focusable(interactionSource = interactionSource)
                     .onPreviewKeyEvent { ev ->
                         if (ev.type == KeyEventType.KeyDown && ev.key == Key.DirectionDown) {
@@ -1076,7 +1080,19 @@ private fun MainNavPill(
                                 KeyEventType.KeyUp -> {
                                     isLongPressing = false
                                     longPressJob?.cancel()
-                                    if (!longPressTriggered) onTabSelected(tab)
+                                    if (!longPressTriggered) {
+                                        if (isSelected) {
+                                            // Già sul tab: OK (breve) apre la tendina
+                                            // ancorata sotto il tab.
+                                            onTabLongPress(
+                                                tab,
+                                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 8f),
+                                                returnRequester
+                                            )
+                                        } else {
+                                            onTabSelected(tab)
+                                        }
+                                    }
                                     true
                                 }
                                 else -> false
@@ -1086,7 +1102,15 @@ private fun MainNavPill(
                         }
                     }
                     .clickable(interactionSource = interactionSource, indication = null) {
-                        onTabSelected(tab)
+                        if (isSelected && hasSubmenu) {
+                            onTabLongPress(
+                                tab,
+                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 8f),
+                                returnRequester
+                            )
+                        } else {
+                            onTabSelected(tab)
+                        }
                     }
                     .onGloballyPositioned { coords ->
                         val rootPos = coords.positionInRoot()
@@ -1182,7 +1206,7 @@ private fun NavTabDropdownMenu(
     ) {
         Column(modifier = Modifier.padding(6.dp)) {
             NavDropdownItem(
-                label = "Tutte le categorie",
+                label = "Categorie",
                 isFirst = true,
                 isLast = false,
                 focusRequester = firstRequester,
