@@ -96,6 +96,7 @@ import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.CarouselRow
 import it.wavestream.app.ui.home.HeroItem
 import it.wavestream.app.ui.home.HomeScreenState
+import it.wavestream.app.ui.home.LocalHomeFocusMemory
 import it.wavestream.app.ui.home.resolveHeroes
 import it.wavestream.app.ui.home.SerieAMatchLiveBadge
 import it.wavestream.app.ui.home.serieAKickoffLabel
@@ -355,13 +356,22 @@ private fun TvHomeScreenContent(
                 ) {
                     tvGridItems(items, key = { "${it.contentType}_${it.id}" }) { item ->
                         var isFocused by remember { mutableStateOf(false) }
+                        val focusMemory = LocalHomeFocusMemory.current
+                        val gridKey = "grid|${item.contentType}_${item.id}"
+                        val gridRequester = remember { FocusRequester() }
+                        DisposableEffect(gridKey) {
+                            focusMemory?.register(gridKey, gridRequester)
+                            onDispose { focusMemory?.unregister(gridKey) }
+                        }
                         
                         // Grid item: poster verticale 2:3 che riempie la cella
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .focusRequester(gridRequester)
                                 .onFocusChanged { focusState ->
                                     isFocused = focusState.isFocused
+                                    if (focusState.isFocused) focusMemory?.onFocused(gridKey)
                                 }
                                 .focusable()
                                 .graphicsLayer {

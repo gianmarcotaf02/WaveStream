@@ -39,6 +39,7 @@ import androidx.tv.material3.MaterialTheme
 import androidx.tv.material3.Text
 import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.CarouselRow
+import it.wavestream.app.ui.home.LocalHomeFocusMemory
 import it.wavestream.app.ui.components.CategoryCard
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
@@ -76,6 +77,9 @@ fun TvCarouselRow(
     onLeftOnFirstItem: (() -> Unit)? = null
 ) {
     val listState = rememberTvLazyListState()
+    // Registro di focus: consente di riprendere sull'elemento da cui si è entrati
+    // in un'altra schermata (detail view, "Vedi tutto").
+    val focusMemory = LocalHomeFocusMemory.current
     
     // Aurora: chiavi già entrate in scena — l'animazione di cascata scatta una
     // sola volta per item (non ad ogni rientro nello viewport durante lo scroll)
@@ -111,7 +115,17 @@ fun TvCarouselRow(
             )
             
             if (row.showSeeAll) {
-                TvSeeAllButton(onClick = onSeeAllClick)
+                val headerKey = "${row.title}|seeall_header"
+                val headerRequester = remember { FocusRequester() }
+                DisposableEffect(headerKey) {
+                    focusMemory?.register(headerKey, headerRequester)
+                    onDispose { focusMemory?.unregister(headerKey) }
+                }
+                TvSeeAllButton(
+                    onClick = onSeeAllClick,
+                    modifier = Modifier.focusRequester(headerRequester),
+                    onFocused = { focusMemory?.onFocused(headerKey) }
+                )
             }
         }
         
@@ -157,6 +171,12 @@ fun TvCarouselRow(
             ) { index, item ->
                 val isFocused = remember { mutableStateOf(false) }
                 val isFirst = index == 0
+                val focusKey = "${row.title}|${item.contentType}_${item.id}"
+                val itemFocusRequester = remember { FocusRequester() }
+                DisposableEffect(focusKey) {
+                    focusMemory?.register(focusKey, itemFocusRequester)
+                    onDispose { focusMemory?.unregister(focusKey) }
+                }
                 
                 // Aurora: ingresso a cascata (stagger 35ms/item, max 8 step)
                 val itemKey = "${item.contentType}_${item.id}"
@@ -189,8 +209,10 @@ fun TvCarouselRow(
                 Box(
                     modifier = Modifier
                         .padding(start = if (row.isRanked && index < RANK_MAX) RANK_GUTTER else 0.dp)
+                        .focusRequester(itemFocusRequester)
                         .onFocusChanged { focusState ->
                             isFocused.value = focusState.isFocused
+                            if (focusState.isFocused) focusMemory?.onFocused(focusKey)
                             if (isFirst) {
                                 isFirstItemFocused = focusState.isFocused
                             }
@@ -227,7 +249,17 @@ fun TvCarouselRow(
             
             if (row.showSeeAll) {
                 item(key = "see_all_${row.title}") {
-                    TvSeeAllCard(onClick = onSeeAllClick)
+                    val seeAllKey = "${row.title}|seeall"
+                    val seeAllRequester = remember { FocusRequester() }
+                    DisposableEffect(seeAllKey) {
+                        focusMemory?.register(seeAllKey, seeAllRequester)
+                        onDispose { focusMemory?.unregister(seeAllKey) }
+                    }
+                    TvSeeAllCard(
+                        onClick = onSeeAllClick,
+                        modifier = Modifier.focusRequester(seeAllRequester),
+                        onFocused = { focusMemory?.onFocused(seeAllKey) }
+                    )
                 }
             }
         }
@@ -240,7 +272,11 @@ fun TvCarouselRow(
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun TvSeeAllButton(onClick: () -> Unit) {
+private fun TvSeeAllButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onFocused: (() -> Unit)? = null
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     
@@ -253,7 +289,8 @@ private fun TvSeeAllButton(onClick: () -> Unit) {
         text = "Vedi tutto →",
         style = MaterialTheme.typography.labelLarge,
         color = textColor,
-        modifier = Modifier
+        modifier = modifier
+            .onFocusChanged { if (it.isFocused) onFocused?.invoke() }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -269,7 +306,11 @@ private fun TvSeeAllButton(onClick: () -> Unit) {
  */
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
-private fun TvSeeAllCard(onClick: () -> Unit) {
+private fun TvSeeAllCard(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onFocused: (() -> Unit)? = null
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     
@@ -290,7 +331,7 @@ private fun TvSeeAllCard(onClick: () -> Unit) {
     )
     
     Box(
-        modifier = Modifier
+        modifier = modifier
             .graphicsLayer { 
                 scaleX = scale
                 scaleY = scale 
@@ -300,6 +341,7 @@ private fun TvSeeAllCard(onClick: () -> Unit) {
             .clip(RoundedCornerShape(12.dp))
             .border(1.dp, borderColor, RoundedCornerShape(12.dp))
             .background(backgroundColor)
+            .onFocusChanged { if (it.isFocused) onFocused?.invoke() }
             .onKeyEvent { event ->
                 if (event.type == KeyEventType.KeyUp && 
                     (event.key == Key.DirectionCenter || event.key == Key.Enter)) {
