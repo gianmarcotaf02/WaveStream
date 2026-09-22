@@ -1202,7 +1202,9 @@ private fun NavTabDropdownMenu(
         stroke = GlassTokens.StrokeGradient,
         modifier = Modifier
             .offset { IntOffset(state.x.roundToInt(), state.y.roundToInt()) }
-            .width(200.dp)
+            // Larghezza = intrinseca del contenuto: si adatta alla voce più lunga tra
+            // "Categorie" e "Tutti i film" / "Tutte le serie", invece di un 200dp fisso.
+            .width(IntrinsicSize.Max)
             .graphicsLayer {
                 alpha = enterAnim
                 val s = 0.96f + 0.04f * enterAnim
