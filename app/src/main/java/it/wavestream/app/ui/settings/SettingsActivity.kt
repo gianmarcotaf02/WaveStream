@@ -1275,37 +1275,65 @@ private fun PlaylistCard(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    Row(
+
+    // Passo 3 — card playlist in vetro: stesso linguaggio di dropdown/switch.
+    // Prima era un pannello SurfaceDark con bordo accent netto di 2dp a tinta piena.
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "playlistFill"
+    )
+    val stroke = if (isFocused) {
+        GlassTokens.accentStroke(WaveStreamColors.Accent)
+    } else {
+        GlassTokens.StrokeGradient
+    }
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "playlistScale"
+    )
+
+    GlassSurface(
+        shape = RoundedCornerShape(14.dp),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (isFocused) WaveStreamColors.BackgroundTertiary else WaveStreamColors.SurfaceDark)
-            .border(2.dp, if (isFocused) WaveStreamColors.Accent else Color.Transparent, RoundedCornerShape(12.dp))
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
             .focusable(interactionSource = interactionSource)
             .clickable(interactionSource = interactionSource, indication = null, onClick = onEdit)
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(playlist.name, style = MaterialTheme.typography.titleMedium, color = WaveStreamColors.TextPrimary)
-            Text(
-                text = "${playlist.type.uppercase()} • ${playlist.channelCount} canali • ${playlist.movieCount} film • ${playlist.seriesCount} serie",
-                style = MaterialTheme.typography.bodySmall,
-                color = WaveStreamColors.TextTertiary
-            )
-        }
-        
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(onClick = onRefresh) {
-                Icon(Icons.Default.Refresh, contentDescription = "Aggiorna", tint = WaveStreamColors.Accent)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(playlist.name, style = MaterialTheme.typography.titleMedium, color = WaveStreamColors.TextPrimary)
+                Text(
+                    text = "${playlist.type.uppercase()} • ${playlist.channelCount} canali • ${playlist.movieCount} film • ${playlist.seriesCount} serie",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WaveStreamColors.TextTertiary
+                )
             }
-            IconButton(onClick = onEdit) {
-                Icon(Icons.Default.Edit, contentDescription = "Modifica", tint = WaveStreamColors.TextSecondary)
-            }
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.Delete, contentDescription = "Elimina", tint = Color.Red)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconButton(onClick = onRefresh) {
+                    Icon(Icons.Default.Refresh, contentDescription = "Aggiorna", tint = WaveStreamColors.Accent)
+                }
+                IconButton(onClick = onEdit) {
+                    Icon(Icons.Default.Edit, contentDescription = "Modifica", tint = WaveStreamColors.TextSecondary)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(Icons.Default.Delete, contentDescription = "Elimina", tint = Color.Red)
+                }
             }
         }
     }
