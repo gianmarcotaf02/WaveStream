@@ -173,8 +173,10 @@ class SettingsActivity : ComponentActivity() {
         // ---- Fase 2: status live sulle tile (solo fonti locali) ----
         // Reattivi dove il dato è un Flow (profilo, playlist, EPG): si aggiornano da soli.
         val currentProfileId by userPreferences.getCurrentProfileIdFlow().collectAsState(initial = null)
-        val playlists by playlistDao.getAllPlaylists().collectAsState(initial = emptyList())
-        val epgLastUpdate by userPreferences.getEpgLastUpdateFlow().collectAsState(initial = 0L)
+        // initial = null: finché il dato non è pronto resta il sottotitolo statico,
+        // così non si mostra per un frame un valore sbagliato ("Nessuna playlist").
+        val playlists by playlistDao.getAllPlaylists().collectAsState(initial = null)
+        val epgLastUpdate by userPreferences.getEpgLastUpdateFlow().collectAsState(initial = null)
         // Letture una-tantum (secure storage): una volta all'ingresso, non a ogni frame.
         var profileName by remember { mutableStateOf<String?>(null) }
         var openRouterConfigured by remember { mutableStateOf<Boolean?>(null) }
@@ -199,12 +201,12 @@ class SettingsActivity : ComponentActivity() {
             profileName?.takeIf { it.isNotBlank() }?.let {
                 put("profile", TileStatus(it, WaveStreamColors.TextPrimary))
             }
-            put(
-                "playlist",
-                TileStatus(
-                    if (playlists.isEmpty()) "Nessuna playlist" else "${playlists.size} playlist"
+            playlists?.let { list ->
+                put(
+                    "playlist",
+                    TileStatus(if (list.isEmpty()) "Nessuna playlist" else "${list.size} playlist")
                 )
-            )
+            }
             subtitlesAuthenticated?.let {
                 put(
                     "subtitles",
@@ -223,7 +225,7 @@ class SettingsActivity : ComponentActivity() {
                     )
                 )
             }
-            put("epg", TileStatus(epgStatusText(epgLastUpdate)))
+            epgLastUpdate?.let { put("epg", TileStatus(epgStatusText(it))) }
             put("updates", TileStatus("Versione ${appUpdateManager.getInstalledVersionName()}"))
         }
 
