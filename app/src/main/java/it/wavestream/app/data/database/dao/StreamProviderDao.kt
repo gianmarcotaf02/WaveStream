@@ -38,6 +38,9 @@ interface StreamProviderDao {
     @Query("SELECT COUNT(*) FROM stream_providers WHERE movieId = :movieId")
     suspend fun countProvidersForMovie(movieId: Long): Int
 
+    @Query("SELECT movieId AS movieId, COUNT(*) AS count FROM stream_providers WHERE playlistId = :playlistId GROUP BY movieId")
+    suspend fun getProviderCountsByPlaylist(playlistId: Long): List<MovieProviderCount>
+
     @Query("SELECT * FROM stream_providers WHERE movieId = :movieId ORDER BY qualityRank DESC, lastUsedAt DESC LIMIT 1")
     suspend fun getBestProviderForMovie(movieId: Long): StreamProvider?
 
@@ -77,3 +80,8 @@ interface StreamProviderDao {
     @Query("DELETE FROM stream_providers WHERE movieId = :movieId AND id NOT IN (:keepIds)")
     suspend fun deleteByMovieExcept(movieId: Long, keepIds: List<Long>)
 }
+
+data class MovieProviderCount(
+    val movieId: Long,
+    val count: Int
+)

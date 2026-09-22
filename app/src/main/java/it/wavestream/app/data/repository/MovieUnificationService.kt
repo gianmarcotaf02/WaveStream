@@ -148,7 +148,11 @@ class MovieUnificationService @Inject constructor(
     suspend fun unifyPlaylist(playlistId: Long) = withContext(Dispatchers.IO) {
         mergeByTitleAndYear(playlistId)
         unifyByTmdbId(playlistId)
-        movieDao.getAllByPlaylistIncludingHidden(playlistId).forEach { ensureMovieIntegrity(it) }
+        // Integrità: solo per i film senza sorgente o senza cleanName (economico).
+        val counts = streamProviderDao.getProviderCountsByPlaylist(playlistId).associate { it.movieId to it.count }
+        movieDao.getAllByPlaylistIncludingHidden(playlistId).forEach { m ->
+            if (m.cleanName.isNullOrBlank() || (counts[m.id] ?: 0) == 0) ensureMovieIntegrity(m)
+        }
     }
 
     /** Unisce solo le righe che condividono lo stesso `tmdbId` (leggero, adatto
