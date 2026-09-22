@@ -409,6 +409,17 @@ private fun MainActivityScreen(
         }
     }
 
+    // Chiude la tendina dei tab (Film/Serie) e riporta il focus sul tab di
+    // partenza. Usata sia dal BackHandler sia dal secondo OK sul tab.
+    fun dismissNavDropdown() {
+        val st = navDropdown ?: return
+        navDropdown = null
+        coroutineScope.launch {
+            withFrameNanos { }
+            try { st.returnFocus.requestFocus() } catch (_: Exception) { /* noop */ }
+        }
+    }
+
     // Helper for animated activity navigation
     fun startActivityWithTransition(intent: Intent) {
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -622,6 +633,8 @@ private fun MainActivityScreen(
                     navDropdown = NavDropdownState(tab, anchor.x, anchor.y, returnFocus)
                 },
                 navDropdownOpen = navDropdown != null,
+                navDropdownTab = navDropdown?.tab,
+                onNavDropdownDismiss = { dismissNavDropdown() },
                 onContentFocusRequest = { moveFocusToContent(FocusDirection.Down) },
                 searchButtonFocusRequester = searchButtonFocusRequester,
                 firstButtonFocusRequester = topBarFocusRequester,
@@ -772,14 +785,7 @@ private fun MainActivityScreen(
     navDropdown?.let { st ->
             NavTabDropdownMenu(
                 state = st,
-                onDismiss = {
-                    val target = st.returnFocus
-                    navDropdown = null
-                    coroutineScope.launch {
-                        withFrameNanos { }
-                        try { target.requestFocus() } catch (_: Exception) { /* noop */ }
-                    }
-                },
+                onDismiss = { dismissNavDropdown() },
                 onOpenAllCategories = {
                     navDropdown = null
                     startActivityWithTransition(
