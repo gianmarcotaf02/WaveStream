@@ -67,6 +67,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun mediaSegmentDao(): MediaSegmentDao
     abstract fun streamProviderDao(): StreamProviderDao
     abstract fun movieCategoryDao(): MovieCategoryDao
+    abstract fun mergeDao(): MergeDao
     
     companion object {
         const val DATABASE_NAME = "wavestream_database"

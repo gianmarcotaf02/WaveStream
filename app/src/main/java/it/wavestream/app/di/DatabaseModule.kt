@@ -657,6 +657,9 @@ object DatabaseModule {
 
     @Provides
     fun provideMovieCategoryDao(db: AppDatabase): MovieCategoryDao = db.movieCategoryDao()
+
+    @Provides
+    fun provideMergeDao(db: AppDatabase): MergeDao = db.mergeDao()
     
     @Provides
     @Singleton
