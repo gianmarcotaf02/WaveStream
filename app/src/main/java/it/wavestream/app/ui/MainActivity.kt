@@ -10,6 +10,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.animateFloat
@@ -898,6 +901,53 @@ private fun MainNavPill(
     onTabLongPress: (MainTab, Offset, FocusRequester) -> Unit = { _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
+    val density = LocalDensity.current
+
+    // --- Indicatore di selezione condiviso: bolla accent che scivola fra i tab ---
+    // Ogni tab registra la propria posizione/larghezza (px). Un'unica bolla viene
+    // disegnata dietro le etichette e animata verso il tab selezionato: la X con uno
+    // spring "molle", la larghezza con un keyframe che la fa restringere a bolla a
+    // metà viaggio e riesplodere all'arrivo.
+    val tabRootLeft = remember { mutableStateMapOf<MainTab, Float>() }
+    val tabWidthPx = remember { mutableStateMapOf<MainTab, Float>() }
+    var containerRootLeft by remember { mutableStateOf(0f) }
+    val indicatorX = remember { Animatable(0f) }
+    val indicatorWidth = remember { Animatable(0f) }
+    var indicatorReady by remember { mutableStateOf(false) }
+
+    val selectedLeft = tabRootLeft[selectedTab]
+    val selectedWidth = tabWidthPx[selectedTab]
+
+    LaunchedEffect(selectedTab, selectedLeft, selectedWidth, containerRootLeft) {
+        if (selectedTab !in FIRST_PILL_TABS) return@LaunchedEffect
+        val left = selectedLeft ?: return@LaunchedEffect
+        val width = selectedWidth ?: return@LaunchedEffect
+        val targetX = left - containerRootLeft
+        if (!indicatorReady) {
+            indicatorX.snapTo(targetX)
+            indicatorWidth.snapTo(width)
+            indicatorReady = true
+            return@LaunchedEffect
+        }
+        // X: slide "molle" con leggero rimbalzo.
+        launch {
+            indicatorX.animateTo(
+                targetValue = targetX,
+                animationSpec = spring(dampingRatio = 0.72f, stiffness = 380f)
+            )
+        }
+        // Larghezza: bolla che si rimpicciolisce, viaggia e si riapre all'arrivo.
+        indicatorWidth.animateTo(
+            targetValue = width,
+            animationSpec = keyframes {
+                durationMillis = 420
+                (width * 0.22f) at 130 using FastOutSlowInEasing
+                (width * 0.22f) at 250 using LinearEasing
+                width at 420 using FastOutSlowInEasing
+            }
+        )
+    }
+
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(50))
@@ -916,6 +966,24 @@ private fun MainNavPill(
             focusRequester = searchButtonFocusRequester
         )
 
+        // Contenitore della navigazione: la bolla condivisa sta dietro i tab.
+        Box(
+            modifier = Modifier.onGloballyPositioned {
+                containerRootLeft = it.positionInRoot().x
+            }
+        ) {
+            if (indicatorReady && selectedTab in FIRST_PILL_TABS) {
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(indicatorX.value.roundToInt(), 0) }
+                        .width(with(density) { indicatorWidth.value.toDp() })
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(50))
+                        .background(WaveStreamColors.Accent.copy(alpha = 0.85f))
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
         // Prima pillola: solo la navigazione fino a Live.
         FIRST_PILL_TABS.forEach { tab ->
             val isSelected = tab == selectedTab
@@ -945,11 +1013,14 @@ private fun MainNavPill(
                 if (isSelected && selectedFocusRequester != null) selectedFocusRequester
                 else tabFocusRequester
 
+            // Lo sfondo accent della selezione non è più per-tab: lo disegna la bolla
+            // condivisa che scivola. Qui resta solo l'alone bianco sul focus quando il
+            // tab non è ancora quello selezionato.
             val bg by animateColorAsState(
-                targetValue = when {
-                    isSelected -> WaveStreamColors.Accent.copy(alpha = 0.85f)
-                    isFocused -> Color.White.copy(alpha = 0.14f)
-                    else -> Color.Transparent
+                targetValue = if (isFocused && !isSelected) {
+                    Color.White.copy(alpha = 0.14f)
+                } else {
+                    Color.Transparent
                 },
                 label = "navPillBg"
             )
@@ -1014,8 +1085,13 @@ private fun MainNavPill(
                         onTabSelected(tab)
                     }
                     .onGloballyPositioned { coords ->
-                        tabOrigin = coords.positionInRoot()
+                        val rootPos = coords.positionInRoot()
+                        tabOrigin = rootPos
                         tabHeight = coords.size.height.toFloat()
+                        val left = rootPos.x
+                        val width = coords.size.width.toFloat()
+                        if (tabRootLeft[tab] != left) tabRootLeft[tab] = left
+                        if (tabWidthPx[tab] != width) tabWidthPx[tab] = width
                     }
                     .padding(horizontal = 14.dp, vertical = 7.dp)
             ) {
@@ -1037,7 +1113,8 @@ private fun MainNavPill(
                     )
                 }
             }
-        }
+            } // close inner Row (tab)
+        } // close Box (bolla indicatore)
     }
 }
 
