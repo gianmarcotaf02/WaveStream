@@ -56,7 +56,9 @@ fun TvContentCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     customWidth: androidx.compose.ui.unit.Dp? = null,
-    customHeight: androidx.compose.ui.unit.Dp? = null
+    customHeight: androidx.compose.ui.unit.Dp? = null,
+    // In griglia: la card riempie la cella mantenendo l'aspect ratio (poster verticale)
+    fillWidth: Boolean = false
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -80,6 +82,7 @@ fun TvContentCard(
     val isChannel = item.contentType == "CHANNEL"
     val cardWidth = customWidth ?: if (isChannel) 90.dp else 122.dp
     val cardHeight = customHeight ?: if (isChannel) 70.dp else 183.dp
+    val cardAspect = cardWidth / cardHeight
 
     // Logo canali: richiesta dedicata (bitmap software + downscale) per la
     // compatibilità sui TV stick (vedi channelLogoRequest).
@@ -90,13 +93,13 @@ fun TvContentCard(
 
     Column(
         modifier = modifier
-            .width(cardWidth)
+            .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(cardWidth))
     ) {
         Card(
             onClick = onClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(cardHeight)
+                .then(if (fillWidth) Modifier.aspectRatio(cardAspect) else Modifier.height(cardHeight))
                 .onFocusChanged { isFocused = it.isFocused }
                 .graphicsLayer {
                     // Focus glow via shadow - derived from focusProgress

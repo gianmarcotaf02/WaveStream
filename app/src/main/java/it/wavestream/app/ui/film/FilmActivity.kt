@@ -429,7 +429,7 @@ fun FilmScreen(
                     
                     // Movie grid using TV Compose for proper D-pad navigation
                     TvLazyVerticalGrid(
-                        columns = TvGridCells.Adaptive(minSize = 150.dp),
+                        columns = TvGridCells.Fixed(4),
                         state = gridState,
                         contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -522,7 +522,7 @@ private fun MovieGridCard(
                 scaleX = scale
                 scaleY = scale
             }
-            .width(150.dp)
+            .fillMaxWidth()
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -534,7 +534,7 @@ private fun MovieGridCard(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(205.dp)
+                .aspectRatio(2f / 3f)
                 .clip(RoundedCornerShape(8.dp))
                 .border(2.dp, borderColor, RoundedCornerShape(8.dp))
                 .background(WaveStreamColors.CardBackground)
