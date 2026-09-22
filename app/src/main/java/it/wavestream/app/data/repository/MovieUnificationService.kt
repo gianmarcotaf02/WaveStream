@@ -213,8 +213,13 @@ class MovieUnificationService @Inject constructor(
                 val all = movieDao.getAllMoviesIncludingHidden()
                 Log.i(TAG, "First-time movie unification: ${all.size} movies, ${all.map { it.playlistId }.distinct().size} playlists")
 
-                // Backfill per ogni film (crea la sorgente dal movie stesso se assente)
-                all.forEach { ensureMovieIntegrity(it) }
+                // Backfill incrementale/resumabile: processa solo i film che non hanno
+                // ancora una sorgente o il titolo pulito. Se l'app viene chiusa a metà,
+                // al riavvio riparte solo da quelli mancanti.
+                val counts = streamProviderDao.getAllProviderCounts().associate { it.movieId to it.count }
+                val needsWork = all.filter { it.cleanName.isNullOrBlank() || (counts[it.id] ?: 0) == 0 }
+                Log.i(TAG, "First-time movie unification: ${needsWork.size} movies need providers/cleanName")
+                needsWork.forEach { ensureMovieIntegrity(it) }
 
                 // Unificazione per playlist
                 all.map { it.playlistId }.distinct().forEach { unifyPlaylist(it) }

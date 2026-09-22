@@ -41,6 +41,9 @@ interface StreamProviderDao {
     @Query("SELECT movieId AS movieId, COUNT(*) AS count FROM stream_providers WHERE playlistId = :playlistId GROUP BY movieId")
     suspend fun getProviderCountsByPlaylist(playlistId: Long): List<MovieProviderCount>
 
+    @Query("SELECT movieId AS movieId, COUNT(*) AS count FROM stream_providers GROUP BY movieId")
+    suspend fun getAllProviderCounts(): List<MovieProviderCount>
+
     @Query("SELECT * FROM stream_providers WHERE movieId = :movieId ORDER BY qualityRank DESC, lastUsedAt DESC LIMIT 1")
     suspend fun getBestProviderForMovie(movieId: Long): StreamProvider?
 
