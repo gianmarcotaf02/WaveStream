@@ -567,17 +567,13 @@ private fun ProfileSettings(
                 // Avatar with edit button
                 val avatarInteractionSource = remember { MutableInteractionSource() }
                 val isAvatarFocused by avatarInteractionSource.collectIsFocusedAsState()
-                val avatarBorderColor by animateColorAsState(
-                    targetValue = if (isAvatarFocused) WaveStreamColors.Accent else Color.Transparent,
-                    animationSpec = tween(200),
-                    label = "avatarBorder"
-                )
-                Box(
+                GlassSurface(
+                    shape = RoundedCornerShape(16.dp),
+                    fill = Color.White.copy(alpha = 0.06f),
+                    stroke = if (isAvatarFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
+                    strokeWidth = if (isAvatarFocused) 2.dp else 1.dp,
                     modifier = Modifier
                         .size(120.dp)
-                        .border(3.dp, avatarBorderColor, RoundedCornerShape(16.dp))
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(WaveStreamColors.CardBackground)
                         .focusable(interactionSource = avatarInteractionSource)
                         .clickable { showAvatarPicker = true }
                 ) {
@@ -609,11 +605,14 @@ private fun ProfileSettings(
                 )
                 
                 if (showAvatarPicker) {
+                    // Passo 3 — pannello in vetro (stessa resa di GlassSurface: fill
+                    // translucido + bordo gradiente) invece del pannello opaco a tinta piena.
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(WaveStreamColors.BackgroundSecondary)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color.White.copy(alpha = 0.05f))
+                            .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(14.dp))
                             .padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -1638,8 +1637,8 @@ private fun SubtitlesSettings(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .background(WaveStreamColors.Accent.copy(alpha = 0.15f))
-                        .border(1.dp, WaveStreamColors.Accent.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                        .background(WaveStreamColors.Accent.copy(alpha = 0.12f))
+                        .border(1.dp, GlassTokens.accentStroke(WaveStreamColors.Accent), RoundedCornerShape(12.dp))
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -1934,8 +1933,9 @@ private fun EpgSettings(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(WaveStreamColors.BackgroundTertiary)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(12.dp))
                         .padding(12.dp)
                 ) {
                     if (isRefreshing) {
@@ -2156,8 +2156,10 @@ private fun StorageSettings(
                 color = WaveStreamColors.TextTertiary
             )
             if (showClearConfirm) {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = WaveStreamColors.Accent.copy(alpha = 0.15f)),
+                GlassSurface(
+                    shape = RoundedCornerShape(14.dp),
+                    fill = WaveStreamColors.Accent.copy(alpha = 0.12f),
+                    stroke = GlassTokens.accentStroke(WaveStreamColors.Accent),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -2261,7 +2263,8 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
-                    .background(WaveStreamColors.BackgroundSecondary)
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(12.dp))
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -2385,9 +2388,9 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(WaveStreamColors.Accent.copy(alpha = 0.15f))
-                        .border(1.dp, WaveStreamColors.Accent.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(WaveStreamColors.Accent.copy(alpha = 0.12f))
+                        .border(1.dp, GlassTokens.accentStroke(WaveStreamColors.Accent), RoundedCornerShape(14.dp))
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -3050,9 +3053,9 @@ private fun VpnSettings(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .border(1.dp, WaveStreamColors.Accent.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .background(WaveStreamColors.Accent.copy(alpha = 0.10f))
+                        .clip(RoundedCornerShape(14.dp))
+                        .border(1.dp, GlassTokens.accentStroke(WaveStreamColors.Accent), RoundedCornerShape(14.dp))
+                        .background(WaveStreamColors.Accent.copy(alpha = 0.12f))
                         .padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -3684,18 +3687,19 @@ private fun AssistantVoiceSlider(
     onValueChangeFinished: () -> Unit
 ) {
     var focused by remember { mutableStateOf(false) }
-    val borderColor by animateColorAsState(
-        targetValue = if (focused) WaveStreamColors.Accent else Color.Transparent,
-        animationSpec = tween(150),
-        label = "assistantSliderBorder"
-    )
 
+    // Passo 3 — riga in vetro anche per lo slider (prima: pannello SurfaceDark a
+    // tinta piena con bordo accent netto).
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-            .background(WaveStreamColors.SurfaceDark)
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (focused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill)
+            .border(
+                width = if (focused) 1.5.dp else 1.dp,
+                brush = if (focused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
+                shape = RoundedCornerShape(12.dp)
+            )
             .padding(horizontal = 12.dp)
     ) {
         Text(
