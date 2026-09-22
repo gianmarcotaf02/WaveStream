@@ -14,6 +14,9 @@ interface MovieDao {
     @Query("SELECT * FROM movies WHERE isHidden = 0 ORDER BY name")
     suspend fun getAllMoviesList(): List<Movie>
 
+    @Query("SELECT * FROM movies")
+    suspend fun getAllMoviesIncludingHidden(): List<Movie>
+
     @Query("SELECT * FROM movies WHERE isHidden = 0 ORDER BY name LIMIT :limit OFFSET :offset")
     suspend fun getAllMoviesListPaged(limit: Int, offset: Int): List<Movie>
 

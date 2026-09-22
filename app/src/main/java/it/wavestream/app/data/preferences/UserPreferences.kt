@@ -101,6 +101,9 @@ class UserPreferences @Inject constructor(
         
         // Setup
         private val SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
+
+        // Unificazione film (doppioni/versioni) — eseguita una sola volta
+        private val MOVIES_UNIFIED_V1 = booleanPreferencesKey("movies_unified_v1")
         
         // OMDb (IMDB ratings)
         private val OMDB_API_KEY = stringPreferencesKey("omdb_api_key")
@@ -559,6 +562,15 @@ class UserPreferences @Inject constructor(
     
     suspend fun isSetupComplete(): Boolean {
         return dataStore.data.first()[SETUP_COMPLETE] ?: false
+    }
+
+    // Unificazione film (doppioni/versioni)
+    suspend fun isMoviesUnifiedV1(): Boolean {
+        return dataStore.data.first()[MOVIES_UNIFIED_V1] ?: false
+    }
+
+    suspend fun setMoviesUnifiedV1(done: Boolean) {
+        dataStore.edit { it[MOVIES_UNIFIED_V1] = done }
     }
     
     // OMDb API Key (for IMDB ratings) (cifrata)
