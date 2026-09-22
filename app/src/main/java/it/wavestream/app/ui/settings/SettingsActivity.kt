@@ -2694,13 +2694,23 @@ private fun SettingsDropdown(
                     )
                 }
             }
+            // Passo 3 — anche il menu che si apre è in vetro: contenitore translucido
+            // + bordo gradiente, e voci custom con alone di focus (MenuItemColors di
+            // Material3 non espone uno stato focus, quindi la voce selezionata col D-pad
+            // non era evidenziata).
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                shape = RoundedCornerShape(14.dp),
+                containerColor = WaveStreamColors.SurfaceDark.copy(alpha = 0.94f),
+                tonalElevation = 0.dp,
+                shadowElevation = 12.dp,
+                border = BorderStroke(1.dp, GlassTokens.StrokeGradient)
             ) {
                 options.forEach { (key, display) ->
-                    DropdownMenuItem(
-                        text = { Text(display) },
+                    GlassDropdownMenuItem(
+                        text = display,
+                        isSelected = key == value,
                         onClick = {
                             onValueChange(key)
                             expanded = false
@@ -2708,6 +2718,61 @@ private fun SettingsDropdown(
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * Voce di un menu a tendina in stile vetro, con alone di focus visibile.
+ * Stessa ricetta delle righe ([SettingsDropdown]): fill animato + testo che si accende.
+ */
+@Composable
+private fun GlassDropdownMenuItem(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val background by animateColorAsState(
+        targetValue = when {
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            isSelected -> WaveStreamColors.Accent.copy(alpha = 0.18f)
+            else -> Color.Transparent
+        },
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "menuItemBg"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(background)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (isFocused || isSelected) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+            fontWeight = if (isFocused || isSelected) FontWeight.SemiBold else FontWeight.Normal
+        )
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = WaveStreamColors.Accent,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }
