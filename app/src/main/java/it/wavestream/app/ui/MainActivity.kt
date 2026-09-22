@@ -455,14 +455,20 @@ private fun MainActivityScreen(
 
     // Al ritorno da un'altra Activity il contenuto viene ricomposto (forceRefresh)
     // e il focus può finire di default sulla prima cosa focusabile (l'icona Cerca).
-    // Riportiamo invece il focus sulla TAB attualmente selezionata (Home/Film/
-    // Serie/Live), così dopo "Categorie" o un player si resta dove si era.
+    // Se esiste, ripristiniamo il focus sull'ultimo elemento della Home da cui si
+    // era entrati (card contenuto o "Vedi tutto"); altrimenti sulla TAB selezionata.
+    val homeFocusMemory = it.wavestream.app.ui.home.LocalHomeFocusMemory.current
     LaunchedEffect(resumeTick) {
         if (resumeTick == 0) return@LaunchedEffect
         repeat(3) { withFrameNanos { } }
         kotlinx.coroutines.delay(250)
-        // `navPillFocusRequester` è agganciato proprio al tab selezionato.
-        navPillFocusRequester.requestFocusWhenReady()
+        val restored = homeFocusMemory?.requesterFor(homeFocusMemory.lastFocusedKey)
+        if (restored != null) {
+            restored.requestFocusWhenReady()
+        } else {
+            // `navPillFocusRequester` è agganciato proprio al tab selezionato.
+            navPillFocusRequester.requestFocusWhenReady()
+        }
     }
     
     // Sposta il focus sul contenuto aspettando un frame, così la ricerca
