@@ -21,10 +21,12 @@ import it.wavestream.app.data.database.dao.*
 import it.wavestream.app.data.database.entity.*
 import it.wavestream.app.data.repository.ImdbRatingsRepository
 import it.wavestream.app.data.repository.PlaylistRepository
+import it.wavestream.app.data.repository.MovieSourceResolver
 import it.wavestream.app.data.tmdb.TMDBService
 import it.wavestream.app.data.preferences.UserPreferences
 import android.net.Uri
 import it.wavestream.app.ui.player.PlayerActivity
+import it.wavestream.app.ui.dialog.MovieSourceDialog
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.util.TitleCleaner
 import it.wavestream.app.data.repository.DownloadContentManager
@@ -62,6 +64,7 @@ class DetailsActivity : ComponentActivity() {
     @androidx.media3.common.util.UnstableApi
     @Inject lateinit var downloadManager: DownloadContentManager
     @Inject lateinit var movieEndingRepository: MovieEndingRepository
+    @Inject lateinit var movieSourceResolver: MovieSourceResolver
     
     private var contentId: Long = 0
     private var contentType: ContentType = ContentType.MOVIE
@@ -69,6 +72,10 @@ class DetailsActivity : ComponentActivity() {
     private var contentTitle: String = ""
     private var currentSeriesId: Long = 0
     private var profileId: Long = 1L
+
+    // Sorgenti in attesa di scelta (film con più versioni/doppioni)
+    private val pendingMovieSources = mutableStateOf<List<StreamProvider>?>(null)
+    private var pendingMovieDuration: Long? = null
     
     // Intent extras for instant rendering
     private var intentTitle: String = ""

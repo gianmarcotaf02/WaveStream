@@ -27,6 +27,11 @@ class MovieSourceResolver @Inject constructor(
         return listOf(synthetic(movie))
     }
 
+    /** Registra che una sorgente è stata usata (per ordinarla per ultima scelta). */
+    suspend fun markUsed(providerId: Long) {
+        if (providerId > 0) runCatching { streamProviderDao.updateLastUsed(providerId) }
+    }
+
     private fun synthetic(movie: Movie): StreamProvider {
         val quality = contentNameParser.detectQuality(movie.name)
         return StreamProvider(
