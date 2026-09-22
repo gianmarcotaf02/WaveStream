@@ -2857,13 +2857,14 @@ private fun SettingsSwitch(
                 fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal
             )
             Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = WaveStreamColors.Accent,
-                checkedTrackColor = WaveStreamColors.Accent.copy(alpha = 0.5f)
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = WaveStreamColors.Accent,
+                    checkedTrackColor = WaveStreamColors.Accent.copy(alpha = 0.5f)
+                )
             )
-        )
+        }
     }
 }
 
