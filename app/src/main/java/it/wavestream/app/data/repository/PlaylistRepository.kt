@@ -41,7 +41,8 @@ class PlaylistRepository @Inject constructor(
     private val xtreamParser: XtreamParser,
     private val contentNameParser: ContentNameParser,
     private val contentCache: ContentCache,
-    private val tmdbService: TMDBService
+    private val tmdbService: TMDBService,
+    private val movieUnificationService: MovieUnificationService
 ) {
     companion object {
         private const val TAG = "PlaylistRepo"
@@ -78,6 +79,10 @@ class PlaylistRepository @Inject constructor(
         saveChannels(playlistId, parseResult.channels)
         saveMovies(playlistId, parseResult.movies)
         saveSeries(playlistId, parseResult.series)
+        
+        // M3U: crea le sorgenti e il mapping categorie per i nuovi film
+        runCatching { movieUnificationService.unifyPlaylist(playlistId) }
+            .onFailure { Log.w(TAG, "unifyPlaylist failed after M3U import", it) }
         
         playlistDao.updateCounts(
             playlistId, 
@@ -176,6 +181,11 @@ class PlaylistRepository @Inject constructor(
             }
         }
         
+        // Fase B: unifica i doppioni (per titolo+anno e tmdbId) e crea le sorgenti
+        // per i film che non ne hanno (es. M3U), preservando i progressi esistenti.
+        runCatching { movieUnificationService.unifyPlaylist(playlistId) }
+            .onFailure { Log.w(TAG, "unifyPlaylist failed for playlist $playlistId", it) }
+
         playlistDao.updateLastUpdated(playlistId, System.currentTimeMillis())
         
         // Content may have changed (M3U re-inserts with new ids, Xtream removes gone items):
@@ -615,22 +625,24 @@ class PlaylistRepository @Inject constructor(
             
             val vodCategoryMap = vodCategories.associate { it.id to contentNameParser.normalizeMovieCategory(it.name) }
             categoryDao.insertAll(vodCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeMovieCategory(it.name), type = CategoryType.MOVIE, externalId = it.id) })
-            movieDao.insertAll(vodStreams.mapIndexed { index, vod ->
-                Movie(
-                    playlistId = playlistId,
-                    name = vod.name,
+            // Unificazione Fase A: doppioni/versioni dello stesso film (stesso
+            // titolo+anno) → un unico Movie canonico con N StreamProvider.
+            val vodInputs = vodStreams.mapIndexed { index, vod ->
+                MovieUnificationService.MovieSourceInput(
+                    rawName = vod.name,
                     streamUrl = "$baseUrl/movie/$username/$password/${vod.id}.${vod.extension ?: "mp4"}",
-                    logoUrl = vod.poster,
-                    xtreamBackdropUrl = vod.backdrop,
+                    poster = vod.poster,
+                    backdrop = vod.backdrop,
                     category = vodCategoryMap[vod.categoryId] ?: "Uncategorized",
                     categoryId = vod.categoryId,
                     xtreamStreamId = vod.id,
                     containerExtension = vod.extension,
+                    rating = vod.rating,
                     year = vod.year?.toIntOrNull() ?: contentNameParser.extractReleaseYear(vod.name),
-                    xtreamRating = vod.rating,
                     playlistOrder = (vod.added ?: index.toLong()).toInt()
                 )
-            })
+            }
+            val movieCount = movieUnificationService.persistGroupedMovies(playlistId, vodInputs)
             
             val seriesCategoryMap = seriesCategories.associate { it.id to contentNameParser.normalizeSeriesCategory(it.name) }
             categoryDao.insertAll(seriesCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeSeriesCategory(it.name), type = CategoryType.SERIES, externalId = it.id) })
@@ -656,8 +668,8 @@ class PlaylistRepository @Inject constructor(
                 )
             })
             
-            playlistDao.updateCounts(playlistId, liveStreams.size, vodStreams.size, filteredSeries.size)
-            Log.d(TAG, "loadXtreamContent FINAL: live=${liveStreams.size}, vod=${vodStreams.size}, series=${filteredSeries.size} inserted into DB")
+            playlistDao.updateCounts(playlistId, liveStreams.size, movieCount, filteredSeries.size)
+            Log.d(TAG, "loadXtreamContent FINAL: live=${liveStreams.size}, movies=${movieCount}, series=${filteredSeries.size} inserted into DB")
         } catch (e: Exception) {
             Log.e(TAG, "Error loading Xtream content", e)
             throw Exception("Errore nel caricamento dei contenuti Xtream: ${e.message}")
@@ -776,7 +788,6 @@ class PlaylistRepository @Inject constructor(
             channelDao.insertAll(channelsToInsert)
 
             val currentMovies = movieDao.getAllMoviesList().filter { it.playlistId == playlistId }
-            val currentMovieMap = currentMovies.associateBy { it.xtreamStreamId }
             // CATEGORY GUARD: if the VOD response is empty/corrupt but the DB still has
             // movies for this playlist, preserve the existing ones instead of deleting them.
             val preserveMovies = vodStreams.isEmpty() && currentMovies.isNotEmpty()
@@ -787,45 +798,29 @@ class PlaylistRepository @Inject constructor(
             val vodCategoryMap = vodCategories.associate { it.id to contentNameParser.normalizeMovieCategory(it.name) }
             val movieCategoryEntities = vodCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeMovieCategory(it.name), type = CategoryType.MOVIE, externalId = it.id) }
             categoryDao.insertAll(movieCategoryEntities)
-            
-            val moviesToInsert = mutableListOf<Movie>()
-            val moviesToUpdate = mutableListOf<Movie>()
-            val moviesToDelete = mutableListOf<Movie>()
-            val seenXtreamIds = mutableSetOf<Int>()
 
-            vodStreams.forEachIndexed { index, vod ->
-                val xtreamId = vod.id
-                if (xtreamId != null) {
-                    seenXtreamIds.add(xtreamId)
-                    val existing = currentMovieMap[xtreamId]
-                    val categoryName = vodCategoryMap[vod.categoryId] ?: "Uncategorized"
-                    val streamUrl = "$baseUrl/movie/$username/$password/${vod.id}.${vod.extension ?: "mp4"}"
-                    val playlistOrder = (vod.added ?: index.toLong()).toInt()
-                    val derivedYear = vod.year?.toIntOrNull()
-                        ?: contentNameParser.extractReleaseYear(vod.name)
-                        ?: existing?.year
-                    
-                    if (existing != null) {
-                        if (existing.name != vod.name || existing.logoUrl != vod.poster || existing.category != categoryName || existing.streamUrl != streamUrl || existing.year != derivedYear || existing.xtreamRating != vod.rating) {
-                            moviesToUpdate.add(existing.copy(
-                                name = vod.name, streamUrl = streamUrl, logoUrl = vod.poster, xtreamBackdropUrl = vod.backdrop,
-                                category = categoryName, categoryId = vod.categoryId, containerExtension = vod.extension,
-                                year = derivedYear, xtreamRating = vod.rating, playlistOrder = playlistOrder
-                            ))
-                        }
-                    } else {
-                        moviesToInsert.add(Movie(
-                            playlistId = playlistId, name = vod.name, streamUrl = streamUrl, logoUrl = vod.poster, xtreamBackdropUrl = vod.backdrop,
-                            category = categoryName, categoryId = vod.categoryId, xtreamStreamId = vod.id,
-                            containerExtension = vod.extension, year = derivedYear, xtreamRating = vod.rating, playlistOrder = playlistOrder
-                        ))
-                    }
+            // Unificazione Fase A + riconciliazione: le sorgenti vengono raggruppate
+            // e i film rimossi dal provider eliminati, preservando gli id canonici.
+            val movieCount = if (preserveMovies) {
+                currentMovies.size
+            } else {
+                val vodInputs = vodStreams.mapIndexed { index, vod ->
+                    MovieUnificationService.MovieSourceInput(
+                        rawName = vod.name,
+                        streamUrl = "$baseUrl/movie/$username/$password/${vod.id}.${vod.extension ?: "mp4"}",
+                        poster = vod.poster,
+                        backdrop = vod.backdrop,
+                        category = vodCategoryMap[vod.categoryId] ?: "Uncategorized",
+                        categoryId = vod.categoryId,
+                        xtreamStreamId = vod.id,
+                        containerExtension = vod.extension,
+                        rating = vod.rating,
+                        year = vod.year?.toIntOrNull() ?: contentNameParser.extractReleaseYear(vod.name),
+                        playlistOrder = (vod.added ?: index.toLong()).toInt()
+                    )
                 }
+                movieUnificationService.persistGroupedMovies(playlistId, vodInputs)
             }
-            currentMovies.forEach { if (!preserveMovies && it.xtreamStreamId != null && !seenXtreamIds.contains(it.xtreamStreamId)) moviesToDelete.add(it) }
-            movieDao.deleteList(moviesToDelete)
-            movieDao.updateList(moviesToUpdate)
-            movieDao.insertAll(moviesToInsert)
 
             val currentSeries = seriesDao.getAllSeriesList().filter { it.playlistId == playlistId }
             val currentSeriesMap = currentSeries.associateBy { it.xtreamSeriesId }
@@ -892,7 +887,7 @@ class PlaylistRepository @Inject constructor(
             seriesDao.insertAll(seriesToInsert)
             Log.d(TAG, "refreshXtreamContent FINAL: series insert=${seriesToInsert.size}, update=${seriesToUpdate.size}, delete=${seriesToDelete.size}, total now=${currentSeries.size - seriesToDelete.size + seriesToInsert.size}")
 
-            playlistDao.updateCounts(playlistId, liveStreams.size, currentMovies.size - moviesToDelete.size + moviesToInsert.size, currentSeries.size - seriesToDelete.size + seriesToInsert.size)
+            playlistDao.updateCounts(playlistId, liveStreams.size, movieCount, currentSeries.size - seriesToDelete.size + seriesToInsert.size)
         } catch (e: Exception) {
             Log.e(TAG, "Error refreshing Xtream content", e)
             throw Exception("Errore nel refresh contenuti Xtream: ${e.message}")
