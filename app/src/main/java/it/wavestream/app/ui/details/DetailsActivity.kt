@@ -170,6 +170,22 @@ class DetailsActivity : ComponentActivity() {
             }
         }
         
+        // Menu di scelta sorgente per i film con più versioni/doppioni
+        pendingMovieSources.value?.let { sources ->
+            MovieSourceDialog(
+                movieTitle = state.title.ifBlank { contentTitle },
+                sources = sources,
+                fallbackDurationSeconds = pendingMovieDuration,
+                onSelect = { provider ->
+                    pendingMovieSources.value = null
+                    streamUrl = provider.streamUrl
+                    lifecycleScope.launch { movieSourceResolver.markUsed(provider.id) }
+                    launchPlayer(provider.streamUrl, null)
+                },
+                onDismiss = { pendingMovieSources.value = null }
+            )
+        }
+
         DetailsScreen(
             state = state,
             onBackClick = { finish() },
@@ -1151,15 +1167,39 @@ class DetailsActivity : ComponentActivity() {
 
     
     private fun playContent(@Suppress("UNUSED_PARAMETER") state: DetailsState, episode: Episode? = null) {
+        // Film: se esistono più versioni/doppioni unificati, lascia scegliere la sorgente.
+        if (episode == null && contentType == ContentType.MOVIE) {
+            lifecycleScope.launch {
+                val movie = runCatching { movieDao.getMovieById(contentId) }.getOrNull()
+                val sources = if (movie != null) movieSourceResolver.resolve(movie) else emptyList()
+                pendingMovieDuration = movie?.duration ?: movie?.tmdbRuntime?.toLong()?.times(60)
+                if (sources.size > 1) {
+                    pendingMovieSources.value = sources
+                } else {
+                    val url = sources.firstOrNull()?.streamUrl ?: streamUrl
+                    if (url.isNullOrEmpty()) {
+                        Log.e(TAG, "Cannot play: stream URL is empty!")
+                        android.widget.Toast.makeText(this@DetailsActivity, "Errore: URL streaming mancante", android.widget.Toast.LENGTH_LONG).show()
+                        return@launch
+                    }
+                    streamUrl = url
+                    launchPlayer(url, null)
+                }
+            }
+            return
+        }
+
         val url = episode?.streamUrl ?: streamUrl
-        Log.d(TAG, "playContent called: episode=${episode?.name}, streamUrl=$url")
-        
         if (url.isNullOrEmpty()) {
             Log.e(TAG, "Cannot play: stream URL is empty!")
             android.widget.Toast.makeText(this, "Errore: URL streaming mancante", android.widget.Toast.LENGTH_LONG).show()
             return
         }
-        
+        launchPlayer(url, episode)
+    }
+
+    private fun launchPlayer(url: String, episode: Episode?) {
+        Log.d(TAG, "launchPlayer: episode=${episode?.name}, streamUrl=$url")
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("content_id", episode?.id ?: contentId)
             putExtra("content_type", (episode?.let { ContentType.EPISODE } ?: contentType).name)
