@@ -202,25 +202,31 @@ class MainActivity : FragmentActivity() {
         
         setContent {
             WaveStreamTheme {
-                MainActivityScreen(
-                    initialTab = currentTab,
-                    onTabChanged = { currentTab = it },
-                    activity = this
-                )
-
-                // Menu di scelta sorgente per il play diretto dell'hero (film multi-versione)
-                pendingMovieSources.value?.let { sources ->
-                    MovieSourceDialog(
-                        movieTitle = pendingMovieTitle,
-                        sources = sources,
-                        fallbackDurationSeconds = pendingMovieDuration,
-                        onSelect = { provider ->
-                            pendingMovieSources.value = null
-                            lifecycleScope.launch { movieSourceResolver.markUsed(provider.id) }
-                            launchPlayer(provider.movieId ?: 0L, "MOVIE", pendingMovieTitle, provider.streamUrl)
-                        },
-                        onDismiss = { pendingMovieSources.value = null }
+                // Memoria di focus della Home: permette di riprendere la navigazione
+                // sull'elemento da cui si è entrati in un'altra schermata.
+                androidx.compose.runtime.CompositionLocalProvider(
+                    it.wavestream.app.ui.home.LocalHomeFocusMemory provides homeFocusMemory
+                ) {
+                    MainActivityScreen(
+                        initialTab = currentTab,
+                        onTabChanged = { currentTab = it },
+                        activity = this
                     )
+
+                    // Menu di scelta sorgente per il play diretto dell'hero (film multi-versione)
+                    pendingMovieSources.value?.let { sources ->
+                        MovieSourceDialog(
+                            movieTitle = pendingMovieTitle,
+                            sources = sources,
+                            fallbackDurationSeconds = pendingMovieDuration,
+                            onSelect = { provider ->
+                                pendingMovieSources.value = null
+                                lifecycleScope.launch { movieSourceResolver.markUsed(provider.id) }
+                                launchPlayer(provider.movieId ?: 0L, "MOVIE", pendingMovieTitle, provider.streamUrl)
+                            },
+                            onDismiss = { pendingMovieSources.value = null }
+                        )
+                    }
                 }
             }
         }
@@ -233,6 +239,9 @@ class MainActivity : FragmentActivity() {
 
     // Sorgenti in attesa di scelta (film con più versioni) dal play dell'hero
     private val pendingMovieSources = mutableStateOf<List<StreamProvider>?>(null)
+
+    // Memoria di focus della Home (per-composizione dell'Activity)
+    private val homeFocusMemory = it.wavestream.app.ui.home.HomeFocusMemory()
     private var pendingMovieTitle: String = ""
     private var pendingMovieDuration: Long? = null
 
