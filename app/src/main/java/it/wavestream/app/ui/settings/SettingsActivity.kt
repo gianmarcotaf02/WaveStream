@@ -248,153 +248,315 @@ class SettingsActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Passo 4 — HUB delle Impostazioni: griglia a 4 colonne di tile in vetro.
+ *
+ * Sostituisce la sidebar. Tutte le tile sono composte subito (Column, non LazyGrid)
+ * così il focus iniziale è immediato e, al ritorno da una sezione, torna sulla tile
+ * di partenza senza flash.
+ */
 @Composable
-private fun SettingsSidebar(
+private fun SettingsHub(
     menuItems: List<SettingsMenuItem>,
-    selectedItem: String?,
-    onItemClick: (SettingsMenuItem) -> Unit,
-    modifier: Modifier = Modifier
+    initialFocusId: String?,
+    onItemClick: (SettingsMenuItem) -> Unit
 ) {
     val regularItems = menuItems.filter { !it.isDestructive }
     val destructiveItems = menuItems.filter { it.isDestructive }
-    
-    // Guarantee the initial focus lands on the first menu item ("Profilo") instead of
-    // flashing on "Disconnetti". The plain Column below composes all items immediately,
-    // so the first item is focusable right away (no long delay, hence no flash).
-    val firstItemFocus = remember { FocusRequester() }
-    LaunchedEffect(Unit) {
-        try {
-            firstItemFocus.requestFocus()
-        } catch (e: Exception) {
-            // ignore focus errors
-        }
-    }
-    
 
-    
-    Column(
-        modifier = modifier
-            .background(
-                // Passo 1 — sidebar in vetro con BORDO MORBIDO.
-                // Prima: gradiente OPACO (BackgroundSecondary → BackgroundDark) con un
-                // limite netto a 350dp, che la faceva sembrare un pannello appoggiato
-                // sopra. Ora sfuma a trasparente sul bordo destro, come la rail della
-                // Home: nessun limite geometrico visibile.
-                Brush.horizontalGradient(
-                    colorStops = arrayOf(
-                        0.00f to WaveStreamColors.BackgroundSecondary.copy(alpha = 0.72f),
-                        0.60f to WaveStreamColors.BackgroundDark.copy(alpha = 0.45f),
-                        1.00f to Color.Transparent
-                    )
-                )
-            )
-    ) {
-        // Header with logo and title
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // App icon with glow effect
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(
-                                    WaveStreamColors.Accent,
-                                    WaveStreamColors.AccentDark
-                                )
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-                
-                Column {
-                    Text(
-                        text = "Impostazioni",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = WaveStreamColors.TextPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Configura la tua esperienza",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = WaveStreamColors.TextTertiary
-                    )
-                }
+    // Key sugli id (uguaglianza strutturale): i FocusRequester non vengono ricreati
+    // a ogni ricomposizione, quindi il focus resta stabile.
+    val requesters = remember(regularItems.map { it.id }) {
+        regularItems.associate { it.id to FocusRequester() }
+    }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(120)
+        val targetId = initialFocusId?.takeIf { requesters.containsKey(it) }
+            ?: regularItems.firstOrNull()?.id
+        targetId?.let {
+            try {
+                requesters[it]?.requestFocus()
+            } catch (e: Exception) {
+                // ignore focus errors
             }
         }
-        
-        // Subtle divider
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .height(1.dp)
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.08f),
-                            Color.Transparent
-                        )
-                    )
-                )
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Regular menu items
-        // Plain Column (not LazyColumn) so all items compose immediately: this makes "Profilo"
-        // (first focusable) receive the initial focus instead of flashing on "Disconnetti".
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 40.dp, vertical = 28.dp)
+    ) {
+        SettingsHubHeader()
+
+        Spacer(modifier = Modifier.height(20.dp))
+
         Column(
             modifier = Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            regularItems.forEachIndexed { index, item ->
-                SettingsMenuItemRow(
-                    item = item,
-                    isSelected = selectedItem == item.id,
-                    onClick = { onItemClick(item) },
-                    modifier = if (index == 0) Modifier.focusRequester(firstItemFocus) else Modifier
+            regularItems.chunked(4).forEach { rowItems ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    rowItems.forEach { item ->
+                        SettingsHubTile(
+                            item = item,
+                            onClick = { onItemClick(item) },
+                            modifier = Modifier
+                                .weight(1f)
+                                .focusRequester(requesters.getValue(item.id))
+                        )
+                    }
+                    // Celle vuote per mantenere l'allineamento delle colonne.
+                    repeat(4 - rowItems.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+
+            if (destructiveItems.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Color.White.copy(alpha = 0.06f))
+                )
+                destructiveItems.forEach { item ->
+                    SettingsMenuItemRow(
+                        item = item,
+                        isSelected = false,
+                        onClick = { onItemClick(item) }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+    }
+}
+
+@Composable
+private fun SettingsHubHeader() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            WaveStreamColors.Accent,
+                            WaveStreamColors.AccentDark
+                        )
+                    )
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        Column {
+            Text(
+                text = "Impostazioni",
+                style = MaterialTheme.typography.headlineSmall,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Configura la tua esperienza",
+                style = MaterialTheme.typography.bodySmall,
+                color = WaveStreamColors.TextTertiary
+            )
+        }
+    }
+}
+
+/**
+ * Tile dell'hub: icona + titolo + sottotitolo su superficie in vetro.
+ * Il focus è un alone chiaro, come il resto del design system.
+ *
+ * [status] è già predisposto per la Fase 2 (dato live al posto del sottotitolo
+ * statico); oggi arriva `null` e si mostra [SettingsMenuItem.subtitle].
+ */
+@Composable
+private fun SettingsHubTile(
+    item: SettingsMenuItem,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    status: String? = null,
+    statusColor: Color = WaveStreamColors.TextTertiary
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val fill by animateColorAsState(
+        targetValue = when {
+            item.isDestructive && isFocused -> WaveStreamColors.Error.copy(alpha = 0.18f)
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            else -> Color.White.copy(alpha = 0.04f)
+        },
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "hubTileFill"
+    )
+    val accent = if (item.isDestructive) WaveStreamColors.Error else WaveStreamColors.Accent
+    val stroke = if (isFocused) {
+        GlassTokens.accentStroke(accent)
+    } else {
+        GlassTokens.StrokeGradient
+    }
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "hubTileScale"
+    )
+
+    GlassSurface(
+        shape = RoundedCornerShape(18.dp),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
+        modifier = modifier
+            .height(124.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (isFocused) accent.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.06f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = item.icon,
+                    contentDescription = null,
+                    tint = when {
+                        item.isDestructive -> WaveStreamColors.Error
+                        isFocused -> WaveStreamColors.Accent
+                        else -> WaveStreamColors.TextSecondary
+                    },
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Column {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (isFocused || item.isDestructive) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+                    fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = status ?: item.subtitle.orEmpty(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (status != null) statusColor else WaveStreamColors.TextTertiary,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
-        
-        // Separator before destructive actions
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp, vertical = 16.dp)
-                .height(1.dp)
-                .background(Color.White.copy(alpha = 0.06f))
+    }
+}
+
+/** Pulsante "indietro" in vetro della vista sezione. */
+@Composable
+private fun SettingsBackButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "settingsBackScale"
+    )
+    val background by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.04f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "settingsBackBg"
+    )
+
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(50))
+            .background(background)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Indietro",
+            tint = WaveStreamColors.TextPrimary,
+            modifier = Modifier.size(24.dp)
         )
-        
-        // Destructive items (logout, etc.)
-        destructiveItems.forEach { item ->
-            SettingsMenuItemRow(
-                item = item,
-                isSelected = selectedItem == item.id,
-                onClick = { onItemClick(item) }
-            )
+    }
+}
+
+/**
+ * Vista sezione: contenuto a tutta larghezza (max 1200dp, centrato) con il pulsante
+ * indietro in alto. Prima la sezione era confinata accanto alla sidebar da 350dp.
+ */
+@Composable
+private fun SettingsDetail(
+    onBack: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 40.dp, vertical = 28.dp),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 1200.dp)
+                .fillMaxWidth()
+                .fillMaxHeight()
+        ) {
+            SettingsBackButton(onClick = onBack)
+            Spacer(modifier = Modifier.height(16.dp))
+            content()
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
