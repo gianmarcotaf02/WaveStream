@@ -237,7 +237,7 @@ class MainActivity : FragmentActivity() {
     private var pendingMovieDuration: Long? = null
 
     /** Play di un film con eventuale menu di scelta sorgente (hero). */
-    private fun playMovieWithSourceChoice(movieId: Long, title: String) {
+    fun playMovieWithSourceChoice(movieId: Long, title: String) {
         lifecycleScope.launch {
             val movie = runCatching { movieDao.getMovieById(movieId) }.getOrNull()
             val sources = if (movie != null) movieSourceResolver.resolve(movie) else emptyList()
@@ -260,7 +260,12 @@ class MainActivity : FragmentActivity() {
             putExtra("title", title)
             if (!streamUrl.isNullOrEmpty()) putExtra("stream_url", streamUrl)
         }
-        startActivityWithTransition(intent)
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            this,
+            it.wavestream.app.R.anim.zoom_in_enter,
+            it.wavestream.app.R.anim.zoom_in_exit
+        )
+        startActivity(intent, options.toBundle())
     }
     
     fun playTrailer(trailerKey: String) {
@@ -741,7 +746,7 @@ private fun MainActivityScreen(
                                 // "Guarda adesso" → griglia canali della partita mostrata
                                 homeViewModel.openSerieAChannelPicker(heroItem.serieAMatchId)
                             } else if (heroItem.contentType == "MOVIE") {
-                                playMovieWithSourceChoice(heroItem.id, heroItem.title)
+                                activity.playMovieWithSourceChoice(heroItem.id, heroItem.title)
                             } else {
                                 val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
                                     putExtra("content_id", heroItem.id)
