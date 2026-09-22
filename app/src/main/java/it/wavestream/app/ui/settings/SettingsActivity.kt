@@ -62,6 +62,8 @@ import it.wavestream.app.ui.loading.LoadingActivity
 import it.wavestream.app.ui.MainActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
+import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -2616,45 +2618,70 @@ private fun SettingsDropdown(
     val displayValue = options.find { it.first == value }?.second ?: value
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        animationSpec = tween(150),
-        label = "dropdownBorder"
+
+    // Passo 3 — riga in vetro: una sola animazione (fill) + bordo accent su focus.
+    // Prima era un pannello opaco (SurfaceDark) con bordo netto accent: "rettangolo
+    // appoggiato sopra" la scheda. Ora usa gli stessi token di GlassCard/ContentSortFilter.
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "dropdownFill"
     )
-    
+    val stroke = if (isFocused) {
+        GlassTokens.accentStroke(WaveStreamColors.Accent)
+    } else {
+        GlassTokens.StrokeGradient
+    }
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "dropdownScale"
+    )
+
     Column {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyMedium,
-            color = WaveStreamColors.TextPrimary
+            color = WaveStreamColors.TextSecondary
         )
         Spacer(modifier = Modifier.height(8.dp))
         Box {
-            Row(
+            GlassSurface(
+                shape = RoundedCornerShape(12.dp),
+                fill = fill,
+                stroke = stroke,
+                strokeWidth = if (isFocused) 1.5.dp else 1.dp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(2.dp, borderColor, RoundedCornerShape(8.dp))
-                    .background(WaveStreamColors.SurfaceDark)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                    }
                     .focusable(interactionSource = interactionSource)
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
                     ) { expanded = true }
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = displayValue,
-                    color = WaveStreamColors.TextPrimary
-                )
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    tint = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = displayValue,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+                        fontWeight = if (isFocused) FontWeight.SemiBold else FontWeight.Normal
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        tint = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextSecondary
+                    )
+                }
             }
             DropdownMenu(
                 expanded = expanded,
