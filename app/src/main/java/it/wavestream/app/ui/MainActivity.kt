@@ -910,6 +910,7 @@ private fun MainNavPill(
     // metà viaggio e riesplodere all'arrivo.
     val tabRootLeft = remember { mutableStateMapOf<MainTab, Float>() }
     val tabWidthPx = remember { mutableStateMapOf<MainTab, Float>() }
+    val tabHeightPx = remember { mutableStateMapOf<MainTab, Float>() }
     var containerRootLeft by remember { mutableStateOf(0f) }
     val indicatorX = remember { Animatable(0f) }
     val indicatorWidth = remember { Animatable(0f) }
@@ -977,7 +978,10 @@ private fun MainNavPill(
                     modifier = Modifier
                         .offset { IntOffset(indicatorX.value.roundToInt(), 0) }
                         .width(with(density) { indicatorWidth.value.toDp() })
-                        .fillMaxHeight()
+                        // Altezza = altezza reale del tab misurata: NON usare
+                        // fillMaxHeight(), che prende la max constraint del genitore
+                        // (schermo intero) e gonfia box + pillola a tutta altezza.
+                        .height(with(density) { (tabHeightPx[selectedTab] ?: 0f).toDp() })
                         .clip(RoundedCornerShape(50))
                         .background(WaveStreamColors.Accent.copy(alpha = 0.85f))
                 )
@@ -1090,8 +1094,10 @@ private fun MainNavPill(
                         tabHeight = coords.size.height.toFloat()
                         val left = rootPos.x
                         val width = coords.size.width.toFloat()
+                        val height = coords.size.height.toFloat()
                         if (tabRootLeft[tab] != left) tabRootLeft[tab] = left
                         if (tabWidthPx[tab] != width) tabWidthPx[tab] = width
+                        if (tabHeightPx[tab] != height) tabHeightPx[tab] = height
                     }
                     .padding(horizontal = 14.dp, vertical = 7.dp)
             ) {
