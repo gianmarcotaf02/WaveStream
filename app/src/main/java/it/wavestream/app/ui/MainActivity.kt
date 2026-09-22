@@ -116,6 +116,10 @@ import it.wavestream.app.ui.home.HomeContentType
 import it.wavestream.app.ui.home.HomeViewModel
 import it.wavestream.app.ui.home.SerieAChannelPickerDialog
 import it.wavestream.app.ui.player.PlayerActivity
+import it.wavestream.app.data.database.dao.MovieDao
+import it.wavestream.app.data.database.entity.StreamProvider
+import it.wavestream.app.data.repository.MovieSourceResolver
+import it.wavestream.app.ui.dialog.MovieSourceDialog
 import it.wavestream.app.ui.search.SearchActivity
 import it.wavestream.app.ui.settings.SettingsActivity
 import it.wavestream.app.ui.theme.GlassSurface
@@ -203,12 +207,61 @@ class MainActivity : FragmentActivity() {
                     onTabChanged = { currentTab = it },
                     activity = this
                 )
+
+                // Menu di scelta sorgente per il play diretto dell'hero (film multi-versione)
+                pendingMovieSources.value?.let { sources ->
+                    MovieSourceDialog(
+                        movieTitle = pendingMovieTitle,
+                        sources = sources,
+                        fallbackDurationSeconds = pendingMovieDuration,
+                        onSelect = { provider ->
+                            pendingMovieSources.value = null
+                            lifecycleScope.launch { movieSourceResolver.markUsed(provider.id) }
+                            launchPlayer(provider.movieId ?: 0L, "MOVIE", pendingMovieTitle, provider.streamUrl)
+                        },
+                        onDismiss = { pendingMovieSources.value = null }
+                    )
+                }
             }
         }
     }
     
     @Inject lateinit var userPreferences: UserPreferences
     @Inject lateinit var trailerManager: it.wavestream.app.util.TrailerManager
+    @Inject lateinit var movieDao: MovieDao
+    @Inject lateinit var movieSourceResolver: MovieSourceResolver
+
+    // Sorgenti in attesa di scelta (film con più versioni) dal play dell'hero
+    private val pendingMovieSources = mutableStateOf<List<StreamProvider>?>(null)
+    private var pendingMovieTitle: String = ""
+    private var pendingMovieDuration: Long? = null
+
+    /** Play di un film con eventuale menu di scelta sorgente (hero). */
+    private fun playMovieWithSourceChoice(movieId: Long, title: String) {
+        lifecycleScope.launch {
+            val movie = runCatching { movieDao.getMovieById(movieId) }.getOrNull()
+            val sources = if (movie != null) movieSourceResolver.resolve(movie) else emptyList()
+            if (sources.size > 1) {
+                pendingMovieTitle = title.ifBlank { movie?.title ?: "" }
+                pendingMovieDuration = movie?.duration ?: movie?.tmdbRuntime?.toLong()?.times(60)
+                pendingMovieSources.value = sources
+            } else {
+                val provider = sources.firstOrNull()
+                provider?.let { p -> lifecycleScope.launch { movieSourceResolver.markUsed(p.id) } }
+                launchPlayer(movieId, "MOVIE", title, provider?.streamUrl)
+            }
+        }
+    }
+
+    private fun launchPlayer(contentId: Long, contentTypeName: String, title: String, streamUrl: String?) {
+        val intent = Intent(this, PlayerActivity::class.java).apply {
+            putExtra("content_id", contentId)
+            putExtra("content_type", contentTypeName)
+            putExtra("title", title)
+            if (!streamUrl.isNullOrEmpty()) putExtra("stream_url", streamUrl)
+        }
+        startActivityWithTransition(intent)
+    }
     
     fun playTrailer(trailerKey: String) {
         lifecycleScope.launch {
@@ -687,6 +740,8 @@ private fun MainActivityScreen(
                             if (heroItem.contentType == "SERIEA_MATCH") {
                                 // "Guarda adesso" → griglia canali della partita mostrata
                                 homeViewModel.openSerieAChannelPicker(heroItem.serieAMatchId)
+                            } else if (heroItem.contentType == "MOVIE") {
+                                playMovieWithSourceChoice(heroItem.id, heroItem.title)
                             } else {
                                 val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
                                     putExtra("content_id", heroItem.id)
