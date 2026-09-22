@@ -52,10 +52,11 @@ fun MovieSourceDialog(
     Dialog(onDismissRequest = onDismiss) {
         GlassSurface(
             shape = RoundedCornerShape(22.dp),
-            fill = GlassTokens.SurfaceFillStrong,
+            // Pannello vetro: base scura semi-opaca (leggibile) + bordo a gradiente.
+            // NB: niente blur — RenderEffect sfocherebbe il contenuto stesso del dialog.
+            fill = WaveStreamColors.BackgroundSecondary.copy(alpha = 0.94f),
             stroke = GlassTokens.StrokeGradient,
             strokeWidth = 1.dp,
-            blurEnabled = true,
             modifier = Modifier.width(560.dp)
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
