@@ -440,20 +440,24 @@ private fun DownloadInProgressCard(
     onCancelClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    // Restyle — card in vetro (prima: pannello a tinta piena BackgroundSecondary).
+    GlassSurface(
+        shape = RoundedCornerShape(14.dp),
+        fill = Color.White.copy(alpha = 0.05f),
         modifier = modifier
             .fillMaxWidth()
             .height(100.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(WaveStreamColors.BackgroundSecondary),
-        verticalAlignment = Alignment.CenterVertically
     ) {
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
         // Poster
         Box(
             modifier = Modifier
                 .width(70.dp)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
+                .clip(RoundedCornerShape(topStart = 14.dp, bottomStart = 14.dp))
         ) {
             AsyncImage(
                 model = download.posterUrl,
@@ -489,7 +493,7 @@ private fun DownloadInProgressCard(
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp)),
                 color = WaveStreamColors.Accent,
-                trackColor = WaveStreamColors.BackgroundTertiary
+                trackColor = Color.White.copy(alpha = 0.10f)
             )
             
             Spacer(modifier = Modifier.height(4.dp))
@@ -501,11 +505,12 @@ private fun DownloadInProgressCard(
             )
         }
         
-        // Cancel button
-        CancelButton(
-            onClick = onCancelClick,
-            modifier = Modifier.padding(end = 16.dp)
-        )
+            // Cancel button
+            CancelButton(
+                onClick = onCancelClick,
+                modifier = Modifier.padding(end = 16.dp)
+            )
+        }
     }
 }
 
@@ -516,23 +521,24 @@ private fun DeleteButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
+
+    // Restyle — alone rosso (Error) su focus, vetro tenue a riposo; niente bordo netto 2dp.
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) Color.Red.copy(alpha = 0.2f) else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Error.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.04f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "deleteBg"
     )
-    
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) Color.Red else Color.Transparent,
-        label = "deleteBorder"
-    )
-    
+
     Box(
         modifier = modifier
             .size(40.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(50))
             .background(backgroundColor)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                brush = GlassTokens.accentStroke(WaveStreamColors.Error),
+                shape = RoundedCornerShape(50)
+            )
             .focusable(interactionSource = interactionSource)
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Enter) {
@@ -550,7 +556,7 @@ private fun DeleteButton(
         Icon(
             imageVector = Icons.Default.Delete,
             contentDescription = "Elimina",
-            tint = if (isFocused) Color.Red else WaveStreamColors.TextSecondary,
+            tint = if (isFocused) WaveStreamColors.Error else WaveStreamColors.TextSecondary,
             modifier = Modifier.size(24.dp)
         )
     }
@@ -563,23 +569,24 @@ private fun CancelButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
+
+    // Restyle — come DeleteButton: alone rosso su focus, vetro tenue a riposo.
     val backgroundColor by animateColorAsState(
-        targetValue = if (isFocused) Color.Red.copy(alpha = 0.2f) else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Error.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.04f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
         label = "cancelBg"
     )
-    
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) Color.Red else Color.Transparent,
-        label = "cancelBorder"
-    )
-    
+
     Box(
         modifier = modifier
             .size(40.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(50))
             .background(backgroundColor)
+            .border(
+                width = if (isFocused) 1.5.dp else 0.dp,
+                brush = GlassTokens.accentStroke(WaveStreamColors.Error),
+                shape = RoundedCornerShape(50)
+            )
             .focusable(interactionSource = interactionSource)
             .onKeyEvent { keyEvent ->
                 if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Enter) {
@@ -597,7 +604,7 @@ private fun CancelButton(
         Icon(
             imageVector = Icons.Default.Close,
             contentDescription = "Annulla",
-            tint = if (isFocused) Color.Red else WaveStreamColors.TextSecondary,
+            tint = if (isFocused) WaveStreamColors.Error else WaveStreamColors.TextSecondary,
             modifier = Modifier.size(24.dp)
         )
     }
