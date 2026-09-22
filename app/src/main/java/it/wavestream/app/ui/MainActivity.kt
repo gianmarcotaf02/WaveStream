@@ -1043,7 +1043,6 @@ private fun MainNavPill(
                             Modifier.focusRequester(selectedFocusRequester)
                         else Modifier
                     )
-                    .focusable(interactionSource = interactionSource)
                     .onPreviewKeyEvent { ev ->
                         if (ev.type == KeyEventType.KeyDown && ev.key == Key.DirectionDown) {
                             onDownPress()
@@ -1102,6 +1101,9 @@ private fun MainNavPill(
                             false
                         }
                     }
+                    // I gestori di tasto DEVONO stare prima di `focusable()`: se stanno
+                    // dopo, `clickable` (più interno) consuma Enter e il menu non si apre.
+                    .focusable(interactionSource = interactionSource)
                     .clickable(interactionSource = interactionSource, indication = null) {
                         if (isSelected && hasSubmenu) {
                             onTabLongPress(
