@@ -564,22 +564,32 @@ private fun CategorySearchBar(
                 modifier = Modifier.size(20.dp)
             )
             Box(modifier = Modifier.weight(1f)) {
-                if (query.isEmpty()) {
-                    Text(
-                        text = "Cerca categoria...",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = WaveStreamColors.TextTertiary
-                    )
-                }
                 BasicTextField(
                     value = query,
                     onValueChange = onQueryChange,
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = WaveStreamColors.TextPrimary),
                     cursorBrush = SolidColor(WaveStreamColors.Accent),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusable(interactionSource = interactionSource)
+                    // interactionSource passato al field (pattern usato in CreateListDialog):
+                    // niente .focusable() esterno, altrimenti il campo prende il focus ma
+                    // non riceve la tastiera/cursore.
+                    interactionSource = interactionSource,
+                    modifier = Modifier.fillMaxWidth(),
+                    decorationBox = { inner ->
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            if (query.isEmpty()) {
+                                Text(
+                                    text = "Cerca categoria...",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = WaveStreamColors.TextTertiary
+                                )
+                            }
+                            inner()
+                        }
+                    }
                 )
             }
             if (query.isNotEmpty()) {
