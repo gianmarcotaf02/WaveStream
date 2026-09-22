@@ -1681,6 +1681,8 @@ private fun MiniTopBar(
     firstButtonFocusRequester: FocusRequester? = null,
     onTabLongPress: (MainTab, Offset, FocusRequester) -> Unit = { _, _, _ -> },
     navDropdownOpen: Boolean = false,
+    navDropdownTab: MainTab? = null,
+    onNavDropdownDismiss: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -1728,7 +1730,9 @@ private fun MiniTopBar(
             selectedFocusRequester = if (navDropdownOpen) null else navFocusRequester,
             onSearchClick = onSearchClick,
             searchButtonFocusRequester = searchButtonFocusRequester,
-            onTabLongPress = onTabLongPress
+            onTabLongPress = onTabLongPress,
+            navDropdownTab = navDropdownTab,
+            onNavDropdownDismiss = onNavDropdownDismiss
         )
 
         Spacer(modifier = Modifier.weight(1f))
