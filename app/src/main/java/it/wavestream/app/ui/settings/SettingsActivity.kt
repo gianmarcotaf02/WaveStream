@@ -2609,23 +2609,28 @@ private fun SettingsSection(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        // Passo 2 — titolo in stile editoriale, come la Home: eyebrow in accent maiuscolo
-        // + titolo grande. Prima era un singolo Text headlineSmall, identico in ogni
-        // sezione: nessuna gerarchia, nessun carattere.
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelMedium,
-            color = WaveStreamColors.Accent,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 2.sp
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineMedium,
-            color = WaveStreamColors.TextPrimary,
-            fontWeight = FontWeight.Bold
-        )
+        // Passo 3 — niente più eyebrow testuale: era `title.uppercase()`, cioè il
+        // titolo ripetuto due volte in ogni sezione ("GUIDA TV (EPG)" + "Guida TV (EPG)").
+        // Il carattere editoriale resta affidato a un elemento accent non testuale
+        // (barretta verticale), così la sezione ha una gerarchia senza ridondanza.
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(28.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(WaveStreamColors.Accent)
+            )
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
+        }
         Spacer(modifier = Modifier.height(20.dp))
 
         // Contenuto dentro una superficie in vetro: la sezione smette di essere un
