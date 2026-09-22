@@ -9,13 +9,15 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,120 +27,122 @@ import it.wavestream.app.data.database.entity.StreamQuality
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 /**
- * Compose Dialog for selecting stream provider when multiple sources are available
+ * Dialog mostrato quando un film unificato ha più versioni/sorgenti.
+ *
+ * Ogni riga mostra: titolo del contenuto, qualità rilevata dal VOD, categoria di
+ * appartenenza e durata (per sicurezza). Le sorgenti arrivano già ordinate per
+ * qualità decrescente dal DAO.
  */
 @Composable
-fun StreamSelectionDialog(
+fun MovieSourceDialog(
     movieTitle: String,
-    providers: List<StreamProvider>,
-    onProviderSelected: (StreamProvider) -> Unit,
+    sources: List<StreamProvider>,
+    fallbackDurationSeconds: Long? = null,
+    onSelect: (StreamProvider) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val firstFocus = remember { FocusRequester() }
+
     Dialog(onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
-                .width(500.dp)
+                .width(560.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(WaveStreamColors.BackgroundSecondary)
                 .padding(24.dp)
         ) {
-            // Title
             Text(
                 text = movieTitle,
                 style = MaterialTheme.typography.headlineSmall,
                 color = WaveStreamColors.TextPrimary,
                 fontWeight = FontWeight.Bold
             )
-            
             Spacer(modifier = Modifier.height(4.dp))
-            
             Text(
-                text = "Seleziona sorgente",
+                text = if (sources.size == 1) "1 versione disponibile" else "${sources.size} versioni disponibili",
                 style = MaterialTheme.typography.bodyMedium,
                 color = WaveStreamColors.TextSecondary
             )
-            
             Spacer(modifier = Modifier.height(16.dp))
-            
-            // Providers list
+
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.heightIn(max = 400.dp)
+                modifier = Modifier.heightIn(max = 420.dp)
             ) {
-                items(providers) { provider ->
-                    ProviderItem(
+                itemsIndexed(sources, key = { _, p -> p.id }) { index, provider ->
+                    SourceItem(
                         provider = provider,
-                        onClick = { onProviderSelected(provider) }
+                        fallbackDurationSeconds = fallbackDurationSeconds,
+                        focusRequester = if (index == 0) firstFocus else null,
+                        onClick = { onSelect(provider) }
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
-            // Cancel button
             TextButton(
                 onClick = onDismiss,
                 modifier = Modifier.align(Alignment.End)
             ) {
-                Text(
-                    text = "Annulla",
-                    color = WaveStreamColors.TextSecondary
-                )
+                Text(text = "Annulla", color = WaveStreamColors.TextSecondary)
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        runCatching { firstFocus.requestFocus() }
     }
 }
 
 @Composable
-private fun ProviderItem(
+private fun SourceItem(
     provider: StreamProvider,
+    fallbackDurationSeconds: Long?,
+    focusRequester: FocusRequester?,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
+
     val backgroundColor by animateColorAsState(
         targetValue = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.2f) else WaveStreamColors.BackgroundTertiary,
-        label = "providerBg"
+        label = "sourceBg"
     )
-    
     val borderColor by animateColorAsState(
         targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-        label = "providerBorder"
+        label = "sourceBorder"
     )
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .border(2.dp, borderColor, RoundedCornerShape(12.dp))
             .background(backgroundColor)
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .focusable(interactionSource = interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Provider info
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = provider.originalName,
                 style = MaterialTheme.typography.bodyLarge,
                 color = WaveStreamColors.TextPrimary,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                maxLines = 2
             )
-            
-            // Subtitle
+
             val subtitleParts = buildList {
-                provider.category?.let { add(it) }
+                provider.category?.takeIf { it.isNotBlank() }?.let { add(it) }
                 provider.language?.let { add(it) }
                 if (provider.isExtended) add("Extended")
+                if (provider.isHdr) add("HDR")
+                formatDuration(provider.durationSeconds ?: fallbackDurationSeconds)?.let { add(it) }
             }
-            
             if (subtitleParts.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = subtitleParts.joinToString(" • "),
                     style = MaterialTheme.typography.bodySmall,
@@ -146,19 +150,10 @@ private fun ProviderItem(
                 )
             }
         }
-        
-        // Quality badge
-        val qualityText = buildString {
-            append(when (provider.quality) {
-                StreamQuality.AUTO -> "Auto"
-                StreamQuality.UHD_4K, StreamQuality.UHD -> "4K"
-                StreamQuality.FHD, StreamQuality.HD -> "HD"
-                StreamQuality.SD -> "SD"
-                StreamQuality.UNKNOWN -> ""
-            })
-            if (provider.isHdr && isNotEmpty()) append(" HDR")
-        }
-        
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        val qualityText = qualityLabel(provider)
         if (qualityText.isNotEmpty()) {
             Box(
                 modifier = Modifier
@@ -177,32 +172,32 @@ private fun ProviderItem(
     }
 }
 
-/**
- * Helper class for backward compatibility - wraps Compose dialog in function call
- */
-object StreamSelectionDialogHelper {
-    private var showDialog: MutableState<Boolean>? = null
-    private var dialogData: Triple<String, List<StreamProvider>, (StreamProvider) -> Unit>? = null
-    
-    /**
-     * Get current dialog state for composition
-     */
-    @Composable
-    fun DialogHost() {
-        val show = showDialog?.value ?: return
-        val data = dialogData ?: return
-        
-        if (show) {
-            StreamSelectionDialog(
-                movieTitle = data.first,
-                providers = data.second,
-                onProviderSelected = { provider ->
-                    showDialog?.value = false
-                    data.third(provider)
-                },
-                onDismiss = { showDialog?.value = false }
-            )
-        }
+private fun qualityLabel(provider: StreamProvider): String = buildString {
+    val base = when (provider.quality) {
+        StreamQuality.AUTO -> "AUTO"
+        StreamQuality.UHD_4K, StreamQuality.UHD -> "4K"
+        StreamQuality.FHD -> "FHD"
+        StreamQuality.HD -> "HD"
+        StreamQuality.SD -> "SD"
+        StreamQuality.UNKNOWN -> ""
+    }
+    append(base)
+    val res = provider.resolution
+    if (res != null && res.isNotBlank() && !base.contains(res)) {
+        if (isNotEmpty()) append(" ")
+        append(res)
     }
 }
 
+/** Formatta una durata in secondi come "1h 32m" (o "45 min"). */
+private fun formatDuration(seconds: Long?): String? {
+    if (seconds == null || seconds <= 0) return null
+    val totalMinutes = seconds / 60
+    return if (totalMinutes >= 60) {
+        val h = totalMinutes / 60
+        val m = totalMinutes % 60
+        if (m == 0L) "${h}h" else "${h}h ${m}m"
+    } else {
+        "$totalMinutes min"
+    }
+}
