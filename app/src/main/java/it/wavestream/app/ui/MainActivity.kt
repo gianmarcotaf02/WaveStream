@@ -906,6 +906,8 @@ private fun MainNavPill(
     onSearchClick: () -> Unit = {},
     searchButtonFocusRequester: FocusRequester? = null,
     onTabLongPress: (MainTab, Offset, FocusRequester) -> Unit = { _, _, _ -> },
+    navDropdownTab: MainTab? = null,
+    onNavDropdownDismiss: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
@@ -1023,6 +1025,20 @@ private fun MainNavPill(
             // dall'hero) viene agganciato IN PIÙ al solo tab selezionato.
             val returnRequester: FocusRequester = tabFocusRequester
 
+            // Apre la tendina o la chiude se è già aperta per questo tab (toggle
+            // di OK sul tab Film/Serie).
+            val toggleDropdown: () -> Unit = {
+                if (navDropdownTab == tab) {
+                    onNavDropdownDismiss()
+                } else {
+                    onTabLongPress(
+                        tab,
+                        Offset(tabOrigin.x, tabOrigin.y + tabHeight + 6f),
+                        returnRequester
+                    )
+                }
+            }
+
             // Lo sfondo accent della selezione non è più per-tab: lo disegna la bolla
             // condivisa che scivola. Qui resta solo l'alone bianco sul focus quando il
             // tab non è ancora quello selezionato.
@@ -1074,11 +1090,7 @@ private fun MainNavPill(
                                         longPressJob = tabCoroutineScope.launch {
                                             kotlinx.coroutines.delay(450L)
                                             longPressTriggered = true
-                                            onTabLongPress(
-                                                tab,
-                                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 6f),
-                                                returnRequester
-                                            )
+                                            toggleDropdown()
                                         }
                                     }
                                     true
@@ -1088,13 +1100,8 @@ private fun MainNavPill(
                                     longPressJob?.cancel()
                                     if (!longPressTriggered) {
                                         if (isSelected) {
-                                            // Già sul tab: OK (breve) apre la tendina
-                                            // ancorata sotto il tab.
-                                            onTabLongPress(
-                                                tab,
-                                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 6f),
-                                                returnRequester
-                                            )
+                                            // Già sul tab: OK apre/chiude la tendina.
+                                            toggleDropdown()
                                         } else {
                                             onTabSelected(tab)
                                         }
@@ -1112,11 +1119,7 @@ private fun MainNavPill(
                     .focusable(interactionSource = interactionSource)
                     .clickable(interactionSource = interactionSource, indication = null) {
                         if (isSelected && hasSubmenu) {
-                            onTabLongPress(
-                                tab,
-                                Offset(tabOrigin.x, tabOrigin.y + tabHeight + 6f),
-                                returnRequester
-                            )
+                            toggleDropdown()
                         } else {
                             onTabSelected(tab)
                         }
@@ -1225,6 +1228,11 @@ private fun NavTabDropdownMenu(
                 isFirst = true,
                 isLast = false,
                 focusRequester = firstRequester,
+                // SU dal primo item riporta il focus al tab in alto (es. Film): così
+                // si può ripremere OK sul tab per chiudere la tendina.
+                onUpFromFirst = {
+                    try { state.returnFocus.requestFocus() } catch (_: Exception) { /* noop */ }
+                },
                 onClick = onOpenAllCategories
             )
             NavDropdownItem(
@@ -1245,6 +1253,7 @@ private fun NavDropdownItem(
     isFirst: Boolean,
     isLast: Boolean,
     focusRequester: FocusRequester?,
+    onUpFromFirst: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -1266,7 +1275,16 @@ private fun NavDropdownItem(
             .onPreviewKeyEvent { ev ->
                 if (ev.type == KeyEventType.KeyDown) {
                     when (ev.key) {
-                        Key.DirectionUp -> isFirst
+                        Key.DirectionUp -> {
+                            // Dal primo item si esce verso il tab (se richiesto),
+                            // altrimenti si resta in cima alla tendina.
+                            if (isFirst && onUpFromFirst != null) {
+                                onUpFromFirst()
+                                true
+                            } else {
+                                isFirst
+                            }
+                        }
                         Key.DirectionDown -> isLast
                         Key.DirectionLeft, Key.DirectionRight -> true
                         else -> false
