@@ -941,9 +941,11 @@ class PlaylistRepository @Inject constructor(
     
     private suspend fun saveMovies(playlistId: Long, movies: List<M3UParser.ParsedMovie>) {
         val entities = movies.map { entry ->
+            val cleaned = entry.cleanName.ifBlank { entry.originalName }
             Movie(
                 playlistId = playlistId,
-                name = entry.originalName,
+                name = cleaned,
+                cleanName = cleaned,
                 streamUrl = entry.streamUrl,
                 logoUrl = entry.logoUrl,
                 category = entry.category,
