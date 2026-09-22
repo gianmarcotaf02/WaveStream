@@ -69,6 +69,7 @@ class LoadingActivity : ComponentActivity() {
     @Inject lateinit var serieAMatchRepository: it.wavestream.app.data.repository.SerieAMatchRepository
     @Inject @ApplicationScope lateinit var applicationScope: CoroutineScope
     @Inject lateinit var contentCache: ContentCache
+    @Inject lateinit var movieUnificationService: it.wavestream.app.data.repository.MovieUnificationService
     
     private val homeViewModel: HomeViewModel by viewModels()
 
@@ -215,6 +216,11 @@ class LoadingActivity : ComponentActivity() {
                 // Backfill dell'anno di uscita dai nomi (playlist Xtream senza campo year):
                 // mantiene corretto l'ordinamento "Data di uscita" anche senza risincronizzare.
                 runCatching { playlistRepository.backfillReleaseYears() }
+
+                // Unificazione dei film doppioni/versioni (una-tantum + riconciliazione).
+                // Guardata da flag: dopo la prima esecuzione è praticamente un no-op.
+                runCatching { movieUnificationService.runFirstTimeIfNeeded() }
+                    .onFailure { Log.e("LoadingActivity", "Movie unification failed", it) }
 
                 loadEpgIfNeeded(playlists, forceRefresh, onStateUpdate)
                 refreshTrendingCategoriesIfNeeded(onStateUpdate)
