@@ -867,7 +867,7 @@ fun SearchScreen(
                             label = "searchSkeletonAlpha"
                         )
                         TvLazyVerticalGrid(
-                            columns = TvGridCells.Adaptive(minSize = 140.dp),
+                            columns = TvGridCells.Fixed(4),
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             verticalArrangement = Arrangement.spacedBy(24.dp),
                             contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
@@ -878,7 +878,7 @@ fun SearchScreen(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .height(210.dp)
+                                            .aspectRatio(2f / 3f)
                                             .clip(RoundedCornerShape(14.dp))
                                             .background(Color.White.copy(alpha = 0.06f * skeletonAlpha))
                                     )
@@ -914,7 +914,7 @@ fun SearchScreen(
                     }
                     results.isNotEmpty() -> {
                         TvLazyVerticalGrid(
-                            columns = TvGridCells.Adaptive(minSize = 140.dp),
+                            columns = TvGridCells.Fixed(4),
                             horizontalArrangement = Arrangement.spacedBy(16.dp),
                             verticalArrangement = Arrangement.spacedBy(24.dp),
                             contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp),
@@ -1106,7 +1106,7 @@ private fun SearchResultCard(
                 scaleX = scale
                 scaleY = scale
             }
-            .width(140.dp)
+            .fillMaxWidth()
             .focusable(interactionSource = interactionSource)
             .onPreviewKeyEvent { keyEvent ->
                 when {
@@ -1134,11 +1134,11 @@ private fun SearchResultCard(
                 }
             }
     ) {
-        // Poster
+        // Poster (2:3, adattato alla larghezza della colonna)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
+                .aspectRatio(2f / 3f)
                 .clip(RoundedCornerShape(14.dp))
                 .border(1.dp, borderColor, RoundedCornerShape(14.dp))
                 .background(posterFill),
