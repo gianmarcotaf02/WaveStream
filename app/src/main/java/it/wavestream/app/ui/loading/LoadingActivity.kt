@@ -217,20 +217,22 @@ class LoadingActivity : ComponentActivity() {
                 // mantiene corretto l'ordinamento "Data di uscita" anche senza risincronizzare.
                 runCatching { playlistRepository.backfillReleaseYears() }
 
-                // Unificazione dei film doppioni/versioni (una-tantum + riconciliazione).
-                // Guardata da flag: dopo la prima esecuzione è praticamente un no-op.
-                runCatching { movieUnificationService.runFirstTimeIfNeeded() }
-                    .onFailure { Log.e("LoadingActivity", "Movie unification failed", it) }
-
                 loadEpgIfNeeded(playlists, forceRefresh, onStateUpdate)
                 refreshTrendingCategoriesIfNeeded(onStateUpdate)
                 enrichHeroContent(onStateUpdate)
 
-                // Dopo l'arricchimento TMDB molti film hanno ora un tmdbId: unifica le
-                // eventuali varianti di titolo che puntano allo stesso contenuto.
-                runCatching { movieUnificationService.unifyByTmdbIdAllPlaylists() }
-                    .onFailure { Log.e("LoadingActivity", "TMDB-based movie unification failed", it) }
-                
+                // Unificazione film (una-tantum + merge per tmdbId) in BACKGROUND:
+                // è un lavoro pesante su librerie grandi e NON deve bloccare l'avvio.
+                // Guardata da flag: dopo la prima esecuzione è praticamente un no-op.
+                applicationScope.launch(Dispatchers.IO) {
+                    runCatching { movieUnificationService.runFirstTimeIfNeeded() }
+                        .onFailure { Log.e("LoadingActivity", "Movie unification failed", it) }
+                    // Dopo l'arricchimento TMDB molti film hanno ora un tmdbId: unifica le
+                    // eventuali varianti di titolo che puntano allo stesso contenuto.
+                    runCatching { movieUnificationService.unifyByTmdbIdAllPlaylists() }
+                        .onFailure { Log.e("LoadingActivity", "TMDB-based movie unification failed", it) }
+                }
+
                 // Calendario Serie A (football-data.org) per l'hero live — sync in
                 // parallelo ai preload, con timeout: mai un blocco duro se l'API
                 // non risponde (l'HomeViewModel rincorre comunque la sync da solo).
