@@ -460,9 +460,12 @@ private fun MainActivityScreen(
     val homeFocusMemory = it.wavestream.app.ui.home.LocalHomeFocusMemory.current
     LaunchedEffect(resumeTick) {
         if (resumeTick == 0) return@LaunchedEffect
+        // Cattura subito la chiave: eventuali focus transitori durante la
+        // ricomposizione non devono sovrascrivere l'intento di ripristino.
+        val targetKey = homeFocusMemory?.lastFocusedKey
         repeat(3) { withFrameNanos { } }
         kotlinx.coroutines.delay(250)
-        val restored = homeFocusMemory?.requesterFor(homeFocusMemory.lastFocusedKey)
+        val restored = homeFocusMemory?.requesterFor(targetKey)
         if (restored != null) {
             restored.requestFocusWhenReady()
         } else {

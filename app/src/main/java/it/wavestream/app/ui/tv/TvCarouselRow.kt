@@ -212,7 +212,7 @@ fun TvCarouselRow(
                         .focusRequester(itemFocusRequester)
                         .onFocusChanged { focusState ->
                             isFocused.value = focusState.isFocused
-                            if (focusState.isFocused) focusMemory?.onFocused(focusKey)
+                            if (focusState.hasFocus) focusMemory?.onFocused(focusKey)
                             if (isFirst) {
                                 isFirstItemFocused = focusState.isFocused
                             }

@@ -371,7 +371,7 @@ private fun TvHomeScreenContent(
                                 .focusRequester(gridRequester)
                                 .onFocusChanged { focusState ->
                                     isFocused = focusState.isFocused
-                                    if (focusState.isFocused) focusMemory?.onFocused(gridKey)
+                                    if (focusState.hasFocus) focusMemory?.onFocused(gridKey)
                                 }
                                 .focusable()
                                 .graphicsLayer {
