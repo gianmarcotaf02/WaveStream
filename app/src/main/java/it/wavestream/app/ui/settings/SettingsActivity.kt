@@ -101,6 +101,31 @@ data class SettingsMenuItem(
     val isDestructive: Boolean = false
 )
 
+/**
+ * Fase 2 — status "live" di una tile dell'hub: un dato reale dell'app (nome profilo,
+ * n. playlist, versione, connessione OpenSubtitles...) al posto del sottotitolo fisso.
+ * Tutte le fonti sono LOCALI (Room / DataStore / secure storage): nessuna chiamata di
+ * rete parte all'apertura dell'hub.
+ */
+@Immutable
+data class TileStatus(
+    val text: String,
+    val color: Color = WaveStreamColors.TextTertiary
+)
+
+/** Formatta "ultimo aggiornamento EPG" in testo relativo. */
+private fun epgStatusText(lastUpdate: Long): String {
+    if (lastUpdate <= 0L) return "Mai aggiornata"
+    val minutes = (System.currentTimeMillis() - lastUpdate) / 60_000L
+    return when {
+        minutes < 1L -> "Aggiornata ora"
+        minutes < 60L -> "Aggiornata $minutes min fa"
+        minutes < 60L * 24L -> "Aggiornata ${minutes / 60L} h fa"
+        minutes < 60L * 48L -> "Aggiornata ieri"
+        else -> "Aggiornata ${minutes / (60L * 24L)} giorni fa"
+    }
+}
+
 @AndroidEntryPoint
 class SettingsActivity : ComponentActivity() {
     
@@ -144,7 +169,64 @@ class SettingsActivity : ComponentActivity() {
                 }
             }
         }
-        
+
+        // ---- Fase 2: status live sulle tile (solo fonti locali) ----
+        // Reattivi dove il dato è un Flow (profilo, playlist, EPG): si aggiornano da soli.
+        val currentProfileId by userPreferences.getCurrentProfileIdFlow().collectAsState(initial = null)
+        val playlists by playlistDao.getAllPlaylists().collectAsState(initial = emptyList())
+        val epgLastUpdate by userPreferences.getEpgLastUpdateFlow().collectAsState(initial = 0L)
+        // Letture una-tantum (secure storage): una volta all'ingresso, non a ogni frame.
+        var profileName by remember { mutableStateOf<String?>(null) }
+        var openRouterConfigured by remember { mutableStateOf<Boolean?>(null) }
+        var subtitlesAuthenticated by remember { mutableStateOf<Boolean?>(null) }
+
+        LaunchedEffect(currentProfileId) {
+            val id = currentProfileId
+            profileName = if (id != null && id > 0) {
+                withContext(Dispatchers.IO) { profileDao.getProfileById(id)?.name }
+            } else null
+        }
+        LaunchedEffect(Unit) {
+            openRouterConfigured = withContext(Dispatchers.IO) {
+                !userPreferences.getOpenRouterApiKey().isNullOrBlank()
+            }
+            subtitlesAuthenticated = withContext(Dispatchers.IO) {
+                openSubtitlesRepository.isAuthenticated()
+            }
+        }
+
+        val tileStatuses: Map<String, TileStatus> = buildMap {
+            profileName?.takeIf { it.isNotBlank() }?.let {
+                put("profile", TileStatus(it, WaveStreamColors.TextPrimary))
+            }
+            put(
+                "playlist",
+                TileStatus(
+                    if (playlists.isEmpty()) "Nessuna playlist" else "${playlists.size} playlist"
+                )
+            )
+            subtitlesAuthenticated?.let {
+                put(
+                    "subtitles",
+                    TileStatus(
+                        if (it) "Connesso" else "Non configurato",
+                        if (it) WaveStreamColors.Success else WaveStreamColors.TextTertiary
+                    )
+                )
+            }
+            openRouterConfigured?.let {
+                put(
+                    "movieending",
+                    TileStatus(
+                        if (it) "Chiave configurata" else "Chiave non configurata",
+                        if (it) WaveStreamColors.Success else WaveStreamColors.TextTertiary
+                    )
+                )
+            }
+            put("epg", TileStatus(epgStatusText(epgLastUpdate)))
+            put("updates", TileStatus("Versione ${appUpdateManager.getInstalledVersionName()}"))
+        }
+
         val menuItems = listOf(
             SettingsMenuItem("profile", "Profilo", "Modifica nome e avatar", Icons.Default.Person),
             SettingsMenuItem("account", "Account", "Dettagli account Xtream", Icons.Default.Lock),
@@ -191,6 +273,7 @@ class SettingsActivity : ComponentActivity() {
             if (selectedMenuId == null) {
                 SettingsHub(
                     menuItems = menuItems,
+                    statuses = tileStatuses,
                     initialFocusId = lastOpenedId,
                     onItemClick = { item ->
                         when (item.id) {
@@ -261,6 +344,7 @@ class SettingsActivity : ComponentActivity() {
 @Composable
 private fun SettingsHub(
     menuItems: List<SettingsMenuItem>,
+    statuses: Map<String, TileStatus>,
     initialFocusId: String?,
     onItemClick: (SettingsMenuItem) -> Unit
 ) {
@@ -310,8 +394,11 @@ private fun SettingsHub(
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
                     rowItems.forEach { item ->
+                        val status = statuses[item.id]
                         SettingsHubTile(
                             item = item,
+                            status = status?.text,
+                            statusColor = status?.color ?: WaveStreamColors.TextTertiary,
                             onClick = { onItemClick(item) },
                             modifier = Modifier
                                 .weight(1f)
