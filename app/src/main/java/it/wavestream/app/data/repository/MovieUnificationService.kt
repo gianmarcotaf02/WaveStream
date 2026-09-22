@@ -78,6 +78,8 @@ class MovieUnificationService @Inject constructor(
         if (inputs.isEmpty()) return@withContext 0
 
         val existing = movieDao.getAllByPlaylistIncludingHidden(playlistId)
+        val existingByKey = existing.groupBy { groupKeyOf(it) }
+        val existingByTitle = existing.groupBy { ContentKey.normalizeTitle(it.cleanName ?: it.name) }
         val consumed = mutableSetOf<Long>()
         val active = mutableSetOf<Long>()
 
@@ -96,14 +98,12 @@ class MovieUnificationService @Inject constructor(
 
             // Righe esistenti corrispondenti: prima per chiave esatta, altrimenti
             // stesso titolo normalizzato e stesso anno (evita merge tra remake).
-            val exact = existing.filter {
-                it.id !in consumed && groupKeyOf(it) == ContentKey.groupKey(cleanTitle, year)
-            }
-            val candidates = if (exact.isNotEmpty()) exact else existing.filter {
-                it.id !in consumed &&
-                    ContentKey.normalizeTitle(it.cleanName ?: it.name) == ContentKey.normalizeTitle(cleanTitle) &&
-                    it.year == year
-            }
+            val exact = existingByKey[ContentKey.groupKey(cleanTitle, year)]
+                ?.filter { it.id !in consumed }
+                .orEmpty()
+            val candidates = if (exact.isNotEmpty()) exact else existingByTitle[ContentKey.normalizeTitle(cleanTitle)]
+                ?.filter { it.id !in consumed && it.year == year }
+                .orEmpty()
             candidates.forEach { consumed.add(it.id) }
 
             val canonicalExisting = candidates.minByOrNull { it.id }
