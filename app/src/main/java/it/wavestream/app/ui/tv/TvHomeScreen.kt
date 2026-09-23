@@ -1047,7 +1047,9 @@ fun HeroBanner(
                         .padding(
                             start = 72.dp, end = 24.dp,
                             top = if (isMatchHero) 28.dp else 20.dp,
-                            bottom = 8.dp
+                            // 16dp (era 8dp): l'ultimo elemento del blocco hero finiva sotto la
+                            // sezione caroselli, che copriva i minuti rimasti del CTA.
+                            bottom = 16.dp
                         )
                         .fillMaxHeight()
                         .fillMaxWidth(), // Force full width for buttons
@@ -1347,7 +1349,7 @@ fun HeroBanner(
                                 }
                             }
                             // Codice episodio mostrato in piccolo SOTTO l'etichetta, dentro il box
-                            val buttonBadge = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber, hero.newEpisodeCaughtUp, hero.contentType) {
+                            val buttonBadge = remember(isInProgress, isNextEpisode, hero.resumeEpisodeSeason, hero.resumeEpisodeNumber, hero.newEpisodeSeason, hero.newEpisodeNumber, hero.newEpisodeCaughtUp, hero.contentType, hero.resumeMinutes) {
                                 when {
                                     hero.contentType == "SERIEA_MATCH" -> null
                                     isInProgress && hero.resumeEpisodeSeason != null && hero.resumeEpisodeNumber != null ->
@@ -1357,6 +1359,10 @@ fun HeroBanner(
                                     hero.newEpisodeSeason != null && hero.newEpisodeNumber != null && hero.newEpisodeCaughtUp ->
                                         "S${hero.newEpisodeSeason}E${hero.newEpisodeNumber}"
                                     hero.contentType == "SERIES" -> "S1E1"
+                                    // Film in corso: i minuti rimasti stanno nella SECONDA RIGA del CTA
+                                    // (come SxEy per le serie). Prima erano un Text sotto la riga dei
+                                    // pulsanti e finivano coperti dalla sezione caroselli sottostante.
+                                    hero.resumeMinutes != null -> formatRemainingMinutes(hero.resumeMinutes!!)
                                     else -> null
                                 }
                             }
@@ -1374,8 +1380,10 @@ fun HeroBanner(
                                         spotShadowColor = WaveStreamColors.Accent
                                     }
                                     .then(if (playButtonFocusRequester != null) Modifier.focusRequester(playButtonFocusRequester) else Modifier)
-                                    // Serie TV (badge episodio): altezza ridotta rispetto ai film
-                                    .height(if (buttonBadge != null) 56.dp else 52.dp)
+                                    // Altezza UNICA per tutti i CTA: con il badge (SxEy o minuti
+                                    // rimasti) serve spazio per due righe, e un'altezza che cambia
+                                    // tra un hero e l'altro si vedeva come un "salto" in rotazione.
+                                    .height(56.dp)
                                     .wrapContentWidth()
                                     .widthIn(min = 140.dp)
                                     .clip(RoundedCornerShape(12.dp))
@@ -1455,26 +1463,27 @@ fun HeroBanner(
                                     }
                                 }
                                 
-                                // Progress bar integrated flush at the bottom edge of the button
+                                // Progress bar INSET.
+                                // Prima era a filo del bordo inferiore e copriva il border(3.dp)
+                                // del CTA: restava solo un cuneo viola sull'angolo arrotondato,
+                                // che sembrava un elemento estraneo stampato sopra il pulsante.
                                 if (hasProgress && hero.progressPercent != null) {
                                     val progress = hero.progressPercent.coerceIn(0.05f, 1f)
                                     Box(
-                                        modifier = Modifier.matchParentSize()
+                                        modifier = Modifier
+                                            .align(Alignment.BottomCenter)
+                                            .padding(start = 10.dp, end = 10.dp, bottom = 5.dp)
+                                            .fillMaxWidth()
+                                            .height(3.dp)
+                                            .clip(RoundedCornerShape(2.dp))
+                                            .background(Color.Black.copy(alpha = 0.25f))
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .align(Alignment.BottomStart)
-                                                .fillMaxWidth()
-                                                .height(4.dp)
-                                                .background(Color.Black.copy(alpha = 0.15f))
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxHeight()
-                                                    .fillMaxWidth(progress)
-                                                    .background(WaveStreamColors.Accent)
-                                            )
-                                        }
+                                                .fillMaxHeight()
+                                                .fillMaxWidth(progress)
+                                                .background(WaveStreamColors.Accent)
+                                        )
                                     }
                                 }
                             }
@@ -1537,22 +1546,9 @@ fun HeroBanner(
                             }
                         }
 
-                        // Text: "xx min rimasti di yy min" - Below the buttons row
-                        if (hero.resumeMinutes != null && hero.totalDurationMinutes != null) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            // Format minutes → "2h 7min" when >= 60, otherwise "X min"
-                            fun formatMins(m: Int): String = if (m >= 60) {
-                                val h = m / 60; val rem = m % 60
-                                if (rem > 0) "${h}h ${rem}min" else "${h}h"
-                            } else "$m min"
-                            Text(
-                                text = "${formatMins(hero.resumeMinutes!!)} rimasti di ${formatMins(hero.totalDurationMinutes!!)}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = WaveStreamColors.TextSecondary,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                        }
+                        // NB: i "xx min rimasti" non stanno più qui sotto la riga dei pulsanti:
+                        // la sezione caroselli copriva questa fascia e il testo risultava tagliato.
+                        // Ora è la seconda riga del CTA (vedi buttonBadge).
                 }  // Close Column
         }  // Close heroForeground AnimatedContent
         
