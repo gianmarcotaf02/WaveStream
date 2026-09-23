@@ -155,9 +155,10 @@ class PlayerActivity : ComponentActivity() {
     // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
     // al primo onVideoSizeChanged. -1 = non nota (es. serie/canali).
     private var sourceProviderId: Long = -1L
-    // La misura viene salvata una volta sola per sessione (onVideoSizeChanged può
-    // scattare più volte: rotazione, cambio di traccia, ecc.).
-    private var detectedHeightSaved = false
+    // Ultima altezza già scritta in DB in questa sessione. onVideoSizeChanged scatta più
+    // volte (primo frame, cambio traccia, rotazione) e i valori iniziali possono essere
+    // provvisori: si aggiorna finché il valore cambia, così in DB resta quello finale.
+    private var lastSavedHeight = -1
     
     // Seek state management - prevents reset during hold-to-seek
     private var isSeekingForward = false
@@ -840,8 +841,8 @@ class PlayerActivity : ComponentActivity() {
                 // Salvato una volta per sessione, così il menu delle versioni può
                 // mostrare un badge affidabile invece di una supposizione.
                 val height = videoSize.height
-                if (height > 0 && !detectedHeightSaved && sourceProviderId > 0) {
-                    detectedHeightSaved = true
+                if (height > 0 && height != lastSavedHeight && sourceProviderId > 0) {
+                    lastSavedHeight = height
                     lifecycleScope.launch {
                         runCatching { streamProviderDao.updateDetectedHeight(sourceProviderId, height) }
                     }
