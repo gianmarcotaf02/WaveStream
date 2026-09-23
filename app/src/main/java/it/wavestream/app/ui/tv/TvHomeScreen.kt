@@ -1684,114 +1684,17 @@ private fun HeroPageIndicator(
 
 
 /**
- * Hero action button (Play, Info) with optional progress bar
+ * "2h 7min rimasti" / "45 min rimasti" — seconda riga del CTA primario per i titoli in
+ * corso, equivalente dell'"SxEy" usato dalle serie. Compatto perché sta dentro il pulsante.
  */
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-private fun HeroButton(
-    text: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    isPrimary: Boolean,
-    onClick: () -> Unit,
-    onFocusChange: (Boolean) -> Unit,
-    progress: Float? = null,  // 0.0 to 1.0, null = no progress bar
-    focusRequester: FocusRequester? = null,
-    onLeftPress: (() -> Unit)? = null,   // Called when LEFT D-pad pressed while focused
-    onRightPress: (() -> Unit)? = null   // Called when RIGHT D-pad pressed while focused
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    LaunchedEffect(isFocused) {
-        onFocusChange(isFocused)
+private fun formatRemainingMinutes(minutes: Int): String =
+    if (minutes >= 60) {
+        val h = minutes / 60
+        val rem = minutes % 60
+        if (rem > 0) "${h}h ${rem}min rimasti" else "${h}h rimasti"
+    } else {
+        "$minutes min rimasti"
     }
-    
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.ButtonFocusScale else 1f,
-        animationSpec = AppAnimations.SpringButtonPress,
-        label = "heroButtonScale"
-    )
-    
-    val backgroundColor = when {
-        isPrimary && isFocused -> Color.White
-        isPrimary -> Color.White.copy(alpha = 0.9f)
-        isFocused -> WaveStreamColors.BackgroundTertiary
-        else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.8f)
-    }
-    
-    val contentColor = if (isPrimary) Color.Black else WaveStreamColors.TextPrimary
-    
-    Box(
-        modifier = Modifier
-            .wrapContentWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clip(RoundedCornerShape(8.dp))
-    ) {
-        // Button content
-        Row(
-            modifier = Modifier
-                .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
-                .onPreviewKeyEvent { keyEvent ->
-                    // Handle LEFT/RIGHT to trigger prev/next hero (when available)
-                    if (keyEvent.type == KeyEventType.KeyDown) {
-                        when (keyEvent.key) {
-                            Key.DirectionLeft -> {
-                                onLeftPress?.let { it(); true } ?: false
-                            }
-                            Key.DirectionRight -> {
-                                onRightPress?.let { it(); true } ?: false
-                            }
-                            else -> false
-                        }
-                    } else false
-                }
-                .background(backgroundColor)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick
-                )
-                .focusable(interactionSource = interactionSource)
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = contentColor,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                color = contentColor,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-        
-        // Progress bar at bottom of button (if provided)
-        progress?.let { prog ->
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .background(Color.Black.copy(alpha = 0.3f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(prog.coerceIn(0f, 1f))
-                        .background(WaveStreamColors.Accent)
-                )
-            }
-        }
-    }
-}
 
 /**
  * Hero circular icon button (for secondary actions like Info, Favorites, List)
