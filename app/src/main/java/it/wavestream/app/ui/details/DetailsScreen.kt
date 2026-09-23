@@ -98,6 +98,7 @@ data class DetailsState(
     val directorPeople: List<it.wavestream.app.data.entity.PersonInfo> = emptyList(),
     val posterUrl: String? = null,
     val backdropUrl: String? = null,
+    val logoUrl: String? = null,  // Titolo grafico (clear logo TMDb), null = testo
     val contentType: ContentType = ContentType.MOVIE,
     val isFavorite: Boolean = false,
     val trailerKey: String? = null,
@@ -356,15 +357,26 @@ fun DetailsScreen(
                             animationSpec = tween(durationMillis = 400)
                         )
                 ) {
-                    // Title
-                    Text(
-                        text = state.title,
-                        style = MaterialTheme.typography.displaySmall,
-                        color = WaveStreamColors.TextPrimary,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 3,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    // Title: clear logo TMDb se disponibile, altrimenti testo di sistema
+                    if (!state.logoUrl.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = state.logoUrl,
+                            contentDescription = state.title,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .heightIn(max = 72.dp)
+                                .widthIn(max = 420.dp)
+                        )
+                    } else {
+                        Text(
+                            text = state.title,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = WaveStreamColors.TextPrimary,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     

@@ -1106,16 +1106,30 @@ fun HeroBanner(
                             )
                             Spacer(modifier = Modifier.height(6.dp))
                         }
-                        Text(
-                            text = hero.title,
-                            // Fase 3.1 — titolo hero più grande, per riequilibrare la
-                            // gerarchia: la riga dei 5 rating resta invariata.
-                            style = MaterialTheme.typography.displaySmall,
-                            color = WaveStreamColors.TextPrimary,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        // Titolo: clear logo TMDb se disponibile, altrimenti testo.
+                        // Su TV la larghezza massima è più generosa per non rimpicciolire
+                        // i loghi orizzontali (che altrimenti restano alti pochi pixel).
+                        if (!hero.logoUrl.isNullOrEmpty()) {
+                            AsyncImage(
+                                model = hero.logoUrl,
+                                contentDescription = hero.title,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .heightIn(max = 88.dp)
+                                    .widthIn(max = 560.dp)
+                            )
+                        } else {
+                            Text(
+                                text = hero.title,
+                                // Fase 3.1 — titolo hero più grande, per riequilibrare la
+                                // gerarchia: la riga dei 5 rating resta invariata.
+                                style = MaterialTheme.typography.displaySmall,
+                                color = WaveStreamColors.TextPrimary,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                         
                         Spacer(modifier = Modifier.height(6.dp))
                         
