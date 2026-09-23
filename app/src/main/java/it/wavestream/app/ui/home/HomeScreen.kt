@@ -293,24 +293,13 @@ private fun HeroBanner(
                 .align(Alignment.BottomStart)
                 .padding(start = 48.dp, bottom = 28.dp, end = 48.dp)  // Reduced padding
         ) {
-            // Title: titolo grafico se disponibile, altrimenti testo di sistema
-            if (!item.logoUrl.isNullOrEmpty()) {
-                AsyncImage(
-                    model = item.logoUrl,
-                    contentDescription = item.title,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .heightIn(max = 64.dp)
-                        .widthIn(max = 360.dp)
-                )
-            } else {
-                Text(
-                    text = item.title,
-                    style = MaterialTheme.typography.displaySmall,  // Fase 3.1: più grande
-                    color = WaveStreamColors.TextPrimary,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            // Title
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.displaySmall,  // Fase 3.1: più grande
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Bold
+            )
             
             Spacer(modifier = Modifier.height(12.dp))  // Reduced spacing
             
