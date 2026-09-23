@@ -167,18 +167,21 @@ private fun SourceItem(
 
             val qualityText = qualityLabel(provider)
             if (qualityText.isNotEmpty()) {
+                // Badge OVALE in vetro accent: stessa trasparenza delle superfici della
+                // topbar (GlassTokens.accentFill = 12% di accent) + bordo a gradiente.
+                // Il valore è "reale" quando possibile: vedi [qualityLabel].
                 GlassSurface(
-                    shape = RoundedCornerShape(6.dp),
-                    fill = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.9f) else WaveStreamColors.Accent.copy(alpha = 0.7f),
+                    shape = RoundedCornerShape(50),
+                    fill = GlassTokens.accentFill(WaveStreamColors.Accent),
                     stroke = GlassTokens.accentStroke(WaveStreamColors.Accent),
                     strokeWidth = 1.dp
                 ) {
                     Text(
                         text = qualityText,
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
+                        color = WaveStreamColors.AccentLight,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                     )
                 }
             }
@@ -218,7 +221,36 @@ private fun GlassDismissButton(text: String, onClick: () -> Unit) {
     }
 }
 
-private fun qualityLabel(provider: StreamProvider): String = buildString {
+/**
+ * Etichetta qualità del badge.
+ *
+ * 1. Se disponibile, usa la risoluzione **REALE** misurata dal player quando la sorgente è
+ *    stata riprodotta ([StreamProvider.detectedHeight]): è l'unico dato verificato sul
+ *    contenuto effettivamente riproducibile.
+ * 2. Altrimenti ricade su quanto **dichiara il nome della sorgente** (`quality`/`resolution`,
+ *    derivati da [it.wavestream.app.data.parser.ContentNameParser]).
+ *
+ * La categoria di appartenenza del contenuto NON viene mai usata: stare nella categoria
+ * "4K" non significa essere 4K.
+ */
+private fun qualityLabel(provider: StreamProvider): String {
+    provider.detectedHeight?.takeIf { it > 0 }?.let { return detectedQualityLabel(it) }
+    return declaredQualityLabel(provider)
+}
+
+/** Risoluzione reale (px di altezza) → etichetta compatta. */
+private fun detectedQualityLabel(height: Int): String = when {
+    height >= 2160 -> "4K"
+    height >= 1440 -> "1440p"
+    height >= 1080 -> "1080p"
+    height >= 720 -> "720p"
+    height >= 576 -> "576p"
+    height >= 480 -> "480p"
+    else -> "${height}p"
+}
+
+/** Qualità dichiarata dal nome della sorgente (fallback, non verificata). */
+private fun declaredQualityLabel(provider: StreamProvider): String = buildString {
     val base = when (provider.quality) {
         StreamQuality.AUTO -> "AUTO"
         StreamQuality.UHD_4K, StreamQuality.UHD -> "4K"

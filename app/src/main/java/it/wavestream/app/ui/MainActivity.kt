@@ -222,7 +222,7 @@ class MainActivity : FragmentActivity() {
                             onSelect = { provider ->
                                 pendingMovieSources.value = null
                                 lifecycleScope.launch { movieSourceResolver.markUsed(provider.id) }
-                                launchPlayer(provider.movieId ?: 0L, "MOVIE", pendingMovieTitle, provider.streamUrl)
+                                launchPlayer(provider.movieId ?: 0L, "MOVIE", pendingMovieTitle, provider.streamUrl, provider.id)
                             },
                             onDismiss = { pendingMovieSources.value = null }
                         )
@@ -264,17 +264,27 @@ class MainActivity : FragmentActivity() {
             } else {
                 val provider = remembered ?: sources.firstOrNull()
                 provider?.let { p -> lifecycleScope.launch { movieSourceResolver.markUsed(p.id) } }
-                launchPlayer(movieId, "MOVIE", title, provider?.streamUrl)
+                launchPlayer(movieId, "MOVIE", title, provider?.streamUrl, provider?.id)
             }
         }
     }
 
-    private fun launchPlayer(contentId: Long, contentTypeName: String, title: String, streamUrl: String?) {
+    private fun launchPlayer(
+        contentId: Long,
+        contentTypeName: String,
+        title: String,
+        streamUrl: String?,
+        sourceProviderId: Long? = null
+    ) {
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("content_id", contentId)
             putExtra("content_type", contentTypeName)
             putExtra("title", title)
             if (!streamUrl.isNullOrEmpty()) putExtra("stream_url", streamUrl)
+            // Permette al player di registrare la qualità REALE di questa sorgente.
+            if (sourceProviderId != null && sourceProviderId > 0) {
+                putExtra("source_provider_id", sourceProviderId)
+            }
         }
         val options = ActivityOptionsCompat.makeCustomAnimation(
             this,

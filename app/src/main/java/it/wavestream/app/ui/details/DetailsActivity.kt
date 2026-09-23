@@ -180,7 +180,7 @@ class DetailsActivity : ComponentActivity() {
                     pendingMovieSources.value = null
                     streamUrl = provider.streamUrl
                     lifecycleScope.launch { movieSourceResolver.markUsed(provider.id) }
-                    launchPlayer(provider.streamUrl, null)
+                    launchPlayer(provider.streamUrl, null, provider.id)
                 },
                 onDismiss = { pendingMovieSources.value = null }
             )
@@ -1194,7 +1194,7 @@ class DetailsActivity : ComponentActivity() {
                     }
                     provider?.let { p -> movieSourceResolver.markUsed(p.id) }
                     streamUrl = url
-                    launchPlayer(url, null)
+                    launchPlayer(url, null, provider?.id)
                 }
             }
             return
@@ -1209,12 +1209,16 @@ class DetailsActivity : ComponentActivity() {
         launchPlayer(url, episode)
     }
 
-    private fun launchPlayer(url: String, episode: Episode?) {
+    private fun launchPlayer(url: String, episode: Episode?, sourceProviderId: Long? = null) {
         Log.d(TAG, "launchPlayer: episode=${episode?.name}, streamUrl=$url")
         val intent = Intent(this, PlayerActivity::class.java).apply {
             putExtra("content_id", episode?.id ?: contentId)
             putExtra("content_type", (episode?.let { ContentType.EPISODE } ?: contentType).name)
             putExtra("stream_url", url)
+            // Permette al player di registrare la qualità REALE di questa sorgente.
+            if (sourceProviderId != null && sourceProviderId > 0) {
+                putExtra("source_provider_id", sourceProviderId)
+            }
             // Title: series name + episode title
             // Priority: tmdbName > extract from playlist
             val displayTitle = episode?.let {
