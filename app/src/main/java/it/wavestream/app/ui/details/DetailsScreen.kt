@@ -957,8 +957,9 @@ private fun CastPersonCard(
 }
 
 /**
- * Ratings row - Modern minimal style with icon + value + label
- * Inspired by premium streaming services
+ * Ratings row - Badge ovali semi-trasparenti con icona + valore inline.
+ * Stile pill glass coerente col design dell'app. IMDb resta il badge primario
+ * (fallback N/A), gli altri appaiono se il dato c'è.
  */
 @Composable
 private fun RatingsBadges(
@@ -971,101 +972,88 @@ private fun RatingsBadges(
     tmdbVotes: String? = null
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(vertical = 4.dp)
     ) {
-        // Aurora: gerarchia informativa come nell'hero — solo rating esistenti.
-        // IMDb resta il badge primario (fallback N/A), gli altri appaiono se il dato c'è.
         if (imdbRating != null) {
             ModernRatingItem(
                 iconResId = R.drawable.imdb_logo,
-                value = imdbRating,
-                label = imdbVotes ?: "IMDb"
+                value = imdbRating
             )
         } else {
             ModernRatingItem(
                 iconResId = R.drawable.imdb_na,
-                value = "N/A",
-                label = "IMDb"
+                value = "N/A"
             )
         }
-        
+
         rottenTomatoesScore?.let { rtScore ->
             val isFresh = rtScore >= 60
             ModernRatingItem(
                 iconResId = if (isFresh) R.drawable.rotten_tomatoes_logo else R.drawable.rotten_tomatoes_rotten,
-                value = "$rtScore%",
-                label = "Tomatometer®"
+                value = "$rtScore%"
             )
         }
-        
+
         audienceScore?.let { audScore ->
             val isFresh = audScore >= 60
             ModernRatingItem(
                 iconResId = if (isFresh) R.drawable.popcornmeter_fresh else R.drawable.popcornmeter_rotten,
-                value = "$audScore%",
-                label = "Popcornmeter®"
+                value = "$audScore%"
             )
         }
-        
+
         metacriticScore?.let { metaScore ->
             ModernRatingItem(
                 iconResId = R.drawable.metacritic_logo,
-                value = "$metaScore",
-                label = "Metascore"
+                value = "$metaScore"
             )
         }
-        
+
         if (tmdbRating != null && tmdbRating > 0) {
             ModernRatingItem(
                 iconResId = R.drawable.tmdb_logo,
-                value = String.format("%.1f", tmdbRating),
-                label = tmdbVotes ?: "TMDb"
+                value = String.format("%.1f", tmdbRating)
             )
         }
     }
 }
 
 /**
- * Modern rating item - Icon + Value inline, Label below
+ * Badge ovale semi-trasparente: icona + valore inline, stile pill glass.
  */
 @Composable
 private fun ModernRatingItem(
     iconResId: Int,
-    value: String,
-    label: String
+    value: String
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .clip(RoundedCornerShape(percent = 50))
+            .background(GlassTokens.SurfaceFillStrong)
+            .border(
+                width = 1.dp,
+                brush = GlassTokens.StrokeGradient,
+                shape = RoundedCornerShape(percent = 50)
+            )
+            .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
-        // Icon + Value row
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Image(
-                painter = painterResource(id = iconResId),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                contentScale = ContentScale.Fit
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.titleMedium,
-                color = WaveStreamColors.TextPrimary,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                softWrap = false
-            )
-        }
-        
-        // Label below
-        Spacer(modifier = Modifier.height(4.dp))
+        Image(
+            painter = painterResource(id = iconResId),
+            contentDescription = null,
+            modifier = Modifier.size(22.dp),
+            contentScale = ContentScale.Fit
+        )
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = WaveStreamColors.TextTertiary
+            text = value,
+            style = MaterialTheme.typography.titleMedium,
+            color = WaveStreamColors.TextPrimary,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false
         )
     }
 }
