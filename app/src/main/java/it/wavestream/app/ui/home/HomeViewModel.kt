@@ -543,9 +543,9 @@ class HomeViewModel @Inject constructor(
                         loadPopularMovies()?.let { movies ->
                             if (movies.isNotEmpty()) {
                                 val newItems = movies.map { it.toCarouselItem() }
-                                // HOME tab uses "Film per te"; MOVIES tab uses "Film popolari"
+                                // Stesso titolo su HOME e MOVIES: la riga trending è unica.
                                 val idx = updatedRows.indexOfFirst {
-                                    it.title == "Film per te" || it.title == "Film popolari"
+                                    it.title == "Film in tendenza"
                                 }
                                 if (idx >= 0) {
                                     updatedRows[idx] = updatedRows[idx].copy(items = newItems)
@@ -559,9 +559,9 @@ class HomeViewModel @Inject constructor(
                         loadPopularSeries()?.let { series ->
                             if (series.isNotEmpty()) {
                                 val newItems = series.map { it.toCarouselItem() }
-                                // HOME tab uses "Serie TV per te"; SERIES tab uses "Serie TV popolari"
+                                // Stesso titolo su HOME e SERIES: la riga trending è unica.
                                 val idx = updatedRows.indexOfFirst {
-                                    it.title == "Serie TV per te" || it.title == "Serie TV popolari"
+                                    it.title == "Serie in tendenza"
                                 }
                                 if (idx >= 0) {
                                     updatedRows[idx] = updatedRows[idx].copy(items = newItems)
@@ -2449,22 +2449,24 @@ class HomeViewModel @Inject constructor(
             }
         }
         
-        // 3. Film per te
+        // 3. Film in tendenza (Top 10 TMDB, con numeri di classifica)
         popularMoviesDeferred.await()?.let { movies ->
             if (movies.isNotEmpty()) {
                 rows.add(CarouselRow(
-                    title = "Film per te",
-                    items = movies.map { it.toCarouselItem() }
+                    title = "Film in tendenza",
+                    items = movies.map { it.toCarouselItem() },
+                    isRanked = true
                 ))
             }
         }
         
-        // 4. Serie TV per te
+        // 4. Serie in tendenza (Top 10 TMDB, con numeri di classifica)
         popularSeriesDeferred.await()?.let { series ->
             if (series.isNotEmpty()) {
                 rows.add(CarouselRow(
-                    title = "Serie TV per te",
-                    items = series.map { it.toCarouselItem() }
+                    title = "Serie in tendenza",
+                    items = series.map { it.toCarouselItem() },
+                    isRanked = true
                 ))
             }
         }
@@ -2582,7 +2584,7 @@ class HomeViewModel @Inject constructor(
         loadPopularMovies()?.let { movies ->
             if (movies.isNotEmpty()) {
                 rows.add(CarouselRow(
-                    title = "Film popolari",
+                    title = "Film in tendenza",
                     items = movies.map { it.toCarouselItem() },
                     isRanked = true
                 ))
@@ -2748,7 +2750,7 @@ class HomeViewModel @Inject constructor(
         loadPopularSeries()?.let { series ->
             if (series.isNotEmpty()) {
                 rows.add(CarouselRow(
-                    title = "Serie TV popolari",
+                    title = "Serie in tendenza",
                     items = series.map { it.toCarouselItem() },
                     isRanked = true
                 ))
@@ -3208,7 +3210,10 @@ class HomeViewModel @Inject constructor(
                 
                 if (movies.isEmpty()) return@withContext null
                 
-                val result = movies.shuffled().take(10)
+                // ORDINE TRENDING: la query getByTrendingCategory ordina già per
+                // tmdbPopularity DESC (= ordine TMDB). NON va rimescolata: i numeri
+                // di classifica devono corrispondere alla posizione in tendenza.
+                val result = movies.take(10)
                 contentCache.popularMoviesCache = result.map { it.id }
                 contentCache.popularMoviesCacheTime = System.currentTimeMillis()
                 result
@@ -3260,7 +3265,10 @@ class HomeViewModel @Inject constructor(
                 
                 if (series.isEmpty()) return@withContext null
                 
-                val result = series.shuffled().take(10)
+                // ORDINE TRENDING: la query getByTrendingCategory ordina già per
+                // tmdbPopularity DESC (= ordine TMDB). NON va rimescolata: i numeri
+                // di classifica devono corrispondere alla posizione in tendenza.
+                val result = series.take(10)
                 contentCache.popularSeriesCache = result.map { it.id }
                 contentCache.popularSeriesCacheTime = System.currentTimeMillis()
                 result

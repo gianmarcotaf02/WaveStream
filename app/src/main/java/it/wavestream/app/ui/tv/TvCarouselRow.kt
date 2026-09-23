@@ -52,7 +52,7 @@ import kotlinx.coroutines.delay
 private const val RANK_MAX = 10
 
 /** Fascia a sinistra della card riservata al numero di classifica. */
-private val RANK_GUTTER = 56.dp
+private val RANK_GUTTER = 64.dp
 
 /**
  * TV-optimized carousel row using TvLazyRow
@@ -394,17 +394,17 @@ private fun TvRankNumber(rank: Int, modifier: Modifier = Modifier) {
     Text(
         text = rank.toString(),
         style = MaterialTheme.typography.displayLarge.copy(
-            fontSize = 50.sp,
+            fontSize = 76.sp,
             fontWeight = FontWeight.Black,
-            drawStyle = Stroke(width = 2.5f, join = StrokeJoin.Round)
+            drawStyle = Stroke(width = 3f, join = StrokeJoin.Round)
         ),
-        color = WaveStreamColors.TextPrimary.copy(alpha = 0.85f),
+        color = WaveStreamColors.TextPrimary.copy(alpha = 0.9f),
         textAlign = TextAlign.End,
         maxLines = 1,
         softWrap = false,
         modifier = modifier
             .width(RANK_GUTTER)
-            .padding(end = 10.dp)
+            .padding(end = 8.dp)
     )
 }
 
