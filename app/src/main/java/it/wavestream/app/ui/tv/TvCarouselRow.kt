@@ -51,10 +51,10 @@ import kotlinx.coroutines.delay
 private const val RANK_MAX = 10
 
 /**
- * Fascia totale riservata al numero di classifica (nella riga, a sinistra della card).
- * Il numero è largo quasi quanto la card ed è coperto per ~1/3 dalla copertina.
+ * Fascia riservata al numero di classifica (a sinistra della card).
+ * Il numero è coperto per ~1/3 dalla copertina.
  */
-private val RANK_NUMBER_WIDTH = 104.dp
+private val RANK_NUMBER_WIDTH = 120.dp
 
 /**
  * Di quanto la copertina è spostata a destra rispetto all'inizio della fascia:
@@ -62,6 +62,12 @@ private val RANK_NUMBER_WIDTH = 104.dp
  * numero per circa un terzo. Più è piccolo, più le card risultano vicine.
  */
 private val RANK_CARD_INSET = 58.dp
+
+/**
+ * Inset dedicato alla posizione 10: "10" è largo quasi il doppio di una cifra
+ * singola, quindi la card va spostata più a destra per lasciare leggibile la "0".
+ */
+private val RANK_CARD_INSET_TEN = 84.dp
 
 /**
  * TV-optimized carousel row using TvLazyRow
@@ -209,7 +215,8 @@ fun TvCarouselRow(
                 // Top classifica (righe popolari): numero grande a sinistra della
                 // card, parzialmente nascosto dietro la copertina. Decorativo, non
                 // focusable: non intercetta il D-pad.
-                if (row.isRanked && index < RANK_MAX) {
+                val isRankedItem = row.isRanked && index < RANK_MAX
+                if (isRankedItem) {
                     TvRankNumber(
                         rank = index + 1,
                         modifier = Modifier.align(Alignment.CenterStart)
@@ -217,7 +224,14 @@ fun TvCarouselRow(
                 }
                 Box(
                     modifier = Modifier
-                        .padding(start = if (row.isRanked && index < RANK_MAX) RANK_CARD_INSET else 0.dp)
+                        .padding(
+                            start = when {
+                                !isRankedItem -> 0.dp
+                                // "10" ha bisogno di più spazio per restare leggibile.
+                                index + 1 >= 10 -> RANK_CARD_INSET_TEN
+                                else -> RANK_CARD_INSET
+                            }
+                        )
                         .focusRequester(itemFocusRequester)
                         .onFocusChanged { focusState ->
                             isFocused.value = focusState.isFocused
@@ -403,8 +417,9 @@ private fun TvRankNumber(rank: Int, modifier: Modifier = Modifier) {
     Text(
         text = rank.toString(),
         style = MaterialTheme.typography.displayLarge.copy(
-            // "10" ha due cifre: rimpicciolito per restare nella fascia.
-            fontSize = if (rank >= 10) 108.sp else 160.sp,
+            // "10" ha due cifre: dimensione ridotta per restare leggibile
+            // nonostante la copertina ne copra il lato destro.
+            fontSize = if (rank >= 10) 104.sp else 160.sp,
             fontWeight = FontWeight.Black,
             drawStyle = Stroke(width = 3f, join = StrokeJoin.Round)
         ),
