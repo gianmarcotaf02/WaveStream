@@ -507,6 +507,7 @@ class DetailsActivity : ComponentActivity() {
                 directorPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(movie.tmdbCrewJson),
                 posterUrl = movie.posterUrl,
                 backdropUrl = movie.backdropUrl,
+                logoUrl = movie.titleLogoUrl,
                 contentType = ContentType.MOVIE,
                 isFavorite = isFavorite,
                 // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
@@ -608,6 +609,7 @@ class DetailsActivity : ComponentActivity() {
             directorPeople = it.wavestream.app.data.entity.PersonInfoParser.parse(enrichedMovie.tmdbCrewJson),
             posterUrl = enrichedMovie.posterUrl,
             backdropUrl = enrichedMovie.backdropUrl,
+            logoUrl = enrichedMovie.titleLogoUrl,
             contentType = ContentType.MOVIE,
             isFavorite = isFavorite,
             isLoading = false,
@@ -906,6 +908,7 @@ class DetailsActivity : ComponentActivity() {
                 director = series.director,
                 posterUrl = series.posterUrl,
                 backdropUrl = series.backdropUrl,
+                logoUrl = series.titleLogoUrl,
                 contentType = ContentType.SERIES,
                 isFavorite = dbIsFavorite,
                 // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
@@ -975,6 +978,7 @@ class DetailsActivity : ComponentActivity() {
             director = series.director,
             posterUrl = series.posterUrl,
             backdropUrl = series.backdropUrl,
+            logoUrl = series.titleLogoUrl,
             contentType = ContentType.SERIES,
             isFavorite = isFavorite,
             isLoading = false,
