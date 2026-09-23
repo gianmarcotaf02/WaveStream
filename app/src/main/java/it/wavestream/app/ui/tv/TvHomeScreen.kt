@@ -1397,6 +1397,23 @@ fun HeroBanner(
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
+                                // Il CTA È la barra di avanzamento: si riempie da sinistra di
+                                // accent al 30% sul bianco del pulsante, in base a quanto visto.
+                                // Sostituisce la barretta separata, che copriva il bordo inferiore
+                                // del CTA (o, se inset, rubava spazio dentro il pulsante).
+                                // Dichiarato PRIMA del contenuto: resta dietro a testo e badge.
+                                // matchParentSize è necessario: senza di esso il fillMaxWidth entra
+                                // nelle misure del CTA (wrapContentWidth) e lo allarga a tutto schermo.
+                                if (hasProgress && hero.progressPercent != null) {
+                                    Box(modifier = Modifier.matchParentSize()) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                                .fillMaxWidth(hero.progressPercent!!.coerceIn(0.05f, 1f))
+                                                .background(WaveStreamColors.Accent.copy(alpha = 0.30f))
+                                        )
+                                    }
+                                }
                                 if (buttonBadge != null) {
                                     // Etichetta in alto + codice episodio sotto, entrambi DENTRO il box
                                     Column(
@@ -1463,34 +1480,6 @@ fun HeroBanner(
                                     }
                                 }
                                 
-                                // Progress bar INSET.
-                                // Prima era a filo del bordo inferiore e copriva il border(3.dp)
-                                // del CTA: restava solo un cuneo viola sull'angolo arrotondato,
-                                // che sembrava un elemento estraneo stampato sopra il pulsante.
-                                // NB: il wrapper `matchParentSize()` è indispensabile — senza di
-                                // esso la barra (`fillMaxWidth`) entra nelle misure del CTA, che
-                                // essendo `wrapContentWidth` si allarga a tutta la larghezza.
-                                if (hasProgress && hero.progressPercent != null) {
-                                    val progress = hero.progressPercent.coerceIn(0.05f, 1f)
-                                    Box(modifier = Modifier.matchParentSize()) {
-                                        Box(
-                                            modifier = Modifier
-                                                .align(Alignment.BottomStart)
-                                                .padding(start = 10.dp, end = 10.dp, bottom = 5.dp)
-                                                .fillMaxWidth()
-                                                .height(3.dp)
-                                                .clip(RoundedCornerShape(2.dp))
-                                                .background(Color.Black.copy(alpha = 0.25f))
-                                        ) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxHeight()
-                                                    .fillMaxWidth(progress)
-                                                    .background(WaveStreamColors.Accent)
-                                            )
-                                        }
-                                    }
-                                }
                             }
                             
                             Spacer(modifier = Modifier.width(12.dp)) // Gap after Play button before other buttons
