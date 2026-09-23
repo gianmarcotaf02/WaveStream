@@ -36,6 +36,7 @@ class TMDBService @Inject constructor(
         private const val LANGUAGE = "it-IT"
         private const val CACHE_DURATION_HOURS = 168L  // 7 days = 168 hours
         private const val MAX_RETRIES = 2
+        private const val MAX_LOGO_OPTIONS = 12  // candidati salvati per un eventuale selettore
     }
 
     private fun fetchUrl(url: String): String {
@@ -1125,8 +1126,77 @@ class TMDBService @Inject constructor(
     /**
      * Fetch full movie details from TMDB
      */
+    /**
+     * Sceglie il clear logo (titolo grafico) migliore dal blocco `images` di TMDB.
+     *
+     * Regole:
+     *  - scarta SVG (Coil senza coil-svg non li renderizza) e path vuoti;
+     *  - scarta aspect ratio fuori da [1.2, 8.0] (loghi quadrati/verticali o troppo stirati);
+     *  - preferisce it > en > neutro, poi il più votato, poi il più orizzontale.
+     *
+     * @return Pair(miglior path, JSON dei candidati ordinati) oppure (null, null).
+     */
+    private fun selectTitleLogo(details: JSONObject): Pair<String?, String?> {
+        val logos = details.optJSONObject("images")?.optJSONArray("logos") ?: return null to null
+
+        data class Logo(
+            val path: String,
+            val lang: String?,
+            val aspectRatio: Double,
+            val vote: Double
+        )
+
+        val candidates = ArrayList<Logo>(logos.length())
+        for (i in 0 until logos.length()) {
+            val logo = logos.optJSONObject(i) ?: continue
+            val path = logo.optString("file_path", "")
+            if (path.isBlank() || path.endsWith(".svg", ignoreCase = true)) continue
+            val aspectRatio = logo.optDouble("aspect_ratio", 0.0)
+            if (aspectRatio < 1.2 || aspectRatio > 8.0) continue
+            candidates += Logo(
+                path = path,
+                lang = logo.optString("iso_639_1", "").takeIf { it.isNotBlank() },
+                aspectRatio = aspectRatio,
+                vote = logo.optDouble("vote_average", 0.0)
+            )
+        }
+        if (candidates.isEmpty()) return null to null
+
+        fun languageScore(lang: String?): Int = when {
+            lang == null -> 1
+            lang.equals("it", ignoreCase = true) -> 3
+            lang.equals("en", ignoreCase = true) -> 2
+            else -> 1
+        }
+
+        val ordered = candidates.sortedWith(
+            compareByDescending<Logo> { languageScore(it.lang) }
+                .thenByDescending { it.vote }
+                .thenByDescending { it.aspectRatio }
+        )
+
+        val optionsJson = org.json.JSONArray().apply {
+            ordered.take(MAX_LOGO_OPTIONS).forEach { logo ->
+                put(JSONObject().apply {
+                    put("path", logo.path)
+                    put("lang", logo.lang ?: "")
+                    put("ar", logo.aspectRatio)
+                    put("vote", logo.vote)
+                })
+            }
+        }.toString()
+
+        Log.d(TAG, "Title logo: ${ordered.first().path} (lang=${ordered.first().lang}, candidati=${candidates.size})")
+        return ordered.first().path to optionsJson
+    }
+
     private fun fetchMovieDetails(movie: Movie, tmdbId: Int): Movie {
-        val detailsUrl = "$BASE_URL/movie/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,external_ids,videos&include_video_language=it,en,null"
+        // Il blocco `images` pesa ~+38% sulla risposta: lo chiediamo solo se ci manca il
+        // titolo grafico (poi resta in DB), così le chiamate successive restano leggere.
+        val needsLogo = movie.tmdbLogoPath.isNullOrBlank()
+        val imagesParam = if (needsLogo) ",images" else ""
+        val imagesLanguageParam = if (needsLogo) "&include_image_language=it,en,null" else ""
+        val detailsUrl = "$BASE_URL/movie/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,external_ids,videos$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
         Log.d(TAG, "Fetching: $detailsUrl")
         val detailsResponse = fetchUrl(detailsUrl)
         val details = JSONObject(detailsResponse)
@@ -1238,7 +1308,10 @@ class TMDBService @Inject constructor(
         }
         
         Log.d(TAG, "Trailer check: key=$trailerKey")
-        
+
+        // Clear logo / titolo grafico (presente solo se abbiamo chiesto `images`)
+        val (logoPath, logoOptionsJson) = selectTitleLogo(details)
+
         // Update movie entity (keep original name unchanged!)
         return movie.copy(
             tmdbId = tmdbId,
@@ -1246,6 +1319,8 @@ class TMDBService @Inject constructor(
             tmdbOriginalTitle = tmdbOriginalTitle,  // For OMDB fallback
             tmdbImdbId = imdbId,  // For direct OMDB lookup by ID
             tmdbTrailerKey = trailerKey,
+            tmdbLogoPath = logoPath ?: movie.tmdbLogoPath,
+            tmdbLogoOptionsJson = logoOptionsJson ?: movie.tmdbLogoOptionsJson,
             tmdbOverview = overview,
             tmdbRuntime = runtime,
             tmdbCast = cast,
@@ -1468,7 +1543,11 @@ class TMDBService @Inject constructor(
      * Fetch full TV series details from TMDB
      */
     private fun fetchSeriesDetails(series: Series, tmdbId: Int): Series {
-        val detailsUrl = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,videos,external_ids&include_video_language=it,en,null"
+        // Vedi fetchMovieDetails: `images` solo quando il titolo grafico ci manca ancora.
+        val needsLogo = series.tmdbLogoPath.isNullOrBlank()
+        val imagesParam = if (needsLogo) ",images" else ""
+        val imagesLanguageParam = if (needsLogo) "&include_image_language=it,en,null" else ""
+        val detailsUrl = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,videos,external_ids$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
         val detailsResponse = fetchUrl(detailsUrl)
         val details = JSONObject(detailsResponse)
         
@@ -1558,11 +1637,16 @@ class TMDBService @Inject constructor(
         val imdbId = externalIds?.optString("imdb_id", "")?.takeIf { it.isNotBlank() }
         Log.d(TAG, "TV External IDs: imdb_id=$imdbId")
 
+        // Clear logo / titolo grafico (presente solo se abbiamo chiesto `images`)
+        val (logoPath, logoOptionsJson) = selectTitleLogo(details)
+
         // Update series entity
         return series.copy(
             tmdbId = tmdbId,
             tmdbImdbId = imdbId,
             tmdbTrailerKey = trailerKey,
+            tmdbLogoPath = logoPath ?: series.tmdbLogoPath,
+            tmdbLogoOptionsJson = logoOptionsJson ?: series.tmdbLogoOptionsJson,
             tmdbOverview = overview,
             tmdbFirstAirDate = firstAirDate,
             tmdbCast = cast,
