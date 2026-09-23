@@ -962,6 +962,7 @@ private fun CastPersonCard(
  * (fallback N/A), gli altri appaiono se il dato c'è.
  */
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun RatingsBadges(
     tmdbRating: Float?,
     imdbRating: String?,
@@ -971,9 +972,12 @@ private fun RatingsBadges(
     imdbVotes: String? = null,
     tmdbVotes: String? = null
 ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    // FlowRow (era Row): con 5 badge la riga può superare la larghezza disponibile
+    // e l'ultimo veniva tagliato sul lato destro. Ora va a capo invece di essere
+    // tagliato — sulle TV larghe resta comunque su una riga sola.
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.padding(vertical = 4.dp)
     ) {
         if (imdbRating != null) {
@@ -1030,7 +1034,7 @@ private fun ModernRatingItem(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier
             .clip(RoundedCornerShape(percent = 50))
             .background(GlassTokens.SurfaceFillStrong)
@@ -1039,17 +1043,19 @@ private fun ModernRatingItem(
                 brush = GlassTokens.StrokeGradient,
                 shape = RoundedCornerShape(percent = 50)
             )
-            .padding(horizontal = 14.dp, vertical = 8.dp)
+            // Compattati (era 14/8 con icona 22dp e testo titleMedium): 5 badge
+            // ora stanno in riga senza toccare il bordo destro.
+            .padding(horizontal = 10.dp, vertical = 6.dp)
     ) {
         Image(
             painter = painterResource(id = iconResId),
             contentDescription = null,
-            modifier = Modifier.size(22.dp),
+            modifier = Modifier.size(18.dp),
             contentScale = ContentScale.Fit
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             color = WaveStreamColors.TextPrimary,
             fontWeight = FontWeight.Bold,
             maxLines = 1,

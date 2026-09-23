@@ -1168,7 +1168,8 @@ fun HeroBanner(
                         
                         // Ratings — nascoste per l'hero partita (nessun dato)
                         if (hero.contentType != "SERIEA_MATCH") Row(
-                            horizontalArrangement = Arrangement.spacedBy(20.dp),
+                            // 16dp (era 20): con 5 badge la riga arrivava vicina al bordo destro.
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
                             verticalAlignment = Alignment.Top,
                             modifier = Modifier.padding(vertical = 4.dp)
                         ) {
@@ -2148,12 +2149,13 @@ private fun HeroRatingItem(
             Image(
                 painter = painterResource(id = iconResId),
                 contentDescription = null,
-                modifier = Modifier.size(30.dp),  // Increased from 28dp
+                // 24dp (erano 30): badge più compatti, 5 rating stanno in riga comodi.
+                modifier = Modifier.size(24.dp),
                 contentScale = ContentScale.Fit
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleSmall,
                 color = WaveStreamColors.TextPrimary,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
@@ -2162,12 +2164,12 @@ private fun HeroRatingItem(
         }
         
         // Label below
-        Spacer(modifier = Modifier.height(4.dp))  // Increased from 2dp
+        Spacer(modifier = Modifier.height(3.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
             color = WaveStreamColors.TextTertiary,
-            fontSize = 10.sp
+            fontSize = 9.sp
         )
     }
 }
