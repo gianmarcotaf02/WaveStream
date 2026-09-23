@@ -1410,7 +1410,7 @@ fun HeroBanner(
                                             modifier = Modifier
                                                 .fillMaxHeight()
                                                 .fillMaxWidth(hero.progressPercent!!.coerceIn(0.05f, 1f))
-                                                .background(WaveStreamColors.Accent.copy(alpha = 0.30f))
+                                                .background(WaveStreamColors.Accent.copy(alpha = 0.40f))
                                         )
                                     }
                                 }
