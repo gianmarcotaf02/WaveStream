@@ -1578,7 +1578,7 @@ class HomeViewModel @Inject constructor(
                 // Arricchisce TUTTI gli hero col progresso reale dal DB: anche gli hero
                 // da raccomandazione/popolari mostrano così "Riprendi SxEy" invece del
                 // fallback S1E1 (bug: hero senza resume info pur avendo contenuti in corso).
-                val enrichedHeroes = refreshHeroItemsWatchProgress(mergedHeroes.toList())
+                val enrichedHeroes = ensureHeroTitleLogos(refreshHeroItemsWatchProgress(mergedHeroes.toList()))
                 val hasAnyCW = enrichedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                 Log.d("HomeViewModel", "loadHeroItems: final mergedHeroes=${enrichedHeroes.size}, hasAnyCW=$hasAnyCW")
                 HeroPairData(enrichedHeroes, hasAnyCW)
@@ -2297,7 +2297,10 @@ class HomeViewModel @Inject constructor(
                                     rottenTomatoesScore = it.omdbRottenTomatoesScore,
                                     audienceScore = it.omdbAudienceScore,
                                     metacriticScore = it.omdbMetacriticScore,
-                                    tmdbRating = it.tmdbVoteAverage
+                                    tmdbRating = it.tmdbVoteAverage,
+                                    // Titolo grafico: patch dall'DB senza rete (l'hero in cache
+                                    // può essere precedente al prefetch dei loghi).
+                                    logoUrl = it.titleLogoUrl
                                 )
                             } ?: hero
                         }
@@ -2309,7 +2312,9 @@ class HomeViewModel @Inject constructor(
                                     rottenTomatoesScore = it.omdbRottenTomatoesScore,
                                     audienceScore = it.omdbAudienceScore,
                                     metacriticScore = it.omdbMetacriticScore,
-                                    tmdbRating = it.tmdbVoteAverage
+                                    tmdbRating = it.tmdbVoteAverage,
+                                    // Vedi il ramo MOVIE: patch del titolo grafico dal DB.
+                                    logoUrl = it.titleLogoUrl
                                 )
                             } ?: hero
                         }
@@ -2323,6 +2328,49 @@ class HomeViewModel @Inject constructor(
         }
     }
     
+    /**
+     * Garantisce il titolo grafico (clear logo) per gli hero che ne sono privi.
+     *
+     * La LoadingActivity pre-carica i loghi del pool trending, quindi nel caso normale
+     * questa è solo una rilettura dal DB (nessuna rete). Resta comunque come rete di
+     * sicurezza per gli hero che non passano da lì (tipicamente "Continua a guardare")
+     * e per i titoli non ancora controllati: una chiamata per titolo, poi il marker in DB
+     * evita qualsiasi ripetizione.
+     */
+    private suspend fun ensureHeroTitleLogos(heroes: List<HeroItem>): List<HeroItem> = coroutineScope {
+        val missing = heroes.filter {
+            it.logoUrl.isNullOrEmpty() &&
+                (it.contentType == ContentType.MOVIE.name || it.contentType == ContentType.SERIES.name)
+        }
+        if (missing.isEmpty()) return@coroutineScope heroes
+
+        val resolved = missing.map { hero ->
+            async(Dispatchers.IO) {
+                val key = "${hero.contentType}:${hero.id}"
+                try {
+                    val logoUrl = when (hero.contentType) {
+                        ContentType.MOVIE.name -> {
+                            movieDao.getMovieById(hero.id)?.let { tmdbService.prefetchMovieLogo(it) }
+                            movieDao.getMovieById(hero.id)?.titleLogoUrl
+                        }
+                        else -> {
+                            seriesDao.getSeriesById(hero.id)?.let { tmdbService.prefetchSeriesLogo(it) }
+                            seriesDao.getSeriesById(hero.id)?.titleLogoUrl
+                        }
+                    }
+                    key to logoUrl
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "Error fetching title logo for hero ${hero.id}", e)
+                    key to null
+                }
+            }
+        }.awaitAll().toMap()
+
+        heroes.map { hero ->
+            resolved["${hero.contentType}:${hero.id}"]?.let { hero.copy(logoUrl = it) } ?: hero
+        }
+    }
+
     /**
      * Load hero items for HOME tab (mix of movies and series from continue watching or popular)
      */
@@ -2395,7 +2443,7 @@ class HomeViewModel @Inject constructor(
                 }
 
                 // Arricchisce TUTTI gli hero col progresso reale dal DB (anche raccomandazioni)
-                val enrichedHeroes = refreshHeroItemsWatchProgress(mergedHeroes.toList())
+                val enrichedHeroes = ensureHeroTitleLogos(refreshHeroItemsWatchProgress(mergedHeroes.toList()))
                 val hasAnyCW = enrichedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                 Log.d("HomeViewModel", "loadHomeHeroItems: final mergedHeroes=${enrichedHeroes.size}, hasAnyCW=$hasAnyCW")
                 if (enrichedHeroes.isNotEmpty()) HeroPairData(enrichedHeroes, hasAnyCW) else null
