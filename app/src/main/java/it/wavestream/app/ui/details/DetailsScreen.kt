@@ -1121,6 +1121,21 @@ private fun PlayButton(
             ),
         contentAlignment = Alignment.Center
     ) {
+        // Il CTA È la barra di avanzamento: si riempie da sinistra di accent al 40% sul
+        // bianco del pulsante, in base a quanto visto (stesso pattern dell'hero in
+        // TvHomeScreen). Dichiarato PRIMA del contenuto: resta dietro a testo e badge.
+        // matchParentSize: non entra nelle misure del bottone (widthIn + wrap content).
+        if (isResume) {
+            val effectiveProgress = (resumeProgress ?: 0.1f).coerceIn(0.05f, 1f)
+            Box(modifier = Modifier.matchParentSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(effectiveProgress)
+                        .background(WaveStreamColors.Accent.copy(alpha = 0.40f))
+                )
+            }
+        }
         if (badge != null) {
             // Layout verticale: etichetta principale in alto e codice episodio
             // (SxEy) subito sotto, in piccolo — entrambi DENTRO il box del bottone.
@@ -1180,33 +1195,6 @@ private fun PlayButton(
             }
         }
         
-        // Progress bar at bottom of button (for resume state)
-        // Show progress bar if we have any resume state (isResume), even if resumeProgress is null
-        if (isResume) {
-            // Use actual progress if available, otherwise show a minimal bar
-            val effectiveProgress = (resumeProgress ?: 0.1f).coerceIn(0.05f, 1f)
-            // matchParentSize: la barra segue la larghezza FINALE del bottone (decisa dal
-            // contenuto) senza influenzarla. Con fillMaxWidth la barra costringeva il Box
-            // a espandersi su tutta la larghezza disponibile → bottone "Riprendi" enorme.
-            Box(
-                modifier = Modifier.matchParentSize()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .background(Color.Black.copy(alpha = 0.15f))  // Consistent track
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(effectiveProgress)
-                            .background(WaveStreamColors.Accent)
-                    )
-                }
-            }
-        }
     }
 }
 
