@@ -40,6 +40,8 @@ class TMDBService @Inject constructor(
         // Aspect ratio tipico di un titolo grafico su una riga: serve come tie-breaker,
         // perché a parità di voti i loghi ultra-larghi (6:1+) rendono molto più piccoli.
         private const val TARGET_LOGO_ASPECT_RATIO = 3.0
+        // Lingue richieste per i loghi: italiano, poi inglese, poi artwork neutro.
+        private const val IMAGE_LANGUAGE = "it,en,null"
     }
 
     private fun fetchUrl(url: String): String {
@@ -1149,7 +1151,14 @@ class TMDBService @Inject constructor(
      */
     private fun selectTitleLogo(details: JSONObject): Pair<String?, String?> {
         val images = details.optJSONObject("images") ?: return null to null
-        val logos = images.optJSONArray("logos") ?: return null to "[]"
+        return selectTitleLogoFromLogos(images.optJSONArray("logos"))
+    }
+
+    /**
+     * Variante usata dall'endpoint dedicato `/images`, che restituisce già l'array `logos`.
+     */
+    private fun selectTitleLogoFromLogos(logos: org.json.JSONArray?): Pair<String?, String?> {
+        if (logos == null) return null to "[]"
 
         data class Logo(
             val path: String,
@@ -1202,12 +1211,51 @@ class TMDBService @Inject constructor(
         return ordered.first().path to optionsJson
     }
 
+    /**
+     * Recupera SOLO il titolo grafico di un film (endpoint `/images`: niente credits, ratings
+     * o trailer) e lo salva in DB. Serve a pre-caricare i loghi degli hero durante il loading,
+     * così la home non fa chiamate di rete mentre costruisce gli hero.
+     *
+     * No-op se il titolo non ha tmdbId o se i loghi sono già stati controllati
+     * (marker `tmdbLogoOptionsJson`): il costo si paga una sola volta per titolo.
+     *
+     * @return true se un titolo grafico è disponibile in DB.
+     */
+    suspend fun prefetchMovieLogo(movie: Movie): Boolean = withContext(Dispatchers.IO) {
+        if (movie.tmdbLogoOptionsJson != null) return@withContext movie.tmdbLogoPath != null
+        val tmdbId = movie.tmdbId ?: return@withContext false
+        try {
+            val url = "$BASE_URL/movie/$tmdbId/images?api_key=$API_KEY&include_image_language=$IMAGE_LANGUAGE"
+            val (path, optionsJson) = selectTitleLogoFromLogos(JSONObject(fetchUrl(url)).optJSONArray("logos"))
+            movieDao.update(movie.copy(tmdbLogoPath = path, tmdbLogoOptionsJson = optionsJson))
+            path != null
+        } catch (e: Exception) {
+            Log.w(TAG, "Logo prefetch failed for movie '${movie.name}': ${e.message}")
+            false
+        }
+    }
+
+    /** Vedi [prefetchMovieLogo]: stessa cosa per le serie. */
+    suspend fun prefetchSeriesLogo(series: Series): Boolean = withContext(Dispatchers.IO) {
+        if (series.tmdbLogoOptionsJson != null) return@withContext series.tmdbLogoPath != null
+        val tmdbId = series.tmdbId ?: return@withContext false
+        try {
+            val url = "$BASE_URL/tv/$tmdbId/images?api_key=$API_KEY&include_image_language=$IMAGE_LANGUAGE"
+            val (path, optionsJson) = selectTitleLogoFromLogos(JSONObject(fetchUrl(url)).optJSONArray("logos"))
+            seriesDao.update(series.copy(tmdbLogoPath = path, tmdbLogoOptionsJson = optionsJson))
+            path != null
+        } catch (e: Exception) {
+            Log.w(TAG, "Logo prefetch failed for series '${series.name}': ${e.message}")
+            false
+        }
+    }
+
     private fun fetchMovieDetails(movie: Movie, tmdbId: Int): Movie {
         // Il blocco `images` pesa ~+38% sulla risposta: lo chiediamo solo finché non abbiamo
         // mai controllato i loghi (marker nullo), così le chiamate successive restano leggere.
         val needsLogo = movie.tmdbLogoOptionsJson == null
         val imagesParam = if (needsLogo) ",images" else ""
-        val imagesLanguageParam = if (needsLogo) "&include_image_language=it,en,null" else ""
+        val imagesLanguageParam = if (needsLogo) "&include_image_language=$IMAGE_LANGUAGE" else ""
         val detailsUrl = "$BASE_URL/movie/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,external_ids,videos$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
         Log.d(TAG, "Fetching: $detailsUrl")
         val detailsResponse = fetchUrl(detailsUrl)
@@ -1561,7 +1609,7 @@ class TMDBService @Inject constructor(
         // Vedi fetchMovieDetails: `images` solo finché non abbiamo mai controllato i loghi.
         val needsLogo = series.tmdbLogoOptionsJson == null
         val imagesParam = if (needsLogo) ",images" else ""
-        val imagesLanguageParam = if (needsLogo) "&include_image_language=it,en,null" else ""
+        val imagesLanguageParam = if (needsLogo) "&include_image_language=$IMAGE_LANGUAGE" else ""
         val detailsUrl = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,videos,external_ids$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
         val detailsResponse = fetchUrl(detailsUrl)
         val details = JSONObject(detailsResponse)
