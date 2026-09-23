@@ -75,6 +75,7 @@ class PlayerActivity : ComponentActivity() {
     @Inject lateinit var downloadedContentDao: DownloadedContentDao
     @Inject lateinit var mediaSegmentRepository: MediaSegmentRepository
     @Inject lateinit var creditsAudioMonitor: CreditsAudioMonitor
+    @Inject lateinit var streamProviderDao: it.wavestream.app.data.database.dao.StreamProviderDao
     
     private lateinit var player: ExoPlayer
     
@@ -151,6 +152,12 @@ class PlayerActivity : ComponentActivity() {
     // nell'overlay dei controlli, a destra del titolo. Null finché la traccia
     // video non è nota; segue automaticamente i cambi di risoluzione (HLS adattivo).
     private val _videoQuality = mutableStateOf<String?>(null)
+    // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
+    // al primo onVideoSizeChanged. -1 = non nota (es. serie/canali).
+    private var sourceProviderId: Long = -1L
+    // La misura viene salvata una volta sola per sessione (onVideoSizeChanged può
+    // scattare più volte: rotazione, cambio di traccia, ecc.).
+    private var detectedHeightSaved = false
     
     // Seek state management - prevents reset during hold-to-seek
     private var isSeekingForward = false
@@ -434,6 +441,7 @@ class PlayerActivity : ComponentActivity() {
         season = intent.getIntExtra("season", -1).takeIf { it > 0 }
         episode = intent.getIntExtra("episode", -1).takeIf { it > 0 }
         groupId = intent.getLongExtra("group_id", -1).takeIf { it > 0 }
+        sourceProviderId = intent.getLongExtra("source_provider_id", -1L)
         
         android.util.Log.d("PlayerActivity", "Intent: contentId=$contentId, type=$contentType, streamUrl=$streamUrl, title=$title")
         
@@ -827,6 +835,17 @@ class PlayerActivity : ComponentActivity() {
             
             override fun onVideoSizeChanged(videoSize: androidx.media3.common.VideoSize) {
                 _videoQuality.value = videoQualityLabel(videoSize.height)
+                // Qualità REALE della sorgente: è l'unico dato verificato sul contenuto
+                // effettivamente riproducibile (quello nel DB è dedotto dal nome).
+                // Salvato una volta per sessione, così il menu delle versioni può
+                // mostrare un badge affidabile invece di una supposizione.
+                val height = videoSize.height
+                if (height > 0 && !detectedHeightSaved && sourceProviderId > 0) {
+                    detectedHeightSaved = true
+                    lifecycleScope.launch {
+                        runCatching { streamProviderDao.updateDetectedHeight(sourceProviderId, height) }
+                    }
+                }
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
