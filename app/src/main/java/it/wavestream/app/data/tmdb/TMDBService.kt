@@ -915,9 +915,13 @@ class TMDBService @Inject constructor(
         // (vote_average was 0, or a previous partial enrichment) must be re-fetched.
         // Note: tmdbTrailerKey is intentionally NOT required here: many titles simply have no
         // trailer, and requiring it forced a full TMDB search pipeline on every detail open.
+        // tmdbLogoOptionsJson è richiesto perché i cataloghi già arricchiti prima dei titoli
+        // grafici devono fare UNA sola chiamata extra per recuperare il clear logo (il marker
+        // resta valorizzato anche quando il logo non esiste, quindi non si ripete).
         val hasRealData = movie.tmdbId != null && movie.tmdbOverview != null &&
             movie.tmdbOriginalTitle != null && movie.tmdbVoteAverage != null
         if (hasRealData && movie.tmdbLastFetchAt != null && 
+            movie.tmdbLogoOptionsJson != null &&
             System.currentTimeMillis() - movie.tmdbLastFetchAt < 7 * 24 * 60 * 60 * 1000) {  // 7 days cache
             Log.d(TAG, "SKIP: Movie '${movie.name}' already enriched, returning cached (rating=${movie.tmdbVoteAverage})")
             // Return fresh data from DB to ensure all fields are populated (in case movie passed is stale)
@@ -1137,10 +1141,15 @@ class TMDBService @Inject constructor(
      *  - scarta aspect ratio fuori da [1.2, 8.0] (loghi quadrati/verticali o troppo stirati);
      *  - preferisce it > en > neutro, poi il più votato, poi l'aspect ratio più vicino a 3:1.
      *
-     * @return Pair(miglior path, JSON dei candidati ordinati) oppure (null, null).
+     * Il secondo elemento della Pair è anche un marker di "loghi già controllati":
+     *  - `null`  = blocco `images` non richiesto → non sappiamo nulla, non forzare un refetch;
+     *  - `"[]"`  = `images` richiesto ma nessun logo utilizzabile → evita di riscaricarlo ogni volta.
+     *
+     * @return Pair(miglior path, JSON dei candidati ordinati) oppure (null, marker).
      */
     private fun selectTitleLogo(details: JSONObject): Pair<String?, String?> {
-        val logos = details.optJSONObject("images")?.optJSONArray("logos") ?: return null to null
+        val images = details.optJSONObject("images") ?: return null to null
+        val logos = images.optJSONArray("logos") ?: return null to "[]"
 
         data class Logo(
             val path: String,
@@ -1163,7 +1172,7 @@ class TMDBService @Inject constructor(
                 vote = logo.optDouble("vote_average", 0.0)
             )
         }
-        if (candidates.isEmpty()) return null to null
+        if (candidates.isEmpty()) return null to "[]"
 
         fun languageScore(lang: String?): Int = when {
             lang == null -> 1
@@ -1194,9 +1203,9 @@ class TMDBService @Inject constructor(
     }
 
     private fun fetchMovieDetails(movie: Movie, tmdbId: Int): Movie {
-        // Il blocco `images` pesa ~+38% sulla risposta: lo chiediamo solo se ci manca il
-        // titolo grafico (poi resta in DB), così le chiamate successive restano leggere.
-        val needsLogo = movie.tmdbLogoPath.isNullOrBlank()
+        // Il blocco `images` pesa ~+38% sulla risposta: lo chiediamo solo finché non abbiamo
+        // mai controllato i loghi (marker nullo), così le chiamate successive restano leggere.
+        val needsLogo = movie.tmdbLogoOptionsJson == null
         val imagesParam = if (needsLogo) ",images" else ""
         val imagesLanguageParam = if (needsLogo) "&include_image_language=it,en,null" else ""
         val detailsUrl = "$BASE_URL/movie/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,external_ids,videos$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
@@ -1407,8 +1416,11 @@ class TMDBService @Inject constructor(
     suspend fun enrichSeriesDetails(series: Series): Series = withContext(Dispatchers.IO) {
         // Cache hit: recently searched AND has full data AND has a vote (vote required so that
         // a partial enrichment without tmdbVoteAverage is re-fetched).
+        // tmdbLogoOptionsJson: vedi enrichMovieDetails — una sola chiamata extra per il
+        // titolo grafico sui cataloghi arricchiti prima di questa feature.
         val hasRealData = series.tmdbId != null && series.tmdbOverview != null && series.tmdbVoteAverage != null
-        if (hasRealData && series.tmdbLastFetchAt != null && 
+        if (hasRealData && series.tmdbLastFetchAt != null &&
+            series.tmdbLogoOptionsJson != null &&
             System.currentTimeMillis() - series.tmdbLastFetchAt < 24 * 60 * 60 * 1000) {
             Log.d(TAG, "Series '${series.name}' already enriched with data, skipping")
             val freshFromDb = seriesDao.getSeriesById(series.id)
@@ -1546,8 +1558,8 @@ class TMDBService @Inject constructor(
      * Fetch full TV series details from TMDB
      */
     private fun fetchSeriesDetails(series: Series, tmdbId: Int): Series {
-        // Vedi fetchMovieDetails: `images` solo quando il titolo grafico ci manca ancora.
-        val needsLogo = series.tmdbLogoPath.isNullOrBlank()
+        // Vedi fetchMovieDetails: `images` solo finché non abbiamo mai controllato i loghi.
+        val needsLogo = series.tmdbLogoOptionsJson == null
         val imagesParam = if (needsLogo) ",images" else ""
         val imagesLanguageParam = if (needsLogo) "&include_image_language=it,en,null" else ""
         val detailsUrl = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,videos,external_ids$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
