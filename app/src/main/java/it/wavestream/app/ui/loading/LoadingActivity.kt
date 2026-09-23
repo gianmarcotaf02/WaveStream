@@ -518,6 +518,8 @@ class LoadingActivity : ComponentActivity() {
         try {
             // True se almeno una valutazione è stata aggiornata/scritta nel DB
             var ratingsUpdated = false
+            // True se almeno un titolo grafico (clear logo) è stato salvato nel DB
+            var logosUpdated = false
             withContext(Dispatchers.IO) {
                 val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
                 
@@ -758,16 +760,67 @@ class LoadingActivity : ComponentActivity() {
                         ))
                     }
                 }
+
+                // === TITOLI GRAFICI (clear logo) per gli hero ===
+                // Gli hero di Home/Film/Serie nascono dal pool trending: precarichiamo qui i
+                // loghi, così la home non fa chiamate di rete mentre costruisce gli hero.
+                // Il marker tmdbLogoOptionsJson fa sì che il lavoro si paghi UNA sola volta
+                // per titolo (anche quando il logo su TMDB non esiste).
+                try {
+                    val logoPrefetchLimit = 40  // copre ampiamente gli hero (max 10 per tab)
+                    val logoTargets = movieDao.getByTrendingCategory("Film Popolari")
+                        .filter { it.tmdbId != null && it.tmdbLogoOptionsJson == null && it.tmdbLogoPath == null }
+                        .sortedByDescending { it.tmdbPopularity ?: 0f }
+                        .take(logoPrefetchLimit)
+                    val seriesLogoTargets = seriesDao.getByTrendingCategory("Serie Popolari")
+                        .filter { it.tmdbId != null && it.tmdbLogoOptionsJson == null && it.tmdbLogoPath == null }
+                        .sortedByDescending { it.tmdbPopularity ?: 0f }
+                        .take(logoPrefetchLimit)
+
+                    android.util.Log.d("LoadingActivity",
+                        "Clear logo: ${logoTargets.size} film + ${seriesLogoTargets.size} serie da controllare")
+
+                    if (logoTargets.isNotEmpty() || seriesLogoTargets.isNotEmpty()) {
+                        withContext(Dispatchers.Main) {
+                            onStateUpdate(LoadingState(
+                                status = "Preparazione titoli...",
+                                detail = "",
+                                progress = 97,
+                                showProgress = true
+                            ))
+                        }
+                        val logoBatchSize = 8
+                        for (batchStart in logoTargets.indices step logoBatchSize) {
+                            val found = logoTargets.drop(batchStart).take(logoBatchSize)
+                                .map { movie -> async(Dispatchers.IO) { tmdbService.prefetchMovieLogo(movie) } }
+                                .awaitAll()
+                            if (found.any { it }) logosUpdated = true
+                        }
+                        for (batchStart in seriesLogoTargets.indices step logoBatchSize) {
+                            val found = seriesLogoTargets.drop(batchStart).take(logoBatchSize)
+                                .map { series -> async(Dispatchers.IO) { tmdbService.prefetchSeriesLogo(series) } }
+                                .awaitAll()
+                            if (found.any { it }) logosUpdated = true
+                        }
+                        android.util.Log.d("LoadingActivity",
+                            "Clear logo prefetch completo (logosUpdated=$logosUpdated)")
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.e("LoadingActivity", "Error prefetching clear logos", e)
+                }
             }
             
             // Se almeno una valutazione è stata aggiornata nel DB, invalida la cache
             // degli hero: verranno ricostruiti leggendo i voti appena aggiornati, così
             // un voto comparso nelle API dopo la prima enrichment diventa visibile in home.
-            if (ratingsUpdated) {
+            // Idem per i titoli grafici appena salvati: senza invalidazione la cache
+            // serializzata continuerebbe a servire hero senza logo.
+            if (ratingsUpdated || logosUpdated) {
                 listOf("hero_HOME", "hero_MOVIES", "hero_SERIES").forEach { key ->
                     contentCache.removeHomeSessionData(key)
                 }
-                android.util.Log.d("LoadingActivity", "Ratings updated → invalidata cache hero per ricostruzione con voti freschi")
+                android.util.Log.d("LoadingActivity",
+                    "Cache hero invalidata (ratingsUpdated=$ratingsUpdated, logosUpdated=$logosUpdated)")
             }
             
             android.util.Log.d("LoadingActivity", "Hero content enrichment complete")
