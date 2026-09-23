@@ -37,6 +37,9 @@ class TMDBService @Inject constructor(
         private const val CACHE_DURATION_HOURS = 168L  // 7 days = 168 hours
         private const val MAX_RETRIES = 2
         private const val MAX_LOGO_OPTIONS = 12  // candidati salvati per un eventuale selettore
+        // Aspect ratio tipico di un titolo grafico su una riga: serve come tie-breaker,
+        // perché a parità di voti i loghi ultra-larghi (6:1+) rendono molto più piccoli.
+        private const val TARGET_LOGO_ASPECT_RATIO = 3.0
     }
 
     private fun fetchUrl(url: String): String {
@@ -1132,7 +1135,7 @@ class TMDBService @Inject constructor(
      * Regole:
      *  - scarta SVG (Coil senza coil-svg non li renderizza) e path vuoti;
      *  - scarta aspect ratio fuori da [1.2, 8.0] (loghi quadrati/verticali o troppo stirati);
-     *  - preferisce it > en > neutro, poi il più votato, poi il più orizzontale.
+     *  - preferisce it > en > neutro, poi il più votato, poi l'aspect ratio più vicino a 3:1.
      *
      * @return Pair(miglior path, JSON dei candidati ordinati) oppure (null, null).
      */
@@ -1172,7 +1175,7 @@ class TMDBService @Inject constructor(
         val ordered = candidates.sortedWith(
             compareByDescending<Logo> { languageScore(it.lang) }
                 .thenByDescending { it.vote }
-                .thenByDescending { it.aspectRatio }
+                .thenBy { kotlin.math.abs(it.aspectRatio - TARGET_LOGO_ASPECT_RATIO) }
         )
 
         val optionsJson = org.json.JSONArray().apply {
