@@ -245,17 +245,24 @@ class MainActivity : FragmentActivity() {
     private var pendingMovieTitle: String = ""
     private var pendingMovieDuration: Long? = null
 
-    /** Play di un film con eventuale menu di scelta sorgente (hero). */
-    fun playMovieWithSourceChoice(movieId: Long, title: String) {
+    /**
+     * Play di un film con eventuale menu di scelta sorgente (hero).
+     *
+     * @param isResume true quando l'utente sta riprendendo un film già iniziato: in quel
+     *   caso la versione è già stata scelta e non ha senso riproporre il menu — si riparte
+     *   dall'ultima sorgente usata ([MovieSourceResolver.lastUsedProvider]).
+     */
+    fun playMovieWithSourceChoice(movieId: Long, title: String, isResume: Boolean = false) {
         lifecycleScope.launch {
             val movie = runCatching { movieDao.getMovieById(movieId) }.getOrNull()
             val sources = if (movie != null) movieSourceResolver.resolve(movie) else emptyList()
-            if (sources.size > 1) {
+            val remembered = if (isResume) movieSourceResolver.lastUsedProvider(sources) else null
+            if (sources.size > 1 && remembered == null) {
                 pendingMovieTitle = title.ifBlank { movie?.title ?: "" }
                 pendingMovieDuration = movie?.duration ?: movie?.tmdbRuntime?.toLong()?.times(60)
                 pendingMovieSources.value = sources
             } else {
-                val provider = sources.firstOrNull()
+                val provider = remembered ?: sources.firstOrNull()
                 provider?.let { p -> lifecycleScope.launch { movieSourceResolver.markUsed(p.id) } }
                 launchPlayer(movieId, "MOVIE", title, provider?.streamUrl)
             }
@@ -764,7 +771,13 @@ private fun MainActivityScreen(
                                 // "Guarda adesso" → griglia canali della partita mostrata
                                 homeViewModel.openSerieAChannelPicker(heroItem.serieAMatchId)
                             } else if (heroItem.contentType == "MOVIE") {
-                                activity.playMovieWithSourceChoice(heroItem.id, heroItem.title)
+                                // Se l'hero è in ripresa (minuti rimasti/progresso) la versione
+                                // è già stata scelta: si riparte da quella, senza il menu.
+                                activity.playMovieWithSourceChoice(
+                                    heroItem.id,
+                                    heroItem.title,
+                                    isResume = heroItem.resumeMinutes != null || heroItem.progressPercent != null
+                                )
                             } else {
                                 val intent = Intent(context, it.wavestream.app.ui.player.PlayerActivity::class.java).apply {
                                     putExtra("content_id", heroItem.id)

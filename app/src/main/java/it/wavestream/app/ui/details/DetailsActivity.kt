@@ -1170,22 +1170,29 @@ class DetailsActivity : ComponentActivity() {
     }
 
     
-    private fun playContent(@Suppress("UNUSED_PARAMETER") state: DetailsState, episode: Episode? = null) {
+    private fun playContent(state: DetailsState, episode: Episode? = null) {
         // Film: se esistono più versioni/doppioni unificati, lascia scegliere la sorgente.
+        // Eccezione: in RIPRESA la versione è già stata scelta quando il film è stato
+        // iniziato — riproporre il menu a ogni "Riprendi" non ha senso, si riparte
+        // dall'ultima sorgente usata.
         if (episode == null && contentType == ContentType.MOVIE) {
             lifecycleScope.launch {
                 val movie = runCatching { movieDao.getMovieById(contentId) }.getOrNull()
                 val sources = if (movie != null) movieSourceResolver.resolve(movie) else emptyList()
                 pendingMovieDuration = movie?.duration ?: movie?.tmdbRuntime?.toLong()?.times(60)
-                if (sources.size > 1) {
+                val isResume = state.resumeMinutes != null || state.resumeProgress != null
+                val remembered = if (isResume) movieSourceResolver.lastUsedProvider(sources) else null
+                if (sources.size > 1 && remembered == null) {
                     pendingMovieSources.value = sources
                 } else {
-                    val url = sources.firstOrNull()?.streamUrl ?: streamUrl
+                    val provider = remembered ?: sources.firstOrNull()
+                    val url = provider?.streamUrl ?: streamUrl
                     if (url.isNullOrEmpty()) {
                         Log.e(TAG, "Cannot play: stream URL is empty!")
                         android.widget.Toast.makeText(this@DetailsActivity, "Errore: URL streaming mancante", android.widget.Toast.LENGTH_LONG).show()
                         return@launch
                     }
+                    provider?.let { p -> movieSourceResolver.markUsed(p.id) }
                     streamUrl = url
                     launchPlayer(url, null)
                 }
