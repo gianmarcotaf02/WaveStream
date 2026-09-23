@@ -56,6 +56,10 @@ interface StreamProviderDao {
     @Query("UPDATE stream_providers SET durationSeconds = :seconds WHERE id = :id")
     suspend fun updateDuration(id: Long, seconds: Long?)
 
+    /** Salva la risoluzione REALE misurata dal player per quella sorgente. */
+    @Query("UPDATE stream_providers SET detectedHeight = :height, detectedAt = :timestamp WHERE id = :id")
+    suspend fun updateDetectedHeight(id: Long, height: Int, timestamp: Long = System.currentTimeMillis())
+
     @Query("UPDATE stream_providers SET movieId = :toMovieId WHERE movieId = :fromMovieId")
     suspend fun reassignToMovie(fromMovieId: Long, toMovieId: Long): Int
 

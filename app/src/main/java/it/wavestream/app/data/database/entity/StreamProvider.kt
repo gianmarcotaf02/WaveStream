@@ -93,5 +93,12 @@ data class StreamProvider(
 
     // Metadata
     val addedAt: Long = System.currentTimeMillis(),
-    val lastUsedAt: Long? = null
+    val lastUsedAt: Long? = null,
+
+    // Qualità REALE della sorgente, misurata a runtime dal player (onVideoSizeChanged).
+    // È l'unico dato verificato sul contenuto effettivamente riproducibile: `quality` e
+    // `resolution` qui sopra sono dedotti dal NOME della sorgente (non dalla categoria),
+    // quindi possono sbagliare. Quando presente, questo valore ha la precedenza nel badge.
+    val detectedHeight: Int? = null,   // altezza video reale in px (es. 2160, 1080)
+    val detectedAt: Long? = null
 )
