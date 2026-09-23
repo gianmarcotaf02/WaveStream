@@ -76,6 +76,10 @@ data class Series(
     val tmdbCrewJson: String? = null,    // JSON array of {id, name, job, department, profile_path}
     val tmdbStatus: String? = null, // "Returning Series", "Ended", etc.
     val tmdbTrailerKey: String? = null, // YouTube video key
+    // Clear logo / title treatment (TMDb, PNG trasparente) + lista candidati alternativi
+    // in JSON ({path, lang, ar, vote}) per un eventuale selettore del titolo grafico.
+    val tmdbLogoPath: String? = null,
+    val tmdbLogoOptionsJson: String? = null,
     
     // Metadata
     val seasonCount: Int = 0,
@@ -103,6 +107,9 @@ data class Series(
     // since IPTV providers often supply incorrect covers (e.g. a different movie with same title).
     val posterUrl: String? get() = tmdbPosterPath?.let { "https://image.tmdb.org/t/p/w500$it" } ?: logoUrl
     val backdropUrl: String? get() = tmdbBackdropPath?.let { "https://image.tmdb.org/t/p/w1280$it" } ?: xtreamBackdropUrl
+    // Titolo grafico (clear logo). w500 basta e avanza: i loghi sono orizzontali e
+    // pesanti in originale; il DiskCache Coil (300 MB) li tiene comunque offline.
+    val titleLogoUrl: String? get() = tmdbLogoPath?.let { "https://image.tmdb.org/t/p/w500$it" }
     val rating: Float? get() = xtreamRating?.toFloatOrNull() ?: tmdbVoteAverage ?: omdbImdbRating?.toFloatOrNull()
     // Blank-safe fallbacks: providers often return empty/placeholder strings ("", "00:00:00")
     // which must NOT block the TMDB data.
