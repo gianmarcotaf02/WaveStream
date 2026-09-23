@@ -51,8 +51,18 @@ import kotlinx.coroutines.delay
  */
 private const val RANK_MAX = 10
 
-/** Fascia a sinistra della card riservata al numero di classifica. */
-private val RANK_GUTTER = 68.dp
+/**
+ * Fascia totale riservata al numero di classifica (nella riga, a sinistra della card).
+ * Il numero è largo quasi quanto la card ed è coperto per ~1/3 dalla copertina.
+ */
+private val RANK_NUMBER_WIDTH = 104.dp
+
+/**
+ * Di quanto la copertina è spostata a destra rispetto all'inizio della fascia:
+ * essendo minore della larghezza del numero, la card copre il lato destro del
+ * numero per circa un terzo. Più è piccolo, più le card risultano vicine.
+ */
+private val RANK_CARD_INSET = 58.dp
 
 /**
  * TV-optimized carousel row using TvLazyRow
@@ -197,9 +207,9 @@ fun TvCarouselRow(
                         translationY = (1f - entranceAlpha.value) * 40f
                     }
                 ) {
-                // Top classifica (righe popolari): numero in outline nella fascia a
-                // sinistra della card, fino a RANK_MAX. Decorativo, non focusable:
-                // non intercetta il D-pad.
+                // Top classifica (righe popolari): numero grande a sinistra della
+                // card, parzialmente nascosto dietro la copertina. Decorativo, non
+                // focusable: non intercetta il D-pad.
                 if (row.isRanked && index < RANK_MAX) {
                     TvRankNumber(
                         rank = index + 1,
@@ -208,7 +218,7 @@ fun TvCarouselRow(
                 }
                 Box(
                     modifier = Modifier
-                        .padding(start = if (row.isRanked && index < RANK_MAX) RANK_GUTTER else 0.dp)
+                        .padding(start = if (row.isRanked && index < RANK_MAX) RANK_CARD_INSET else 0.dp)
                         .focusRequester(itemFocusRequester)
                         .onFocusChanged { focusState ->
                             isFocused.value = focusState.isFocused
@@ -381,9 +391,9 @@ private fun TvSeeAllCard(
 }
 
 /**
- * Numero di classifica in stile "Top 10": solo outline, alto quanto la card,
- * a sinistra del poster (idea ripresa da KIPTV, vedi
- * wavestream_kiptv_teardown.md §4.4).
+ * Numero di classifica in stile "Top 10": grande (circa metà/tre quarti
+ * dell'altezza della copertina), allineato a sinistra. La copertina, disegnata
+ * dopo e spostata di [RANK_CARD_INSET], ne copre ~1/3 sul lato destro.
  *
  * Puramente decorativo: non è focusable e non intercetta il D-pad, quindi non
  * entra nel percorso di navigazione delle righe.
@@ -394,18 +404,15 @@ private fun TvRankNumber(rank: Int, modifier: Modifier = Modifier) {
     Text(
         text = rank.toString(),
         style = MaterialTheme.typography.displayLarge.copy(
-            // "10" ha due cifre: rimpicciolito per non uscire dalla fascia.
-            fontSize = if (rank >= 10) 52.sp else 76.sp,
+            // "10" ha due cifre: rimpicciolito per restare nella fascia.
+            fontSize = if (rank >= 10) 108.sp else 160.sp,
             fontWeight = FontWeight.Black,
             drawStyle = Stroke(width = 3f, join = StrokeJoin.Round)
         ),
         color = WaveStreamColors.TextPrimary.copy(alpha = 0.9f),
-        textAlign = TextAlign.End,
         maxLines = 1,
         softWrap = false,
-        modifier = modifier
-            .width(RANK_GUTTER)
-            .padding(end = 8.dp)
+        modifier = modifier.width(RANK_NUMBER_WIDTH)
     )
 }
 
