@@ -1467,23 +1467,28 @@ fun HeroBanner(
                                 // Prima era a filo del bordo inferiore e copriva il border(3.dp)
                                 // del CTA: restava solo un cuneo viola sull'angolo arrotondato,
                                 // che sembrava un elemento estraneo stampato sopra il pulsante.
+                                // NB: il wrapper `matchParentSize()` è indispensabile — senza di
+                                // esso la barra (`fillMaxWidth`) entra nelle misure del CTA, che
+                                // essendo `wrapContentWidth` si allarga a tutta la larghezza.
                                 if (hasProgress && hero.progressPercent != null) {
                                     val progress = hero.progressPercent.coerceIn(0.05f, 1f)
-                                    Box(
-                                        modifier = Modifier
-                                            .align(Alignment.BottomCenter)
-                                            .padding(start = 10.dp, end = 10.dp, bottom = 5.dp)
-                                            .fillMaxWidth()
-                                            .height(3.dp)
-                                            .clip(RoundedCornerShape(2.dp))
-                                            .background(Color.Black.copy(alpha = 0.25f))
-                                    ) {
+                                    Box(modifier = Modifier.matchParentSize()) {
                                         Box(
                                             modifier = Modifier
-                                                .fillMaxHeight()
-                                                .fillMaxWidth(progress)
-                                                .background(WaveStreamColors.Accent)
-                                        )
+                                                .align(Alignment.BottomStart)
+                                                .padding(start = 10.dp, end = 10.dp, bottom = 5.dp)
+                                                .fillMaxWidth()
+                                                .height(3.dp)
+                                                .clip(RoundedCornerShape(2.dp))
+                                                .background(Color.Black.copy(alpha = 0.25f))
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxHeight()
+                                                    .fillMaxWidth(progress)
+                                                    .background(WaveStreamColors.Accent)
+                                            )
+                                        }
                                     }
                                 }
                             }
