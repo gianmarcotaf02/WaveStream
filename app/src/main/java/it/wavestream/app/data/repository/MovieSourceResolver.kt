@@ -32,6 +32,20 @@ class MovieSourceResolver @Inject constructor(
         if (providerId > 0) runCatching { streamProviderDao.updateLastUsed(providerId) }
     }
 
+    /**
+     * Sorgente scelta l'ultima volta dall'utente, se ne esiste una.
+     *
+     * Serve al "Riprendi": riproporre il menu delle versioni a ogni ripresa non ha
+     * senso, si riparte dalla versione già vista. Attenzione: la lista è ordinata per
+     * qualità, quindi non basta prendere il primo elemento — va cercato il `lastUsedAt`
+     * più recente.
+     *
+     * @return la sorgente usata più di recente, oppure null se l'utente non ha mai
+     *         scelto (in quel caso il menu ha senso eccome).
+     */
+    fun lastUsedProvider(providers: List<StreamProvider>): StreamProvider? =
+        providers.filter { it.lastUsedAt != null }.maxByOrNull { it.lastUsedAt ?: 0L }
+
     private fun synthetic(movie: Movie): StreamProvider {
         val quality = contentNameParser.detectQuality(movie.name)
         return StreamProvider(
