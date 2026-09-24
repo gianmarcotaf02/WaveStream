@@ -380,26 +380,21 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // META su una sola riga: anno · generi · durata.
+                    // META su una sola riga: anno · durata · generi.
                     // La durata era una riga separata e "Valutazioni" era un heading
                     // ridondante: entrambi spariscono e la colonna guadagna due righe
-                    // verticali. La durata diventa un chip coerente con le pillole
-                    // dei rating (stessi token glass).
+                    // verticali. Ordine NON casuale: il chip sta SUBITO dopo l'anno,
+                    // nella zona sinistra ancora scura — appoggiato in coda alla riga dei
+                    // generi finiva sull'arte chiara del backdrop e diventava illeggibile.
+                    // I generi sono l'unico elemento che può accorciarsi (ellissi).
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         if (state.year.isNotEmpty()) {
                             Text(
                                 text = state.year,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = WaveStreamColors.TextSecondary
-                            )
-                        }
-                        
-                        if (state.genres.isNotEmpty()) {
-                            Text(
-                                text = state.genres,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = WaveStreamColors.TextSecondary
                             )
@@ -421,10 +416,23 @@ fun DetailsScreen(
                                 Text(
                                     text = "⏱ $duration",
                                     style = MaterialTheme.typography.bodyLarge,
-                                    color = WaveStreamColors.TextSecondary,
+                                    color = WaveStreamColors.TextPrimary,
                                     maxLines = 1
                                 )
                             }
+                        }
+                        
+                        if (state.genres.isNotEmpty()) {
+                            Text(
+                                text = state.genres,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = WaveStreamColors.TextSecondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                // fill = false: occupa solo lo spazio che serve, così il
+                                // chip non viene mai spinto fuori dalla colonna (440dp).
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
                         }
                     }
                     
