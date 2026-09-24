@@ -450,10 +450,13 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Action buttons — leggermente indentati a destra rispetto al bordo
-                    // della colonna (il testo "xx min rimasti" qui sotto parte invece flush)
+                    // Action buttons — pill icona+label (piano L2).
+                    // Con le etichette le 6 azioni superano i 720dp della colonna:
+                    // la riga scorre in orizzontale e il focus D-pad la scorre da solo.
                     Row(
-                        modifier = Modifier.padding(start = 10.dp),
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+                            .horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -1267,7 +1270,7 @@ private fun PlayButton(
  * Usa l'icona di Nova ma è indipendente dalla feature Nova (che resta in pausa).
  */
 @Composable
-private fun ExplainEndingButton(onClick: () -> Unit, label: String? = null) {
+private fun ExplainEndingButton(onClick: () -> Unit, label: String? = "Finale") {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
@@ -1494,7 +1497,7 @@ private fun EndingSourceBadge(ending: MovieEnding) {
 private fun FavoriteButton(
     isFavorite: Boolean,
     onClick: () -> Unit,
-    label: String? = null
+    label: String? = "Preferiti"
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1602,7 +1605,7 @@ private fun FavoriteButton(
 @Composable
 private fun MarkAsWatchedButton(
     onClick: () -> Unit,
-    label: String? = null
+    label: String? = "Visto"
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1732,11 +1735,11 @@ private fun DownloadButton(
                 scaleX = focusScale
                 scaleY = focusScale
             }
-            .then(if (buttonLabel != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .height(52.dp)
             .clip(actionShape(buttonLabel))
             .background(backgroundColor)
             .border(1.dp, borderColor, actionShape(buttonLabel))
-            .then(if (buttonLabel != null) Modifier.padding(horizontal = 14.dp) else Modifier)
+            .padding(horizontal = 14.dp)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -2355,7 +2358,7 @@ private fun EpisodeCard(
 @Composable
 private fun TrailerButton(
     onClick: () -> Unit,
-    label: String? = null
+    label: String? = "Trailer"
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -2420,7 +2423,7 @@ private fun AddToListButton(
     onCreateList: (String) -> Unit,
     @Suppress("UNUSED_PARAMETER") // onRenameList kept for API consistency
     onRenameList: (Long, String) -> Unit,
-    label: String? = null
+    label: String? = "Lista"
 ) {
     var showDropdown by remember { mutableStateOf(false) }
     var showCreateDialog by remember { mutableStateOf(false) }
