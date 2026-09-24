@@ -42,4 +42,25 @@ data class WatchProgress(
 ) {
     val progressPercent: Float
         get() = if (duration > 0) (position.toFloat() / duration.toFloat()) * 100 else 0f
+
+    /**
+     * Vero solo se c'è **davvero** qualcosa da riprendere: almeno 15s visionati
+     * (o qualsiasi posizione su contenuti di 1 minuto o meno) e non completato.
+     *
+     * Senza questa soglia, una riga con `position = 0` — che si crea quando il
+     * player viene aperto e chiuso prima che la riproduzione parta — veniva
+     * presentata come "Riprendi" con i minuti rimasti pari alla durata totale
+     * (es. "2h 24m rimasti" su un film mai visto).
+     */
+    val isResumable: Boolean
+        get() = when {
+            isCompleted || duration <= 0 -> false
+            duration <= MIN_RESUME_MS -> position > 0
+            else -> position >= MIN_RESUME_MS
+        }
+
+    companion object {
+        /** Soglia minima di visione per parlare di "riprendi" (15 secondi). */
+        const val MIN_RESUME_MS = 15_000L
+    }
 }

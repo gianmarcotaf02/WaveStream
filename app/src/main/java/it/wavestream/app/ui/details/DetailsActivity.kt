@@ -622,7 +622,11 @@ class DetailsActivity : ComponentActivity() {
         )
         
         // Load watch progress for resume button
+        // isResumable: senza soglia, una riga position=0 (player aperto e chiuso
+        // prima della riproduzione) o un film già completato proponevano "Riprendi"
+        // con i minuti rimasti pari alla durata totale / quasi finita.
         val watchProgress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
+            ?.takeIf { it.isResumable }
         val resumeMinutes = watchProgress?.let { 
             val remaining = (it.duration - it.position) / 60000
             remaining.toInt().coerceAtLeast(1)

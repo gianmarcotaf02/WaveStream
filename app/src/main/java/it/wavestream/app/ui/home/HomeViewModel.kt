@@ -1738,7 +1738,7 @@ class HomeViewModel @Inject constructor(
 
         if (actualResumeMinutes == null) {
             val progress = watchProgressDao.getProgress(currentProfileId, ContentType.MOVIE, movie.id)
-            if (progress != null && !progress.isCompleted) {
+            if (progress != null && progress.isResumable) {
                 actualResumeMinutes = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(1)
                 actualProgressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
             }
@@ -2227,7 +2227,7 @@ class HomeViewModel @Inject constructor(
             heroes.map { hero ->
                 if (hero.contentType == ContentType.MOVIE.name) {
                     val progress = watchProgressDao.getProgress(currentProfileId, ContentType.MOVIE, hero.id)
-                    if (progress != null && !progress.isCompleted) {
+                    if (progress != null && progress.isResumable) {
                         val remainingMinutes = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(1)
                         val progressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
                         hero.copy(
