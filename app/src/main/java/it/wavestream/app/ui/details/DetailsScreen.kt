@@ -201,6 +201,15 @@ fun DetailsScreen(
     
     // Lazy list state for auto-scroll to current/next episode
     val listState = remember { androidx.tv.foundation.lazy.list.TvLazyListState() }
+    // Carosello "Potrebbe piacerti" a SCOMPARSA: si attiva SOLO da quando l'utente
+    // comincia a scorrere verso il basso. Una volta attivato resta, così non si ha
+    // un salto di layout mentre si scorre (lo scroll hint in basso sparisce nello
+    // stesso istante).
+    var relatedRevealed by remember { mutableStateOf(false) }
+    LaunchedEffect(listState) {
+        androidx.compose.runtime.snapshotFlow { listState.firstVisibleItemScrollOffset }
+            .collect { offset -> if (offset > 0) relatedRevealed = true }
+    }
     // Solo redirect D-pad (giù dall'header stagione → primo episodio): NON richiede mai il focus
     val firstEpisodeFocusRequester = remember { FocusRequester() }
 
@@ -675,27 +684,35 @@ fun DetailsScreen(
                         }
                     }
                     
-                    // 3. Potrebbe piacerti — rail di contenuti correlati (piano L5).
-                    // Fallback locale: TMDBApiService non espone /recommendations,
-                    // quindi si usano gli stessi dati già in Room (nessuna rete).
-                    if (state.relatedContent.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            text = "Potrebbe piacerti",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = WaveStreamColors.TextSecondary,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(state.relatedContent.size) { index ->
-                                val related = state.relatedContent[index]
-                                RelatedContentCard(
-                                    related = related,
-                                    onClick = { onRelatedClick(related.contentId, related.contentType) }
-                                )
+                    // 3. Potrebbe piacerti — carosello a SCOMPARSA (piano L5 + rev. §0):
+                    // non esiste finché l'utente non comincia a scorrere verso il basso,
+                    // poi si svela con fade + slide. Fallback locale: TMDBApiService non
+                    // espone /recommendations, quindi si usano i dati già in Room.
+                    AnimatedVisibility(
+                        visible = relatedRevealed && state.relatedContent.isNotEmpty(),
+                        enter = fadeIn(tween(300)) +
+                            slideInVertically(animationSpec = tween(340)) { it / 4 },
+                        exit = fadeOut(tween(220))
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            Text(
+                                text = "Potrebbe piacerti",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = WaveStreamColors.TextSecondary,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                items(state.relatedContent.size) { index ->
+                                    val related = state.relatedContent[index]
+                                    RelatedContentCard(
+                                        related = related,
+                                        onClick = { onRelatedClick(related.contentId, related.contentType) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -805,6 +822,52 @@ fun DetailsScreen(
                 Spacer(modifier = Modifier.height(56.dp))
             }
     }
+            
+            // Scroll hint in basso: freccia verso il basso che invita a scorrere per
+            // i suggerimenti. Sparisce appena l'utente scorre (relatedRevealed), cioè
+            // nel momento stesso in cui il carosello a scomparsa si svela.
+            AnimatedVisibility(
+                visible = !relatedRevealed && state.relatedContent.isNotEmpty(),
+                enter = fadeIn(tween(300)),
+                exit = fadeOut(tween(220)),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 24.dp)
+            ) {
+                val hintBob by rememberInfiniteTransition(label = "scrollHint").animateFloat(
+                    initialValue = 0f,
+                    targetValue = 8f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(900),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "scrollHintBob"
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .offset(y = hintBob.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(GlassTokens.SurfaceFillStrong)
+                        .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(999.dp))
+                        .padding(horizontal = 18.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = "Scorri per i suggerimenti",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = WaveStreamColors.TextPrimary,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = WaveStreamColors.Accent,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
     }  // end inner Box (AnimatedVisibility content)
     }  // end AnimatedVisibility
 }  // end Box
