@@ -777,7 +777,14 @@ fun DetailsScreen(
             }
             
             item {
-                Spacer(modifier = Modifier.height(56.dp))
+                // Spazio di scorrimento: SENZA questa coda la pagina entra tutta,
+                // l'offset resta a 0 e il carosello a scomparsa non si attiverebbe
+                // mai. Serve solo se ci sono suggerimenti da rivelare.
+                Spacer(
+                    modifier = Modifier.height(
+                        if (state.relatedContent.isNotEmpty()) 180.dp else 56.dp
+                    )
+                )
             }
     }
             
