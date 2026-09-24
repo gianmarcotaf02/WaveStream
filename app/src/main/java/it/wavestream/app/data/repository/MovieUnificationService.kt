@@ -1,7 +1,9 @@
 package it.wavestream.app.data.repository
 
 import android.util.Log
+import androidx.room.withTransaction
 import it.wavestream.app.data.cache.ContentCache
+import it.wavestream.app.data.database.AppDatabase
 import it.wavestream.app.data.database.dao.MergeDao
 import it.wavestream.app.data.database.dao.MovieCategoryDao
 import it.wavestream.app.data.database.dao.MovieDao
@@ -33,6 +35,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class MovieUnificationService @Inject constructor(
+    private val appDatabase: AppDatabase,
     private val movieDao: MovieDao,
     private val movieCategoryDao: MovieCategoryDao,
     private val streamProviderDao: StreamProviderDao,
@@ -77,11 +80,21 @@ class MovieUnificationService @Inject constructor(
     ): Int = withContext(Dispatchers.IO) {
         if (inputs.isEmpty()) return@withContext 0
 
+        // Tutta la persistenza gira in UNA sola transazione Room: prima ogni
+        // update/insert/delete era una transazione a sé (con decine di migliaia di
+        // VOD si traducevano in centinaia di migliaia di commit → minuti di sync).
+        appDatabase.withTransaction {
         val existing = movieDao.getAllByPlaylistIncludingHidden(playlistId)
         val existingByKey = existing.groupBy { groupKeyOf(it) }
         val existingByTitle = existing.groupBy { ContentKey.normalizeTitle(it.cleanName ?: it.name) }
         val consumed = mutableSetOf<Long>()
         val active = mutableSetOf<Long>()
+
+        // Prefetch delle sorgenti già presenti (una query invece di una per VOD):
+        // serve a preservare id/durata/data di aggiunta delle sorgenti esistenti.
+        val existingProvidersByXtreamId = streamProviderDao.getAllByPlaylist(playlistId)
+            .mapNotNull { p -> p.xtreamStreamId?.let { it to p } }
+            .toMap()
 
         val groups = ContentKey.groupByTitleAndYear(
             items = inputs,
@@ -120,14 +133,18 @@ class MovieUnificationService @Inject constructor(
             val duplicates = candidates.filter { it.id != movieId }
             if (duplicates.isNotEmpty()) mergeDuplicatesInto(movieId, duplicates)
 
-            syncProviders(playlistId, movieId, group, primary)
+            val providerCount = syncProviders(playlistId, movieId, group, primary, existingProvidersByXtreamId)
             syncCategories(playlistId, movieId, group)
 
-            // Allinea il badge "N versioni" al numero effettivo di sorgenti
-            // (mergeDuplicatesInto può averlo toccato prima del sync).
-            movieDao.getMovieById(movieId)?.let { fresh ->
-                if (fresh.streamCount != group.size) {
-                    movieDao.update(fresh.copy(streamCount = group.size))
+            // Allinea il badge "N versioni" al numero effettivo di sorgenti.
+            // Solo se c'erano duplicati fusi serve un riallineamento (il merge può
+            // aver toccato streamCount e altri campi): nel caso normale il movie
+            // appena scritto ha già streamCount == group.size.
+            if (duplicates.isNotEmpty() && providerCount != group.size) {
+                movieDao.getMovieById(movieId)?.let { fresh ->
+                    if (fresh.streamCount != providerCount) {
+                        movieDao.update(fresh.copy(streamCount = providerCount))
+                    }
                 }
             }
         }
@@ -145,6 +162,7 @@ class MovieUnificationService @Inject constructor(
         }
 
         active.size
+        }
     }
 
     // ---------------------------------------------------------------------
