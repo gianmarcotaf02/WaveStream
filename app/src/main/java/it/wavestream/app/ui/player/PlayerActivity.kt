@@ -2260,6 +2260,21 @@ class PlayerActivity : ComponentActivity() {
             val isCompleted = currentPos > (totalDur * 0.95) || remainingMs <= 6 * 60 * 1000
             
             lifecycleScope.launch {
+                // Nessun progresso irrisore: se il player è stato aperto e chiuso prima
+                // che la riproduzione parta, salvare position~0 lasciava righe che
+                // l'home presentava come "Riprendi" con i minuti rimasti pari alla
+                // durata totale (es. "2h 24m rimasti" su un film mai visto).
+                if (currentPos < WatchProgress.MIN_RESUME_MS) {
+                    val existing = watchProgressDao.getProgress(profileId, contentType, contentId)
+                    if (existing != null && existing.position >= WatchProgress.MIN_RESUME_MS) {
+                        // Progresso reale già registrato: non azzerarlo con un position~0
+                        return@launch
+                    }
+                    // Righe fantasma: eliminale invece di crearle
+                    watchProgressDao.deleteProgress(profileId, contentType, contentId)
+                    return@launch
+                }
+
                 val progress = WatchProgress(
                     profileId = profileId,
                     contentType = contentType,
