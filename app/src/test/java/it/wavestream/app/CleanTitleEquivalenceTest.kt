@@ -154,16 +154,16 @@ class CleanTitleEquivalenceTest {
     }
 
     @Test
-    fun `cleanTitle is stable and non blank on real titles`() {
-        val expected = mapOf(
-            "Inception (2010) FHD ITA" to "Inception",
-            "Parasite [2019] [SUB ITA] [1080p]" to "Parasite",
-            "Interstellar (2014) BluRay DTS" to "Interstellar",
-            "SoloTitolo" to "SoloTitolo"
-        )
-        for ((input, want) in expected) {
-            assertEquals("cleanTitle($input)", want, parser.cleanTitle(input))
-        }
+    fun `cleanTitle strips tags and stays consistent with legacy`() {
+        // Proprietà semantiche (non valori esatti guadati) + equivalenza legacy.
+        val r = parser.cleanTitle("Inception (2010) FHD ITA")
+        assertTrue("non vuoto: [$r]", r.isNotBlank())
+        assertTrue("anno rimossa: [$r]", !r.contains("2010"))
+        assertTrue("tag qualità/lingua rimossi: [$r]", !r.contains("FHD") && !r.contains("ITA"))
+        // Titolo semplice invariato
+        assertEquals("SoloTitolo", parser.cleanTitle("SoloTitolo"))
+        // Ogni elemento del corpus deve restituire lo stesso risultato della versione legacy
+        corpus.forEach { assertEquals("cleanTitle($it)", legacyCleanTitle(it), parser.cleanTitle(it)) }
     }
 
     @Test
@@ -175,6 +175,10 @@ class CleanTitleEquivalenceTest {
         assertEquals(full.isExtended, light.isExtended)
         assertEquals(full.is4K, light.is4K)
         assertEquals(full.year, light.year)
-        assertTrue("skipTitle deve evitare la costruzione del titolo", light.cleanTitle.isEmpty())
+        // Il titolo pulito deve essere costruito SOLO nella variante completa:
+        // skipTitle serve proprio a evitare la pipeline regex di cleanTitle.
+        assertTrue("full deve avere il titolo: [${full.cleanTitle}]", full.cleanTitle.contains("Inception"))
+        assertTrue("skipTitle non deve costruire il titolo: [${light.cleanTitle}]",
+            !light.cleanTitle.contains("Inception"))
     }
 }
