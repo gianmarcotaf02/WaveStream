@@ -88,7 +88,9 @@ class MovieUnificationService @Inject constructor(
         // VOD si traducevano in centinaia di migliaia di commit → minuti di sync).
         appDatabase.withTransaction {
         val startedAt = System.currentTimeMillis()
+        val startedAt = System.currentTimeMillis()
         val existing = movieDao.getAllByPlaylistIncludingHidden(playlistId)
+        Log.i(TAG, "persist: ${inputs.size} sorgenti, ${existing.size} film in DB (+${System.currentTimeMillis() - startedAt}ms)")
         val existingByKey = existing.groupBy { groupKeyOf(it) }
         val existingByTitle = existing.groupBy { ContentKey.normalizeTitle(it.cleanName ?: it.name) }
         val consumed = mutableSetOf<Long>()
@@ -112,6 +114,8 @@ class MovieUnificationService @Inject constructor(
             titleOf = { titleFor(it.rawName) },
             yearOf = { it.year }
         )
+        Log.i(TAG, "persist: ${groups.size} gruppi (+${System.currentTimeMillis() - startedAt}ms)")
+        var flushMs = 0L
 
         val moviesToWrite = ArrayList<Movie>(FLUSH_BATCH)
         val providersToWrite = ArrayList<StreamProvider>(FLUSH_BATCH)
@@ -122,13 +126,13 @@ class MovieUnificationService @Inject constructor(
         // insert/update batch (una sola acquisizione di connessione per batch).
         suspend fun flushIfNeeded() {
             if (moviesToWrite.size >= FLUSH_BATCH) {
-                movieDao.updateList(moviesToWrite); moviesToWrite.clear()
+                val t = System.currentTimeMillis(); movieDao.updateList(moviesToWrite); moviesToWrite.clear(); flushMs += System.currentTimeMillis() - t
             }
             if (providersToWrite.size >= FLUSH_BATCH) {
-                streamProviderDao.insertAll(providersToWrite); providersToWrite.clear()
+                val t = System.currentTimeMillis(); streamProviderDao.insertAll(providersToWrite); providersToWrite.clear(); flushMs += System.currentTimeMillis() - t
             }
             if (categoriesToWrite.size >= FLUSH_BATCH) {
-                movieCategoryDao.insertAll(categoriesToWrite); categoriesToWrite.clear()
+                val t = System.currentTimeMillis(); movieCategoryDao.insertAll(categoriesToWrite); categoriesToWrite.clear(); flushMs += System.currentTimeMillis() - t
             }
         }
 
@@ -172,8 +176,8 @@ class MovieUnificationService @Inject constructor(
             providersToWrite += buildProviders(playlistId, movieId, group, primary, existingProvidersByXtreamId)
             categoriesToWrite += buildCategories(playlistId, movieId, group)
             flushIfNeeded()
-            if (++processed % 5000 == 0) {
-                Log.i(TAG, "persistGroupedMovies: $processed/${groups.size} gruppi in ${System.currentTimeMillis() - startedAt}ms")
+            if (++processed % 1000 == 0) {
+                Log.i(TAG, "persist: $processed/${groups.size} gruppi in ${System.currentTimeMillis() - startedAt}ms (flush=$flushMs)")
             }
         }
 
@@ -181,7 +185,7 @@ class MovieUnificationService @Inject constructor(
         if (moviesToWrite.isNotEmpty()) movieDao.updateList(moviesToWrite)
         if (providersToWrite.isNotEmpty()) streamProviderDao.insertAll(providersToWrite)
         if (categoriesToWrite.isNotEmpty()) movieCategoryDao.insertAll(categoriesToWrite)
-        Log.i(TAG, "persistGroupedMovies: ${inputs.size} sorgenti → ${active.size} film in ${System.currentTimeMillis() - startedAt}ms")
+        Log.i(TAG, "persist: FINE ${inputs.size} sorgenti → ${active.size} film in ${System.currentTimeMillis() - startedAt}ms (flush=$flushMs)")
 
         // Elimina i film della playlist scomparsi dal provider (i duplicati sono
         // già stati fusi sopra). La cancellazione a cascata rimuove sorgenti e
