@@ -159,6 +159,7 @@ class ContentNameParser @Inject constructor() {
     private val cleanTrailingDigits = Regex("""\s+\d+\s*$""")
     private val cleanHashtag = Regex("""#\w+""")
     private val cleanWhitespace = Regex("""\s+""")
+    private val parenthesizedYearOnly = Regex("""\(\d{4}\)""")
     
     // Live TV indicators in category names
     private val liveTvCategories = listOf(
@@ -281,7 +282,7 @@ class ContentNameParser @Inject constructor() {
         }
         
         // Check for year in parentheses (common for movies)
-        if ("""\(\d{4}\)""".toRegex().containsMatchIn(name)) {
+        if (parenthesizedYearOnly.containsMatchIn(name)) {
             return ContentType.MOVIE
         }
         
