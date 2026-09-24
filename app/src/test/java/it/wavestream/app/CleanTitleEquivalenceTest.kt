@@ -167,6 +167,35 @@ class CleanTitleEquivalenceTest {
     }
 
     @Test
+    fun `generated combinations match legacy`() {
+        val fragments = listOf(
+            "Inception", "Matrix", "2019", "4K", "FHD", "HD", "SD", "ITA", "ENG",
+            "WEB-DL", "BluRay", "HDR10+", "H.264", "x264", "TS", "CAM", "WEB", "TS",
+            "Multi Audio", "Dolby Vision", "Extended", "Director's Cut", "Sub ITA",
+            "720p", "1080p", "2160p", "HDTV", "REMUX", "AAC", "Atmos", "8bit"
+        )
+        val seps = listOf(" ", " - ", " | ", "  ", " (", ") ", "[", "]")
+        var cases = 0
+        val sb = StringBuilder()
+        // Combinazioni deterministiche: tutte le coppie + una finestra scorrevole di 4
+        for (a in fragments) for (b in fragments) {
+            val name = "$a$b"
+            assertEquals("cleanTitle($name)", legacyCleanTitle(name), parser.cleanTitle(name))
+            cases++
+            val spaced = "$a $b"
+            assertEquals("cleanTitle($spaced)", legacyCleanTitle(spaced), parser.cleanTitle(spaced))
+            cases++
+        }
+        for (i in fragments.indices) {
+            val name = fragments.drop(i).take(4).joinToString(seps[i % seps.size])
+            assertEquals("cleanTitle($name)", legacyCleanTitle(name), parser.cleanTitle(name))
+            cases++
+            sb.append(name).append('\n')
+        }
+        assertTrue("almeno qualche centinaio di casi ($cases)", cases >= 1000)
+    }
+
+    @Test
     fun `skipTitle does not affect other parse fields`() {
         val full = parser.parse("Inception (2010) FHD ITA ENG")
         val light = parser.parse("Inception (2010) FHD ITA ENG", skipTitle = true)
