@@ -380,7 +380,11 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // Year and genre
+                    // META su una sola riga: anno · generi · durata.
+                    // La durata era una riga separata e "Valutazioni" era un heading
+                    // ridondante: entrambi spariscono e la colonna guadagna due righe
+                    // verticali. La durata diventa un chip coerente con le pillole
+                    // dei rating (stessi token glass).
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -400,27 +404,34 @@ fun DetailsScreen(
                                 color = WaveStreamColors.TextSecondary
                             )
                         }
+                        
+                        state.duration?.let { duration ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(percent = 50))
+                                    .background(GlassTokens.SurfaceFillStrong)
+                                    .border(
+                                        width = 1.dp,
+                                        brush = GlassTokens.StrokeGradient,
+                                        shape = RoundedCornerShape(percent = 50)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "⏱ $duration",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = WaveStreamColors.TextSecondary,
+                                    maxLines = 1
+                                )
+                            }
+                        }
                     }
                     
-                    // Duration on separate line
-                    state.duration?.let {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "⏱ $it",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = WaveStreamColors.TextSecondary
-                        )
-                    }
-                    
+                    // Rating: striscia inline, NESSUN heading. FlowRow resta volutamente
+                    // flessibile in altezza: su schermi stretti va a capo invece di
+                    // tagliare l'ultimo badge (era già la ragione della scelta).
                     Spacer(modifier = Modifier.height(16.dp))
-                    
-                    // Ratings section with header
-                    Text(
-                        text = "Valutazioni",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = WaveStreamColors.TextSecondary,
-                        fontWeight = FontWeight.Medium
-                    )
                     RatingsBadges(
                         tmdbRating = state.tmdbRating,
                         imdbRating = state.imdbRating,
@@ -429,7 +440,7 @@ fun DetailsScreen(
                         audienceScore = state.audienceScore
                     )
                     
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                     
                     // Action buttons — leggermente indentati a destra rispetto al bordo
                     // della colonna (il testo "xx min rimasti" qui sotto parte invece flush)
