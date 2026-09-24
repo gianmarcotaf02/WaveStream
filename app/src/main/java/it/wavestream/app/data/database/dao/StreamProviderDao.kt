@@ -32,6 +32,14 @@ interface StreamProviderDao {
     @Query("SELECT * FROM stream_providers WHERE playlistId = :playlistId")
     suspend fun getAllByPlaylist(playlistId: Long): List<StreamProvider>
 
+    /**
+     * Solo i campi che l'unificazione deve conservare dalle sorgenti esistenti
+     * (id, tmdb, durata, date). Proiettare le colonne invece di caricare le righe
+     * intere alleggerisce molto memoria e tempo di prefetch su ~70k VOD.
+     */
+    @Query("SELECT * FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId IS NOT NULL")
+    suspend fun getPreservableByPlaylist(playlistId: Long): List<StreamProvider>
+
     @Query("SELECT * FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId = :xtreamStreamId LIMIT 1")
     suspend fun getByXtreamId(playlistId: Long, xtreamStreamId: Int): StreamProvider?
 
