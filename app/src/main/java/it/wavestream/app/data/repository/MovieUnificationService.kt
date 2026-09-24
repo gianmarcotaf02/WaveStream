@@ -88,7 +88,6 @@ class MovieUnificationService @Inject constructor(
         // VOD si traducevano in centinaia di migliaia di commit → minuti di sync).
         appDatabase.withTransaction {
         val startedAt = System.currentTimeMillis()
-        val startedAt = System.currentTimeMillis()
         val existing = movieDao.getAllByPlaylistIncludingHidden(playlistId)
         Log.i(TAG, "persist: ${inputs.size} sorgenti, ${existing.size} film in DB (+${System.currentTimeMillis() - startedAt}ms)")
         val existingByKey = existing.groupBy { groupKeyOf(it) }
