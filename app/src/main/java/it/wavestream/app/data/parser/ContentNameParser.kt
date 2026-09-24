@@ -147,6 +147,20 @@ class ContentNameParser @Inject constructor() {
         "10BIT", "8BIT", "SDR", "HDR10+", "HDR10", "DOLBY VISION", "EAC3", "DD5.1")
     private val codecRegexes: List<Regex> = codecTags.map { wb(it) }
 
+    // Rimozione di TUTTI i tag (qualità, lingua, edizioni, HDR, codec) in una sola
+    // passata. Prima erano ~90 regex separate, ognuna con uno scan completo della
+    // stringa: ~0.6ms per titolo, e con ~69k VOD il solo raggruppamento occupava
+    // decine di secondi. L'ordine degli alternativi riproduce esattamente quello
+    // dei loop originali (qualità → lingua → edizioni → HDR → codec).
+    private val tagStripRegex: Regex = Regex(
+        "\\b(?:${(qualityPatterns.values.flatten() +
+            languagePatterns.values.flatten() +
+            extendedPatterns +
+            hdrPatterns +
+            codecTags).joinToString("|") { Regex.escape(it) }})\\b",
+        RegexOption.IGNORE_CASE
+    )
+
     // Regex di cleanTitle precompilate: la funzione viene invocata per migliaia di
     // titoli durante sync/unificazione, ricompilare le regex a ogni chiamata era
     // un costo misurabile.
@@ -180,7 +194,7 @@ class ContentNameParser @Inject constructor() {
     /**
      * Parse content name and extract metadata
      */
-    fun parse(name: String, category: String? = null, tvgType: String? = null, duration: Int = -1): ParsedContent {
+    fun parse(name: String, category: String? = null, tvgType: String? = null, duration: Int = -1, skipTitle: Boolean = false): ParsedContent {
         val originalName = name.trim()
         var workingName = originalName
         
@@ -219,7 +233,7 @@ class ContentNameParser @Inject constructor() {
         val isExtended = extendedPatterns.any { workingName.lowercase().contains(it) }
         
         // Clean the title for TMDB search
-        var cleanTitle = cleanTitle(workingName)
+        var cleanTitle = if (skipTitle) "" else cleanTitle(workingName)
         
         // Fix for movies named with a year (e.g. "2012", "1917")
         // If parsing stripped everything because it looked like a year/quality,
@@ -353,32 +367,9 @@ class ContentNameParser @Inject constructor() {
         // Remove year in parentheses: (2024), (2025), etc.
         result = result.replace(cleanYear, " ")
         
-        // Remove quality indicators
-        for (regex in qualityRegexesFlat) {
-            result = regex.replace(result, "")
-        }
-        
-        // Remove language indicators
-        for (regexes in languageRegexes.values) {
-            for (regex in regexes) {
-                result = regex.replace(result, "")
-            }
-        }
-        
-        // Remove extended edition indicators
-        for (regex in extendedRegexes) {
-            result = regex.replace(result, "")
-        }
-        
-        // Remove HDR indicators
-        for (regex in hdrRegexes) {
-            result = regex.replace(result, "")
-        }
-        
-        // Remove common codec/format tags
-        for (regex in codecRegexes) {
-            result = regex.replace(result, "")
-        }
+        // Remove quality/language/edition/HDR/codec indicators in a SINGLE pass
+        // (era un loop per lista: ~90 regex, uno scan ciascuna).
+        result = tagStripRegex.replace(result, "")
         
         // Apply generic cleanup patterns
         for (pattern in removePatterns) {

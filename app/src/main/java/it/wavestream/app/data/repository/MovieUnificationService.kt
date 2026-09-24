@@ -353,7 +353,9 @@ class MovieUnificationService @Inject constructor(
     ): List<StreamProvider> {
         val result = ArrayList<StreamProvider>(group.size)
         for (src in group) {
-            val parsed = contentNameParser.parse(src.rawName)
+            // skipTitle: qui servono solo lingua/HDR/edizione, il titolo pulito no
+            // (ricostruirlo per ogni sorgente era ~69k cleanTitle inutili).
+            val parsed = contentNameParser.parse(src.rawName, skipTitle = true)
             val quality = contentNameParser.detectQuality(src.rawName)
             val existing = src.xtreamStreamId?.let { existingProvidersByXtreamId[it] }
             result.add(
