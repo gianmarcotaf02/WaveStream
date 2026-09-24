@@ -133,7 +133,18 @@ data class DetailsState(
     // Episode download states (episodeId -> EpisodeDownloadState)
     val episodeDownloadStates: Map<Long, EpisodeDownloadState> = emptyMap(),
     // Auto-scroll target: index of the episode to scroll to in the episodes list
-    val scrollToEpisodeIndex: Int? = null
+    val scrollToEpisodeIndex: Int? = null,
+    // Contenuti correlati per il rail "Potrebbe piacerti" (piano L5)
+    val relatedContent: List<RelatedContent> = emptyList()
+)
+
+/** Voce del rail "Potrebbe piacerti" (piano L5). */
+@Immutable
+data class RelatedContent(
+    val contentId: Long,
+    val title: String,
+    val posterUrl: String?,
+    val contentType: ContentType
 )
 
 // State for individual episode downloads
@@ -165,6 +176,7 @@ fun DetailsScreen(
     onRenameList: (Long, String) -> Unit = { _, _ -> },
     onMarkAsWatchedClick: () -> Unit = {},
     onPersonClick: (personId: Int, personName: String) -> Unit = { _, _ -> },
+    onRelatedClick: (contentId: Long, contentType: ContentType) -> Unit = { _, _ -> },
     // Download callbacks
     onDownloadClick: () -> Unit = {},
     onDeleteDownloadClick: () -> Unit = {},
@@ -741,6 +753,29 @@ fun DetailsScreen(
                             }
                         }
                     }
+                    
+                    // 3. Potrebbe piacerti — rail di contenuti correlati (piano L5).
+                    // Fallback locale: TMDBApiService non espone /recommendations,
+                    // quindi si usano gli stessi dati già in Room (nessuna rete).
+                    if (state.relatedContent.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "Potrebbe piacerti",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WaveStreamColors.TextSecondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            items(state.relatedContent.size) { index ->
+                                val related = state.relatedContent[index]
+                                RelatedContentCard(
+                                    related = related,
+                                    onClick = { onRelatedClick(related.contentId, related.contentType) }
+                                )
+                            }
+                        }
+                    }
                 }
             }
             
@@ -864,6 +899,72 @@ private fun DetailsTopBar(
  * Cast person card — clickable circular photo with name + role
  */
 @Composable
+/**
+ * Card di un contenuto correlato — rail "Potrebbe piacerti" (piano L5).
+ * Poster 2:3 (132×198dp) + titolo su due righe, con alone di focus.
+ */
+@Composable
+private fun RelatedContentCard(
+    related: RelatedContent,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "relatedScale"
+    )
+    val ring by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.35f) else Color.Transparent,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "relatedRing"
+    )
+
+    Column(
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier
+            .width(132.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+    ) {
+        AsyncImage(
+            model = coil.request.ImageRequest.Builder(
+                androidx.compose.ui.platform.LocalContext.current
+            )
+                .data(related.posterUrl)
+                .size(132, 198)
+                .crossfade(true)
+                .build(),
+            contentDescription = related.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(198.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .border(2.dp, ring, RoundedCornerShape(12.dp))
+        )
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = related.title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = WaveStreamColors.TextPrimary,
+            fontWeight = FontWeight.Medium,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
 private fun CastPersonCard(
     person: PersonInfo,
     onClick: () -> Unit,
