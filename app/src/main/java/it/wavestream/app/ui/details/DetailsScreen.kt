@@ -259,15 +259,18 @@ fun DetailsScreen(
                                 WaveStreamColors.BackgroundDark,  // 100% opaque at left edge
                                 WaveStreamColors.BackgroundDark,  // Keep solid
                                 WaveStreamColors.BackgroundDark,  // Keep solid
-                                WaveStreamColors.BackgroundDark,  // Keep solid until ~50%
-                                WaveStreamColors.BackgroundDark.copy(alpha = 0.95f),
-                                WaveStreamColors.BackgroundDark.copy(alpha = 0.8f),
-                                WaveStreamColors.BackgroundDark.copy(alpha = 0.5f),
-                                WaveStreamColors.BackgroundDark.copy(alpha = 0.2f),
+                                WaveStreamColors.BackgroundDark,  // Keep solid
+                                WaveStreamColors.BackgroundDark,  // Keep solid until ~55%
+                                WaveStreamColors.BackgroundDark.copy(alpha = 0.9f),
+                                WaveStreamColors.BackgroundDark.copy(alpha = 0.6f),
+                                WaveStreamColors.BackgroundDark.copy(alpha = 0.3f),
                                 Color.Transparent
                             ),
                             startX = 0f,
-                            endX = 1600f  // Extended much further for 50% solid dark
+                            // 1800 (era 1600): con la scala corta a x=1390 restavano
+                            // ~0.2 di alpha, cioè proprio dove finiva la trama
+                            // sull'arte chiara (problema P4).
+                            endX = 1800f
                         )
                     )
             )
@@ -319,7 +322,10 @@ fun DetailsScreen(
         ) {
             // Top content block: poster, info, buttons, overview, cast
             item {
-            // Main content - back button + poster + info in one row
+            // Main content - back button + info (piano L3: il poster è RIMOSSO —
+            // duplicava logo e backdrop e occupava una colonna intera da 150dp.
+            // L'info parte ora molto più a sinistra, dentro la fascia più scura dello
+            // scrim, e guadagna larghezza per il testo.)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -329,25 +335,6 @@ fun DetailsScreen(
                     onBackClick = onBackClick,
                     modifier = Modifier.padding(top = 4.dp)
                 )
-                
-                // Poster
-                if (!state.posterUrl.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = coil.request.ImageRequest.Builder(
-                            androidx.compose.ui.platform.LocalContext.current
-                        )
-                            .data(state.posterUrl)
-                            .size(150, 225)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = state.title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .width(150.dp)
-                            .height(225.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                    )
-                }
                 
                 // Info column
                 Column(
@@ -632,20 +619,23 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // 1. Overview (Trama)
+                    // 1. Overview (Trama) — piano L4: maxLines 3 (era 5) e corpo
+                    // 19sp/28sp (era 13sp/22sp): su TV da 3 metri 13sp non si legge.
                     if (state.overview.isNotEmpty()) {
                         var isExpanded by remember { mutableStateOf(false) }
                         var hasOverflow by remember { mutableStateOf(false) }
-                        val maxLines = if (isExpanded) Int.MAX_VALUE else 5
+                        val maxLines = if (isExpanded) Int.MAX_VALUE else 3
                         
                         Column {
                             Text(
                                 text = state.overview,
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = 19.sp,
+                                    lineHeight = 28.sp
+                                ),
                                 color = WaveStreamColors.TextSecondary,
                                 maxLines = maxLines,
                                 overflow = TextOverflow.Ellipsis,
-                                lineHeight = 22.sp,
                                 onTextLayout = { textLayoutResult ->
                                     if (!isExpanded) {
                                         hasOverflow = textLayoutResult.hasVisualOverflow
@@ -657,7 +647,7 @@ fun DetailsScreen(
                             if (!isExpanded && hasOverflow) {
                                 Text(
                                     text = "Leggi di più...",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = WaveStreamColors.Accent,
                                     fontWeight = FontWeight.Medium,
                                     modifier = Modifier
