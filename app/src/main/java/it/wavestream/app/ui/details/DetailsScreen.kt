@@ -1783,6 +1783,7 @@ private fun DownloadButton(
                 )
             }
         }
+        }
     }
 }
 
