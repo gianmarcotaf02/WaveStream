@@ -762,7 +762,11 @@ private fun TvHomeScreenContent(
                                 translationY = rowOffsetY.toPx()
                             }
                         ) {
-                            Spacer(modifier = Modifier.height(30.dp))
+                            // Leading del carosello. Per il PRIMO rigo (quello subito
+                            // sotto l'hero) e' ridotto a 8dp: compensa i +21.6dp con cui e'
+                            // cresciuto l'hero, cosi' la posizione assoluta di TUTTI i
+                            // caroselli resta invariata e la spaziatura tra righe resta 30dp.
+                            Spacer(modifier = Modifier.height(if (isFirstRow && hasHero) 8.dp else 30.dp))
                             
                             // First carousel with Hero: intercept UP to return to Hero
                             if (isFirstRow && hasHero) {
@@ -996,8 +1000,12 @@ fun HeroBanner(
     }
     
     // Fase 1 - altezza adattiva. Prima 340dp fissi: su schermi a bassa densita'
-    // risultava una banda bassa e "incollata" sul nero. Ora ~62% dello schermo.
-    val heroHeight = (LocalConfiguration.current.screenHeightDp * 0.62f).dp
+    // risultava una banda bassa e "incollata" sul nero. Ora ~66% dello schermo.
+    // 0.62 -> 0.66 (+21.6dp): il contenuto dell'hero e' bottom-aligned, quindi
+    // l'overflow mangiava la cima (logo/titolo/badge tagliati su titoli con logo
+    // alto, es. NEAGLEY). Il extra spazio e' compensato riducendo il leading del
+    // PRIMO carosello, cosi' le righe carosello restano esattamente dov'erano.
+    val heroHeight = (LocalConfiguration.current.screenHeightDp * 0.66f).dp
 
     // Scrim statiche (SrcOver): raccordano il backdrop a tutta fascia con lo sfondo
     // nero del contenitore e danno contrasto al testo. Sostituiscono le maschere
@@ -1384,7 +1392,10 @@ fun HeroBanner(
                                     // Altezza UNICA per tutti i CTA: con il badge (SxEy o minuti
                                     // rimasti) serve spazio per due righe, e un'altezza che cambia
                                     // tra un hero e l'altro si vedeva come un "salto" in rotazione.
-                                    .height(56.dp)
+                                    // requiredHeight (non height): con .height il vincolo poteva
+                                    // essere degradato dai genitori e alcuni CTA misuravano 50/51dp
+                                    // invece di 56dp.
+                                    .requiredHeight(56.dp)
                                     .wrapContentWidth()
                                     .widthIn(min = 140.dp)
                                     .clip(RoundedCornerShape(12.dp))
@@ -1448,8 +1459,10 @@ fun HeroBanner(
                                         Spacer(modifier = Modifier.height(1.dp))
                                         Text(
                                             text = buttonBadge,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = playContent.copy(alpha = 0.7f),
+                                            // labelSmall (10sp) al 70% di alpha era poco leggibile da
+                                            // divano: 11sp pieni, mantenendo il colore del contenuto.
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = playContent.copy(alpha = 0.9f),
                                             fontWeight = FontWeight.Bold,
                                             maxLines = 1
                                         )
