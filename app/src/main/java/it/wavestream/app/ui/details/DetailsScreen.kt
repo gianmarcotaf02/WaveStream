@@ -678,7 +678,16 @@ fun DetailsScreen(
                     // ULTIMA RIGA: CAST E REGIA SULLA STESSA RIGA, centrati
                     // (chiarimento della specifica). La regia apre la riga, il cast
                     // la segue: un solo heading, una sola riga orizzontale.
-                    val crew = state.directorPeople + state.castPeople
+                    // Deduplica per persona: nel crew TMDB la stessa persona
+                    // compare UNA VOLTA PER RUOLO (es. "Christophe…" = Director +
+                    // Writer + Producer → 3 card identiche). Il "Director" va per
+                    // primo e distinctBy tiene la prima occorrenza, così anche un
+                    // attore che è anche nella crew non genera una seconda card.
+                    val crew = (
+                        state.directorPeople.sortedBy { p ->
+                            if (p.job.equals("Director", ignoreCase = true)) 0 else 1
+                        } + state.castPeople
+                    ).distinctBy { it.id }
                     if (crew.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
@@ -797,7 +806,7 @@ fun DetailsScreen(
                 exit = fadeOut(tween(220)),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 24.dp)
+                    .padding(bottom = 14.dp)
             ) {
                 val hintBob by rememberInfiniteTransition(label = "scrollHint").animateFloat(
                     initialValue = 0f,
@@ -815,21 +824,21 @@ fun DetailsScreen(
                         .clip(RoundedCornerShape(999.dp))
                         .background(GlassTokens.SurfaceFillStrong)
                         .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(999.dp))
-                        .padding(horizontal = 18.dp, vertical = 10.dp)
+                        .padding(horizontal = 14.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = "Scorri per i suggerimenti",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.labelLarge,
                         color = WaveStreamColors.TextPrimary,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = null,
                         tint = WaveStreamColors.Accent,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
@@ -988,7 +997,7 @@ private fun CastPersonCard(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .width(72.dp)
+            .width(56.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -1006,7 +1015,7 @@ private fun CastPersonCard(
         // Profile photo
         Box(
             modifier = Modifier
-                .size(64.dp)
+                .size(48.dp)
                 .clip(CircleShape)
                 .background(WaveStreamColors.BackgroundTertiary)
         ) {
@@ -1022,7 +1031,7 @@ private fun CastPersonCard(
             if (person.profileUrl == null) {
                 Text(
                     text = person.name.firstOrNull()?.uppercase() ?: "?",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     color = WaveStreamColors.TextSecondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.align(Alignment.Center)
@@ -1030,12 +1039,12 @@ private fun CastPersonCard(
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         // Name
         Text(
             text = person.name,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
             color = WaveStreamColors.TextPrimary,
             textAlign = TextAlign.Center,
             maxLines = 1,
@@ -1046,7 +1055,7 @@ private fun CastPersonCard(
         person.roleLabel?.let { role ->
             Text(
                 text = role,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
                 color = WaveStreamColors.TextTertiary,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
