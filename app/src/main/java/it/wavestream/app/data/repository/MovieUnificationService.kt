@@ -91,7 +91,9 @@ class MovieUnificationService @Inject constructor(
         val existing = movieDao.getAllByPlaylistIncludingHidden(playlistId)
         Log.i(TAG, "persist: ${inputs.size} sorgenti, ${existing.size} film in DB (+${System.currentTimeMillis() - startedAt}ms)")
         val existingByKey = existing.groupBy { groupKeyOf(it) }
+        Log.i(TAG, "persist: existingByKey +${System.currentTimeMillis() - startedAt}ms")
         val existingByTitle = existing.groupBy { ContentKey.normalizeTitle(it.cleanName ?: it.name) }
+        Log.i(TAG, "persist: existingByTitle +${System.currentTimeMillis() - startedAt}ms")
         val consumed = mutableSetOf<Long>()
         val active = mutableSetOf<Long>()
 
@@ -100,13 +102,16 @@ class MovieUnificationService @Inject constructor(
         val existingProvidersByXtreamId = streamProviderDao.getAllByPlaylist(playlistId)
             .mapNotNull { p -> p.xtreamStreamId?.let { it to p } }
             .toMap()
+        Log.i(TAG, "persist: providers prefetch=${existingProvidersByXtreamId.size} +${System.currentTimeMillis() - startedAt}ms")
 
         // Sorgenti e appartenenze di categoria vengono azzerate UNA volta e
         // riscritte in batch a fine sync. Prima erano N insert/delete per film: su
         // ~70k VOD significavano centinaia di migliaia di chiamate Room (minuti di
         // sync, con il pool DB saturato per i lettori concorrenti).
         streamProviderDao.deleteByPlaylist(playlistId)
+        Log.i(TAG, "persist: delete providers +${System.currentTimeMillis() - startedAt}ms")
         movieCategoryDao.deleteByPlaylist(playlistId)
+        Log.i(TAG, "persist: delete categories +${System.currentTimeMillis() - startedAt}ms")
 
         val groups = ContentKey.groupByTitleAndYear(
             items = inputs,
