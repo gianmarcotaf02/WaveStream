@@ -360,7 +360,7 @@ class MovieUnificationService @Inject constructor(
         return base.copy(
             name = cleanTitle,
             cleanName = cleanTitle,
-            groupKey = ContentKey.groupKey(cleanTitle, resolvedYear),
+            groupKey = targetGroupKey,
             streamCount = streamCount,
             streamUrl = primary.streamUrl,
             logoUrl = primary.poster ?: base.logoUrl,
@@ -380,7 +380,7 @@ class MovieUnificationService @Inject constructor(
         movieId: Long,
         group: List<MovieSourceInput>,
         primary: MovieSourceInput,
-        existingProvidersByXtreamId: Map<Int, StreamProvider>
+        existingProvidersByXtreamId: Map<Int, ProviderPreserve>
     ): List<StreamProvider> {
         val result = ArrayList<StreamProvider>(group.size)
         for (src in group) {
