@@ -7,6 +7,7 @@ import it.wavestream.app.data.database.AppDatabase
 import it.wavestream.app.data.database.dao.MergeDao
 import it.wavestream.app.data.database.dao.MovieCategoryDao
 import it.wavestream.app.data.database.dao.MovieDao
+import it.wavestream.app.data.database.dao.ProviderPreserve
 import it.wavestream.app.data.database.dao.StreamProviderDao
 import it.wavestream.app.data.database.entity.Movie
 import it.wavestream.app.data.database.entity.MovieCategory
@@ -97,11 +98,10 @@ class MovieUnificationService @Inject constructor(
         val consumed = mutableSetOf<Long>()
         val active = mutableSetOf<Long>()
 
-        // Prefetch delle sorgenti già presenti (una query invece di una per VOD):
-        // serve a preservare durata/data di aggiunta/data d'uso delle sorgenti.
-        val existingProvidersByXtreamId = streamProviderDao.getAllByPlaylist(playlistId)
-            .mapNotNull { p -> p.xtreamStreamId?.let { it to p } }
-            .toMap()
+        // Prefetch proiettato (solo i campi da conservare) di una query invece di
+        // una per VOD: serve a preservare durata/data di aggiunta/data d'uso.
+        val existingProvidersByXtreamId = streamProviderDao.getPreservableByPlaylist(playlistId)
+            .associateBy { it.xtreamStreamId }
         Log.i(TAG, "persist: providers prefetch=${existingProvidersByXtreamId.size} +${System.currentTimeMillis() - startedAt}ms")
 
         // Sorgenti e appartenenze di categoria vengono azzerate UNA volta e
@@ -147,12 +147,18 @@ class MovieUnificationService @Inject constructor(
             val cleanTitle = titleFor(primary.rawName).ifBlank { primary.rawName.trim() }
             val year = group.firstNotNullOfOrNull { it.year }
 
+            // normalizeTitle calcolato UNA volta e riusato sia per la chiave di
+            // gruppo sia per il fallback per titolo (prima veniva ricalcolato 2-3
+            // volte per gruppo, ~5 String allocate ciascuno).
+            val normTitle = ContentKey.normalizeTitle(cleanTitle)
+            val groupKey = if (year != null) "$normTitle|$year" else "$normTitle|"
+
             // Righe esistenti corrispondenti: prima per chiave esatta, altrimenti
             // stesso titolo normalizzato e stesso anno (evita merge tra remake).
-            val exact = existingByKey[ContentKey.groupKey(cleanTitle, year)]
+            val exact = existingByKey[groupKey]
                 ?.filter { it.id !in consumed }
                 .orEmpty()
-            val candidates = if (exact.isNotEmpty()) exact else existingByTitle[ContentKey.normalizeTitle(cleanTitle)]
+            val candidates = if (exact.isNotEmpty()) exact else existingByTitle[normTitle]
                 ?.filter { it.id !in consumed && it.year == year }
                 .orEmpty()
             candidates.forEach { consumed.add(it.id) }
@@ -168,7 +174,8 @@ class MovieUnificationService @Inject constructor(
                     mergeDuplicatesInto(canonicalExisting.id, duplicates)
                         ?.let { movie = it.copy(streamCount = group.size) }
                 }
-                moviesToWrite.add(movie)
+                // Se buildCanonicalMovie ha riusato la riga invariata, nessuna scrittura.
+                if (movie !== canonicalExisting) moviesToWrite.add(movie)
                 movieId = movie.id
             } else {
                 // L'id serve subito per collegare sorgenti/categorie: solo i film
@@ -326,6 +333,30 @@ class MovieUnificationService @Inject constructor(
             streamUrl = primary.streamUrl
         )
         val resolvedYear = year ?: existing?.year
+        val targetGroupKey = ContentKey.groupKey(cleanTitle, resolvedYear)
+
+        // Catalogo immutato → nessuna variazione: riusa la riga esistente senza
+        // nemmeno allocare il copy, così la caller può saltare l'update
+        // (su un refresh senza cambiamenti evita ~55k riscritture).
+        if (existing != null) {
+            val unchanged =
+                existing.name == cleanTitle &&
+                existing.cleanName == cleanTitle &&
+                existing.groupKey == targetGroupKey &&
+                existing.streamCount == streamCount &&
+                existing.streamUrl == primary.streamUrl &&
+                existing.logoUrl == (primary.poster ?: existing.logoUrl) &&
+                existing.xtreamBackdropUrl == (primary.backdrop ?: existing.xtreamBackdropUrl) &&
+                existing.category == (primary.category ?: existing.category) &&
+                existing.categoryId == (primary.categoryId ?: existing.categoryId) &&
+                existing.xtreamStreamId == (primary.xtreamStreamId ?: existing.xtreamStreamId) &&
+                existing.containerExtension == (primary.containerExtension ?: existing.containerExtension) &&
+                existing.xtreamRating == (primary.rating ?: existing.xtreamRating) &&
+                existing.year == resolvedYear &&
+                existing.playlistOrder == primary.playlistOrder
+            if (unchanged) return existing
+        }
+
         return base.copy(
             name = cleanTitle,
             cleanName = cleanTitle,
