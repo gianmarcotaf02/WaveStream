@@ -1130,9 +1130,12 @@ private fun PlayButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .widthIn(min = if (badge != null) 132.dp else 120.dp)
-            // Serie TV (badge episodio): altezza ridotta — il codice SxEy sta sotto in piccolo
-            .height(if (badge != null) 56.dp else 52.dp)
+            .widthIn(min = if (badge != null) 148.dp else 140.dp)
+            // Altezza UNIFORME a 64dp (piano L2): prima era 56dp con badge e 52dp
+            // senza, quindi il CTA "saltava" in altezza passando da un contenuto
+            // all'altro. Con due righe (etichetta + SxEy) e la barra di progresso
+            // ci sta tutto comodo.
+            .height(64.dp)
             .border(1.5.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
@@ -1191,8 +1194,10 @@ private fun PlayButton(
                 Spacer(modifier = Modifier.height(1.dp))
                 Text(
                     text = badge,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = contentColor.copy(alpha = 0.7f),
+                    // labelSmall (10sp) al 70% di alpha era sotto il minimo leggibile
+                    // su TV: 11sp a pieno contrasto (regola §5 del piano di layout).
+                    style = MaterialTheme.typography.labelMedium,
+                    color = contentColor.copy(alpha = 0.9f),
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
