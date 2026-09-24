@@ -159,6 +159,7 @@ data class EpisodeDownloadState(
  * Details Screen - Shows movie/series/channel details
  * Premium design with backdrop, ratings badges, and episodes list
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DetailsScreen(
     state: DetailsState,
@@ -612,7 +613,9 @@ fun DetailsScreen(
                         Text(
                             text = remainingText,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = WaveStreamColors.TextTertiary
+                            color = WaveStreamColors.TextTertiary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                     
@@ -625,7 +628,7 @@ fun DetailsScreen(
                         var hasOverflow by remember { mutableStateOf(false) }
                         val maxLines = if (isExpanded) Int.MAX_VALUE else 3
                         
-                        Column {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 text = state.overview,
                                 style = MaterialTheme.typography.bodyLarge.copy(
@@ -633,6 +636,7 @@ fun DetailsScreen(
                                     lineHeight = 28.sp
                                 ),
                                 color = WaveStreamColors.TextSecondary,
+                                textAlign = TextAlign.Center,
                                 maxLines = maxLines,
                                 overflow = TextOverflow.Ellipsis,
                                 onTextLayout = { textLayoutResult ->
@@ -649,6 +653,8 @@ fun DetailsScreen(
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = WaveStreamColors.Accent,
                                     fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth(),
                                     modifier = Modifier
                                         .padding(top = 4.dp)
                                         .clickable { isExpanded = true }
@@ -667,80 +673,6 @@ fun DetailsScreen(
                         }
                     }
                     
-                    // 2. Cast & Regia — UNA sola rail (piano L6).
-                    // Prima erano due sezioni con due heading separati ("Cast",
-                    // "Regia"): due righe verticali per un'informazione dello stesso
-                    // tipo. Ora la regia apre la rail e il cast la segue (§3.2), con un
-                    // solo heading. I fallback di testo piatto restano indipendenti, così
-                    // non si perde nulla quando manca solo uno dei due dati.
-                    val crew = state.directorPeople + state.castPeople
-                    if (crew.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "Cast & Regia",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = WaveStreamColors.TextSecondary,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(crew.size) { index ->
-                                val person = crew[index]
-                                CastPersonCard(
-                                    person = person,
-                                    onClick = { onPersonClick(person.id, person.name) }
-                                )
-                            }
-                        }
-                    }
-                    
-                    if (crew.isEmpty()) {
-                        state.cast?.let {
-                            // Fallback: plain text if no structured cast data
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Row(
-                                verticalAlignment = Alignment.Top,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_cast_purple),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(32.dp),
-                                    colorFilter = ColorFilter.tint(WaveStreamColors.Accent)
-                                )
-                                Text(
-                                    text = "Cast: $it",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = WaveStreamColors.TextTertiary,
-                                    maxLines = 2,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                        state.director?.let {
-                            // Fallback: plain text if no structured crew data
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.ic_regia_purple),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(32.dp),
-                                    colorFilter = ColorFilter.tint(WaveStreamColors.Accent)
-                                )
-                                Text(
-                                    text = "Regia: $it",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = WaveStreamColors.TextTertiary
-                                )
-                            }
-                        }
-                    }
-                    
                     // 3. Potrebbe piacerti — rail di contenuti correlati (piano L5).
                     // Fallback locale: TMDBApiService non espone /recommendations,
                     // quindi si usano gli stessi dati già in Room (nessuna rete).
@@ -750,7 +682,9 @@ fun DetailsScreen(
                             text = "Potrebbe piacerti",
                             style = MaterialTheme.typography.titleMedium,
                             color = WaveStreamColors.TextSecondary,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -762,6 +696,39 @@ fun DetailsScreen(
                                 )
                             }
                         }
+                    }
+                    
+                    // ULTIMA RIGA: la REGIA, centrata (come da specifica).
+                    // Il cast non fa più parte di questa scheda ridisegnata.
+                    if (state.directorPeople.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(28.dp))
+                        Text(
+                            text = "Regia",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WaveStreamColors.TextSecondary,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            items(state.directorPeople.size) { index ->
+                                val person = state.directorPeople[index]
+                                CastPersonCard(
+                                    person = person,
+                                    onClick = { onPersonClick(person.id, person.name) }
+                                )
+                            }
+                        }
+                    } else state.director?.let {
+                        Spacer(modifier = Modifier.height(28.dp))
+                        Text(
+                            text = "Regia: $it",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = WaveStreamColors.TextSecondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -1158,6 +1125,31 @@ private fun ModernRatingItem(
  */
 private fun actionShape(label: String?) =
     if (label != null) RoundedCornerShape(26.dp) else CircleShape
+
+/**
+ * Durata in ore/minuti per la riga informativa (es. "2h 24m"), come da specifica
+ * del nuovo layout centrato. Accetta sia "144 min" (tmdbRuntime) sia "01:31:19"
+ * (Xtream): se il formato non è riconosciuto restituisce il testo invariato.
+ */
+private fun formatDurationInHours(raw: String?): String {
+    val value = raw?.trim().orEmpty()
+    if (value.isEmpty()) return value
+
+    Regex("""^(\d{1,2}):(\d{2}):(\d{2})$""").find(value)?.let { m ->
+        val h = m.groupValues[1].toInt()
+        val min = m.groupValues[2].toInt()
+        return if (h > 0) "${h}h ${min}m" else "${min}m"
+    }
+
+    val minutes = Regex("""^(\d+)\s*min""").find(value)?.groupValues?.get(1)?.toIntOrNull()
+        ?: value.toIntOrNull()
+    if (minutes != null && minutes > 0) {
+        val h = minutes / 60
+        val min = minutes % 60
+        return if (h > 0) "${h}h ${min}m" else "${min}m"
+    }
+    return value
+}
 
 /**
  * Contenuto dei pulsanti azione. Con [label] disegna "icona + testo" (pill);
