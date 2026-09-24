@@ -189,6 +189,17 @@ class DetailsActivity : ComponentActivity() {
         DetailsScreen(
             state = state,
             onBackClick = { finish() },
+            // Rail "Potrebbe piacerti" (piano L5): apre la scheda del contenuto
+            // correlato come activity sopra questa, così il back torna alla scheda
+            // di partenza con tutto il suo stato.
+            onRelatedClick = { contentId, contentType ->
+                startActivity(
+                    Intent(this@DetailsActivity, DetailsActivity::class.java).apply {
+                        putExtra("content_id", contentId)
+                        putExtra("content_type", contentType.name)
+                    }
+                )
+            },
             onPlayClick = { 
                 if (state.contentType == ContentType.SERIES) {
                     // If there's a next episode to watch (from nextEpisodeId), play that
@@ -460,6 +471,35 @@ class DetailsActivity : ComponentActivity() {
             ?: matches.firstOrNull()
     }
     
+    /**
+     * Contenuti correlati per il rail "Potrebbe piacerti" (piano L5).
+     *
+     * `TMDBApiService` non espone `/recommendations`, quindi si usano i dati già
+     * in Room: stessa categoria di playlist, escludendo il contenuto corrente e
+     * ordinati per popolarità TMDB. Nessuna chiamata di rete aggiuntiva e nessun
+     * stato di caricamento. Ritorna vuoto se la categoria non è nota, così non
+     * compare mai una sezione vuota.
+     */
+    private suspend fun relatedContentFor(movie: Movie): List<RelatedContent> {
+        val category = movie.category?.takeIf { it.isNotBlank() } ?: return emptyList()
+        return runCatching {
+            movieDao.getMoviesByCategoryList(category)
+                .asSequence()
+                .filter { it.id != movie.id && !it.isHidden }
+                .sortedByDescending { it.tmdbPopularity ?: 0f }
+                .take(12)
+                .map {
+                    RelatedContent(
+                        contentId = it.id,
+                        title = it.name,
+                        posterUrl = it.posterUrl,
+                        contentType = ContentType.MOVIE
+                    )
+                }
+                .toList()
+        }.getOrElse { emptyList() }
+    }
+
     private suspend fun loadMovie(onStateUpdate: (DetailsState) -> Unit) {
         Log.d(TAG, "loadMovie: contentId=$contentId, contentType=$contentType")
         val movie = movieDao.getMovieById(contentId)
@@ -597,7 +637,11 @@ class DetailsActivity : ComponentActivity() {
         genre = genre ?: enrichedMovie.tmdbGenres
         duration = duration ?: enrichedMovie.tmdbRuntime?.let { "$it min" }
         
+        // Rail "Potrebbe piacerti" (piano L5): fallback locale, nessuna rete.
+        val related = relatedContentFor(movie)
+        
         var state = DetailsState(
+            relatedContent = related,
             title = movie.name,
             year = enrichedMovie.year?.toString() ?: "",
             overview = enrichedMovie.plot ?: "",
