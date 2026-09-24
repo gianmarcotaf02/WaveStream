@@ -146,6 +146,19 @@ class ContentNameParser @Inject constructor() {
         "BDMUX", "REMUX", "MUX", "WEB", "HDTS", "HQ", "VIP", "MULTI", "DUAL", "DUAL AUDIO",
         "10BIT", "8BIT", "SDR", "HDR10+", "HDR10", "DOLBY VISION", "EAC3", "DD5.1")
     private val codecRegexes: List<Regex> = codecTags.map { wb(it) }
+
+    // Regex di cleanTitle precompilate: la funzione viene invocata per migliaia di
+    // titoli durante sync/unificazione, ricompilare le regex a ogni chiamata era
+    // un costo misurabile.
+    private val cleanLeadingJunk = Regex("""^[\-\#\*\|\[\]:\s]+""")
+    private val cleanTrailingJunk = Regex("""[\-\#\*\|\[\]:\s]+$""")
+    private val cleanBrackets = Regex("""\[[^\]]*\]""")
+    private val cleanYear = Regex("""\s*\(\d{4}\)\s*""")
+    private val cleanLeadingSeparator = Regex("""^\s*[-|:•]+\s*""")
+    private val cleanTrailingSeparator = Regex("""\s*[-|:•]+\s*$""")
+    private val cleanTrailingDigits = Regex("""\s+\d+\s*$""")
+    private val cleanHashtag = Regex("""#\w+""")
+    private val cleanWhitespace = Regex("""\s+""")
     
     // Live TV indicators in category names
     private val liveTvCategories = listOf(
@@ -328,16 +341,16 @@ class ContentNameParser @Inject constructor() {
         var result = name
         
         // Remove leading special characters (-, #, *, |, etc.)
-        result = result.replace(Regex("""^[\-\#\*\|\[\]:\s]+"""), "")
+        result = result.replace(cleanLeadingJunk, "")
         
         // Remove trailing special characters
-        result = result.replace(Regex("""[\-\#\*\|\[\]:\s]+$"""), "")
+        result = result.replace(cleanTrailingJunk, "")
         
         // Remove ALL square bracket content like [2020], [SUB ITA], [HD], etc.
-        result = result.replace(Regex("""\[[^\]]*\]"""), " ")
+        result = result.replace(cleanBrackets, " ")
         
         // Remove year in parentheses: (2024), (2025), etc.
-        result = result.replace(Regex("""\s*\(\d{4}\)\s*"""), " ")
+        result = result.replace(cleanYear, " ")
         
         // Remove quality indicators
         for (regex in qualityRegexesFlat) {
@@ -372,17 +385,17 @@ class ContentNameParser @Inject constructor() {
         }
         
         // Remove common separators at start and end
-        result = result.replace(Regex("""^\s*[-|:•]+\s*"""), "")
-        result = result.replace(Regex("""\s*[-|:•]+\s*$"""), "")
+        result = result.replace(cleanLeadingSeparator, "")
+        result = result.replace(cleanTrailingSeparator, "")
         
         // Remove trailing numbers that look like IDs (e.g., "0 Ql", "123")
-        result = result.replace(Regex("""\s+\d+\s*$"""), "")
+        result = result.replace(cleanTrailingDigits, "")
         
         // Remove hashtags anywhere
-        result = result.replace(Regex("""#\w+"""), "")
+        result = result.replace(cleanHashtag, "")
         
         // Clean up whitespace
-        result = result.trim().replace(Regex("""\s+"""), " ")
+        result = result.trim().replace(cleanWhitespace, " ")
         
         return result
     }
