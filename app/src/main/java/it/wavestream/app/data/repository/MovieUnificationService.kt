@@ -87,6 +87,7 @@ class MovieUnificationService @Inject constructor(
         // update/insert/delete era una transazione a sé (con decine di migliaia di
         // VOD si traducevano in centinaia di migliaia di commit → minuti di sync).
         appDatabase.withTransaction {
+        val startedAt = System.currentTimeMillis()
         val existing = movieDao.getAllByPlaylistIncludingHidden(playlistId)
         val existingByKey = existing.groupBy { groupKeyOf(it) }
         val existingByTitle = existing.groupBy { ContentKey.normalizeTitle(it.cleanName ?: it.name) }
@@ -115,6 +116,7 @@ class MovieUnificationService @Inject constructor(
         val moviesToWrite = ArrayList<Movie>(FLUSH_BATCH)
         val providersToWrite = ArrayList<StreamProvider>(FLUSH_BATCH)
         val categoriesToWrite = ArrayList<MovieCategory>(FLUSH_BATCH)
+        var processed = 0
 
         // Flush incrementale: mantiene basso il picco di memoria e sfrutta le
         // insert/update batch (una sola acquisizione di connessione per batch).
@@ -170,12 +172,16 @@ class MovieUnificationService @Inject constructor(
             providersToWrite += buildProviders(playlistId, movieId, group, primary, existingProvidersByXtreamId)
             categoriesToWrite += buildCategories(playlistId, movieId, group)
             flushIfNeeded()
+            if (++processed % 5000 == 0) {
+                Log.i(TAG, "persistGroupedMovies: $processed/${groups.size} gruppi in ${System.currentTimeMillis() - startedAt}ms")
+            }
         }
 
         // Flush finale
         if (moviesToWrite.isNotEmpty()) movieDao.updateList(moviesToWrite)
         if (providersToWrite.isNotEmpty()) streamProviderDao.insertAll(providersToWrite)
         if (categoriesToWrite.isNotEmpty()) movieCategoryDao.insertAll(categoriesToWrite)
+        Log.i(TAG, "persistGroupedMovies: ${inputs.size} sorgenti → ${active.size} film in ${System.currentTimeMillis() - startedAt}ms")
 
         // Elimina i film della playlist scomparsi dal provider (i duplicati sono
         // già stati fusi sopra). La cancellazione a cascata rimuove sorgenti e
@@ -330,80 +336,70 @@ class MovieUnificationService @Inject constructor(
         )
     }
 
-    private suspend fun syncProviders(
+    private fun buildProviders(
         playlistId: Long,
         movieId: Long,
         group: List<MovieSourceInput>,
         primary: MovieSourceInput,
         existingProvidersByXtreamId: Map<Int, StreamProvider>
-    ): Int {
-        val keptIds = ArrayList<Long>(group.size)
+    ): List<StreamProvider> {
+        val result = ArrayList<StreamProvider>(group.size)
         for (src in group) {
             val parsed = contentNameParser.parse(src.rawName)
             val quality = contentNameParser.detectQuality(src.rawName)
             val existing = src.xtreamStreamId?.let { existingProvidersByXtreamId[it] }
-            val provider = StreamProvider(
-                id = existing?.id ?: 0,
-                movieId = movieId,
-                seriesId = null,
-                tmdbId = existing?.tmdbId,
-                playlistId = playlistId,
-                streamUrl = src.streamUrl,
-                originalName = src.rawName,
-                category = src.category,
-                categoryId = src.categoryId,
-                xtreamStreamId = src.xtreamStreamId,
-                containerExtension = src.containerExtension,
-                logoUrl = src.poster,
-                year = src.year,
-                quality = quality,
-                qualityRank = contentNameParser.qualityRank(quality),
-                resolution = contentNameParser.detectResolution(src.rawName),
-                language = parsed.language,
-                isExtended = parsed.isExtended,
-                isHdr = parsed.isHdr,
-                is4K = quality == StreamQuality.UHD || quality == StreamQuality.UHD_4K,
-                durationSeconds = existing?.durationSeconds,
-                providerName = src.providerName,
-                playlistOrder = src.playlistOrder,
-                isPrimary = src === primary || src.xtreamStreamId == primary.xtreamStreamId && src.streamUrl == primary.streamUrl,
-                addedAt = existing?.addedAt ?: System.currentTimeMillis(),
-                lastUsedAt = existing?.lastUsedAt
+            result.add(
+                StreamProvider(
+                    id = 0,
+                    movieId = movieId,
+                    seriesId = null,
+                    tmdbId = existing?.tmdbId,
+                    playlistId = playlistId,
+                    streamUrl = src.streamUrl,
+                    originalName = src.rawName,
+                    category = src.category,
+                    categoryId = src.categoryId,
+                    xtreamStreamId = src.xtreamStreamId,
+                    containerExtension = src.containerExtension,
+                    logoUrl = src.poster,
+                    year = src.year,
+                    quality = quality,
+                    qualityRank = contentNameParser.qualityRank(quality),
+                    resolution = contentNameParser.detectResolution(src.rawName),
+                    language = parsed.language,
+                    isExtended = parsed.isExtended,
+                    isHdr = parsed.isHdr,
+                    is4K = quality == StreamQuality.UHD || quality == StreamQuality.UHD_4K,
+                    durationSeconds = existing?.durationSeconds,
+                    providerName = src.providerName,
+                    playlistOrder = src.playlistOrder,
+                    isPrimary = src === primary || src.xtreamStreamId == primary.xtreamStreamId && src.streamUrl == primary.streamUrl,
+                    addedAt = existing?.addedAt ?: System.currentTimeMillis(),
+                    lastUsedAt = existing?.lastUsedAt,
+                    detectedHeight = existing?.detectedHeight,
+                    detectedAt = existing?.detectedAt
+                )
             )
-            val id = streamProviderDao.insert(provider)
-            if (id > 0) keptIds.add(id)
         }
-        if (keptIds.isNotEmpty()) {
-            streamProviderDao.deleteByMovieExcept(movieId, keptIds)
-        } else {
-            streamProviderDao.deleteByMovie(movieId)
-        }
-        return keptIds.size
+        return result
     }
 
-    private suspend fun syncCategories(
+    private fun buildCategories(
         playlistId: Long,
         movieId: Long,
         group: List<MovieSourceInput>
-    ) {
-        val cats = group.mapNotNull { it.category?.takeIf { c -> c.isNotBlank() } }.distinct()
-        if (cats.isEmpty()) {
-            movieCategoryDao.deleteByMovie(movieId)
-            return
-        }
-        movieCategoryDao.deleteByMovieExcept(movieId, cats)
-        movieCategoryDao.insertAll(cats.map {
-            MovieCategory(movieId = movieId, playlistId = playlistId, category = it)
-        })
-    }
+    ): List<MovieCategory> =
+        group.mapNotNull { it.category?.takeIf { c -> c.isNotBlank() } }
+            .distinct()
+            .map { MovieCategory(movieId = movieId, playlistId = playlistId, category = it) }
 
     /**
      * Fonde [duplicates] nel movie [canonicalId]: rimappa tutti i riferimenti
      * utente, sposta le sorgenti, unisce le categorie e i metadati, elimina i
      * duplicati.
      */
-    private suspend fun mergeDuplicatesInto(canonicalId: Long, duplicates: List<Movie>) {
-        var canonical = movieDao.getMovieById(canonicalId) ?: return
+    private suspend fun mergeDuplicatesInto(canonicalId: Long, duplicates: List<Movie>): Movie? {
+        var canonical = movieDao.getMovieById(canonicalId) ?: return null
         for (dup in duplicates) {
             if (dup.id == canonicalId) continue
             try {
@@ -442,7 +438,9 @@ class MovieUnificationService @Inject constructor(
             })
         }
         val count = streamProviderDao.countProvidersForMovie(canonicalId)
-        movieDao.update(canonical.copy(streamCount = maxOf(count, 1)))
+        val updated = canonical.copy(streamCount = maxOf(count, 1))
+        movieDao.update(updated)
+        return updated
     }
 
     /** Garantisce che un movie abbia una sorgente, cleanName/groupKey/streamCount
