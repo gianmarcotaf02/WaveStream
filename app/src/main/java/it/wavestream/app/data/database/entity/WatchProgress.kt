@@ -55,12 +55,15 @@ data class WatchProgress(
     val isResumable: Boolean
         get() = when {
             isCompleted || duration <= 0 -> false
-            duration <= MIN_RESUME_MS -> position > 0
+            duration <= SHORT_CONTENT_MS -> position > 0
             else -> position >= MIN_RESUME_MS
         }
 
     companion object {
         /** Soglia minima di visione per parlare di "riprendi" (15 secondi). */
         const val MIN_RESUME_MS = 15_000L
+
+        /** Sotto questo minutaggio basta qualsiasi posizione > 0 (contenuti brevi). */
+        const val SHORT_CONTENT_MS = 60_000L
     }
 }
