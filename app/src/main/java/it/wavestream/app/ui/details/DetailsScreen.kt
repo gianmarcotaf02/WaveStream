@@ -1254,9 +1254,14 @@ private fun PlayButton(
         label = "playScale"
     )
     
-    // Ring chiaro su focus (il bottone resta accent: è la CTA primaria)
+    // Ring di focus ACCENT, 3dp — coerente con l'hero di TvHomeScreen (stesso
+    // trattamento per la CTA primaria). Sul bottone in fase "resume" (sfondo
+    // bianco) e su quello normale (AccentLight, più chiaro) l'accent resta sempre
+    // distinto.
+    // ⚠️ Il border DEVE stare DOPO .background(): `border` disegna DIETRO il
+    // riempimento, quindi messo prima veniva coperto e il ring non appariva.
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) Color.White.copy(alpha = 0.55f) else Color.Transparent,
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
         label = "playBorder"
     )
     
@@ -1285,9 +1290,10 @@ private fun PlayButton(
             // all'altro. Con due righe (etichetta + SxEy) e la barra di progresso
             // ci sta tutto comodo.
             .height(56.dp)
-            .border(1.5.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
+            // DOPO background: vedi nota su borderColor
+            .border(3.dp, borderColor, RoundedCornerShape(12.dp))
             .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .onFocusChanged { onFocusedChanged(it.isFocused) }
             .focusable(interactionSource = interactionSource)
