@@ -46,6 +46,9 @@ class MovieUnificationService @Inject constructor(
 ) {
     companion object {
         private const val TAG = "MovieUnify"
+
+        /** Dimensione dei batch di scrittura (movie/provider/categorie). */
+        private const val FLUSH_BATCH = 2000
     }
 
     /** Sorgente risolta pronta per essere persistita (Xtream o M3U). */
@@ -91,16 +94,41 @@ class MovieUnificationService @Inject constructor(
         val active = mutableSetOf<Long>()
 
         // Prefetch delle sorgenti già presenti (una query invece di una per VOD):
-        // serve a preservare id/durata/data di aggiunta delle sorgenti esistenti.
+        // serve a preservare durata/data di aggiunta/data d'uso delle sorgenti.
         val existingProvidersByXtreamId = streamProviderDao.getAllByPlaylist(playlistId)
             .mapNotNull { p -> p.xtreamStreamId?.let { it to p } }
             .toMap()
+
+        // Sorgenti e appartenenze di categoria vengono azzerate UNA volta e
+        // riscritte in batch a fine sync. Prima erano N insert/delete per film: su
+        // ~70k VOD significavano centinaia di migliaia di chiamate Room (minuti di
+        // sync, con il pool DB saturato per i lettori concorrenti).
+        streamProviderDao.deleteByPlaylist(playlistId)
+        movieCategoryDao.deleteByPlaylist(playlistId)
 
         val groups = ContentKey.groupByTitleAndYear(
             items = inputs,
             titleOf = { titleFor(it.rawName) },
             yearOf = { it.year }
         )
+
+        val moviesToWrite = ArrayList<Movie>(FLUSH_BATCH)
+        val providersToWrite = ArrayList<StreamProvider>(FLUSH_BATCH)
+        val categoriesToWrite = ArrayList<MovieCategory>(FLUSH_BATCH)
+
+        // Flush incrementale: mantiene basso il picco di memoria e sfrutta le
+        // insert/update batch (una sola acquisizione di connessione per batch).
+        suspend fun flushIfNeeded() {
+            if (moviesToWrite.size >= FLUSH_BATCH) {
+                movieDao.updateList(moviesToWrite); moviesToWrite.clear()
+            }
+            if (providersToWrite.size >= FLUSH_BATCH) {
+                streamProviderDao.insertAll(providersToWrite); providersToWrite.clear()
+            }
+            if (categoriesToWrite.size >= FLUSH_BATCH) {
+                movieCategoryDao.insertAll(categoriesToWrite); categoriesToWrite.clear()
+            }
+        }
 
         for (rawGroup in groups) {
             // Ordina per qualità decrescente: la prima è la sorgente "primaria".
@@ -120,34 +148,34 @@ class MovieUnificationService @Inject constructor(
             candidates.forEach { consumed.add(it.id) }
 
             val canonicalExisting = candidates.minByOrNull { it.id }
-            val movie = buildCanonicalMovie(playlistId, cleanTitle, year, primary, group.size, canonicalExisting)
+            var movie = buildCanonicalMovie(playlistId, cleanTitle, year, primary, group.size, canonicalExisting)
             val movieId: Long
             if (canonicalExisting != null) {
-                movieDao.update(movie)
+                // Il merge può unire campi (tmdbId/poster/...) dei duplicati: usiamo
+                // il risultato per non sovrascriverli al momento del flush.
+                val duplicates = candidates.filter { it.id != canonicalExisting.id }
+                if (duplicates.isNotEmpty()) {
+                    mergeDuplicatesInto(canonicalExisting.id, duplicates)
+                        ?.let { movie = it.copy(streamCount = group.size) }
+                }
+                moviesToWrite.add(movie)
                 movieId = movie.id
             } else {
+                // L'id serve subito per collegare sorgenti/categorie: solo i film
+                // nuovi (primo import) passano da un insert singolo.
                 movieId = movieDao.insert(movie)
             }
             active.add(movieId)
 
-            val duplicates = candidates.filter { it.id != movieId }
-            if (duplicates.isNotEmpty()) mergeDuplicatesInto(movieId, duplicates)
-
-            val providerCount = syncProviders(playlistId, movieId, group, primary, existingProvidersByXtreamId)
-            syncCategories(playlistId, movieId, group)
-
-            // Allinea il badge "N versioni" al numero effettivo di sorgenti.
-            // Solo se c'erano duplicati fusi serve un riallineamento (il merge può
-            // aver toccato streamCount e altri campi): nel caso normale il movie
-            // appena scritto ha già streamCount == group.size.
-            if (duplicates.isNotEmpty() && providerCount != group.size) {
-                movieDao.getMovieById(movieId)?.let { fresh ->
-                    if (fresh.streamCount != providerCount) {
-                        movieDao.update(fresh.copy(streamCount = providerCount))
-                    }
-                }
-            }
+            providersToWrite += buildProviders(playlistId, movieId, group, primary, existingProvidersByXtreamId)
+            categoriesToWrite += buildCategories(playlistId, movieId, group)
+            flushIfNeeded()
         }
+
+        // Flush finale
+        if (moviesToWrite.isNotEmpty()) movieDao.updateList(moviesToWrite)
+        if (providersToWrite.isNotEmpty()) streamProviderDao.insertAll(providersToWrite)
+        if (categoriesToWrite.isNotEmpty()) movieCategoryDao.insertAll(categoriesToWrite)
 
         // Elimina i film della playlist scomparsi dal provider (i duplicati sono
         // già stati fusi sopra). La cancellazione a cascata rimuove sorgenti e
