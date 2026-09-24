@@ -1084,6 +1084,40 @@ private fun ModernRatingItem(
 }
 
 /**
+ * Forma dei pulsanti azione della scheda: cerchio se c'è solo l'icona, pill se
+ * c'è anche l'etichetta (piano L2 — ogni azione deve essere leggibile da 3 m).
+ */
+private fun actionShape(label: String?) =
+    if (label != null) RoundedCornerShape(26.dp) else CircleShape
+
+/**
+ * Contenuto dei pulsanti azione. Con [label] disegna "icona + testo" (pill);
+ * senza mantiene l'icona circolare di prima.
+ */
+@Composable
+private fun ActionBody(label: String?, tint: Color, icon: @Composable () -> Unit) {
+    if (label == null) {
+        icon()
+        return
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        icon()
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = label,
+            // 15sp: sotto questo valore non si legge da divano (piano L2, §5)
+            style = MaterialTheme.typography.bodyLarge,
+            color = tint,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1
+        )
+    }
+}
+
+/**
  * Primary play button with optional progress bar for resume state
  */
 @Composable
@@ -1233,7 +1267,7 @@ private fun PlayButton(
  * Usa l'icona di Nova ma è indipendente dalla feature Nova (che resta in pausa).
  */
 @Composable
-private fun ExplainEndingButton(onClick: () -> Unit) {
+private fun ExplainEndingButton(onClick: () -> Unit, label: String? = null) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
@@ -1264,10 +1298,11 @@ private fun ExplainEndingButton(onClick: () -> Unit) {
                 scaleX = scale
                 scaleY = scale
             }
-            .size(52.dp)
-            .clip(CircleShape)
+            .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .clip(actionShape(label))
             .background(backgroundColor)
-            .border(1.dp, borderColor, CircleShape)
+            .border(1.dp, borderColor, actionShape(label))
+            .then(if (label != null) Modifier.padding(horizontal = 14.dp) else Modifier)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1276,12 +1311,14 @@ private fun ExplainEndingButton(onClick: () -> Unit) {
             ),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.AutoAwesome,
-            contentDescription = "Spiega il finale con l'AI",
-            tint = iconColor,
-            modifier = Modifier.size(26.dp)
-        )
+        ActionBody(label = label, tint = iconColor) {
+            Icon(
+                imageVector = Icons.Default.AutoAwesome,
+                contentDescription = "Spiega il finale con l'AI",
+                tint = iconColor,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
@@ -1456,7 +1493,8 @@ private fun EndingSourceBadge(ending: MovieEnding) {
 @Composable
 private fun FavoriteButton(
     isFavorite: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    label: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1529,10 +1567,11 @@ private fun FavoriteButton(
                 scaleX = focusScale
                 scaleY = focusScale
             }
-            .size(52.dp)
-            .clip(CircleShape)
+            .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .clip(actionShape(label))
             .background(backgroundColor)
-            .border(1.dp, borderColor, CircleShape) // Consistent 1dp border
+            .border(1.dp, borderColor, actionShape(label)) // Consistent 1dp border
+            .then(if (label != null) Modifier.padding(horizontal = 14.dp) else Modifier)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1541,17 +1580,19 @@ private fun FavoriteButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-            contentDescription = "Favorite",
-            tint = heartColor,
-            modifier = Modifier
-                .size(26.dp)
-                .graphicsLayer {
-                scaleX = animatedBounce
-                scaleY = animatedBounce
-            }
-        )
+        ActionBody(label = label, tint = heartColor) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorite",
+                tint = heartColor,
+                modifier = Modifier
+                    .size(24.dp)
+                    .graphicsLayer {
+                    scaleX = animatedBounce
+                    scaleY = animatedBounce
+                }
+            )
+        }
     }
 }
 
@@ -1560,7 +1601,8 @@ private fun FavoriteButton(
  */
 @Composable
 private fun MarkAsWatchedButton(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    label: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1599,10 +1641,11 @@ private fun MarkAsWatchedButton(
                 scaleX = focusScale
                 scaleY = focusScale
             }
-            .size(52.dp)
-            .clip(CircleShape)
+            .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .clip(actionShape(label))
             .background(backgroundColor)
-            .border(1.dp, borderColor, CircleShape)
+            .border(1.dp, borderColor, actionShape(label))
+            .then(if (label != null) Modifier.padding(horizontal = 14.dp) else Modifier)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1611,12 +1654,14 @@ private fun MarkAsWatchedButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_eye),
-            contentDescription = "Segna come già visto",
-            tint = iconTint,
-            modifier = Modifier.size(26.dp)
-        )
+        ActionBody(label = label, tint = iconTint) {
+            Icon(
+                painter = painterResource(R.drawable.ic_eye),
+                contentDescription = "Segna come già visto",
+                tint = iconTint,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
@@ -1629,8 +1674,15 @@ private fun DownloadButton(
     isDownloading: Boolean,
     downloadProgress: Int = 0,
     onDownloadClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onDeleteClick: () -> Unit,
+    label: String? = null
 ) {
+    // Etichetta reattiva allo stato: "Scarica" → "%" → "Scaricato".
+    val buttonLabel = label ?: when {
+        isDownloading -> "$downloadProgress%"
+        isDownloaded -> "Scaricato"
+        else -> "Scarica"
+    }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     
@@ -1680,10 +1732,11 @@ private fun DownloadButton(
                 scaleX = focusScale
                 scaleY = focusScale
             }
-            .size(52.dp)
-            .clip(CircleShape)
+            .then(if (buttonLabel != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .clip(actionShape(buttonLabel))
             .background(backgroundColor)
-            .border(1.dp, borderColor, CircleShape)
+            .border(1.dp, borderColor, actionShape(buttonLabel))
+            .then(if (buttonLabel != null) Modifier.padding(horizontal = 14.dp) else Modifier)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
@@ -1692,6 +1745,7 @@ private fun DownloadButton(
             ),
         contentAlignment = Alignment.Center
     ) {
+        ActionBody(label = buttonLabel, tint = iconTint) {
         when {
             isDownloading -> {
                 Box(contentAlignment = Alignment.Center) {
@@ -2300,7 +2354,8 @@ private fun EpisodeCard(
  */
 @Composable
 private fun TrailerButton(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    label: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -2329,10 +2384,11 @@ private fun TrailerButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .size(52.dp)
-            .clip(CircleShape)
+            .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .clip(actionShape(label))
             .background(backgroundColor)
-            .border(1.dp, borderColor, CircleShape)
+            .border(1.dp, borderColor, actionShape(label))
+            .then(if (label != null) Modifier.padding(horizontal = 14.dp) else Modifier)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -2341,12 +2397,14 @@ private fun TrailerButton(
             .focusable(interactionSource = interactionSource),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_youtube_logo),
-            contentDescription = "Trailer",
-            modifier = Modifier.size(28.dp),
-            contentScale = ContentScale.Fit
-        )
+        ActionBody(label = label, tint = WaveStreamColors.TextPrimary) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_youtube_logo),
+                contentDescription = "Trailer",
+                modifier = Modifier.size(24.dp),
+                contentScale = ContentScale.Fit
+            )
+        }
     }
 }
 
@@ -2361,7 +2419,8 @@ private fun AddToListButton(
     onRemoveFromList: (Long) -> Unit,
     onCreateList: (String) -> Unit,
     @Suppress("UNUSED_PARAMETER") // onRenameList kept for API consistency
-    onRenameList: (Long, String) -> Unit
+    onRenameList: (Long, String) -> Unit,
+    label: String? = null
 ) {
     var showDropdown by remember { mutableStateOf(false) }
     var showCreateDialog by remember { mutableStateOf(false) }
@@ -2420,10 +2479,11 @@ private fun AddToListButton(
                 scaleX = scale
                 scaleY = scale
             }
-                .size(52.dp)
-                .clip(CircleShape) // Changed to CircleShape
+                .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+                .clip(actionShape(label)) // Changed to CircleShape
                 .background(backgroundColor)
-                .border(1.dp, borderColor, CircleShape) // Consistent 1dp border
+                .border(1.dp, borderColor, actionShape(label)) // Consistent 1dp border
+                .then(if (label != null) Modifier.padding(horizontal = 14.dp) else Modifier)
                 .focusable(interactionSource = interactionSource)
                 .clickable(
                     interactionSource = interactionSource,
@@ -2432,6 +2492,7 @@ private fun AddToListButton(
                 ),
             contentAlignment = Alignment.Center
         ) {
+            ActionBody(label = label, tint = iconColor) {
             // Crossfade between + and ✓ icons
             androidx.compose.animation.Crossfade(
                 targetState = isInList,
@@ -2442,8 +2503,9 @@ private fun AddToListButton(
                     imageVector = if (inList) Icons.Default.Check else Icons.AutoMirrored.Filled.PlaylistAdd,
                     contentDescription = if (inList) "In lista" else "Aggiungi a lista",
                     tint = iconColor,
-                    modifier = Modifier.size(26.dp)
+                    modifier = Modifier.size(24.dp)
                 )
+            }
             }
         }
         
