@@ -260,13 +260,13 @@ fun DetailsScreen(
             AsyncImage(
                 model = coil.request.ImageRequest.Builder(androidx.compose.ui.platform.LocalContext.current)
                     .data(state.backdropUrl)
-                    .size(1280, 720)
+                    .size(1920, 1080)
                     .crossfade(true)
                     .diskCachePolicy(coil.request.CachePolicy.ENABLED)
                     .memoryCachePolicy(coil.request.CachePolicy.ENABLED)
                     .build(),
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 alignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
             )
@@ -343,7 +343,7 @@ fun DetailsScreen(
                 }
                 
                 // Porta il blocco titolo → ratings a circa metà altezza
-                Spacer(modifier = Modifier.height(120.dp))
+                Spacer(modifier = Modifier.height(48.dp))
                 
                 // Contenuto centrato
                 Column(
@@ -361,8 +361,8 @@ fun DetailsScreen(
                             contentDescription = state.title,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .heightIn(max = 72.dp)
-                                .widthIn(max = 420.dp)
+                                .heightIn(max = 56.dp)
+                                .widthIn(max = 340.dp)
                         )
                     } else {
                         Text(
@@ -433,7 +433,7 @@ fun DetailsScreen(
                     // Rating: striscia inline, NESSUN heading. FlowRow resta volutamente
                     // flessibile in altezza: su schermi stretti va a capo invece di
                     // tagliare l'ultimo badge (era già la ragione della scelta).
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     RatingsBadges(
                         tmdbRating = state.tmdbRating,
                         imdbRating = state.imdbRating,
@@ -442,15 +442,11 @@ fun DetailsScreen(
                         audienceScore = state.audienceScore
                     )
                     
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     
-                    // Action buttons — pill icona+label (piano L2).
-                    // Con le etichette le 6 azioni superano i 720dp della colonna:
-                    // la riga scorre in orizzontale e il focus D-pad la scorre da solo.
                     // Azioni: CENTRATE e SOLO ICONA (come da specifica: "sotto i
-                    // ratings ... i bottoni, senza il nome"). Con le etichette non
-                    // entravano; con le sole icone stanno comode in una riga, quindi
-                    // niente scroll.
+                    // ratings ... i bottoni, senza il nome"). Con le sole icone le 7
+                    // azioni entrano comode in una riga: niente scroll.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -630,57 +626,19 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // 1. Overview (Trama) — piano L4: maxLines 3 (era 5) e corpo
-                    // 19sp/28sp (era 13sp/22sp): su TV da 3 metri 13sp non si legge.
+                    // 1. Overview (Trama) — corpo RIDOTTO (19sp → 14sp) e testo SEMPRE
+                    // per intero: niente "Leggi di più" (rev. §0/§2).
                     if (state.overview.isNotEmpty()) {
-                        var isExpanded by remember { mutableStateOf(false) }
-                        var hasOverflow by remember { mutableStateOf(false) }
-                        val maxLines = if (isExpanded) Int.MAX_VALUE else 3
-                        
                         Column(modifier = Modifier.fillMaxWidth()) {
                             Text(
                                 text = state.overview,
                                 style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontSize = 19.sp,
-                                    lineHeight = 28.sp
+                                    fontSize = 14.sp,
+                                    lineHeight = 20.sp
                                 ),
                                 color = WaveStreamColors.TextSecondary,
-                                textAlign = TextAlign.Center,
-                                maxLines = maxLines,
-                                overflow = TextOverflow.Ellipsis,
-                                onTextLayout = { textLayoutResult ->
-                                    if (!isExpanded) {
-                                        hasOverflow = textLayoutResult.hasVisualOverflow
-                                    }
-                                }
+                                textAlign = TextAlign.Center
                             )
-                            
-                            // Show "Leggi di più" only if text actually overflows
-                            if (!isExpanded && hasOverflow) {
-                                Text(
-                                    text = "Leggi di più...",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = WaveStreamColors.Accent,
-                                    fontWeight = FontWeight.Medium,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 4.dp)
-                                        .clickable { isExpanded = true }
-                                )
-                            } else if (isExpanded && hasOverflow) {
-                                Text(
-                                    text = "Leggi meno",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = WaveStreamColors.Accent,
-                                    fontWeight = FontWeight.Medium,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 4.dp)
-                                        .clickable { isExpanded = false }
-                                )
-                            }
                         }
                     }
                     
@@ -722,7 +680,7 @@ fun DetailsScreen(
                     // la segue: un solo heading, una sola riga orizzontale.
                     val crew = state.directorPeople + state.castPeople
                     if (crew.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(28.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = "Cast & Regia",
                             style = MaterialTheme.typography.titleMedium,
@@ -744,7 +702,7 @@ fun DetailsScreen(
                     } else {
                         // Nessun dato strutturato: due righe di testo, sempre centrate
                         state.director?.let {
-                            Spacer(modifier = Modifier.height(28.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "Regia: $it",
                                 style = MaterialTheme.typography.bodyLarge,
@@ -1310,7 +1268,7 @@ private fun PlayButton(
             // senza, quindi il CTA "saltava" in altezza passando da un contenuto
             // all'altro. Con due righe (etichetta + SxEy) e la barra di progresso
             // ci sta tutto comodo.
-            .height(64.dp)
+            .height(56.dp)
             .border(1.5.dp, borderColor, RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
@@ -1818,12 +1776,9 @@ private fun DownloadButton(
     onDeleteClick: () -> Unit,
     label: String? = null
 ) {
-    // Etichetta reattiva allo stato: "Scarica" → "%" → "Scaricato".
-    val buttonLabel = label ?: when {
-        isDownloading -> "$downloadProgress%"
-        isDownloaded -> "Scaricato"
-        else -> "Scarica"
-    }
+    // Solo icona, come le altre azioni: lo stato si legge dall'icona (verde quando
+    // scaricato) e dalla percentuale dentro il CircularProgressIndicator.
+    val buttonLabel = label
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     
@@ -1873,11 +1828,11 @@ private fun DownloadButton(
                 scaleX = focusScale
                 scaleY = focusScale
             }
-            .height(52.dp)
+            .then(if (buttonLabel != null) Modifier.height(52.dp) else Modifier.size(52.dp))
             .clip(actionShape(buttonLabel))
             .background(backgroundColor)
             .border(1.dp, borderColor, actionShape(buttonLabel))
-            .padding(horizontal = 14.dp)
+            .then(if (buttonLabel != null) Modifier.padding(horizontal = 14.dp) else Modifier)
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
