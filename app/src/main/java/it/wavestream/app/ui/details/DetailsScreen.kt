@@ -316,7 +316,7 @@ fun DetailsScreen(
         // TvLazyColumn resta per lo scroll D-pad e per gli episodi.
         androidx.tv.foundation.lazy.list.TvLazyColumn(
             state = listState,
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 24.dp),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 8.dp),
             pivotOffsets = androidx.tv.foundation.PivotOffsets(parentFraction = 0.6f),
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -343,7 +343,7 @@ fun DetailsScreen(
                 }
                 
                 // Porta il blocco titolo → ratings a circa metà altezza
-                Spacer(modifier = Modifier.height(48.dp))
+                Spacer(modifier = Modifier.height(32.dp))
                 
                 // Contenuto centrato
                 Column(
@@ -361,8 +361,8 @@ fun DetailsScreen(
                             contentDescription = state.title,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
-                                .heightIn(max = 56.dp)
-                                .widthIn(max = 340.dp)
+                                .heightIn(max = 48.dp)
+                                .widthIn(max = 300.dp)
                         )
                     } else {
                         Text(
