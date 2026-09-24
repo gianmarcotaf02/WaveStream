@@ -668,11 +668,17 @@ fun DetailsScreen(
                         }
                     }
                     
-                    // 2. Cast — clickable with profile photos
-                    if (state.castPeople.isNotEmpty()) {
+                    // 2. Cast & Regia — UNA sola rail (piano L6).
+                    // Prima erano due sezioni con due heading separati ("Cast",
+                    // "Regia"): due righe verticali per un'informazione dello stesso
+                    // tipo. Ora la regia apre la rail e il cast la segue (§3.2), con un
+                    // solo heading. I fallback di testo piatto restano indipendenti, così
+                    // non si perde nulla quando manca solo uno dei due dati.
+                    val crew = state.directorPeople + state.castPeople
+                    if (crew.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Cast",
+                            text = "Cast & Regia",
                             style = MaterialTheme.typography.titleMedium,
                             color = WaveStreamColors.TextSecondary,
                             fontWeight = FontWeight.Medium
@@ -681,76 +687,58 @@ fun DetailsScreen(
                         LazyRow(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            items(state.castPeople.size) { index ->
-                                val person = state.castPeople[index]
+                            items(crew.size) { index ->
+                                val person = crew[index]
                                 CastPersonCard(
                                     person = person,
                                     onClick = { onPersonClick(person.id, person.name) }
                                 )
                             }
-                        }
-                    } else state.cast?.let {
-                        // Fallback: plain text if no structured cast data
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_cast_purple),
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp),
-                                colorFilter = ColorFilter.tint(WaveStreamColors.Accent)
-                            )
-                            Text(
-                                text = "Cast: $it",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = WaveStreamColors.TextTertiary,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
                         }
                     }
                     
-                    // 3. Director (Regia) — clickable with profile photos
-                    if (state.directorPeople.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = "Regia",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = WaveStreamColors.TextSecondary,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(state.directorPeople.size) { index ->
-                                val person = state.directorPeople[index]
-                                CastPersonCard(
-                                    person = person,
-                                    onClick = { onPersonClick(person.id, person.name) }
+                    if (crew.isEmpty()) {
+                        state.cast?.let {
+                            // Fallback: plain text if no structured cast data
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(
+                                verticalAlignment = Alignment.Top,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_cast_purple),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(32.dp),
+                                    colorFilter = ColorFilter.tint(WaveStreamColors.Accent)
+                                )
+                                Text(
+                                    text = "Cast: $it",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = WaveStreamColors.TextTertiary,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
-                    } else state.director?.let {
-                        // Fallback: plain text if no structured crew data
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.ic_regia_purple),
-                                contentDescription = null,
-                                modifier = Modifier.size(32.dp),
-                                colorFilter = ColorFilter.tint(WaveStreamColors.Accent)
-                            )
-                            Text(
-                                text = "Regia: $it",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = WaveStreamColors.TextTertiary
-                            )
+                        state.director?.let {
+                            // Fallback: plain text if no structured crew data
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_regia_purple),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(32.dp),
+                                    colorFilter = ColorFilter.tint(WaveStreamColors.Accent)
+                                )
+                                Text(
+                                    text = "Regia: $it",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = WaveStreamColors.TextTertiary
+                                )
+                            }
                         }
                     }
                 }
