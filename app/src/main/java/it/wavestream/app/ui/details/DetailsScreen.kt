@@ -700,12 +700,14 @@ fun DetailsScreen(
                         }
                     }
                     
-                    // ULTIMA RIGA: la REGIA, centrata (come da specifica).
-                    // Il cast non fa più parte di questa scheda ridisegnata.
-                    if (state.directorPeople.isNotEmpty()) {
+                    // ULTIMA RIGA: CAST E REGIA SULLA STESSA RIGA, centrati
+                    // (chiarimento della specifica). La regia apre la riga, il cast
+                    // la segue: un solo heading, una sola riga orizzontale.
+                    val crew = state.directorPeople + state.castPeople
+                    if (crew.isNotEmpty()) {
                         Spacer(modifier = Modifier.height(28.dp))
                         Text(
-                            text = "Regia",
+                            text = "Cast & Regia",
                             style = MaterialTheme.typography.titleMedium,
                             color = WaveStreamColors.TextSecondary,
                             fontWeight = FontWeight.Medium,
@@ -714,23 +716,36 @@ fun DetailsScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(state.directorPeople.size) { index ->
-                                val person = state.directorPeople[index]
+                            items(crew.size) { index ->
+                                val person = crew[index]
                                 CastPersonCard(
                                     person = person,
                                     onClick = { onPersonClick(person.id, person.name) }
                                 )
                             }
                         }
-                    } else state.director?.let {
-                        Spacer(modifier = Modifier.height(28.dp))
-                        Text(
-                            text = "Regia: $it",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = WaveStreamColors.TextSecondary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    } else {
+                        // Nessun dato strutturato: due righe di testo, sempre centrate
+                        state.director?.let {
+                            Spacer(modifier = Modifier.height(28.dp))
+                            Text(
+                                text = "Regia: $it",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = WaveStreamColors.TextSecondary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        state.cast?.let {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Cast: $it",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = WaveStreamColors.TextTertiary,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
             }
