@@ -33,12 +33,14 @@ interface StreamProviderDao {
     suspend fun getAllByPlaylist(playlistId: Long): List<StreamProvider>
 
     /**
-     * Solo i campi che l'unificazione deve conservare dalle sorgenti esistenti
-     * (id, tmdb, durata, date). Proiettare le colonne invece di caricare le righe
-     * intere alleggerisce molto memoria e tempo di prefetch su ~70k VOD.
+     * Solo i campi che l'unificazione deve conservare dalle sorgenti esistenti.
+     * Proiettare le colonne invece di caricare le righe intere (~28 campi) riduce
+     * molto memoria e tempo di prefetch su ~70k VOD.
      */
-    @Query("SELECT * FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId IS NOT NULL")
-    suspend fun getPreservableByPlaylist(playlistId: Long): List<StreamProvider>
+    @Query("SELECT xtreamStreamId AS xtreamStreamId, tmdbId AS tmdbId, durationSeconds AS durationSeconds, " +
+        "addedAt AS addedAt, lastUsedAt AS lastUsedAt, detectedHeight AS detectedHeight, detectedAt AS detectedAt " +
+        "FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId IS NOT NULL")
+    suspend fun getPreservableByPlaylist(playlistId: Long): List<ProviderPreserve>
 
     @Query("SELECT * FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId = :xtreamStreamId LIMIT 1")
     suspend fun getByXtreamId(playlistId: Long, xtreamStreamId: Int): StreamProvider?
@@ -99,4 +101,15 @@ interface StreamProviderDao {
 data class MovieProviderCount(
     val movieId: Long,
     val count: Int
+)
+
+/** Proiezione leggera delle sorgenti esistenti (vedi [getPreservableByPlaylist]). */
+data class ProviderPreserve(
+    val xtreamStreamId: Int,
+    val tmdbId: Int?,
+    val durationSeconds: Long?,
+    val addedAt: Long,
+    val lastUsedAt: Long?,
+    val detectedHeight: Int?,
+    val detectedAt: Long?
 )
