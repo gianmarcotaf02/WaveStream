@@ -11,15 +11,27 @@ interface WatchProgressDao {
     @Query("SELECT * FROM watch_progress WHERE profileId = :profileId ORDER BY lastWatchedAt DESC")
     fun getProgressByProfile(profileId: Long): Flow<List<WatchProgress>>
     
-    @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND isCompleted = 0 ORDER BY lastWatchedAt DESC LIMIT :limit")
+    // NOTA: la clausola su `position` è l'equivalente SQL di [WatchProgress.isResumable]:
+    // esclude i progressi con position ~0 (righe create aprendo e chiudendo il player
+    // prima che la riproduzione parta), che altrimenti comparivano nei caroselli
+    // "Continua a guardare" con i minuti rimasti pari alla durata totale.
+
+    // All items (Home continue-watching row)
+    @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND isCompleted = 0 " +
+        "AND duration > 0 AND position >= CASE WHEN duration <= 60000 THEN 1 ELSE 15000 END " +
+        "ORDER BY lastWatchedAt DESC LIMIT :limit")
     suspend fun getContinueWatching(profileId: Long, limit: Int = 20): List<WatchProgress>
-    
+
     // Movies only - for FilmActivity carousel
-    @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND contentType = 'MOVIE' AND isCompleted = 0 ORDER BY lastWatchedAt DESC LIMIT :limit")
+    @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND contentType = 'MOVIE' AND isCompleted = 0 " +
+        "AND duration > 0 AND position >= CASE WHEN duration <= 60000 THEN 1 ELSE 15000 END " +
+        "ORDER BY lastWatchedAt DESC LIMIT :limit")
     suspend fun getContinueWatchingMovies(profileId: Long, limit: Int = 20): List<WatchProgress>
-    
+
     // Series/Episodes - for SeriesActivity carousel
-    @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND contentType IN ('SERIES', 'EPISODE') AND isCompleted = 0 ORDER BY lastWatchedAt DESC LIMIT :limit")
+    @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND contentType IN ('SERIES', 'EPISODE') AND isCompleted = 0 " +
+        "AND duration > 0 AND position >= CASE WHEN duration <= 60000 THEN 1 ELSE 15000 END " +
+        "ORDER BY lastWatchedAt DESC LIMIT :limit")
     suspend fun getContinueWatchingSeries(profileId: Long, limit: Int = 20): List<WatchProgress>
     
     @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND contentType = :contentType AND contentId = :contentId")
