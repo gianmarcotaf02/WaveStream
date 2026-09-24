@@ -2794,49 +2794,64 @@ fun DetailsSkeletonLoader(modifier: Modifier = Modifier) {
     )
 
     Box(modifier = modifier.fillMaxSize().background(WaveStreamColors.BackgroundDark)) {
-        // Main content row (similar layout to the loaded state)
-        Row(
+        // Stesso scaffolding del layout CENTRATO: logo, meta, ratings, bottoni,
+        // trama e riga Cast & Regia sull'asse — non piu il vecchio layout con poster.
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 56.dp, end = 56.dp, top = 64.dp, bottom = 48.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Left column (Poster placeholder)
-            Box(
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(225.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(shimmerBrush)
-            )
+            Spacer(modifier = Modifier.height(40.dp))
             
-            Spacer(modifier = Modifier.width(32.dp))
+            // Logo / titolo
+            Box(modifier = Modifier.width(300.dp).height(44.dp).clip(RoundedCornerShape(6.dp)).background(shimmerBrush))
+            Spacer(modifier = Modifier.height(20.dp))
             
-            // Right column (Info placeholders)
-            Column(modifier = Modifier.weight(1f)) {
-                // Title
-                Box(modifier = Modifier.width(300.dp).height(40.dp).clip(RoundedCornerShape(4.dp)).background(shimmerBrush))
-                Spacer(modifier = Modifier.height(16.dp))
-                // Year/Genre
-                Box(modifier = Modifier.width(200.dp).height(20.dp).clip(RoundedCornerShape(4.dp)).background(shimmerBrush))
-                Spacer(modifier = Modifier.height(24.dp))
-                // Ratings
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    repeat(3) {
-                        Box(modifier = Modifier.width(60.dp).height(30.dp).clip(RoundedCornerShape(4.dp)).background(shimmerBrush))
+            // Meta: anno · durata · generi
+            Box(modifier = Modifier.width(340.dp).height(22.dp).clip(RoundedCornerShape(6.dp)).background(shimmerBrush))
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Ratings
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                repeat(5) {
+                    Box(modifier = Modifier.width(56.dp).height(26.dp).clip(RoundedCornerShape(13.dp)).background(shimmerBrush))
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // CTA + azioni
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(modifier = Modifier.width(116.dp).height(48.dp).clip(RoundedCornerShape(12.dp)).background(shimmerBrush))
+                repeat(5) {
+                    Box(modifier = Modifier.width(44.dp).height(44.dp).clip(CircleShape).background(shimmerBrush))
+                }
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            
+            // Trama
+            repeat(3) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(if (it == 2) 0.5f else 0.75f)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(shimmerBrush)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Cast & Regia
+            Box(modifier = Modifier.width(140.dp).height(18.dp).clip(RoundedCornerShape(4.dp)).background(shimmerBrush))
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                repeat(6) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(shimmerBrush))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(modifier = Modifier.width(44.dp).height(9.dp).clip(RoundedCornerShape(3.dp)).background(shimmerBrush))
                     }
-                }
-                Spacer(modifier = Modifier.height(32.dp))
-                // Buttons
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Box(modifier = Modifier.width(140.dp).height(48.dp).clip(RoundedCornerShape(24.dp)).background(shimmerBrush))
-                    Box(modifier = Modifier.width(48.dp).height(48.dp).clip(CircleShape).background(shimmerBrush))
-                    Box(modifier = Modifier.width(48.dp).height(48.dp).clip(CircleShape).background(shimmerBrush))
-                }
-                Spacer(modifier = Modifier.height(32.dp))
-                // Overview
-                repeat(3) {
-                    Box(modifier = Modifier.fillMaxWidth(0.8f - (it * 0.1f)).height(16.dp).clip(RoundedCornerShape(4.dp)).background(shimmerBrush))
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
