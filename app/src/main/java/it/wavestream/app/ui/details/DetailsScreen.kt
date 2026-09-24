@@ -896,10 +896,6 @@ private fun DetailsTopBar(
 }
 
 /**
- * Cast person card — clickable circular photo with name + role
- */
-@Composable
-/**
  * Card di un contenuto correlato — rail "Potrebbe piacerti" (piano L5).
  * Poster 2:3 (132×198dp) + titolo su due righe, con alone di focus.
  */
@@ -965,6 +961,10 @@ private fun RelatedContentCard(
     }
 }
 
+/**
+ * Cast person card — clickable circular photo with name + role
+ */
+@Composable
 private fun CastPersonCard(
     person: PersonInfo,
     onClick: () -> Unit,
