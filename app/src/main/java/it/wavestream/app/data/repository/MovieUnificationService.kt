@@ -172,6 +172,7 @@ class MovieUnificationService @Inject constructor(
     /** Unisce i duplicati di una playlist (per titolo+anno e per tmdbId) e
      *  ripristina l'integrità di sorgenti/categorie/streamCount. */
     suspend fun unifyPlaylist(playlistId: Long) = withContext(Dispatchers.IO) {
+        appDatabase.withTransaction {
         mergeByTitleAndYear(playlistId)
         unifyByTmdbId(playlistId)
         // Integrità: solo per i film senza sorgente o senza cleanName (economico).
@@ -179,17 +180,20 @@ class MovieUnificationService @Inject constructor(
         movieDao.getAllByPlaylistIncludingHidden(playlistId).forEach { m ->
             if (m.cleanName.isNullOrBlank() || (counts[m.id] ?: 0) == 0) ensureMovieIntegrity(m)
         }
+        }
     }
 
     /** Unisce solo le righe che condividono lo stesso `tmdbId` (leggero, adatto
      *  a girare dopo l'arricchimento TMDB). */
     suspend fun unifyByTmdbId(playlistId: Long) = withContext(Dispatchers.IO) {
+        appDatabase.withTransaction {
         val movies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
         for ((_, group) in movies.filter { it.tmdbId != null }.groupBy { it.tmdbId!! }) {
             if (group.size > 1) {
                 val canonical = group.minByOrNull { it.id } ?: continue
                 mergeDuplicatesInto(canonical.id, group.filter { it.id != canonical.id })
             }
+        }
         }
     }
 
@@ -228,6 +232,7 @@ class MovieUnificationService @Inject constructor(
         if (userPreferences.isMoviesUnifiedV1()) return
         withContext(Dispatchers.IO) {
             try {
+                appDatabase.withTransaction {
                 val all = movieDao.getAllMoviesIncludingHidden()
                 Log.i(TAG, "First-time movie unification: ${all.size} movies, ${all.map { it.playlistId }.distinct().size} playlists")
 
@@ -241,6 +246,7 @@ class MovieUnificationService @Inject constructor(
 
                 // Unificazione per playlist
                 all.map { it.playlistId }.distinct().forEach { unifyPlaylist(it) }
+                }
 
                 contentCache.clearHomeSessionData()
                 userPreferences.setMoviesUnifiedV1(true)
@@ -300,13 +306,14 @@ class MovieUnificationService @Inject constructor(
         playlistId: Long,
         movieId: Long,
         group: List<MovieSourceInput>,
-        primary: MovieSourceInput
-    ) {
+        primary: MovieSourceInput,
+        existingProvidersByXtreamId: Map<Int, StreamProvider>
+    ): Int {
         val keptIds = ArrayList<Long>(group.size)
         for (src in group) {
             val parsed = contentNameParser.parse(src.rawName)
             val quality = contentNameParser.detectQuality(src.rawName)
-            val existing = src.xtreamStreamId?.let { streamProviderDao.getByXtreamId(playlistId, it) }
+            val existing = src.xtreamStreamId?.let { existingProvidersByXtreamId[it] }
             val provider = StreamProvider(
                 id = existing?.id ?: 0,
                 movieId = movieId,
@@ -343,6 +350,7 @@ class MovieUnificationService @Inject constructor(
         } else {
             streamProviderDao.deleteByMovie(movieId)
         }
+        return keptIds.size
     }
 
     private suspend fun syncCategories(
