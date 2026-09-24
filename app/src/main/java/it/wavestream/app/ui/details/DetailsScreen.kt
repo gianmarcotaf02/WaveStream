@@ -201,14 +201,12 @@ fun DetailsScreen(
     
     // Lazy list state for auto-scroll to current/next episode
     val listState = remember { androidx.tv.foundation.lazy.list.TvLazyListState() }
-    // Carosello "Potrebbe piacerti" a SCOMPARSA: si attiva SOLO da quando l'utente
-    // comincia a scorrere verso il basso. Una volta attivato resta, così non si ha
-    // un salto di layout mentre si scorre (lo scroll hint in basso sparisce nello
-    // stesso istante).
-    var relatedRevealed by remember { mutableStateOf(false) }
-    LaunchedEffect(listState) {
-        androidx.compose.runtime.snapshotFlow { listState.firstVisibleItemScrollOffset }
-            .collect { offset -> if (offset > 0) relatedRevealed = true }
+    // Carosello "Potrebbe piacerti" a SCOMPARSA — RIVELAZIONE RIBALTABILE:
+    // c'è SOLO mentre si scorre verso il basso (offset > 0) e sparisce di nuovo
+    // tornando in cima, così risalendo su "Riproduci" la scheda torna senza il
+    // carosello. Derivato, non latch.
+    val relatedRevealed by remember {
+        derivedStateOf { listState.firstVisibleItemScrollOffset > 0 }
     }
     // Solo redirect D-pad (giù dall'header stagione → primo episodio): NON richiede mai il focus
     val firstEpisodeFocusRequester = remember { FocusRequester() }
@@ -392,7 +390,7 @@ fun DetailsScreen(
                         if (state.year.isNotEmpty()) {
                             Text(
                                 text = state.year,
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = WaveStreamColors.TextSecondary
                             )
                         }
@@ -408,11 +406,11 @@ fun DetailsScreen(
                                         brush = GlassTokens.StrokeGradient,
                                         shape = RoundedCornerShape(percent = 50)
                                     )
-                                    .padding(horizontal = 12.dp, vertical = 2.dp)
+                                    .padding(horizontal = 10.dp, vertical = 1.dp)
                             ) {
                                 Text(
                                     text = "⏱ ${formatDurationInHours(duration)}",
-                                    style = MaterialTheme.typography.bodyLarge,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = WaveStreamColors.TextPrimary,
                                     maxLines = 1
                                 )
@@ -422,7 +420,7 @@ fun DetailsScreen(
                         if (state.genres.isNotEmpty()) {
                             Text(
                                 text = state.genres,
-                                style = MaterialTheme.typography.bodyLarge,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = WaveStreamColors.TextSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -806,7 +804,7 @@ fun DetailsScreen(
                 exit = fadeOut(tween(220)),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 14.dp)
+                    .padding(bottom = 10.dp)
             ) {
                 val hintBob by rememberInfiniteTransition(label = "scrollHint").animateFloat(
                     initialValue = 0f,
@@ -824,21 +822,21 @@ fun DetailsScreen(
                         .clip(RoundedCornerShape(999.dp))
                         .background(GlassTokens.SurfaceFillStrong)
                         .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(999.dp))
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = "Scorri per i suggerimenti",
-                        style = MaterialTheme.typography.labelLarge,
+                        style = MaterialTheme.typography.labelMedium,
                         color = WaveStreamColors.TextPrimary,
                         fontWeight = FontWeight.Medium,
                         maxLines = 1
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(5.dp))
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
                         contentDescription = null,
                         tint = WaveStreamColors.Accent,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
             }
@@ -929,7 +927,7 @@ private fun RelatedContentCard(
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier
-            .width(132.dp)
+            .width(104.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -946,21 +944,21 @@ private fun RelatedContentCard(
                 androidx.compose.ui.platform.LocalContext.current
             )
                 .data(related.posterUrl)
-                .size(132, 198)
+                .size(104, 156)
                 .crossfade(true)
                 .build(),
             contentDescription = related.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(198.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .border(2.dp, ring, RoundedCornerShape(12.dp))
+                .height(156.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .border(2.dp, ring, RoundedCornerShape(10.dp))
         )
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = related.title,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = WaveStreamColors.TextPrimary,
             fontWeight = FontWeight.Medium,
             maxLines = 2,
@@ -1284,12 +1282,9 @@ private fun PlayButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .widthIn(min = if (badge != null) 148.dp else 140.dp)
-            // Altezza UNIFORME a 64dp (piano L2): prima era 56dp con badge e 52dp
-            // senza, quindi il CTA "saltava" in altezza passando da un contenuto
-            // all'altro. Con due righe (etichetta + SxEy) e la barra di progresso
-            // ci sta tutto comodo.
-            .height(56.dp)
+            .widthIn(min = if (badge != null) 124.dp else 116.dp)
+            // Altezza UNIFORME: il CTA non deve "saltare" quando cambia il badge.
+            .height(48.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
             // DOPO background: vedi nota su borderColor
@@ -1419,7 +1414,7 @@ private fun ExplainEndingButton(onClick: () -> Unit, label: String? = null) {
                 scaleX = scale
                 scaleY = scale
             }
-            .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .then(if (label != null) Modifier.height(44.dp) else Modifier.size(44.dp))
             .clip(actionShape(label))
             .background(backgroundColor)
             .border(1.dp, borderColor, actionShape(label))
@@ -1688,7 +1683,7 @@ private fun FavoriteButton(
                 scaleX = focusScale
                 scaleY = focusScale
             }
-            .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .then(if (label != null) Modifier.height(44.dp) else Modifier.size(44.dp))
             .clip(actionShape(label))
             .background(backgroundColor)
             .border(1.dp, borderColor, actionShape(label)) // Consistent 1dp border
@@ -1762,7 +1757,7 @@ private fun MarkAsWatchedButton(
                 scaleX = focusScale
                 scaleY = focusScale
             }
-            .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .then(if (label != null) Modifier.height(44.dp) else Modifier.size(44.dp))
             .clip(actionShape(label))
             .background(backgroundColor)
             .border(1.dp, borderColor, actionShape(label))
@@ -1850,7 +1845,7 @@ private fun DownloadButton(
                 scaleX = focusScale
                 scaleY = focusScale
             }
-            .then(if (buttonLabel != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .then(if (buttonLabel != null) Modifier.height(44.dp) else Modifier.size(44.dp))
             .clip(actionShape(buttonLabel))
             .background(backgroundColor)
             .border(1.dp, borderColor, actionShape(buttonLabel))
@@ -2503,7 +2498,7 @@ private fun TrailerButton(
                 scaleX = scale
                 scaleY = scale
             }
-            .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+            .then(if (label != null) Modifier.height(44.dp) else Modifier.size(44.dp))
             .clip(actionShape(label))
             .background(backgroundColor)
             .border(1.dp, borderColor, actionShape(label))
@@ -2598,7 +2593,7 @@ private fun AddToListButton(
                 scaleX = scale
                 scaleY = scale
             }
-                .then(if (label != null) Modifier.height(52.dp) else Modifier.size(52.dp))
+                .then(if (label != null) Modifier.height(44.dp) else Modifier.size(44.dp))
                 .clip(actionShape(label)) // Changed to CircleShape
                 .background(backgroundColor)
                 .border(1.dp, borderColor, actionShape(label)) // Consistent 1dp border
