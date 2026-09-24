@@ -654,18 +654,20 @@ fun DetailsScreen(
                                     color = WaveStreamColors.Accent,
                                     fontWeight = FontWeight.Medium,
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth(),
                                     modifier = Modifier
+                                        .fillMaxWidth()
                                         .padding(top = 4.dp)
                                         .clickable { isExpanded = true }
                                 )
                             } else if (isExpanded && hasOverflow) {
                                 Text(
                                     text = "Leggi meno",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodyLarge,
                                     color = WaveStreamColors.Accent,
                                     fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center,
                                     modifier = Modifier
+                                        .fillMaxWidth()
                                         .padding(top = 4.dp)
                                         .clickable { isExpanded = false }
                                 )
