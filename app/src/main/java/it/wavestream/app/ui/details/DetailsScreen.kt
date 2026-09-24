@@ -257,51 +257,33 @@ fun DetailsScreen(
                     .build(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                alignment = Alignment.CenterEnd,  // Shift image to the right
+                alignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
             )
             
-            // Horizontal gradient: DARK left (50% solid black) → transparent right
+            // Scrim VERTICALE: sostituisce lo scrim orizzontale (che rendeva il
+            // lato sinistro più scuro del destro, incompatibile con un testo centrato)
+            // e il gradiente top. Il backdrop resta visibile in alto e sfuma nel
+            // grigio scuro/nero scendendo verso il basso, come da specifica. Il
+            // blocco centrato titolo/info/ratings cade intorno al 45% dell'altezza,
+            // dove l'alpha è già ~0.65.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(
-                                WaveStreamColors.BackgroundDark,  // 100% opaque at left edge
-                                WaveStreamColors.BackgroundDark,  // Keep solid
-                                WaveStreamColors.BackgroundDark,  // Keep solid
-                                WaveStreamColors.BackgroundDark,  // Keep solid
-                                WaveStreamColors.BackgroundDark,  // Keep solid until ~55%
-                                WaveStreamColors.BackgroundDark.copy(alpha = 0.9f),
-                                WaveStreamColors.BackgroundDark.copy(alpha = 0.6f),
-                                WaveStreamColors.BackgroundDark.copy(alpha = 0.3f),
-                                Color.Transparent
-                            ),
-                            startX = 0f,
-                            // 1800 (era 1600): con la scala corta a x=1390 restavano
-                            // ~0.2 di alpha, cioè proprio dove finiva la trama
-                            // sull'arte chiara (problema P4).
-                            endX = 1800f
-                        )
-                    )
-            )
-            
-            // Vertical gradient at top for header area
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .background(
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                WaveStreamColors.BackgroundDark.copy(alpha = 0.9f),
-                                Color.Transparent
+                                WaveStreamColors.BackgroundDark.copy(alpha = 0.35f),
+                                WaveStreamColors.BackgroundDark.copy(alpha = 0.20f),
+                                WaveStreamColors.BackgroundDark.copy(alpha = 0.45f),
+                                WaveStreamColors.BackgroundDark.copy(alpha = 0.78f),
+                                WaveStreamColors.BackgroundDark.copy(alpha = 0.93f),
+                                WaveStreamColors.BackgroundDark,
+                                WaveStreamColors.BackgroundDark
                             )
                         )
                     )
             )
-            
             // Vertical gradient at BOTTOM for cast/director readability
             Box(
                 modifier = Modifier
@@ -320,41 +302,47 @@ fun DetailsScreen(
             )
         }
         
-        // Content - LEFT ALIGNED with better width for readability
-        // Using TvLazyColumn for focus-driven scrolling (like Live TV sidebar)
-        // The whole page scrolls when navigating with D-pad
+        // Content — CENTRATO su tutta la larghezza (nuovo layout "billboard").
+        // TvLazyColumn resta per lo scroll D-pad e per gli episodi.
         androidx.tv.foundation.lazy.list.TvLazyColumn(
             state = listState,
             contentPadding = androidx.compose.foundation.layout.PaddingValues(top = 24.dp),
             pivotOffsets = androidx.tv.foundation.PivotOffsets(parentFraction = 0.6f),
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxHeight()
-                .fillMaxWidth(0.75f)  // Use left 75% of screen for content (increased to fit all buttons)
-                .padding(start = 32.dp, end = 16.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
         ) {
-            // Top content block: poster, info, buttons, overview, cast
+            // Top content block — tutto centrato sull'asse dello schermo
             item {
-            // Main content - back button + info (piano L3: il poster è RIMOSSO —
-            // duplicava logo e backdrop e occupava una colonna intera da 150dp.
-            // L'info parte ora molto più a sinistra, dentro la fascia più scura dello
-            // scrim, e guadagna larghezza per il testo.)
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Back button - aligned to top of info column (same height as title)
-                DetailsTopBar(
-                    onBackClick = onBackClick,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
+                // Il back resta in alto a SINISTRA: è un controllo di navigazione,
+                // non fa parte del contenuto centrato.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    DetailsTopBar(
+                        onBackClick = onBackClick,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
                 
-                // Info column
+                // Porta il blocco titolo → ratings a circa metà altezza
+                Spacer(modifier = Modifier.height(120.dp))
+                
+                // Contenuto centrato
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
                         .animateContentSize(
                             animationSpec = tween(durationMillis = 400)
-                        )
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Title: clear logo TMDb se disponibile, altrimenti testo di sistema
                     if (!state.logoUrl.isNullOrEmpty()) {
@@ -386,10 +374,10 @@ fun DetailsScreen(
                     // nella zona sinistra ancora scura — appoggiato in coda alla riga dei
                     // generi finiva sull'arte chiara del backdrop e diventava illeggibile.
                     // I generi sono l'unico elemento che può accorciarsi (ellissi).
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        modifier = Modifier.fillMaxWidth()
+                    FlowRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         if (state.year.isNotEmpty()) {
                             Text(
@@ -413,7 +401,7 @@ fun DetailsScreen(
                                     .padding(horizontal = 12.dp, vertical = 2.dp)
                             ) {
                                 Text(
-                                    text = "⏱ $duration",
+                                    text = "⏱ ${formatDurationInHours(duration)}",
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = WaveStreamColors.TextPrimary,
                                     maxLines = 1
@@ -427,10 +415,7 @@ fun DetailsScreen(
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = WaveStreamColors.TextSecondary,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                // fill = false: occupa solo lo spazio che serve, così il
-                                // chip non viene mai spinto fuori dalla colonna (440dp).
-                                modifier = Modifier.weight(1f, fill = false)
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -452,11 +437,13 @@ fun DetailsScreen(
                     // Action buttons — pill icona+label (piano L2).
                     // Con le etichette le 6 azioni superano i 720dp della colonna:
                     // la riga scorre in orizzontale e il focus D-pad la scorre da solo.
+                    // Azioni: CENTRATE e SOLO ICONA (come da specifica: "sotto i
+                    // ratings ... i bottoni, senza il nome"). Con le etichette non
+                    // entravano; con le sole icone stanno comode in una riga, quindi
+                    // niente scroll.
                     Row(
-                        modifier = Modifier
-                            .padding(start = 10.dp)
-                            .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Play button - compatto: etichetta breve + badge SxEy ridotto
@@ -1077,9 +1064,9 @@ private fun RatingsBadges(
     // e l'ultimo veniva tagliato sul lato destro. Ora va a capo invece di essere
     // tagliato — sulle TV larghe resta comunque su una riga sola.
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.padding(vertical = 4.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
     ) {
         if (imdbRating != null) {
             ModernRatingItem(
@@ -1349,7 +1336,7 @@ private fun PlayButton(
  * Usa l'icona di Nova ma è indipendente dalla feature Nova (che resta in pausa).
  */
 @Composable
-private fun ExplainEndingButton(onClick: () -> Unit, label: String? = "Finale") {
+private fun ExplainEndingButton(onClick: () -> Unit, label: String? = null) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
@@ -1576,7 +1563,7 @@ private fun EndingSourceBadge(ending: MovieEnding) {
 private fun FavoriteButton(
     isFavorite: Boolean,
     onClick: () -> Unit,
-    label: String? = "Preferiti"
+    label: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1684,7 +1671,7 @@ private fun FavoriteButton(
 @Composable
 private fun MarkAsWatchedButton(
     onClick: () -> Unit,
-    label: String? = "Visto"
+    label: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -2438,7 +2425,7 @@ private fun EpisodeCard(
 @Composable
 private fun TrailerButton(
     onClick: () -> Unit,
-    label: String? = "Trailer"
+    label: String? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -2503,7 +2490,7 @@ private fun AddToListButton(
     onCreateList: (String) -> Unit,
     @Suppress("UNUSED_PARAMETER") // onRenameList kept for API consistency
     onRenameList: (Long, String) -> Unit,
-    label: String? = "Lista"
+    label: String? = null
 ) {
     var showDropdown by remember { mutableStateOf(false) }
     var showCreateDialog by remember { mutableStateOf(false) }
