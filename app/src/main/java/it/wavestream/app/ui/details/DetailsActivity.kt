@@ -490,16 +490,53 @@ class DetailsActivity : ComponentActivity() {
     private suspend fun relatedContentFor(movie: Movie): List<RelatedContent> {
         val fromTmdb = runCatching {
             val tmdbId = movie.tmdbId ?: return@runCatching emptyList<Movie>()
-            tmdbService.getRecommendations(tmdbId, "movie")
-                .mapNotNull { item ->
-                    if (item.id == tmdbId) null else movieDao.getMovieByTmdbId(item.id)
-                }
+            tmdbRelatedIds(tmdbId, "movie")
+                .filter { it != tmdbId }
+                .mapNotNull { movieDao.getMovieByTmdbId(it) }
                 .filter { !it.isHidden && it.id != movie.id }
                 .take(10)
         }.getOrElse { emptyList() }
 
         val base = if (fromTmdb.isNotEmpty()) fromTmdb else localRelatedFallback(movie)
         return base.toRelatedContent()
+    }
+
+    /** Stessa rail per le SERIE: `mediaType = "tv"`, id risolti su `series`. */
+    private suspend fun relatedContentForSeries(series: Series): List<RelatedContent> {
+        val tmdbId = series.tmdbId ?: return emptyList()
+        return runCatching {
+            tmdbRelatedIds(tmdbId, "tv")
+                .filter { it != tmdbId }
+                .mapNotNull { seriesDao.getSeriesByTmdbId(it) }
+                .filter { !it.isHidden && it.id != series.id }
+                .take(10)
+        }.getOrElse { emptyList() }
+            .map {
+                RelatedContent(
+                    contentId = it.id,
+                    title = it.name,
+                    posterUrl = it.posterUrl,
+                    contentType = ContentType.SERIES
+                )
+            }
+    }
+
+    /**
+     * Id TMDB dei correlati: unisce `/recommendations` e `/similar` con gli **stessi
+     * pesi di `RecommendationEngine`** (raccomandazioni 2.0, similar 1.0), così la
+     * scheda usa lo stesso "motore" TMDB della Home. Un titolo presente in entrambe
+     * le liste sale in cima.
+     */
+    private suspend fun tmdbRelatedIds(tmdbId: Int, mediaType: String): List<Int> {
+        val recs = runCatching { tmdbService.getRecommendations(tmdbId, mediaType) }
+            .getOrElse { emptyList() }
+        val similar = runCatching { tmdbService.getSimilar(tmdbId, mediaType) }
+            .getOrElse { emptyList() }
+
+        val scores = LinkedHashMap<Int, Float>()
+        recs.forEach { scores[it.id] = (scores[it.id] ?: 0f) + 2.0f }
+        similar.forEach { scores[it.id] = (scores[it.id] ?: 0f) + 1.0f }
+        return scores.entries.sortedByDescending { it.value }.map { it.key }
     }
 
     /** Righe `Movie` → voci della rail. */
@@ -800,11 +837,11 @@ class DetailsActivity : ComponentActivity() {
         // stato, così la scheda non deve aspettare la rete. Se torna qualcosa di
         // meglio del fallback locale (o il fallback non aveva niente), sostituisce
         // solo la rail.
-        val finalState = state
         lifecycleScope.launch {
             val related = relatedContentFor(movie)
-            if (related != finalState.relatedContent) {
-                onStateUpdate(finalState.copy(relatedContent = related))
+            if (related != state.relatedContent) {
+                state = state.copy(relatedContent = related)
+                onStateUpdate(state)
             }
         }
     }
@@ -1155,6 +1192,18 @@ class DetailsActivity : ComponentActivity() {
                         ))
                     }
                 }
+            }
+        }
+        
+        // Rail "Potrebbe piacerti" anche per le SERIE: stessa fonte TMDB
+        // (mediaType "tv", /recommendations + /similar con i pesi di
+        // RecommendationEngine) risolta sulle serie locali. Parte dopo l'emissione
+        // dello stato, quindi la scheda non aspetta la rete.
+        lifecycleScope.launch {
+            val related = relatedContentForSeries(series)
+            if (related.isNotEmpty() && related != state.relatedContent) {
+                state = state.copy(relatedContent = related)
+                onStateUpdate(state)
             }
         }
     }
