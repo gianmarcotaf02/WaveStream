@@ -183,9 +183,9 @@ class PlaylistRepository @Inject constructor(
         
         // Fase B: unifica i doppioni e crea le sorgenti mancanti. Necessaria solo
         // per M3U (saveMovies inserisce righe grezze senza raggruppare): per Xtream
-        // `persistGroupedMovies` ha GIÀ raggruppato per titolo+anno e creato le
-        // sorgenti, quindi ripetere `unifyPlaylist` rifaceva da zero su tutta la
-        // libreria lo stesso lavoro (il principale collo di bottiglia del refresh).
+        // il refresh incrementale ha GIÀ raggruppato le sorgenti nuove e creato
+        // quelle mancanti, quindi ripetere `unifyPlaylist` rifaceva da zero su
+        // tutta la libreria lo stesso lavoro (il principale collo di bottiglia).
         if (playlist.type == "m3u") {
             runCatching { movieUnificationService.unifyPlaylist(playlistId) }
                 .onFailure { Log.w(TAG, "unifyPlaylist failed for playlist $playlistId", it) }
