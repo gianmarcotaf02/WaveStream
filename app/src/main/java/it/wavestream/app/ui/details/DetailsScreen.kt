@@ -2305,7 +2305,269 @@ private fun EpisodeCarouselCard(
     upFocusRequester: FocusRequester? = null,
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
+    onDownloadClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    val cardInteraction = remember { MutableInteractionSource() }
+    val isFocused by cardInteraction.collectIsFocusedAsState()
 
+    val downloadInteraction = remember { MutableInteractionSource() }
+    val isDownloadFocused by downloadInteraction.collectIsFocusedAsState()
+
+    val fallbackCardFocus = remember { FocusRequester() }
+    val effectiveCardFocus = cardFocusRequester ?: fallbackCardFocus
+    val downloadFocusRequester = remember { FocusRequester() }
+
+    var pressStartTime by remember { mutableStateOf(0L) }
+    val longPressThreshold = 500L
+
+    val isDownloaded = downloadState?.isDownloaded == true
+    val isDownloading = downloadState?.isDownloading == true
+    val downloadProgress = downloadState?.downloadProgress ?: 0
+
+    val hasProgress = progress != null && progress.progress > 0.01f && !progress.isCompleted
+    val isWatched = progress?.isCompleted == true ||
+        (progress != null && progress.remainingMinutes <= 7 && progress.progress > 0.9f)
+
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.05f else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "episodeCardScale"
+    )
+    val ring by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.08f),
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "episodeCardRing"
+    )
+    val cardFill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.12f) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "episodeCardFill"
+    )
+
+    // Titolo mostrato: titolo vero (provider, poi TMDB), altrimenti "Episodio N".
+    val displayTitle = remember(episode.name, episode.tmdbName, episode.episodeNumber, seriesName) {
+        TitleCleaner.resolveEpisodeDisplayTitle(
+            providerName = episode.name,
+            tmdbName = episode.tmdbName,
+            episodeNumber = episode.episodeNumber,
+            seriesName = seriesName
+        )
+    }
+
+    Column(
+        modifier = modifier
+            .width(168.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .clip(RoundedCornerShape(16.dp))
+            .background(cardFill)
+            .border(1.dp, ring, RoundedCornerShape(16.dp))
+            .padding(8.dp)
+    ) {
+        // Copertina (pseudo quadrata) — principale focus target della card
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(126.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(WaveStreamColors.BackgroundSecondary)
+                .focusRequester(effectiveCardFocus)
+                .then(
+                    if (upFocusRequester != null) Modifier.focusProperties { up = upFocusRequester } else Modifier
+                )
+                .focusProperties { down = downloadFocusRequester }
+                .focusable(interactionSource = cardInteraction)
+                .onPreviewKeyEvent { keyEvent ->
+                    when {
+                        keyEvent.key == Key.DirectionCenter || keyEvent.key == Key.Enter -> {
+                            if (keyEvent.type == KeyEventType.KeyDown) {
+                                if (pressStartTime == 0L) pressStartTime = System.currentTimeMillis()
+                                true
+                            } else if (keyEvent.type == KeyEventType.KeyUp) {
+                                val pressDuration = System.currentTimeMillis() - pressStartTime
+                                pressStartTime = 0L
+                                if (pressDuration >= longPressThreshold) onLongClick() else onClick()
+                                true
+                            } else false
+                        }
+                        else -> false
+                    }
+                }
+                .combinedClickable(
+                    interactionSource = cardInteraction,
+                    indication = null,
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                )
+        ) {
+            AsyncImage(
+                model = episode.posterUrl,
+                contentDescription = episode.name,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // Scrim in alto per la leggibilità del badge episodio
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent)
+                        )
+                    )
+            )
+
+            // Badge numero episodio ("E3")
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(6.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(Color.Black.copy(alpha = 0.65f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = "E${episode.episodeNumber}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Bottone download (focus target separato; "su" torna alla copertina)
+            val downloadBg by animateColorAsState(
+                targetValue = when {
+                    isDownloaded -> WaveStreamColors.Accent
+                    isDownloadFocused -> WaveStreamColors.Accent
+                    else -> Color.Black.copy(alpha = 0.55f)
+                },
+                animationSpec = AppAnimations.SpringCardFocusColor,
+                label = "episodeDownloadBg"
+            )
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(6.dp)
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(downloadBg)
+                    .focusRequester(downloadFocusRequester)
+                    .focusProperties { up = effectiveCardFocus }
+                    .focusable(interactionSource = downloadInteraction)
+                    .clickable(
+                        interactionSource = downloadInteraction,
+                        indication = null,
+                        onClick = onDownloadClick
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    isDownloading -> {
+                        if (downloadProgress > 0) {
+                            CircularProgressIndicator(
+                                progress = { downloadProgress / 100f },
+                                modifier = Modifier.size(22.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp,
+                                trackColor = Color.White.copy(alpha = 0.25f)
+                            )
+                        } else {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(22.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp,
+                                trackColor = Color.White.copy(alpha = 0.25f)
+                            )
+                        }
+                    }
+                    isDownloaded -> Icon(
+                        imageVector = Icons.Default.DownloadDone,
+                        contentDescription = "Scaricato",
+                        tint = Color.White,
+                        modifier = Modifier.size(17.dp)
+                    )
+                    else -> Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = "Scarica episodio",
+                        tint = Color.White,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+            }
+
+            // Overlay centro: "visto" oppure play (focus/ripresa)
+            if (isWatched) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.55f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Guardato",
+                        tint = WaveStreamColors.Accent,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            } else if (isFocused || hasProgress) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.35f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play",
+                        tint = Color.White,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
+
+            // Barra di avanzamento in basso
+            if (hasProgress && progress != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .background(Color.Black.copy(alpha = 0.6f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(progress.progress.coerceIn(0f, 1f))
+                            .background(WaveStreamColors.Accent)
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Titolo pulito, 2 righe di altezza fissa per allineare le card della rail
+        Box(modifier = Modifier.height(38.dp)) {
+            Text(
+                text = displayTitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
 
 // ============ Preview ============
 
