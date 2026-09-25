@@ -495,7 +495,7 @@ class DetailsActivity : ComponentActivity() {
                     if (item.id == tmdbId) null else movieDao.getMovieByTmdbId(item.id)
                 }
                 .filter { !it.isHidden && it.id != movie.id }
-                .take(12)
+                .take(10)
         }.getOrElse { emptyList() }
 
         val base = if (fromTmdb.isNotEmpty()) fromTmdb else localRelatedFallback(movie)
@@ -519,7 +519,7 @@ class DetailsActivity : ComponentActivity() {
             movieDao.getMoviesByCategoryList(category)
                 .filter { it.id != movie.id && !it.isHidden }
                 .sortedByDescending { it.tmdbPopularity ?: 0f }
-                .take(12)
+                .take(10)
         }.getOrElse { emptyList() }
     }
 
