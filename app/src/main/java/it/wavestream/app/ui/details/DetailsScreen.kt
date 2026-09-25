@@ -16,8 +16,10 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -208,6 +210,10 @@ fun DetailsScreen(
     val relatedRevealed by remember {
         derivedStateOf { listState.firstVisibleItemScrollOffset > 0 }
     }
+    // Stati delle due rail con frecce laterali (come l'hero)
+    val castRailState = rememberLazyListState()
+    val relatedRailState = rememberLazyListState()
+    val railScope = rememberCoroutineScope()
     // Solo redirect D-pad (giù dall'header stagione → primo episodio): NON richiede mai il focus
     val firstEpisodeFocusRequester = remember { FocusRequester() }
 
@@ -631,8 +637,8 @@ fun DetailsScreen(
                             Text(
                                 text = state.overview,
                                 style = MaterialTheme.typography.bodyLarge.copy(
-                                    fontSize = 14.sp,
-                                    lineHeight = 20.sp
+                                    fontSize = 12.sp,
+                                    lineHeight = 17.sp
                                 ),
                                 color = WaveStreamColors.TextSecondary,
                                 textAlign = TextAlign.Center
@@ -661,13 +667,28 @@ fun DetailsScreen(
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(8.dp))
-                            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                items(state.relatedContent.size) { index ->
-                                    val related = state.relatedContent[index]
-                                    RelatedContentCard(
-                                        related = related,
-                                        onClick = { onRelatedClick(related.contentId, related.contentType) }
-                                    )
+                            RailRow(
+                                listState = relatedRailState,
+                                onScroll = { forward ->
+                                    railScope.launch {
+                                        relatedRailState.animateScrollToItem(
+                                            (relatedRailState.firstVisibleItemIndex + if (forward) 3 else -3)
+                                                .coerceAtLeast(0)
+                                        )
+                                    }
+                                }
+                            ) {
+                                LazyRow(
+                                    state = relatedRailState,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(state.relatedContent.size) { index ->
+                                        val related = state.relatedContent[index]
+                                        RelatedContentCard(
+                                            related = related,
+                                            onClick = { onRelatedClick(related.contentId, related.contentType) }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -697,13 +718,28 @@ fun DetailsScreen(
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            items(crew.size) { index ->
-                                val person = crew[index]
-                                CastPersonCard(
-                                    person = person,
-                                    onClick = { onPersonClick(person.id, person.name) }
-                                )
+                        RailRow(
+                            listState = castRailState,
+                            onScroll = { forward ->
+                                railScope.launch {
+                                    castRailState.animateScrollToItem(
+                                        (castRailState.firstVisibleItemIndex + if (forward) 3 else -3)
+                                            .coerceAtLeast(0)
+                                    )
+                                }
+                            }
+                        ) {
+                            LazyRow(
+                                state = castRailState,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(crew.size) { index ->
+                                    val person = crew[index]
+                                    CastPersonCard(
+                                        person = person,
+                                        onClick = { onPersonClick(person.id, person.name) }
+                                    )
+                                }
                             }
                         }
                     } else {
@@ -902,6 +938,102 @@ private fun DetailsTopBar(
 }
 
 /**
+ * Freccia di scorrimento per le rail, nello stile dell'hero (cerchio, accent sul
+ * focus). Fa da INDICATORE e da comando e, stando ai bordi, lascia spazio laterale
+ * ai contenuti come richiesto. Difettosa quando non c'è nulla da scorrere.
+ */
+@Composable
+private fun RailArrow(
+    isLeft: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "railArrowScale"
+    )
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            !enabled -> Color.Transparent
+            isFocused -> WaveStreamColors.Accent
+            else -> WaveStreamColors.BackgroundSecondary.copy(alpha = 0.6f)
+        },
+        animationSpec = tween(150),
+        label = "railArrowBg"
+    )
+
+    Box(
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .size(40.dp)
+            .clip(CircleShape)
+            .border(
+                2.dp,
+                if (isFocused && enabled) WaveStreamColors.Accent else Color.Transparent,
+                CircleShape
+            )
+            .background(backgroundColor)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = if (isLeft) Icons.Default.ChevronLeft else Icons.Default.ChevronRight,
+            contentDescription = if (isLeft) "Scorri indietro" else "Scorri avanti",
+            tint = if (enabled) WaveStreamColors.TextPrimary else WaveStreamColors.TextTertiary,
+            modifier = Modifier.size(26.dp)
+        )
+    }
+}
+
+/**
+ * Riga scorrevole con le frecce ai bordi: il contenuto non tocca mai i bordi e
+ * resta spazio laterale (armonia visiva). Le frecce scorrono di 3 item alla volta.
+ */
+@Composable
+private fun RailRow(
+    listState: LazyListState,
+    onScroll: (forward: Boolean) -> Unit,
+    content: @Composable () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RailArrow(
+            isLeft = true,
+            enabled = listState.canScrollBackward,
+            onClick = { onScroll(false) }
+        )
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 12.dp)
+        ) {
+            content()
+        }
+        RailArrow(
+            isLeft = false,
+            enabled = listState.canScrollForward,
+            onClick = { onScroll(true) }
+        )
+    }
+}
+
+/**
  * Card di un contenuto correlato — rail "Potrebbe piacerti" (piano L5).
  * Poster 2:3 (132×198dp) + titolo su due righe, con alone di focus.
  */
@@ -995,7 +1127,7 @@ private fun CastPersonCard(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .width(56.dp)
+            .width(64.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -1013,7 +1145,7 @@ private fun CastPersonCard(
         // Profile photo
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(44.dp)
                 .clip(CircleShape)
                 .background(WaveStreamColors.BackgroundTertiary)
         ) {
@@ -1039,17 +1171,30 @@ private fun CastPersonCard(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Name
+        // Nome e cognome su DUE RIGHE separate (come da specifica).
+        val nameParts = remember(person.name) { person.name.trim().split(Regex("\\s+")) }
         Text(
-            text = person.name,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+            text = nameParts.firstOrNull().orEmpty().ifBlank { person.name },
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+            fontWeight = FontWeight.SemiBold,
             color = WaveStreamColors.TextPrimary,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+        if (nameParts.size > 1) {
+            Text(
+                text = nameParts.drop(1).joinToString(" "),
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                fontWeight = FontWeight.SemiBold,
+                color = WaveStreamColors.TextPrimary,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
 
-        // Role (character)
+        // Ruolo/interpretazione: leggermente più piccolo del nome (10sp → 9sp)
         person.roleLabel?.let { role ->
             Text(
                 text = role,
