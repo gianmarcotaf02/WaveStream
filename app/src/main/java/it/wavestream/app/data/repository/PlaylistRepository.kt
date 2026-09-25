@@ -181,10 +181,15 @@ class PlaylistRepository @Inject constructor(
             }
         }
         
-        // Fase B: unifica i doppioni (per titolo+anno e tmdbId) e crea le sorgenti
-        // per i film che non ne hanno (es. M3U), preservando i progressi esistenti.
-        runCatching { movieUnificationService.unifyPlaylist(playlistId) }
-            .onFailure { Log.w(TAG, "unifyPlaylist failed for playlist $playlistId", it) }
+        // Fase B: unifica i doppioni e crea le sorgenti mancanti. Necessaria solo
+        // per M3U (saveMovies inserisce righe grezze senza raggruppare): per Xtream
+        // `persistGroupedMovies` ha GIÀ raggruppato per titolo+anno e creato le
+        // sorgenti, quindi ripetere `unifyPlaylist` rifaceva da zero su tutta la
+        // libreria lo stesso lavoro (il principale collo di bottiglia del refresh).
+        if (playlist.type == "m3u") {
+            runCatching { movieUnificationService.unifyPlaylist(playlistId) }
+                .onFailure { Log.w(TAG, "unifyPlaylist failed for playlist $playlistId", it) }
+        }
 
         playlistDao.updateLastUpdated(playlistId, System.currentTimeMillis())
         
@@ -787,7 +792,11 @@ class PlaylistRepository @Inject constructor(
             channelDao.updateList(channelsToUpdate)
             channelDao.insertAll(channelsToInsert)
 
-            val currentMovies = movieDao.getAllMoviesList().filter { it.playlistId == playlistId }
+            // Una sola scansione dei film della playlist, riusata sia per il
+            // "preserve guard" sia da persistGroupedMovies (che altrimenti la
+            // ricaricherebbe da capo). getAllByPlaylistIncludingHidden sfrutta
+            // l'indice su playlistId, a differenza di getAllMoviesList().filter.
+            val currentMovies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
             // CATEGORY GUARD: if the VOD response is empty/corrupt but the DB still has
             // movies for this playlist, preserve the existing ones instead of deleting them.
             val preserveMovies = vodStreams.isEmpty() && currentMovies.isNotEmpty()
@@ -802,7 +811,7 @@ class PlaylistRepository @Inject constructor(
             // Unificazione Fase A + riconciliazione: le sorgenti vengono raggruppate
             // e i film rimossi dal provider eliminati, preservando gli id canonici.
             val movieCount = if (preserveMovies) {
-                currentMovies.size
+                currentMovies.count { !it.isHidden }
             } else {
                 val vodInputs = vodStreams.mapIndexed { index, vod ->
                     MovieUnificationService.MovieSourceInput(
@@ -819,10 +828,10 @@ class PlaylistRepository @Inject constructor(
                         playlistOrder = (vod.added ?: index.toLong()).toInt()
                     )
                 }
-                movieUnificationService.persistGroupedMovies(playlistId, vodInputs)
+                movieUnificationService.persistGroupedMovies(playlistId, vodInputs, currentMovies)
             }
 
-            val currentSeries = seriesDao.getAllSeriesList().filter { it.playlistId == playlistId }
+            val currentSeries = seriesDao.getAllByPlaylistIncludingHidden(playlistId)
             val currentSeriesMap = currentSeries.associateBy { it.xtreamSeriesId }
             // CATEGORY GUARD: if the series response is empty/corrupt but the DB still has
             // series for this playlist, preserve the existing ones instead of deleting them.

@@ -30,6 +30,10 @@ interface SeriesDao {
     
     @Query("SELECT * FROM series WHERE playlistId = :playlistId AND isHidden = 0 ORDER BY name")
     fun getSeriesByPlaylist(playlistId: Long): Flow<List<Series>>
+
+    /** Tutte le serie di una playlist, incluse quelle nascoste (per il refresh). */
+    @Query("SELECT * FROM series WHERE playlistId = :playlistId")
+    suspend fun getAllByPlaylistIncludingHidden(playlistId: Long): List<Series>
     
     @Query("SELECT * FROM series WHERE category = :category AND isHidden = 0 ORDER BY name")
     fun getSeriesByCategory(category: String): Flow<List<Series>>
