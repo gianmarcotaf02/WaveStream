@@ -22,6 +22,30 @@ class ContentKeyTest {
     }
 
     @Test
+    fun `groupKeyNormalized equivale a groupKey`() {
+        assertEquals(
+            ContentKey.groupKey("Cà  Va!", 1999),
+            ContentKey.groupKeyNormalized(ContentKey.normalizeTitle("Cà  Va!"), 1999)
+        )
+        assertEquals(
+            ContentKey.groupKey("Cà  Va!", null),
+            ContentKey.groupKeyNormalized(ContentKey.normalizeTitle("Cà  Va!"), null)
+        )
+    }
+
+    @Test
+    fun `groupByTitleAndYearWithKeys espone il titolo normalizzato`() {
+        val groups = ContentKey.groupByTitleAndYearWithKeys(
+            items = listOf("Inception" to 2010, "Inception" to null),
+            titleOf = { it.first },
+            yearOf = { it.second }
+        )
+        assertEquals(1, groups.size)
+        assertEquals("inception", groups[0].first)
+        assertEquals(2, groups[0].second.size)
+    }
+
+    @Test
     fun `stesso titolo senza anno viene raggruppato`() {
         val groups = ContentKey.groupByTitleAndYear(
             items = listOf("Inception" to 2010, "Inception" to null, "Inception" to null),
