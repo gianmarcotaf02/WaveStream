@@ -472,31 +472,51 @@ class DetailsActivity : ComponentActivity() {
     }
     
     /**
-     * Contenuti correlati per il rail "Potrebbe piacerti" (piano L5).
+     * Contenuti correlati per il rail "Potrebbe piacerti".
      *
-     * `TMDBApiService` non espone `/recommendations`, quindi si usano i dati già
-     * in Room: stessa categoria di playlist, escludendo il contenuto corrente e
-     * ordinati per popolarità TMDB. Nessuna chiamata di rete aggiuntiva e nessun
-     * stato di caricamento. Ritorna vuoto se la categoria non è nota, così non
-     * compare mai una sezione vuota.
+     * **Fonte primaria: TMDB** — `TMDBService.getRecommendations` fa
+     * `GET /3/movie/{id}/recommendations?api_key=…&language=it-IT&page=1`
+     * (v. `tmdb_recommendations_api_guide.md`, §1 e §4; l'auth è l'opzione 2 di §3,
+     * `api_key` come query parameter, già gestita dal servizio).
+     *
+     * ⚠️ Gli id che TMDB restituisce sono **id TMDB**, mentre la rail naviga per
+     * `content_id`: ogni id viene quindi risolto sui film LOCALI con
+     * `getMovieByTmdbId` (indice su `tmdbId`). Solo i titoli presenti in catalogo
+     * sono utilizzabili — altrimenti il tap porterebbe a una scheda inesistente.
+     *
+     * **Fallback locale** quando TMDB non torna con nulla: nessun `tmdbId`, offline,
+     * oppure nessun match in catalogo → stessa categoria di playlist come prima.
      */
     private suspend fun relatedContentFor(movie: Movie): List<RelatedContent> {
+        val fromTmdb = runCatching {
+            val tmdbId = movie.tmdbId ?: return@runCatching emptyList<Movie>()
+            tmdbService.getRecommendations(tmdbId, "movie")
+                .mapNotNull { item ->
+                    if (item.id == tmdbId) null else movieDao.getMovieByTmdbId(item.id)
+                }
+                .filter { !it.isHidden && it.id != movie.id }
+                .take(12)
+        }.getOrElse { emptyList() }
+
+        val base = if (fromTmdb.isNotEmpty()) fromTmdb else localRelatedFallback(movie)
+        return base.map {
+            RelatedContent(
+                contentId = it.id,
+                title = it.name,
+                posterUrl = it.posterUrl,
+                contentType = ContentType.MOVIE
+            )
+        }
+    }
+
+    /** Fallback: stessa categoria di playlist, per popolarità TMDB decrescente. */
+    private suspend fun localRelatedFallback(movie: Movie): List<Movie> {
         val category = movie.category?.takeIf { it.isNotBlank() } ?: return emptyList()
         return runCatching {
             movieDao.getMoviesByCategoryList(category)
-                .asSequence()
                 .filter { it.id != movie.id && !it.isHidden }
                 .sortedByDescending { it.tmdbPopularity ?: 0f }
                 .take(12)
-                .map {
-                    RelatedContent(
-                        contentId = it.id,
-                        title = it.name,
-                        posterUrl = it.posterUrl,
-                        contentType = ContentType.MOVIE
-                    )
-                }
-                .toList()
         }.getOrElse { emptyList() }
     }
 
@@ -768,6 +788,18 @@ class DetailsActivity : ComponentActivity() {
                         ))
                     }
                 }
+            }
+        }
+        
+        // Rail "Potrebbe piacerti": il recupero TMDB parte DOPO l'emissione dello
+        // stato, così la scheda non deve aspettare la rete. Se torna qualcosa di
+        // meglio del fallback locale (o il fallback non aveva niente), sostituisce
+        // solo la rail.
+        val finalState = state
+        lifecycleScope.launch {
+            val related = relatedContentFor(movie)
+            if (related != finalState.relatedContent) {
+                onStateUpdate(finalState.copy(relatedContent = related))
             }
         }
     }
