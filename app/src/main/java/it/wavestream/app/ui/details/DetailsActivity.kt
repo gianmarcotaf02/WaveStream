@@ -499,14 +499,17 @@ class DetailsActivity : ComponentActivity() {
         }.getOrElse { emptyList() }
 
         val base = if (fromTmdb.isNotEmpty()) fromTmdb else localRelatedFallback(movie)
-        return base.map {
-            RelatedContent(
-                contentId = it.id,
-                title = it.name,
-                posterUrl = it.posterUrl,
-                contentType = ContentType.MOVIE
-            )
-        }
+        return base.toRelatedContent()
+    }
+
+    /** Righe `Movie` → voci della rail. */
+    private fun List<Movie>.toRelatedContent(): List<RelatedContent> = map {
+        RelatedContent(
+            contentId = it.id,
+            title = it.name,
+            posterUrl = it.posterUrl,
+            contentType = ContentType.MOVIE
+        )
     }
 
     /** Fallback: stessa categoria di playlist, per popolarità TMDB decrescente. */
@@ -657,8 +660,10 @@ class DetailsActivity : ComponentActivity() {
         genre = genre ?: enrichedMovie.tmdbGenres
         duration = duration ?: enrichedMovie.tmdbRuntime?.let { "$it min" }
         
-        // Rail "Potrebbe piacerti" (piano L5): fallback locale, nessuna rete.
-        val related = relatedContentFor(movie)
+        // Rail "Potrebbe piacerti": SUBITO il fallback locale (solo DB, nessuna
+        // rete: la scheda non deve aspettare). La fonte TMDB primaria arriva poi in
+        // async, alla fine di loadMovie, e sostituisce questa lista.
+        val related = localRelatedFallback(movie).toRelatedContent()
         
         var state = DetailsState(
             relatedContent = related,
