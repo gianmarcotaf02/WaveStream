@@ -2328,6 +2328,9 @@ private fun EpisodeCarouselCard(
     val hasProgress = progress != null && progress.progress > 0.01f && !progress.isCompleted
     val isWatched = progress?.isCompleted == true ||
         (progress != null && progress.remainingMinutes <= 7 && progress.progress > 0.9f)
+    // Frazione 0..1 per la barra di avanzamento (null = nessuna barra).
+    val progressFraction: Float? =
+        if (hasProgress) progress?.progress?.coerceIn(0f, 1f) else null
 
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.05f else 1f,
@@ -2535,7 +2538,7 @@ private fun EpisodeCarouselCard(
             }
 
             // Barra di avanzamento in basso
-            if (hasProgress && progress != null) {
+            if (progressFraction != null) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -2546,7 +2549,7 @@ private fun EpisodeCarouselCard(
                     Box(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .fillMaxWidth(progress.progress.coerceIn(0f, 1f))
+                            .fillMaxWidth(progressFraction)
                             .background(WaveStreamColors.Accent)
                     )
                 }
