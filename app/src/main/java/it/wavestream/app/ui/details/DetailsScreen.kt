@@ -275,7 +275,11 @@ fun DetailsScreen(
                 val verticalDensity = LocalDensity.current
                 val backRowDp = with(verticalDensity) { backRowHeightPx.toDp() }
                 val topBlockDp = with(verticalDensity) { topBlockHeightPx.toDp() }
-                val topSpacing = if (backRowHeightPx > 0 && topBlockHeightPx > 0) {
+                // Adattivo solo dove NON c'è la sezione episodi: nelle serie il
+                // carosello sotto il blocco deve restare subito visibile, quindi
+                // si mantiene lo spazio storico di 32dp.
+                val hasEpisodesSection = state.contentType == ContentType.SERIES && state.seasons.isNotEmpty()
+                val topSpacing = if (!hasEpisodesSection && backRowHeightPx > 0 && topBlockHeightPx > 0) {
                     (maxHeight - backRowDp - topBlockDp - 56.dp).coerceIn(32.dp, 96.dp)
                 } else {
                     32.dp
