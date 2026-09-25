@@ -221,6 +221,7 @@ fun DetailsScreen(
     // Stati delle due rail con frecce laterali (come l'hero)
     val castRailState = rememberLazyListState()
     val relatedRailState = rememberLazyListState()
+    val episodeRailState = rememberLazyListState()
     val railScope = rememberCoroutineScope()
     // Solo redirect D-pad (giù dall'header stagione → primo episodio): NON richiede mai il focus
     val firstEpisodeFocusRequester = remember { FocusRequester() }
@@ -813,32 +814,46 @@ fun DetailsScreen(
                     Spacer(modifier = Modifier.height(20.dp))
                 }
 
-                // Each episode as an individual lazy item for proper D-pad scrolling
-                items(state.episodes.size, key = { state.episodes[it].id }) { index ->
-                    val episode = state.episodes[index]
-                    val progress = state.episodeProgress[episode.id]
-                    val downloadState = state.episodeDownloadStates[episode.id]
-                    EpisodeCard(
-                        episode = episode,
-                        progress = progress,
-                        downloadState = downloadState,
-                        seriesName = state.title,
-                        onClick = { onEpisodeClick(episode) },
-                        onLongClick = { onEpisodeLongClick(episode) },
-                        onDownloadClick = { onDownloadEpisode(episode) },
-                        modifier = Modifier
-                            // Dal primo episodio, "su" deve andare al bottone Riproduci,
-                            // NON al bottone indietro in alto a sinistra
-                            .then(
-                                if (index == 0) Modifier.focusProperties { up = playButtonFocusRequester } else Modifier
-                            )
-                            .then(
-                                // Il requester DEVE restare attaccato alla PRIMA card episodio:
-                                // è il destinatario del redirect D-pad "giù" dall'header stagione.
-                                // (nessun auto-scroll: la prima card visibile è sempre la index 0)
-                                if (index == 0) Modifier.focusRequester(firstEpisodeFocusRequester) else Modifier
-                            )
-                    )
+                // Carosello episodi: gli episodi scorrono orizzontalmente come le
+                // rail di cast e suggerimenti, invece della vecchia lista verticale.
+                // Le frecce di RailRow e il D-pad sinistra/destra scorrono la rail.
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    RailRow(
+                        listState = episodeRailState,
+                        onScroll = { forward ->
+                            railScope.launch {
+                                episodeRailState.animateScrollToItem(
+                                    (episodeRailState.firstVisibleItemIndex + if (forward) 2 else -2)
+                                        .coerceAtLeast(0)
+                                )
+                            }
+                        }
+                    ) {
+                        LazyRow(
+                            state = episodeRailState,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(state.episodes.size, key = { state.episodes[it].id }) { index ->
+                                val episode = state.episodes[index]
+                                EpisodeCarouselCard(
+                                    episode = episode,
+                                    progress = state.episodeProgress[episode.id],
+                                    downloadState = state.episodeDownloadStates[episode.id],
+                                    seriesName = state.title,
+                                    // Il requester DEVE restare attaccato alla PRIMA card:
+                                    // è il destinatario del redirect D-pad "giù" dall'header stagione.
+                                    cardFocusRequester = if (index == 0) firstEpisodeFocusRequester else null,
+                                    // Dal primo episodio, "su" deve andare al bottone Riproduci,
+                                    // NON al bottone indietro in alto a sinistra.
+                                    upFocusRequester = if (index == 0) playButtonFocusRequester else null,
+                                    onClick = { onEpisodeClick(episode) },
+                                    onLongClick = { onEpisodeLongClick(episode) },
+                                    onDownloadClick = { onDownloadEpisode(episode) }
+                                )
+                            }
+                        }
+                    }
                     Spacer(modifier = Modifier.height(12.dp))
                 }
             }

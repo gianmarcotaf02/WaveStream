@@ -63,4 +63,74 @@ object TitleCleaner {
         // Return the final formatted string
         return "$basePrefix - $clean"
     }
+
+    /**
+     * Titolo "pulito" di un episodio, **senza** anteporre "Episodio N":
+     * rimuove nome serie, pattern SxxExx, "Episodio/Episode N" e separatori.
+     *
+     * Ritorna `null` quando non resta un titolo reale (nome vuoto, solo
+     * "Episodio N"/"S01E02"/numero, oppure uguale al nome della serie): in quel
+     * caso la UI usa il fallback "Episodio N".
+     */
+    fun getCleanEpisodeTitle(
+        originalName: String?,
+        episodeNumber: Int,
+        seriesName: String? = null
+    ): String? {
+        if (originalName.isNullOrBlank()) return null
+
+        var clean: String = originalName
+
+        // 1. Nome serie come prefisso
+        seriesName?.let { name ->
+            if (name.isNotBlank() && clean.startsWith(name, ignoreCase = true)) {
+                clean = clean.substring(name.length)
+            }
+        }
+
+        // 2. Pattern SxxExx
+        clean = clean.replace(Regex("""S\d+\s*E\d+\s*-?""", RegexOption.IGNORE_CASE), "")
+
+        // 3. "Episode X" / "Episodio X" ovunque
+        clean = clean.replace(Regex("""Episode\s*#?\d+\s*-?""", RegexOption.IGNORE_CASE), "")
+        clean = clean.replace(Regex("""Episodio\s*#?\d+\s*-?""", RegexOption.IGNORE_CASE), "")
+
+        // 4. Numero episodio isolato (es. " - 02 - ")
+        clean = clean.replace(Regex("""^\s*-\s*0?$episodeNumber\s*-\s*"""), "")
+
+        // 5. Separatori/whitespace residui
+        clean = clean.trim(' ', '-', ':')
+
+        if (clean.isEmpty() ||
+            clean.equals("Episode $episodeNumber", ignoreCase = true) ||
+            clean.equals("Episodio $episodeNumber", ignoreCase = true) ||
+            clean == episodeNumber.toString() ||
+            clean == "0$episodeNumber" ||
+            (!seriesName.isNullOrBlank() && clean.equals(seriesName, ignoreCase = true))
+        ) {
+            return null
+        }
+
+        return clean
+    }
+
+    /**
+     * Titolo finale mostrato nel carosello episodi:
+     * 1. titolo "vero" del provider (playlist);
+     * 2. fallback sul titolo TMDB, se presente;
+     * 3. fallback "Episodio N".
+     *
+     * Funzione pura e deterministica: non richiede alcun lavoro di sync e quindi
+     * non pesa sui refresh della playlist (viene calcolata a runtime, in `remember`).
+     */
+    fun resolveEpisodeDisplayTitle(
+        providerName: String?,
+        tmdbName: String?,
+        episodeNumber: Int,
+        seriesName: String? = null
+    ): String {
+        getCleanEpisodeTitle(providerName, episodeNumber, seriesName)?.let { return it }
+        getCleanEpisodeTitle(tmdbName, episodeNumber, seriesName)?.let { return it }
+        return "Episodio $episodeNumber"
+    }
 }
