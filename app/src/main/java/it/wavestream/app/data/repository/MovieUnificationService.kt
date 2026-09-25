@@ -80,7 +80,8 @@ class MovieUnificationService @Inject constructor(
      */
     suspend fun persistGroupedMovies(
         playlistId: Long,
-        inputs: List<MovieSourceInput>
+        inputs: List<MovieSourceInput>,
+        preloadedExisting: List<Movie>? = null
     ): Int = withContext(Dispatchers.IO) {
         if (inputs.isEmpty()) return@withContext 0
 
@@ -89,11 +90,22 @@ class MovieUnificationService @Inject constructor(
         // VOD si traducevano in centinaia di migliaia di commit → minuti di sync).
         appDatabase.withTransaction {
         val startedAt = System.currentTimeMillis()
-        val existing = movieDao.getAllByPlaylistIncludingHidden(playlistId)
+        // `preloadedExisting` evita una seconda scansione completa della playlist
+        // quando il chiamante (refreshXtreamContent) ha già caricato i film.
+        val existing = preloadedExisting ?: movieDao.getAllByPlaylistIncludingHidden(playlistId)
         Log.i(TAG, "persist: ${inputs.size} sorgenti, ${existing.size} film in DB (+${System.currentTimeMillis() - startedAt}ms)")
-        val existingByKey = existing.groupBy { groupKeyOf(it) }
+        // Titolo normalizzato calcolato UNA sola volta per film esistente e riusato
+        // per la mappa a chiave esatta e per quella di fallback per titolo (prima
+        // normalizeTitle girava due volte su ogni riga esistente).
+        val existingNormTitle = HashMap<Long, String>(existing.size * 2)
+        existing.forEach { m ->
+            existingNormTitle[m.id] = ContentKey.normalizeTitle(
+                m.cleanName?.takeIf { it.isNotBlank() } ?: titleFor(m.name)
+            )
+        }
+        val existingByKey = existing.groupBy { ContentKey.groupKeyNormalized(existingNormTitle.getValue(it.id), it.year) }
         Log.i(TAG, "persist: existingByKey +${System.currentTimeMillis() - startedAt}ms")
-        val existingByTitle = existing.groupBy { ContentKey.normalizeTitle(it.cleanName ?: it.name) }
+        val existingByTitle = existing.groupBy { existingNormTitle.getValue(it.id) }
         Log.i(TAG, "persist: existingByTitle +${System.currentTimeMillis() - startedAt}ms")
         val consumed = mutableSetOf<Long>()
         val active = mutableSetOf<Long>()
@@ -113,7 +125,7 @@ class MovieUnificationService @Inject constructor(
         movieCategoryDao.deleteByPlaylist(playlistId)
         Log.i(TAG, "persist: delete categories +${System.currentTimeMillis() - startedAt}ms")
 
-        val groups = ContentKey.groupByTitleAndYear(
+        val groups = ContentKey.groupByTitleAndYearWithKeys(
             items = inputs,
             titleOf = { titleFor(it.rawName) },
             yearOf = { it.year }
@@ -140,18 +152,17 @@ class MovieUnificationService @Inject constructor(
             }
         }
 
-        for (rawGroup in groups) {
+        for ((groupNormTitle, rawGroup) in groups) {
             // Ordina per qualità decrescente: la prima è la sorgente "primaria".
             val group = rawGroup.sortedByDescending { qualityRankOf(it.rawName) }
             val primary = group.first()
             val cleanTitle = titleFor(primary.rawName).ifBlank { primary.rawName.trim() }
             val year = group.firstNotNullOfOrNull { it.year }
 
-            // normalizeTitle calcolato UNA volta e riusato sia per la chiave di
-            // gruppo sia per il fallback per titolo (prima veniva ricalcolato 2-3
-            // volte per gruppo, ~5 String allocate ciascuno).
-            val normTitle = ContentKey.normalizeTitle(cleanTitle)
-            val groupKey = if (year != null) "$normTitle|$year" else "$normTitle|"
+            // Il titolo normalizzato arriva già calcolato dal raggruppamento: niente
+            // seconda normalizeTitle per gruppo (~70k in meno a ogni refresh).
+            val normTitle = groupNormTitle
+            val groupKey = ContentKey.groupKeyNormalized(normTitle, year)
 
             // Righe esistenti corrispondenti: prima per chiave esatta, altrimenti
             // stesso titolo normalizzato e stesso anno (evita merge tra remake).

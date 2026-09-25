@@ -31,10 +31,11 @@ object ContentKey {
     }
 
     /** Chiave completa (titolo|anno). Anno null → solo titolo. */
-    fun groupKey(title: String, year: Int?): String {
-        val t = normalizeTitle(title)
-        return if (year != null) "$t|$year" else "$t|"
-    }
+    fun groupKey(title: String, year: Int?): String = groupKeyNormalized(normalizeTitle(title), year)
+
+    /** Chiave completa a partire da un titolo **già normalizzato** con [normalizeTitle]. */
+    fun groupKeyNormalized(normalizedTitle: String, year: Int?): String =
+        if (year != null) "$normalizedTitle|$year" else "$normalizedTitle|"
 
     /**
      * Raggruppa elementi per titolo normalizzato, gestendo l'anno in modo
@@ -52,15 +53,26 @@ object ContentKey {
         items: List<T>,
         titleOf: (T) -> String,
         yearOf: (T) -> Int?
-    ): List<List<T>> {
+    ): List<List<T>> = groupByTitleAndYearWithKeys(items, titleOf, yearOf).map { it.second }
+
+    /**
+     * Come [groupByTitleAndYear] ma restituisce anche il titolo **normalizzato**
+     * di ogni gruppo: evita di ricalcolare [normalizeTitle] una seconda volta a
+     * valle (su ~70k VOD era una delle voci più care del sync/refresh).
+     */
+    fun <T> groupByTitleAndYearWithKeys(
+        items: List<T>,
+        titleOf: (T) -> String,
+        yearOf: (T) -> Int?
+    ): List<Pair<String, List<T>>> {
         val byTitle = items.groupBy { normalizeTitle(titleOf(it)) }
-        val result = ArrayList<List<T>>(byTitle.size)
-        for ((_, sameTitle) in byTitle) {
+        val result = ArrayList<Pair<String, List<T>>>(byTitle.size)
+        for ((title, sameTitle) in byTitle) {
             val years = sameTitle.mapNotNull(yearOf).distinct()
             if (years.size <= 1) {
-                result.add(sameTitle)
+                result.add(title to sameTitle)
             } else {
-                sameTitle.groupBy { yearOf(it) ?: -1 }.values.forEach { result.add(it) }
+                sameTitle.groupBy { yearOf(it) ?: -1 }.values.forEach { result.add(title to it) }
             }
         }
         return result
