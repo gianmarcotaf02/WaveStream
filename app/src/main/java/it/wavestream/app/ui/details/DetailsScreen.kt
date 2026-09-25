@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -68,6 +69,7 @@ import it.wavestream.app.ai.MovieEndingRequest
 import it.wavestream.app.ai.MovieEndingUiState
 import it.wavestream.app.ai.MovieEndingUnavailableException
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.key.*
@@ -200,6 +202,12 @@ fun DetailsScreen(
     // Stato del popup "finale del film" (AI)
     var endingState by remember { mutableStateOf<MovieEndingUiState>(MovieEndingUiState.Idle) }
     val endingScope = rememberCoroutineScope()
+
+    // Altezze reali (px) misurate a runtime per distribuire lo spazio verticale:
+    // il blocco titolo→Cast viene abbassato quando avanza spazio, così non resta
+    // un vuoto fra la riga "Cast & Regia" e l'hint "Scorri per i suggerimenti".
+    var backRowHeightPx by remember { mutableIntStateOf(0) }
+    var topBlockHeightPx by remember { mutableIntStateOf(0) }
     
     // Lazy list state for auto-scroll to current/next episode
     val listState = remember { androidx.tv.foundation.lazy.list.TvLazyListState() }
@@ -258,7 +266,19 @@ fun DetailsScreen(
             enter = fadeIn(tween(600)),
             exit = fadeOut(tween(300))
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                // Distribuzione verticale del blocco titolo→Cast: con contenuti più
+                // corti del viewport il blocco resta ancorato in alto e il vuoto si
+                // accumula in fondo. Misurando le altezze reali lo si abbassa quanto
+                // basta a riservare l'area dell'hint, ma mai sopra i 32dp storici.
+                val verticalDensity = LocalDensity.current
+                val backRowDp = with(verticalDensity) { backRowHeightPx.toDp() }
+                val topBlockDp = with(verticalDensity) { topBlockHeightPx.toDp() }
+                val topSpacing = if (backRowHeightPx > 0 && topBlockHeightPx > 0) {
+                    (maxHeight - backRowDp - topBlockDp - 56.dp).coerceIn(32.dp, 96.dp)
+                } else {
+                    32.dp
+                }
         // Backdrop image - FULLSCREEN, shifted RIGHT
         if (!state.backdropUrl.isNullOrEmpty()) {
             AsyncImage(
@@ -337,7 +357,9 @@ fun DetailsScreen(
                 // Il back resta in alto a SINISTRA: è un controllo di navigazione,
                 // non fa parte del contenuto centrato.
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onSizeChanged { backRowHeightPx = it.height },
                     horizontalArrangement = Arrangement.Start
                 ) {
                     DetailsTopBar(
@@ -346,13 +368,15 @@ fun DetailsScreen(
                     )
                 }
                 
-                // Porta il blocco titolo → ratings a circa metà altezza
-                Spacer(modifier = Modifier.height(32.dp))
+                // Spazio superiore adattivo (vedi topSpacing): abbassa tutto il
+                // blocco titolo→Cast quando il contenuto è più corto del viewport.
+                Spacer(modifier = Modifier.height(topSpacing))
                 
                 // Contenuto centrato
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .onSizeChanged { if (!relatedRevealed) topBlockHeightPx = it.height }
                         .animateContentSize(
                             animationSpec = tween(durationMillis = 400)
                         ),
