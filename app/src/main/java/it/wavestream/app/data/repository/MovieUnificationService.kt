@@ -28,6 +28,9 @@ import javax.inject.Singleton
  *
  * - Fase A ([persistGroupedMovies]): al momento del parsing/sync, i VOD con lo
  *   stesso titolo+anno vengono raggruppati senza alcuna chiamata di rete.
+ * - Refresh incrementale ([refreshGroupedMoviesIncremental]): nei refresh
+ *   successivi al primo si toccano solo sorgenti nuove/cambiate/rimosse, senza
+ *   rileggere né riscrivere l'intero catalogo.
  * - Fase B ([unifyPlaylist]): dopo l'arricchimento TMDB, unisce anche le righe
  *   con stesso `tmdbId`/`imdbId` o leftover storici.
  * - Tutti i riferimenti (progressi, preferiti, download, liste, segmenti) vengono
