@@ -233,13 +233,19 @@ class MovieUnificationService @Inject constructor(
      *  ripristina l'integrità di sorgenti/categorie/streamCount. */
     suspend fun unifyPlaylist(playlistId: Long) = withContext(Dispatchers.IO) {
         appDatabase.withTransaction {
-        mergeByTitleAndYear(playlistId)
-        unifyByTmdbId(playlistId)
+            unifyPlaylistLocked(playlistId, movieDao.getAllByPlaylistIncludingHidden(playlistId))
+        }
+    }
+
+    /** Corpo di [unifyPlaylist] su una lista di film già in memoria: evita una
+     *  scansione completa della playlist quando i film sono già stati caricati. */
+    private suspend fun unifyPlaylistLocked(playlistId: Long, movies: List<Movie>) {
+        mergeByTitleAndYear(movies)
+        unifyByTmdbIdLocked(movies)
         // Integrità: solo per i film senza sorgente o senza cleanName (economico).
         val counts = streamProviderDao.getProviderCountsByPlaylist(playlistId).associate { it.movieId to it.count }
-        movieDao.getAllByPlaylistIncludingHidden(playlistId).forEach { m ->
+        movies.forEach { m ->
             if (m.cleanName.isNullOrBlank() || (counts[m.id] ?: 0) == 0) ensureMovieIntegrity(m)
-        }
         }
     }
 
@@ -247,18 +253,22 @@ class MovieUnificationService @Inject constructor(
      *  a girare dopo l'arricchimento TMDB). */
     suspend fun unifyByTmdbId(playlistId: Long) = withContext(Dispatchers.IO) {
         appDatabase.withTransaction {
-        val movies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
+            unifyByTmdbIdLocked(movieDao.getAllByPlaylistIncludingHidden(playlistId))
+        }
+    }
+
+    private suspend fun unifyByTmdbIdLocked(movies: List<Movie>) {
+        // Filtro prima del groupBy: i film senza tmdbId (la maggioranza) non
+        // entrano nelle mappe temporanee.
         for ((_, group) in movies.filter { it.tmdbId != null }.groupBy { it.tmdbId!! }) {
             if (group.size > 1) {
                 val canonical = group.minByOrNull { it.id } ?: continue
                 mergeDuplicatesInto(canonical.id, group.filter { it.id != canonical.id })
             }
         }
-        }
     }
 
-    private suspend fun mergeByTitleAndYear(playlistId: Long) {
-        val movies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
+    private suspend fun mergeByTitleAndYear(movies: List<Movie>) {
         for (group in ContentKey.groupByTitleAndYear(movies, { it.cleanName ?: it.name }, { it.year })) {
             if (group.size > 1) {
                 val canonical = group.minByOrNull { it.id } ?: continue
@@ -269,14 +279,20 @@ class MovieUnificationService @Inject constructor(
 
     /** Unifica tutte le playlist (usato dopo un refresh completo). */
     suspend fun unifyAllPlaylists() = withContext(Dispatchers.IO) {
-        movieDao.getAllMoviesIncludingHidden().map { it.playlistId }.distinct()
-            .forEach { unifyPlaylist(it) }
+        // Una sola lettura dell'intera tabella: prima era una scansione per playlist.
+        movieDao.getAllMoviesIncludingHidden().groupBy { it.playlistId }
+            .forEach { (playlistId, movies) ->
+                appDatabase.withTransaction { unifyPlaylistLocked(playlistId, movies) }
+            }
     }
 
     /** Unifica per `tmdbId` tutte le playlist (leggero, post-arricchimento). */
     suspend fun unifyByTmdbIdAllPlaylists() = withContext(Dispatchers.IO) {
-        movieDao.getAllMoviesIncludingHidden().map { it.playlistId }.distinct()
-            .forEach { unifyByTmdbId(it) }
+        // Una sola lettura dell'intera tabella: prima era una scansione per playlist.
+        movieDao.getAllMoviesIncludingHidden().groupBy { it.playlistId }
+            .forEach { (_, movies) ->
+                appDatabase.withTransaction { unifyByTmdbIdLocked(movies) }
+            }
     }
 
     // ---------------------------------------------------------------------
@@ -304,8 +320,11 @@ class MovieUnificationService @Inject constructor(
                 Log.i(TAG, "First-time movie unification: ${needsWork.size} movies need providers/cleanName")
                 needsWork.forEach { ensureMovieIntegrity(it) }
 
-                // Unificazione per playlist
-                all.map { it.playlistId }.distinct().forEach { unifyPlaylist(it) }
+                // Unificazione per playlist (dai film già in memoria: nessuna
+                // scansione aggiuntiva della tabella)
+                all.groupBy { it.playlistId }.forEach { (playlistId, movies) ->
+                    unifyPlaylistLocked(playlistId, movies)
+                }
                 }
 
                 contentCache.clearHomeSessionData()
@@ -323,9 +342,6 @@ class MovieUnificationService @Inject constructor(
 
     private fun titleFor(rawName: String): String =
         contentNameParser.cleanTitle(rawName).ifBlank { rawName.trim() }
-
-    private fun groupKeyOf(movie: Movie): String =
-        ContentKey.groupKey(movie.cleanName?.takeIf { it.isNotBlank() } ?: titleFor(movie.name), movie.year)
 
     private fun qualityRankOf(rawName: String): Int =
         contentNameParser.qualityRank(contentNameParser.detectQuality(rawName))
