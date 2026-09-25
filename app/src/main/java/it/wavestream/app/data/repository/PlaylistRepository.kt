@@ -792,26 +792,25 @@ class PlaylistRepository @Inject constructor(
             channelDao.updateList(channelsToUpdate)
             channelDao.insertAll(channelsToInsert)
 
-            // Una sola scansione dei film della playlist, riusata sia per il
-            // "preserve guard" sia da persistGroupedMovies (che altrimenti la
-            // ricaricherebbe da capo). getAllByPlaylistIncludingHidden sfrutta
-            // l'indice su playlistId, a differenza di getAllMoviesList().filter.
-            val currentMovies = movieDao.getAllByPlaylistIncludingHidden(playlistId)
             // CATEGORY GUARD: if the VOD response is empty/corrupt but the DB still has
             // movies for this playlist, preserve the existing ones instead of deleting them.
-            val preserveMovies = vodStreams.isEmpty() && currentMovies.isNotEmpty()
+            // Il conteggio è lazy: nei refresh normali (vodStreams non vuoto) NON si
+            // tocca la tabella movies, che è il punto della modalità incrementale.
+            val preserveMovies = vodStreams.isEmpty() && movieDao.countByPlaylist(playlistId) > 0
             if (preserveMovies) {
-                Log.w(TAG, "refreshXtreamContent: VOD API empty but DB has ${currentMovies.size} movies — preserving existing movies")
+                Log.w(TAG, "refreshXtreamContent: VOD API empty but DB has movies — preserving existing movies")
             }
             categoryDao.deleteByPlaylistAndType(playlistId, CategoryType.MOVIE)
             val vodCategoryMap = vodCategories.associate { it.id to contentNameParser.normalizeMovieCategory(it.name) }
             val movieCategoryEntities = vodCategories.map { Category(playlistId = playlistId, name = contentNameParser.normalizeMovieCategory(it.name), type = CategoryType.MOVIE, externalId = it.id) }
             categoryDao.insertAll(movieCategoryEntities)
 
-            // Unificazione Fase A + riconciliazione: le sorgenti vengono raggruppate
-            // e i film rimossi dal provider eliminati, preservando gli id canonici.
+            // Refresh INCREMENTALE: i film già unificati restano in DB senza essere
+            // riletti/riscritti. Si toccano solo sorgenti nuove/cambiate/rimosse,
+            // quindi la ricerca dei doppioni si applica di fatto ai soli nuovi
+            // contenuti (era il collo di bottiglia dei refresh quotidiani).
             val movieCount = if (preserveMovies) {
-                currentMovies.count { !it.isHidden }
+                movieDao.countByPlaylist(playlistId)
             } else {
                 val vodInputs = vodStreams.mapIndexed { index, vod ->
                     MovieUnificationService.MovieSourceInput(
@@ -828,7 +827,7 @@ class PlaylistRepository @Inject constructor(
                         playlistOrder = (vod.added ?: index.toLong()).toInt()
                     )
                 }
-                movieUnificationService.persistGroupedMovies(playlistId, vodInputs, currentMovies)
+                movieUnificationService.refreshGroupedMoviesIncremental(playlistId, vodInputs)
             }
 
             val currentSeries = seriesDao.getAllByPlaylistIncludingHidden(playlistId)

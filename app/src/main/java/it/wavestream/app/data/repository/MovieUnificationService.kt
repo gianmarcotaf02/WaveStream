@@ -80,8 +80,7 @@ class MovieUnificationService @Inject constructor(
      */
     suspend fun persistGroupedMovies(
         playlistId: Long,
-        inputs: List<MovieSourceInput>,
-        preloadedExisting: List<Movie>? = null
+        inputs: List<MovieSourceInput>
     ): Int = withContext(Dispatchers.IO) {
         if (inputs.isEmpty()) return@withContext 0
 
@@ -90,9 +89,7 @@ class MovieUnificationService @Inject constructor(
         // VOD si traducevano in centinaia di migliaia di commit → minuti di sync).
         appDatabase.withTransaction {
         val startedAt = System.currentTimeMillis()
-        // `preloadedExisting` evita una seconda scansione completa della playlist
-        // quando il chiamante (refreshXtreamContent) ha già caricato i film.
-        val existing = preloadedExisting ?: movieDao.getAllByPlaylistIncludingHidden(playlistId)
+        val existing = movieDao.getAllByPlaylistIncludingHidden(playlistId)
         Log.i(TAG, "persist: ${inputs.size} sorgenti, ${existing.size} film in DB (+${System.currentTimeMillis() - startedAt}ms)")
         // Titolo normalizzato calcolato UNA sola volta per film esistente e riusato
         // per la mappa a chiave esatta e per quella di fallback per titolo (prima
