@@ -37,7 +37,8 @@ interface StreamProviderDao {
      * Proiettare le colonne invece di caricare le righe intere (~28 campi) riduce
      * molto memoria e tempo di prefetch su ~70k VOD.
      */
-    @Query("SELECT xtreamStreamId AS xtreamStreamId, tmdbId AS tmdbId, durationSeconds AS durationSeconds, " +
+    @Query("SELECT xtreamStreamId AS xtreamStreamId, movieId AS movieId, originalName AS originalName, " +
+        "tmdbId AS tmdbId, durationSeconds AS durationSeconds, " +
         "addedAt AS addedAt, lastUsedAt AS lastUsedAt, detectedHeight AS detectedHeight, detectedAt AS detectedAt " +
         "FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId IS NOT NULL")
     suspend fun getPreservableByPlaylist(playlistId: Long): List<ProviderPreserve>
@@ -53,6 +54,12 @@ interface StreamProviderDao {
 
     @Query("SELECT movieId AS movieId, COUNT(*) AS count FROM stream_providers GROUP BY movieId")
     suspend fun getAllProviderCounts(): List<MovieProviderCount>
+
+    @Query("SELECT movieId AS movieId, COUNT(*) AS count FROM stream_providers WHERE movieId IN (:movieIds) GROUP BY movieId")
+    suspend fun getProviderCountsForMovies(movieIds: List<Long>): List<MovieProviderCount>
+
+    @Query("DELETE FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId IN (:xtreamStreamIds)")
+    suspend fun deleteByXtreamIds(playlistId: Long, xtreamStreamIds: List<Int>): Int
 
     @Query("SELECT * FROM stream_providers WHERE movieId = :movieId ORDER BY qualityRank DESC, lastUsedAt DESC LIMIT 1")
     suspend fun getBestProviderForMovie(movieId: Long): StreamProvider?
@@ -106,6 +113,10 @@ data class MovieProviderCount(
 /** Proiezione leggera delle sorgenti esistenti (vedi [getPreservableByPlaylist]). */
 data class ProviderPreserve(
     val xtreamStreamId: Int,
+    /** Film canonico a cui la sorgente è attualmente collegata. */
+    val movieId: Long?,
+    /** Nome grezzo salvato all'ultimo import: se cambia, la sorgente va riposizionata. */
+    val originalName: String,
     val tmdbId: Int?,
     val durationSeconds: Long?,
     val addedAt: Long,

@@ -228,6 +228,18 @@ interface MovieDao {
     @Query("SELECT * FROM movies WHERE playlistId = :playlistId")
     suspend fun getAllByPlaylistIncludingHidden(playlistId: Long): List<Movie>
 
+    @Query("SELECT * FROM movies WHERE playlistId = :playlistId AND groupKey = :groupKey ORDER BY id")
+    suspend fun getByPlaylistAndGroupKey(playlistId: Long, groupKey: String): List<Movie>
+
+    @Query("SELECT * FROM movies WHERE id IN (:ids)")
+    suspend fun getByIds(ids: List<Long>): List<Movie>
+
+    @Query("DELETE FROM movies WHERE id IN (:ids)")
+    suspend fun deleteByIds(ids: List<Long>): Int
+
+    @Query("SELECT COUNT(*) FROM movies WHERE playlistId = :playlistId")
+    suspend fun countByPlaylist(playlistId: Long): Int
+
     /**
      * Backfill dell'anno di uscita dal nome per i contenuti importati prima che
      * l'anno venisse estratto (es. "2012 (2009) FHD" -> 2009).

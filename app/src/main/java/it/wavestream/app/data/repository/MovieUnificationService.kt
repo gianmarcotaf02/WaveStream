@@ -226,6 +226,112 @@ class MovieUnificationService @Inject constructor(
     }
 
     // ---------------------------------------------------------------------
+    // Refresh incrementale (Xtream) — solo sorgenti nuove/cambiate/rimosse
+    // ---------------------------------------------------------------------
+
+    /**
+     * Refresh incrementale di una playlist Xtream.
+     *
+     * A differenza di [persistGroupedMovies] (che ricostruisce TUTTO il catalogo
+     * a ogni chiamata), qui i film già unificati e le loro sorgenti **restano in
+     * DB senza essere riletti né riscritti**: vengono toccate solo le sorgenti
+     * nuove, quelle il cui nome grezzo è cambiato e quelle scomparse dal provider.
+     *
+     * Nei refresh quotidiani, dove l'utente aggiunge/rimuove pochi titoli, il
+     * lavoro è quindi proporzionale ai nuovi arrivi e non alle decine di migliaia
+     * di VOD dell'intero catalogo. La ricerca dei doppioni viene fatta una volta
+     * sola (import/primo refresh); ai successivi si limita ai nuovi contenuti.
+     *
+     * Ritorna il numero di film canonici della playlist.
+     */
+    suspend fun refreshGroupedMoviesIncremental(
+        playlistId: Long,
+        inputs: List<MovieSourceInput>
+    ): Int = withContext(Dispatchers.IO) {
+        if (inputs.isEmpty()) return@withContext movieDao.countByPlaylist(playlistId)
+
+        appDatabase.withTransaction {
+            val startedAt = System.currentTimeMillis()
+
+            // Proiezione leggera (id stream → film + nome grezzo): niente caricamento
+            // di decine di migliaia di Movie con tutti i campi TMDB.
+            val existingProviders = streamProviderDao.getPreservableByPlaylist(playlistId)
+            val existingByXtream = existingProviders.associateBy { it.xtreamStreamId }
+            Log.i(TAG, "refresh incr: ${inputs.size} sorgenti, ${existingByXtream.size} già presenti (+${System.currentTimeMillis() - startedAt}ms)")
+
+            val incomingIds = HashSet<Int>(inputs.size * 2)
+            val toPlace = ArrayList<MovieSourceInput>()
+            for (src in inputs) {
+                val xtreamId = src.xtreamStreamId ?: continue
+                incomingIds.add(xtreamId)
+                val prev = existingByXtream[xtreamId]
+                // Nuova, oppure nome/qualità/edizione/lingua cambiati: da (ri)posizionare.
+                // Tutto il resto resta esattamente com'è: nessuna riscrittura.
+                if (prev == null || prev.originalName != src.rawName) toPlace.add(src)
+            }
+            val removedIds = existingByXtream.keys.filter { it !in incomingIds }
+            Log.i(TAG, "refresh incr: ${toPlace.size} nuove/cambiate, ${removedIds.size} rimosse (+${System.currentTimeMillis() - startedAt}ms)")
+
+            // Film canonici effettivamente toccati: solo questi vanno riallineati.
+            val touched = HashSet<Long>()
+
+            if (removedIds.isNotEmpty()) {
+                removedIds.mapNotNullTo(touched) { existingByXtream[it]?.movieId }
+                streamProviderDao.deleteByXtreamIds(playlistId, removedIds)
+            }
+
+            if (toPlace.isNotEmpty()) {
+                // Le sorgenti cambiate vanno rimosse dal film attuale prima di essere
+                // ricollocate: l'indice unico (playlistId, xtreamStreamId) impedirebbe
+                // altrimenti il re-insert.
+                val changedIds = toPlace.mapNotNull { it.xtreamStreamId }.filter { it in existingByXtream }
+                if (changedIds.isNotEmpty()) {
+                    changedIds.mapNotNullTo(touched) { existingByXtream[it]?.movieId }
+                    streamProviderDao.deleteByXtreamIds(playlistId, changedIds)
+                }
+
+                // Raggruppa SOLO le sorgenti da posizionare (di norma poche unità).
+                val groups = ContentKey.groupByTitleAndYearWithKeys(
+                    items = toPlace,
+                    titleOf = { titleFor(it.rawName) },
+                    yearOf = { it.year }
+                )
+                for ((normTitle, rawGroup) in groups) {
+                    val group = rawGroup.sortedByDescending { qualityRankOf(it.rawName) }
+                    val primary = group.first()
+                    val cleanTitle = titleFor(primary.rawName).ifBlank { primary.rawName.trim() }
+                    val year = group.firstNotNullOfOrNull { it.year }
+                    val groupKey = ContentKey.groupKeyNormalized(normTitle, year)
+
+                    val canonical = movieDao.getByPlaylistAndGroupKey(playlistId, groupKey).minByOrNull { it.id }
+                    val movieId = canonical?.id ?: movieDao.insert(
+                        buildCanonicalMovie(playlistId, cleanTitle, year, primary, group.size, null)
+                    )
+                    touched.add(movieId)
+                    streamProviderDao.insertAll(
+                        buildProviders(playlistId, movieId, group, primary, existingByXtream)
+                    )
+                    movieCategoryDao.insertAll(buildCategories(playlistId, movieId, group))
+                }
+            }
+
+            // Riallinea streamCount/categorie solo per i film toccati ed elimina
+            // quelli rimasti senza alcuna sorgente.
+            if (touched.isNotEmpty()) {
+                val counts = streamProviderDao.getProviderCountsForMovies(touched.toList())
+                    .associate { it.movieId to it.count }
+                val empty = touched.filter { (counts[it] ?: 0) == 0 }
+                if (empty.isNotEmpty()) movieDao.deleteByIds(empty)
+                val alive = touched - empty.toSet()
+                if (alive.isNotEmpty()) movieDao.getByIds(alive.toList()).forEach { ensureMovieIntegrity(it) }
+            }
+
+            Log.i(TAG, "refresh incr: FINE toccati=${touched.size} (+${System.currentTimeMillis() - startedAt}ms)")
+            movieDao.countByPlaylist(playlistId)
+        }
+    }
+
+    // ---------------------------------------------------------------------
     // Fase B — unificazione post-enrichment / pulizia
     // ---------------------------------------------------------------------
 
