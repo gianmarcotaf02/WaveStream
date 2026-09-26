@@ -675,54 +675,11 @@ fun DetailsScreen(
                         }
                     }
                     
-                    // 3. Potrebbe piacerti — carosello a SCOMPARSA (piano L5 + rev. §0):
-                    // non esiste finché l'utente non comincia a scorrere verso il basso,
-                    // poi si svela con fade + slide. Fallback locale: TMDBApiService non
-                    // espone /recommendations, quindi si usano i dati già in Room.
-                    AnimatedVisibility(
-                        visible = relatedRevealed && state.relatedContent.isNotEmpty(),
-                        enter = fadeIn(tween(300)) +
-                            slideInVertically(animationSpec = tween(340)) { it / 4 },
-                        exit = fadeOut(tween(220))
-                    ) {
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            Spacer(modifier = Modifier.height(24.dp))
-                            Text(
-                                text = "Potrebbe piacerti",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = WaveStreamColors.TextSecondary,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            RailRow(
-                                listState = relatedRailState,
-                                onScroll = { forward ->
-                                    railScope.launch {
-                                        relatedRailState.animateScrollToItem(
-                                            (relatedRailState.firstVisibleItemIndex + if (forward) 3 else -3)
-                                                .coerceAtLeast(0)
-                                        )
-                                    }
-                                }
-                            ) {
-                                LazyRow(
-                                    state = relatedRailState,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(state.relatedContent.size) { index ->
-                                        val related = state.relatedContent[index]
-                                        RelatedContentCard(
-                                            related = related,
-                                            onClick = { onRelatedClick(related.contentId, related.contentType) }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
+                    // NOTA: "Potrebbe piacerti" NON è più qui: era inserito SOPRA
+                    // "Cast & Regia" e, svelato durante lo scroll, spostava il layout
+                    // facendolo comparire sopra il cast. Ora è una item a parte in
+                    // fondo alla pagina (sotto cast ed episodi).
+
                     // ULTIMA RIGA: CAST E REGIA SULLA STESSA RIGA, centrati
                     // (chiarimento della specifica). La regia apre la riga, il cast
                     // la segue: un solo heading, una sola riga orizzontale.
@@ -862,6 +819,56 @@ fun DetailsScreen(
                 }
             }
             
+            // "Potrebbe piacerti" — carosello a SCOMPARSA, ORA IN FONDO alla pagina:
+            // si svela solo dopo aver iniziato a scorrere e resta sotto cast, trama
+            // ed episodi. Prima veniva inserito sopra "Cast & Regia", quindi durante
+            // lo scroll spostava il layout e compariva sopra il cast.
+            item {
+                AnimatedVisibility(
+                    visible = relatedRevealed && state.relatedContent.isNotEmpty(),
+                    enter = fadeIn(tween(300)) +
+                        slideInVertically(animationSpec = tween(340)) { it / 4 },
+                    exit = fadeOut(tween(220))
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = "Potrebbe piacerti",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WaveStreamColors.TextSecondary,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        RailRow(
+                            listState = relatedRailState,
+                            onScroll = { forward ->
+                                railScope.launch {
+                                    relatedRailState.animateScrollToItem(
+                                        (relatedRailState.firstVisibleItemIndex + if (forward) 3 else -3)
+                                            .coerceAtLeast(0)
+                                    )
+                                }
+                            }
+                        ) {
+                            LazyRow(
+                                state = relatedRailState,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                items(state.relatedContent.size) { index ->
+                                    val related = state.relatedContent[index]
+                                    RelatedContentCard(
+                                        related = related,
+                                        onClick = { onRelatedClick(related.contentId, related.contentType) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             item {
                 // Spazio di scorrimento: SENZA questa coda la pagina entra tutta,
                 // l'offset resta a 0 e il carosello a scomparsa non si attiverebbe
