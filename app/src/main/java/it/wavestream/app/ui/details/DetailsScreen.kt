@@ -2234,7 +2234,13 @@ private fun EpisodesSectionHeader(
             DropdownMenu(
                 expanded = dropdownExpanded,
                 onDismissRequest = { dropdownExpanded = false },
-                modifier = Modifier.background(WaveStreamColors.BackgroundSecondary)
+                // Tema esplicito: senza tonalElevation la superficie M3 prende una
+                // tinta bluastra fuori palette; qui si allinea al vetro scuro dell'app.
+                shape = RoundedCornerShape(14.dp),
+                containerColor = WaveStreamColors.BackgroundSecondary,
+                tonalElevation = 0.dp,
+                shadowElevation = 8.dp,
+                border = BorderStroke(1.dp, WaveStreamColors.SurfaceBorderStrong)
             ) {
                 seasons.forEach { season ->
                     DropdownMenuItem(
@@ -2756,7 +2762,12 @@ private fun AddToListButton(
         DropdownMenu(
             expanded = showDropdown,
             onDismissRequest = { showDropdown = false },
-            modifier = Modifier.background(WaveStreamColors.BackgroundSecondary, RoundedCornerShape(12.dp)).width(280.dp)
+            shape = RoundedCornerShape(12.dp),
+            containerColor = WaveStreamColors.BackgroundSecondary,
+            tonalElevation = 0.dp,
+            shadowElevation = 8.dp,
+            border = BorderStroke(1.dp, WaveStreamColors.SurfaceBorderStrong),
+            modifier = Modifier.width(280.dp)
         ) {
             Text(
                 text = "Aggiungi a lista",
