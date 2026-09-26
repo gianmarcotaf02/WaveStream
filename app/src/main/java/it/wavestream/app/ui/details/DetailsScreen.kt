@@ -226,6 +226,9 @@ fun DetailsScreen(
     val railScope = rememberCoroutineScope()
     // Solo redirect D-pad (giù dall'header stagione → primo episodio): NON richiede mai il focus
     val firstEpisodeFocusRequester = remember { FocusRequester() }
+    // Entry point della rail "Potrebbe piacerti": il D-pad "giù" dal carosello
+    // episodi porta SEMPRE qui (prima card a sinistra), non all'ultima card usata.
+    val relatedFirstCardFocusRequester = remember { FocusRequester() }
 
     // NOTE: nessun auto-scroll né auto-focus sulla lista episodi all'apertura:
     // la vista resta in alto e il focus va SOLO al bottone Riproduci.
@@ -819,6 +822,8 @@ fun DetailsScreen(
                                     // Dal primo episodio, "su" deve andare al bottone Riproduci,
                                     // NON al bottone indietro in alto a sinistra.
                                     upFocusRequester = if (index == 0) playButtonFocusRequester else null,
+                                    // "giù" dal download: prima card della rail suggerimenti.
+                                    downFocusRequester = if (state.relatedContent.isNotEmpty()) relatedFirstCardFocusRequester else null,
                                     onClick = { onEpisodeClick(episode) },
                                     onLongClick = { onEpisodeLongClick(episode) },
                                     onDownloadClick = { onDownloadEpisode(episode) }
@@ -853,12 +858,15 @@ fun DetailsScreen(
             // lo scroll spostava il layout e compariva sopra il cast.
             item {
                 AnimatedVisibility(
-                    visible = relatedRevealed && state.relatedContent.isNotEmpty(),
+                    // Per le serie la rail è sempre composta (sta sotto il carosello
+                    // episodi): così la prima card è già attaccata come destinazione
+                    // del D-pad "giù", anche prima dello scroll.
+                    visible = state.relatedContent.isNotEmpty() && (relatedRevealed || hasEpisodesSection),
                     enter = fadeIn(tween(300)) +
                         slideInVertically(animationSpec = tween(340)) { it / 4 },
                     exit = fadeOut(tween(220))
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
                             text = "Potrebbe piacerti",
@@ -878,17 +886,24 @@ fun DetailsScreen(
                                             .coerceAtLeast(0)
                                     )
                                 }
-                            }
+                            },
+                            // Stessi margini frecce del carosello episodi.
+                            contentHorizontalPadding = 14.dp
                         ) {
                             LazyRow(
                                 state = relatedRailState,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                             ) {
                                 items(state.relatedContent.size) { index ->
                                     val related = state.relatedContent[index]
                                     RelatedContentCard(
                                         related = related,
-                                        onClick = { onRelatedClick(related.contentId, related.contentType) }
+                                        onClick = { onRelatedClick(related.contentId, related.contentType) },
+                                        // Prima card = entry point fisso della rail.
+                                        modifier = if (index == 0) {
+                                            Modifier.focusRequester(relatedFirstCardFocusRequester)
+                                        } else Modifier
                                     )
                                 }
                             }
@@ -1130,7 +1145,8 @@ private fun ScrollHintPill(modifier: Modifier = Modifier) {
 @Composable
 private fun RelatedContentCard(
     related: RelatedContent,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1148,7 +1164,7 @@ private fun RelatedContentCard(
 
     Column(
         horizontalAlignment = Alignment.Start,
-        modifier = Modifier
+        modifier = modifier
             .width(104.dp)
             .graphicsLayer {
                 scaleX = scale
@@ -2359,6 +2375,7 @@ private fun EpisodeCarouselCard(
     seriesName: String? = null,
     cardFocusRequester: FocusRequester? = null,
     upFocusRequester: FocusRequester? = null,
+    downFocusRequester: FocusRequester? = null,
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
     onDownloadClick: () -> Unit = {},
@@ -2552,7 +2569,11 @@ private fun EpisodeCarouselCard(
                     .clip(CircleShape)
                     .background(if (isDownloadFocused || isDownloaded) Color.Black.copy(alpha = 0.55f) else Color.Transparent)
                     .focusRequester(downloadFocusRequester)
-                    .focusProperties { up = effectiveCardFocus }
+                    .focusProperties {
+                        up = effectiveCardFocus
+                        // "giù" → prima card della rail "Potrebbe piacerti".
+                        downFocusRequester?.let { down = it }
+                    }
                     .focusable(interactionSource = downloadInteraction)
                     .clickable(
                         interactionSource = downloadInteraction,
