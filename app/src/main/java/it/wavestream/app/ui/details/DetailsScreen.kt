@@ -258,6 +258,15 @@ fun DetailsScreen(
         }
     }
 
+    // Porta la rail episodi sull'episodio target quando la rail è composta: così la
+    // card target esiste nella composizione e il redirect di focus del selettore
+    // stagioni non punta mai a un FocusRequester non inizializzato.
+    LaunchedEffect(state.selectedSeason, episodeFocusTargetIndex, episodeRailState.layoutInfo.totalItemsCount) {
+        if (episodeRailState.layoutInfo.totalItemsCount > 0 && episodeFocusTargetIndex > 0) {
+            runCatching { episodeRailState.scrollToItem(episodeFocusTargetIndex) }
+        }
+    }
+
     // NOTE: nessun auto-scroll né auto-focus sulla lista episodi all'apertura:
     // la vista resta in alto e il focus va SOLO al bottone Riproduci.
     
@@ -1349,7 +1358,10 @@ private fun CastPersonCard(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Nome e cognome su DUE RIGHE separate (come da specifica).
+        // Nome e cognome su DUE RIGHE separate (come da specifica). Le due righe e
+        // il ruolo occupano SEMPRE lo stesso spazio (anche se vuoti) per dare a
+        // tutte le card la STESSA altezza: senza altezza uniforme, in una LazyRow
+        // il D-pad "giù" trovava una card più bassa a sinistra e restava nella rail.
         val nameParts = remember(person.name) { person.name.trim().split(Regex("\\s+")) }
         Text(
             text = nameParts.firstOrNull().orEmpty().ifBlank { person.name },
@@ -1360,28 +1372,32 @@ private fun CastPersonCard(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        if (nameParts.size > 1) {
-            Text(
-                text = nameParts.drop(1).joinToString(" "),
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                fontWeight = FontWeight.SemiBold,
-                color = WaveStreamColors.TextPrimary,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        Box(modifier = Modifier.height(13.dp), contentAlignment = Alignment.Center) {
+            if (nameParts.size > 1) {
+                Text(
+                    text = nameParts.drop(1).joinToString(" "),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    fontWeight = FontWeight.SemiBold,
+                    color = WaveStreamColors.TextPrimary,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
 
-        // Ruolo/interpretazione: leggermente più piccolo del nome (10sp → 9sp)
-        person.roleLabel?.let { role ->
-            Text(
-                text = role,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
-                color = WaveStreamColors.TextTertiary,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+        // Ruolo/interpretazione: riga sempre riservata (altezza uniforme).
+        Box(modifier = Modifier.height(12.dp), contentAlignment = Alignment.Center) {
+            if (!person.roleLabel.isNullOrBlank()) {
+                Text(
+                    text = person.roleLabel!!,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp),
+                    color = WaveStreamColors.TextTertiary,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
