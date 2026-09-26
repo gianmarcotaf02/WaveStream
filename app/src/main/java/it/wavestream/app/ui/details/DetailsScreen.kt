@@ -875,7 +875,10 @@ fun DetailsScreen(
                 // mai. Serve solo se ci sono suggerimenti da rivelare.
                 Spacer(
                     modifier = Modifier.height(
-                        if (state.relatedContent.isNotEmpty()) 180.dp else 56.dp
+                        // Coda di scorrimento: consente di portare in alto il carosello
+                        // episodi (col titolo + trama sotto) senza che la trama venga
+                        // tagliata dal bordo inferiore, anche senza suggerimenti.
+                        if (state.relatedContent.isNotEmpty()) 220.dp else 170.dp
                     )
                 )
             }
@@ -2368,7 +2371,7 @@ private fun EpisodeCarouselCard(
 
     Column(
         modifier = modifier
-            .width(300.dp)
+            .width(196.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -2434,12 +2437,12 @@ private fun EpisodeCarouselCard(
             // Numero episodio grande (1, 2, 3…) in alto a sinistra
             Text(
                 text = "${episode.episodeNumber}",
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = 12.dp, top = 4.dp)
+                    .padding(start = 10.dp, top = 2.dp)
             )
 
             // Stato "visto": check in alto a destra
@@ -2474,7 +2477,7 @@ private fun EpisodeCarouselCard(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = "Play",
                         tint = Color.White,
-                        modifier = Modifier.size(46.dp)
+                        modifier = Modifier.size(40.dp)
                     )
                 }
             }
@@ -2501,8 +2504,8 @@ private fun EpisodeCarouselCard(
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(10.dp)
-                    .size(32.dp)
+                    .padding(6.dp)
+                    .size(28.dp)
                     .clip(CircleShape)
                     .background(if (isDownloadFocused || isDownloaded) Color.Black.copy(alpha = 0.55f) else Color.Transparent)
                     .focusRequester(downloadFocusRequester)
@@ -2520,14 +2523,14 @@ private fun EpisodeCarouselCard(
                         if (downloadProgress > 0) {
                             CircularProgressIndicator(
                                 progress = { downloadProgress / 100f },
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(18.dp),
                                 color = Color.White,
                                 strokeWidth = 2.dp,
                                 trackColor = Color.White.copy(alpha = 0.25f)
                             )
                         } else {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(18.dp),
                                 color = Color.White,
                                 strokeWidth = 2.dp,
                                 trackColor = Color.White.copy(alpha = 0.25f)
@@ -2538,24 +2541,24 @@ private fun EpisodeCarouselCard(
                         imageVector = Icons.Default.DownloadDone,
                         contentDescription = "Scaricato",
                         tint = Color.White,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                     else -> Icon(
                         imageVector = Icons.Default.Download,
                         contentDescription = "Scarica episodio",
                         tint = Color.White,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Titolo pulito (1 riga)
         Text(
             text = displayTitle,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
@@ -2564,14 +2567,13 @@ private fun EpisodeCarouselCard(
 
         // Breve trama (TMDB, fallback provider), come nella reference
         if (plot != null) {
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = plot,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 15.sp),
                 color = WaveStreamColors.TextTertiary,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                lineHeight = 17.sp
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
