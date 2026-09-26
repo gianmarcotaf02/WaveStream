@@ -1093,8 +1093,8 @@ private fun ScrollHintPill(modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            // Puramente decorativo: NON deve mai diventare un target del D-pad.
-            .focusProperties { canFocus = false }
+            // Puramente decorativo: NESSUN modificatore di focus/click, così non
+            // entra mai nel percorso del D-pad (nessun target di focus).
             .clip(RoundedCornerShape(999.dp))
             .background(GlassTokens.SurfaceFillStrong)
             .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(999.dp))
