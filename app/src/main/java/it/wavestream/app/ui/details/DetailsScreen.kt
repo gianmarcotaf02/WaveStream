@@ -828,6 +828,23 @@ fun DetailsScreen(
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                 }
+
+                // Feedback visivo "scorri in basso per i suggerimenti": le serie
+                // hanno lo stesso cue dei film, ma posizionato SOTTO il carosello
+                // episodi (dove l'utente si trova quando cerca altro). Scorrendo oltre
+                // si apre la rail "Potrebbe piacerti" (recommendations TMDB TV).
+                if (state.relatedContent.isNotEmpty()) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            ScrollHintPill()
+                        }
+                    }
+                }
             }
             
             // "Potrebbe piacerti" — carosello a SCOMPARSA, ORA IN FONDO alla pagina:
