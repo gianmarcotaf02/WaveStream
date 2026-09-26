@@ -2224,7 +2224,8 @@ private fun EpisodesSectionHeader(
     onSeasonSelected: (Int) -> Unit,
     onDownloadSeason: (Int) -> Unit = {},
     firstEpisodeFocusRequester: FocusRequester? = null,
-    upFocusRequester: FocusRequester? = null
+    upFocusRequester: FocusRequester? = null,
+    selectorFocusRequester: FocusRequester? = null
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -2234,36 +2235,99 @@ private fun EpisodesSectionHeader(
     val seasonDownloadInteractionSource = remember { MutableInteractionSource() }
     val isSeasonDownloadFocused by seasonDownloadInteractionSource.collectIsFocusedAsState()
 
-    // Section title + download button + Season dropdown
+    // Titolo a SINISTRA; a DESTRA selettore stagione + download stagione.
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(
-                if (firstEpisodeFocusRequester != null) {
-                    Modifier.focusProperties { down = firstEpisodeFocusRequester }
-                } else Modifier
-            )
-            .then(
-                if (upFocusRequester != null) {
-                    Modifier.focusProperties { up = upFocusRequester }
-                } else Modifier
-            ),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Left side: Episodi + download season button
+        Text(
+            text = stringResource(R.string.episodes),
+            style = MaterialTheme.typography.headlineSmall,
+            color = WaveStreamColors.TextPrimary,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        // A destra: selettore stagione, poi il download stagione.
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = stringResource(R.string.episodes),
-                style = MaterialTheme.typography.headlineSmall,
-                color = WaveStreamColors.TextPrimary,
-                fontWeight = FontWeight.SemiBold
-            )
-            
-            // Download season button
+            // Season dropdown
+            Box {
+                val borderColor by animateColorAsState(
+                    targetValue = if (isFocused || dropdownExpanded) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
+                    label = "dropdownBorder"
+                )
+
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .border(1.dp, borderColor, RoundedCornerShape(50))
+                        .background(if (dropdownExpanded) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill)
+                        .then(
+                            if (selectorFocusRequester != null) Modifier.focusRequester(selectorFocusRequester) else Modifier
+                        )
+                        .then(
+                            if (firstEpisodeFocusRequester != null) Modifier.focusProperties { down = firstEpisodeFocusRequester } else Modifier
+                        )
+                        .then(
+                            if (upFocusRequester != null) Modifier.focusProperties { up = upFocusRequester } else Modifier
+                        )
+                        .focusable(interactionSource = interactionSource)
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = null,
+                            onClick = { dropdownExpanded = !dropdownExpanded }
+                        )
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.season_number, selectedSeason),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = WaveStreamColors.TextPrimary,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(
+                        imageVector = if (dropdownExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = WaveStreamColors.TextSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = dropdownExpanded,
+                    onDismissRequest = { dropdownExpanded = false },
+                    // Tema esplicito: senza tonalElevation la superficie M3 prende una
+                    // tinta bluastra fuori palette; qui si allinea al vetro scuro dell'app.
+                    shape = RoundedCornerShape(14.dp),
+                    containerColor = WaveStreamColors.BackgroundSecondary,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 8.dp,
+                    border = BorderStroke(1.dp, WaveStreamColors.SurfaceBorderStrong)
+                ) {
+                    seasons.forEach { season ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.season_number, season),
+                                    color = if (season == selectedSeason) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
+                                    fontWeight = if (season == selectedSeason) FontWeight.Bold else FontWeight.Normal
+                                )
+                            },
+                            onClick = {
+                                onSeasonSelected(season)
+                                dropdownExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Download stagione (a DESTRA del selettore)
             val seasonDownloadScale by animateFloatAsState(
                 targetValue = if (isSeasonDownloadFocused) AppAnimations.GlassPillFocusScale else 1f,
                 animationSpec = AppAnimations.SpringCardFocus,
@@ -2274,16 +2338,22 @@ private fun EpisodesSectionHeader(
                 animationSpec = AppAnimations.SpringCardFocusColor,
                 label = "seasonDownloadBg"
             )
-            
+
             Box(
                 modifier = Modifier
                     .graphicsLayer {
-                    scaleX = seasonDownloadScale
-                    scaleY = seasonDownloadScale
-                }
+                        scaleX = seasonDownloadScale
+                        scaleY = seasonDownloadScale
+                    }
                     .size(36.dp)
                     .clip(CircleShape)
                     .background(seasonDownloadBg)
+                    .then(
+                        if (firstEpisodeFocusRequester != null) Modifier.focusProperties { down = firstEpisodeFocusRequester } else Modifier
+                    )
+                    .then(
+                        if (upFocusRequester != null) Modifier.focusProperties { up = upFocusRequester } else Modifier
+                    )
                     .focusable(interactionSource = seasonDownloadInteractionSource)
                     .clickable(
                         interactionSource = seasonDownloadInteractionSource,
@@ -2298,71 +2368,6 @@ private fun EpisodesSectionHeader(
                     tint = if (isSeasonDownloadFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
                     modifier = Modifier.size(20.dp)
                 )
-            }
-        }
-        
-        // Season dropdown
-        Box {
-            val borderColor by animateColorAsState(
-                targetValue = if (isFocused || dropdownExpanded) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.10f),
-                label = "dropdownBorder"
-            )
-            
-            Row(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .border(1.dp, borderColor, RoundedCornerShape(50))
-                    .background(if (dropdownExpanded) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill)
-                    .focusable(interactionSource = interactionSource)
-                    .clickable(
-                        interactionSource = interactionSource,
-                        indication = null,
-                        onClick = { dropdownExpanded = !dropdownExpanded }
-                    )
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.season_number, selectedSeason),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = WaveStreamColors.TextPrimary,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = if (dropdownExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = null,
-                    tint = WaveStreamColors.TextSecondary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            
-            DropdownMenu(
-                expanded = dropdownExpanded,
-                onDismissRequest = { dropdownExpanded = false },
-                // Tema esplicito: senza tonalElevation la superficie M3 prende una
-                // tinta bluastra fuori palette; qui si allinea al vetro scuro dell'app.
-                shape = RoundedCornerShape(14.dp),
-                containerColor = WaveStreamColors.BackgroundSecondary,
-                tonalElevation = 0.dp,
-                shadowElevation = 8.dp,
-                border = BorderStroke(1.dp, WaveStreamColors.SurfaceBorderStrong)
-            ) {
-                seasons.forEach { season ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = stringResource(R.string.season_number, season),
-                                color = if (season == selectedSeason) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
-                                fontWeight = if (season == selectedSeason) FontWeight.Bold else FontWeight.Normal
-                            )
-                        },
-                        onClick = {
-                            onSeasonSelected(season)
-                            dropdownExpanded = false
-                        }
-                    )
-                }
             }
         }
     }
