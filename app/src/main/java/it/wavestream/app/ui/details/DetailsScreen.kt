@@ -1116,6 +1116,8 @@ private fun ScrollHintPill(modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
+            // Puramente decorativo: NON deve mai diventare un target del D-pad.
+            .focusProperties { canFocus = false }
             .clip(RoundedCornerShape(999.dp))
             .background(GlassTokens.SurfaceFillStrong)
             .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(999.dp))
