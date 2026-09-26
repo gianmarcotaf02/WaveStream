@@ -794,9 +794,9 @@ fun DetailsScreen(
                                 )
                             }
                         },
-                        // Margine interno ampio: le card restano lontane dalle frecce
-                        // (ora vicine ai bordi) e non vengono tagliate dal loro bordo.
-                        contentHorizontalPadding = 22.dp
+                        // Margine interno: separa le card dalle frecce (vicine al bordo)
+                        // mentre il contentPadding della LazyRow evita il taglio in focus.
+                        contentHorizontalPadding = 14.dp
                     ) {
                         LazyRow(
                             state = episodeRailState,
