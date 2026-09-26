@@ -487,6 +487,18 @@ class DetailsActivity : ComponentActivity() {
      * **Fallback locale** quando TMDB non torna con nulla: nessun `tmdbId`, offline,
      * oppure nessun match in catalogo → stessa categoria di playlist come prima.
      */
+    /**
+     * Tag (lingua/adult) da NON mostrare nella rail "Potrebbe piacerti": titoli con
+     * DE / GERMANY / XXX vengono esclusi, sia per i film sia per le serie.
+     */
+    private val relatedExcludedTokens = setOf("DE", "GERMANY", "XXX")
+
+    private fun isExcludedRelatedTitle(name: String?): Boolean {
+        if (name.isNullOrBlank()) return false
+        val tokens = name.uppercase(java.util.Locale.ROOT).split(Regex("[^\\p{L}\\p{N}]+"))
+        return tokens.any { it in relatedExcludedTokens }
+    }
+
     private suspend fun relatedContentFor(movie: Movie): List<RelatedContent> {
         // SOLO raccomandazioni TMDB (/recommendations + /similar). La risoluzione
         // sul catalogo usa lo stesso matching della Home (tmdbId, poi titolo+anno),
@@ -497,7 +509,7 @@ class DetailsActivity : ComponentActivity() {
             tmdbService.getRelatedLocalIds(tmdbId, "movie")
                 .filter { it != movie.id }
                 .mapNotNull { movieDao.getMovieById(it) }
-                .filter { !it.isHidden }
+                .filter { !it.isHidden && !isExcludedRelatedTitle(it.name) }
                 .take(10)
         }.getOrElse { emptyList() }
         return fromTmdb.toRelatedContent()
@@ -513,7 +525,7 @@ class DetailsActivity : ComponentActivity() {
             tmdbService.getRelatedLocalIds(tmdbId, "tv")
                 .filter { it != series.id }
                 .mapNotNull { seriesDao.getSeriesById(it) }
-                .filter { !it.isHidden }
+                .filter { !it.isHidden && !isExcludedRelatedTitle(it.name) }
                 .take(10)
         }.getOrElse { emptyList() }
 
