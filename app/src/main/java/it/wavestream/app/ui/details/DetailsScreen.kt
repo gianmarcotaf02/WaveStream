@@ -800,7 +800,11 @@ fun DetailsScreen(
                     ) {
                         LazyRow(
                             state = episodeRailState,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            // Margine interno alla rail: la prima/ultima card hanno spazio
+                            // per la scala di focus (e il bordo accent) senza essere
+                            // tagliate dal bordo di clip della LazyRow.
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                         ) {
                             items(state.episodes.size, key = { state.episodes[it].id }) { index ->
                                 val episode = state.episodes[index]
@@ -2358,7 +2362,7 @@ private fun EpisodeCarouselCard(
         label = "episodeCardRing"
     )
     val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.03f else 1f,
+        targetValue = if (isFocused) 1.02f else 1f,
         animationSpec = AppAnimations.SpringCardFocus,
         label = "episodeCardScale"
     )
