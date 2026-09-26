@@ -351,7 +351,6 @@ fun DetailsScreen(
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth()
-                .padding(horizontal = 24.dp)
         ) {
             // Top content block — tutto centrato sull'asse dello schermo
             item {
@@ -364,6 +363,7 @@ fun DetailsScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
                         .onSizeChanged { backRowHeightPx = it.height },
                     horizontalArrangement = Arrangement.Start
                 ) {
@@ -381,6 +381,7 @@ fun DetailsScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .padding(horizontal = 24.dp)
                         .onSizeChanged { if (!relatedRevealed) topBlockHeightPx = it.height }
                         .animateContentSize(
                             animationSpec = tween(durationMillis = 400)
@@ -761,17 +762,19 @@ fun DetailsScreen(
                 // Season selector as its own item
                 item {
                     Spacer(modifier = Modifier.height(40.dp))
-                    EpisodesSectionHeader(
-                        seasons = state.seasons,
-                        selectedSeason = state.selectedSeason,
-                        onSeasonSelected = onSeasonSelected,
-                        onDownloadSeason = onDownloadSeason,
-                        // Passa il requester solo se ci sono episodi: il redirect "giù" verso un
-                        // FocusRequester non attaccato a nessun composable crasha l'app.
-                        firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
-                        // "su" dall'header stagione deve tornare al bottone Riproduci
-                        upFocusRequester = playButtonFocusRequester
-                    )
+                    Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+                        EpisodesSectionHeader(
+                            seasons = state.seasons,
+                            selectedSeason = state.selectedSeason,
+                            onSeasonSelected = onSeasonSelected,
+                            onDownloadSeason = onDownloadSeason,
+                            // Passa il requester solo se ci sono episodi: il redirect "giù" verso un
+                            // FocusRequester non attaccato a nessun composable crasha l'app.
+                            firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
+                            // "su" dall'header stagione deve tornare al bottone Riproduci
+                            upFocusRequester = playButtonFocusRequester
+                        )
+                    }
                     Spacer(modifier = Modifier.height(20.dp))
                 }
 
@@ -789,7 +792,10 @@ fun DetailsScreen(
                                         .coerceAtLeast(0)
                                 )
                             }
-                        }
+                        },
+                        // Margine interno ampio: le card restano lontane dalle frecce
+                        // (ora vicine ai bordi) e non vengono tagliate dal loro bordo.
+                        contentHorizontalPadding = 22.dp
                     ) {
                         LazyRow(
                             state = episodeRailState,
@@ -830,7 +836,7 @@ fun DetailsScreen(
                         slideInVertically(animationSpec = tween(340)) { it / 4 },
                     exit = fadeOut(tween(220))
                 ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                         Spacer(modifier = Modifier.height(24.dp))
                         Text(
                             text = "Potrebbe piacerti",
@@ -1058,6 +1064,7 @@ private fun RailArrow(
 private fun RailRow(
     listState: LazyListState,
     onScroll: (forward: Boolean) -> Unit,
+    contentHorizontalPadding: Dp = 12.dp,
     content: @Composable () -> Unit
 ) {
     Row(
@@ -1074,7 +1081,7 @@ private fun RailRow(
         Box(
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = contentHorizontalPadding)
         ) {
             content()
         }
