@@ -832,14 +832,13 @@ fun DetailsScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(12.dp))
-                }
 
-                // Feedback visivo "scorri in basso per i suggerimenti": le serie
-                // hanno lo stesso cue dei film, ma posizionato SOTTO il carosello
-                // episodi (dove l'utente si trova quando cerca altro). Scorrendo oltre
-                // si apre la rail "Potrebbe piacerti" (recommendations TMDB TV).
-                if (state.relatedContent.isNotEmpty()) {
-                    item {
+                    // Feedback visivo "scorri in basso per i suggerimenti" + rail
+                    // "Potrebbe piacerti" NELLO STESSO item del carosello episodi:
+                    // così la prima card è composta insieme agli episodi e il redirect
+                    // D-pad "giù" non punta mai a un FocusRequester non inizializzato
+                    // (che causava il crash in FocusOwner.focusSearch).
+                    if (state.relatedContent.isNotEmpty()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -849,66 +848,44 @@ fun DetailsScreen(
                             ScrollHintPill()
                         }
                     }
+                    RelatedRailSection(
+                        relatedContent = state.relatedContent,
+                        visible = state.relatedContent.isNotEmpty(),
+                        railState = relatedRailState,
+                        firstCardFocusRequester = relatedFirstCardFocusRequester,
+                        onScroll = { forward ->
+                            railScope.launch {
+                                relatedRailState.animateScrollToItem(
+                                    (relatedRailState.firstVisibleItemIndex + if (forward) 3 else -3)
+                                        .coerceAtLeast(0)
+                                )
+                            }
+                        },
+                        onRelatedClick = onRelatedClick
+                    )
                 }
             }
             
-            // "Potrebbe piacerti" — carosello a SCOMPARSA, ORA IN FONDO alla pagina:
-            // si svela solo dopo aver iniziato a scorrere e resta sotto cast, trama
-            // ed episodi. Prima veniva inserito sopra "Cast & Regia", quindi durante
-            // lo scroll spostava il layout e compariva sopra il cast.
-            item {
-                AnimatedVisibility(
-                    // Per le serie la rail è sempre composta (sta sotto il carosello
-                    // episodi): così la prima card è già attaccata come destinazione
-                    // del D-pad "giù", anche prima dello scroll.
-                    visible = state.relatedContent.isNotEmpty() && (relatedRevealed || hasEpisodesSection),
-                    enter = fadeIn(tween(300)) +
-                        slideInVertically(animationSpec = tween(340)) { it / 4 },
-                    exit = fadeOut(tween(220))
-                ) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Spacer(modifier = Modifier.height(24.dp))
-                        Text(
-                            text = "Potrebbe piacerti",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = WaveStreamColors.TextSecondary,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        RailRow(
-                            listState = relatedRailState,
-                            onScroll = { forward ->
-                                railScope.launch {
-                                    relatedRailState.animateScrollToItem(
-                                        (relatedRailState.firstVisibleItemIndex + if (forward) 3 else -3)
-                                            .coerceAtLeast(0)
-                                    )
-                                }
-                            },
-                            // Stessi margini frecce del carosello episodi.
-                            contentHorizontalPadding = 14.dp
-                        ) {
-                            LazyRow(
-                                state = relatedRailState,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 8.dp)
-                            ) {
-                                items(state.relatedContent.size) { index ->
-                                    val related = state.relatedContent[index]
-                                    RelatedContentCard(
-                                        related = related,
-                                        onClick = { onRelatedClick(related.contentId, related.contentType) },
-                                        // Prima card = entry point fisso della rail.
-                                        modifier = if (index == 0) {
-                                            Modifier.focusRequester(relatedFirstCardFocusRequester)
-                                        } else Modifier
-                                    )
-                                }
+            // "Potrebbe piacerti" (FILM): carosello a scomparsa, si svela dopo lo
+            // scroll. Per le SERIE è invece dentro l'item del carosello episodi
+            // (vedi sopra), così la prima card è già composta.
+            if (!hasEpisodesSection) {
+                item {
+                    RelatedRailSection(
+                        relatedContent = state.relatedContent,
+                        visible = relatedRevealed && state.relatedContent.isNotEmpty(),
+                        railState = relatedRailState,
+                        firstCardFocusRequester = relatedFirstCardFocusRequester,
+                        onScroll = { forward ->
+                            railScope.launch {
+                                relatedRailState.animateScrollToItem(
+                                    (relatedRailState.firstVisibleItemIndex + if (forward) 3 else -3)
+                                        .coerceAtLeast(0)
+                                )
                             }
-                        }
-                    }
+                        },
+                        onRelatedClick = onRelatedClick
+                    )
                 }
             }
 
@@ -1137,6 +1114,64 @@ private fun ScrollHintPill(modifier: Modifier = Modifier) {
             tint = WaveStreamColors.Accent,
             modifier = Modifier.size(15.dp)
         )
+    }
+}
+
+/**
+ * Sezione "Potrebbe piacerti": titolo + rail di card. Estratta perché usata
+ * in due punti (item separato per i film, dentro l'item episodi per le serie).
+ */
+@Composable
+private fun RelatedRailSection(
+    relatedContent: List<RelatedContent>,
+    visible: Boolean,
+    railState: LazyListState,
+    firstCardFocusRequester: FocusRequester,
+    onScroll: (forward: Boolean) -> Unit,
+    onRelatedClick: (Long, ContentType) -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(tween(300)) +
+            slideInVertically(animationSpec = tween(340)) { it / 4 },
+        exit = fadeOut(tween(220))
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = "Potrebbe piacerti",
+                style = MaterialTheme.typography.titleMedium,
+                color = WaveStreamColors.TextSecondary,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            RailRow(
+                listState = railState,
+                onScroll = onScroll,
+                // Stessi margini frecce del carosello episodi.
+                contentHorizontalPadding = 14.dp
+            ) {
+                LazyRow(
+                    state = railState,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    items(relatedContent.size) { index ->
+                        val related = relatedContent[index]
+                        RelatedContentCard(
+                            related = related,
+                            onClick = { onRelatedClick(related.contentId, related.contentType) },
+                            // Prima card = entry point fisso della rail.
+                            modifier = if (index == 0) {
+                                Modifier.focusRequester(firstCardFocusRequester)
+                            } else Modifier
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
