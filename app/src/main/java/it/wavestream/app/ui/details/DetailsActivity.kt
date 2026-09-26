@@ -553,18 +553,6 @@ class DetailsActivity : ComponentActivity() {
         )
     }
 
-    /** Fallback: stessa categoria di playlist, per popolarità TMDB decrescente. */
-    private suspend fun localRelatedFallback(movie: Movie): List<Movie> {
-        val category = movie.category?.takeIf { it.isNotBlank() } ?: return emptyList()
-        val enabledPlaylists = playlistDao.getEnabledPlaylistsList().map { it.id }.toSet()
-        return runCatching {
-            movieDao.getMoviesByCategoryList(category)
-                .filter { it.id != movie.id && !it.isHidden && it.playlistId in enabledPlaylists }
-                .sortedByDescending { it.tmdbPopularity ?: 0f }
-                .take(10)
-        }.getOrElse { emptyList() }
-    }
-
     private suspend fun loadMovie(onStateUpdate: (DetailsState) -> Unit) {
         Log.d(TAG, "loadMovie: contentId=$contentId, contentType=$contentType")
         val movie = movieDao.getMovieById(contentId)
@@ -702,10 +690,10 @@ class DetailsActivity : ComponentActivity() {
         genre = genre ?: enrichedMovie.tmdbGenres
         duration = duration ?: enrichedMovie.tmdbRuntime?.let { "$it min" }
         
-        // Rail "Potrebbe piacerti": SUBITO il fallback locale (solo DB, nessuna
-        // rete: la scheda non deve aspettare). La fonte TMDB primaria arriva poi in
-        // async, alla fine di loadMovie, e sostituisce questa lista.
-        val related = localRelatedFallback(movie).toRelatedContent()
+        // Rail "Potrebbe piacerti": SOLO TMDB. Nessun segnaposto di categoria
+        // (evitava di aspettare la rete, ma poteva restare visibile come lista
+        // locale). Si popola quando arriva la risposta TMDB in loadMovie.
+        val related = emptyList<RelatedContent>()
         
         var state = DetailsState(
             relatedContent = related,
