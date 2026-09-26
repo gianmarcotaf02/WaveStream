@@ -565,18 +565,6 @@ class DetailsActivity : ComponentActivity() {
         }.getOrElse { emptyList() }
     }
 
-    /** Fallback serie: stessa categoria di playlist, per popolarità TMDB decrescente. */
-    private suspend fun localRelatedFallbackForSeries(series: Series): List<Series> {
-        val category = series.category?.takeIf { it.isNotBlank() } ?: return emptyList()
-        val enabledPlaylists = playlistDao.getEnabledPlaylistsList().map { it.id }.toSet()
-        return runCatching {
-            seriesDao.getSeriesByCategoryList(category)
-                .filter { it.id != series.id && !it.isHidden && it.playlistId in enabledPlaylists }
-                .sortedByDescending { it.tmdbPopularity ?: 0f }
-                .take(10)
-        }.getOrElse { emptyList() }
-    }
-
     private suspend fun loadMovie(onStateUpdate: (DetailsState) -> Unit) {
         Log.d(TAG, "loadMovie: contentId=$contentId, contentType=$contentType")
         val movie = movieDao.getMovieById(contentId)
