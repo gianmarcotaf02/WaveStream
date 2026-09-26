@@ -1070,7 +1070,10 @@ private fun RailArrow(
                 CircleShape
             )
             .background(backgroundColor)
-            .focusable(interactionSource = interactionSource)
+            // Frecce puramente VISIVE: non devono essere un target del D-pad (la rail
+            // si scorre con sinistra/destra sulle card). canFocus=false sul clickable
+            // impedisce che diventino una tappa di focus tra le sezioni.
+            .focusProperties { canFocus = false }
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
