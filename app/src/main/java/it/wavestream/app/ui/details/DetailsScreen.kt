@@ -932,13 +932,7 @@ fun DetailsScreen(
                     ),
                     label = "scrollHintBob"
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .offset(y = hintBob.dp)
-                ) {
-                    ScrollHintPill()
-                }
+                ScrollHintPill(modifier = Modifier.offset(y = hintBob.dp))
             }
     }  // end inner Box (AnimatedVisibility content)
     }  // end AnimatedVisibility
