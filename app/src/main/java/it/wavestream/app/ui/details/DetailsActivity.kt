@@ -496,11 +496,15 @@ class DetailsActivity : ComponentActivity() {
                 // playlist abilitata): niente schede che poi risulterebbero vuote.
                 .mapNotNull { movieDao.getVisibleMovieByTmdbId(it) }
                 .filter { it.id != movie.id }
-                .take(10)
         }.getOrElse { emptyList() }
 
-        val base = if (fromTmdb.isNotEmpty()) fromTmdb else localRelatedFallback(movie)
-        return base.toRelatedContent()
+        // Unisce i match TMDB al fallback di categoria (anch'esso filtrato su
+        // contenuti visibili): senza unione la rail mostrava UN solo titolo quando
+        // TMDB risolveva poco in catalogo.
+        val combined = (fromTmdb + localRelatedFallback(movie))
+            .distinctBy { it.id }
+            .take(12)
+        return combined.toRelatedContent()
     }
 
     /** Stessa rail per le SERIE: `mediaType = "tv"`, id risolti su `series`.
@@ -514,11 +518,14 @@ class DetailsActivity : ComponentActivity() {
                 // Solo serie realmente visibili in playlist.
                 .mapNotNull { seriesDao.getVisibleSeriesByTmdbId(it) }
                 .filter { it.id != series.id }
-                .take(10)
         }.getOrElse { emptyList() }
 
-        val base = if (fromTmdb.isNotEmpty()) fromTmdb else localRelatedFallbackForSeries(series)
-        return base.map {
+        // Unisce TMDB + fallback di categoria (visibile): evita la rail con UN solo
+        // elemento quando TMDB risolve poco in catalogo.
+        val combined = (fromTmdb + localRelatedFallbackForSeries(series))
+            .distinctBy { it.id }
+            .take(12)
+        return combined.map {
             RelatedContent(
                 contentId = it.id,
                 title = it.name,
