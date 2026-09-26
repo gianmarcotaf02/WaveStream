@@ -539,6 +539,18 @@ fun DetailsScreen(
                                 "S${state.resumeEpisodeSeason}E${state.resumeEpisodeNumber}"
                             } else null
                         }
+                        // Per i FILM (nessun SxEy) il badge del bottone mostra i minuti
+                        // rimasti: così l'informazione sta DENTRO il CTA invece di
+                        // comparire come riga a sé sotto la riga dei pulsanti.
+                        val resumeRemainingBadge = state.resumeMinutes?.takeIf { it > 0 }?.let { mins ->
+                            if (mins >= 60) {
+                                val h = mins / 60
+                                val m = mins % 60
+                                if (m > 0) "${h}h ${m}m rimasti" else "${h}h rimaste"
+                            } else {
+                                "$mins min rimasti"
+                            }
+                        }
                         val seriesBadge = if (state.contentType == ContentType.SERIES) {
                             // Serie mai iniziata: primo episodio della stagione selezionata (S1E1).
                             // Con episodi non ancora caricati (sync in corso) mostri comunque S1E1 come default.
@@ -556,7 +568,7 @@ fun DetailsScreen(
                             },
                             badge = when {
                                 state.nextEpisodeInfo != null -> nextEpisodeBadge
-                                state.resumeMinutes != null -> resumeBadge
+                                state.resumeMinutes != null -> resumeBadge ?: resumeRemainingBadge
                                 state.contentType == ContentType.SERIES -> seriesBadge
                                 else -> null
                             },
@@ -675,27 +687,6 @@ fun DetailsScreen(
                         EndingDialog(
                             state = endingState,
                             onDismiss = { endingState = MovieEndingUiState.Idle }
-                        )
-                    }
-                    
-                    // Remaining time text below buttons (for resume state)
-                    if (state.resumeMinutes != null) {
-                        val remainingText = when {
-                            state.resumeMinutes <= 0 -> "Pochi minuti rimasti"
-                            state.resumeMinutes >= 60 -> {
-                                val hours = state.resumeMinutes / 60
-                                val mins = state.resumeMinutes % 60
-                                if (mins > 0) "${hours}h ${mins}min rimasti" else "${hours}h rimaste"
-                            }
-                            else -> "${state.resumeMinutes} min rimasti"
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = remainingText,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = WaveStreamColors.TextTertiary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                     
