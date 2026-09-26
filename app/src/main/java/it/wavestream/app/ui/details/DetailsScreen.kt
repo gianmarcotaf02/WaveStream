@@ -2297,17 +2297,6 @@ private fun SeasonTab(
 }
 
 /**
- * Card episodio del carosello orizzontale (sostituisce la vecchia lista
- * verticale). Rettangolo "pseudo quadrato": copertina con badge episodio e
- * overlay di stato (visto / ripresa / download) + titolo sotto.
- *
- * Il titolo è pulito da "Episodio N"/SxxExx: se resta un titolo vero lo mostra,
- * altrimenti usa il fallback "Episodio N". La risoluzione è pura e deterministica
- * ([TitleCleaner.resolveEpisodeDisplayTitle]) quindi non aggiunge lavoro al sync.
- */
-@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
-@Composable
-/**
  * Card episodio del carosello orizzontale, in stile "episodi" da streaming TV:
  * copertina landscape 16:9 con numero episodio grande in alto a sinistra e
  * freccia di download in basso a destra; sotto, titolo e breve trama.
