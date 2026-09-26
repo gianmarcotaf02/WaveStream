@@ -2307,6 +2307,16 @@ private fun SeasonTab(
  */
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
+/**
+ * Card episodio del carosello orizzontale, in stile "episodi" da streaming TV:
+ * copertina landscape 16:9 con numero episodio grande in alto a sinistra e
+ * freccia di download in basso a destra; sotto, titolo e breve trama.
+ *
+ * Il titolo è pulito da "Episodio N"/SxxExx: se resta un titolo vero lo mostra,
+ * altrimenti usa il fallback "Episodio N" ([TitleCleaner.resolveEpisodeDisplayTitle]).
+ */
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
 private fun EpisodeCarouselCard(
     episode: Episode,
     progress: EpisodeProgress?,
@@ -2339,24 +2349,18 @@ private fun EpisodeCarouselCard(
     val hasProgress = progress != null && progress.progress > 0.01f && !progress.isCompleted
     val isWatched = progress?.isCompleted == true ||
         (progress != null && progress.remainingMinutes <= 7 && progress.progress > 0.9f)
-    // Frazione 0..1 per la barra di avanzamento (null = nessuna barra).
     val progressFraction: Float? =
         if (hasProgress) progress?.progress?.coerceIn(0f, 1f) else null
 
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) 1.05f else 1f,
-        animationSpec = AppAnimations.SpringCardFocus,
-        label = "episodeCardScale"
-    )
     val ring by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else Color.White.copy(alpha = 0.08f),
+        targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
         animationSpec = AppAnimations.SpringCardFocusColor,
         label = "episodeCardRing"
     )
-    val cardFill by animateColorAsState(
-        targetValue = if (isFocused) Color.White.copy(alpha = 0.12f) else GlassTokens.SurfaceFill,
-        animationSpec = AppAnimations.SpringCardFocusColor,
-        label = "episodeCardFill"
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) 1.03f else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "episodeCardScale"
     )
 
     // Titolo mostrato: titolo vero (provider, poi TMDB), altrimenti "Episodio N".
@@ -2368,26 +2372,27 @@ private fun EpisodeCarouselCard(
             seriesName = seriesName
         )
     }
+    val plot = remember(episode.tmdbOverview, episode.plot) {
+        episode.tmdbOverview?.takeIf { it.isNotBlank() }
+            ?: episode.plot?.takeIf { it.isNotBlank() }
+    }
 
     Column(
         modifier = modifier
-            .width(168.dp)
+            .width(300.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
-            .clip(RoundedCornerShape(16.dp))
-            .background(cardFill)
-            .border(1.dp, ring, RoundedCornerShape(16.dp))
-            .padding(8.dp)
     ) {
-        // Copertina (pseudo quadrata) — principale focus target della card
+        // Copertina landscape 16:9 — principale focus target della card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(126.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .aspectRatio(16f / 9f)
+                .clip(RoundedCornerShape(14.dp))
                 .background(WaveStreamColors.BackgroundSecondary)
+                .border(2.dp, ring, RoundedCornerShape(14.dp))
                 .focusRequester(effectiveCardFocus)
                 .then(
                     if (upFocusRequester != null) Modifier.focusProperties { up = upFocusRequester } else Modifier
@@ -2424,12 +2429,12 @@ private fun EpisodeCarouselCard(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Scrim in alto per la leggibilità del badge episodio
+            // Scrim in alto: dà contrasto al numero grande
             Box(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .fillMaxWidth()
-                    .height(44.dp)
+                    .height(72.dp)
                     .background(
                         Brush.verticalGradient(
                             listOf(Color.Black.copy(alpha = 0.55f), Color.Transparent)
@@ -2437,40 +2442,80 @@ private fun EpisodeCarouselCard(
                     )
             )
 
-            // Badge numero episodio ("E3")
-            Box(
+            // Numero episodio grande (1, 2, 3…) in alto a sinistra
+            Text(
+                text = "${episode.episodeNumber}",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(6.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(Color.Black.copy(alpha = 0.65f))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = "E${episode.episodeNumber}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+                    .padding(start = 12.dp, top = 4.dp)
+            )
+
+            // Stato "visto": check in alto a destra
+            if (isWatched) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(10.dp)
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.55f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Guardato",
+                        tint = WaveStreamColors.Accent,
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
             }
 
-            // Bottone download (focus target separato; "su" torna alla copertina)
-            val downloadBg by animateColorAsState(
-                targetValue = when {
-                    isDownloaded -> WaveStreamColors.Accent
-                    isDownloadFocused -> WaveStreamColors.Accent
-                    else -> Color.Black.copy(alpha = 0.55f)
-                },
-                animationSpec = AppAnimations.SpringCardFocusColor,
-                label = "episodeDownloadBg"
-            )
+            // Overlay play al focus / in ripresa
+            if (isFocused || hasProgress) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.30f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play",
+                        tint = Color.White,
+                        modifier = Modifier.size(46.dp)
+                    )
+                }
+            }
+
+            // Barra di avanzamento in basso
+            if (progressFraction != null) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .background(Color.Black.copy(alpha = 0.6f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(progressFraction)
+                            .background(WaveStreamColors.Accent)
+                    )
+                }
+            }
+
+            // Freccia di download in basso a destra (focus target separato)
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(6.dp)
-                    .size(30.dp)
+                    .align(Alignment.BottomEnd)
+                    .padding(10.dp)
+                    .size(32.dp)
                     .clip(CircleShape)
-                    .background(downloadBg)
+                    .background(if (isDownloadFocused || isDownloaded) Color.Black.copy(alpha = 0.55f) else Color.Transparent)
                     .focusRequester(downloadFocusRequester)
                     .focusProperties { up = effectiveCardFocus }
                     .focusable(interactionSource = downloadInteraction)
@@ -2504,80 +2549,40 @@ private fun EpisodeCarouselCard(
                         imageVector = Icons.Default.DownloadDone,
                         contentDescription = "Scaricato",
                         tint = Color.White,
-                        modifier = Modifier.size(17.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                     else -> Icon(
                         imageVector = Icons.Default.Download,
                         contentDescription = "Scarica episodio",
                         tint = Color.White,
-                        modifier = Modifier.size(17.dp)
-                    )
-                }
-            }
-
-            // Overlay centro: "visto" oppure play (focus/ripresa)
-            if (isWatched) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(38.dp)
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.55f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Guardato",
-                        tint = WaveStreamColors.Accent,
                         modifier = Modifier.size(22.dp)
-                    )
-                }
-            } else if (isFocused || hasProgress) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.35f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play",
-                        tint = Color.White,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-            }
-
-            // Barra di avanzamento in basso
-            if (progressFraction != null) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .background(Color.Black.copy(alpha = 0.6f))
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(progressFraction)
-                            .background(WaveStreamColors.Accent)
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
-        // Titolo pulito, 2 righe di altezza fissa per allineare le card della rail
-        Box(modifier = Modifier.height(38.dp)) {
+        // Titolo pulito (1 riga)
+        Text(
+            text = displayTitle,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        // Breve trama (TMDB, fallback provider), come nella reference
+        if (plot != null) {
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = displayTitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                text = plot,
+                style = MaterialTheme.typography.bodySmall,
+                color = WaveStreamColors.TextTertiary,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                lineHeight = 17.sp
             )
         }
     }
