@@ -501,24 +501,28 @@ class DetailsActivity : ComponentActivity() {
         return base.toRelatedContent()
     }
 
-    /** Stessa rail per le SERIE: `mediaType = "tv"`, id risolti su `series`. */
+    /** Stessa rail per le SERIE: `mediaType = "tv"`, id risolti su `series`.
+     *  Se TMDB non restituisce nulla di presente in catalogo, fallback locale
+     *  sulla stessa categoria (come per i film) così la rail non resta vuota. */
     private suspend fun relatedContentForSeries(series: Series): List<RelatedContent> {
-        val tmdbId = series.tmdbId ?: return emptyList()
-        return runCatching {
+        val fromTmdb = runCatching {
+            val tmdbId = series.tmdbId ?: return@runCatching emptyList<Series>()
             tmdbRelatedIds(tmdbId, "tv")
                 .filter { it != tmdbId }
                 .mapNotNull { seriesDao.getSeriesByTmdbId(it) }
                 .filter { !it.isHidden && it.id != series.id }
                 .take(10)
         }.getOrElse { emptyList() }
-            .map {
-                RelatedContent(
-                    contentId = it.id,
-                    title = it.name,
-                    posterUrl = it.posterUrl,
-                    contentType = ContentType.SERIES
-                )
-            }
+
+        val base = if (fromTmdb.isNotEmpty()) fromTmdb else localRelatedFallbackForSeries(series)
+        return base.map {
+            RelatedContent(
+                contentId = it.id,
+                title = it.name,
+                posterUrl = it.posterUrl,
+                contentType = ContentType.SERIES
+            )
+        }
     }
 
     /**
@@ -555,6 +559,17 @@ class DetailsActivity : ComponentActivity() {
         return runCatching {
             movieDao.getMoviesByCategoryList(category)
                 .filter { it.id != movie.id && !it.isHidden }
+                .sortedByDescending { it.tmdbPopularity ?: 0f }
+                .take(10)
+        }.getOrElse { emptyList() }
+    }
+
+    /** Fallback serie: stessa categoria di playlist, per popolarità TMDB decrescente. */
+    private suspend fun localRelatedFallbackForSeries(series: Series): List<Series> {
+        val category = series.category?.takeIf { it.isNotBlank() } ?: return emptyList()
+        return runCatching {
+            seriesDao.getSeriesByCategoryList(category)
+                .filter { it.id != series.id && !it.isHidden }
                 .sortedByDescending { it.tmdbPopularity ?: 0f }
                 .take(10)
         }.getOrElse { emptyList() }
