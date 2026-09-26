@@ -789,6 +789,24 @@ fun DetailsScreen(
                             )
                         }
                     }
+
+                    // Header "Episodi" (serie): DENTRO il blocco del cast, così il
+                    // selettore stagioni è composto insieme al cast e il redirect di
+                    // focus "giù" dal cast non punta mai a un requester assente.
+                    if (state.contentType == ContentType.SERIES && state.seasons.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(36.dp))
+                        EpisodesSectionHeader(
+                            seasons = state.seasons,
+                            selectedSeason = state.selectedSeason,
+                            onSeasonSelected = onSeasonSelected,
+                            onDownloadSeason = onDownloadSeason,
+                            firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
+                            // "su" dal selettore torna al bottone Riproduci.
+                            upFocusRequester = playButtonFocusRequester,
+                            selectorFocusRequester = seasonSelectorFocusRequester
+                        )
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
                 }
             }
             
@@ -796,26 +814,6 @@ fun DetailsScreen(
             
             // Episodes section (for series) - inlined into TvLazyColumn
             if (state.contentType == ContentType.SERIES && state.seasons.isNotEmpty()) {
-                // Season selector as its own item
-                item {
-                    Spacer(modifier = Modifier.height(40.dp))
-                    Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
-                        EpisodesSectionHeader(
-                            seasons = state.seasons,
-                            selectedSeason = state.selectedSeason,
-                            onSeasonSelected = onSeasonSelected,
-                            onDownloadSeason = onDownloadSeason,
-                            // Passa il requester solo se ci sono episodi: il redirect "giù" verso un
-                            // FocusRequester non attaccato a nessun composable crasha l'app.
-                            firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
-                            // "su" dal selettore torna al bottone Riproduci.
-                            upFocusRequester = playButtonFocusRequester,
-                            selectorFocusRequester = seasonSelectorFocusRequester
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-
                 // Carosello episodi: gli episodi scorrono orizzontalmente come le
                 // rail di cast e suggerimenti, invece della vecchia lista verticale.
                 // Le frecce di RailRow e il D-pad sinistra/destra scorrono la rail.
