@@ -224,11 +224,39 @@ fun DetailsScreen(
     val relatedRailState = rememberLazyListState()
     val episodeRailState = rememberLazyListState()
     val railScope = rememberCoroutineScope()
-    // Solo redirect D-pad (giù dall'header stagione → primo episodio): NON richiede mai il focus
+    // Solo redirect D-pad (giù dall'header stagione → episodio target): NON richiede mai il focus
     val firstEpisodeFocusRequester = remember { FocusRequester() }
+    // Focus target del selettore stagioni: l'episodio target, con "su", torna qui.
+    val seasonSelectorFocusRequester = remember { FocusRequester() }
     // Entry point della rail "Potrebbe piacerti": il D-pad "giù" dal carosello
     // episodi porta SEMPRE qui (prima card a sinistra), non all'ultima card usata.
     val relatedFirstCardFocusRequester = remember { FocusRequester() }
+
+    // Episodio su cui atterrare scendendo dal selettore stagioni:
+    // - quello IN CORSO (continue watching), se presente;
+    // - altrimenti il PRIMO non ancora visto (il "successivo da guardare"
+    //   quando il precedente risulta completato);
+    // - altrimenti il primo episodio della stagione.
+    val episodeFocusTargetIndex = remember(state.episodes, state.episodeProgress) {
+        val eps = state.episodes
+        if (eps.isEmpty()) {
+            -1
+        } else {
+            val inProgress = eps.indexOfFirst { ep ->
+                val p = state.episodeProgress[ep.id]
+                p != null && p.progress > 0.01f && !p.isCompleted
+            }
+            if (inProgress >= 0) {
+                inProgress
+            } else {
+                val firstUnwatched = eps.indexOfFirst { ep ->
+                    val p = state.episodeProgress[ep.id]
+                    p == null || !p.isCompleted
+                }
+                if (firstUnwatched >= 0) firstUnwatched else 0
+            }
+        }
+    }
 
     // NOTE: nessun auto-scroll né auto-focus sulla lista episodi all'apertura:
     // la vista resta in alto e il focus va SOLO al bottone Riproduci.
@@ -775,8 +803,9 @@ fun DetailsScreen(
                             // Passa il requester solo se ci sono episodi: il redirect "giù" verso un
                             // FocusRequester non attaccato a nessun composable crasha l'app.
                             firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
-                            // "su" dall'header stagione deve tornare al bottone Riproduci
-                            upFocusRequester = playButtonFocusRequester
+                            // "su" dal selettore torna al bottone Riproduci.
+                            upFocusRequester = playButtonFocusRequester,
+                            selectorFocusRequester = seasonSelectorFocusRequester
                         )
                     }
                     Spacer(modifier = Modifier.height(20.dp))
@@ -818,10 +847,9 @@ fun DetailsScreen(
                                     seriesName = state.title,
                                     // Il requester DEVE restare attaccato alla PRIMA card:
                                     // è il destinatario del redirect D-pad "giù" dall'header stagione.
-                                    cardFocusRequester = if (index == 0) firstEpisodeFocusRequester else null,
-                                    // Dal primo episodio, "su" deve andare al bottone Riproduci,
-                                    // NON al bottone indietro in alto a sinistra.
-                                    upFocusRequester = if (index == 0) playButtonFocusRequester else null,
+                                    cardFocusRequester = if (index == episodeFocusTargetIndex) firstEpisodeFocusRequester else null,
+                                    // "su" dall'episodio target torna al selettore stagioni.
+                                    upFocusRequester = if (index == episodeFocusTargetIndex) seasonSelectorFocusRequester else null,
                                     // "giù" dal download: prima card della rail suggerimenti.
                                     downFocusRequester = if (state.relatedContent.isNotEmpty()) relatedFirstCardFocusRequester else null,
                                     onClick = { onEpisodeClick(episode) },
