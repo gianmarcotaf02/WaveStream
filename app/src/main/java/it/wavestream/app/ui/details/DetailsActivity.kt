@@ -492,8 +492,10 @@ class DetailsActivity : ComponentActivity() {
             val tmdbId = movie.tmdbId ?: return@runCatching emptyList<Movie>()
             tmdbRelatedIds(tmdbId, "movie")
                 .filter { it != tmdbId }
-                .mapNotNull { movieDao.getMovieByTmdbId(it) }
-                .filter { !it.isHidden && it.id != movie.id }
+                // Solo contenuti realmente visibili in playlist (non nascosti,
+                // playlist abilitata): niente schede che poi risulterebbero vuote.
+                .mapNotNull { movieDao.getVisibleMovieByTmdbId(it) }
+                .filter { it.id != movie.id }
                 .take(10)
         }.getOrElse { emptyList() }
 
@@ -509,8 +511,9 @@ class DetailsActivity : ComponentActivity() {
             val tmdbId = series.tmdbId ?: return@runCatching emptyList<Series>()
             tmdbRelatedIds(tmdbId, "tv")
                 .filter { it != tmdbId }
-                .mapNotNull { seriesDao.getSeriesByTmdbId(it) }
-                .filter { !it.isHidden && it.id != series.id }
+                // Solo serie realmente visibili in playlist.
+                .mapNotNull { seriesDao.getVisibleSeriesByTmdbId(it) }
+                .filter { it.id != series.id }
                 .take(10)
         }.getOrElse { emptyList() }
 
@@ -556,9 +559,10 @@ class DetailsActivity : ComponentActivity() {
     /** Fallback: stessa categoria di playlist, per popolarità TMDB decrescente. */
     private suspend fun localRelatedFallback(movie: Movie): List<Movie> {
         val category = movie.category?.takeIf { it.isNotBlank() } ?: return emptyList()
+        val enabledPlaylists = playlistDao.getEnabledPlaylistsList().map { it.id }.toSet()
         return runCatching {
             movieDao.getMoviesByCategoryList(category)
-                .filter { it.id != movie.id && !it.isHidden }
+                .filter { it.id != movie.id && !it.isHidden && it.playlistId in enabledPlaylists }
                 .sortedByDescending { it.tmdbPopularity ?: 0f }
                 .take(10)
         }.getOrElse { emptyList() }
@@ -567,9 +571,10 @@ class DetailsActivity : ComponentActivity() {
     /** Fallback serie: stessa categoria di playlist, per popolarità TMDB decrescente. */
     private suspend fun localRelatedFallbackForSeries(series: Series): List<Series> {
         val category = series.category?.takeIf { it.isNotBlank() } ?: return emptyList()
+        val enabledPlaylists = playlistDao.getEnabledPlaylistsList().map { it.id }.toSet()
         return runCatching {
             seriesDao.getSeriesByCategoryList(category)
-                .filter { it.id != series.id && !it.isHidden }
+                .filter { it.id != series.id && !it.isHidden && it.playlistId in enabledPlaylists }
                 .sortedByDescending { it.tmdbPopularity ?: 0f }
                 .take(10)
         }.getOrElse { emptyList() }

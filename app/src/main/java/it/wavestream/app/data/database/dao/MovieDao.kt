@@ -74,6 +74,15 @@ interface MovieDao {
     
     @Query("SELECT * FROM movies WHERE tmdbId = :tmdbId LIMIT 1")
     suspend fun getMovieByTmdbId(tmdbId: Int): Movie?
+
+    /**
+     * Come [getMovieByTmdbId], ma solo se il film è realmente visibile: non
+     * nascosto e appartenente a una playlist ABILITATA. Usato dai suggerimenti
+     * "Potrebbe piacerti" per non mostrare contenuti non presenti/attivi.
+     */
+    @Query("SELECT m.* FROM movies m INNER JOIN playlists p ON p.id = m.playlistId " +
+        "WHERE m.tmdbId = :tmdbId AND m.isHidden = 0 AND p.isEnabled = 1 LIMIT 1")
+    suspend fun getVisibleMovieByTmdbId(tmdbId: Int): Movie?
     
     // LIMIT: senza, una query corta (es. "a") restituiva decine di migliaia di righe
     // da trasferire e poi riordinare in Kotlin. Con ORDER BY name SQLite può

@@ -64,6 +64,15 @@ interface SeriesDao {
     
     @Query("SELECT * FROM series WHERE tmdbId = :tmdbId LIMIT 1")
     suspend fun getSeriesByTmdbId(tmdbId: Int): Series?
+
+    /**
+     * Come [getSeriesByTmdbId], ma solo se la serie è realmente visibile: non
+     * nascosta e appartenente a una playlist ABILITATA. Usato dai suggerimenti
+     * "Potrebbe piacerti" per non mostrare contenuti non presenti/attivi.
+     */
+    @Query("SELECT s.* FROM series s INNER JOIN playlists p ON p.id = s.playlistId " +
+        "WHERE s.tmdbId = :tmdbId AND s.isHidden = 0 AND p.isEnabled = 1 LIMIT 1")
+    suspend fun getVisibleSeriesByTmdbId(tmdbId: Int): Series?
     
     // LIMIT 200 — vedi la nota in MovieDao.searchMovies: evita di restituire decine
     // di migliaia di righe sulle query corte.
