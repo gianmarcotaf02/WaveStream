@@ -756,7 +756,12 @@ fun DetailsScreen(
                                     val person = crew[index]
                                     CastPersonCard(
                                         person = person,
-                                        onClick = { onPersonClick(person.id, person.name) }
+                                        onClick = { onPersonClick(person.id, person.name) },
+                                        // Dalla rail del cast, "giù" va DIRETTAMENTE al
+                                        // selettore stagioni: senza redirect il focus, non
+                                        // trovando un target sotto, restava nella rail e
+                                        // saltava a una card a sinistra.
+                                        downFocusRequester = if (hasEpisodesSection) seasonSelectorFocusRequester else null
                                     )
                                 }
                             }
@@ -1277,7 +1282,8 @@ private fun RelatedContentCard(
 private fun CastPersonCard(
     person: PersonInfo,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    downFocusRequester: FocusRequester? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1305,6 +1311,9 @@ private fun CastPersonCard(
             }
             .clip(RoundedCornerShape(14.dp))
             .background(cardFill)
+            .then(
+                if (downFocusRequester != null) Modifier.focusProperties { down = downFocusRequester } else Modifier
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
