@@ -936,25 +936,8 @@ fun DetailsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .offset(y = hintBob.dp)
-                        .clip(RoundedCornerShape(999.dp))
-                        .background(GlassTokens.SurfaceFillStrong)
-                        .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(999.dp))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text(
-                        text = "Scorri per i suggerimenti",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = WaveStreamColors.TextPrimary,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
-                    )
-                    Spacer(modifier = Modifier.width(5.dp))
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        tint = WaveStreamColors.Accent,
-                        modifier = Modifier.size(15.dp)
-                    )
+                    ScrollHintPill()
                 }
             }
     }  // end inner Box (AnimatedVisibility content)
@@ -1111,6 +1094,37 @@ private fun RailRow(
             isLeft = false,
             enabled = listState.canScrollForward,
             onClick = { onScroll(true) }
+        )
+    }
+}
+
+/**
+ * Pill "Scorri per i suggerimenti" con freccia in basso. Condivisa tra film
+ * (overlay in basso) e serie (sotto il carosello episodi).
+ */
+@Composable
+private fun ScrollHintPill(modifier: Modifier = Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(RoundedCornerShape(999.dp))
+            .background(GlassTokens.SurfaceFillStrong)
+            .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(999.dp))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = "Scorri per i suggerimenti",
+            style = MaterialTheme.typography.labelMedium,
+            color = WaveStreamColors.TextPrimary,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowDown,
+            contentDescription = null,
+            tint = WaveStreamColors.Accent,
+            modifier = Modifier.size(15.dp)
         )
     }
 }
