@@ -831,8 +831,11 @@ class DetailsActivity : ComponentActivity() {
         // meglio del fallback locale (o il fallback non aveva niente), sostituisce
         // solo la rail.
         lifecycleScope.launch {
-            val related = relatedContentFor(movie)
-            if (related != state.relatedContent) {
+            // USA enrichedMovie: se il tmdbId non era già in DB viene impostato
+            // dall'arricchimento su enrichedMovie, non sulla `movie` stantia —
+            // con `movie` la rail restava vuota (nessun carosello né hint).
+            val related = relatedContentFor(enrichedMovie)
+            if (related.isNotEmpty() && related != state.relatedContent) {
                 state = state.copy(relatedContent = related)
                 onStateUpdate(state)
             }
