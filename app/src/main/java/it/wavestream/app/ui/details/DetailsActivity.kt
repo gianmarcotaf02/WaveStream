@@ -488,14 +488,16 @@ class DetailsActivity : ComponentActivity() {
      * oppure nessun match in catalogo → stessa categoria di playlist come prima.
      */
     private suspend fun relatedContentFor(movie: Movie): List<RelatedContent> {
-        // SOLO raccomandazioni TMDB (/recommendations + /similar), risolte sul
-        // catalogo. Nessun fallback di categoria: la rail è esclusivamente TMDB.
+        // SOLO raccomandazioni TMDB (/recommendations + /similar). La risoluzione
+        // sul catalogo usa lo stesso matching della Home (tmdbId, poi titolo+anno),
+        // perché il solo match per tmdbId lasciava la rail vuota quando i titoli
+        // consigliati non erano ancora arricchiti in catalogo.
+        val tmdbId = movie.tmdbId ?: return emptyList()
         val fromTmdb = runCatching {
-            val tmdbId = movie.tmdbId ?: return@runCatching emptyList<Movie>()
-            tmdbRelatedIds(tmdbId, "movie")
-                .filter { it != tmdbId }
-                .mapNotNull { movieDao.getMovieByTmdbId(it) }
-                .filter { !it.isHidden && it.id != movie.id }
+            tmdbService.getRelatedLocalIds(tmdbId, "movie")
+                .filter { it != movie.id }
+                .mapNotNull { movieDao.getMovieById(it) }
+                .filter { !it.isHidden }
                 .take(10)
         }.getOrElse { emptyList() }
         return fromTmdb.toRelatedContent()
@@ -505,13 +507,13 @@ class DetailsActivity : ComponentActivity() {
      *  Se TMDB non restituisce nulla di presente in catalogo, fallback locale
      *  sulla stessa categoria (come per i film) così la rail non resta vuota. */
     private suspend fun relatedContentForSeries(series: Series): List<RelatedContent> {
-        // SOLO raccomandazioni TMDB (mediaType "tv"), risolte sul catalogo.
+        // SOLO raccomandazioni TMDB (mediaType "tv"), con matching tmdbId → titolo+anno.
+        val tmdbId = series.tmdbId ?: return emptyList()
         val fromTmdb = runCatching {
-            val tmdbId = series.tmdbId ?: return@runCatching emptyList<Series>()
-            tmdbRelatedIds(tmdbId, "tv")
-                .filter { it != tmdbId }
-                .mapNotNull { seriesDao.getSeriesByTmdbId(it) }
-                .filter { !it.isHidden && it.id != series.id }
+            tmdbService.getRelatedLocalIds(tmdbId, "tv")
+                .filter { it != series.id }
+                .mapNotNull { seriesDao.getSeriesById(it) }
+                .filter { !it.isHidden }
                 .take(10)
         }.getOrElse { emptyList() }
 
@@ -523,24 +525,6 @@ class DetailsActivity : ComponentActivity() {
                 contentType = ContentType.SERIES
             )
         }
-    }
-
-    /**
-     * Id TMDB dei correlati: unisce `/recommendations` e `/similar` con gli **stessi
-     * pesi di `RecommendationEngine`** (raccomandazioni 2.0, similar 1.0), così la
-     * scheda usa lo stesso "motore" TMDB della Home. Un titolo presente in entrambe
-     * le liste sale in cima.
-     */
-    private suspend fun tmdbRelatedIds(tmdbId: Int, mediaType: String): List<Int> {
-        val recs = runCatching { tmdbService.getRecommendations(tmdbId, mediaType) }
-            .getOrElse { emptyList() }
-        val similar = runCatching { tmdbService.getSimilar(tmdbId, mediaType) }
-            .getOrElse { emptyList() }
-
-        val scores = LinkedHashMap<Int, Float>()
-        recs.forEach { scores[it.id] = (scores[it.id] ?: 0f) + 2.0f }
-        similar.forEach { scores[it.id] = (scores[it.id] ?: 0f) + 1.0f }
-        return scores.entries.sortedByDescending { it.value }.map { it.key }
     }
 
     /** Righe `Movie` → voci della rail. */

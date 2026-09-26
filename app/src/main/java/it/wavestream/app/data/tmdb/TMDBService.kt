@@ -1121,6 +1121,33 @@ class TMDBService @Inject constructor(
         }
     }
 
+    /**
+     * Id dei contenuti LOCALI corrispondenti alle raccomandazioni TMDB per un
+     * contenuto, usando lo STESSO matching della Home: prima per `tmdbId`, poi per
+     * titolo+anno ([matchMoviesWithLocal] / [matchSeriesWithLocal]).
+     *
+     * Serve alla rail "Potrebbe piacerti" della scheda: il match per solo `tmdbId`
+     * non basta quando i titoli consigliati non sono ancora arricchiti in catalogo,
+     * e la rail restava vuota (o con un solo elemento).
+     */
+    suspend fun getRelatedLocalIds(tmdbId: Int, mediaType: String): List<Long> = withContext(Dispatchers.IO) {
+        val recs = runCatching { getRecommendations(tmdbId, mediaType) }.getOrElse { emptyList() }
+        val similar = runCatching { getSimilar(tmdbId, mediaType) }.getOrElse { emptyList() }
+
+        // Raccomandazioni prima (peso maggiore), poi similar; dedup per tmdb id.
+        val merged = LinkedHashMap<Int, TMDBItem>()
+        recs.forEach { merged[it.id] = it }
+        similar.forEach { merged.putIfAbsent(it.id, it) }
+        val items = merged.values.toList()
+        if (items.isEmpty()) return@withContext emptyList()
+
+        if (mediaType == "tv") {
+            matchSeriesWithLocal(items, 12).mapNotNull { (it.localContent as? Series)?.id }
+        } else {
+            matchMoviesWithLocal(items, 12).mapNotNull { (it.localContent as? Movie)?.id }
+        }
+    }
+
     suspend fun getDiscoverByGenre(genreIds: List<Int>, mediaType: String, page: Int = 1): List<TMDBItem> = withContext(Dispatchers.IO) {
         try {
             val genresParam = genreIds.joinToString(",")
