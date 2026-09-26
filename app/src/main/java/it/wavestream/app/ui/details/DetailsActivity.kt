@@ -488,44 +488,34 @@ class DetailsActivity : ComponentActivity() {
      * oppure nessun match in catalogo → stessa categoria di playlist come prima.
      */
     private suspend fun relatedContentFor(movie: Movie): List<RelatedContent> {
+        // SOLO raccomandazioni TMDB (/recommendations + /similar), risolte sul
+        // catalogo. Nessun fallback di categoria: la rail è esclusivamente TMDB.
         val fromTmdb = runCatching {
             val tmdbId = movie.tmdbId ?: return@runCatching emptyList<Movie>()
             tmdbRelatedIds(tmdbId, "movie")
                 .filter { it != tmdbId }
-                // Solo contenuti realmente visibili in playlist (non nascosti,
-                // playlist abilitata): niente schede che poi risulterebbero vuote.
-                .mapNotNull { movieDao.getVisibleMovieByTmdbId(it) }
-                .filter { it.id != movie.id }
+                .mapNotNull { movieDao.getMovieByTmdbId(it) }
+                .filter { !it.isHidden && it.id != movie.id }
+                .take(10)
         }.getOrElse { emptyList() }
-
-        // Unisce i match TMDB al fallback di categoria (anch'esso filtrato su
-        // contenuti visibili): senza unione la rail mostrava UN solo titolo quando
-        // TMDB risolveva poco in catalogo.
-        val combined = (fromTmdb + localRelatedFallback(movie))
-            .distinctBy { it.id }
-            .take(12)
-        return combined.toRelatedContent()
+        return fromTmdb.toRelatedContent()
     }
 
     /** Stessa rail per le SERIE: `mediaType = "tv"`, id risolti su `series`.
      *  Se TMDB non restituisce nulla di presente in catalogo, fallback locale
      *  sulla stessa categoria (come per i film) così la rail non resta vuota. */
     private suspend fun relatedContentForSeries(series: Series): List<RelatedContent> {
+        // SOLO raccomandazioni TMDB (mediaType "tv"), risolte sul catalogo.
         val fromTmdb = runCatching {
             val tmdbId = series.tmdbId ?: return@runCatching emptyList<Series>()
             tmdbRelatedIds(tmdbId, "tv")
                 .filter { it != tmdbId }
-                // Solo serie realmente visibili in playlist.
-                .mapNotNull { seriesDao.getVisibleSeriesByTmdbId(it) }
-                .filter { it.id != series.id }
+                .mapNotNull { seriesDao.getSeriesByTmdbId(it) }
+                .filter { !it.isHidden && it.id != series.id }
+                .take(10)
         }.getOrElse { emptyList() }
 
-        // Unisce TMDB + fallback di categoria (visibile): evita la rail con UN solo
-        // elemento quando TMDB risolve poco in catalogo.
-        val combined = (fromTmdb + localRelatedFallbackForSeries(series))
-            .distinctBy { it.id }
-            .take(12)
-        return combined.map {
+        return fromTmdb.map {
             RelatedContent(
                 contentId = it.id,
                 title = it.name,
