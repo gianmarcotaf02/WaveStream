@@ -18,7 +18,8 @@ import javax.inject.Singleton
 @Singleton
 class MovieSourceResolver @Inject constructor(
     private val streamProviderDao: StreamProviderDao,
-    private val contentNameParser: ContentNameParser
+    private val contentNameParser: ContentNameParser,
+    private val streamProbeRepository: StreamProbeRepository
 ) {
 
     suspend fun resolve(movie: Movie): List<StreamProvider> {
@@ -26,6 +27,13 @@ class MovieSourceResolver @Inject constructor(
         if (providers.isNotEmpty()) return providers
         return listOf(synthetic(movie))
     }
+
+    /**
+     * Misura (e memorizza) la qualità **REALE** della sorgente con un probe headless.
+     * Best-effort: `null` se non è possibile misurarla.
+     */
+    suspend fun probeQuality(provider: StreamProvider): Int? =
+        streamProbeRepository.probeHeight(provider)
 
     /** Registra che una sorgente è stata usata (per ordinarla per ultima scelta). */
     suspend fun markUsed(providerId: Long) {

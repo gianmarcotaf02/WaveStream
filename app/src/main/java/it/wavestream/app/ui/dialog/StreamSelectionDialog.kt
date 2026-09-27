@@ -26,6 +26,7 @@ import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
+import kotlinx.coroutines.delay
 
 /**
  * Dialog mostrato quando un film unificato ha più versioni/sorgenti.
@@ -36,6 +37,9 @@ import it.wavestream.app.ui.theme.WaveStreamColors
  *
  * Ogni riga mostra: titolo del contenuto, qualità rilevata dal VOD, categoria di
  * appartenenza e durata. Le sorgenti arrivano già ordinate per qualità dal DAO.
+ *
+ * @param probeQuality se non null, misura in background la qualità **REALE** delle
+ *        sorgenti non ancora verificate (un probe alla volta) e aggiorna i badge.
  */
 @Composable
 fun MovieSourceDialog(
@@ -43,9 +47,32 @@ fun MovieSourceDialog(
     sources: List<StreamProvider>,
     fallbackDurationSeconds: Long? = null,
     onSelect: (StreamProvider) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    probeQuality: (suspend (StreamProvider) -> Int?)? = null
 ) {
     val firstFocus = remember { FocusRequester() }
+
+    // Altezze misurate a runtime dal probe (chiave = id sorgente) e id in misurazione.
+    val probedHeights = remember { mutableStateMapOf<Long, Int>() }
+    val probingIds = remember { mutableStateOf(emptySet<Long>()) }
+
+    // Probe SERIALE: una sorgente alla volta per non consumare più slot di
+    // connessione del provider. Parte subito, il menu resta immediato.
+    LaunchedEffect(sources, probeQuality) {
+        if (probeQuality == null) return@LaunchedEffect
+        val pending = sources.filter {
+            it.id > 0 && (it.detectedHeight ?: 0) <= 0 && !probedHeights.containsKey(it.id)
+        }
+        if (pending.isEmpty()) return@LaunchedEffect
+        for (provider in pending) {
+            probingIds.value = probingIds.value + provider.id
+            val height = runCatching { probeQuality(provider) }.getOrNull()
+            if (height != null && height > 0) probedHeights[provider.id] = height
+            probingIds.value = probingIds.value - provider.id
+            // Piccola pausa tra un probe e l'altro: cortesia verso il provider.
+            delay(150)
+        }
+    }
 
     Dialog(onDismissRequest = onDismiss) {
         GlassSurface(
@@ -81,6 +108,8 @@ fun MovieSourceDialog(
                     itemsIndexed(sources, key = { _, p -> p.id }) { index, provider ->
                         SourceItem(
                             provider = provider,
+                            probedHeight = probedHeights[provider.id],
+                            isProbing = provider.id in probingIds.value,
                             fallbackDurationSeconds = fallbackDurationSeconds,
                             focusRequester = if (index == 0) firstFocus else null,
                             onClick = { onSelect(provider) }
@@ -105,6 +134,8 @@ fun MovieSourceDialog(
 @Composable
 private fun SourceItem(
     provider: StreamProvider,
+    probedHeight: Int?,
+    isProbing: Boolean,
     fallbackDurationSeconds: Long?,
     focusRequester: FocusRequester?,
     onClick: () -> Unit
@@ -165,11 +196,11 @@ private fun SourceItem(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            val qualityText = qualityLabel(provider)
+            val qualityText = qualityLabel(provider, probedHeight)
             if (qualityText.isNotEmpty()) {
                 // Badge OVALE in vetro accent: stessa trasparenza delle superfici della
                 // topbar (GlassTokens.accentFill = 12% di accent) + bordo a gradiente.
-                // Il valore è "reale" quando possibile: vedi [qualityLabel].
+                // Il valore è REALE quando il probe/player l'ha misurato: vedi [qualityLabel].
                 GlassSurface(
                     shape = RoundedCornerShape(50),
                     fill = GlassTokens.accentFill(WaveStreamColors.Accent),
@@ -180,6 +211,22 @@ private fun SourceItem(
                         text = qualityText,
                         style = MaterialTheme.typography.labelSmall,
                         color = WaveStreamColors.AccentLight,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                    )
+                }
+            } else if (isProbing) {
+                // Misurazione in corso: stesso badge ma neutro, così la riga non "salta".
+                GlassSurface(
+                    shape = RoundedCornerShape(50),
+                    fill = GlassTokens.SurfaceFill,
+                    stroke = GlassTokens.StrokeGradient,
+                    strokeWidth = 1.dp
+                ) {
+                    Text(
+                        text = "…",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = WaveStreamColors.TextTertiary,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
                     )
@@ -224,16 +271,16 @@ private fun GlassDismissButton(text: String, onClick: () -> Unit) {
 /**
  * Etichetta qualità del badge.
  *
- * 1. Se disponibile, usa la risoluzione **REALE** misurata dal player quando la sorgente è
- *    stata riprodotta ([StreamProvider.detectedHeight]): è l'unico dato verificato sul
- *    contenuto effettivamente riproducibile.
- * 2. Altrimenti ricade su quanto **dichiara il nome della sorgente** (`quality`/`resolution`,
- *    derivati da [it.wavestream.app.data.parser.ContentNameParser]).
+ * 1. Risoluzione misurata dal **probe headless** appena eseguito ([probedHeight]).
+ * 2. Risoluzione **REALE** misurata dal player in una riproduzione precedente
+ *    ([StreamProvider.detectedHeight]).
+ * 3. Fallback sulla qualità **dichiarata dal nome della sorgente** (`quality`/`resolution`).
  *
  * La categoria di appartenenza del contenuto NON viene mai usata: stare nella categoria
  * "4K" non significa essere 4K.
  */
-private fun qualityLabel(provider: StreamProvider): String {
+private fun qualityLabel(provider: StreamProvider, probedHeight: Int?): String {
+    probedHeight?.takeIf { it > 0 }?.let { return detectedQualityLabel(it) }
     provider.detectedHeight?.takeIf { it > 0 }?.let { return detectedQualityLabel(it) }
     return declaredQualityLabel(provider)
 }

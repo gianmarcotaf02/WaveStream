@@ -182,7 +182,8 @@ class DetailsActivity : ComponentActivity() {
                     lifecycleScope.launch { movieSourceResolver.markUsed(provider.id) }
                     launchPlayer(provider.streamUrl, null, provider.id)
                 },
-                onDismiss = { pendingMovieSources.value = null }
+                onDismiss = { pendingMovieSources.value = null },
+                probeQuality = { provider -> movieSourceResolver.probeQuality(provider) }
             )
         }
 
