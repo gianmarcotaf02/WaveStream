@@ -224,7 +224,8 @@ class MainActivity : FragmentActivity() {
                                 lifecycleScope.launch { movieSourceResolver.markUsed(provider.id) }
                                 launchPlayer(provider.movieId ?: 0L, "MOVIE", pendingMovieTitle, provider.streamUrl, provider.id)
                             },
-                            onDismiss = { pendingMovieSources.value = null }
+                            onDismiss = { pendingMovieSources.value = null },
+                            probeQuality = { provider -> movieSourceResolver.probeQuality(provider) }
                         )
                     }
                 }
