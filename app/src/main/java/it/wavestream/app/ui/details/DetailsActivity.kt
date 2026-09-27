@@ -548,55 +548,68 @@ class DetailsActivity : ComponentActivity() {
         return tokens.any { it in relatedExcludedTokens }
     }
 
+    /**
+     * Rail "Potrebbe piacerti" per i FILM.
+     *
+     * SOLO raccomandazioni TMDB (/recommendations + /similar), ma ogni voce è
+     * **risolta sul catalogo locale** ([movieDao]) con lo stesso matching della
+     * Home (tmdbId, poi titolo+anno): la rail mostra quindi solo contenuti
+     * realmente presenti in playlist, e il tap naviga sulla loro riga unificata.
+     *
+     * La copertina usa il poster ufficiale della raccomandazione TMDB (se c'è),
+     * così un titolo locale non ancora arricchito non espone il logo del provider
+     * (es. la bandiera tedesca di un doppione di lingua).
+     */
     private suspend fun relatedContentFor(movie: Movie): List<RelatedContent> {
-        // SOLO raccomandazioni TMDB (/recommendations + /similar). La risoluzione
-        // sul catalogo usa lo stesso matching della Home (tmdbId, poi titolo+anno),
-        // perché il solo match per tmdbId lasciava la rail vuota quando i titoli
-        // consigliati non erano ancora arricchiti in catalogo.
         val tmdbId = movie.tmdbId ?: return emptyList()
-        val fromTmdb = runCatching {
+        return runCatching {
             tmdbService.getRelatedLocalIds(tmdbId, "movie")
-                .filter { it != movie.id }
-                .mapNotNull { movieDao.getMovieById(it) }
-                .filter { !it.isHidden && !isExcludedRelatedTitle(it.name) }
+                .asSequence()
+                .filter { it.localId != movie.id }
+                .mapNotNull { related ->
+                    val local = movieDao.getMovieById(related.localId) ?: return@mapNotNull null
+                    if (local.isHidden || isExcludedRelatedTitle(local.name)) return@mapNotNull null
+                    RelatedContent(
+                        contentId = local.id,
+                        // Il marcatore di doppione del provider ("(4)") non va mai mostrato.
+                        title = ContentKey.stripDuplicateMarker(local.title),
+                        posterUrl = related.tmdbPosterUrl() ?: local.posterUrl,
+                        contentType = ContentType.MOVIE
+                    )
+                }
                 .take(10)
+                .toList()
         }.getOrElse { emptyList() }
-        return fromTmdb.toRelatedContent()
     }
 
-    /** Stessa rail per le SERIE: `mediaType = "tv"`, id risolti su `series`.
+    /** Stessa rail per le SERIE: `mediaType = "tv"`, voci risolte su `series`.
      *  Se TMDB non restituisce nulla di presente in catalogo, fallback locale
      *  sulla stessa categoria (come per i film) così la rail non resta vuota. */
     private suspend fun relatedContentForSeries(series: Series): List<RelatedContent> {
         // SOLO raccomandazioni TMDB (mediaType "tv"), con matching tmdbId → titolo+anno.
         val tmdbId = series.tmdbId ?: return emptyList()
-        val fromTmdb = runCatching {
+        return runCatching {
             tmdbService.getRelatedLocalIds(tmdbId, "tv")
-                .filter { it != series.id }
-                .mapNotNull { seriesDao.getSeriesById(it) }
-                .filter { !it.isHidden && !isExcludedRelatedTitle(it.name) }
+                .asSequence()
+                .filter { it.localId != series.id }
+                .mapNotNull { related ->
+                    val local = seriesDao.getSeriesById(related.localId) ?: return@mapNotNull null
+                    if (local.isHidden || isExcludedRelatedTitle(local.name)) return@mapNotNull null
+                    RelatedContent(
+                        contentId = local.id,
+                        title = ContentKey.stripDuplicateMarker(local.name),
+                        posterUrl = related.tmdbPosterUrl() ?: local.posterUrl,
+                        contentType = ContentType.SERIES
+                    )
+                }
                 .take(10)
+                .toList()
         }.getOrElse { emptyList() }
-
-        return fromTmdb.map {
-            RelatedContent(
-                contentId = it.id,
-                title = it.name,
-                posterUrl = it.posterUrl,
-                contentType = ContentType.SERIES
-            )
-        }
     }
 
-    /** Righe `Movie` → voci della rail. */
-    private fun List<Movie>.toRelatedContent(): List<RelatedContent> = map {
-        RelatedContent(
-            contentId = it.id,
-            title = it.name,
-            posterUrl = it.posterUrl,
-            contentType = ContentType.MOVIE
-        )
-    }
+    /** Poster ufficiale TMDB (w500) di una voce della rail, se disponibile. */
+    private fun TMDBService.RelatedLocal.tmdbPosterUrl(): String? =
+        posterPath?.let { "https://image.tmdb.org/t/p/w500$it" }
 
     private suspend fun loadMovie(onStateUpdate: (DetailsState) -> Unit) {
         Log.d(TAG, "loadMovie: contentId=$contentId, contentType=$contentType")
