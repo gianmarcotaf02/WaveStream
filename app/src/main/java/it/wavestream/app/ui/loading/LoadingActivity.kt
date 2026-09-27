@@ -225,6 +225,10 @@ class LoadingActivity : ComponentActivity() {
                 // è un lavoro pesante su librerie grandi e NON deve bloccare l'avvio.
                 // Guardata da flag: dopo la prima esecuzione è praticamente un no-op.
                 applicationScope.launch(Dispatchers.IO) {
+                    // Pulizia una-tantum dei marcatori di doppione nei titoli già
+                    // importati ("Iron Man 2 (4)" → "Iron Man 2") + riunificazione.
+                    runCatching { movieUnificationService.runDuplicateMarkerCleanupIfNeeded() }
+                        .onFailure { Log.e("LoadingActivity", "Duplicate-marker cleanup failed", it) }
                     runCatching { movieUnificationService.runFirstTimeIfNeeded() }
                         .onFailure { Log.e("LoadingActivity", "Movie unification failed", it) }
                     // Dopo l'arricchimento TMDB molti film hanno ora un tmdbId: unifica le

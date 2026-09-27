@@ -442,6 +442,57 @@ class MovieUnificationService @Inject constructor(
         }
     }
 
+    /**
+     * Migrazione una-tantum dei cataloghi già importati: rimuove dal titolo dei
+     * film i marcatori di doppione accodati dal provider (es. `"Iron Man 2 (4)"`,
+     * `"Guardians of the Galaxy Vol. 2 (11)"`), ricalcola `cleanName`/`groupKey` e
+     * **riunifica** i duplicati che fino a ora restavano separati.
+     *
+     * Senza questo passaggio le righe già in DB mantengono il titolo sporco:
+     * la ricerca TMDB fallisce (scheda vuota, badge "N/A", copertina = logo del
+     * provider) e i doppioni non si uniscono. Idempotente e guardata da flag.
+     */
+    suspend fun runDuplicateMarkerCleanupIfNeeded() {
+        if (userPreferences.isMovieTitlesCleanedV1()) return
+        withContext(Dispatchers.IO) {
+            try {
+                var changed = false
+                appDatabase.withTransaction {
+                    val all = movieDao.getAllMoviesIncludingHidden()
+                    val updated = ArrayList<Movie>()
+                    for (m in all) {
+                        val name = ContentKey.stripDuplicateMarker(m.name)
+                        val cleanName = m.cleanName
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { ContentKey.stripDuplicateMarker(it) }
+                            ?: name
+                        if (name != m.name || cleanName != m.cleanName) {
+                            updated += m.copy(
+                                name = name,
+                                cleanName = cleanName,
+                                groupKey = ContentKey.groupKey(cleanName, m.year)
+                            )
+                        }
+                    }
+                    Log.i(TAG, "Duplicate-marker cleanup: ${updated.size}/${all.size} titoli ripuliti")
+                    if (updated.isNotEmpty()) {
+                        movieDao.updateList(updated)
+                        changed = true
+                    }
+                }
+
+                // I titoli ora coincidono: unifica le righe che erano rimaste separate
+                // a causa del marcatore ("iron man 2 4" vs "iron man 2").
+                if (changed) unifyAllPlaylists()
+
+                userPreferences.setMovieTitlesCleanedV1(true)
+                Log.i(TAG, "Duplicate-marker cleanup completed")
+            } catch (e: Exception) {
+                Log.e(TAG, "Duplicate-marker cleanup failed", e)
+            }
+        }
+    }
+
     // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
