@@ -1,5 +1,7 @@
 package it.wavestream.app.ui.home
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -63,6 +65,9 @@ import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.data.repository.SerieATabellino
 import it.wavestream.app.ui.epg.EpgProgram
+import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 
 data class SerieAChannelPickerState(
@@ -140,18 +145,26 @@ fun SerieAChannelPickerDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Column(
+        Box(
             modifier = modifier
                 .fillMaxSize()
-                .background(WaveStreamColors.BackgroundDark)
-                .padding(24.dp)
+                .background(WaveStreamColors.BackgroundGradient)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp)
+            ) {
             // ===== Header: backdrop hero + close (compatto) =====
-            Box(
+            // Pannello in vetro: il backdrop partita viene ritagliato dalla superficie
+            // glass, che aggiunge bordo a gradiente e raccorda l'header al resto.
+            GlassSurface(
+                shape = GlassTokens.RadiusLarge,
+                fill = GlassTokens.SurfaceFill,
+                stroke = GlassTokens.StrokeGradient,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(140.dp)
-                    .clip(RoundedCornerShape(24.dp))
             ) {
                 SerieAMatchHeroBackdrop(
                     match = match,
@@ -244,8 +257,9 @@ fun SerieAChannelPickerDialog(
                     state = tabellinoState
                 )
             }
-        }
-    }
+            } // Column
+        } // Box
+    } // Dialog
 }
 
 // ========== Tab: Canali ==========
@@ -481,13 +495,14 @@ private fun EventBubble(
     isFocused: Boolean,
     content: @Composable () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(if (isFocused) Color(0xFF444444) else Color(0x66000000))
-            .padding(8.dp)
+    val accent = WaveStreamColors.Accent
+    GlassSurface(
+        shape = RoundedCornerShape(10.dp),
+        fill = if (isFocused) GlassTokens.accentFill(accent) else GlassTokens.SurfaceFill,
+        stroke = if (isFocused) GlassTokens.accentStroke(accent) else GlassTokens.StrokeGradient,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp
     ) {
-        content()
+        Box(modifier = Modifier.padding(8.dp)) { content() }
     }
 }
 
@@ -587,12 +602,12 @@ private fun EventContent(incident: SofascoreIncident, alignment: Alignment.Horiz
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
                                 text = incident.playerIn?.name ?: "?",
-                                color = Color(0xFF3FC46B),
+                                color = WaveStreamColors.Success,
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
                                 text = incident.playerOut?.name ?: "?",
-                                color = Color(0xFFE05A5A),
+                                color = WaveStreamColors.Error,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -612,12 +627,12 @@ private fun EventContent(incident: SofascoreIncident, alignment: Alignment.Horiz
                         Column(horizontalAlignment = Alignment.Start) {
                             Text(
                                 text = incident.playerIn?.name ?: "?",
-                                color = Color(0xFF3FC46B),
+                                color = WaveStreamColors.Success,
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
                                 text = incident.playerOut?.name ?: "?",
-                                color = Color(0xFFE05A5A),
+                                color = WaveStreamColors.Error,
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -653,18 +668,42 @@ private fun FormazioniTab(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                LineupColumn(
-                    teamName = match.homeShortName,
-                    formation = t.homeFormation,
-                    players = t.homePlayers,
-                    modifier = Modifier.weight(1f)
-                )
-                LineupColumn(
-                    teamName = match.awayShortName,
-                    formation = t.awayFormation,
-                    players = t.awayPlayers,
-                    modifier = Modifier.weight(1f)
-                )
+                // Ogni formazione è un pannello in vetro: due colonne simmetriche
+                // che si staccano dal fondo Aurora senza bordi netti.
+                GlassSurface(
+                    shape = GlassTokens.RadiusMedium,
+                    fill = GlassTokens.SurfaceFill,
+                    stroke = GlassTokens.StrokeGradient,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    LineupColumn(
+                        teamName = match.homeShortName,
+                        formation = t.homeFormation,
+                        players = t.homePlayers,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
+                GlassSurface(
+                    shape = GlassTokens.RadiusMedium,
+                    fill = GlassTokens.SurfaceFill,
+                    stroke = GlassTokens.StrokeGradient,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    LineupColumn(
+                        teamName = match.awayShortName,
+                        formation = t.awayFormation,
+                        players = t.awayPlayers,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
             }
         }
     }
@@ -771,30 +810,46 @@ private fun MatchTabButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+
+    val accent = WaveStreamColors.Accent
+    // Pillola in vetro che si "accende": accent se selezionata, bianca al focus,
+    // neutra altrimenti (stesso linguaggio delle sorgenti nel dialog streaming).
+    val fill by animateColorAsState(
+        targetValue = when {
+            selected -> GlassTokens.accentFill(accent)
+            isFocused -> GlassTokens.SurfaceFillFocused
+            else -> GlassTokens.SurfaceFill
+        },
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "matchTabFill"
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringGlass,
+        label = "matchTabScale"
+    )
+    val stroke = if (selected || isFocused) {
+        GlassTokens.accentStroke(accent)
+    } else {
+        GlassTokens.StrokeGradient
+    }
+
+    GlassSurface(
+        shape = RoundedCornerShape(50),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (selected || isFocused) 1.5.dp else 1.dp,
         modifier = Modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                when {
-                    selected -> WaveStreamColors.Accent.copy(alpha = 0.25f)
-                    isFocused -> Color.White.copy(alpha = 0.12f)
-                    else -> WaveStreamColors.BackgroundTertiary
-                }
-            )
-            .border(
-                width = if (isFocused) 2.dp else 0.dp,
-                color = if (isFocused) Color.White else Color.Transparent,
-                shape = RoundedCornerShape(10.dp)
-            )
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
             .focusable(interactionSource = interactionSource)
-            .padding(horizontal = 22.dp, vertical = 10.dp)
     ) {
         Text(
             text = label,
-            color = if (selected || isFocused) Color.White else WaveStreamColors.TextSecondary,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (selected) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+            modifier = Modifier.padding(horizontal = 22.dp, vertical = 10.dp)
         )
     }
 }
@@ -817,34 +872,39 @@ private fun CloseButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    Box(
-        contentAlignment = Alignment.Center,
+
+    val accent = WaveStreamColors.Accent
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) GlassTokens.accentFill(accent) else GlassTokens.SurfaceFillDark,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "closeFill"
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.IconButtonFocusScale else 1f,
+        animationSpec = AppAnimations.SpringGlass,
+        label = "closeScale"
+    )
+    val stroke = if (isFocused) GlassTokens.accentStroke(accent) else GlassTokens.StrokeGradient
+
+    GlassSurface(
+        shape = CircleShape,
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
         modifier = modifier
             .padding(16.dp)
             .size(44.dp)
-            .graphicsLayer {
-                val s = if (isFocused) 1.1f else 1f
-                scaleX = s
-                scaleY = s
-            }
-            .background(
-                color = if (isFocused) WaveStreamColors.Accent else Color.Black.copy(alpha = 0.55f),
-                shape = CircleShape
-            )
-            .border(
-                width = if (isFocused) 2.dp else 0.dp,
-                color = if (isFocused) Color.White else Color.Transparent,
-                shape = CircleShape
-            )
-            .clip(CircleShape)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
             .clickable(interactionSource = interactionSource, indication = null, onClick = onDismiss)
             .focusable(interactionSource = interactionSource)
     ) {
-        Icon(
-            imageVector = Icons.Filled.Close,
-            contentDescription = "Chiudi",
-            tint = Color.White
-        )
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Chiudi",
+                tint = if (isFocused) accent else WaveStreamColors.TextPrimary
+            )
+        }
     }
 }
 
@@ -859,49 +919,69 @@ private fun ChannelPickCard(
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        val accent = WaveStreamColors.Accent
+        // Card canale in vetro: neutra a riposo, si accende di accent al focus
+        // (fill + bordo gradiente), come le righe sorgente del dialog streaming.
+        val fill by animateColorAsState(
+            targetValue = if (isFocused) GlassTokens.accentFill(accent) else GlassTokens.SurfaceFill,
+            animationSpec = AppAnimations.SpringCardFocusColor,
+            label = "channelCardFill"
+        )
+        val scale by animateFloatAsState(
+            targetValue = if (isFocused) AppAnimations.ButtonFocusScale else 1f,
+            animationSpec = AppAnimations.SpringCardFocus,
+            label = "channelCardScale"
+        )
+        val stroke = if (isFocused) GlassTokens.accentStroke(accent) else GlassTokens.StrokeGradient
+
+        GlassSurface(
+            shape = RoundedCornerShape(14.dp),
+            fill = fill,
+            stroke = stroke,
+            strokeWidth = if (isFocused) 1.5.dp else 1.dp,
             modifier = Modifier
-                .graphicsLayer {
-                    val s = if (isFocused) 1.05f else 1f
-                    scaleX = s
-                    scaleY = s
-                }
                 .fillMaxWidth()
-                .background(
-                    color = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.BackgroundTertiary,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .border(
-                    width = if (isFocused) 2.dp else 0.dp,
-                    color = if (isFocused) Color.White else Color.Transparent,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .clip(RoundedCornerShape(12.dp))
+                .graphicsLayer { scaleX = scale; scaleY = scale }
                 .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
                 .focusable(interactionSource = interactionSource)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            AsyncImage(
-                model = channel.logoUrl,
-                contentDescription = null,
-                modifier = Modifier.size(44.dp)
-            )
-            Text(
-                text = channel.name,
-                color = Color.White,
-                fontWeight = if (isFocused) FontWeight.Bold else FontWeight.Medium,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                imageVector = Icons.Filled.PlayArrow,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.9f)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                // Logo del canale su un piccolo disco in vetro: stacca su qualsiasi backdrop.
+                GlassSurface(
+                    shape = CircleShape,
+                    fill = GlassTokens.SurfaceFillStrong,
+                    stroke = GlassTokens.StrokeGradient,
+                    strokeWidth = 1.dp
+                ) {
+                    AsyncImage(
+                        model = channel.logoUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(44.dp)
+                            .padding(6.dp)
+                    )
+                }
+                Text(
+                    text = channel.name,
+                    color = WaveStreamColors.TextPrimary,
+                    fontWeight = if (isFocused) FontWeight.Bold else FontWeight.Medium,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    tint = if (isFocused) accent else WaveStreamColors.TextSecondary
+                )
+            }
         }
 
         // EPG fuori dalla card (sotto), mostrato solo se disponibile.
