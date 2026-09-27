@@ -150,6 +150,21 @@ fun TvPlayerScreen(
     val playerViewState = remember { mutableStateOf<PlayerView?>(null) }
     val creditsDebugText = remember { mutableStateOf("") }
 
+    // Fade-through sul cambio sorgente (es. switch canale live): il video entra in
+    // dissolvenza quando cambia currentChannelId.
+    val surfaceAlpha = remember { Animatable(1f) }
+    var lastChannelId by remember { mutableStateOf(currentChannelId) }
+    LaunchedEffect(currentChannelId) {
+        if (currentChannelId != lastChannelId) {
+            lastChannelId = currentChannelId
+            surfaceAlpha.snapTo(0f)
+            surfaceAlpha.animateTo(
+                1f,
+                tween(AppAnimations.FadeEnterMs, easing = AppAnimations.Emphasized)
+            )
+        }
+    }
+
     CreditsWatchdog(
         playerView = playerViewState.value,
         enabled = creditsDetectionEnabled,
@@ -283,6 +298,7 @@ fun TvPlayerScreen(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .width(videoWidth)
+                .graphicsLayer { alpha = surfaceAlpha.value }
                 .then(
                     if (isMiniPlayer) {
                         Modifier
@@ -344,8 +360,8 @@ fun TvPlayerScreen(
         // Controls overlay
         AnimatedVisibility(
             visible = controlsVisible && !isMiniPlayer,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(300))
+            enter = AppAnimations.overlayIn,
+            exit = AppAnimations.overlayOut
         ) {
             ModernPlayerControls(
                 title = title,
