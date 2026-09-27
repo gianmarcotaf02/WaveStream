@@ -55,19 +55,26 @@ fun MovieSourceDialog(
     // Altezze misurate a runtime dal probe (chiave = id sorgente) e id in misurazione.
     val probedHeights = remember { mutableStateMapOf<Long, Int>() }
     val probingIds = remember { mutableStateOf(emptySet<Long>()) }
+    // Probe già falliti: non li ritentiamo a ogni ricomposizione (es. lambda rigenerata).
+    val failedIds = remember { mutableStateOf(emptySet<Long>()) }
 
     // Probe SERIALE: una sorgente alla volta per non consumare più slot di
     // connessione del provider. Parte subito, il menu resta immediato.
     LaunchedEffect(sources, probeQuality) {
         if (probeQuality == null) return@LaunchedEffect
         val pending = sources.filter {
-            it.id > 0 && (it.detectedHeight ?: 0) <= 0 && !probedHeights.containsKey(it.id)
+            it.id > 0 && (it.detectedHeight ?: 0) <= 0 &&
+                !probedHeights.containsKey(it.id) && it.id !in failedIds.value
         }
         if (pending.isEmpty()) return@LaunchedEffect
         for (provider in pending) {
             probingIds.value = probingIds.value + provider.id
             val height = runCatching { probeQuality(provider) }.getOrNull()
-            if (height != null && height > 0) probedHeights[provider.id] = height
+            if (height != null && height > 0) {
+                probedHeights[provider.id] = height
+            } else {
+                failedIds.value = failedIds.value + provider.id
+            }
             probingIds.value = probingIds.value - provider.id
             // Piccola pausa tra un probe e l'altro: cortesia verso il provider.
             delay(150)
