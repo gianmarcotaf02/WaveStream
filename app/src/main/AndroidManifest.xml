@@ -12,6 +12,9 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Notifica "aggiornamento installato": unico modo per rientrare nell'app dopo
+         un self-update, perché Android 10+ blocca la riapertura automatica (BAL). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <!-- Microfono per l'assistente vocale AI -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
 

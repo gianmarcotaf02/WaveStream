@@ -1,7 +1,9 @@
 package it.wavestream.app.ui.profile
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
@@ -10,6 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.ProfileDao
 import it.wavestream.app.data.database.entity.Profile
 import it.wavestream.app.data.preferences.UserPreferences
+import it.wavestream.app.service.NotificationHelper
 import it.wavestream.app.ui.loading.SplashScreen
 import it.wavestream.app.ui.setup.SetupActivity
 import it.wavestream.app.ui.theme.WaveStreamTheme
@@ -67,6 +70,33 @@ class ProfileSelectionActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         android.util.Log.d("WaveStreamDebug", "ProfileSelectionActivity onResume")
+
+        // Se stiamo tornando qui dopo un self-update la notifica ha esaurito il suo
+        // scopo (l'app è di nuovo in primo piano) e mostriamo la conferma una tantum.
+        NotificationHelper.cancelUpdateInstalledNotification(this)
+        showUpdateCompletedNotice()
+    }
+
+    /**
+     * Conferma "aggiornamento completato" mostrata al primo rientro nell'app dopo
+     * un self-update. Il flag è scritto da
+     * [it.wavestream.app.update.PackageReplacedReceiver]: serve perché su Android 10+
+     * la notifica è l'unico feedback possibile e può facilmente non essere vista.
+     */
+    private fun showUpdateCompletedNotice() {
+        val prefs = getSharedPreferences(
+            it.wavestream.app.update.PackageReplacedReceiver.PREFS,
+            Context.MODE_PRIVATE
+        )
+        val version = prefs.getString(
+            it.wavestream.app.update.PackageReplacedReceiver.KEY_PENDING_VERSION,
+            null
+        ) ?: return
+
+        prefs.edit()
+            .remove(it.wavestream.app.update.PackageReplacedReceiver.KEY_PENDING_VERSION)
+            .apply()
+        Toast.makeText(this, getString(R.string.update_completed_toast, version), Toast.LENGTH_LONG).show()
     }
     
     @Composable

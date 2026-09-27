@@ -3,6 +3,8 @@ package it.wavestream.app.ui.settings
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.ComponentActivity
@@ -49,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.lifecycleScope
@@ -2515,10 +2518,19 @@ private fun StorageSettings(
 @Composable
 private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateManager, contentFocusRequester: FocusRequester? = null) {
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     var isChecking by remember { mutableStateOf(false) }
     var updateInfo by remember { mutableStateOf<it.wavestream.app.update.UpdateInfo?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var noUpdateMessage by remember { mutableStateOf<String?>(null) }
+    var showInstallConfirm by remember { mutableStateOf(false) }
+
+    // La notifica "aggiornamento installato" è l'unico modo affidabile per rientrare
+    // nell'app dopo il self-update (Android 10+ blocca il riavvio automatico), quindi
+    // chiediamo il permesso notifiche (API 33+) proprio quando si installa.
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { /* esito ignorato: la notifica è un aiuto, non un requisito per installare */ }
     
     val downloadState by updateManager.downloadState.collectAsState()
     
@@ -2787,7 +2799,7 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
                         }
                         is it.wavestream.app.update.DownloadState.Downloaded -> {
                             Button(
-                                onClick = { coroutineScope.launch { updateManager.installUpdate() } },
+                                onClick = { showInstallConfirm = true },
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981)),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -2828,6 +2840,101 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
             }
         }
     }
+    if (showInstallConfirm) {
+        UpdateInstallConfirmDialog(
+            onConfirm = {
+                showInstallConfirm = false
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    ContextCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+                coroutineScope.launch { updateManager.installUpdate() }
+            },
+            onDismiss = { showInstallConfirm = false }
+        )
+    }
+}
+
+/**
+ * Conferma prima di avviare il self-update.
+ *
+ * L'installazione di un aggiornamento in-place **chiude** per forza il processo dell'app
+ * e da Android 10 in poi il sistema impedisce all'app di riaprirsi da sola (BAL). Senza
+ * questo avviso la chiusura improvvisa sembra un crash; con l'avviso l'utente sa che
+ * deve rientrare dalla Home (o dalla notifica "Aggiornamento installato").
+ */
+@Composable
+private fun UpdateInstallConfirmDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val installFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        installFocus.requestFocusWhenReady()
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = WaveStreamColors.BackgroundElevated,
+        title = {
+            Text("Installa aggiornamento", color = WaveStreamColors.TextPrimary)
+        },
+        text = {
+            Text(
+                "Per completare l'aggiornamento WaveStream verrà chiusa e sostituita con la nuova " +
+                    "versione. Android non le permette di riaprirsi da sola: al termine torna su " +
+                    "WaveStream dalla schermata Home oppure tocca la notifica \"Aggiornamento installato\".",
+                color = WaveStreamColors.TextSecondary
+            )
+        },
+        confirmButton = {
+            val interactionSource = remember { MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+            Button(
+                onClick = onConfirm,
+                modifier = Modifier
+                    .focusRequester(installFocus)
+                    .graphicsLayer {
+                        scaleX = if (isFocused) 1.05f else 1f
+                        scaleY = if (isFocused) 1.05f else 1f
+                    }
+                    .border(
+                        width = if (isFocused) 2.dp else 0.dp,
+                        color = if (isFocused) Color.White else Color.Transparent,
+                        shape = RoundedCornerShape(20.dp)
+                    ),
+                interactionSource = interactionSource,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF10B981))
+            ) {
+                Text("Installa")
+            }
+        },
+        dismissButton = {
+            val interactionSource = remember { MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .graphicsLayer {
+                        scaleX = if (isFocused) 1.05f else 1f
+                        scaleY = if (isFocused) 1.05f else 1f
+                    }
+                    .border(
+                        width = if (isFocused) 2.dp else 0.dp,
+                        color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                        shape = RoundedCornerShape(20.dp)
+                    ),
+                interactionSource = interactionSource,
+                colors = ButtonDefaults.textButtonColors(contentColor = WaveStreamColors.TextSecondary)
+            ) {
+                Text("Annulla")
+            }
+        }
+    )
 }
 
 @Composable
