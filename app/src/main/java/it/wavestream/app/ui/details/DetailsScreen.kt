@@ -951,6 +951,8 @@ fun DetailsScreen(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 10.dp)
+                    // Hint decorativo: mai un target del D-pad.
+                    .focusProperties { canFocus = false }
             ) {
                 val hintBob by rememberInfiniteTransition(label = "scrollHint").animateFloat(
                     initialValue = 0f,
