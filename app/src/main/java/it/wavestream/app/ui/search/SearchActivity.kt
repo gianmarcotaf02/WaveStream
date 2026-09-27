@@ -247,6 +247,10 @@ class SearchActivity : ComponentActivity() {
         val updated = loadRecentSearches().filter { it != query.trim() }
         recentPrefs.edit().putString("recent_queries", updated.joinToString("\u0001")).apply()
     }
+
+    private fun clearRecentSearches() {
+        recentPrefs.edit().remove("recent_queries").apply()
+    }
     private var voiceResultCallback: ((String) -> Unit)? = null
     private lateinit var voiceSearchLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>
     
@@ -365,6 +369,11 @@ class SearchActivity : ComponentActivity() {
                 removeRecentSearch(recent)
                 recentSearches = loadRecentSearches()
                 android.widget.Toast.makeText(context, "Ricerca rimossa", android.widget.Toast.LENGTH_SHORT).show()
+            },
+            onClearRecentSearches = {
+                clearRecentSearches()
+                recentSearches = loadRecentSearches()
+                android.widget.Toast.makeText(context, "Cronologia cancellata", android.widget.Toast.LENGTH_SHORT).show()
             },
             onItemClick = { item ->
                 // Salva la query nella cronologia (se abbastanza lunga)
@@ -704,6 +713,7 @@ fun SearchScreen(
     recentSearches: List<String>,
     onRecentSearchClick: (String) -> Unit,
     onRecentSearchRemove: (String) -> Unit,
+    onClearRecentSearches: () -> Unit,
     onItemClick: (SearchResultItem) -> Unit,
     onItemLongClick: (SearchResultItem) -> Unit
 ) {
@@ -838,6 +848,65 @@ fun SearchScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                // Ricerche recenti: allineate a sinistra sotto la tastiera, in riga.
+                // Il cestino accanto al titolo cancella tutta la cronologia.
+                if (query.isBlank() && recentSearches.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Ricerche recenti",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = WaveStreamColors.TextTertiary,
+                            maxLines = 1,
+                            modifier = Modifier.weight(1f)
+                        )
+                        val trashInteractionSource = remember { MutableInteractionSource() }
+                        val trashIsFocused by trashInteractionSource.collectIsFocusedAsState()
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(
+                                    if (trashIsFocused) Color.White.copy(alpha = 0.16f)
+                                    else Color.Transparent
+                                )
+                                .focusable(interactionSource = trashInteractionSource)
+                                .clickable(
+                                    interactionSource = trashInteractionSource,
+                                    indication = null
+                                ) { onClearRecentSearches() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Cancella cronologia",
+                                tint = if (trashIsFocused) WaveStreamColors.TextPrimary
+                                else WaveStreamColors.TextTertiary,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                    ) {
+                        recentSearches.forEach { recent ->
+                            RecentSearchPill(
+                                text = recent,
+                                onClick = { onRecentSearchClick(recent) },
+                                onLongClick = { onRecentSearchRemove(recent) }
+                            )
+                        }
+                    }
+                }
+
                 // Suggerimenti sotto la tastiera RIMOSSI su richiesta: il pannello
                 // sinistro ora contiene solo la tastiera, i risultati restano a destra.
                 // (La computazione fuzzy è ancora attiva perché il fallback "nessun
@@ -933,7 +1002,7 @@ fun SearchScreen(
                         }
                     }
                     else -> {
-                        // Stato iniziale (query vuota): icona + cronologia ricerche recenti
+                        // Stato iniziale (query vuota): icona centrata
                         Column(
                             modifier = Modifier
                                 .align(Alignment.Center)
@@ -953,30 +1022,6 @@ fun SearchScreen(
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = WaveStreamColors.TextSecondary
                             )
-                            
-                            // Ricerche recenti: un tap (o D-pad OK) ripete la ricerca
-                            if (recentSearches.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(28.dp))
-                                Text(
-                                    text = "Ricerche recenti",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = WaveStreamColors.TextTertiary
-                                )
-                                Spacer(modifier = Modifier.height(12.dp))
-                                FlowRow(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.fillMaxWidth()
-                                ) {
-                                    recentSearches.forEach { recent ->
-                                        RecentSearchPill(
-                                            text = recent,
-                                            onClick = { onRecentSearchClick(recent) },
-                                            onLongClick = { onRecentSearchRemove(recent) }
-                                        )
-                                    }
-                                }
-                            }
                         }
                     }
                 }
