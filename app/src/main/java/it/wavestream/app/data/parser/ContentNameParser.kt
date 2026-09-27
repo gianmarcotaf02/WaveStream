@@ -382,6 +382,11 @@ class ContentNameParser @Inject constructor() {
         
         // Remove trailing numbers that look like IDs (e.g., "0 Ql", "123")
         result = result.replace(cleanTrailingDigits, "")
+
+        // Remove provider duplicate markers, e.g. "Iron Man 2 (4)" -> "Iron Man 2".
+        // Senza questo il titolo resta sporco (numero tra parentesi), la ricerca TMDB
+        // fallisce e i doppioni non si unificano (chiavi di gruppo diverse).
+        result = ContentKey.stripDuplicateMarker(result)
         
         // Remove hashtags anywhere
         result = result.replace(cleanHashtag, "")

@@ -19,6 +19,26 @@ object ContentKey {
     private val nonAlnum = Regex("""[^\p{L}\p{N}\s]""")
     private val combiningMarks = Regex("""\p{Mn}+""")
 
+    /**
+     * Marcatori di doppione/versione che molti provider IPTV accodano al titolo,
+     * es. "Iron Man 2 (4)" o "Guardians of the Galaxy Vol. 2 (11)". Il numero tra
+     * parentesi NON fa parte del titolo: è il conteggio delle versioni pubblicate.
+     *
+     * Va rimosso in fase di parsing/ricerca, altrimenti:
+     *  - il titolo mostrato contiene il numero ("Iron Man 2 (4)");
+     *  - la ricerca TMDB fallisce (nessun match per "Iron Man 2 (4)") → scheda vuota;
+     *  - i doppioni di uno stesso film non si unificano (chiavi diverse:
+     *    "iron man 2 4" vs "iron man 2"), restando due righe separate.
+     */
+    private val duplicateMarker = Regex("""(?:\s*\(\d{1,2}\))++\s*$""")
+
+    /**
+     * Rimuove dal titolo i marcatori di doppione finali accodati dal provider:
+     * `"Iron Man 2 (4)"` → `"Iron Man 2"`, `"Titolo (2) (3)"` → `"Titolo"`.
+     * Non tocca titoli legittimi come `"1917"` o `"Iron Man 2"` (nessuna parentesi).
+     */
+    fun stripDuplicateMarker(raw: String): String = raw.replace(duplicateMarker, "").trim()
+
     /** Normalizza un titolo per il confronto (non per la visualizzazione). */
     fun normalizeTitle(raw: String): String {
         val noAccents = Normalizer.normalize(raw, Normalizer.Form.NFD)
