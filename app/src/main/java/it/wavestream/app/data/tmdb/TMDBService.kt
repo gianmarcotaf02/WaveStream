@@ -9,6 +9,8 @@ import it.wavestream.app.data.database.entity.Movie
 import it.wavestream.app.data.database.entity.Series
 import it.wavestream.app.data.preferences.UserPreferences
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -1131,8 +1133,13 @@ class TMDBService @Inject constructor(
      * e la rail restava vuota (o con un solo elemento).
      */
     suspend fun getRelatedLocalIds(tmdbId: Int, mediaType: String): List<Long> = withContext(Dispatchers.IO) {
-        val recs = runCatching { getRecommendations(tmdbId, mediaType) }.getOrElse { emptyList() }
-        val similar = runCatching { getSimilar(tmdbId, mediaType) }.getOrElse { emptyList() }
+        // Le due chiamate TMDB sono indipendenti: in parallelo dimezziamo la latenza
+        // della rail, che ora fa parte del caricamento della scheda (skeleton).
+        val (recs, similar) = coroutineScope {
+            val recsDeferred = async { runCatching { getRecommendations(tmdbId, mediaType) }.getOrElse { emptyList() } }
+            val similarDeferred = async { runCatching { getSimilar(tmdbId, mediaType) }.getOrElse { emptyList() } }
+            recsDeferred.await() to similarDeferred.await()
+        }
 
         // Raccomandazioni prima (peso maggiore), poi similar; dedup per tmdb id.
         val merged = LinkedHashMap<Int, TMDBItem>()
