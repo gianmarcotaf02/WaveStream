@@ -1328,11 +1328,15 @@ private fun RelatedRailSection(
     restoreFocusIndex: Int = -1,
     restoreFocusRef: FocusTargetRef? = null
 ) {
+    // Reveal lento "a scoperta": la sezione resta composta (il focus della prima
+    // card resta valido) ma appare in dissolvenza quando diventa visibile.
+    // Vale sia per i FILM (allo scroll) sia per le SERIE (all'ingresso in scena).
+    var appeared by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { appeared = true }
     AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(tween(300)) +
-            slideInVertically(animationSpec = tween(340)) { it / 4 },
-        exit = fadeOut(tween(220))
+        visible = visible && appeared,
+        enter = AppAnimations.revealEnter,
+        exit = AppAnimations.revealExit
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Spacer(modifier = Modifier.height(24.dp))

@@ -276,4 +276,20 @@ object AppAnimations {
     val listItemOut: ExitTransition =
         fadeOut(tween(ListItemExitMs)) +
             slideOutVertically(tween(ListItemExitMs)) { -it / 8 }
+
+    /**
+     * REVEAL — apertura lenta "a scoperta" (es. rail "Potrebbe piacerti"):
+     * dissolvenza lunga con un accenno di salita. Usata sia per film che per serie.
+     */
+    const val RevealEnterMs = 800
+    const val RevealExitMs = 320
+
+    val revealEnter: EnterTransition =
+        fadeIn(tween(RevealEnterMs, easing = EmphasizedDecelerate)) +
+            slideInVertically(
+                tween(RevealEnterMs, easing = EmphasizedDecelerate)
+            ) { it / 20 }
+
+    val revealExit: ExitTransition =
+        fadeOut(tween(RevealExitMs, easing = androidx.compose.animation.core.FastOutSlowInEasing))
 }
