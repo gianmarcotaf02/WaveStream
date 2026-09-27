@@ -33,6 +33,8 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
+import androidx.tv.foundation.lazy.grid.itemsIndexed
+import it.wavestream.app.ui.theme.cascadeIn
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.dao.MovieDao
@@ -498,10 +500,12 @@ private fun CategoryScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(displayItems, key = { "${it.contentType}_${it.id}" }) { item ->
+                val cascadeSeen = remember { mutableSetOf<String>() }
+                itemsIndexed(displayItems, key = { _, it -> "${it.contentType}_${it.id}" }) { index, item ->
                     TvContentCard(
                         item = item,
                         onClick = { onItemClick(item) },
+                        modifier = Modifier.cascadeIn(cascadeSeen, "${item.contentType}_${item.id}", index),
                         fillWidth = !isLiveCategory
                     )
                 }

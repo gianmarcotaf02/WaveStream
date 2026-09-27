@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.items as tvGridItems
+import androidx.tv.foundation.lazy.grid.itemsIndexed as tvGridItemsIndexed
+import it.wavestream.app.ui.theme.cascadeIn
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.items as tvListItems
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -447,11 +449,14 @@ fun SeriesScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         modifier = Modifier.weight(1f).fillMaxWidth()
                     ) {
-                        tvGridItems(seriesList, key = { it.id }) { series ->
-                            SeriesGridCard(
-                                series = series,
-                                onClick = { onSeriesClick(series) }
-                            )
+                        val cascadeSeen = remember { mutableSetOf<String>() }
+                        tvGridItemsIndexed(seriesList, key = { _, it -> it.id }) { index, series ->
+                            Box(modifier = Modifier.cascadeIn(cascadeSeen, "SERIES_${series.id}", index)) {
+                                SeriesGridCard(
+                                    series = series,
+                                    onClick = { onSeriesClick(series) }
+                                )
+                            }
                         }
                         // Load more button — shown when more data is available
                         if (hasMoreSeries || isLoadingMore) {

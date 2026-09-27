@@ -21,6 +21,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.items as tvGridItems
+import androidx.tv.foundation.lazy.grid.itemsIndexed as tvGridItemsIndexed
+import it.wavestream.app.ui.theme.cascadeIn
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.items as tvListItems
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -436,11 +438,14 @@ fun FilmScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         modifier = Modifier.weight(1f).fillMaxWidth()
                     ) {
-                        tvGridItems(movies, key = { it.id }) { movie ->
-                            MovieGridCard(
-                                movie = movie,
-                                onClick = { onMovieClick(movie) }
-                            )
+                        val cascadeSeen = remember { mutableSetOf<String>() }
+                        tvGridItemsIndexed(movies, key = { _, it -> it.id }) { index, movie ->
+                            Box(modifier = Modifier.cascadeIn(cascadeSeen, "MOVIE_${movie.id}", index)) {
+                                MovieGridCard(
+                                    movie = movie,
+                                    onClick = { onMovieClick(movie) }
+                                )
+                            }
                         }
                         // Load more button — shown when more data is available
                         if (hasMoreMovies || isLoadingMore) {

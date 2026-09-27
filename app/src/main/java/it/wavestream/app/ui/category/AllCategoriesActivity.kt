@@ -320,6 +320,7 @@ private fun AllCategoriesScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
+                val cascadeSeen = remember { mutableSetOf<String>() }
                 itemsIndexed(filteredCategories, key = { _, it -> it.name }) { index, category ->
                     val isFav = favoriteCategories.contains(category.name)
                     CategoryCard(
@@ -329,6 +330,7 @@ private fun AllCategoriesScreen(
                         isFavorite = isFav,
                         isViewAll = category.isViewAll,
                         focusRequester = if (index == 0) firstCategoryFocusRequester else null,
+                        modifier = Modifier.cascadeIn(cascadeSeen, category.name, index),
                         onClick = {
                             if (category.isViewAll) onViewAllClick()
                             else onCategoryClick(category.name)
@@ -362,6 +364,7 @@ private fun CategoryCard(
     isFavorite: Boolean = false,
     isViewAll: Boolean = false,
     focusRequester: FocusRequester? = null,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onLongPress: () -> Unit = {}
 ) {
@@ -403,7 +406,7 @@ private fun CategoryCard(
         shape = RoundedCornerShape(14.dp),
         fill = Color.Transparent,
         stroke = GlassTokens.StrokeGradient,
-        modifier = Modifier
+        modifier = modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
