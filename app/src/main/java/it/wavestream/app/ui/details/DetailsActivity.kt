@@ -33,6 +33,7 @@ import it.wavestream.app.data.repository.DownloadContentManager
 import it.wavestream.app.ai.MovieEndingRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -691,8 +692,11 @@ class DetailsActivity : ComponentActivity() {
         
         // Rail "Potrebbe piacerti": caricata QUI, durante lo skeleton, così quando la
         // scheda si svela il carosello è già pronto (niente pop-in né hint tardivo).
-        // SOLO TMDB, risolta sui titoli realmente presenti in catalogo.
-        val related = runCatching { relatedContentFor(enrichedMovie) }.getOrElse { emptyList() }
+        // SOLO TMDB, risolta sui titoli realmente presenti in catalogo. Timeout di
+        // sicurezza: meglio svelare la scheda senza rail che restare bloccati sulla rete.
+        val related = withTimeoutOrNull(5_000) {
+            runCatching { relatedContentFor(enrichedMovie) }.getOrNull()
+        }.orEmpty()
         
         var state = DetailsState(
             relatedContent = related,
@@ -1073,7 +1077,9 @@ class DetailsActivity : ComponentActivity() {
         
         // Rail "Potrebbe piacerti" per le SERIE: caricata QUI, durante lo skeleton
         // (stessa fonte TMDB, mediaType "tv"), risolta sulle serie in catalogo.
-        val related = runCatching { relatedContentForSeries(series) }.getOrElse { emptyList() }
+        val related = withTimeoutOrNull(5_000) {
+            runCatching { relatedContentForSeries(series) }.getOrNull()
+        }.orEmpty()
 
         var state = DetailsState(
             relatedContent = related,
