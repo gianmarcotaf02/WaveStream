@@ -180,6 +180,14 @@ fun TvContentCard(
                         modifier = Modifier
                             .fillMaxSize()
                             .then(if (isChannel) Modifier.padding(8.dp) else Modifier)
+                            .graphicsLayer {
+                                // Refinement focus: micro-parallax verticale + lieve
+                                // zoom-in dell'immagine per dare profondità alla card.
+                                translationY = -4f * focusProgress
+                                val s = 1f + 0.04f * focusProgress
+                                scaleX = s
+                                scaleY = s
+                            }
                     )
                 }
 
