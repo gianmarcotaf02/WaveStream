@@ -39,9 +39,9 @@ import androidx.compose.ui.unit.dp
  * NOTA: applicare .tvFocus DOPO .focusable / .focusableInScroll ecc., così
  * l'InteractionSource è la stessa che genera gli stati focus.
  *
- * TODO (Fase 2+): dimming ambientale delle superfici non focalizzate
- *  ([WaveStreamColors.DimmingAlpha]) da implementare a livello di riga/carosello,
- *  dove è noto quale child ha il focus.
+ * NOTA: il dimming ambientale delle superfici non focalizzate
+ * ([WaveStreamColors.DimmingAlpha]) è implementato a livello di riga in
+ * `TvHomeScreenContent` (le righe diverse da quella focalizzata si attenuano).
  */
 @Composable
 fun Modifier.tvFocus(
