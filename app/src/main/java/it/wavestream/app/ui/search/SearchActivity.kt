@@ -1221,36 +1221,34 @@ private fun SearchResultCard(
                 )
             }
             
-            // Type badge (top left)
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(
-                        when {
-                            // Aurora: tinte pastello coerenti con CategoryCard
-                            item.isCategory -> Color(0xFFB48CFA) // Soft Violet
-                            item.type == ContentType.MOVIE -> WaveStreamColors.Accent
-                            item.type == ContentType.SERIES -> Color(0xFF86E0A4) // Soft Green
-                            item.type == ContentType.CHANNEL -> Color.Red
-                            else -> WaveStreamColors.BackgroundSecondary
-                        }
+            // Type badge (top left) — vetro: fill traslucido + bordo chiaro,
+            // nessuna codifica cromatica per tipo.
+            val badgeLabel = when {
+                item.isCategory -> "Categoria"
+                item.type == ContentType.MOVIE -> "Film"
+                item.type == ContentType.SERIES -> "Serie"
+                item.type == ContentType.CHANNEL -> "Live"
+                else -> ""
+            }
+            if (badgeLabel.isNotEmpty()) {
+                val badgeShape = RoundedCornerShape(6.dp)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                        .clip(badgeShape)
+                        .background(GlassTokens.SurfaceFillStrong)
+                        .border(1.dp, GlassTokens.StrokeGradient, badgeShape)
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = badgeLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.4.sp
                     )
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            ) {
-                Text(
-                    text = when {
-                        item.isCategory -> "Categoria"
-                        item.type == ContentType.MOVIE -> "Film"
-                        item.type == ContentType.SERIES -> "Serie"
-                        item.type == ContentType.CHANNEL -> "Live"
-                        else -> ""
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+                }
             }
             
             // Favorite heart icon (top right) - only for non-category items
