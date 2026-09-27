@@ -601,7 +601,9 @@ class DetailsActivity : ComponentActivity() {
                 contentType = ContentType.MOVIE,
                 isFavorite = isFavorite,
                 // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
-                isLoading = movie.plot.isNullOrEmpty() || movie.tmdbVoteAverage == null,
+                // oppure se c'è una rail TMDB da caricare: così carosello e scheda
+                // si svelano INSIEME, senza il pop-in del carosello dopo lo skeleton.
+                isLoading = movie.plot.isNullOrEmpty() || movie.tmdbVoteAverage == null || movie.tmdbId != null,
                 tmdbRating = movie.tmdbVoteAverage,
                 imdbRating = movie.omdbImdbRating,
                 rottenTomatoesScore = movie.omdbRottenTomatoesScore,
@@ -687,10 +689,10 @@ class DetailsActivity : ComponentActivity() {
         genre = genre ?: enrichedMovie.tmdbGenres
         duration = duration ?: enrichedMovie.tmdbRuntime?.let { "$it min" }
         
-        // Rail "Potrebbe piacerti": SOLO TMDB. Nessun segnaposto di categoria
-        // (evitava di aspettare la rete, ma poteva restare visibile come lista
-        // locale). Si popola quando arriva la risposta TMDB in loadMovie.
-        val related = emptyList<RelatedContent>()
+        // Rail "Potrebbe piacerti": caricata QUI, durante lo skeleton, così quando la
+        // scheda si svela il carosello è già pronto (niente pop-in né hint tardivo).
+        // SOLO TMDB, risolta sui titoli realmente presenti in catalogo.
+        val related = runCatching { relatedContentFor(enrichedMovie) }.getOrElse { emptyList() }
         
         var state = DetailsState(
             relatedContent = related,
@@ -820,21 +822,6 @@ class DetailsActivity : ComponentActivity() {
                         ))
                     }
                 }
-            }
-        }
-        
-        // Rail "Potrebbe piacerti": il recupero TMDB parte DOPO l'emissione dello
-        // stato, così la scheda non deve aspettare la rete. Se torna qualcosa di
-        // meglio del fallback locale (o il fallback non aveva niente), sostituisce
-        // solo la rail.
-        lifecycleScope.launch {
-            // USA enrichedMovie: se il tmdbId non era già in DB viene impostato
-            // dall'arricchimento su enrichedMovie, non sulla `movie` stantia —
-            // con `movie` la rail restava vuota (nessun carosello né hint).
-            val related = relatedContentFor(enrichedMovie)
-            if (related.isNotEmpty() && related != state.relatedContent) {
-                state = state.copy(relatedContent = related)
-                onStateUpdate(state)
             }
         }
     }
@@ -1027,7 +1014,9 @@ class DetailsActivity : ComponentActivity() {
                 contentType = ContentType.SERIES,
                 isFavorite = dbIsFavorite,
                 // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
-                isLoading = series.plot.isNullOrEmpty() || series.tmdbVoteAverage == null,
+                // oppure se c'è una rail TMDB da caricare, così scheda e carosello
+                // appaiono insieme (niente pop-in dopo lo skeleton).
+                isLoading = series.plot.isNullOrEmpty() || series.tmdbVoteAverage == null || series.tmdbId != null,
                 tmdbRating = series.tmdbVoteAverage,
                 imdbRating = series.omdbImdbRating,
                 rottenTomatoesScore = series.omdbRottenTomatoesScore,
@@ -1082,7 +1071,12 @@ class DetailsActivity : ComponentActivity() {
         
         Log.d(TAG, "Downloaded episodes found: ${downloadedEpisodes.size}")
         
+        // Rail "Potrebbe piacerti" per le SERIE: caricata QUI, durante lo skeleton
+        // (stessa fonte TMDB, mediaType "tv"), risolta sulle serie in catalogo.
+        val related = runCatching { relatedContentForSeries(series) }.getOrElse { emptyList() }
+
         var state = DetailsState(
+            relatedContent = related,
             title = series.name,
             year = series.year?.toString() ?: "",
             overview = series.plot ?: "",
@@ -1185,18 +1179,6 @@ class DetailsActivity : ComponentActivity() {
                         ))
                     }
                 }
-            }
-        }
-        
-        // Rail "Potrebbe piacerti" anche per le SERIE: stessa fonte TMDB
-        // (mediaType "tv", /recommendations + /similar con i pesi di
-        // RecommendationEngine) risolta sulle serie locali. Parte dopo l'emissione
-        // dello stato, quindi la scheda non aspetta la rete.
-        lifecycleScope.launch {
-            val related = relatedContentForSeries(series)
-            if (related.isNotEmpty() && related != state.relatedContent) {
-                state = state.copy(relatedContent = related)
-                onStateUpdate(state)
             }
         }
     }
