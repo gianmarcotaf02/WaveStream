@@ -256,6 +256,12 @@ fun DetailsScreen(
     var pendingRelatedFocusIndex by remember { mutableIntStateOf(-1) }
     var restoreFocusRequest by remember { mutableIntStateOf(0) }
 
+    // Richiesta di spostare il focus sulla PRIMA card del rail (D-pad "giù" dal
+    // bottone Riproduci/Riprendi). Con Cast & Regia non più focusabile, per il
+    // dettaglio film è il passo naturale verso il basso.
+    var relatedFirstFocusRequest by remember { mutableStateOf(false) }
+    var forceRelatedVisible by remember { mutableStateOf(false) }
+
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -272,7 +278,7 @@ fun DetailsScreen(
     // La card cliccata è composta solo quando la rail è visibile: il film forza
     // la rivelazione del carosello finché il focus non è stato ripristinato.
     val relatedRailVisible = state.relatedContent.isNotEmpty() &&
-        (relatedRevealed || pendingRelatedFocusIndex >= 0)
+        (relatedRevealed || pendingRelatedFocusIndex >= 0 || forceRelatedVisible)
 
     LaunchedEffect(restoreFocusRequest, state.relatedContent, state.isLoading) {
         if (restoreFocusRequest == 0) return@LaunchedEffect
@@ -289,6 +295,25 @@ fun DetailsScreen(
         }
         runCatching { relatedFocusTargetRef.requester.requestFocus() }
         pendingRelatedFocusIndex = -1
+    }
+
+    // D-pad "giù" dal CTA: rivela la rail (se a scomparsa) e porta il focus sulla
+    // prima card, che resta l'entry point della sezione.
+    LaunchedEffect(relatedFirstFocusRequest, state.relatedContent, state.isLoading) {
+        if (!relatedFirstFocusRequest) return@LaunchedEffect
+        if (state.isLoading || state.relatedContent.isEmpty()) return@LaunchedEffect
+        var attempts = 0
+        while (!relatedFirstCardFocusRef.attached && attempts < 20) {
+            delay(50)
+            attempts++
+        }
+        runCatching { relatedFirstCardFocusRequester.requestFocus() }
+        relatedFirstFocusRequest = false
+    }
+
+    // Quando lo scroll ha davvero rivelato la rail (offset > 0) il force non serve più.
+    LaunchedEffect(relatedRevealed) {
+        if (relatedRevealed) forceRelatedVisible = false
     }
 
     // Episodio su cui atterrare scendendo dal selettore stagioni:
@@ -818,16 +843,7 @@ fun DetailsScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 items(crew.size) { index ->
-                                    val person = crew[index]
-                                    CastPersonCard(
-                                        person = person,
-                                        onClick = { onPersonClick(person.id, person.name) },
-                                        // Dalla rail del cast, "giù" va DIRETTAMENTE al
-                                        // selettore stagioni: senza redirect il focus, non
-                                        // trovando un target sotto, restava nella rail e
-                                        // saltava a una card a sinistra.
-                                        downFocusRequester = if (hasEpisodesSection && seasonSelectorFocusRef.attached) seasonSelectorFocusRequester else null
-                                    )
+                                    CastPersonCard(person = crew[index])
                                 }
                             }
                         }
@@ -1406,45 +1422,15 @@ private fun RelatedContentCard(
 @Composable
 private fun CastPersonCard(
     person: PersonInfo,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    downFocusRequester: FocusRequester? = null
+    modifier: Modifier = Modifier
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-
-    val scale by animateFloatAsState(
-        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
-        animationSpec = AppAnimations.SpringCardFocus,
-        label = "castScale"
-    )
-
-    // Card persona in vetro (Fase D5): cerchio foto + focus ad alone.
-    val cardFill by animateColorAsState(
-        targetValue = if (isFocused) Color.White.copy(alpha = 0.16f) else Color.Transparent,
-        animationSpec = AppAnimations.SpringCardFocusColor,
-        label = "castFill"
-    )
-
+    // Sezione NON interattiva (richiesta esplicita): nessun focus, nessun click.
+    // Resta puramente informativa, quindi non entra nel giro di navigazione D-pad.
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .width(64.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
             .clip(RoundedCornerShape(14.dp))
-            .background(cardFill)
-            .then(
-                if (downFocusRequester != null) Modifier.focusProperties { down = downFocusRequester } else Modifier
-            )
-            .focusable(interactionSource = interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
             .padding(4.dp)
     ) {
         // Profile photo
@@ -1698,7 +1684,10 @@ private fun PlayButton(
     resumeProgress: Float? = null,
     onClick: () -> Unit,
     focusRef: FocusTargetRef? = null,
-    onFocusedChanged: (Boolean) -> Unit = {}
+    onFocusedChanged: (Boolean) -> Unit = {},
+    // Gestisce il D-pad "giù": se ritorna true l'evento è consumato e la
+    // navigazione di default NON parte (usato per portare il focus sulla rail).
+    onDownKey: (() -> Boolean)? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -1748,6 +1737,13 @@ private fun PlayButton(
             .border(3.dp, borderColor, RoundedCornerShape(12.dp))
             .then(if (focusRef != null) Modifier.registerFocusTarget(focusRef) else Modifier)
             .onFocusChanged { onFocusedChanged(it.isFocused) }
+            .then(
+                if (onDownKey != null) Modifier.onKeyEvent { event ->
+                    event.type == KeyEventType.KeyDown &&
+                        event.key == Key.DirectionDown &&
+                        onDownKey()
+                } else Modifier
+            )
             .focusable(interactionSource = interactionSource)
             .clickable(
                 interactionSource = interactionSource,
