@@ -732,16 +732,21 @@ private fun MainActivityScreen(
             )
 
             // Main content with animated tab transition
+            // R1 (Motion Contract): questo è l'UNICO responsabile del cambio tab
+            // (TAB_SWAP, fade-through). L'AnimatedContent interno di TvHomeScreen
+            // gestisce solo il cambio HERO (HERO_SWAP) e, essendo ricomposto per tab,
+            // non anima al cambio tab → nessuna doppia animazione.
+            val reducedMotion = it.wavestream.app.ui.theme.rememberReducedMotion()
             androidx.compose.animation.AnimatedContent(
                 targetState = selectedTab,
                 transitionSpec = {
-                    androidx.compose.animation.fadeIn(
-                        animationSpec = androidx.compose.animation.core.tween(400)
-                    ).togetherWith(
-                        androidx.compose.animation.fadeOut(
-                            animationSpec = androidx.compose.animation.core.tween(400)
-                        )
-                    )
+                    if (reducedMotion) {
+                        androidx.compose.animation.EnterTransition.None togetherWith
+                            androidx.compose.animation.ExitTransition.None
+                    } else {
+                        it.wavestream.app.ui.theme.AppAnimations.tabSwapIn togetherWith
+                            it.wavestream.app.ui.theme.AppAnimations.tabSwapOut
+                    }
                 },
                 label = "tabTransition"
             ) { targetTab ->

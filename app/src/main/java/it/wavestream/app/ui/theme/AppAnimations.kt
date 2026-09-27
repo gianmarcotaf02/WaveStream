@@ -237,6 +237,24 @@ object AppAnimations {
     val fadeThroughOut: ExitTransition =
         fadeOut(tween(FadeExitMs, easing = androidx.compose.animation.core.FastOutSlowInEasing))
 
+    /** TAB_SWAP — fade-through sequenziale per il cambio tab (out veloce, in ritardato). */
+    val tabSwapIn: EnterTransition =
+        fadeIn(
+            tween(
+                TabSwapMs,
+                delayMillis = TabSwapMs / 3,
+                easing = androidx.compose.animation.core.FastOutSlowInEasing
+            )
+        )
+
+    val tabSwapOut: ExitTransition =
+        fadeOut(
+            tween(
+                TabSwapMs / 2,
+                easing = androidx.compose.animation.core.FastOutSlowInEasing
+            )
+        )
+
     /** AXIS_Y — modali/wizard (slide verticale breve + fade). */
     fun sharedAxisYEnter(): EnterTransition =
         fadeIn(tween(AxisYEnterMs, easing = EmphasizedDecelerate)) +
