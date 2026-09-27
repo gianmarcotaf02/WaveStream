@@ -430,6 +430,7 @@ fun FilmScreen(
                     }
                     
                     // Movie grid using TV Compose for proper D-pad navigation
+                    val cascadeSeen = remember { mutableSetOf<String>() }
                     TvLazyVerticalGrid(
                         columns = TvGridCells.Adaptive(minSize = 150.dp),
                         state = gridState,
@@ -438,7 +439,6 @@ fun FilmScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         modifier = Modifier.weight(1f).fillMaxWidth()
                     ) {
-                        val cascadeSeen = remember { mutableSetOf<String>() }
                         tvGridItemsIndexed(movies, key = { _, it -> it.id }) { index, movie ->
                             Box(modifier = Modifier.cascadeIn(cascadeSeen, "MOVIE_${movie.id}", index)) {
                                 MovieGridCard(

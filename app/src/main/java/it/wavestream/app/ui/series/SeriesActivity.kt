@@ -441,6 +441,7 @@ fun SeriesScreen(
                     }
                     
                     // Series grid using TV Compose for proper D-pad navigation
+                    val cascadeSeen = remember { mutableSetOf<String>() }
                     TvLazyVerticalGrid(
                         columns = TvGridCells.Adaptive(minSize = 150.dp),
                         state = gridState,
@@ -449,7 +450,6 @@ fun SeriesScreen(
                         verticalArrangement = Arrangement.spacedBy(24.dp),
                         modifier = Modifier.weight(1f).fillMaxWidth()
                     ) {
-                        val cascadeSeen = remember { mutableSetOf<String>() }
                         tvGridItemsIndexed(seriesList, key = { _, it -> it.id }) { index, series ->
                             Box(modifier = Modifier.cascadeIn(cascadeSeen, "SERIES_${series.id}", index)) {
                                 SeriesGridCard(

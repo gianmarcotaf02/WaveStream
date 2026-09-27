@@ -492,6 +492,7 @@ private fun CategoryScreen(
         } else if (viewMode == "grid" || !isLiveCategory) {
             // Grid view - use smaller cells for Live channels
             val gridMinSize = if (isLiveCategory) 100.dp else 150.dp
+            val cascadeSeen = remember { mutableSetOf<String>() }
             TvLazyVerticalGrid(
                 columns = TvGridCells.Adaptive(minSize = gridMinSize),
                 state = gridState,
@@ -500,7 +501,6 @@ private fun CategoryScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                val cascadeSeen = remember { mutableSetOf<String>() }
                 itemsIndexed(displayItems, key = { _, it -> "${it.contentType}_${it.id}" }) { index, item ->
                     TvContentCard(
                         item = item,

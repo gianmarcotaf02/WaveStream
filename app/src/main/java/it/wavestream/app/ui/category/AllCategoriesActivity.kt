@@ -48,6 +48,7 @@ import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvLazyVerticalGrid
 import androidx.tv.foundation.lazy.grid.items
 import androidx.tv.foundation.lazy.grid.itemsIndexed
+import it.wavestream.app.ui.theme.cascadeIn
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.SeriesDao
@@ -313,6 +314,7 @@ private fun AllCategoriesScreen(
                 )
             }
         } else {
+            val cascadeSeen = remember { mutableSetOf<String>() }
             TvLazyVerticalGrid(
                 columns = TvGridCells.Adaptive(minSize = 200.dp),
                 contentPadding = PaddingValues(top = 12.dp, bottom = 40.dp),
@@ -320,7 +322,6 @@ private fun AllCategoriesScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                val cascadeSeen = remember { mutableSetOf<String>() }
                 itemsIndexed(filteredCategories, key = { _, it -> it.name }) { index, category ->
                     val isFav = favoriteCategories.contains(category.name)
                     CategoryCard(
