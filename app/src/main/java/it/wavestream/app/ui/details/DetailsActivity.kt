@@ -50,6 +50,11 @@ class DetailsActivity : ComponentActivity() {
     companion object {
         private const val TAG = "DetailsActivity"
     }
+
+    // true mentre questa scheda ha aperto un contenuto correlato dal rail
+    // "Potrebbe piacerti": al ritorno NON va ricaricata (niente skeleton) così
+    // il focus resta/riprende sulla card da cui si è partiti.
+    private var openedRelatedContent = false
     
     @Inject lateinit var movieDao: MovieDao
     @Inject lateinit var seriesDao: SeriesDao
@@ -158,10 +163,17 @@ class DetailsActivity : ComponentActivity() {
         androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
             val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
                 if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME && hasLoadedOnce) {
-                    // Reload to refresh episode progress
-                    lifecycleScope.launch {
-                        loadContent { newState ->
-                            state = newState
+                    if (openedRelatedContent) {
+                        // Ritorno dal rail "Potrebbe piacerti": NON ricaricare. Un
+                        // reload rimetterebbe isLoading=true (skeleton) e sposterebbe
+                        // il focus su Riproduci, perdendo la posizione nella rail.
+                        openedRelatedContent = false
+                    } else {
+                        // Reload to refresh episode progress (es. ritorno dal player)
+                        lifecycleScope.launch {
+                            loadContent { newState ->
+                                state = newState
+                            }
                         }
                     }
                 }
@@ -196,6 +208,9 @@ class DetailsActivity : ComponentActivity() {
             // correlato come activity sopra questa, così il back torna alla scheda
             // di partenza con tutto il suo stato.
             onRelatedClick = { contentId, contentType ->
+                // Segnala che il prossimo ON_RESUME è un ritorno da una scheda
+                // correlata: niente reload, focus ripristinato dal DetailsScreen.
+                openedRelatedContent = true
                 startActivity(
                     Intent(this@DetailsActivity, DetailsActivity::class.java).apply {
                         putExtra("content_id", contentId)
