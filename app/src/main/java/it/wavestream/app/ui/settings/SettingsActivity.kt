@@ -2528,9 +2528,13 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
     // La notifica "aggiornamento installato" è l'unico modo affidabile per rientrare
     // nell'app dopo il self-update (Android 10+ blocca il riavvio automatico), quindi
     // chiediamo il permesso notifiche (API 33+) proprio quando si installa.
+    // L'installazione parte dal callback del permesso: così i due dialog di sistema
+    // (permesso + conferma installazione) non si sovrappongono.
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { /* esito ignorato: la notifica è un aiuto, non un requisito per installare */ }
+    ) { /* esito ignorato: la notifica è un aiuto, non un requisito per installare */
+        coroutineScope.launch { updateManager.installUpdate() }
+    }
     
     val downloadState by updateManager.downloadState.collectAsState()
     
@@ -2850,9 +2854,11 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
                         android.Manifest.permission.POST_NOTIFICATIONS
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
+                    // installUpdate() parte dal callback del permesso
                     notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    coroutineScope.launch { updateManager.installUpdate() }
                 }
-                coroutineScope.launch { updateManager.installUpdate() }
             },
             onDismiss = { showInstallConfirm = false }
         )
