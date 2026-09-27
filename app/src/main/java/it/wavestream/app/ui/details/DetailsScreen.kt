@@ -228,13 +228,19 @@ fun DetailsScreen(
     val relatedRailState = rememberLazyListState()
     val episodeRailState = rememberLazyListState()
     val railScope = rememberCoroutineScope()
-    // Solo redirect D-pad (giù dall'header stagione → episodio target): NON richiede mai il focus
-    val firstEpisodeFocusRequester = remember { FocusRequester() }
+    // Target del D-pad "giù" dall'header stagione: l'episodio target. Tracciamo
+    // l'attach perché una card della LazyRow può essere riciclata fuori schermo:
+    // senza il guard il redirect "down" punterebbe a un FocusRequester scollegato
+    // e il focus search lancerebbe "FocusRequester is not initialized".
+    val firstEpisodeFocusRef = rememberFocusTargetRef()
+    val firstEpisodeFocusRequester = firstEpisodeFocusRef.requester
     // Focus target del selettore stagioni: l'episodio target, con "su", torna qui.
     val seasonSelectorFocusRequester = remember { FocusRequester() }
     // Entry point della rail "Potrebbe piacerti": il D-pad "giù" dal carosello
     // episodi porta SEMPRE qui (prima card a sinistra), non all'ultima card usata.
-    val relatedFirstCardFocusRequester = remember { FocusRequester() }
+    // Anche qui va tracciato l'attach: la prima card può uscire dalla LazyRow.
+    val relatedFirstCardFocusRef = rememberFocusTargetRef()
+    val relatedFirstCardFocusRequester = relatedFirstCardFocusRef.requester
 
     // Episodio su cui atterrare scendendo dal selettore stagioni:
     // - quello IN CORSO (continue watching), se presente;
@@ -810,7 +816,7 @@ fun DetailsScreen(
                             episodes = state.episodes,
                             onDownloadSeason = onDownloadSeason,
                             onDownloadEpisodes = onDownloadEpisodes,
-                            firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
+                            firstEpisodeFocusRequester = if (firstEpisodeFocusRef.attached) firstEpisodeFocusRequester else null,
                             // "su" dal selettore torna al bottone Riproduci.
                             upFocusRequester = playButtonFocusRequester,
                             selectorFocusRequester = seasonSelectorFocusRequester
@@ -859,11 +865,11 @@ fun DetailsScreen(
                                     seriesName = state.title,
                                     // Il requester DEVE restare attaccato alla PRIMA card:
                                     // è il destinatario del redirect D-pad "giù" dall'header stagione.
-                                    cardFocusRequester = if (index == episodeFocusTargetIndex) firstEpisodeFocusRequester else null,
+                                    cardFocusRef = if (index == episodeFocusTargetIndex) firstEpisodeFocusRef else null,
                                     // "su" dall'episodio target torna al selettore stagioni.
                                     upFocusRequester = if (index == episodeFocusTargetIndex) seasonSelectorFocusRequester else null,
                                     // "giù" → prima card della rail "Potrebbe piacerti".
-                                    downFocusRequester = if (state.relatedContent.isNotEmpty()) relatedFirstCardFocusRequester else null,
+                                    downFocusRequester = if (state.relatedContent.isNotEmpty() && relatedFirstCardFocusRef.attached) relatedFirstCardFocusRequester else null,
                                     onClick = { onEpisodeClick(episode) },
                                     onLongClick = { onEpisodeLongClick(episode) }
                                 )
@@ -893,7 +899,7 @@ fun DetailsScreen(
                         relatedContent = state.relatedContent,
                         visible = state.relatedContent.isNotEmpty(),
                         railState = relatedRailState,
-                        firstCardFocusRequester = relatedFirstCardFocusRequester,
+                        firstCardRef = relatedFirstCardFocusRef,
                         onScroll = { forward ->
                             railScope.launch {
                                 relatedRailState.animateScrollToItem(
@@ -916,7 +922,7 @@ fun DetailsScreen(
                         relatedContent = state.relatedContent,
                         visible = relatedRevealed && state.relatedContent.isNotEmpty(),
                         railState = relatedRailState,
-                        firstCardFocusRequester = relatedFirstCardFocusRequester,
+                        firstCardRef = relatedFirstCardFocusRef,
                         onScroll = { forward ->
                             railScope.launch {
                                 relatedRailState.animateScrollToItem(
@@ -1173,7 +1179,7 @@ private fun RelatedRailSection(
     relatedContent: List<RelatedContent>,
     visible: Boolean,
     railState: LazyListState,
-    firstCardFocusRequester: FocusRequester,
+    firstCardRef: FocusTargetRef,
     onScroll: (forward: Boolean) -> Unit,
     onRelatedClick: (Long, ContentType) -> Unit
 ) {
@@ -1212,7 +1218,7 @@ private fun RelatedRailSection(
                             onClick = { onRelatedClick(related.contentId, related.contentType) },
                             // Prima card = entry point fisso della rail.
                             modifier = if (index == 0) {
-                                Modifier.focusRequester(firstCardFocusRequester)
+                                Modifier.registerFocusTarget(firstCardRef)
                             } else Modifier
                         )
                     }
@@ -2801,7 +2807,7 @@ private fun EpisodeCarouselCard(
     episode: Episode,
     progress: EpisodeProgress?,
     seriesName: String? = null,
-    cardFocusRequester: FocusRequester? = null,
+    cardFocusRef: FocusTargetRef? = null,
     upFocusRequester: FocusRequester? = null,
     downFocusRequester: FocusRequester? = null,
     onClick: () -> Unit,
@@ -2810,9 +2816,6 @@ private fun EpisodeCarouselCard(
 ) {
     val cardInteraction = remember { MutableInteractionSource() }
     val isFocused by cardInteraction.collectIsFocusedAsState()
-
-    val fallbackCardFocus = remember { FocusRequester() }
-    val effectiveCardFocus = cardFocusRequester ?: fallbackCardFocus
 
     var pressStartTime by remember { mutableStateOf(0L) }
     val longPressThreshold = 500L
@@ -2864,7 +2867,11 @@ private fun EpisodeCarouselCard(
                 .clip(RoundedCornerShape(14.dp))
                 .background(WaveStreamColors.BackgroundSecondary)
                 .border(2.dp, ring, RoundedCornerShape(14.dp))
-                .focusRequester(effectiveCardFocus)
+                .then(
+                    // La card target (episodio su cui atterrare) è l'unica che registra
+                    // un FocusRequester, tracciandone l'attach per i redirect dei vicini.
+                    if (cardFocusRef != null) Modifier.registerFocusTarget(cardFocusRef) else Modifier
+                )
                 .then(
                     if (upFocusRequester != null) Modifier.focusProperties { up = upFocusRequester } else Modifier
                 )
