@@ -296,7 +296,7 @@ class SeriesActivity : ComponentActivity() {
                         item.seasonNumber?.let { putExtra("resume_season", it) }
                         item.episodeNumber?.let { putExtra("resume_episode", it) }
                     }
-                    startActivity(intent)
+                    it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
                 }
             },
             onBackClick = { finish() },
@@ -312,7 +312,7 @@ class SeriesActivity : ComponentActivity() {
             putExtra("poster_url", series.posterUrl ?: series.logoUrl)
             putExtra("backdrop_url", series.backdropUrl)
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
     }
 }
 

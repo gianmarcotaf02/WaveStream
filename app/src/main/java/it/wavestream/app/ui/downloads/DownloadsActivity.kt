@@ -51,7 +51,7 @@ class DownloadsActivity : ComponentActivity() {
                                 download.episodeNumber?.let { putExtra("episode", it) }
                             }
                         }
-                        startActivity(intent)
+                        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
                     },
                     onDeleteClick = { download ->
                         viewModel.deleteDownload(download)

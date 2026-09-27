@@ -313,10 +313,16 @@ class LiveActivity : ComponentActivity() {
                 }
             },
             onMultiscreenClick = {
-                startActivity(Intent(this@LiveActivity, MultiscreenActivity::class.java))
+                it.wavestream.app.ui.theme.ActivityTransitions.start(
+                    this@LiveActivity,
+                    Intent(this@LiveActivity, MultiscreenActivity::class.java)
+                )
             },
             onOpenEpg = {
-                startActivity(Intent(this@LiveActivity, it.wavestream.app.ui.epg.EPGActivity::class.java))
+                it.wavestream.app.ui.theme.ActivityTransitions.start(
+                    this@LiveActivity,
+                    Intent(this@LiveActivity, it.wavestream.app.ui.epg.EPGActivity::class.java)
+                )
             },
             favoriteCategories = favoriteCategories,
             onToggleFavorite = onToggleFavorite,
@@ -338,7 +344,7 @@ class LiveActivity : ComponentActivity() {
             putExtra("stream_url", channel.streamUrl)
             putExtra("title", channel.name)
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
     }
 }
 

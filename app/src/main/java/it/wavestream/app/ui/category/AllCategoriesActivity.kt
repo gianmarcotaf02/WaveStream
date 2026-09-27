@@ -106,7 +106,7 @@ class AllCategoriesActivity : ComponentActivity() {
                             putExtra("categoryName", categoryName)
                             putExtra("contentType", categoryType)
                         }
-                        startActivity(intent)
+                        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
                     },
                     onViewAllClick = {
                         // "Tutti i film" / "Tutte le serie TV" → griglia completa con
@@ -116,7 +116,7 @@ class AllCategoriesActivity : ComponentActivity() {
                         } else {
                             Intent(this, it.wavestream.app.ui.series.SeriesActivity::class.java)
                         }
-                        startActivity(intent)
+                        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
                     },
                     onBack = { finish() },
                     loadCategories = { loadCategories() },

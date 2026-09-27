@@ -304,7 +304,7 @@ class CategoryActivity : ComponentActivity() {
                 putExtra("poster_url", item.posterUrl)
                 putExtra("backdrop_url", item.backdropUrl)
             }
-            startActivity(intent)
+            it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
         } catch (e: Exception) {
             android.util.Log.e("CategoryActivity", "Error opening details", e)
         }
@@ -320,7 +320,7 @@ class CategoryActivity : ComponentActivity() {
                     putExtra("content_type", "CHANNEL")
                     putExtra("title", ch.name)
                 }
-                startActivity(intent)
+                it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
             }
         }
     }

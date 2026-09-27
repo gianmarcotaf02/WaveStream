@@ -395,7 +395,7 @@ class LoadingActivity : ComponentActivity() {
             putExtra("profile_id", profileId)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
         finish()
     }
     
@@ -403,7 +403,7 @@ class LoadingActivity : ComponentActivity() {
         val intent = Intent(this, it.wavestream.app.ui.setup.SetupActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
         finish()
     }
     

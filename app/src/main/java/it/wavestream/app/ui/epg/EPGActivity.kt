@@ -140,7 +140,7 @@ class EPGActivity : ComponentActivity() {
             putExtra("stream_url", channel.streamUrl)
             putExtra("title", channel.name)
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
     }
 }
 

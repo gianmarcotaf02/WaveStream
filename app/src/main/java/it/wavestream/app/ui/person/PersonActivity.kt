@@ -43,7 +43,7 @@ class PersonActivity : ComponentActivity() {
                             putExtra("content_id", contentId)
                             putExtra("content_type", contentType.name)
                         }
-                        startActivity(intent)
+                        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
                     }
                 )
             }

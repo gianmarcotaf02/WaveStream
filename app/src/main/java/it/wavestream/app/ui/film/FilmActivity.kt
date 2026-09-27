@@ -285,7 +285,7 @@ class FilmActivity : ComponentActivity() {
                     putExtra("poster_url", item.posterUrl)
                     putExtra("backdrop_url", item.backdropUrl)
                 }
-                startActivity(intent)
+                it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
             },
             onBackClick = { finish() },
             gridState = gridState
@@ -300,7 +300,7 @@ class FilmActivity : ComponentActivity() {
             putExtra("poster_url", movie.posterUrl ?: movie.logoUrl)
             putExtra("backdrop_url", movie.backdropUrl)
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
     }
 }
 
