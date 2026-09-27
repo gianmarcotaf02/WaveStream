@@ -805,7 +805,9 @@ fun DetailsScreen(
                             seasons = state.seasons,
                             selectedSeason = state.selectedSeason,
                             onSeasonSelected = onSeasonSelected,
+                            episodes = state.episodes,
                             onDownloadSeason = onDownloadSeason,
+                            onDownloadEpisode = onDownloadEpisode,
                             firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
                             // "su" dal selettore torna al bottone Riproduci.
                             upFocusRequester = playButtonFocusRequester,
@@ -852,18 +854,16 @@ fun DetailsScreen(
                                 EpisodeCarouselCard(
                                     episode = episode,
                                     progress = state.episodeProgress[episode.id],
-                                    downloadState = state.episodeDownloadStates[episode.id],
                                     seriesName = state.title,
                                     // Il requester DEVE restare attaccato alla PRIMA card:
                                     // è il destinatario del redirect D-pad "giù" dall'header stagione.
                                     cardFocusRequester = if (index == episodeFocusTargetIndex) firstEpisodeFocusRequester else null,
                                     // "su" dall'episodio target torna al selettore stagioni.
                                     upFocusRequester = if (index == episodeFocusTargetIndex) seasonSelectorFocusRequester else null,
-                                    // "giù" dal download: prima card della rail suggerimenti.
+                                    // "giù" → prima card della rail "Potrebbe piacerti".
                                     downFocusRequester = if (state.relatedContent.isNotEmpty()) relatedFirstCardFocusRequester else null,
                                     onClick = { onEpisodeClick(episode) },
-                                    onLongClick = { onEpisodeLongClick(episode) },
-                                    onDownloadClick = { onDownloadEpisode(episode) }
+                                    onLongClick = { onEpisodeLongClick(episode) }
                                 )
                             }
                         }
@@ -2469,32 +2469,22 @@ private fun SeasonTab(
 private fun EpisodeCarouselCard(
     episode: Episode,
     progress: EpisodeProgress?,
-    downloadState: EpisodeDownloadState? = null,
     seriesName: String? = null,
     cardFocusRequester: FocusRequester? = null,
     upFocusRequester: FocusRequester? = null,
     downFocusRequester: FocusRequester? = null,
     onClick: () -> Unit,
     onLongClick: () -> Unit = {},
-    onDownloadClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val cardInteraction = remember { MutableInteractionSource() }
     val isFocused by cardInteraction.collectIsFocusedAsState()
 
-    val downloadInteraction = remember { MutableInteractionSource() }
-    val isDownloadFocused by downloadInteraction.collectIsFocusedAsState()
-
     val fallbackCardFocus = remember { FocusRequester() }
     val effectiveCardFocus = cardFocusRequester ?: fallbackCardFocus
-    val downloadFocusRequester = remember { FocusRequester() }
 
     var pressStartTime by remember { mutableStateOf(0L) }
     val longPressThreshold = 500L
-
-    val isDownloaded = downloadState?.isDownloaded == true
-    val isDownloading = downloadState?.isDownloading == true
-    val downloadProgress = downloadState?.downloadProgress ?: 0
 
     val hasProgress = progress != null && progress.progress > 0.01f && !progress.isCompleted
     val isWatched = progress?.isCompleted == true ||
@@ -2547,7 +2537,10 @@ private fun EpisodeCarouselCard(
                 .then(
                     if (upFocusRequester != null) Modifier.focusProperties { up = upFocusRequester } else Modifier
                 )
-                .focusProperties { down = downloadFocusRequester }
+                .then(
+                    // "giù" → prima card della rail "Potrebbe piacerti" (se presente).
+                    if (downFocusRequester != null) Modifier.focusProperties { down = downFocusRequester } else Modifier
+                )
                 .focusable(interactionSource = cardInteraction)
                 .onPreviewKeyEvent { keyEvent ->
                     when {
@@ -2654,62 +2647,6 @@ private fun EpisodeCarouselCard(
                             .fillMaxHeight()
                             .fillMaxWidth(progressFraction)
                             .background(WaveStreamColors.Accent)
-                    )
-                }
-            }
-
-            // Freccia di download in basso a destra (focus target separato)
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(6.dp)
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(if (isDownloadFocused || isDownloaded) Color.Black.copy(alpha = 0.55f) else Color.Transparent)
-                    .focusRequester(downloadFocusRequester)
-                    .focusProperties {
-                        up = effectiveCardFocus
-                        // "giù" → prima card della rail "Potrebbe piacerti".
-                        downFocusRequester?.let { down = it }
-                    }
-                    .focusable(interactionSource = downloadInteraction)
-                    .clickable(
-                        interactionSource = downloadInteraction,
-                        indication = null,
-                        onClick = onDownloadClick
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                when {
-                    isDownloading -> {
-                        if (downloadProgress > 0) {
-                            CircularProgressIndicator(
-                                progress = { downloadProgress / 100f },
-                                modifier = Modifier.size(18.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp,
-                                trackColor = Color.White.copy(alpha = 0.25f)
-                            )
-                        } else {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                color = Color.White,
-                                strokeWidth = 2.dp,
-                                trackColor = Color.White.copy(alpha = 0.25f)
-                            )
-                        }
-                    }
-                    isDownloaded -> Icon(
-                        imageVector = Icons.Default.DownloadDone,
-                        contentDescription = "Scaricato",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    else -> Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = "Scarica episodio",
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
