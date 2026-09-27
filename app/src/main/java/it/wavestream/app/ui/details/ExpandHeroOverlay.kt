@@ -32,8 +32,9 @@ fun ExpandHeroOverlay(
     origin: Rect,
     imageUrl: String?,
     onFinished: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val density = LocalDensity.current
         val targetW = with(density) { maxWidth.toPx() }
         val targetH = with(density) { maxHeight.toPx() }

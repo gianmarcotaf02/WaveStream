@@ -88,6 +88,10 @@ class DetailsActivity : ComponentActivity() {
     private var intentTitle: String = ""
     private var intentPosterUrl: String? = null
     private var intentBackdropUrl: String? = null
+
+    // Origine per l'animazione EXPAND poster→hero (letta una volta dall'Intent)
+    private var expandOriginRect: androidx.compose.ui.geometry.Rect? = null
+    private var expandImageUrl: String? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,6 +103,14 @@ class DetailsActivity : ComponentActivity() {
         intentTitle = intent.getStringExtra("title") ?: ""
         intentPosterUrl = intent.getStringExtra("poster_url")
         intentBackdropUrl = intent.getStringExtra("backdrop_url")
+        intent.getIntArrayExtra(it.wavestream.app.ui.theme.ExpandHeroExtras.KEY_ORIGIN)
+            ?.takeIf { it.size == 4 }
+            ?.let { a ->
+                expandOriginRect = androidx.compose.ui.geometry.Rect(
+                    a[0].toFloat(), a[1].toFloat(), a[2].toFloat(), a[3].toFloat()
+                )
+            }
+        expandImageUrl = intent.getStringExtra(it.wavestream.app.ui.theme.ExpandHeroExtras.KEY_IMAGE)
         
         setContent {
             WaveStreamTheme {
@@ -203,6 +215,8 @@ class DetailsActivity : ComponentActivity() {
 
         DetailsScreen(
             state = state,
+            expandOrigin = expandOriginRect,
+            expandImage = expandImageUrl,
             onBackClick = { finish() },
             // Rail "Potrebbe piacerti" (piano L5): apre la scheda del contenuto
             // correlato come activity sopra questa, così il back torna alla scheda
