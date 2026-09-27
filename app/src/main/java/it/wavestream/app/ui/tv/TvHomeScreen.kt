@@ -100,6 +100,7 @@ import it.wavestream.app.ui.home.LocalHomeFocusMemory
 import it.wavestream.app.ui.home.resolveHeroes
 import it.wavestream.app.ui.home.SerieAMatchLiveBadge
 import it.wavestream.app.ui.home.SerieACompetitionChip
+import it.wavestream.app.ui.home.SerieAScoreChip
 import it.wavestream.app.ui.home.SerieAKickoffChip
 import it.wavestream.app.ui.home.serieAKickoffLabel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
