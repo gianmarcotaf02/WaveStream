@@ -1261,7 +1261,10 @@ private fun RelatedRailSection(
     railState: LazyListState,
     firstCardRef: FocusTargetRef,
     onScroll: (forward: Boolean) -> Unit,
-    onRelatedClick: (Long, ContentType) -> Unit
+    onRelatedClick: (index: Int, contentId: Long, contentType: ContentType) -> Unit,
+    // Card su cui ripristinare il focus al ritorno (indice nella rail), -1 = nessuna.
+    restoreFocusIndex: Int = -1,
+    restoreFocusRef: FocusTargetRef? = null
 ) {
     AnimatedVisibility(
         visible = visible,
@@ -1295,11 +1298,16 @@ private fun RelatedRailSection(
                         val related = relatedContent[index]
                         RelatedContentCard(
                             related = related,
-                            onClick = { onRelatedClick(related.contentId, related.contentType) },
-                            // Prima card = entry point fisso della rail.
-                            modifier = if (index == 0) {
-                                Modifier.registerFocusTarget(firstCardRef)
-                            } else Modifier
+                            onClick = { onRelatedClick(index, related.contentId, related.contentType) },
+                            // Card su cui ripristinare il focus (se stiamo tornando da
+                            // una scheda correlata), altrimenti la prima card = entry
+                            // point fisso della rail.
+                            modifier = when {
+                                index == restoreFocusIndex && restoreFocusRef != null ->
+                                    Modifier.registerFocusTarget(restoreFocusRef)
+                                index == 0 -> Modifier.registerFocusTarget(firstCardRef)
+                                else -> Modifier
+                            }
                         )
                     }
                 }
