@@ -18,7 +18,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.rememberScrollState
@@ -850,7 +849,7 @@ fun SearchScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Ricerche recenti: allineate a sinistra sotto la tastiera, in riga.
+                // Ricerche recenti: allineate a sinistra sotto la tastiera, una per riga.
                 // Il cestino accanto al titolo cancella tutta la cronologia.
                 if (query.isBlank() && recentSearches.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(20.dp))
@@ -892,12 +891,12 @@ fun SearchScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(10.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalAlignment = Alignment.Start,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .horizontalScroll(rememberScrollState())
+                            .verticalScroll(rememberScrollState())
                     ) {
                         recentSearches.forEach { recent ->
                             RecentSearchPill(
