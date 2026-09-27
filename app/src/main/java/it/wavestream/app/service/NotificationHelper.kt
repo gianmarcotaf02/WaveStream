@@ -104,8 +104,14 @@ class NotificationHelper @Inject constructor(
         fun postUpdateInstalledNotification(context: Context, versionName: String) {
             ensureChannels(context)
 
-            val launchIntent = Intent(context, ProfileSelectionActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            // Stesso intent del launcher dell'app: `getLaunchIntentForPackage` cerca
+            // CATEGORY_LAUNCHER e in una TV app (solo LEANBACK_LAUNCHER) può tornare null,
+            // quindi il fallback esplicito è il percorso normale.
+            val launchIntent = (
+                context.packageManager.getLaunchIntentForPackage(context.packageName)
+                    ?: Intent(context, ProfileSelectionActivity::class.java)
+                ).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             }
             val contentIntent = PendingIntent.getActivity(
                 context,
@@ -119,7 +125,6 @@ class NotificationHelper @Inject constructor(
                 .setContentTitle(context.getString(R.string.notification_update_installed))
                 .setContentText(context.getString(R.string.notification_update_installed_text, versionName))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_STATUS)
                 .setAutoCancel(true)
                 .setContentIntent(contentIntent)
                 .build()

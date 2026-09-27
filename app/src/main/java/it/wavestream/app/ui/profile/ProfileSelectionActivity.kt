@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import it.wavestream.app.R
 import it.wavestream.app.data.database.dao.ProfileDao
 import it.wavestream.app.data.database.entity.Profile
 import it.wavestream.app.data.preferences.UserPreferences
