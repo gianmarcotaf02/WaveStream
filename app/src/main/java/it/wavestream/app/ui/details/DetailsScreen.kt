@@ -2397,7 +2397,7 @@ private fun EpisodesSectionHeader(
             ) {
                 Icon(
                     imageVector = Icons.Default.Download,
-                    contentDescription = "Scarica stagione $selectedSeason",
+                    contentDescription = "Opzioni download stagione $selectedSeason",
                     tint = if (isSeasonDownloadFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
                     modifier = Modifier.size(20.dp)
                 )
