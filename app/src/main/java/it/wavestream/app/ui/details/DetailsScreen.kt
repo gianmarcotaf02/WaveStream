@@ -2250,12 +2250,15 @@ private fun EpisodesSectionHeader(
     seasons: List<Int>,
     selectedSeason: Int,
     onSeasonSelected: (Int) -> Unit,
+    episodes: List<Episode> = emptyList(),
     onDownloadSeason: (Int) -> Unit = {},
+    onDownloadEpisode: (Episode) -> Unit = {},
     firstEpisodeFocusRequester: FocusRequester? = null,
     upFocusRequester: FocusRequester? = null,
     selectorFocusRequester: FocusRequester? = null
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
+    var showDownloadDialog by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
@@ -2386,7 +2389,7 @@ private fun EpisodesSectionHeader(
                     .clickable(
                         interactionSource = seasonDownloadInteractionSource,
                         indication = null,
-                        onClick = { onDownloadSeason(selectedSeason) }
+                        onClick = { showDownloadDialog = true }
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -2398,6 +2401,332 @@ private fun EpisodesSectionHeader(
                 )
             }
         }
+    }
+
+    if (showDownloadDialog) {
+        SeasonDownloadDialog(
+            seasonNumber = selectedSeason,
+            episodes = episodes,
+            onDownloadSeason = onDownloadSeason,
+            onDownloadEpisodes = { selected -> selected.forEach(onDownloadEpisode) },
+            onDismiss = { showDownloadDialog = false }
+        )
+    }
+}
+
+/**
+ * Dialog di download episodi di una stagione.
+ *
+ * Menu in tema vetro, coerente con gli altri dialog dell'app:
+ *  - "Tutta la stagione" → scarica tutti gli episodi della stagione selezionata;
+ *  - "Seleziona episodi" → checklist con checkbox e conferma sui selezionati.
+ *
+ * Sostituisce i vecchi bottoni download sulle singole card episodio.
+ */
+@Composable
+private fun SeasonDownloadDialog(
+    seasonNumber: Int,
+    episodes: List<Episode>,
+    onDownloadSeason: (Int) -> Unit,
+    onDownloadEpisodes: (List<Episode>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var selecting by remember { mutableStateOf(false) }
+    var selectedIds by remember { mutableStateOf(emptySet<Long>()) }
+    val seasonFocus = remember { FocusRequester() }
+    val firstEpisodeFocus = remember { FocusRequester() }
+
+    // Focus: prima opzione all'apertura, prima riga quando si entra nella selezione.
+    LaunchedEffect(selecting) {
+        kotlinx.coroutines.delay(120)
+        runCatching {
+            if (selecting) firstEpisodeFocus.requestFocus() else seasonFocus.requestFocus()
+        }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        GlassSurface(
+            shape = RoundedCornerShape(22.dp),
+            // Vetro scuro semi-opaco + bordo gradiente: stesso linguaggio degli altri dialog.
+            fill = WaveStreamColors.BackgroundSecondary.copy(alpha = 0.96f),
+            stroke = GlassTokens.StrokeGradient,
+            strokeWidth = 1.dp,
+            modifier = Modifier.width(620.dp)
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = "Scarica episodi",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = WaveStreamColors.TextPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.season_number, seasonNumber) + " · ${episodes.size} episodi",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = WaveStreamColors.TextSecondary
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                if (!selecting) {
+                    DownloadChoiceRow(
+                        icon = Icons.Default.Download,
+                        title = "Tutta la stagione",
+                        subtitle = "Scarica tutti i ${episodes.size} episodi",
+                        focusRequester = seasonFocus,
+                        onClick = {
+                            onDownloadSeason(seasonNumber)
+                            onDismiss()
+                        }
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    DownloadChoiceRow(
+                        icon = Icons.Default.List,
+                        title = "Seleziona episodi",
+                        subtitle = "Scegli quali episodi scaricare",
+                        onClick = { selecting = true }
+                    )
+                } else {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp),
+                        modifier = Modifier.heightIn(max = 360.dp)
+                    ) {
+                        itemsIndexed(episodes, key = { _, e -> e.id }) { index, ep ->
+                            val checked = ep.id in selectedIds
+                            EpisodeSelectRow(
+                                episode = ep,
+                                checked = checked,
+                                focusRequester = if (index == 0) firstEpisodeFocus else null,
+                                onToggle = {
+                                    selectedIds = if (checked) selectedIds - ep.id else selectedIds + ep.id
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (selecting) {
+                        GlassTextAction("Indietro") { selecting = false }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        val chosen = episodes.filter { it.id in selectedIds }
+                        GlassPrimaryAction(
+                            text = if (chosen.isEmpty()) "Scarica" else "Scarica (${chosen.size})",
+                            enabled = chosen.isNotEmpty()
+                        ) {
+                            onDownloadEpisodes(chosen)
+                            onDismiss()
+                        }
+                    } else {
+                        GlassTextAction("Annulla", onClick = onDismiss)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Riga-scelta del dialog download (tutta la stagione / seleziona episodi). */
+@Composable
+private fun DownloadChoiceRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    focusRequester: FocusRequester? = null,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) GlassTokens.accentFill(WaveStreamColors.Accent) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "dlChoiceFill"
+    )
+    val stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient
+
+    GlassSurface(
+        shape = RoundedCornerShape(14.dp),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .focusable(interactionSource = interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = WaveStreamColors.AccentLight,
+                modifier = Modifier.size(22.dp)
+            )
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = WaveStreamColors.TextPrimary,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = WaveStreamColors.TextTertiary
+                )
+            }
+        }
+    }
+}
+
+/** Riga episodio con checkbox per la selezione multipla nel dialog download. */
+@Composable
+private fun EpisodeSelectRow(
+    episode: Episode,
+    checked: Boolean,
+    focusRequester: FocusRequester? = null,
+    onToggle: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) GlassTokens.accentFill(WaveStreamColors.Accent) else GlassTokens.SurfaceFill,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "epSelectFill"
+    )
+    val stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient
+
+    GlassSurface(
+        shape = RoundedCornerShape(12.dp),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .focusable(interactionSource = interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onToggle)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Checkbox custom: la Checkbox M3 non è pensata per il D-pad.ù
+            Box(
+                modifier = Modifier
+                    .size(22.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (checked) WaveStreamColors.Accent else Color.Transparent)
+                    .border(
+                        width = 1.5.dp,
+                        color = if (checked) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
+                        shape = RoundedCornerShape(6.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (checked) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "E${episode.episodeNumber} · ${episode.name ?: "Episodio ${episode.episodeNumber}"}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = WaveStreamColors.TextPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+/** Azione testuale vetro (Indietro / Annulla). */
+@Composable
+private fun GlassTextAction(text: String, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) GlassTokens.SurfaceFillFocused else Color.Transparent,
+        label = "glassTextActionFill"
+    )
+
+    GlassSurface(
+        shape = RoundedCornerShape(50),
+        fill = fill,
+        stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient,
+        strokeWidth = 1.dp,
+        modifier = Modifier
+            .focusable(interactionSource = interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = WaveStreamColors.TextPrimary,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(horizontal = 22.dp, vertical = 10.dp)
+        )
+    }
+}
+
+/** Azione primaria accent (Scarica N episodi). */
+@Composable
+private fun GlassPrimaryAction(text: String, enabled: Boolean, onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val fill by animateColorAsState(
+        targetValue = when {
+            !enabled -> WaveStreamColors.Accent.copy(alpha = 0.30f)
+            isFocused -> WaveStreamColors.Accent
+            else -> WaveStreamColors.Accent.copy(alpha = 0.85f)
+        },
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "glassPrimaryFill"
+    )
+
+    GlassSurface(
+        shape = RoundedCornerShape(50),
+        fill = fill,
+        stroke = GlassTokens.accentStroke(WaveStreamColors.Accent),
+        strokeWidth = 1.dp,
+        modifier = Modifier
+            .focusProperties { canFocus = enabled }
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                enabled = enabled,
+                onClick = onClick
+            )
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 22.dp, vertical = 10.dp)
+        )
     }
 }
 
