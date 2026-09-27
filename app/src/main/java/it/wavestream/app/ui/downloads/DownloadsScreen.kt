@@ -1,7 +1,10 @@
 package it.wavestream.app.ui.downloads
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -105,10 +108,18 @@ fun DownloadsScreen(
                         }
                         
                         items(inProgressDownloads, key = { it.id }) { download ->
-                            DownloadInProgressCard(
-                                download = download,
-                                onCancelClick = { onCancelClick(download) }
-                            )
+                            Box(
+                                modifier = Modifier.animateItem(
+                                    fadeInSpec = tween(AppAnimations.ListItemEnterMs),
+                                    fadeOutSpec = tween(AppAnimations.ListItemExitMs),
+                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                )
+                            ) {
+                                DownloadInProgressCard(
+                                    download = download,
+                                    onCancelClick = { onCancelClick(download) }
+                                )
+                            }
                         }
                         
                         item {
@@ -128,11 +139,19 @@ fun DownloadsScreen(
                         }
                         
                         items(completedDownloads, key = { it.id }) { download ->
-                            DownloadedContentCard(
-                                download = download,
-                                onPlayClick = { onPlayClick(download) },
-                                onDeleteClick = { onDeleteClick(download) }
-                            )
+                            Box(
+                                modifier = Modifier.animateItem(
+                                    fadeInSpec = tween(AppAnimations.ListItemEnterMs),
+                                    fadeOutSpec = tween(AppAnimations.ListItemExitMs),
+                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                )
+                            ) {
+                                DownloadedContentCard(
+                                    download = download,
+                                    onPlayClick = { onPlayClick(download) },
+                                    onDeleteClick = { onDeleteClick(download) }
+                                )
+                            }
                         }
                     }
                 }

@@ -1,7 +1,10 @@
 package it.wavestream.app.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -61,10 +64,18 @@ fun ContinueWatchingCarousel(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(items, key = { it.watchProgressId }) { item ->
-                ContinueWatchingCard(
-                    item = item,
-                    onClick = { onItemClick(item) }
-                )
+                Box(
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = tween(AppAnimations.ListItemEnterMs),
+                        fadeOutSpec = tween(AppAnimations.ListItemExitMs),
+                        placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                    )
+                ) {
+                    ContinueWatchingCard(
+                        item = item,
+                        onClick = { onItemClick(item) }
+                    )
+                }
             }
         }
     }
