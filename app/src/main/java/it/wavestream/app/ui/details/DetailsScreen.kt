@@ -663,7 +663,17 @@ fun DetailsScreen(
                             resumeProgress = state.resumeProgress,
                             onClick = onPlayClick,
                             focusRef = playButtonFocusRef,
-                            onFocusedChanged = { playButtonFocused = it }
+                            onFocusedChanged = { playButtonFocused = it },
+                            // Film: "giù" dal CTA va DIRETTAMENTE alla prima card di
+                            // "Potrebbe piacerti" (Cast & Regia non è più focusabile).
+                            // Serie: si lascia la navigazione esistente verso gli episodi.
+                            onDownKey = if (!hasEpisodesSection && state.relatedContent.isNotEmpty()) {
+                                {
+                                    forceRelatedVisible = true
+                                    relatedFirstFocusRequest = true
+                                    true
+                                }
+                            } else null
                         )
                         
                         // Trailer button
