@@ -197,7 +197,8 @@ fun DetailsScreen(
     modifier: Modifier = Modifier
 ) {
     // FocusRequester for automatic focus on Play button
-    val playButtonFocusRequester = remember { FocusRequester() }
+    val playButtonFocusRef = rememberFocusTargetRef()
+    val playButtonFocusRequester = playButtonFocusRef.requester
     // True quando il bottone Riproduci ha DAVVERO il focus (usato dal retry di autofocus)
     var playButtonFocused by remember { mutableStateOf(false) }
     
@@ -235,7 +236,8 @@ fun DetailsScreen(
     val firstEpisodeFocusRef = rememberFocusTargetRef()
     val firstEpisodeFocusRequester = firstEpisodeFocusRef.requester
     // Focus target del selettore stagioni: l'episodio target, con "su", torna qui.
-    val seasonSelectorFocusRequester = remember { FocusRequester() }
+    val seasonSelectorFocusRef = rememberFocusTargetRef()
+    val seasonSelectorFocusRequester = seasonSelectorFocusRef.requester
     // Entry point della rail "Potrebbe piacerti": il D-pad "giù" dal carosello
     // episodi porta SEMPRE qui (prima card a sinistra), non all'ultima card usata.
     // Anche qui va tracciato l'attach: la prima card può uscire dalla LazyRow.
@@ -775,7 +777,7 @@ fun DetailsScreen(
                                         // selettore stagioni: senza redirect il focus, non
                                         // trovando un target sotto, restava nella rail e
                                         // saltava a una card a sinistra.
-                                        downFocusRequester = if (hasEpisodesSection) seasonSelectorFocusRequester else null
+                                        downFocusRequester = if (hasEpisodesSection && seasonSelectorFocusRef.attached) seasonSelectorFocusRequester else null
                                     )
                                 }
                             }
@@ -818,8 +820,8 @@ fun DetailsScreen(
                             onDownloadEpisodes = onDownloadEpisodes,
                             firstEpisodeFocusRequester = if (firstEpisodeFocusRef.attached) firstEpisodeFocusRequester else null,
                             // "su" dal selettore torna al bottone Riproduci.
-                            upFocusRequester = playButtonFocusRequester,
-                            selectorFocusRequester = seasonSelectorFocusRequester
+                            upFocusRequester = if (playButtonFocusRef.attached) playButtonFocusRequester else null,
+                            selectorFocusRef = seasonSelectorFocusRef
                         )
                         Spacer(modifier = Modifier.height(20.dp))
                     }
@@ -867,7 +869,7 @@ fun DetailsScreen(
                                     // è il destinatario del redirect D-pad "giù" dall'header stagione.
                                     cardFocusRef = if (index == episodeFocusTargetIndex) firstEpisodeFocusRef else null,
                                     // "su" dall'episodio target torna al selettore stagioni.
-                                    upFocusRequester = if (index == episodeFocusTargetIndex) seasonSelectorFocusRequester else null,
+                                    upFocusRequester = if (index == episodeFocusTargetIndex && seasonSelectorFocusRef.attached) seasonSelectorFocusRequester else null,
                                     // "giù" → prima card della rail "Potrebbe piacerti".
                                     downFocusRequester = if (state.relatedContent.isNotEmpty() && relatedFirstCardFocusRef.attached) relatedFirstCardFocusRequester else null,
                                     onClick = { onEpisodeClick(episode) },
