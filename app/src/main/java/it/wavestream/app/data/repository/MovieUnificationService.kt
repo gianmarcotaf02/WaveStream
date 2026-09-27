@@ -483,7 +483,11 @@ class MovieUnificationService @Inject constructor(
 
                 // I titoli ora coincidono: unifica le righe che erano rimaste separate
                 // a causa del marcatore ("iron man 2 4" vs "iron man 2").
-                if (changed) unifyAllPlaylists()
+                if (changed) {
+                    unifyAllPlaylists()
+                    // I titoli in cache (caroselli Home) contengono ancora il marcatore.
+                    contentCache.clearHomeSessionData()
+                }
 
                 userPreferences.setMovieTitlesCleanedV1(true)
                 Log.i(TAG, "Duplicate-marker cleanup completed")
