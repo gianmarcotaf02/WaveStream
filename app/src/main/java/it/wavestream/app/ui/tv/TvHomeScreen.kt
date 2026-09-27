@@ -99,6 +99,8 @@ import it.wavestream.app.ui.home.HomeScreenState
 import it.wavestream.app.ui.home.LocalHomeFocusMemory
 import it.wavestream.app.ui.home.resolveHeroes
 import it.wavestream.app.ui.home.SerieAMatchLiveBadge
+import it.wavestream.app.ui.home.SerieACompetitionChip
+import it.wavestream.app.ui.home.SerieAKickoffChip
 import it.wavestream.app.ui.home.serieAKickoffLabel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.ui.home.PosterCard
@@ -1104,30 +1106,22 @@ fun HeroBanner(
                         // LIVE pill / countdown + label competizione (solo per l'hero partita).
                         // Slot riservato in alto: quando scatterà il LIVE non sposta nulla.
                         if (hero.contentType == "SERIEA_MATCH" && serieAMatch != null) {
-                            Box(modifier = Modifier.height(32.dp)) {
+                            // Slot riservato (36dp): ospita il badge LIVE oppure il chip
+                            // countdown in vetro, entrambi allineati a sinistra.
+                            Box(modifier = Modifier.height(36.dp)) {
                                 if (serieAMatch.isLive) {
                                     SerieAMatchLiveBadge()
                                 } else {
                                     serieAKickoffLabel(serieAMatch)?.let { label ->
-                                        Text(
-                                            text = label,
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = WaveStreamColors.AccentGold,
-                                            fontWeight = FontWeight.Bold,
-                                            letterSpacing = 2.sp,
+                                        SerieAKickoffChip(
+                                            label = label,
                                             modifier = Modifier.align(Alignment.CenterStart)
                                         )
                                     }
                                 }
                             }
                             Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = "Serie A • Giornata ${serieAMatch.matchday ?: "-"}",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color.White.copy(alpha = 0.85f),
-                                fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 2.sp
-                            )
+                            SerieACompetitionChip(match = serieAMatch)
                             Spacer(modifier = Modifier.height(6.dp))
                         }
                         // Titolo: clear logo TMDb se disponibile, altrimenti testo.
@@ -1262,11 +1256,10 @@ fun HeroBanner(
                             serieAMatch.homeScore != null && serieAMatch.awayScore != null
                         ) {
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "${serieAMatch.homeScore} - ${serieAMatch.awayScore}",
-                                style = MaterialTheme.typography.headlineMedium,
-                                color = Color.White,
-                                fontWeight = FontWeight.Black
+                            SerieAScoreChip(
+                                homeScore = serieAMatch.homeScore,
+                                awayScore = serieAMatch.awayScore,
+                                isLive = serieAMatch.isLive
                             )
                         }
                         
