@@ -389,6 +389,10 @@
     <string name="notification_new_content_text">%d nuovi contenuti aggiunti</string>
     <string name="notification_sync_complete">Sincronizzazione completata</string>
     <string name="notification_downloading">Download in corso…</string>
+    <string name="notification_channel_updates">Aggiornamenti</string>
+    <string name="notification_channel_updates_desc">Notifiche sull\'esito degli aggiornamenti dell\'app</string>
+    <string name="notification_update_installed">Aggiornamento installato</string>
+    <string name="notification_update_installed_text">WaveStream %1$s è pronto. Premi OK per aprire l\'app.</string>
     <string name="download_channel_name">Download Video</string>
     <string name="download_channel_description">Notifiche per il download dei contenuti video</string>
     
