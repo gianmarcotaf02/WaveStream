@@ -104,6 +104,10 @@ class UserPreferences @Inject constructor(
 
         // Unificazione film (doppioni/versioni) — eseguita una sola volta
         private val MOVIES_UNIFIED_V1 = booleanPreferencesKey("movies_unified_v1")
+
+        // Pulizia dei marcatori di doppione del provider nei titoli ("Iron Man 2 (4)")
+        // — eseguita una sola volta
+        private val MOVIE_TITLES_CLEANED_V1 = booleanPreferencesKey("movie_titles_cleaned_v1")
         
         // OMDb (IMDB ratings)
         private val OMDB_API_KEY = stringPreferencesKey("omdb_api_key")
@@ -571,6 +575,15 @@ class UserPreferences @Inject constructor(
 
     suspend fun setMoviesUnifiedV1(done: Boolean) {
         dataStore.edit { it[MOVIES_UNIFIED_V1] = done }
+    }
+
+    // Pulizia dei marcatori di doppione nei titoli (una-tantum)
+    suspend fun isMovieTitlesCleanedV1(): Boolean {
+        return dataStore.data.first()[MOVIE_TITLES_CLEANED_V1] ?: false
+    }
+
+    suspend fun setMovieTitlesCleanedV1(done: Boolean) {
+        dataStore.edit { it[MOVIE_TITLES_CLEANED_V1] = done }
     }
     
     // OMDb API Key (for IMDB ratings) (cifrata)
