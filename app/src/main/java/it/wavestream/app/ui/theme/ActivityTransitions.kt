@@ -27,15 +27,19 @@ data class WindowAnimation(val enterRes: Int, val exitRes: Int)
 object ActivityTransitions {
 
     /** Inferisce la categoria dalla classe di destinazione. */
-    fun categoryFor(intent: Intent): MotionCategory {
-        val simple = intent.component?.className?.substringAfterLast('.') ?: return MotionCategory.FADE
-        return when (simple) {
-            "DetailsActivity" -> MotionCategory.EXPAND
-            "PlayerActivity" -> MotionCategory.ZOOM
-            "SetupActivity", "WelcomeActivity", "TasteSetupActivity", "TermsActivity", "LoadingActivity" ->
-                MotionCategory.AXIS_Y
-            else -> MotionCategory.FADE
-        }
+    fun categoryFor(intent: Intent): MotionCategory =
+        categoryForClassName(intent.component?.className?.substringAfterLast('.'))
+
+    /**
+     * Classificazione pura (testabile su JVM) dal nome semplice della classe di
+     * destinazione. `null`/vuoto → [MotionCategory.FADE].
+     */
+    fun categoryForClassName(simpleName: String?): MotionCategory = when (simpleName) {
+        "DetailsActivity" -> MotionCategory.EXPAND
+        "PlayerActivity" -> MotionCategory.ZOOM
+        "SetupActivity", "WelcomeActivity", "TasteSetupActivity", "TermsActivity", "LoadingActivity" ->
+            MotionCategory.AXIS_Y
+        else -> MotionCategory.FADE
     }
 
     /** Animazioni di window per categoria. `null` = nessuna animazione custom. */
