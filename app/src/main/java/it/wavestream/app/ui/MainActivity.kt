@@ -931,12 +931,43 @@ private fun HeroAmbientBackdrop(
     hero: HeroItem,
     serieAMatch: SerieAMatchEntity?
 ) {
+    // Ken Burns "idle": zoom + drift lentissimi sull'immagine di sfondo (solo
+    // graphicsLayer, nessun costo di layout). Disattivato con motion ridotto.
+    val reducedMotion = it.wavestream.app.ui.theme.rememberReducedMotion()
+    val kenBurns = rememberInfiniteTransition(label = "heroKenBurns")
+    val kbScale by kenBurns.animateFloat(
+        initialValue = if (reducedMotion) 1f else 1.02f,
+        targetValue = if (reducedMotion) 1f else 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(24_000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "heroKenBurnsScale"
+    )
+    val kbDriftX by kenBurns.animateFloat(
+        initialValue = if (reducedMotion) 0f else -16f,
+        targetValue = if (reducedMotion) 0f else 16f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(26_000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "heroKenBurnsDriftX"
+    )
+
     androidx.compose.animation.Crossfade(
         targetState = hero,
-        animationSpec = tween(450),
+        animationSpec = tween(it.wavestream.app.ui.theme.AppAnimations.HeroCrossfadeMs),
         label = "heroAmbientBackdrop"
     ) { current ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = kbScale
+                    scaleY = kbScale
+                    translationX = kbDriftX
+                }
+        ) {
             if (current.contentType == "SERIEA_MATCH" && serieAMatch != null) {
                 SerieAMatchHeroBackdrop(
                     match = serieAMatch,
