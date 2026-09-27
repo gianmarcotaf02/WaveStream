@@ -419,6 +419,50 @@ class DetailsActivity : ComponentActivity() {
                     ).show()
                 }
             },
+            onDownloadEpisodes = { episodes ->
+                if (episodes.isNotEmpty()) {
+                    // Stato "in download" per tutti i selezionati in un colpo solo.
+                    val currentStates = state.episodeDownloadStates.toMutableMap()
+                    episodes.forEach { ep ->
+                        currentStates[ep.id] = EpisodeDownloadState(
+                            isDownloaded = false,
+                            isDownloading = true,
+                            downloadProgress = 0
+                        )
+                    }
+                    state = state.copy(episodeDownloadStates = currentStates)
+
+                    lifecycleScope.launch {
+                        var started = 0
+                        episodes.forEach { ep ->
+                            if (downloadManager.downloadEpisode(ep.id)) started++
+                        }
+                        android.widget.Toast.makeText(
+                            this@DetailsActivity,
+                            "Download avviati: $started episodi",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    // Un solo collector per aggiornare il progresso di tutti gli episodi scelti.
+                    lifecycleScope.launch {
+                        downloadManager.downloadProgress.collect { progressMap ->
+                            val updated = state.episodeDownloadStates.toMutableMap()
+                            var changed = false
+                            episodes.forEach { ep ->
+                                val progress = progressMap["episode_${ep.id}"] ?: return@forEach
+                                updated[ep.id] = EpisodeDownloadState(
+                                    isDownloaded = progress >= 100,
+                                    isDownloading = progress < 100,
+                                    downloadProgress = progress
+                                )
+                                changed = true
+                            }
+                            if (changed) state = state.copy(episodeDownloadStates = updated)
+                        }
+                    }
+                }
+            },
             onPersonClick = { personId, personName ->
                 val intent = android.content.Intent(this, it.wavestream.app.ui.person.PersonActivity::class.java).apply {
                     putExtra("person_id", personId)
