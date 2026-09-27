@@ -151,17 +151,20 @@ fun TvPlayerScreen(
     val creditsDebugText = remember { mutableStateOf("") }
 
     // Fade-through sul cambio sorgente (es. switch canale live): il video entra in
-    // dissolvenza quando cambia currentChannelId.
+    // dissolvenza quando cambia currentChannelId. Saltato con motion ridotto.
+    val reducedMotion = it.wavestream.app.ui.theme.rememberReducedMotion()
     val surfaceAlpha = remember { Animatable(1f) }
     var lastChannelId by remember { mutableStateOf(currentChannelId) }
     LaunchedEffect(currentChannelId) {
         if (currentChannelId != lastChannelId) {
             lastChannelId = currentChannelId
-            surfaceAlpha.snapTo(0f)
-            surfaceAlpha.animateTo(
-                1f,
-                tween(AppAnimations.FadeEnterMs, easing = AppAnimations.Emphasized)
-            )
+            if (!reducedMotion) {
+                surfaceAlpha.snapTo(0f)
+                surfaceAlpha.animateTo(
+                    1f,
+                    tween(AppAnimations.FadeEnterMs, easing = AppAnimations.Emphasized)
+                )
+            }
         }
     }
 

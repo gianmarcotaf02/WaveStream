@@ -36,11 +36,13 @@ fun Modifier.cascadeIn(
     durationMs: Int = 350,
     offsetY: Float = 40f,
 ): Modifier {
+    // Rispetta "Riduci animazioni": niente cascata (contenuto subito visibile).
+    val reducedMotion = rememberReducedMotion()
     val alreadySeen = remember(key) { key in seen }
-    val progress = remember(key) { Animatable(if (alreadySeen) 1f else 0f) }
+    val progress = remember(key) { Animatable(if (alreadySeen || reducedMotion) 1f else 0f) }
 
-    LaunchedEffect(key) {
-        if (!alreadySeen) {
+    LaunchedEffect(key, reducedMotion) {
+        if (!alreadySeen && !reducedMotion) {
             delay(index.coerceAtMost(maxSteps) * staggerMs.toLong())
             progress.animateTo(1f, tween(durationMs, easing = FastOutSlowInEasing))
             seen.add(key)
