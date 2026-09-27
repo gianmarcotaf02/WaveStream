@@ -287,12 +287,11 @@ class MainActivity : FragmentActivity() {
                 putExtra("source_provider_id", sourceProviderId)
             }
         }
-        val options = ActivityOptionsCompat.makeCustomAnimation(
+        val options = it.wavestream.app.ui.theme.ActivityTransitions.options(
             this,
-            it.wavestream.app.R.anim.zoom_in_enter,
-            it.wavestream.app.R.anim.zoom_in_exit
+            it.wavestream.app.ui.theme.MotionCategory.ZOOM
         )
-        startActivity(intent, options.toBundle())
+        if (options != null) startActivity(intent, options) else startActivity(intent)
     }
     
     fun playTrailer(trailerKey: String) {
@@ -516,14 +515,9 @@ private fun MainActivityScreen(
         }
     }
 
-    // Helper for animated activity navigation
+    // Helper for animated activity navigation — delega a ActivityTransitions (categoria inferita)
     fun startActivityWithTransition(intent: Intent) {
-        val options = ActivityOptionsCompat.makeCustomAnimation(
-            context,
-            it.wavestream.app.R.anim.zoom_in_enter,
-            it.wavestream.app.R.anim.zoom_in_exit
-        )
-        context.startActivity(intent, options.toBundle())
+        it.wavestream.app.ui.theme.ActivityTransitions.start(context, intent)
     }
     
     // Handle tab selection
