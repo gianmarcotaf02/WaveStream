@@ -1171,6 +1171,42 @@ private fun ScrollHintPill(modifier: Modifier = Modifier) {
 }
 
 /**
+ * Riferimento a un target di focus che tiene traccia di quando è realmente composto.
+ *
+ * Serve per i redirect `focusProperties { down/up = requester }` usati dalle rail:
+ * in una `LazyRow` una card fuori schermo viene rimossa dalla composizione e il suo
+ * `FocusRequester` resta "scollegato". Se un redirect punta a un requester scollegato,
+ * il focus search di Compose lancia `IllegalStateException: FocusRequester is not
+ * initialized`. Con [registerFocusTarget] sappiamo quando il target esiste davvero e
+ * attiviamo il redirect solo in quel caso (altrimenti si usa la ricerca geometrica).
+ */
+@Stable
+private class FocusTargetRef {
+    val requester = FocusRequester()
+    var attached by mutableStateOf(false)
+        private set
+
+    fun onAttached() { attached = true }
+    fun onDetached() { attached = false }
+}
+
+@Composable
+private fun rememberFocusTargetRef(): FocusTargetRef = remember { FocusTargetRef() }
+
+/**
+ * Applica il requester di [ref] e ne traccia l'attach finché il composable resta composto.
+ * Da usare al posto di `Modifier.focusRequester(ref.requester)`.
+ */
+@Composable
+private fun Modifier.registerFocusTarget(ref: FocusTargetRef): Modifier {
+    DisposableEffect(ref) {
+        ref.onAttached()
+        onDispose { ref.onDetached() }
+    }
+    return focusRequester(ref.requester)
+}
+
+/**
  * Sezione "Potrebbe piacerti": titolo + rail di card. Estratta perché usata
  * in due punti (item separato per i film, dentro l'item episodi per le serie).
  */
