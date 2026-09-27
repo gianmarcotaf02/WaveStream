@@ -190,6 +190,7 @@ fun DetailsScreen(
     onDownloadClick: () -> Unit = {},
     onDeleteDownloadClick: () -> Unit = {},
     onDownloadEpisode: (Episode) -> Unit = {},
+    onDownloadEpisodes: (List<Episode>) -> Unit = {},
     onDownloadSeason: (Int) -> Unit = {},  // Season number
     // AI: spiega il finale (solo film). L'attività inietta MovieEndingRepository.
     onExplainEnding: (suspend (MovieEndingRequest) -> MovieEnding)? = null,
@@ -808,7 +809,7 @@ fun DetailsScreen(
                             onSeasonSelected = onSeasonSelected,
                             episodes = state.episodes,
                             onDownloadSeason = onDownloadSeason,
-                            onDownloadEpisode = onDownloadEpisode,
+                            onDownloadEpisodes = onDownloadEpisodes,
                             firstEpisodeFocusRequester = if (state.episodes.isNotEmpty()) firstEpisodeFocusRequester else null,
                             // "su" dal selettore torna al bottone Riproduci.
                             upFocusRequester = playButtonFocusRequester,
@@ -2253,7 +2254,7 @@ private fun EpisodesSectionHeader(
     onSeasonSelected: (Int) -> Unit,
     episodes: List<Episode> = emptyList(),
     onDownloadSeason: (Int) -> Unit = {},
-    onDownloadEpisode: (Episode) -> Unit = {},
+    onDownloadEpisodes: (List<Episode>) -> Unit = {},
     firstEpisodeFocusRequester: FocusRequester? = null,
     upFocusRequester: FocusRequester? = null,
     selectorFocusRequester: FocusRequester? = null
@@ -2409,7 +2410,7 @@ private fun EpisodesSectionHeader(
             seasonNumber = selectedSeason,
             episodes = episodes,
             onDownloadSeason = onDownloadSeason,
-            onDownloadEpisodes = { selected -> selected.forEach(onDownloadEpisode) },
+            onDownloadEpisodes = onDownloadEpisodes,
             onDismiss = { showDownloadDialog = false }
         )
     }
