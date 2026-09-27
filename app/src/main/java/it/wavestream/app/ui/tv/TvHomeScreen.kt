@@ -212,6 +212,10 @@ private fun TvHomeScreenContent(
     modifier: Modifier = Modifier
 ) {
     val columnListState = rememberTvLazyListState()
+
+    // Ambient dimming: chiave dell'ultima riga focalizzata. Le righe diverse si
+    // attenuano a DimmingAlpha (Motion Contract · ambient).
+    var focusedRowKey by remember { mutableStateOf<String?>(null) }
     
     // Focus requesters for each carousel row
     val rowFocusRequesters = remember(state.carouselRows.size) {
@@ -755,10 +759,18 @@ private fun TvHomeScreenContent(
                             animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
                             label = "rowOffset"
                         )
+
+                        // Ambient dimming: la riga non focalizzata si attenua.
+                        val isDimmed = focusedRowKey != null && focusedRowKey != row.title
+                        val dimAlpha by animateFloatAsState(
+                            targetValue = if (isDimmed) WaveStreamColors.DimmingAlpha else 1f,
+                            animationSpec = AppAnimations.DimFade,
+                            label = "rowDim"
+                        )
                         
                         Column(
                             modifier = Modifier.graphicsLayer {
-                                alpha = rowAlpha
+                                alpha = rowAlpha * dimAlpha
                                 translationY = rowOffsetY.toPx()
                             }
                         ) {
@@ -795,6 +807,7 @@ private fun TvHomeScreenContent(
                                         onItemClick = onItemClick,
                                         onSeeAllClick = seeAllForRow,
                                         focusRequester = rowFocusRequester,
+                                        onFocusChanged = { focused -> if (focused) focusedRowKey = row.title },
                                         onLeftOnFirstItem = onRailFocusRequest
                                     )
                                 }
@@ -807,6 +820,7 @@ private fun TvHomeScreenContent(
                                     onItemClick = onItemClick,
                                     onSeeAllClick = seeAllForRow,
                                     focusRequester = rowFocusRequester,
+                                    onFocusChanged = { focused -> if (focused) focusedRowKey = row.title },
                                     onLeftOnFirstItem = onRailFocusRequest
                                 )
                             }
