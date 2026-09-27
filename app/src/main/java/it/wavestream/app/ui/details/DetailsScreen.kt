@@ -332,10 +332,12 @@ fun DetailsScreen(
     // Request focus on Play button when content loads.
     // RIPROVA finché il bottone non ha davvero il focus: nei primi frame può non essere
     // ancora composto (AnimatedVisibility) o il focus può essere rivendicato da altri elementi.
+    // NON tocca il focus se stiamo tornando da una card della rail "Potrebbe piacerti":
+    // in quel caso il focus va ripristinato sulla card, non sul pulsante Riproduci.
     LaunchedEffect(state.isLoading) {
-        if (!state.isLoading) {
+        if (!state.isLoading && pendingRelatedFocusIndex < 0) {
             var attempts = 0
-            while (!playButtonFocused && attempts < 20) {
+            while (!playButtonFocused && attempts < 20 && pendingRelatedFocusIndex < 0) {
                 kotlinx.coroutines.delay(100)
                 attempts++
                 try {
