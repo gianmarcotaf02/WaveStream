@@ -42,6 +42,7 @@ import it.wavestream.app.ui.home.LocalHomeFocusMemory
 import it.wavestream.app.ui.components.CategoryCard
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.cascadeIn
 import kotlinx.coroutines.delay
 
 /**
@@ -193,24 +194,10 @@ fun TvCarouselRow(
                     onDispose { focusMemory?.unregister(focusKey) }
                 }
                 
-                // Aurora: ingresso a cascata (stagger 35ms/item, max 8 step)
+                // Aurora: ingresso a cascata (stagger 35ms/item, max 8 step) — helper condiviso
                 val itemKey = "${item.contentType}_${item.id}"
-                val hasAppeared = remember { mutableStateOf(itemKey in appearedKeys) }
-                val entranceAlpha = remember { Animatable(if (hasAppeared.value) 1f else 0f) }
-                LaunchedEffect(itemKey) {
-                    if (!hasAppeared.value) {
-                        delay(index.coerceAtMost(8) * AppAnimations.CascadeStaggerMs.toLong())
-                        entranceAlpha.animateTo(1f, tween(350, easing = FastOutSlowInEasing))
-                        appearedKeys.add(itemKey)
-                        hasAppeared.value = true
-                    }
-                }
-                
                 Box(
-                    modifier = Modifier.graphicsLayer {
-                        alpha = entranceAlpha.value
-                        translationY = (1f - entranceAlpha.value) * 40f
-                    }
+                    modifier = Modifier.cascadeIn(appearedKeys, itemKey, index)
                 ) {
                 // Top classifica (righe popolari): numero grande a sinistra della
                 // card, parzialmente nascosto dietro la copertina. Decorativo, non
