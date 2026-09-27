@@ -19,6 +19,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,6 +40,7 @@ import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.util.channelLogoRequest
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.ExpandOrigin
 
 /**
  * TV-optimized content card using androidx.tv.material3
@@ -61,6 +64,7 @@ fun TvContentCard(
     fillWidth: Boolean = false
 ) {
     var isFocused by remember { mutableStateOf(false) }
+    var cardBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
 
     // Painter created once and reused for both placeholder and error states
     // (avoid re-creating two painters on every recomposition of each card).
@@ -94,9 +98,14 @@ fun TvContentCard(
     Column(
         modifier = modifier
             .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier.width(cardWidth))
+            .onGloballyPositioned { cardBounds = it.boundsInWindow() }
     ) {
         Card(
-            onClick = onClick,
+            onClick = {
+                // Registra l'origine (rect + immagine) per l'animazione EXPAND poster→hero.
+                ExpandOrigin.set(cardBounds, item.posterUrl ?: item.backdropUrl)
+                onClick()
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .then(if (fillWidth) Modifier.aspectRatio(cardAspect) else Modifier.height(cardHeight))
