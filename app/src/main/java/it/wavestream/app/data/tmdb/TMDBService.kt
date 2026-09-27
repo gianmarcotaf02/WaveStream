@@ -7,6 +7,7 @@ import it.wavestream.app.data.database.dao.SeriesDao
 import it.wavestream.app.data.database.entity.Episode
 import it.wavestream.app.data.database.entity.Movie
 import it.wavestream.app.data.database.entity.Series
+import it.wavestream.app.data.parser.ContentKey
 import it.wavestream.app.data.preferences.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -837,6 +838,10 @@ class TMDBService @Inject constructor(
             cleaned = cleaned.replace(Regex("""(?i)\b$tag\b|\[$tag\]|\($tag\)"""), " ")
         }
         
+        // Rimuove i marcatori di doppione del provider: "Iron Man 2 (4)" -> "Iron Man 2".
+        // Senza questo la ricerca TMDB cercava "Iron Man 2 (4)" e falliva sempre.
+        cleaned = ContentKey.stripDuplicateMarker(cleaned)
+
         // Remove common separators at the end: - | : 
         cleaned = cleaned.replace(Regex("""\s*[-|:]+\s*$"""), "")
         
@@ -1124,15 +1129,28 @@ class TMDBService @Inject constructor(
     }
 
     /**
-     * Id dei contenuti LOCALI corrispondenti alle raccomandazioni TMDB per un
-     * contenuto, usando lo STESSO matching della Home: prima per `tmdbId`, poi per
-     * titolo+anno ([matchMoviesWithLocal] / [matchSeriesWithLocal]).
+     * Voce della rail "Potrebbe piacerti": il contenuto **presente in playlist**
+     * (id locale, per la navigazione) + il poster ufficiale TMDB della
+     * raccomandazione, usato come copertina così un titolo locale non ancora
+     * arricchito non mostra il logo del provider (es. la bandiera tedesca di un
+     * doppione di lingua).
+     */
+    data class RelatedLocal(
+        val localId: Long,
+        val posterPath: String?,
+        val backdropPath: String?
+    )
+
+    /**
+     * Contenuti LOCALI corrispondenti alle raccomandazioni TMDB per un contenuto,
+     * usando lo STESSO matching della Home: prima per `tmdbId`, poi per titolo+anno
+     * ([matchMoviesWithLocal] / [matchSeriesWithLocal]).
      *
      * Serve alla rail "Potrebbe piacerti" della scheda: il match per solo `tmdbId`
      * non basta quando i titoli consigliati non sono ancora arricchiti in catalogo,
      * e la rail restava vuota (o con un solo elemento).
      */
-    suspend fun getRelatedLocalIds(tmdbId: Int, mediaType: String): List<Long> = withContext(Dispatchers.IO) {
+    suspend fun getRelatedLocalIds(tmdbId: Int, mediaType: String): List<RelatedLocal> = withContext(Dispatchers.IO) {
         // Le due chiamate TMDB sono indipendenti: in parallelo dimezziamo la latenza
         // della rail, che ora fa parte del caricamento della scheda (skeleton).
         val (recs, similar) = coroutineScope {
@@ -1149,9 +1167,15 @@ class TMDBService @Inject constructor(
         if (items.isEmpty()) return@withContext emptyList()
 
         if (mediaType == "tv") {
-            matchSeriesWithLocal(items, 12).mapNotNull { (it.localContent as? Series)?.id }
+            matchSeriesWithLocal(items, 12).mapNotNull { matched ->
+                val id = (matched.localContent as? Series)?.id ?: return@mapNotNull null
+                RelatedLocal(id, matched.tmdbItem.posterPath, matched.tmdbItem.backdropPath)
+            }
         } else {
-            matchMoviesWithLocal(items, 12).mapNotNull { (it.localContent as? Movie)?.id }
+            matchMoviesWithLocal(items, 12).mapNotNull { matched ->
+                val id = (matched.localContent as? Movie)?.id ?: return@mapNotNull null
+                RelatedLocal(id, matched.tmdbItem.posterPath, matched.tmdbItem.backdropPath)
+            }
         }
     }
 
