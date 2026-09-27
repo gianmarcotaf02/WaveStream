@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -2482,7 +2483,7 @@ private fun SeasonDownloadDialog(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     DownloadChoiceRow(
-                        icon = Icons.Default.List,
+                        icon = Icons.AutoMirrored.Filled.List,
                         title = "Seleziona episodi",
                         subtitle = "Scegli quali episodi scaricare",
                         onClick = { selecting = true }
@@ -2627,7 +2628,7 @@ private fun EpisodeSelectRow(
                 .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Checkbox custom: la Checkbox M3 non è pensata per il D-pad.ù
+            // Checkbox custom: la Checkbox M3 non è pensata per il D-pad.
             Box(
                 modifier = Modifier
                     .size(22.dp)
@@ -2651,7 +2652,7 @@ private fun EpisodeSelectRow(
             }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "E${episode.episodeNumber} · ${episode.name ?: "Episodio ${episode.episodeNumber}"}",
+                text = "E${episode.episodeNumber} · ${episode.name}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = WaveStreamColors.TextPrimary,
                 maxLines = 1,
