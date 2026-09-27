@@ -63,8 +63,25 @@ object ActivityTransitions {
      * (o esplicita). Con motion ridotto o categoria EXPAND, avvia senza animazione.
      */
     fun start(context: Context, intent: Intent, category: MotionCategory = categoryFor(intent)) {
+        attachExpandOrigin(intent, category)
         val opts = options(context, category)
         if (opts != null) context.startActivity(intent, opts) else context.startActivity(intent)
+    }
+
+    /**
+     * Se la transizione è EXPAND e c'è un'origine recente (card cliccata),
+     * allega rect + immagine all'Intent per l'animazione poster→hero.
+     */
+    private fun attachExpandOrigin(intent: Intent, category: MotionCategory) {
+        if (category != MotionCategory.EXPAND || !ExpandOrigin.isFresh()) return
+        ExpandOrigin.rect?.let { r ->
+            intent.putExtra(
+                ExpandHeroExtras.KEY_ORIGIN,
+                intArrayOf(r.left.toInt(), r.top.toInt(), r.right.toInt(), r.bottom.toInt())
+            )
+        }
+        intent.putExtra(ExpandHeroExtras.KEY_IMAGE, ExpandOrigin.imageUrl)
+        ExpandOrigin.clear()
     }
 
     /**
