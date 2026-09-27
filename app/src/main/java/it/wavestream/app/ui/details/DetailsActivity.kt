@@ -564,22 +564,21 @@ class DetailsActivity : ComponentActivity() {
     private suspend fun relatedContentFor(movie: Movie): List<RelatedContent> {
         val tmdbId = movie.tmdbId ?: return emptyList()
         return runCatching {
-            tmdbService.getRelatedLocalIds(tmdbId, "movie")
-                .asSequence()
-                .filter { it.localId != movie.id }
-                .mapNotNull { related ->
-                    val local = movieDao.getMovieById(related.localId) ?: return@mapNotNull null
-                    if (local.isHidden || isExcludedRelatedTitle(local.name)) return@mapNotNull null
-                    RelatedContent(
-                        contentId = local.id,
-                        // Il marcatore di doppione del provider ("(4)") non va mai mostrato.
-                        title = ContentKey.stripDuplicateMarker(local.title),
-                        posterUrl = related.tmdbPosterUrl() ?: local.posterUrl,
-                        contentType = ContentType.MOVIE
-                    )
-                }
-                .take(10)
-                .toList()
+            val result = ArrayList<RelatedContent>(10)
+            for (related in tmdbService.getRelatedLocalIds(tmdbId, "movie")) {
+                if (result.size >= 10) break
+                if (related.localId == movie.id) continue
+                val local = movieDao.getMovieById(related.localId) ?: continue
+                if (local.isHidden || isExcludedRelatedTitle(local.name)) continue
+                result += RelatedContent(
+                    contentId = local.id,
+                    // Il marcatore di doppione del provider ("(4)") non va mai mostrato.
+                    title = ContentKey.stripDuplicateMarker(local.title),
+                    posterUrl = related.tmdbPosterUrl() ?: local.posterUrl,
+                    contentType = ContentType.MOVIE
+                )
+            }
+            result
         }.getOrElse { emptyList() }
     }
 
@@ -590,21 +589,20 @@ class DetailsActivity : ComponentActivity() {
         // SOLO raccomandazioni TMDB (mediaType "tv"), con matching tmdbId → titolo+anno.
         val tmdbId = series.tmdbId ?: return emptyList()
         return runCatching {
-            tmdbService.getRelatedLocalIds(tmdbId, "tv")
-                .asSequence()
-                .filter { it.localId != series.id }
-                .mapNotNull { related ->
-                    val local = seriesDao.getSeriesById(related.localId) ?: return@mapNotNull null
-                    if (local.isHidden || isExcludedRelatedTitle(local.name)) return@mapNotNull null
-                    RelatedContent(
-                        contentId = local.id,
-                        title = ContentKey.stripDuplicateMarker(local.name),
-                        posterUrl = related.tmdbPosterUrl() ?: local.posterUrl,
-                        contentType = ContentType.SERIES
-                    )
-                }
-                .take(10)
-                .toList()
+            val result = ArrayList<RelatedContent>(10)
+            for (related in tmdbService.getRelatedLocalIds(tmdbId, "tv")) {
+                if (result.size >= 10) break
+                if (related.localId == series.id) continue
+                val local = seriesDao.getSeriesById(related.localId) ?: continue
+                if (local.isHidden || isExcludedRelatedTitle(local.name)) continue
+                result += RelatedContent(
+                    contentId = local.id,
+                    title = ContentKey.stripDuplicateMarker(local.name),
+                    posterUrl = related.tmdbPosterUrl() ?: local.posterUrl,
+                    contentType = ContentType.SERIES
+                )
+            }
+            result
         }.getOrElse { emptyList() }
     }
 
