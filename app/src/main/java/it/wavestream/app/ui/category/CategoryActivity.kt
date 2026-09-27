@@ -320,7 +320,7 @@ class CategoryActivity : ComponentActivity() {
                     putExtra("content_type", "CHANNEL")
                     putExtra("title", ch.name)
                 }
-                it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
+                it.wavestream.app.ui.theme.ActivityTransitions.start(this@CategoryActivity, intent)
             }
         }
     }

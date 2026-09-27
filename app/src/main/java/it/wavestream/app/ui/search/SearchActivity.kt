@@ -634,7 +634,7 @@ class SearchActivity : ComponentActivity() {
                 putExtra("categoryName", item.title)
                 putExtra("contentType", contentType)
             }
-            startActivity(intent)
+            it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
         } else {
             val intent = Intent(this, DetailsActivity::class.java).apply {
                 putExtra("content_id", item.id)
@@ -642,7 +642,7 @@ class SearchActivity : ComponentActivity() {
                 putExtra("title", item.title)
                 putExtra("poster_url", item.posterUrl)
             }
-            startActivity(intent)
+            it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
         }
     }
     
@@ -653,7 +653,7 @@ class SearchActivity : ComponentActivity() {
             putExtra("stream_url", item.streamUrl)
             putExtra("title", item.title)
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
     }
     
     private suspend fun toggleFavorite(item: SearchResultItem) {

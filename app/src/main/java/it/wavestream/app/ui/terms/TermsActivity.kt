@@ -75,7 +75,7 @@ class TermsActivity : ComponentActivity() {
         val intent = Intent(this, SetupActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
         finish()
     }
 }

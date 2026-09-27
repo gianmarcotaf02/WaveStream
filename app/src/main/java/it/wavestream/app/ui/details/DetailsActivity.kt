@@ -211,7 +211,8 @@ class DetailsActivity : ComponentActivity() {
                 // Segnala che il prossimo ON_RESUME è un ritorno da una scheda
                 // correlata: niente reload, focus ripristinato dal DetailsScreen.
                 openedRelatedContent = true
-                startActivity(
+                it.wavestream.app.ui.theme.ActivityTransitions.start(
+                    this@DetailsActivity,
                     Intent(this@DetailsActivity, DetailsActivity::class.java).apply {
                         putExtra("content_id", contentId)
                         putExtra("content_type", contentType.name)
@@ -484,7 +485,7 @@ class DetailsActivity : ComponentActivity() {
                     putExtra("person_id", personId)
                     putExtra("person_name", personName)
                 }
-                startActivity(intent)
+                it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
             }
         )
     }
@@ -1432,12 +1433,11 @@ class DetailsActivity : ComponentActivity() {
                 putExtra("episode", it.episodeNumber)
             }
         }
-        val options = ActivityOptionsCompat.makeCustomAnimation(
+        val options = it.wavestream.app.ui.theme.ActivityTransitions.options(
             this,
-            android.R.anim.fade_in,
-            android.R.anim.fade_out
+            it.wavestream.app.ui.theme.MotionCategory.ZOOM
         )
-        startActivity(intent, options.toBundle())
+        if (options != null) startActivity(intent, options) else startActivity(intent)
     }
     
     private fun toggleFavorite(currentlyFavorite: Boolean, onComplete: (Boolean) -> Unit) {

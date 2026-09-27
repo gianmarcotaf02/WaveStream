@@ -86,6 +86,6 @@ class AssistantActivity : ComponentActivity() {
                 putExtra("poster_url", item.imageUrl)
             }
         }
-        startActivity(intent)
+        it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
     }
 }

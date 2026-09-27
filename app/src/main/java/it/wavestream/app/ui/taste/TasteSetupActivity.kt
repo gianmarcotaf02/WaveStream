@@ -68,9 +68,12 @@ class TasteSetupActivity : ComponentActivity() {
             WaveStreamTheme {
                 TasteSetupScreen(
                     onComplete = {
-                        startActivity(Intent(this, LoadingActivity::class.java).apply {
-                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                        })
+                        it.wavestream.app.ui.theme.ActivityTransitions.start(
+                            this,
+                            Intent(this, LoadingActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            }
+                        )
                         finish()
                     }
                 )

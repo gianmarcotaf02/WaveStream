@@ -427,7 +427,7 @@ private fun MainActivityScreen(
         MainActivity.onLongPressBackToSearch = {
             try {
                 val intent = Intent(context, SearchActivity::class.java)
-                context.startActivity(intent)
+                it.wavestream.app.ui.theme.ActivityTransitions.start(context, intent)
             } catch (e: Exception) {
                 // Ignore focus errors
             }
