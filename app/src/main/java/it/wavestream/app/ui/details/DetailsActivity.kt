@@ -490,14 +490,17 @@ class DetailsActivity : ComponentActivity() {
      * oppure nessun match in catalogo → stessa categoria di playlist come prima.
      */
     /**
-     * Tag (lingua/adult) da NON mostrare nella rail "Potrebbe piacerti": titoli con
-     * DE / GERMANY / XXX vengono esclusi, sia per i film sia per le serie.
+     * Tag (lingua/adult/formato) da NON mostrare nella rail "Potrebbe piacerti":
+     * titoli con DE / GERMANY / XXX / 3D vengono esclusi, sia per i film sia per le serie.
      */
-    private val relatedExcludedTokens = setOf("DE", "GERMANY", "XXX")
+    private val relatedExcludedTokens = setOf("DE", "GERMANY", "XXX", "3D")
 
     private fun isExcludedRelatedTitle(name: String?): Boolean {
         if (name.isNullOrBlank()) return false
-        val tokens = name.uppercase(java.util.Locale.ROOT).split(Regex("[^\\p{L}\\p{N}]+"))
+        val upper = name.uppercase(java.util.Locale.ROOT)
+        // "3D" anche attaccato ad altre parole (es. "Avatar3D"): basta la sottostringa.
+        if (upper.contains("3D")) return true
+        val tokens = upper.split(Regex("[^\\p{L}\\p{N}]+"))
         return tokens.any { it in relatedExcludedTokens }
     }
 
