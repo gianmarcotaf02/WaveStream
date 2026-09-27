@@ -703,6 +703,10 @@ fun DetailsScreen(
                                     lineHeight = 17.sp
                                 ),
                                 color = WaveStreamColors.TextSecondary,
+                                // fillMaxWidth è necessario: senza, una trama corta (caso
+                                // frequente per le serie) misura solo la larghezza del testo
+                                // e textAlign=Center non ha effetto visibile (resta a sinistra).
+                                modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center
                             )
                         }
