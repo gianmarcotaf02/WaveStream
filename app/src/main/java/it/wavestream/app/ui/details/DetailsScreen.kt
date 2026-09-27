@@ -254,12 +254,16 @@ fun DetailsScreen(
     // card (e la rail su quella posizione) invece di farlo atterrare altrove.
     val relatedFocusTargetRef = rememberFocusTargetRef()
     var pendingRelatedFocusIndex by remember { mutableIntStateOf(-1) }
-    var resumeTick by remember { mutableIntStateOf(0) }
+    var restoreFocusRequest by remember { mutableIntStateOf(0) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) resumeTick++
+            // Al ritorno (ON_RESUME) chiediamo il ripristino SOLO se c'è una card da
+            // riportare a fuoco: così l'effetto non scatta al primo avvio né al click.
+            if (event == Lifecycle.Event.ON_RESUME && pendingRelatedFocusIndex >= 0) {
+                restoreFocusRequest++
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -270,9 +274,10 @@ fun DetailsScreen(
     val relatedRailVisible = state.relatedContent.isNotEmpty() &&
         (relatedRevealed || pendingRelatedFocusIndex >= 0)
 
-    LaunchedEffect(resumeTick, pendingRelatedFocusIndex, state.relatedContent, state.isLoading) {
+    LaunchedEffect(restoreFocusRequest, state.relatedContent, state.isLoading) {
+        if (restoreFocusRequest == 0) return@LaunchedEffect
         val index = pendingRelatedFocusIndex
-        if (resumeTick == 0 || index < 0 || state.isLoading || state.relatedContent.isEmpty()) {
+        if (index < 0 || state.isLoading || state.relatedContent.isEmpty()) {
             return@LaunchedEffect
         }
         // La card target deve esistere nella rail: la portiamo in composizione.
@@ -952,7 +957,12 @@ fun DetailsScreen(
                                 )
                             }
                         },
-                        onRelatedClick = onRelatedClick
+                        onRelatedClick = { index, contentId, contentType ->
+                            pendingRelatedFocusIndex = index
+                            onRelatedClick(contentId, contentType)
+                        },
+                        restoreFocusIndex = pendingRelatedFocusIndex,
+                        restoreFocusRef = relatedFocusTargetRef
                     )
                 }
             }
@@ -964,7 +974,7 @@ fun DetailsScreen(
                 item {
                     RelatedRailSection(
                         relatedContent = state.relatedContent,
-                        visible = relatedRevealed && state.relatedContent.isNotEmpty(),
+                        visible = relatedRailVisible,
                         railState = relatedRailState,
                         firstCardRef = relatedFirstCardFocusRef,
                         onScroll = { forward ->
@@ -975,7 +985,12 @@ fun DetailsScreen(
                                 )
                             }
                         },
-                        onRelatedClick = onRelatedClick
+                        onRelatedClick = { index, contentId, contentType ->
+                            pendingRelatedFocusIndex = index
+                            onRelatedClick(contentId, contentType)
+                        },
+                        restoreFocusIndex = pendingRelatedFocusIndex,
+                        restoreFocusRef = relatedFocusTargetRef
                     )
                 }
             }
