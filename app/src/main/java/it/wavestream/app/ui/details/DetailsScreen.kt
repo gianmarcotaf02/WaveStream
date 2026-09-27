@@ -588,7 +588,7 @@ fun DetailsScreen(
                             isResume = state.resumeMinutes != null || state.nextEpisodeInfo != null,
                             resumeProgress = state.resumeProgress,
                             onClick = onPlayClick,
-                            focusRequester = playButtonFocusRequester,
+                            focusRef = playButtonFocusRef,
                             onFocusedChanged = { playButtonFocused = it }
                         )
                         
@@ -1630,7 +1630,7 @@ private fun PlayButton(
     isResume: Boolean = false,
     resumeProgress: Float? = null,
     onClick: () -> Unit,
-    focusRequester: FocusRequester? = null,
+    focusRef: FocusTargetRef? = null,
     onFocusedChanged: (Boolean) -> Unit = {}
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -1679,7 +1679,7 @@ private fun PlayButton(
             .background(backgroundColor)
             // DOPO background: vedi nota su borderColor
             .border(3.dp, borderColor, RoundedCornerShape(12.dp))
-            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .then(if (focusRef != null) Modifier.registerFocusTarget(focusRef) else Modifier)
             .onFocusChanged { onFocusedChanged(it.isFocused) }
             .focusable(interactionSource = interactionSource)
             .clickable(
@@ -2301,7 +2301,7 @@ private fun EpisodesSectionHeader(
     onDownloadEpisodes: (List<Episode>) -> Unit = {},
     firstEpisodeFocusRequester: FocusRequester? = null,
     upFocusRequester: FocusRequester? = null,
-    selectorFocusRequester: FocusRequester? = null
+    selectorFocusRef: FocusTargetRef? = null
 ) {
     var dropdownExpanded by remember { mutableStateOf(false) }
     var showDownloadDialog by remember { mutableStateOf(false) }
@@ -2343,7 +2343,7 @@ private fun EpisodesSectionHeader(
                         .border(1.dp, borderColor, RoundedCornerShape(50))
                         .background(if (dropdownExpanded) Color.White.copy(alpha = 0.16f) else GlassTokens.SurfaceFill)
                         .then(
-                            if (selectorFocusRequester != null) Modifier.focusRequester(selectorFocusRequester) else Modifier
+                            if (selectorFocusRef != null) Modifier.registerFocusTarget(selectorFocusRef) else Modifier
                         )
                         .then(
                             if (firstEpisodeFocusRequester != null) Modifier.focusProperties { down = firstEpisodeFocusRequester } else Modifier
