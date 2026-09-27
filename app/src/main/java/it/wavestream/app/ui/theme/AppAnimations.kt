@@ -1,10 +1,15 @@
 package it.wavestream.app.ui.theme
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 
@@ -159,4 +164,98 @@ object AppAnimations {
     /** Slide out to bottom with fade */
     val slideOutToBottom = fadeOut(tween(SlideMs)) + 
         slideOutVertically(tween(SlideMs)) { it / 4 }
+
+    // ======================================================================
+    // FASE MOTION CONTRACT (03-motion-contract.md)
+    // Categorie normative: EXPAND, ZOOM, FADE, AXIS_Y, TAB_SWAP, OVERLAY,
+    // LIST_ITEM. Solo alpha + graphicsLayer; vietato blur/RenderEffect.
+    // ======================================================================
+
+    // ---------- Easing curves ----------
+
+    /** Transizioni interne importanti (EXPAND, hero, AXIS_Y). */
+    val Emphasized = CubicBezierEasing(0.2f, 0f, 0f, 1f)
+
+    /** Entrata contenuto (decelera). */
+    val EmphasizedDecelerate = CubicBezierEasing(0.05f, 0.7f, 0.1f, 1f)
+
+    /** Uscita contenuto (accelera). */
+    val EmphasizedAccelerate = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
+
+    // ---------- Durate per categoria (ms) ----------
+
+    const val ExpandEnterMs = 480
+    const val ExpandExitMs = 300
+    const val ZoomEnterMs = 320
+    const val ZoomExitMs = 260
+    const val FadeEnterMs = 220
+    const val FadeExitMs = 180
+    const val AxisYEnterMs = 320
+    const val AxisYExitMs = 260
+    const val TabSwapMs = 300
+    const val OverlayEnterMs = 200
+    const val OverlayExitMs = 150
+    const val ListItemEnterMs = 250
+    const val ListItemExitMs = 200
+
+    /** Scala iniziale/finale della categoria ZOOM. */
+    const val ZoomEnterScale = 0.96f
+
+    // ---------- Spec generiche ----------
+
+    /** tween con easing Emphasized della durata richiesta. */
+    fun <T> emphasizedSpec(durationMs: Int) = tween<T>(durationMs, easing = Emphasized)
+
+    // ---------- Enter/Exit pre-costruiti ----------
+
+    /** EXPAND — poster/backdrop → hero. Cinematico. */
+    val expandIn: EnterTransition =
+        fadeIn(tween(ExpandEnterMs, easing = EmphasizedDecelerate))
+
+    val expandOut: ExitTransition =
+        fadeOut(tween(ExpandExitMs, easing = EmphasizedAccelerate))
+
+    /** ZOOM — player/backdrop. scale 0.96→1 + fade. */
+    val zoomIn: EnterTransition =
+        fadeIn(tween(ZoomEnterMs, easing = EmphasizedDecelerate)) +
+            scaleIn(
+                initialScale = ZoomEnterScale,
+                animationSpec = tween(ZoomEnterMs, easing = EmphasizedDecelerate)
+            )
+
+    val zoomOut: ExitTransition =
+        fadeOut(tween(ZoomExitMs, easing = EmphasizedAccelerate)) +
+            scaleOut(
+                targetScale = ZoomEnterScale,
+                animationSpec = tween(ZoomExitMs, easing = EmphasizedAccelerate)
+            )
+
+    /** FADE — pari livello tra schermate (fade-through). */
+    val fadeThroughIn: EnterTransition =
+        fadeIn(tween(FadeEnterMs, easing = androidx.compose.animation.core.FastOutSlowInEasing))
+
+    val fadeThroughOut: ExitTransition =
+        fadeOut(tween(FadeExitMs, easing = androidx.compose.animation.core.FastOutSlowInEasing))
+
+    /** AXIS_Y — modali/wizard (slide verticale breve + fade). */
+    fun sharedAxisYEnter(): EnterTransition =
+        fadeIn(tween(AxisYEnterMs, easing = EmphasizedDecelerate)) +
+            slideInVertically(tween(AxisYEnterMs, easing = EmphasizedDecelerate)) { it / 12 }
+
+    fun sharedAxisYExit(): ExitTransition =
+        fadeOut(tween(AxisYExitMs, easing = EmphasizedAccelerate)) +
+            slideOutVertically(tween(AxisYExitMs, easing = EmphasizedAccelerate)) { -it / 12 }
+
+    /** OVERLAY — controlli/menu/pill (vetro). */
+    val overlayIn: EnterTransition = fadeIn(tween(OverlayEnterMs))
+    val overlayOut: ExitTransition = fadeOut(tween(OverlayExitMs))
+
+    /** LIST_ITEM — add/remove dinamico in liste. */
+    val listItemIn: EnterTransition =
+        fadeIn(tween(ListItemEnterMs, easing = androidx.compose.animation.core.FastOutSlowInEasing)) +
+            slideInVertically(tween(ListItemEnterMs, easing = androidx.compose.animation.core.FastOutSlowInEasing)) { it / 8 }
+
+    val listItemOut: ExitTransition =
+        fadeOut(tween(ListItemExitMs)) +
+            slideOutVertically(tween(ListItemExitMs)) { -it / 8 }
 }
