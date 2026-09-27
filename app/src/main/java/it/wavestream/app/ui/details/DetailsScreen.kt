@@ -74,7 +74,11 @@ import it.wavestream.app.ai.MovieEndingUiState
 import it.wavestream.app.ai.MovieEndingUnavailableException
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.key.*
 
@@ -243,6 +247,44 @@ fun DetailsScreen(
     // Anche qui va tracciato l'attach: la prima card può uscire dalla LazyRow.
     val relatedFirstCardFocusRef = rememberFocusTargetRef()
     val relatedFirstCardFocusRequester = relatedFirstCardFocusRef.requester
+
+    // Ripristino del focus al ritorno da una scheda aperta dal rail "Potrebbe
+    // piacerti": ricordiamo l'indice della card cliccata e, quando la scheda
+    // torna in primo piano (ON_RESUME), riportiamo il focus esattamente su quella
+    // card (e la rail su quella posizione) invece di farlo atterrare altrove.
+    val relatedFocusTargetRef = rememberFocusTargetRef()
+    var pendingRelatedFocusIndex by remember { mutableIntStateOf(-1) }
+    var resumeTick by remember { mutableIntStateOf(0) }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) resumeTick++
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    // La card cliccata è composta solo quando la rail è visibile: il film forza
+    // la rivelazione del carosello finché il focus non è stato ripristinato.
+    val relatedRailVisible = state.relatedContent.isNotEmpty() &&
+        (relatedRevealed || pendingRelatedFocusIndex >= 0)
+
+    LaunchedEffect(resumeTick, pendingRelatedFocusIndex, state.relatedContent, state.isLoading) {
+        val index = pendingRelatedFocusIndex
+        if (resumeTick == 0 || index < 0 || state.isLoading || state.relatedContent.isEmpty()) {
+            return@LaunchedEffect
+        }
+        // La card target deve esistere nella rail: la portiamo in composizione.
+        runCatching { relatedRailState.scrollToItem(index) }
+        var attempts = 0
+        while (!relatedFocusTargetRef.attached && attempts < 20) {
+            delay(50)
+            attempts++
+        }
+        runCatching { relatedFocusTargetRef.requester.requestFocus() }
+        pendingRelatedFocusIndex = -1
+    }
 
     // Episodio su cui atterrare scendendo dal selettore stagioni:
     // - quello IN CORSO (continue watching), se presente;
