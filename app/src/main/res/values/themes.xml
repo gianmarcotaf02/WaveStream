@@ -14,6 +14,20 @@
         <!-- Premium Typography for TV -->
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
+
+    <!--
+      NOTA MOTION (03-motion-contract.md · Step 8):
+      NON impostiamo alcun `android:windowAnimationStyle` globale, di proposito.
+        1) Le transizioni interne sono gestite esplicitamente da `ActivityTransitions`
+           (makeCustomAnimation), che ha la precedenza sul tema.
+        2) Un'animazione di window globale si sommerebbe all'EXPAND di DetailsScreen
+           (regola R2 del Motion Contract) causando una DOPPIA animazione.
+        3) Su Android TV le transizioni di window di sistema sono poco controllabili
+           e possono introdurre jank su GPU economiche.
+      Le uscite via finish() possono adottare `ActivityTransitions.overridePending()
+      (activity, MotionCategory)`. Non reintrodurre windowAnimationStyle senza
+      rivedere la regola R2.
+    -->
     
     <style name="Theme.WaveStream.FullScreen">
         <item name="android:windowBackground">@color/background_dark</item>
