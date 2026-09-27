@@ -6,17 +6,18 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,16 +28,24 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import it.wavestream.app.R
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
-import java.time.Instant
-import java.time.ZoneId
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import it.wavestream.app.ui.theme.GlassSurface
+import it.wavestream.app.ui.theme.GlassTokens
+import it.wavestream.app.ui.theme.WaveStreamColors
+import it.wavestream.app.ui.theme.rememberReducedMotion
+
+/**
+ * Rosso "live" dedicato all'hero partita: leggermente desaturato per non
+ * stonare con la palette "Aurora" fredda del resto dell'app.
+ */
+private val SerieALiveRed = Color(0xFFFF3B30)
 
 /**
  * Backdrop dell'hero "partita Serie A": split diagonale da basso-sx ad alto-dx,
@@ -44,6 +53,11 @@ import java.time.format.DateTimeFormatter
  * Viene renderizzato nella HeroBanner della home e mascherato come i backdrop
  * dei film/serie (nero verso sinistra, feathering ai quattro bordi): i crest
  * stanno quindi sulla metà destra visibile.
+ *
+ * FASE REDESIGN — il backdrop resta volutamente "brand": i colori delle due
+ * squadre sono dati (non token di tema). L'allineamento al nuovo tema avviene
+ * sulle sovrastrutture (badge LIVE, chip competizione/punteggio), che usano
+ * [GlassSurface] e i token Aurora.
  */
 @Composable
 fun SerieAMatchHeroBackdrop(
@@ -121,40 +135,162 @@ fun SerieAMatchHeroBackdrop(
     }
 }
 
-/** Pill rossa pulsante LIVE. */
+/**
+ * Pill LIVE in vetro: fill rosso translucido pulsante + bordo a gradiente, così
+ * "si accende" sul backdrop senza il vecchio rettangolo rosso pieno opaco.
+ * Il pulse viene disattivato con il motion ridotto di sistema.
+ */
 @Composable
 fun SerieAMatchLiveBadge() {
+    val reducedMotion = rememberReducedMotion()
     val transition = rememberInfiniteTransition(label = "serieAlivePulse")
-    val alpha by transition.animateFloat(
+    val pulse by transition.animateFloat(
         initialValue = 1f,
-        targetValue = 0.45f,
+        targetValue = if (reducedMotion) 1f else 0.55f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 800),
             repeatMode = RepeatMode.Reverse
         ),
         label = "serieAlivePulseAlpha"
     )
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .background(
-                color = Color(0xFFE01B2C).copy(alpha = alpha),
-                shape = RoundedCornerShape(6.dp)
+    GlassSurface(
+        shape = RoundedCornerShape(50),
+        fill = SerieALiveRed.copy(alpha = 0.30f + 0.35f * pulse),
+        stroke = Brush.linearGradient(
+            listOf(
+                SerieALiveRed.copy(alpha = 0.90f),
+                Color.White.copy(alpha = 0.16f)
             )
-            .padding(horizontal = 12.dp, vertical = 5.dp)
+        ),
+        strokeWidth = 1.dp
     ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .background(Color.White, CircleShape)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .background(Color.White, CircleShape)
+            )
+            Text(
+                text = "LIVE",
+                color = Color.White,
+                fontWeight = FontWeight.Black,
+                fontSize = 14.sp,
+                letterSpacing = 2.sp
+            )
+        }
+    }
+}
+
+/**
+ * Chip "SERIE A • GIORNATA N" in vetro, con il logo della competizione.
+ * Usato sia nel foreground dell'hero sia nell'header del match center: identità
+ * coerente fra le due superfici.
+ */
+@Composable
+fun SerieACompetitionChip(
+    match: SerieAMatchEntity,
+    modifier: Modifier = Modifier
+) {
+    GlassSurface(
+        shape = GlassTokens.RadiusSmall,
+        fill = GlassTokens.SurfaceFill,
+        stroke = GlassTokens.StrokeGradient,
+        modifier = modifier
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_serie_a_logo),
+                contentDescription = null,
+                modifier = Modifier.height(18.dp)
+            )
+            Text(
+                text = "SERIE A • GIORNATA ${match.matchday ?: "-"}",
+                style = MaterialTheme.typography.labelMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.5.sp
+            )
+        }
+    }
+}
+
+/**
+ * Chip del punteggio in vetro. Quando la partita è live il vetro si accende
+ * con il fill/bordo accent, così il risultato "stona" il meno possibile con lo
+ * stato LIVE del badge.
+ */
+@Composable
+fun SerieAScoreChip(
+    homeScore: Int,
+    awayScore: Int,
+    isLive: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    val accent = WaveStreamColors.Accent
+    GlassSurface(
+        shape = GlassTokens.RadiusSmall,
+        fill = if (isLive) GlassTokens.accentFill(accent) else GlassTokens.SurfaceFill,
+        stroke = if (isLive) GlassTokens.accentStroke(accent) else GlassTokens.StrokeGradient,
+        strokeWidth = if (isLive) 1.5.dp else 1.dp,
+        modifier = modifier
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 3.dp)
+        ) {
+            Text(
+                text = homeScore.toString(),
+                style = MaterialTheme.typography.headlineMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Black
+            )
+            Text(
+                text = "-",
+                style = MaterialTheme.typography.titleMedium,
+                color = WaveStreamColors.TextSecondary,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = awayScore.toString(),
+                style = MaterialTheme.typography.headlineMedium,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.Black
+            )
+        }
+    }
+}
+
+/**
+ * Chip del countdown pre-partita ("INIZIA TRA X MIN") in vetro color oro,
+ * coerente con la palette serale/serale dell'app.
+ */
+@Composable
+fun SerieAKickoffChip(
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    GlassSurface(
+        shape = GlassTokens.RadiusSmall,
+        fill = GlassTokens.accentFill(WaveStreamColors.AccentGold),
+        stroke = GlassTokens.accentStroke(WaveStreamColors.AccentGold),
+        modifier = modifier
+    ) {
         Text(
-            text = "LIVE",
-            color = Color.White,
-            fontWeight = FontWeight.Black,
-            fontSize = 14.sp,
-            letterSpacing = 2.sp
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = WaveStreamColors.AccentGoldLight,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 2.sp,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
     }
 }
