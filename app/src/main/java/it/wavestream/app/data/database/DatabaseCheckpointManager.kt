@@ -58,7 +58,13 @@ class DatabaseCheckpointManager @Inject constructor(
             try {
                 // WAL Checkpoint is heavy/blocking - never run on Main
                 if (database.isOpen) {
-                    database.openHelper.writableDatabase.execSQL("PRAGMA wal_checkpoint(TRUNCATE)")
+                    // IMPORTANTE: `PRAGMA wal_checkpoint(...)` restituisce una riga
+                    // (busy, log, checkpointed): con `execSQL` Room/SQLite la rifiuta con
+                    // "Queries can be performed using SQLiteDatabase query or rawQuery
+                    // methods only" e il checkpoint non avveniva MAI. Serve `query`.
+                    database.openHelper.writableDatabase
+                        .query("PRAGMA wal_checkpoint(TRUNCATE)")
+                        .use { it.moveToFirst() }
                     Log.d(TAG, "WAL checkpoint completed")
                 }
             } catch (e: Exception) {
