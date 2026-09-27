@@ -1237,7 +1237,7 @@ private fun SearchResultCard(
                         .align(Alignment.TopStart)
                         .padding(8.dp)
                         .clip(badgeShape)
-                        .background(GlassTokens.SurfaceFillStrong)
+                        .background(Color(0x99101418))
                         .border(1.dp, GlassTokens.StrokeGradient, badgeShape)
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
