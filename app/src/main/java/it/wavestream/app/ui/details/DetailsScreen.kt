@@ -877,7 +877,9 @@ fun DetailsScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 6.dp),
+                                .padding(top = 6.dp)
+                                // Contenitore decorativo: esclude sé e i figli dal focus.
+                                .focusProperties { canFocus = false },
                             contentAlignment = Alignment.Center
                         ) {
                             ScrollHintPill()
@@ -1131,8 +1133,9 @@ private fun ScrollHintPill(modifier: Modifier = Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            // Puramente decorativo: NESSUN modificatore di focus/click, così non
-            // entra mai nel percorso del D-pad (nessun target di focus).
+            // Puramente decorativo: NESSUN target di focus. `canFocus = false`
+            // impedisce che il D-pad ci si fermi (né per i film né per le serie).
+            .focusProperties { canFocus = false }
             .clip(RoundedCornerShape(999.dp))
             .background(GlassTokens.SurfaceFillStrong)
             .border(1.dp, GlassTokens.StrokeGradient, RoundedCornerShape(999.dp))
