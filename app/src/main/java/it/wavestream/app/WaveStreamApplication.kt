@@ -111,13 +111,19 @@ class WaveStreamApplication : Application() {
         // TV power-off, not only onTrimMemory/onLowMemory callbacks
         checkpointManager.startPeriodicCheckpoint()
 
-        // Riparazione una tantum dei progressi scritti dalle versioni precedenti:
-        // il vecchio criterio "≤ 6 minuti rimanenti" marcava come visti i film
-        // ancora in corso, facendo sparire il "Riprendi" e la voce da "Continua a
-        // guardare". Idempotente, gira in background a ogni avvio.
+        // Riparazione UNA TANTUM dei progressi scritti dalle versioni precedenti:
+        // il vecchio criterio "≤ 6 minuti rimanenti" marcava come visti film ed
+        // episodi ancora in corso, facendo sparire il "Riprendi" e la voce da
+        // "Continua a guardare". Gira solo al primo avvio dopo l'update: dopo questa
+        // release il flag può essere impostato anche ai titoli di coda iniziati.
         applicationScope.launch {
             try {
-                watchProgressDao.repairLegacyMovieCompletion()
+                val prefs = getSharedPreferences("migration_flags", MODE_PRIVATE)
+                val flag = "legacy_watch_completion_repaired_v1"
+                if (!prefs.getBoolean(flag, false)) {
+                    watchProgressDao.repairLegacyCompletion()
+                    prefs.edit().putBoolean(flag, true).apply()
+                }
             } catch (_: Exception) { }
         }
 

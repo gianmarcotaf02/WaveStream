@@ -1370,25 +1370,12 @@ class HomeViewModel @Inject constructor(
                         ContentType.SERIES -> progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE)
                         else -> false
                     }
-                }.filter { progress ->
-                    // Filter out series where the user finished the last episode of the last season
-                    if (progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) &&
-                        progress.season != null && progress.episode != null) {
-                        val seriesId = progress.seriesId ?: progress.contentId
-                        val seasonNumbers = episodeDao.getSeasonNumbers(seriesId)
-                        val maxSeason = seasonNumbers.maxOrNull()
-                        if (maxSeason != null && progress.season == maxSeason) {
-                            val lastEp = episodeDao.getLastEpisodeOfSeason(seriesId, maxSeason)
-                            if (lastEp != null && progress.episode == lastEp.episodeNumber) {
-                                // Last episode of last season — auto-mark as completed
-                                if (!progress.isCompleted) {
-                                    watchProgressDao.upsert(progress.copy(isCompleted = true))
-                                }
-                                false  // Remove from continue watching heroes
-                            } else true
-                        } else true
-                    } else true
                 }
+                // NB: l'ultimo episodio dell'ultima stagione NON viene più marcato
+                // "visto" automaticamente. Prima bastava APRIRE l'ultimo episodio per
+                // farlo sparire da "Continua a guardare", perdendo il resume. Ora esce
+                // solo quando `isCompleted` è davvero true (fine reale o titoli di coda
+                // iniziati), già escluso dalla query getContinueWatching.
                 Log.d("HomeViewModel", "loadHeroItems: filtered continueWatching=${continueWatching.size}")
 
                 // Build CW heroes in parallel for faster OMDB/TMDB fetches
@@ -3385,25 +3372,9 @@ class HomeViewModel @Inject constructor(
                         "MOVIE_${data.contentId}"  // Movies by content ID
                     }
                 }
-                // Filter out series where the user finished the last episode of the last season
-                .filter { data ->
-                    if (data.contentType == ContentType.SERIES && data.seriesId != null && data.seasonNumber != null && data.episodeNumber != null) {
-                        val seasonNumbers = episodeDao.getSeasonNumbers(data.seriesId)
-                        val maxSeason = seasonNumbers.maxOrNull()
-                        if (maxSeason != null && data.seasonNumber == maxSeason) {
-                            val lastEp = episodeDao.getLastEpisodeOfSeason(data.seriesId, maxSeason)
-                            if (lastEp != null && data.episodeNumber == lastEp.episodeNumber) {
-                                // Last episode of last season — treat as completed
-                                // Auto-mark as completed in background
-                                val progress = watchProgressDao.getProgress(currentProfileId, ContentType.EPISODE, data.contentId)
-                                if (progress != null && !progress.isCompleted) {
-                                    watchProgressDao.upsert(progress.copy(isCompleted = true))
-                                }
-                                false  // Remove from continue watching
-                            } else true
-                        } else true
-                    } else true
-                }
+                // NB: niente auto-completamento dell'ultimo episodio dell'ultima
+                // stagione: la serie resta in "Continua a guardare" finché l'episodio
+                // non è realmente finito (vedi loadHeroItems).
                 .take(10)  // Limit to 10 items after deduplication
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading continue watching: ${e.message}")
@@ -3463,25 +3434,9 @@ class HomeViewModel @Inject constructor(
                             else -> false
                         }
                     }
-                    // Filter out series where the user finished the last episode of the last season
-                    .filter { progress ->
-                        if (progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) &&
-                            progress.season != null && progress.episode != null) {
-                            val seriesId = progress.seriesId ?: progress.contentId
-                            val seasonNumbers = episodeDao.getSeasonNumbers(seriesId)
-                            val maxSeason = seasonNumbers.maxOrNull()
-                            if (maxSeason != null && progress.season == maxSeason) {
-                                val lastEp = episodeDao.getLastEpisodeOfSeason(seriesId, maxSeason)
-                                if (lastEp != null && progress.episode == lastEp.episodeNumber) {
-                                    // Last episode of last season — auto-mark as completed
-                                    if (!progress.isCompleted) {
-                                        watchProgressDao.upsert(progress.copy(isCompleted = true))
-                                    }
-                                    false  // Remove from continue watching
-                                } else true
-                            } else true
-                        } else true
-                    }
+                    // NB: niente auto-completamento dell'ultimo episodio dell'ultima
+                    // stagione: la serie resta in "Continua a guardare" finché
+                    // l'episodio non è realmente finito.
                     .take(limit)
                     .mapNotNull { progress ->
                         when (progress.contentType) {
