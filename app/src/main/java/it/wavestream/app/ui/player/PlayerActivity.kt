@@ -130,8 +130,7 @@ class PlayerActivity : ComponentActivity() {
     private val _controlsVisible = mutableStateOf(true)
 
     // Live/DVR state (solo canali live) - timeshift stile Sky/DAZN
-    // Metadati per l'overlay "in pausa" (stile Netflix). Solo VOD.
-    private val _pauseInfo = mutableStateOf<PlayerPauseInfo?>(null)
+    private val _isLive = mutableStateOf(false)
     private val _isAtLiveEdge = mutableStateOf(true)
     // True solo se lo stream live espone una finestra DVR (HLS sliding window /
     // playlist EVENT): il timeshift indietro è possibile solo in quel caso.
@@ -152,7 +151,10 @@ class PlayerActivity : ComponentActivity() {
     // Qualità video reale del flusso in riproduzione (es. "1080p"). Mostrata
     // nell'overlay dei controlli, a destra del titolo. Null finché la traccia
     // video non è nota; segue automaticamente i cambi di risoluzione (HLS adattivo).
-    private val _videoQuality = mutableStateOf<String?>(null)    // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
+    private val _videoQuality = mutableStateOf<String?>(null)
+
+    // Metadati per l'overlay "in pausa" (stile Netflix). Solo VOD.
+    private val _pauseInfo = mutableStateOf<PlayerPauseInfo?>(null)    // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
     // al primo onVideoSizeChanged. -1 = non nota (es. serie/canali).
     private var sourceProviderId: Long = -1L
     // Ultima altezza già scritta in DB in questa sessione. onVideoSizeChanged scatta più
@@ -1598,16 +1600,16 @@ class PlayerActivity : ComponentActivity() {
                     )
                 }
                 ContentType.EPISODE, ContentType.SERIES -> {
-                    val episode = if (contentType == ContentType.EPISODE) {
+                    val ep = if (contentType == ContentType.EPISODE) {
                         episodeDao.getEpisodeById(contentId)
                     } else null
-                    val sid = episode?.seriesId ?: seriesId ?: contentId
+                    val sid = ep?.seriesId ?: seriesId ?: contentId
                     val s = seriesDao.getSeriesById(sid) ?: return@withContext null
-                    val epTitle = episode?.let {
+                    val epTitle = ep?.let { item ->
                         it.wavestream.app.util.TitleCleaner.resolveEpisodeDisplayTitle(
-                            providerName = it.name,
-                            tmdbName = it.tmdbName,
-                            episodeNumber = it.episodeNumber,
+                            providerName = item.name,
+                            tmdbName = item.tmdbName,
+                            episodeNumber = item.episodeNumber,
                             seriesName = s.name
                         )
                     }
@@ -1615,14 +1617,14 @@ class PlayerActivity : ComponentActivity() {
                         logoUrl = s.titleLogoUrl,
                         title = s.title,
                         year = s.year,
-                        durationMinutes = episode?.duration?.takeIf { it > 0 }?.let { (it / 60).toInt() },
+                        durationMinutes = ep?.duration?.takeIf { it > 0 }?.let { (it / 60).toInt() },
                         genres = s.genre,
                         isSeries = true,
-                        seasonNumber = episode?.seasonNumber ?: season,
-                        episodeNumber = episode?.episodeNumber ?: episode,
+                        seasonNumber = ep?.seasonNumber ?: season,
+                        episodeNumber = ep?.episodeNumber ?: episode,
                         episodeTitle = epTitle,
-                        plot = episode?.tmdbOverview?.takeIf { it.isNotBlank() }
-                            ?: episode?.plot?.takeIf { it.isNotBlank() }
+                        plot = ep?.tmdbOverview?.takeIf { it.isNotBlank() }
+                            ?: ep?.plot?.takeIf { it.isNotBlank() }
                             ?: s.plot
                     )
                 }

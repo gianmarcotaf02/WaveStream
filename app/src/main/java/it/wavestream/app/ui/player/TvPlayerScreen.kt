@@ -518,6 +518,120 @@ fun TvPlayerScreen(
 }
 
 /**
+ * Overlay mostrato quando il player è in pausa (stile Netflix).
+ *
+ * VOD soltanto. Mostra il logo del titolo TMDB (fallback al testo) e, sotto, i
+ * metadati: anno • durata • generi • minuti rimasti. Per le serie aggiunge la
+ * stagione/episodio in corso, il titolo dell'episodio e la trama.
+ *Puramente informativo: non cattura il focus (i controlli restano usabili).
+ */
+@Composable
+private fun PauseInfoOverlay(
+    info: PlayerPauseInfo,
+    currentPosition: Long,
+    duration: Long
+) {
+    val remainingMinutes = if (duration > 0L) {
+        ((duration - currentPosition) / 60000L).toInt().coerceAtLeast(0)
+    } else null
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Vignetta orizzontale: scurisce il lato sinistro per il contrasto del testo,
+        // senza blur (vincolo di performance sul video).
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.horizontalGradient(
+                        0.00f to Color.Black.copy(alpha = 0.72f),
+                        0.45f to Color.Black.copy(alpha = 0.34f),
+                        0.85f to Color.Transparent
+                    )
+                )
+        )
+
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(horizontal = 48.dp)
+                .widthIn(max = 620.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            // Logo TMDB (clear logo) oppure titolo testuale di fallback
+            if (!info.logoUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = info.logoUrl,
+                    contentDescription = info.title,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                    modifier = Modifier
+                        .heightIn(max = 92.dp)
+                        .fillMaxWidth(0.62f)
+                )
+            } else {
+                Text(
+                    text = info.title,
+                    style = MaterialTheme.typography.displaySmall,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Riga meta: anno • durata • generi • minuti rimasti
+            val metaParts = buildList {
+                info.year?.let { add(it.toString()) }
+                info.durationMinutes?.takeIf { it > 0 }?.let { add("$it min") }
+                info.genres?.takeIf { it.isNotBlank() }?.let { add(it) }
+                remainingMinutes?.takeIf { it > 0 }?.let { add("$it min rimasti") }
+            }
+            if (metaParts.isNotEmpty()) {
+                Text(
+                    text = metaParts.joinToString("   •   "),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.White.copy(alpha = 0.85f),
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Serie: stagione/episodio in corso + titolo episodio + trama
+            if (info.isSeries && info.seasonNumber != null && info.episodeNumber != null) {
+                Text(
+                    text = "Stagione ${info.seasonNumber}   •   Episodio ${info.episodeNumber}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = WaveStreamColors.Accent,
+                    fontWeight = FontWeight.SemiBold
+                )
+                info.episodeTitle?.takeIf { it.isNotBlank() }?.let { epTitle ->
+                    Text(
+                        text = epTitle,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            if (info.isSeries) {
+                info.plot?.takeIf { it.isNotBlank() }?.let { plot ->
+                    Text(
+                        text = plot,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.8f),
+                        maxLines = 4,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
  * Overlay "Stai ancora guardando?".
  *
  * Implementato come Dialog (non un semplice Box): un Dialog ha una propria
