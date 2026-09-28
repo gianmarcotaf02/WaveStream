@@ -2955,10 +2955,8 @@ private fun EpisodeCarouselCard(
     val longPressThreshold = 500L
 
     val hasProgress = progress != null && progress.progress > 0.01f && !progress.isCompleted
-    // "Visto" SOLO se l'episodio è davvero completato (fine reale o titoli di coda
-    // iniziati). Prima anche gli episodi a ≤ 7 minuti dalla fine con >90% mostravano
-    // la spunta pur essendo ancora da finire.
-    val isWatched = progress?.isCompleted == true
+    val isWatched = progress?.isCompleted == true ||
+        (progress != null && progress.remainingMinutes <= 7 && progress.progress > 0.9f)
     val progressFraction: Float? =
         if (hasProgress) progress?.progress?.coerceIn(0f, 1f) else null
 

@@ -1008,10 +1008,8 @@ class DetailsActivity : ComponentActivity() {
                 val progressPercent = (progress.position.toFloat() / progress.duration.toFloat()).coerceIn(0f, 1f)
                 val remainingMs = progress.duration - progress.position
                 val remainingMin = (remainingMs / 60000).toInt().coerceAtLeast(1)
-                // Solo il flag `isCompleted` (fine reale o titoli di coda iniziati).
-                // Niente più soglia "≤ 6 minuti": un episodio interrotto a 4-5 minuti
-                // dalla fine veniva mostrato come visto e il "Riprendi" spariva.
-                val effectivelyCompleted = progress.isCompleted
+                // Consider completed if isCompleted flag OR remaining <= 6 minutes (credits threshold)
+                val effectivelyCompleted = progress.isCompleted || remainingMs <= 6 * 60 * 1000
 
                 episodeProgressMap[ep.id] = EpisodeProgress(
                     episodeId = ep.id,
@@ -1033,9 +1031,9 @@ class DetailsActivity : ComponentActivity() {
 
         if (lastWatchedEpisode != null && lastWatchedProgress != null) {
             val progressPercent = (lastWatchedProgress!!.position.toFloat() / lastWatchedProgress!!.duration.toFloat()).coerceIn(0f, 1f)
-            val remainingMin = ((lastWatchedProgress!!.duration - lastWatchedProgress!!.position) / 60000).toInt().coerceAtLeast(1)
-            // Solo il flag `isCompleted` (fine reale o titoli di coda iniziati).
-            val effectivelyCompleted = lastWatchedProgress!!.isCompleted
+            val remainingMs = lastWatchedProgress!!.duration - lastWatchedProgress!!.position
+            val remainingMin = (remainingMs / 60000).toInt().coerceAtLeast(1)
+            val effectivelyCompleted = lastWatchedProgress!!.isCompleted || remainingMs <= 6 * 60 * 1000
 
             if (!effectivelyCompleted && progressPercent > 0.01f) {
                 // Episode is in progress - show resume

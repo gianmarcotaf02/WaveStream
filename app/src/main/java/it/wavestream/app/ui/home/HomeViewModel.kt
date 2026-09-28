@@ -3633,7 +3633,7 @@ class HomeViewModel @Inject constructor(
 
     /**
      * Load recently watched content (COMPLETED items only)
-     * Solo i contenuti il cui flag `isCompleted` è true (fine reale o credits).
+     * Shows content that was fully watched (or with <= 6 min remaining to exclude credits)
      */
     private suspend fun loadRecentlyWatched(filterType: ContentType? = null): List<CarouselItem>? {
         return withContext(Dispatchers.IO) {
@@ -3641,13 +3641,14 @@ class HomeViewModel @Inject constructor(
                 val watchHistory = watchProgressDao.getRecentlyWatched(currentProfileId, 50)
                 Log.d("HomeViewModel", "Recently watched items found: ${watchHistory.size}")
                 
-                // La soglia "minuti rimanenti" è stata rimossa: un film messo in pausa
-                // a 4-5 minuti dalla fine NON è "visto", deve restare in "Continua a
-                // guardare" e non comparire anche qui. Il flag isCompleted è ora
-                // affidabile (per i film viene scritto solo a fine reale).
+                // 6 minutes in milliseconds (threshold for "completed" excluding credits)
+                val completedThresholdMs = 6 * 60 * 1000L
+
                 watchHistory
                     .filter { progress ->
-                        val isEffectivelyCompleted = progress.isCompleted
+                        // Completed = isCompleted flag OR remaining time <= 6 minutes
+                        val remainingMs = progress.duration - progress.position
+                        val isEffectivelyCompleted = progress.isCompleted || remainingMs <= completedThresholdMs
                         
                         if (!isEffectivelyCompleted) return@filter false
                         

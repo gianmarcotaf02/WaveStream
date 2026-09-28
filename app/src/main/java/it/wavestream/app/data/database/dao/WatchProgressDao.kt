@@ -85,25 +85,6 @@ interface WatchProgressDao {
     @Query("DELETE FROM watch_progress WHERE profileId = :profileId")
     suspend fun deleteAllForProfile(profileId: Long)
 
-    /**
-     * Riparazione UNA TANTUM dei dati scritti dalle versioni precedenti.
-     *
-     * Il vecchio criterio di completamento "≤ 6 minuti rimanenti / > 95%" marcava
-     * come visti i contenuti ancora in corso (film o episodi interrotti a 4-5 minuti
-     * dalla fine): il "Riprendi" spariva e il titolo usciva da "Continua a guardare".
-     * Qui si riporta `isCompleted = 0` dove la posizione è ancora lontana dalla fine
-     * reale (oltre [WatchProgress.COMPLETION_TAIL_MS]).
-     *
-     * ATTENZIONE: va eseguita UNA SOLA VOLTA (vedi WaveStreamApplication), perché
-     * dopo questa release il flag può essere impostato anche ai titoli di coda
-     * iniziati, con la posizione ancora lontana dalla fine reale.
-     */
-    @Query(
-        "UPDATE watch_progress SET isCompleted = 0 WHERE isCompleted = 1 " +
-        "AND duration > 0 AND position < duration - 30000"
-    )
-    suspend fun repairLegacyCompletion()
-
     /** Elimina un sottoinsieme di voci per id (selezione multipla in cronologia). */
     @Query("DELETE FROM watch_progress WHERE profileId = :profileId AND id IN (:ids)")
     suspend fun deleteByIds(profileId: Long, ids: List<Long>)

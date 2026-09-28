@@ -241,12 +241,6 @@ class PlayerActivity : ComponentActivity() {
     // (evita reset inutili su micro-aggiustamenti del player).
     private val BACKWARD_SEEK_RESET_MS = 10_000L
 
-    // Un VOD è "davvero finito" solo quando manca meno di questa soglia alla fine.
-    // Sostituisce per i FILM la vecchia regola "≤ 6 minuti rimanenti": un film
-    // interrotto a 4-5 minuti dalla fine veniva marcato completato, il "Riprendi"
-    // spariva dal dettaglio e il titolo usciva da "Continua a guardare".
-    private val COMPLETION_TAIL_MS = WatchProgress.COMPLETION_TAIL_MS
-
     // Finestra iniziale in cui il monitor audio cerca la sigla (Fase 4).
     private val INTRO_SCAN_MS = 15 * 60 * 1000L
 
@@ -2261,19 +2255,11 @@ class PlayerActivity : ComponentActivity() {
         if (player.duration > 0) {
             val currentPos = player.currentPosition
             val totalDur = player.duration
-            // Completato:
-            //  - EPISODIO: quando sono iniziati i titoli di coda (marker IntroDB/utente o
-            //    rilevamento a video) OPPURE a fine reale. NON più "≤ 6 minuti rimanenti":
-            //    un episodio interrotto a 4-5 minuti dalla fine veniva marcato visto, il
-            //    "Riprendi SxEy" spariva e la serie usciva da "Continua a guardare".
-            //  - FILM/altro: SOLO a fine reale (ultimi [COMPLETION_TAIL_MS]).
-            val isCompleted = if (contentType == ContentType.EPISODE) {
-                val creditsReached = creditsDetected ||
-                    (creditsMarkerStartMs?.let { currentPos >= it } == true)
-                creditsReached || currentPos >= totalDur - COMPLETION_TAIL_MS
-            } else {
-                currentPos >= totalDur - COMPLETION_TAIL_MS
-            }
+            val remainingMs = totalDur - currentPos
+            // Completato se visto oltre il 95% OPPURE se mancano ≤ 6 minuti
+            // (finestra titoli di coda). Il contenuto viene poi mostrato come
+            // "Visto" nel dettaglio e compare in "Visti di recente".
+            val isCompleted = currentPos > (totalDur * 0.95) || remainingMs <= 6 * 60 * 1000
             
             lifecycleScope.launch {
                 // Nessun progresso irrisore: se il player è stato aperto e chiuso prima

@@ -7,7 +7,6 @@ import dagger.hilt.android.HiltAndroidApp
 import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.DatabaseCheckpointManager
 import it.wavestream.app.data.database.dao.FtsSearchDao
-import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.repository.FtsSearchRepository
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.theme.AccentColor
@@ -41,9 +40,6 @@ class WaveStreamApplication : Application() {
 
     @Inject
     lateinit var ftsSearchRepository: FtsSearchRepository
-
-    @Inject
-    lateinit var watchProgressDao: WatchProgressDao
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -110,22 +106,6 @@ class WaveStreamApplication : Application() {
         // Periodic WAL checkpoint: guarantees playlist/watch data survives sudden
         // TV power-off, not only onTrimMemory/onLowMemory callbacks
         checkpointManager.startPeriodicCheckpoint()
-
-        // Riparazione UNA TANTUM dei progressi scritti dalle versioni precedenti:
-        // il vecchio criterio "≤ 6 minuti rimanenti" marcava come visti film ed
-        // episodi ancora in corso, facendo sparire il "Riprendi" e la voce da
-        // "Continua a guardare". Gira solo al primo avvio dopo l'update: dopo questa
-        // release il flag può essere impostato anche ai titoli di coda iniziati.
-        applicationScope.launch {
-            try {
-                val prefs = getSharedPreferences("migration_flags", MODE_PRIVATE)
-                val flag = "legacy_watch_completion_repaired_v1"
-                if (!prefs.getBoolean(flag, false)) {
-                    watchProgressDao.repairLegacyCompletion()
-                    prefs.edit().putBoolean(flag, true).apply()
-                }
-            } catch (_: Exception) { }
-        }
 
         // FASE 4 — Backfill FTS5. Gira UNA VOLTA SOLA (vedi rebuildFtsIndexIfNeeded):
         // prima rifaceva l'indice completo a ogni avvio, e su cataloghi grandi era
