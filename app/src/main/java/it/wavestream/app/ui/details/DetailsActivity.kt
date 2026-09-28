@@ -1033,8 +1033,7 @@ class DetailsActivity : ComponentActivity() {
 
         if (lastWatchedEpisode != null && lastWatchedProgress != null) {
             val progressPercent = (lastWatchedProgress!!.position.toFloat() / lastWatchedProgress!!.duration.toFloat()).coerceIn(0f, 1f)
-            val remainingMs = lastWatchedProgress!!.duration - lastWatchedProgress!!.position
-            val remainingMin = (remainingMs / 60000).toInt().coerceAtLeast(1)
+            val remainingMin = ((lastWatchedProgress!!.duration - lastWatchedProgress!!.position) / 60000).toInt().coerceAtLeast(1)
             // Solo il flag `isCompleted` (fine reale o titoli di coda iniziati).
             val effectivelyCompleted = lastWatchedProgress!!.isCompleted
 
