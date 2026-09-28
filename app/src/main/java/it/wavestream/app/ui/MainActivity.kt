@@ -129,6 +129,7 @@ import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.ui.theme.AccentColor
 import it.wavestream.app.ui.tv.TvHomeScreen
 import it.wavestream.app.ui.components.ExpandableNavRail
+import it.wavestream.app.ui.components.GlassDialog
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.itemsIndexed
 import androidx.tv.foundation.lazy.list.rememberTvLazyListState
@@ -2685,12 +2686,13 @@ private fun CreateListDialog(
         nameFocusRequester.requestFocusWhenReady()
     }
 
-    Dialog(onDismissRequest = onDismiss) {
+    GlassDialog(
+        onDismissRequest = onDismiss,
+        shape = GlassTokens.RadiusMedium
+    ) {
         Column(
             modifier = Modifier
                 .width(420.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(WaveStreamColors.BackgroundSecondary)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -2869,12 +2871,13 @@ private fun HeroListPickerDialog(
         viewModel.createListWithHero(hero, name) { reload() }
     }
 
-    Dialog(onDismissRequest = onDismiss) {
+    GlassDialog(
+        onDismissRequest = onDismiss,
+        shape = GlassTokens.RadiusMedium
+    ) {
         Column(
             modifier = Modifier
                 .width(420.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(WaveStreamColors.BackgroundSecondary)
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
