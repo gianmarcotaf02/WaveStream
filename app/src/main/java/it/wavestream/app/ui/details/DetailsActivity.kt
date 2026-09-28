@@ -700,11 +700,11 @@ class DetailsActivity : ComponentActivity() {
                 metacriticScore = movie.omdbMetacriticScore,
                 audienceScore = movie.omdbAudienceScore,
                 trailerKey = movie.tmdbTrailerKey,
-                resumeMinutes = fastProgress?.let {
+                resumeMinutes = fastProgress?.takeIf { it.isResumable }?.let {
                     val remaining = (it.duration - it.position) / 60000
                     remaining.toInt().coerceAtLeast(1)
                 },
-                resumeProgress = fastProgress?.let {
+                resumeProgress = fastProgress?.takeIf { it.isResumable }?.let {
                     if (it.duration > 0) {
                         (it.position.toFloat() / it.duration.toFloat()).coerceIn(0f, 1f)
                     } else null

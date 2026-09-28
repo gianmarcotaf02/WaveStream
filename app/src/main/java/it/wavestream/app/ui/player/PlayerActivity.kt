@@ -241,6 +241,12 @@ class PlayerActivity : ComponentActivity() {
     // (evita reset inutili su micro-aggiustamenti del player).
     private val BACKWARD_SEEK_RESET_MS = 10_000L
 
+    // Un VOD è "davvero finito" solo quando manca meno di questa soglia alla fine.
+    // Sostituisce per i FILM la vecchia regola "≤ 6 minuti rimanenti": un film
+    // interrotto a 4-5 minuti dalla fine veniva marcato completato, il "Riprendi"
+    // spariva dal dettaglio e il titolo usciva da "Continua a guardare".
+    private val COMPLETION_TAIL_MS = 30_000L
+
     // Finestra iniziale in cui il monitor audio cerca la sigla (Fase 4).
     private val INTRO_SCAN_MS = 15 * 60 * 1000L
 
@@ -2256,8 +2262,17 @@ class PlayerActivity : ComponentActivity() {
             val currentPos = player.currentPosition
             val totalDur = player.duration
             val remainingMs = totalDur - currentPos
-            // Completed if watched > 95% OR if remaining time <= 6 minutes (credits threshold)
-            val isCompleted = currentPos > (totalDur * 0.95) || remainingMs <= 6 * 60 * 1000
+            // Completato:
+            //  - EPISODIO: > 95% OPPURE ultimi 6 minuti (finestra titoli di coda).
+            //    Serve alla logica serie (checkmark + proposta episodio successivo).
+            //  - FILM/altro: SOLO quando la riproduzione ha davvero raggiunto la fine
+            //    (ultimi [COMPLETION_TAIL_MS]). Prima anche 4-5 minuti di film residui
+            //    contavano come "visto": si perdeva la posizione e il "Riprendi".
+            val isCompleted = if (contentType == ContentType.EPISODE) {
+                currentPos > (totalDur * 0.95) || remainingMs <= 6 * 60 * 1000
+            } else {
+                currentPos >= totalDur - COMPLETION_TAIL_MS
+            }
             
             lifecycleScope.launch {
                 // Nessun progresso irrisore: se il player è stato aperto e chiuso prima
