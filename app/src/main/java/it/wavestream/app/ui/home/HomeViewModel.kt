@@ -1795,6 +1795,9 @@ class HomeViewModel @Inject constructor(
             movie.omdbRottenTomatoesScore != null || 
             movie.omdbMetacriticScore != null
         val needsOmdbRefresh = movie.omdbLastFetchAt == null || 
+            // Voto IMDb mancante (OMDb/Cinemeta a volte danno N/A sui titoli
+            // recenti): ritenta, così lo scraper IMDb GraphQL può completarlo.
+            movie.omdbImdbRating == null ||
             !hasAnyOmdbRating || 
             System.currentTimeMillis() - movie.omdbLastFetchAt!! > 7 * 24 * 60 * 60 * 1000 // 7 days cache
 
@@ -2009,6 +2012,8 @@ class HomeViewModel @Inject constructor(
             series.omdbRottenTomatoesScore != null || 
             series.omdbMetacriticScore != null
         val needsOmdbRefresh = series.omdbLastFetchAt == null || 
+            // Voto IMDb mancante: ritenta (vedi nota nel ramo movie).
+            series.omdbImdbRating == null ||
             !hasAnyOmdbRating || 
             System.currentTimeMillis() - series.omdbLastFetchAt!! > 7 * 24 * 60 * 60 * 1000 // 7 days cache
 
