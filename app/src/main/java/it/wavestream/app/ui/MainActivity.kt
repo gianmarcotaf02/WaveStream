@@ -2687,7 +2687,8 @@ private fun CreateListDialog(
 
     GlassDialog(
         onDismissRequest = onDismiss,
-        shape = GlassTokens.RadiusMedium
+        shape = GlassTokens.RadiusMedium,
+        fill = GlassTokens.SurfaceFillOpaque
     ) {
         Column(
             modifier = Modifier
@@ -2872,7 +2873,8 @@ private fun HeroListPickerDialog(
 
     GlassDialog(
         onDismissRequest = onDismiss,
-        shape = GlassTokens.RadiusMedium
+        shape = GlassTokens.RadiusMedium,
+        fill = GlassTokens.SurfaceFillOpaque
     ) {
         Column(
             modifier = Modifier

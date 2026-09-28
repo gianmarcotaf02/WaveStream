@@ -3328,7 +3328,7 @@ private fun AddToListButton(
             GlassSurface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = GlassTokens.RadiusMedium,
-                fill = GlassTokens.SurfaceFillStrong,
+                fill = GlassTokens.SurfaceFillOpaque,
                 stroke = GlassTokens.StrokeGradient
             ) {
             Column {
@@ -3400,7 +3400,7 @@ private fun AddToListButton(
         var listName by remember { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { showCreateDialog = false },
-            containerColor = GlassTokens.SurfaceFillStrong,
+            containerColor = GlassTokens.SurfaceFillOpaque,
             shape = GlassTokens.RadiusMedium,
             title = { Text("Crea nuova lista", color = WaveStreamColors.TextPrimary) },
             text = {

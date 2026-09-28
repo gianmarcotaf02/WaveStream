@@ -44,6 +44,13 @@ object GlassTokens {
     val SurfaceFillStrong = Color(0x2EFFFFFF)    // 18% white — card flottanti
     val SurfaceFillDark = Color(0x40101418)      // scrim overlay (video)
 
+    /**
+     * Fill quasi pieno per overlay che devono restare leggibili sopra il
+     * contenuto (menu a tendina, dialog). Vetro scuro al ~92%: mantiene un filo
+     * di trasparenza ma garantisce contrasto su hero/immagini luminose.
+     */
+    val SurfaceFillOpaque = Color(0xEB0C1A28)
+
     // FASE 1 — fill di stato: vetro che si "accende" al focus, coerente col FocusSystem
     val SurfaceFillFocused = Color(0x2BFFFFFF)   // 17% white — elemento focalizzato
 
