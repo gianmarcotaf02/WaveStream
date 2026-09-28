@@ -579,18 +579,20 @@ private fun PauseInfoOverlay(
                 .fillMaxHeight()
                 .fillMaxWidth(0.52f)
                 .padding(horizontal = 48.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo TMDB (clear logo) centrato nella metà sinistra; fallback al testo.
+            // Logo TMDB (clear logo) allineato a sinistra, sulla stessa x dell'anno;
+            // fallback al testo.
             if (!info.logoUrl.isNullOrBlank()) {
                 AsyncImage(
                     model = info.logoUrl,
                     contentDescription = info.title,
+                    alignment = Alignment.CenterStart,
                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                     modifier = Modifier
                         .height(88.dp)
-                        .fillMaxWidth(0.85f)
+                        .fillMaxWidth(0.80f)
                 )
             } else {
                 Text(
@@ -598,7 +600,7 @@ private fun PauseInfoOverlay(
                     style = MaterialTheme.typography.displaySmall,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.fillMaxWidth()
@@ -620,7 +622,7 @@ private fun PauseInfoOverlay(
                     style = MaterialTheme.typography.titleSmall,
                     color = Color.White.copy(alpha = 0.88f),
                     fontWeight = FontWeight.Medium,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.fillMaxWidth()
@@ -635,7 +637,7 @@ private fun PauseInfoOverlay(
                     style = MaterialTheme.typography.titleMedium,
                     color = WaveStreamColors.Accent,
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                     modifier = Modifier.fillMaxWidth()
                 )
                 info.episodeTitle?.takeIf { it.isNotBlank() }?.let { epTitle ->
@@ -644,7 +646,7 @@ private fun PauseInfoOverlay(
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth()
@@ -659,7 +661,7 @@ private fun PauseInfoOverlay(
                         text = plot,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.8f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                         maxLines = 4,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth()
