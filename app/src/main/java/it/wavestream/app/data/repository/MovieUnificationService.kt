@@ -53,6 +53,23 @@ class MovieUnificationService @Inject constructor(
 
         /** Dimensione dei batch di scrittura (movie/provider/categorie). */
         private const val FLUSH_BATCH = 2000
+
+        /**
+         * Numero massimo di id per clausola `IN (...)`. SQLite rifiuta le query con
+         * troppi parametri ("too many SQL variables": 999 o 32766 a seconda della
+         * versione). Su un primo refresh i film toccati erano ~45.000, quindi ogni
+         * `IN` va spezzato in blocchi.
+         */
+        private const val SQL_CHUNK = 500
+
+        /**
+         * Sotto questa soglia conviene la lookup diretta per gruppo (poche query).
+         * Sopra, si precarica una volta sola l'indice dei film della playlist
+         * (chiave gruppo → id canonico): era il collo di bottiglia del primo
+         * refresh, dove ogni gruppo costava una SELECT con scansione completa
+         * della playlist (~500 ms su TV stick).
+         */
+        private const val GROUP_MAP_THRESHOLD = 1000
     }
 
     /** Sorgente risolta pronta per essere persistita (Xtream o M3U). */
@@ -277,7 +294,10 @@ class MovieUnificationService @Inject constructor(
 
             if (removedIds.isNotEmpty()) {
                 removedIds.mapNotNullTo(touched) { existingByXtream[it]?.movieId }
-                streamProviderDao.deleteByXtreamIds(playlistId, removedIds)
+                // `IN` a blocchi: le sorgenti rimosse possono essere decine di migliaia.
+                removedIds.chunked(SQL_CHUNK).forEach {
+                    streamProviderDao.deleteByXtreamIds(playlistId, it)
+                }
             }
 
             if (toPlace.isNotEmpty()) {
@@ -287,15 +307,57 @@ class MovieUnificationService @Inject constructor(
                 val changedIds = toPlace.mapNotNull { it.xtreamStreamId }.filter { it in existingByXtream }
                 if (changedIds.isNotEmpty()) {
                     changedIds.mapNotNullTo(touched) { existingByXtream[it]?.movieId }
-                    streamProviderDao.deleteByXtreamIds(playlistId, changedIds)
+                    changedIds.chunked(SQL_CHUNK).forEach {
+                        streamProviderDao.deleteByXtreamIds(playlistId, it)
+                    }
                 }
 
-                // Raggruppa SOLO le sorgenti da posizionare (di norma poche unità).
+                // Raggruppa SOLO le sorgenti da posizionare.
                 val groups = ContentKey.groupByTitleAndYearWithKeys(
                     items = toPlace,
                     titleOf = { titleFor(it.rawName) },
                     yearOf = { it.year }
                 )
+
+                // Indice in memoria dei film già in DB (chiave gruppo → id canonico).
+                // Prima qui c'era una `getByPlaylistAndGroupKey` PER OGNI gruppo: senza
+                // indice composito SQLite scandiva l'intera playlist ad ogni lookup
+                // (~60k righe, ~500 ms su una TV stick) → su ~45k gruppi erano ore di
+                // sync. Ora è una sola query proiettata (id/titolo/anno) + hash map.
+                val canonicalByGroupKey: HashMap<String, Long>? =
+                    if (toPlace.size > GROUP_MAP_THRESHOLD) {
+                        val map = HashMap<String, Long>(toPlace.size * 2)
+                        for (c in movieDao.getGroupCandidatesByPlaylist(playlistId)) {
+                            // Stessa formula usata da `buildCanonicalMovie`/`persistGroupedMovies`.
+                            val key = ContentKey.groupKeyNormalized(
+                                ContentKey.normalizeTitle(
+                                    c.cleanName?.takeIf { it.isNotBlank() } ?: titleFor(c.name)
+                                ),
+                                c.year
+                            )
+                            val prev = map[key]
+                            if (prev == null || c.id < prev) map[key] = c.id
+                        }
+                        map
+                    } else {
+                        null
+                    }
+
+                // Scritture accorpate: prima ogni gruppo faceva una `insertAll` a sé
+                // (~45.000 transazioni annidate sul medesimo connection pool).
+                val providersToWrite = ArrayList<StreamProvider>(FLUSH_BATCH)
+                val categoriesToWrite = ArrayList<MovieCategory>(FLUSH_BATCH)
+                suspend fun flushPendingWrites() {
+                    if (providersToWrite.size >= FLUSH_BATCH) {
+                        streamProviderDao.insertAll(providersToWrite)
+                        providersToWrite.clear()
+                    }
+                    if (categoriesToWrite.size >= FLUSH_BATCH) {
+                        movieCategoryDao.insertAll(categoriesToWrite)
+                        categoriesToWrite.clear()
+                    }
+                }
+
                 for ((normTitle, rawGroup) in groups) {
                     val group = rawGroup.sortedByDescending { qualityRankOf(it.rawName) }
                     val primary = group.first()
@@ -303,27 +365,45 @@ class MovieUnificationService @Inject constructor(
                     val year = group.firstNotNullOfOrNull { it.year }
                     val groupKey = ContentKey.groupKeyNormalized(normTitle, year)
 
-                    val canonical = movieDao.getByPlaylistAndGroupKey(playlistId, groupKey).minByOrNull { it.id }
-                    val movieId = canonical?.id ?: movieDao.insert(
-                        buildCanonicalMovie(playlistId, cleanTitle, year, primary, group.size, null)
-                    )
+                    val movieId = when {
+                        // Mappa precompilata: assenza = sicuramente non in DB.
+                        canonicalByGroupKey != null -> canonicalByGroupKey[groupKey] ?: movieDao.insert(
+                            buildCanonicalMovie(playlistId, cleanTitle, year, primary, group.size, null)
+                        ).also { canonicalByGroupKey[groupKey] = it }
+                        // Batch piccolo: lookup mirata (sfrutta l'indice composito).
+                        else -> movieDao.getByPlaylistAndGroupKey(playlistId, groupKey)
+                            .minByOrNull { it.id }?.id
+                            ?: movieDao.insert(
+                                buildCanonicalMovie(playlistId, cleanTitle, year, primary, group.size, null)
+                            )
+                    }
                     touched.add(movieId)
-                    streamProviderDao.insertAll(
-                        buildProviders(playlistId, movieId, group, primary, existingByXtream)
-                    )
-                    movieCategoryDao.insertAll(buildCategories(playlistId, movieId, group))
+                    providersToWrite += buildProviders(playlistId, movieId, group, primary, existingByXtream)
+                    categoriesToWrite += buildCategories(playlistId, movieId, group)
+                    flushPendingWrites()
                 }
+                if (providersToWrite.isNotEmpty()) streamProviderDao.insertAll(providersToWrite)
+                if (categoriesToWrite.isNotEmpty()) movieCategoryDao.insertAll(categoriesToWrite)
             }
 
             // Riallinea streamCount/categorie solo per i film toccati ed elimina
             // quelli rimasti senza alcuna sorgente.
             if (touched.isNotEmpty()) {
-                val counts = streamProviderDao.getProviderCountsForMovies(touched.toList())
-                    .associate { it.movieId to it.count }
+                // Le clausole `IN` vanno spezzate: `touched` può contenere decine di
+                // migliaia di id e SQLite rifiuta le query con troppi parametri.
+                val counts = providerCountsFor(touched)
                 val empty = touched.filter { (counts[it] ?: 0) == 0 }
-                if (empty.isNotEmpty()) movieDao.deleteByIds(empty)
+                if (empty.isNotEmpty()) {
+                    empty.toList().chunked(SQL_CHUNK).forEach { movieDao.deleteByIds(it) }
+                }
                 val alive = touched - empty.toSet()
-                if (alive.isNotEmpty()) movieDao.getByIds(alive.toList()).forEach { ensureMovieIntegrity(it) }
+                // I film vengono letti e riallineati a blocchi: caricare ~45k entità
+                // Movie intere in una volta sola esauriva la RAM della TV stick.
+                if (alive.isNotEmpty()) {
+                    alive.toList().chunked(SQL_CHUNK).forEach { chunk ->
+                        movieDao.getByIds(chunk).forEach { ensureMovieIntegrity(it) }
+                    }
+                }
             }
 
             Log.i(TAG, "refresh incr: FINE toccati=${touched.size} (+${System.currentTimeMillis() - startedAt}ms)")
@@ -500,6 +580,20 @@ class MovieUnificationService @Inject constructor(
     // ---------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------
+
+    /**
+     * Conteggio sorgenti per film, spezzando la `IN` in blocchi.
+     * Un unico `movieId IN (45000 parametri)` viene rifiutato da SQLite
+     * ("too many SQL variables").
+     */
+    private suspend fun providerCountsFor(movieIds: Collection<Long>): Map<Long, Int> {
+        if (movieIds.isEmpty()) return emptyMap()
+        val result = HashMap<Long, Int>(movieIds.size * 2)
+        movieIds.toList().chunked(SQL_CHUNK).forEach { batch ->
+            streamProviderDao.getProviderCountsForMovies(batch).forEach { result[it.movieId] = it.count }
+        }
+        return result
+    }
 
     private fun titleFor(rawName: String): String =
         contentNameParser.cleanTitle(rawName).ifBlank { rawName.trim() }

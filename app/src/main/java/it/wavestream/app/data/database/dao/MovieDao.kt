@@ -240,6 +240,18 @@ interface MovieDao {
     @Query("SELECT * FROM movies WHERE playlistId = :playlistId AND groupKey = :groupKey ORDER BY id")
     suspend fun getByPlaylistAndGroupKey(playlistId: Long, groupKey: String): List<Movie>
 
+    /**
+     * Proiezione leggera dei soli campi necessari a ricostruire la chiave di
+     * gruppo (titolo normalizzato + anno) dei film di una playlist.
+     *
+     * Serve a indicizzare in memoria i film già presenti con **una sola** query
+     * invece di una `getByPlaylistAndGroupKey` per ogni gruppo da posizionare
+     * (su un primo refresh erano ~45.000 query, ognuna con scansione completa
+     * della playlist).
+     */
+    @Query("SELECT id, cleanName, name, year FROM movies WHERE playlistId = :playlistId")
+    suspend fun getGroupCandidatesByPlaylist(playlistId: Long): List<MovieGroupCandidate>
+
     @Query("SELECT * FROM movies WHERE id IN (:ids)")
     suspend fun getByIds(ids: List<Long>): List<Movie>
 
@@ -276,4 +288,12 @@ interface MovieDao {
 data class CategoryWithCount(
     val name: String,
     val count: Int
+)
+
+/** Riga di [MovieDao.getGroupCandidatesByPlaylist]: id + campi per la chiave di gruppo. */
+data class MovieGroupCandidate(
+    val id: Long,
+    val cleanName: String?,
+    val name: String,
+    val year: Int?
 )

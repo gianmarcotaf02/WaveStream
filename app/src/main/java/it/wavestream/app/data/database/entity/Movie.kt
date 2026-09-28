@@ -29,6 +29,11 @@ import androidx.room.PrimaryKey
         Index("addedAt"),
         Index("playlistOrder"),
         Index("groupKey"),
+        // Lookup del film canonico di un gruppo durante l'unificazione
+        // (WHERE playlistId = ? AND groupKey = ?): con i due indici separati SQLite
+        // scandiva tutti i film della playlist per ogni gruppo (~60k righe,
+        // ~500 ms su una TV stick → ore di sync su un primo refresh).
+        Index(value = ["playlistId", "groupKey"]),
         Index("tmdbImdbId"),
         Index(value = ["playlistId", "category", "isHidden"]),
         Index(value = ["trendingCategory", "isHidden"]),

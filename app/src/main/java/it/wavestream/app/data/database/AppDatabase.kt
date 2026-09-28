@@ -36,7 +36,7 @@ import it.wavestream.app.data.database.entity.*
         StreamProvider::class,
         MovieCategory::class
     ],
-    version = 34,
+    version = 35,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

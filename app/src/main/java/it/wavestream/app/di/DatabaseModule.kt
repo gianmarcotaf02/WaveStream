@@ -475,6 +475,25 @@ object DatabaseModule {
         }
     }
 
+    /**
+     * Migration from version 34 to 35 (indice di unificazione):
+     * - Aggiunge l'indice composito (playlistId, groupKey) su movies.
+     *
+     * Senza di esso la ricerca del film canonico di un gruppo durante il refresh
+     * Xtream usava i due indici singoli e finiva per scandire l'intera playlist
+     * (~60k righe, ~500 ms su TV stick) per **ogni** gruppo da posizionare: su un
+     * primo refresh con ~45k gruppi erano ore di lavoro con il connection pool
+     * di Room saturato. Con l'indice composito la lookup è un index-seek.
+     */
+    private val MIGRATION_34_35 = object : Migration(34, 35) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE INDEX IF NOT EXISTS index_movies_playlistId_groupKey " +
+                    "ON movies(playlistId, groupKey)"
+            )
+        }
+    }
+
     private val MIGRATION_30_31 = object : Migration(30, 31) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("ALTER TABLE media_segments ADD COLUMN fingerprint BLOB")
@@ -605,7 +624,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35)
             .fallbackToDestructiveMigration()
             .build()
     }
