@@ -29,6 +29,7 @@ class ImdbRatingsRepository @Inject constructor(
     // Create scraper instances internally to avoid Hilt injection issues
     private val rtScraper = RottenTomatoesScraper()
     private val metacriticScraper = MetacriticScraper()
+    private val imdbScraper = ImdbScraper()
     private lateinit var cinemeta: CinemetaService
     companion object {
         private const val TAG = "ImdbRatings"
@@ -143,6 +144,10 @@ class ImdbRatingsRepository @Inject constructor(
                 // Freshen the IMDb rating via Cinemeta: OMDb is often outdated for
                 // recent movies / ongoing series, while Cinemeta is refreshed live.
                 rating = mergeCinemetaRating(rating, imdbId)
+
+                // Ultima rete: se OMDb e Cinemeta non hanno il voto, prendilo
+                // dalla GraphQL di IMDb (aggiornata in tempo reale).
+                rating = topUpImdbRating(rating, imdbId)
                 
                 // Cache result
                 ratingsCache[imdbId] = CachedRating(rating, System.currentTimeMillis())
@@ -202,6 +207,9 @@ class ImdbRatingsRepository @Inject constructor(
                 if (rating.imdbRating == null && !result.imdbID.isNullOrEmpty()) {
                     rating = mergeCinemetaRating(rating, result.imdbID)
                 }
+
+                // Se ancora assente, voto dalla GraphQL di IMDb
+                rating = topUpImdbRating(rating, result.imdbID)
                 
                 android.util.Log.d("ImdbRatings", "Parsed: imdb=${rating.imdbRating}, rt=${rating.rottenTomatoesScore}, audience=${rating.audienceScore}, mc=${rating.metacriticScore}")
                 
@@ -388,8 +396,47 @@ class ImdbRatingsRepository @Inject constructor(
             }
         }
 
+        // Strategy 8c: IMDb GraphQL — rete di sicurezza finale quando OMDb e
+        // Cinemeta non hanno il voto IMDb (tipico dei titoli recenti).
+        if (ratings?.imdbRating == null) {
+            val resolvedId = imdbId?.takeIf { it.isNotBlank() }
+                ?: ratings?.imdbId?.takeIf { it.isNotBlank() }
+            if (resolvedId != null) {
+                val base = ratings ?: RatingInfo(
+                    imdbRating = null,
+                    imdbVotes = null,
+                    imdbId = resolvedId,
+                    rottenTomatoesScore = null,
+                    audienceScore = null,
+                    metacriticScore = null,
+                    rated = null,
+                    awards = null,
+                    boxOffice = null
+                )
+                ratings = topUpImdbRating(base, resolvedId)
+            }
+        }
+
         Log.d(TAG, "✗ No ratings found for: $originalTitle")
         return@withContext ratings
+    }
+
+    /**
+     * Completa il voto IMDb mancante interrogando la GraphQL di IMDb per ID.
+     * Non fa nulla se il voto è già presente o se non abbiamo l'ID IMDb.
+     */
+    private suspend fun topUpImdbRating(base: RatingInfo, imdbId: String?): RatingInfo {
+        if (base.imdbRating != null) return base
+        val id = imdbId?.takeIf { it.isNotBlank() } ?: base.imdbId?.takeIf { it.isNotBlank() } ?: return base
+        val scraped = imdbScraper.getRating(id) ?: return base
+        Log.d(TAG, "✓ IMDb rating via IMDb GraphQL for $id: ${scraped.rating}")
+        val updated = base.copy(
+            imdbRating = scraped.rating,
+            imdbVotes = scraped.votes?.toString() ?: base.imdbVotes,
+            imdbId = base.imdbId ?: id
+        )
+        ratingsCache[id] = CachedRating(updated, System.currentTimeMillis())
+        return updated
     }
     
     /**
@@ -662,5 +709,6 @@ class ImdbRatingsRepository @Inject constructor(
     fun clearCache() {
         ratingsCache.clear()
         cinemetaCache.clear()
+        imdbScraper.clearCache()
     }
 }

@@ -906,6 +906,9 @@ class DetailsActivity : ComponentActivity() {
             enrichedMovie.omdbRottenTomatoesScore != null ||
             enrichedMovie.omdbMetacriticScore != null
         val needsOmdbRefresh = !hasAnyOmdbRating ||
+            // Voto IMDb mancante (es. OMDb/Cinemeta disallineati su titoli recenti):
+            // ritenta, così lo scrapers IMDb GraphQL può completarlo.
+            enrichedMovie.omdbImdbRating == null ||
             (enrichedMovie.omdbLastFetchAt?.let { lastFetch ->
                 System.currentTimeMillis() - lastFetch > 7 * 24 * 60 * 60 * 1000
             } ?: false)
@@ -1273,6 +1276,8 @@ class DetailsActivity : ComponentActivity() {
             series.omdbRottenTomatoesScore != null ||
             series.omdbMetacriticScore != null
         val needsOmdbRefresh = !hasAnyOmdbRating ||
+            // Voto IMDb mancante: ritenta (vedi nota nel ramo movie).
+            series.omdbImdbRating == null ||
             (series.omdbLastFetchAt?.let { lastFetch ->
                 System.currentTimeMillis() - lastFetch > 7 * 24 * 60 * 60 * 1000
             } ?: false)
