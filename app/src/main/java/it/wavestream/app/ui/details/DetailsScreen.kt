@@ -666,6 +666,8 @@ fun DetailsScreen(
                         } else null
                         PlayButton(
                             text = when {
+                                // Contenuto già visto: il CTA lo segnala esplicitamente
+                                state.isWatched -> "Visto"
                                 // If there's a next episode to watch (previous completed)
                                 state.nextEpisodeInfo != null -> stringResource(R.string.play)
                                 // If there's watch progress, show resume with S/E info only.
@@ -674,6 +676,7 @@ fun DetailsScreen(
                                 else -> stringResource(R.string.play)
                             },
                             badge = when {
+                                state.isWatched -> null
                                 state.nextEpisodeInfo != null -> nextEpisodeBadge
                                 state.resumeMinutes != null -> resumeBadge ?: resumeRemainingBadge
                                 state.contentType == ContentType.SERIES -> seriesBadge
@@ -681,6 +684,7 @@ fun DetailsScreen(
                             },
                             // Use white button for resume/next episode states
                             isResume = state.resumeMinutes != null || state.nextEpisodeInfo != null,
+                            isWatched = state.isWatched,
                             resumeProgress = state.resumeProgress,
                             onClick = onPlayClick,
                             focusRef = playButtonFocusRef,
@@ -1716,6 +1720,7 @@ private fun PlayButton(
     text: String,
     badge: String? = null,
     isResume: Boolean = false,
+    isWatched: Boolean = false,
     resumeProgress: Float? = null,
     onClick: () -> Unit,
     focusRef: FocusTargetRef? = null,
@@ -1744,18 +1749,19 @@ private fun PlayButton(
         label = "playBorder"
     )
     
-    // Use white background for resume/next episode states, purple for normal play
+    // Sfondo bianco per gli stati "riprendi", "prossimo episodio" e "visto";
+    // viola per il play normale.
     val backgroundColor by animateColorAsState(
         targetValue = when {
-            isResume && isFocused -> Color.White.copy(alpha = 0.9f)
-            isResume -> Color.White
+            (isResume || isWatched) && isFocused -> Color.White.copy(alpha = 0.9f)
+            isResume || isWatched -> Color.White
             isFocused -> WaveStreamColors.AccentLight
             else -> WaveStreamColors.Accent
         },
         label = "playBg"
     )
     
-    val contentColor = if (isResume) Color.Black else WaveStreamColors.TextPrimary
+    val contentColor = if (isResume || isWatched) Color.Black else WaveStreamColors.TextPrimary
     
     Box(
         modifier = Modifier
@@ -1815,7 +1821,7 @@ private fun PlayButton(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.PlayArrow,
+                        imageVector = if (isWatched) Icons.Default.Check else Icons.Default.PlayArrow,
                         contentDescription = null,
                         tint = contentColor,
                         modifier = Modifier.size(20.dp)
@@ -1847,7 +1853,7 @@ private fun PlayButton(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.PlayArrow,
+                    imageVector = if (isWatched) Icons.Default.Check else Icons.Default.PlayArrow,
                     contentDescription = null,
                     tint = contentColor,
                     modifier = Modifier.size(24.dp)
