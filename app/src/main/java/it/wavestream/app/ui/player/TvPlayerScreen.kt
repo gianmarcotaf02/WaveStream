@@ -564,8 +564,8 @@ private fun PauseInfoOverlay(
                     contentDescription = info.title,
                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                     modifier = Modifier
-                        .heightIn(max = 92.dp)
-                        .fillMaxWidth(0.62f)
+                        .height(88.dp)
+                        .fillMaxWidth(0.60f)
                 )
             } else {
                 Text(
