@@ -81,6 +81,14 @@ class LoadingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         profileId = intent.getLongExtra("profile_id", 1L)
+        // Mantiene allineato il profilo corrente anche nei percorsi di auto-start, che
+        // NON passano da selectProfile. Il player legge il mirror sincrono per salvare
+        // i progressi sul profilo giusto.
+        if (profileId > 0L) {
+            lifecycleScope.launch {
+                runCatching { userPreferences.setCurrentProfileId(profileId) }
+            }
+        }
         val forceRefresh = intent.getBooleanExtra("force_refresh", false)
         
         // Clear cache only if stale (>24h) or force refresh — reuse fresh data when possible
