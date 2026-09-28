@@ -3678,7 +3678,7 @@ class HomeViewModel @Inject constructor(
 
     /**
      * Load recently watched content (COMPLETED items only)
-     * Shows content that was fully watched (or with <= 8 min remaining to exclude credits)
+     * Solo i contenuti il cui flag `isCompleted` è true (fine reale o credits).
      */
     private suspend fun loadRecentlyWatched(filterType: ContentType? = null): List<CarouselItem>? {
         return withContext(Dispatchers.IO) {
