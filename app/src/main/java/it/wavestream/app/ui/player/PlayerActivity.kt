@@ -130,7 +130,8 @@ class PlayerActivity : ComponentActivity() {
     private val _controlsVisible = mutableStateOf(true)
 
     // Live/DVR state (solo canali live) - timeshift stile Sky/DAZN
-    private val _isLive = mutableStateOf(false)
+    // Metadati per l'overlay "in pausa" (stile Netflix). Solo VOD.
+    private val _pauseInfo = mutableStateOf<PlayerPauseInfo?>(null)
     private val _isAtLiveEdge = mutableStateOf(true)
     // True solo se lo stream live espone una finestra DVR (HLS sliding window /
     // playlist EVENT): il timeshift indietro è possibile solo in quel caso.
@@ -151,8 +152,7 @@ class PlayerActivity : ComponentActivity() {
     // Qualità video reale del flusso in riproduzione (es. "1080p"). Mostrata
     // nell'overlay dei controlli, a destra del titolo. Null finché la traccia
     // video non è nota; segue automaticamente i cambi di risoluzione (HLS adattivo).
-    private val _videoQuality = mutableStateOf<String?>(null)
-    // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
+    private val _videoQuality = mutableStateOf<String?>(null)    // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
     // al primo onVideoSizeChanged. -1 = non nota (es. serie/canali).
     private var sourceProviderId: Long = -1L
     // Ultima altezza già scritta in DB in questa sessione. onVideoSizeChanged scatta più
@@ -480,6 +480,12 @@ class PlayerActivity : ComponentActivity() {
             return
         }
         
+        // Metadati per l'overlay "in pausa" (stile Netflix): caricati dal DB già
+        // arricchito da TMDB. Solo per VOD (film/serie), mai per i canali live.
+        if (contentType != ContentType.CHANNEL) {
+            lifecycleScope.launch { _pauseInfo.value = loadPauseInfo() }
+        }
+
         // Load remaining data in background (preferences, DB fetches, next/prev episodes)
         lifecycleScope.launch {
             // Load seek preferences
@@ -665,6 +671,7 @@ class PlayerActivity : ComponentActivity() {
                     seekIndicatorVisible = seekIndicatorVisible,
                     hiddenSeekSeconds = hiddenSeekSeconds,
                     showStillWatching = remember { _showStillWatching }.value,
+                    pauseInfo = _pauseInfo.value,
                     onStillWatchingContinue = { 
                         resetAutoPlayCounter()
                         player.play()
@@ -1569,6 +1576,62 @@ class PlayerActivity : ComponentActivity() {
         hideNextEpisodeOverlay()
         _creditsSeekGeneration.intValue++
         loadCreditsMarker()
+    }
+
+    /**
+     * Carica i metadati mostrati nell'overlay "in pausa" (stile Netflix).
+     * Legge dal DB già arricchito da TMDB: nessuna chiamata di rete.
+     */
+    private suspend fun loadPauseInfo(): PlayerPauseInfo? = withContext(Dispatchers.IO) {
+        try {
+            when (contentType) {
+                ContentType.MOVIE -> {
+                    val m = movieDao.getMovieById(contentId) ?: return@withContext null
+                    PlayerPauseInfo(
+                        logoUrl = m.titleLogoUrl,
+                        title = m.title,
+                        year = m.year,
+                        durationMinutes = m.tmdbRuntime
+                            ?: m.duration?.takeIf { it > 0 }?.let { (it / 60).toInt() },
+                        genres = m.genre,
+                        isSeries = false
+                    )
+                }
+                ContentType.EPISODE, ContentType.SERIES -> {
+                    val episode = if (contentType == ContentType.EPISODE) {
+                        episodeDao.getEpisodeById(contentId)
+                    } else null
+                    val sid = episode?.seriesId ?: seriesId ?: contentId
+                    val s = seriesDao.getSeriesById(sid) ?: return@withContext null
+                    val epTitle = episode?.let {
+                        it.wavestream.app.util.TitleCleaner.resolveEpisodeDisplayTitle(
+                            providerName = it.name,
+                            tmdbName = it.tmdbName,
+                            episodeNumber = it.episodeNumber,
+                            seriesName = s.name
+                        )
+                    }
+                    PlayerPauseInfo(
+                        logoUrl = s.titleLogoUrl,
+                        title = s.title,
+                        year = s.year,
+                        durationMinutes = episode?.duration?.takeIf { it > 0 }?.let { (it / 60).toInt() },
+                        genres = s.genre,
+                        isSeries = true,
+                        seasonNumber = episode?.seasonNumber ?: season,
+                        episodeNumber = episode?.episodeNumber ?: episode,
+                        episodeTitle = epTitle,
+                        plot = episode?.tmdbOverview?.takeIf { it.isNotBlank() }
+                            ?: episode?.plot?.takeIf { it.isNotBlank() }
+                            ?: s.plot
+                    )
+                }
+                else -> null
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("PlayerActivity", "loadPauseInfo failed: ${e.message}")
+            null
+        }
     }
 
     /**
