@@ -20,6 +20,9 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 // SharedPreferences key per l'accent color (caricamento sincrono all'avvio)
 private const val SYNC_PREFS_NAME = "wavestream_sync_prefs"
 private const val SYNC_ACCENT_COLOR_KEY = "accent_color"
+// Profilo corrente in SharedPreferences sincrone: il player lo legge subito (senza
+// attendere DataStore) per salvare i progressi sul profilo corretto.
+private const val SYNC_CURRENT_PROFILE_ID_KEY = "current_profile_id"
 private const val ENCRYPTED_PREFS_NAME = "wavestream_encrypted_prefs"
 private const val ENCRYPTED_TMDB_KEY = "tmdb_api_key"
 private const val ENCRYPTED_OMDB_KEY = "omdb_api_key"

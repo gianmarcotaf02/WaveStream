@@ -441,7 +441,12 @@ class PlayerActivity : ComponentActivity() {
         streamUrl = intent.getStringExtra("stream_url") ?: ""
         title = intent.getStringExtra("title") ?: ""
         subtitle = intent.getStringExtra("subtitle")
-        profileId = intent.getLongExtra("profile_id", 1L)
+        profileId = intent.getLongExtra("profile_id", -1L).takeIf { it > 0L }
+            // Il player non riceve sempre il profilo dall'intent (hero, griglie, ecc.):
+            // senza questo fallback restava il default 1L e i progressi finivano sul
+            // profilo sbagliato → niente "Riprendi"/"Continua a guardare".
+            ?: userPreferences.getCurrentProfileIdSync()
+            ?: 1L
         seriesId = intent.getLongExtra("series_id", -1).takeIf { it > 0 }
         season = intent.getIntExtra("season", -1).takeIf { it > 0 }
         episode = intent.getIntExtra("episode", -1).takeIf { it > 0 }
