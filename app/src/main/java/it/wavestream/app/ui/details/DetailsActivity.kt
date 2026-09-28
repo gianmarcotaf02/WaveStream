@@ -55,6 +55,10 @@ class DetailsActivity : ComponentActivity() {
     // "Potrebbe piacerti": al ritorno NON va ricaricata (niente skeleton) così
     // il focus resta/riprende sulla card da cui si è partiti.
     private var openedRelatedContent = false
+
+    // true mentre stiamo tornando dal PlayerActivity aperto da QUESTA scheda:
+    // al resume aggiorniamo solo lo stato di visione, senza rifare tutto.
+    private var returningFromPlayer = false
     
     @Inject lateinit var movieDao: MovieDao
     @Inject lateinit var seriesDao: SeriesDao
@@ -170,7 +174,11 @@ class DetailsActivity : ComponentActivity() {
             }
         }
         
-        // Reload on resume (e.g., after returning from player)
+        // Al ritorno dal player aggiorna SOLO lo stato di visione (resume/progressi).
+        // NIENTE reload completo: prima ogni ON_RESUME rifaceva loadContent
+        // (skeleton + TMDB/OMDB + rail) anche per schede aperte pochi secondi prima,
+        // causando un refresh inutile e fastidioso. Il reload completo ora avviene
+        // solo una volta, al primo caricamento.
         val lifecycleOwner = LocalLifecycleOwner.current
         androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
             val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
@@ -180,12 +188,10 @@ class DetailsActivity : ComponentActivity() {
                         // reload rimetterebbe isLoading=true (skeleton) e sposterebbe
                         // il focus su Riproduci, perdendo la posizione nella rail.
                         openedRelatedContent = false
-                    } else {
-                        // Reload to refresh episode progress (es. ritorno dal player)
+                    } else if (returningFromPlayer) {
+                        returningFromPlayer = false
                         lifecycleScope.launch {
-                            loadContent { newState ->
-                                state = newState
-                            }
+                            state = refreshWatchProgress(state)
                         }
                     }
                 }
@@ -303,9 +309,8 @@ class DetailsActivity : ComponentActivity() {
                         "Progresso azzerato per l'episodio",
                         android.widget.Toast.LENGTH_SHORT
                     ).show()
-                    loadContent { newState ->
-                        state = newState
-                    }
+                    // Solo lo stato di visione cambia: refresh leggero, niente skeleton
+                    state = refreshWatchProgress(state)
                 }
             },
             onTrailerClick = {
@@ -349,10 +354,8 @@ class DetailsActivity : ComponentActivity() {
                         "Rimosso da Continua a guardare", 
                         android.widget.Toast.LENGTH_SHORT
                     ).show()
-                    // Reload content to update UI (remove resume button)
-                    loadContent { newState ->
-                        state = newState
-                    }
+                    // Solo lo stato di visione cambia: refresh leggero, niente skeleton
+                    state = refreshWatchProgress(state)
                 }
             },
             // Download callbacks
@@ -1452,6 +1455,8 @@ class DetailsActivity : ComponentActivity() {
             it.wavestream.app.ui.theme.MotionCategory.ZOOM
         )
         if (options != null) startActivity(intent, options) else startActivity(intent)
+        // Al prossimo ON_RESUME aggiorneremo solo lo stato di visione.
+        returningFromPlayer = true
     }
     
     private fun toggleFavorite(currentlyFavorite: Boolean, onComplete: (Boolean) -> Unit) {
