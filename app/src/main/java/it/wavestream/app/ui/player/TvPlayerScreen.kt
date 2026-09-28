@@ -139,6 +139,8 @@ fun TvPlayerScreen(
     hiddenSeekSeconds: Int = 0,
     showStillWatching: Boolean = false,
     onStillWatchingContinue: () -> Unit = {},
+    /** Metadati per l'overlay "in pausa" stile Netflix (solo VOD). */
+    pauseInfo: PlayerPauseInfo? = null,
     /** Timer "dormire" (mezzaluna) scaduto: il player va in pausa ed esce. */
     onSleepTimerExpired: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -360,6 +362,21 @@ fun TvPlayerScreen(
             )
         }
         
+        // Overlay "in pausa" stile Netflix (solo VOD): logo del titolo TMDB +
+        // metadati. Mostrato immediatamente quando il player è in pausa (e i
+        // controlli sono visibili); si dissolve al resume.
+        val showPauseInfo = pauseInfo != null && !isPlaying && !isLoading &&
+            controlsVisible && !isLiveChannel && !isMiniPlayer
+        AnimatedVisibility(
+            visible = showPauseInfo,
+            enter = fadeIn(tween(AppAnimations.FadeEnterMs))
+                + slideInVertically(initialOffsetY = { it / 18 }),
+            exit = fadeOut(tween(AppAnimations.FadeExitMs)),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            pauseInfo?.let { PauseInfoOverlay(info = it, currentPosition = currentPosition, duration = duration) }
+        }
+
         // Controls overlay
         AnimatedVisibility(
             visible = controlsVisible && !isMiniPlayer,
@@ -369,6 +386,7 @@ fun TvPlayerScreen(
             ModernPlayerControls(
                 title = title,
                 subtitle = subtitle,
+                hideTitle = showPauseInfo,
                 videoQuality = videoQuality,
                 currentPosition = currentPosition,
                 duration = duration,
@@ -604,6 +622,7 @@ private fun StillWatchingOverlay(
 private fun ModernPlayerControls(
     title: String,
     subtitle: String?,
+    hideTitle: Boolean = false,
     videoQuality: String? = null,
     currentPosition: Long,
     duration: Long,
@@ -692,32 +711,35 @@ private fun ModernPlayerControls(
                 size = 44.dp
             )
             
-            // Title and subtitle - floating text with shadow
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        shadow = androidx.compose.ui.graphics.Shadow(
-                            color = Color.Black.copy(alpha = 0.8f),
-                            offset = androidx.compose.ui.geometry.Offset(1f, 1f),
-                            blurRadius = 6f
-                        )
-                    ),
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold
-                )
-                subtitle?.let {
+            // Title and subtitle - floating text with shadow.
+            // Nascosti quando è visibile l'overlay "in pausa" (mostra il logo TMDB).
+            if (!hideTitle) {
+                Column {
                     Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium.copy(
+                        text = title,
+                        style = MaterialTheme.typography.headlineSmall.copy(
                             shadow = androidx.compose.ui.graphics.Shadow(
                                 color = Color.Black.copy(alpha = 0.8f),
                                 offset = androidx.compose.ui.geometry.Offset(1f, 1f),
-                                blurRadius = 4f
+                                blurRadius = 6f
                             )
                         ),
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = Color.White,
+                        fontWeight = FontWeight.SemiBold
                     )
+                    subtitle?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                shadow = androidx.compose.ui.graphics.Shadow(
+                                    color = Color.Black.copy(alpha = 0.8f),
+                                    offset = androidx.compose.ui.geometry.Offset(1f, 1f),
+                                    blurRadius = 4f
+                                )
+                            ),
+                            color = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
                 }
             }
 
