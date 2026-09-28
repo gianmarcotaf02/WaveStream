@@ -154,7 +154,9 @@ class PlayerActivity : ComponentActivity() {
     private val _videoQuality = mutableStateOf<String?>(null)
 
     // Metadati per l'overlay "in pausa" (stile Netflix). Solo VOD.
-    private val _pauseInfo = mutableStateOf<PlayerPauseInfo?>(null)    // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
+    private val _pauseInfo = mutableStateOf<PlayerPauseInfo?>(null)
+
+    // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
     // al primo onVideoSizeChanged. -1 = non nota (es. serie/canali).
     private var sourceProviderId: Long = -1L
     // Ultima altezza già scritta in DB in questa sessione. onVideoSizeChanged scatta più
