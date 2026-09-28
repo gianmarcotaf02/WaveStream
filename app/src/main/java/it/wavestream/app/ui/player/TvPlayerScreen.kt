@@ -518,11 +518,30 @@ fun TvPlayerScreen(
 }
 
 /**
+ * Formatta i minuti in ore/minuti quando superano l'ora (es. "1h 34m").
+ */
+private fun formatDurationLabel(minutes: Int): String =
+    if (minutes >= 60) {
+        val h = minutes / 60
+        val m = minutes % 60
+        if (m > 0) "${h}h ${m}m" else "${h}h"
+    } else "$minutes min"
+
+/** Come [formatDurationLabel] ma con il suffisso "rimasti". */
+private fun formatRemainingLabel(minutes: Int): String =
+    if (minutes >= 60) {
+        val h = minutes / 60
+        val m = minutes % 60
+        if (m > 0) "${h}h ${m}m rimasti" else "${h}h rimaste"
+    } else "$minutes min rimasti"
+
+/**
  * Overlay mostrato quando il player è in pausa (stile Netflix).
  *
- * VOD soltanto. Mostra il logo del titolo TMDB (fallback al testo) e, sotto, i
- * metadati: anno • durata • generi • minuti rimasti. Per le serie aggiunge la
- * stagione/episodio in corso, il titolo dell'episodio e la trama.
+ * VOD soltanto. Logo del titolo TMDB (fallback al testo) centrato nella metà
+ * sinistra dello schermo, con sotto i metadati: anno • durata • generi • minuti
+ * rimasti (in ore/minuti quando superano l'ora). Per le serie: stagione/episodio
+ * in corso, titolo dell'episodio e trama.
  * Puramente informativo: non cattura il focus (i controlli restano usabili).
  */
 @Composable
@@ -536,16 +555,20 @@ private fun PauseInfoOverlay(
     } else null
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Vignetta orizzontale: scurisce il lato sinistro per il contrasto del testo,
-        // senza blur (vincolo di performance sul video).
+        // Scrim grigio semi-trasparente: oscura lievemente il frame in pausa.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF232326).copy(alpha = 0.55f))
+        )
+        // Vignetta leggera sul lato sinistro per il contrasto del testo (no blur).
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.horizontalGradient(
-                        0.00f to Color.Black.copy(alpha = 0.72f),
-                        0.45f to Color.Black.copy(alpha = 0.34f),
-                        0.85f to Color.Transparent
+                        0.00f to Color.Black.copy(alpha = 0.45f),
+                        0.55f to Color.Transparent
                     )
                 )
         )
@@ -553,11 +576,13 @@ private fun PauseInfoOverlay(
         Column(
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .padding(horizontal = 48.dp)
-                .widthIn(max = 620.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .fillMaxHeight()
+                .fillMaxWidth(0.52f)
+                .padding(horizontal = 48.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // Logo TMDB (clear logo) oppure titolo testuale di fallback
+            // Logo TMDB (clear logo) centrato nella metà sinistra; fallback al testo.
             if (!info.logoUrl.isNullOrBlank()) {
                 AsyncImage(
                     model = info.logoUrl,
@@ -565,7 +590,7 @@ private fun PauseInfoOverlay(
                     contentScale = androidx.compose.ui.layout.ContentScale.Fit,
                     modifier = Modifier
                         .height(88.dp)
-                        .fillMaxWidth(0.60f)
+                        .fillMaxWidth(0.85f)
                 )
             } else {
                 Text(
@@ -573,36 +598,45 @@ private fun PauseInfoOverlay(
                     style = MaterialTheme.typography.displaySmall,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
 
             // Riga meta: anno • durata • generi • minuti rimasti
             val metaParts = buildList {
                 info.year?.let { add(it.toString()) }
-                info.durationMinutes?.takeIf { it > 0 }?.let { add("$it min") }
+                info.durationMinutes?.takeIf { it > 0 }?.let { add(formatDurationLabel(it)) }
                 info.genres?.takeIf { it.isNotBlank() }?.let { add(it) }
-                remainingMinutes?.takeIf { it > 0 }?.let { add("$it min rimasti") }
+                remainingMinutes?.takeIf { it > 0 }?.let { add(formatRemainingLabel(it)) }
             }
             if (metaParts.isNotEmpty()) {
                 Text(
                     text = metaParts.joinToString("   •   "),
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color.White.copy(alpha = 0.85f),
+                    color = Color.White.copy(alpha = 0.88f),
                     fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
             // Serie: stagione/episodio in corso + titolo episodio + trama
             if (info.isSeries && info.seasonNumber != null && info.episodeNumber != null) {
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "Stagione ${info.seasonNumber}   •   Episodio ${info.episodeNumber}",
                     style = MaterialTheme.typography.titleMedium,
                     color = WaveStreamColors.Accent,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 info.episodeTitle?.takeIf { it.isNotBlank() }?.let { epTitle ->
                     Text(
@@ -610,20 +644,25 @@ private fun PauseInfoOverlay(
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White,
                         fontWeight = FontWeight.SemiBold,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
 
             if (info.isSeries) {
                 info.plot?.takeIf { it.isNotBlank() }?.let { plot ->
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = plot,
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.White.copy(alpha = 0.8f),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         maxLines = 4,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
