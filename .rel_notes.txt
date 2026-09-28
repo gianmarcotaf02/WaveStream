@@ -1,0 +1,10 @@
+**Novità della 1.1.6**
+
+- **"Continua a guardare" ora funziona davvero** (fix importante): con un profilo diverso da quello di default i progressi venivano salvati sul profilo sbagliato. Ora "Riprendi", il badge "Visto" e "Continua a guardare" si aggiornano correttamente su ogni profilo.
+- **Voto IMDb mancante risolto:** per i film/serie recenti (dove OMDb e Cinemeta non hanno ancora il dato) il voto viene ora letto dalla fonte IMDb aggiornata.
+- **Schermata "in pausa" stile Netflix:** mettendo in pausa appare in dissolvenza il logo del titolo (TMDB) con anno, durata, generi e minuti rimasti; per le serie anche stagione/episodio in corso e trama.
+- **Badge "Visto" sulle card** di film e serie completati.
+- **Dettaglio più veloce:** non si ricarica più da capo a ogni apertura (niente skeleton inutile, usa la cache locale).
+- **Serie TV:** l'ultimo episodio dell'ultima stagione non viene più marcato "visto" appena aperto.
+- **Player:** capsula dei controlli in basso a destra più compatta.
+- **Menu "Aggiungi a lista"** a tema (superficie scura leggibile).
