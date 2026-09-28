@@ -75,7 +75,12 @@ class CleanTitleEquivalenceTest {
         for (pattern in removePatterns) result = pattern.replace(result, " ")
         result = result.replace(Regex("""^\s*[-|:•]+\s*"""), "")
         result = result.replace(Regex("""\s*[-|:•]+\s*$"""), "")
-        result = result.replace(Regex("""\s+\d+\s*$"""), "")
+        // Regola corretta: si rimuove solo un ANNO accodato dal provider
+        // ("Inception 2010"), non un numero qualsiasi. La versione precedente
+        // ("\s+\d+\s*$") mangiava il numero dei seguiti ("Iron Man 2" → "Iron Man",
+        // che poi si univa al primo film) e i titoli che finiscono con un numero
+        // ("Blade Runner 2049" → "Blade Runner").
+        result = result.replace(Regex("""\s+(19\d{2}|20[0-2]\d)\s*$"""), "")
         result = result.replace(Regex("""#\w+"""), "")
         result = result.trim().replace(Regex("""\s+"""), " ")
         return result
