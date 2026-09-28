@@ -366,7 +366,7 @@ fun TvPlayerScreen(
         // metadati. Mostrato immediatamente quando il player è in pausa (e i
         // controlli sono visibili); si dissolve al resume.
         val showPauseInfo = pauseInfo != null && !isPlaying && !isLoading &&
-            controlsVisible && !isLiveChannel && !isMiniPlayer
+            controlsVisible && !isLiveChannel && !isMiniPlayer && nextEpisode == null
         AnimatedVisibility(
             visible = showPauseInfo,
             enter = fadeIn(tween(AppAnimations.FadeEnterMs))
@@ -523,7 +523,7 @@ fun TvPlayerScreen(
  * VOD soltanto. Mostra il logo del titolo TMDB (fallback al testo) e, sotto, i
  * metadati: anno • durata • generi • minuti rimasti. Per le serie aggiunge la
  * stagione/episodio in corso, il titolo dell'episodio e la trama.
- *Puramente informativo: non cattura il focus (i controlli restano usabili).
+ * Puramente informativo: non cattura il focus (i controlli restano usabili).
  */
 @Composable
 private fun PauseInfoOverlay(
