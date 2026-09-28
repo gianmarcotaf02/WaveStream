@@ -3714,7 +3714,15 @@ class HomeViewModel @Inject constructor(
      */
     private suspend fun enrichRowsWithWatchedBadges(rows: MutableList<CarouselRow>) {
         if (rows.isEmpty()) return
-        val keys = loadWatchedKeys(currentProfileId, watchProgressDao)
+        val hasMovies = rows.any { r -> r.items.any { it.contentType == "MOVIE" && !it.isWatched } }
+        val hasSeries = rows.any { r -> r.items.any { it.contentType == "SERIES" && !it.isWatched } }
+        if (!hasMovies && !hasSeries) return
+        val keys = loadWatchedKeys(
+            profileId = currentProfileId,
+            watchProgressDao = watchProgressDao,
+            needMovies = hasMovies,
+            needSeries = hasSeries
+        )
         if (keys.isEmpty) return
         for (i in rows.indices) {
             rows[i] = rows[i].copy(items = rows[i].items.applyWatchedKeys(keys))

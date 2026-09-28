@@ -22,13 +22,22 @@ data class WatchedKeys(
  * Carica gli insiemi di contenuti visti per il profilo. Le query sono dentro
  * [runCatching] così un eventuale errore non fa fallire il caricamento della home.
  */
-suspend fun loadWatchedKeys(profileId: Long, watchProgressDao: WatchProgressDao): WatchedKeys {
-    val movies = runCatching { watchProgressDao.getWatchedMovieIds(profileId) }
-        .getOrDefault(emptyList())
-        .toHashSet()
-    val series = runCatching { watchProgressDao.getFullyWatchedSeriesIds(profileId) }
-        .getOrDefault(emptyList())
-        .toHashSet()
+suspend fun loadWatchedKeys(
+    profileId: Long,
+    watchProgressDao: WatchProgressDao,
+    needMovies: Boolean = true,
+    needSeries: Boolean = true
+): WatchedKeys {
+    val movies = if (needMovies) {
+        runCatching { watchProgressDao.getWatchedMovieIds(profileId) }
+            .getOrDefault(emptyList())
+            .toHashSet()
+    } else emptySet()
+    val series = if (needSeries) {
+        runCatching { watchProgressDao.getFullyWatchedSeriesIds(profileId) }
+            .getOrDefault(emptyList())
+            .toHashSet()
+    } else emptySet()
     return WatchedKeys(movies, series)
 }
 

@@ -213,9 +213,16 @@ class CategoryActivity : ComponentActivity() {
     /** Applica il badge "visto" alle card della griglia (film completati / serie finite). */
     private suspend fun enrichWatched(items: List<CarouselItem>): List<CarouselItem> {
         if (items.isEmpty()) return items
-        if (items.none { it.contentType == "MOVIE" || it.contentType == "SERIES" }) return items
+        val hasMovies = items.any { it.contentType == "MOVIE" && !it.isWatched }
+        val hasSeries = items.any { it.contentType == "SERIES" && !it.isWatched }
+        if (!hasMovies && !hasSeries) return items
         val profileId = userPreferences.getCurrentProfileId() ?: 1L
-        val keys = loadWatchedKeys(profileId, watchProgressDao)
+        val keys = loadWatchedKeys(
+            profileId = profileId,
+            watchProgressDao = watchProgressDao,
+            needMovies = hasMovies,
+            needSeries = hasSeries
+        )
         return items.applyWatchedKeys(keys)
     }
     
