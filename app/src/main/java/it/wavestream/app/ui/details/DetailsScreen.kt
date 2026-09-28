@@ -3400,7 +3400,8 @@ private fun AddToListButton(
         var listName by remember { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { showCreateDialog = false },
-            containerColor = WaveStreamColors.BackgroundSecondary,
+            containerColor = GlassTokens.SurfaceFillStrong,
+            shape = GlassTokens.RadiusMedium,
             title = { Text("Crea nuova lista", color = WaveStreamColors.TextPrimary) },
             text = {
                 OutlinedTextField(
