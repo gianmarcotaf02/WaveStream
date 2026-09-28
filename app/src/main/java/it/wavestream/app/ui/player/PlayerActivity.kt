@@ -2261,15 +2261,16 @@ class PlayerActivity : ComponentActivity() {
         if (player.duration > 0) {
             val currentPos = player.currentPosition
             val totalDur = player.duration
-            val remainingMs = totalDur - currentPos
             // Completato:
-            //  - EPISODIO: > 95% OPPURE ultimi 6 minuti (finestra titoli di coda).
-            //    Serve alla logica serie (checkmark + proposta episodio successivo).
-            //  - FILM/altro: SOLO quando la riproduzione ha davvero raggiunto la fine
-            //    (ultimi [COMPLETION_TAIL_MS]). Prima anche 4-5 minuti di film residui
-            //    contavano come "visto": si perdeva la posizione e il "Riprendi".
+            //  - EPISODIO: quando sono iniziati i titoli di coda (marker IntroDB/utente o
+            //    rilevamento a video) OPPURE a fine reale. NON più "≤ 6 minuti rimanenti":
+            //    un episodio interrotto a 4-5 minuti dalla fine veniva marcato visto, il
+            //    "Riprendi SxEy" spariva e la serie usciva da "Continua a guardare".
+            //  - FILM/altro: SOLO a fine reale (ultimi [COMPLETION_TAIL_MS]).
             val isCompleted = if (contentType == ContentType.EPISODE) {
-                currentPos > (totalDur * 0.95) || remainingMs <= 6 * 60 * 1000
+                val creditsReached = creditsDetected ||
+                    (creditsMarkerStartMs?.let { currentPos >= it } == true)
+                creditsReached || currentPos >= totalDur - COMPLETION_TAIL_MS
             } else {
                 currentPos >= totalDur - COMPLETION_TAIL_MS
             }
