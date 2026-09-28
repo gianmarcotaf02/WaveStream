@@ -2009,7 +2009,7 @@ private fun ModernSleepTimerButton(
 
     Row(
         modifier = Modifier
-            .height(36.dp)
+            .height(32.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -2027,7 +2027,7 @@ private fun ModernSleepTimerButton(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -2266,7 +2266,7 @@ private fun ModernPillButton(
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(
             text = text,
@@ -2306,7 +2306,7 @@ private fun ModernAudioButton(
                     indication = null,
                     onClick = { showMenu = true }
                 )
-                .padding(horizontal = 14.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -2384,7 +2384,7 @@ private fun ModernPreviousButton(onClick: () -> Unit) {
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .padding(horizontal = 10.dp, vertical = 5.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -2436,7 +2436,7 @@ private fun ModernNextButton(onClick: () -> Unit) {
                 indication = null,
                 onClick = onClick
             )
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .padding(horizontal = 10.dp, vertical = 5.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
