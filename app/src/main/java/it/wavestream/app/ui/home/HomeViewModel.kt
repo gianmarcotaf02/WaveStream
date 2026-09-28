@@ -19,6 +19,8 @@ import android.util.Log
 import it.wavestream.app.data.tmdb.TMDBService
 import it.wavestream.app.data.repository.ImdbRatingsRepository
 import it.wavestream.app.data.api.XtreamApiService
+import it.wavestream.app.ui.components.applyWatchedKeys
+import it.wavestream.app.ui.components.loadWatchedKeys
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -3712,12 +3714,10 @@ class HomeViewModel @Inject constructor(
      */
     private suspend fun enrichRowsWithWatchedBadges(rows: MutableList<CarouselRow>) {
         if (rows.isEmpty()) return
-        val keys = it.wavestream.app.ui.components.loadWatchedKeys(currentProfileId, watchProgressDao)
+        val keys = loadWatchedKeys(currentProfileId, watchProgressDao)
         if (keys.isEmpty) return
         for (i in rows.indices) {
-            rows[i] = rows[i].copy(
-                items = it.wavestream.app.ui.components.applyWatchedKeys(rows[i].items, keys)
-            )
+            rows[i] = rows[i].copy(items = rows[i].items.applyWatchedKeys(keys))
         }
     }
 
