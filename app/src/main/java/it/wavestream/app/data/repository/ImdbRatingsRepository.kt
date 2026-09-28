@@ -156,11 +156,26 @@ class ImdbRatingsRepository @Inject constructor(
             } else {
                 Log.w(TAG, "OMDb error: ${response.body()?.Error}")
                 
-                // OMDb failed entirely — try Cinemeta as a standalone fallback
-                fetchCinemetaRating(imdbId)?.let { cinemetaRating ->
-                    Log.d(TAG, "✓ Found via Cinemeta fallback (OMDb unavailable)")
-                    ratingsCache[imdbId] = CachedRating(cinemetaRating, System.currentTimeMillis())
-                    return@withContext cinemetaRating
+                // OMDb failed entirely — prova Cinemeta come fallback e, se anche
+                // questo non ha il voto, la GraphQL di IMDb (titoli recenti).
+                val cinemeta = fetchCinemetaRating(imdbId)
+                val topped = topUpImdbRating(
+                    cinemeta ?: RatingInfo(
+                        imdbRating = null,
+                        imdbVotes = null,
+                        imdbId = imdbId,
+                        rottenTomatoesScore = null,
+                        audienceScore = null,
+                        metacriticScore = null,
+                        rated = null,
+                        awards = null,
+                        boxOffice = null
+                    ),
+                    imdbId
+                )
+                if (topped.hasRatings) {
+                    ratingsCache[imdbId] = CachedRating(topped, System.currentTimeMillis())
+                    return@withContext topped
                 }
                 return@withContext null
             }
