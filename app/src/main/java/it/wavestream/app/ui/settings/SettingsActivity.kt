@@ -1517,12 +1517,24 @@ private fun AppRestartDialog(onDismiss: () -> Unit) {
             Button(
                 onClick = {
                     onDismiss()
-                    // Restart the app
-                    val packageManager = context.packageManager
-                    val intent = packageManager.getLaunchIntentForPackage(context.packageName)
-                    intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    intent?.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
+                    // Riavvio dell'app.
+                    // ATTENZIONE: `getLaunchIntentForPackage` cerca CATEGORY_LAUNCHER e in
+                    // una TV app (dichiarata solo come LEANBACK_LAUNCHER) torna **null**;
+                    // `startActivity(null)` faceva crashare l'app con NullPointerException
+                    // sul main thread (Instrumentation.execStartActivity). Il fallback
+                    // esplicito verso ProfileSelectionActivity è il percorso normale.
+                    val launchIntent = context.packageManager
+                        .getLaunchIntentForPackage(context.packageName)
+                        ?: android.content.Intent(
+                            context,
+                            it.wavestream.app.ui.profile.ProfileSelectionActivity::class.java
+                        )
+                    launchIntent.addFlags(
+                        android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+                    )
+                    runCatching { context.startActivity(launchIntent) }
+                        .onFailure { android.util.Log.e("Settings", "Riavvio app non riuscito", it) }
                     (context as? android.app.Activity)?.finish()
                     android.os.Process.killProcess(android.os.Process.myPid())
                 },
@@ -2488,11 +2500,17 @@ private fun StorageSettings(
                                         context.deleteDatabase("wavestream_database")
                                         context.getSharedPreferences("wavestream_sync_prefs", 0).edit().clear().apply()
                                         context.getDataDir().resolve("datastore").deleteRecursively()
-                                        val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-                                        if (intent != null) {
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                                            context.startActivity(intent)
-                                        }
+                                        // Come in AppRestartDialog: su una TV app il launch
+                                        // intent del launcher è null, quindi senza fallback
+                                        // esplicito l'app si chiudeva senza riaprirsi.
+                                        val intent = context.packageManager
+                                            .getLaunchIntentForPackage(context.packageName)
+                                            ?: android.content.Intent(
+                                                context,
+                                                it.wavestream.app.ui.profile.ProfileSelectionActivity::class.java
+                                            )
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                        runCatching { context.startActivity(intent) }
                                         Runtime.getRuntime().exit(0)
                                     }
                                 },
