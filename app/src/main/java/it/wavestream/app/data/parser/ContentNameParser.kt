@@ -182,7 +182,16 @@ class ContentNameParser @Inject constructor() {
     private val cleanYear = Regex("""\s*\(\d{4}\)\s*""")
     private val cleanLeadingSeparator = Regex("""^\s*[-|:•]+\s*""")
     private val cleanTrailingSeparator = Regex("""\s*[-|:•]+\s*$""")
-    private val cleanTrailingDigits = Regex("""\s+\d+\s*$""")
+    /**
+     * Anno di uscita accodato dal provider **senza** parentesi ("Inception 2010",
+     * "The Matrix 1999 FHD"): va rimosso dal titolo e letto nel campo `year`.
+     *
+     * Il range è volutamente chiuso al futuro prossimo (19xx / 2000-2029):
+     * prima si rimuoveva QUALSIASI numero finale e questo cancellava il numero dei
+     * seguiti ("Iron Man 2" → "Iron Man", che poi si univa al primo film) e i
+     * titoli che finiscono con un numero ("Blade Runner 2049" → "Blade Runner").
+     */
+    private val trailingBareYear = Regex("""\s+(19\d{2}|20[0-2]\d)\s*$""")
     private val cleanHashtag = Regex("""#\w+""")
     private val cleanWhitespace = Regex("""\s+""")
     private val parenthesizedYearOnly = Regex("""\(\d{4}\)""")
@@ -333,6 +342,17 @@ class ContentNameParser @Inject constructor() {
      */
     fun extractReleaseYear(name: String): Int? = extractYear(name)
 
+    /**
+     * Anno accodato dal provider senza parentesi ("Inception 2010 4K" → 2010).
+     *
+     * I tag vengono rimossi prima del controllo perché il provider mette
+     * abitualmente la qualità DOPO l'anno; [cleanTitle] rimuove quel numero, quindi
+     * va letto **prima** di ripulire il nome, altrimenti l'anno andrebbe perso.
+     */
+    fun extractBareYear(rawName: String): Int? =
+        trailingBareYear.find(tagStripRegex.replace(rawName, " ").trim())
+            ?.groupValues?.get(1)?.toIntOrNull()
+
     /** Rimuove dal titolo il marcatore dell'anno tra parentesi (se presente). */
     private fun removeYearMarker(name: String): String =
         parenthesizedYearPattern.replace(name, " ")
@@ -392,8 +412,9 @@ class ContentNameParser @Inject constructor() {
         result = result.replace(cleanLeadingSeparator, "")
         result = result.replace(cleanTrailingSeparator, "")
         
-        // Remove trailing numbers that look like IDs (e.g., "0 Ql", "123")
-        result = result.replace(cleanTrailingDigits, "")
+        // Rimuove l'anno accodato senza parentesi ("Inception 2010" → "Inception"),
+        // ma non i numeri dei seguiti né i titoli che finiscono con un numero.
+        result = result.replace(trailingBareYear, "")
 
         // Remove provider duplicate markers, e.g. "Iron Man 2 (4)" -> "Iron Man 2".
         // Senza questo il titolo resta sporco (numero tra parentesi), la ricerca TMDB
