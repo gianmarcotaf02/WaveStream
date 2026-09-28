@@ -507,6 +507,44 @@ class DetailsActivity : ComponentActivity() {
         )
     }
     
+    /**
+     * Aggiorna SOLO lo stato di visione (resume/progressi) a partire dal DB,
+     * senza ricaricare la scheda: niente skeleton, niente rete, niente rail.
+     *
+     * Usato al ritorno dal player e dopo un reset di progresso, così il dettaglio
+     * si aggiorna all'istante senza il refresh completo che rifaceva TMDB/OMDB e
+     * faceva riapparire la skeleton su contenuti caricati pochi secondi prima.
+     */
+    private suspend fun refreshWatchProgress(current: DetailsState): DetailsState = when (contentType) {
+        ContentType.MOVIE -> {
+            val progress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
+                ?.takeIf { it.isResumable }
+            current.copy(
+                resumeMinutes = progress?.let {
+                    val remaining = (it.duration - it.position) / 60000
+                    remaining.toInt().coerceAtLeast(1)
+                },
+                resumeProgress = progress?.let {
+                    if (it.duration > 0) (it.position.toFloat() / it.duration.toFloat()).coerceIn(0f, 1f)
+                    else null
+                }
+            )
+        }
+        ContentType.SERIES -> {
+            val ws = computeSeriesWatchState(contentId)
+            current.copy(
+                episodeProgress = ws.episodeProgress,
+                resumeMinutes = ws.resumeMinutes,
+                resumeProgress = ws.resumeProgress,
+                resumeEpisodeSeason = ws.resumeEpisodeSeason,
+                resumeEpisodeNumber = ws.resumeEpisodeNumber,
+                nextEpisodeInfo = ws.nextEpisodeInfo,
+                nextEpisodeId = ws.nextEpisodeId
+            )
+        }
+        else -> current
+    }
+
     private fun loadContent(onStateUpdate: (DetailsState) -> Unit) {
         lifecycleScope.launch {
             profileId = userPreferences.getCurrentProfileId() ?: 1L
