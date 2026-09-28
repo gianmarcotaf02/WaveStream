@@ -231,6 +231,10 @@ class LoadingActivity : ComponentActivity() {
                         .onFailure { Log.e("LoadingActivity", "Duplicate-marker cleanup failed", it) }
                     runCatching { movieUnificationService.runFirstTimeIfNeeded() }
                         .onFailure { Log.e("LoadingActivity", "Movie unification failed", it) }
+                    // Normalizzazione una-tantum dei nomi mostrati (titolo pulito senza
+                    // FHD/HD/4K/anno) + riunificazione dei gruppi cambiati dall'anno estratto.
+                    runCatching { movieUnificationService.runNameNormalizationIfNeeded() }
+                        .onFailure { Log.e("LoadingActivity", "Movie name normalization failed", it) }
                     // Dopo l'arricchimento TMDB molti film hanno ora un tmdbId: unifica le
                     // eventuali varianti di titolo che puntano allo stesso contenuto.
                     runCatching { movieUnificationService.unifyByTmdbIdAllPlaylists() }

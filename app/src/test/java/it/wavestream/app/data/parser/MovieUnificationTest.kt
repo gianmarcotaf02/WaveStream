@@ -58,6 +58,15 @@ class MovieUnificationTest {
     }
 
     @Test
+    fun `il nome mostrato perde qualita lingua formato e anno`() {
+        assertEquals("Iron Man 2", parser.cleanTitle("Iron Man 2 (2010) FHD ITA"))
+        assertEquals("Matrix", parser.cleanTitle("Matrix (1999) 4K HDR ITA"))
+        assertEquals("The Matrix", parser.cleanTitle("The Matrix 1999 1080p"))
+        assertEquals("Matrix", parser.cleanTitle("Matrix 3D"))
+        assertEquals("Matrix", parser.cleanTitle("Matrix FHD"))
+    }
+
+    @Test
     fun `i remake con anno diverso restano schede separate`() {
         assertNotEquals(keyOf("Matrix", 1999), keyOf("Matrix", 2021))
         val groups = groupsOf(listOf("Matrix" to 1999, "Matrix" to 2021))
