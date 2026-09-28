@@ -114,6 +114,13 @@ class UserPreferences @Inject constructor(
          */
         private val MOVIES_UNIFIED_V2 = booleanPreferencesKey("movies_unified_v2")
 
+        /**
+         * Normalizzazione dei nomi MOSTRATI dei film già in libreria: prima erano i
+         * nomi grezzi del provider ("Iron Man 2 (2010) FHD ITA"), ora il solo titolo
+         * pulito (l'anno vive nel campo `year`, già mostrato sotto il titolo).
+         */
+        private val MOVIE_NAMES_NORMALIZED_V1 = booleanPreferencesKey("movie_names_normalized_v1")
+
         // Pulizia dei marcatori di doppione del provider nei titoli ("Iron Man 2 (4)")
         // — eseguita una sola volta
         private val MOVIE_TITLES_CLEANED_V1 = booleanPreferencesKey("movie_titles_cleaned_v1")
@@ -592,6 +599,14 @@ class UserPreferences @Inject constructor(
 
     suspend fun setMoviesUnifiedV2(done: Boolean) {
         dataStore.edit { it[MOVIES_UNIFIED_V2] = done }
+    }
+
+    suspend fun isMovieNamesNormalizedV1(): Boolean {
+        return dataStore.data.first()[MOVIE_NAMES_NORMALIZED_V1] ?: false
+    }
+
+    suspend fun setMovieNamesNormalizedV1(done: Boolean) {
+        dataStore.edit { it[MOVIE_NAMES_NORMALIZED_V1] = done }
     }
 
     // Pulizia dei marcatori di doppione nei titoli (una-tantum)

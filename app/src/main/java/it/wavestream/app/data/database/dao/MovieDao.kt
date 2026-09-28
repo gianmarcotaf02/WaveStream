@@ -252,6 +252,29 @@ interface MovieDao {
     @Query("SELECT id, cleanName, name, year FROM movies WHERE playlistId = :playlistId")
     suspend fun getGroupCandidatesByPlaylist(playlistId: Long): List<MovieGroupCandidate>
 
+    /** Come [getGroupCandidatesByPlaylist] ma sull'intera tabella (normalizzazione nomi). */
+    @Query("SELECT id, cleanName, name, year FROM movies")
+    suspend fun getGroupCandidatesAll(): List<MovieGroupCandidate>
+
+    /**
+     * Aggiorna solo i campi del titolo di un film.
+     *
+     * Serve alla normalizzazione una-tantum dei nomi già in libreria: caricare ~96k
+     * entità `Movie` complete (15 indici, ~54 colonne) solo per riscrivere il nome
+     * costava decine di MB e rischiava l'OOM sulle TV stick.
+     */
+    @Query(
+        "UPDATE movies SET name = :name, cleanName = :cleanName, groupKey = :groupKey, year = :year " +
+            "WHERE id = :id"
+    )
+    suspend fun updateTitleFields(
+        id: Long,
+        name: String,
+        cleanName: String?,
+        groupKey: String?,
+        year: Int?
+    )
+
     @Query("SELECT * FROM movies WHERE id IN (:ids)")
     suspend fun getByIds(ids: List<Long>): List<Movie>
 

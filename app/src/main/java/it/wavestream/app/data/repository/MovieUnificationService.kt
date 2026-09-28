@@ -897,6 +897,62 @@ class MovieUnificationService @Inject constructor(
     }
 
     /**
+     * Normalizzazione una-tantum dei nomi MOSTRATI dei film già in libreria.
+     *
+     * Fino alla prima unificazione il nome mostrato era quello grezzo del provider
+     * ("Iron Man 2 (2010) FHD ITA"): qui diventa il solo titolo pulito, come accade
+     * per una libreria importata da zero ([buildCanonicalMovie]). L'anno viene spostato
+     * nel campo `year` (recuperato dal vecchio nome se mancava, altrimenti l'informazione
+     * andrebbe persa) e l'UI lo mostra già sotto il titolo.
+     *
+     * Due transazioni distinte di proposito: la prima scrive a blocchi senza tenere in
+     * memoria una copia per riga (su ~96k film sono decine di MB, rischio OOM sulle TV
+     * stick), la seconda rilegge dal DB e riunifica eventuali gruppi cambiati dall'anno
+     * appena estratto.
+     */
+    suspend fun runNameNormalizationIfNeeded() {
+        if (userPreferences.isMovieNamesNormalizedV1()) return
+        withContext(Dispatchers.IO) {
+            try {
+                normalizeDisplayNames()
+                unifyAllPlaylists()
+                contentCache.clearHomeSessionData()
+                userPreferences.setMovieNamesNormalizedV1(true)
+                Log.i(TAG, "Movie name normalization completed")
+            } catch (e: Exception) {
+                Log.e(TAG, "Movie name normalization failed", e)
+            }
+        }
+    }
+
+    private suspend fun normalizeDisplayNames() = appDatabase.withTransaction {
+        val startedAt = System.currentTimeMillis()
+        // Proiezione: servono solo id/nome/cleanName/anno (niente entità complete).
+        val rows = movieDao.getGroupCandidatesAll()
+        var changed = 0
+        var processed = 0
+        for (r in rows) {
+            val cleanName = titleFor(r.name)
+            // L'anno va estratto PRIMA di ripulire il nome: dopo non c'è più.
+            val year = r.year ?: contentNameParser.extractReleaseYear(r.name)
+            if (r.name != cleanName || r.cleanName != cleanName || r.year != year) {
+                movieDao.updateTitleFields(
+                    id = r.id,
+                    name = cleanName,
+                    cleanName = cleanName,
+                    groupKey = ContentKey.groupKey(cleanName, year),
+                    year = year
+                )
+                changed++
+            }
+            if (++processed % 10000 == 0) {
+                Log.i(TAG, "nomi: $processed/${rows.size} ($changed aggiornati) in ${System.currentTimeMillis() - startedAt}ms")
+            }
+        }
+        Log.i(TAG, "nomi: FINE ${rows.size} film, $changed nomi normalizzati in ${System.currentTimeMillis() - startedAt}ms")
+    }
+
+    /**
      * Titolo da usare per le chiavi di gruppo (normalizzazione, fusione, ricerca
      * del film canonico), **sempre** ripulito dal parser.
      *
