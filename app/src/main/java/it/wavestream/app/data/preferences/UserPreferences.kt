@@ -283,6 +283,18 @@ class UserPreferences @Inject constructor(
     // Current Profile
     suspend fun setCurrentProfileId(profileId: Long) {
         dataStore.edit { it[CURRENT_PROFILE_ID] = profileId }
+        // Mirror sincrono in SharedPreferences: il player lo legge subito (senza
+        // attendere DataStore) per salvare i progressi sul profilo corretto.
+        syncPrefs.edit().putLong(SYNC_CURRENT_PROFILE_ID_KEY, profileId).apply()
+    }
+
+    /**
+     * Profilo corrente letto in modo SINCRONO da SharedPreferences.
+     * Da usare laddove non è possibile sospendere (es. PlayerActivity all'avvio).
+     */
+    fun getCurrentProfileIdSync(): Long? {
+        val id = syncPrefs.getLong(SYNC_CURRENT_PROFILE_ID_KEY, -1L)
+        return id.takeIf { it > 0L }
     }
     
     suspend fun getCurrentProfileId(): Long? {
