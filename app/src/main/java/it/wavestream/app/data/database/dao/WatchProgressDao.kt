@@ -47,6 +47,30 @@ interface WatchProgressDao {
      */
     @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND contentType = 'EPISODE' AND seriesId = :seriesId")
     suspend fun getEpisodeProgressForSeries(profileId: Long, seriesId: Long): List<WatchProgress>
+
+    /**
+     * Id dei FILM già visti: completati (flag) oppure a ≤ 6 minuti dalla fine
+     * (soglia titoli di coda, coerente con il player). Usato per il badge "visto"
+     * sulle card.
+     */
+    @Query(
+        "SELECT contentId FROM watch_progress WHERE profileId = :profileId AND contentType = 'MOVIE' " +
+        "AND duration > 0 AND (isCompleted = 1 OR duration - position <= 360000)"
+    )
+    suspend fun getWatchedMovieIds(profileId: Long): List<Long>
+
+    /**
+     * Id delle SERIE finite: quelle in cui TUTTI gli episodi risultano completati
+     * (flag o ≤ 6 minuti dalla fine). Usato per il badge "visto" sulle card serie.
+     */
+    @Query(
+        "SELECT e.seriesId FROM episodes e " +
+        "LEFT JOIN watch_progress wp ON wp.contentId = e.id AND wp.contentType = 'EPISODE' AND wp.profileId = :profileId " +
+        "GROUP BY e.seriesId " +
+        "HAVING COUNT(e.id) > 0 AND " +
+        "SUM(CASE WHEN wp.isCompleted = 1 OR (wp.duration > 0 AND wp.duration - wp.position <= 360000) THEN 1 ELSE 0 END) = COUNT(e.id)"
+    )
+    suspend fun getFullyWatchedSeriesIds(profileId: Long): List<Long>
     
     @Query("SELECT * FROM watch_progress WHERE profileId = :profileId AND seriesId = :seriesId ORDER BY lastWatchedAt DESC LIMIT 1")
     suspend fun getSeriesProgress(profileId: Long, seriesId: Long): WatchProgress?
