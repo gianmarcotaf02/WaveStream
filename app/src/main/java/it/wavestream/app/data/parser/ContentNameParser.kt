@@ -122,7 +122,7 @@ class ContentNameParser @Inject constructor() {
      * separata da "Matrix": un doppione che non veniva mai unificato (e su cui la
      * ricerca TMDB falliva, quindi niente copertina/trama).
      */
-    private val formatTags = listOf("3d")
+    private val formatTags = listOf("3d", "sbs", "hsbs", "half-sbs", "half sbs", "hou")
     
     // Common suffixes to remove
     private val removePatterns = listOf(
