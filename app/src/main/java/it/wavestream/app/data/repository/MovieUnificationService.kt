@@ -116,9 +116,7 @@ class MovieUnificationService @Inject constructor(
         // normalizeTitle girava due volte su ogni riga esistente).
         val existingNormTitle = HashMap<Long, String>(existing.size * 2)
         existing.forEach { m ->
-            existingNormTitle[m.id] = ContentKey.normalizeTitle(
-                m.cleanName?.takeIf { it.isNotBlank() } ?: titleFor(m.name)
-            )
+            existingNormTitle[m.id] = ContentKey.normalizeTitle(groupTitleOf(m.cleanName, m.name))
         }
         val existingByKey = existing.groupBy { ContentKey.groupKeyNormalized(existingNormTitle.getValue(it.id), it.year) }
         Log.i(TAG, "persist: existingByKey +${System.currentTimeMillis() - startedAt}ms")
@@ -330,9 +328,7 @@ class MovieUnificationService @Inject constructor(
                         for (c in movieDao.getGroupCandidatesByPlaylist(playlistId)) {
                             // Stessa formula usata da `buildCanonicalMovie`/`persistGroupedMovies`.
                             val key = ContentKey.groupKeyNormalized(
-                                ContentKey.normalizeTitle(
-                                    c.cleanName?.takeIf { it.isNotBlank() } ?: titleFor(c.name)
-                                ),
+                                ContentKey.normalizeTitle(groupTitleOf(c.cleanName, c.name)),
                                 c.year
                             )
                             val prev = map[key]
@@ -485,7 +481,7 @@ class MovieUnificationService @Inject constructor(
      */
     private suspend fun mergeByTitleAndYear(movies: List<Movie>): MutableSet<Long> {
         val removed = HashSet<Long>()
-        for (group in ContentKey.groupByTitleAndYear(movies, { it.cleanName ?: it.name }, { it.year })) {
+        for (group in ContentKey.groupByTitleAndYear(movies, { groupTitleOf(it.cleanName, it.name) }, { it.year })) {
             if (group.size > 1) {
                 val canonical = group.minByOrNull { it.id } ?: continue
                 val duplicates = group.filter { it.id != canonical.id }
@@ -524,7 +520,7 @@ class MovieUnificationService @Inject constructor(
      * multi-categoria, poi unifica i duplicati. Idempotente e guardata da flag.
      */
     suspend fun runFirstTimeIfNeeded() {
-        if (userPreferences.isMoviesUnifiedV1()) return
+        if (userPreferences.isMoviesUnifiedV2()) return
         withContext(Dispatchers.IO) {
             try {
                 appDatabase.withTransaction {
@@ -535,19 +531,33 @@ class MovieUnificationService @Inject constructor(
                 // ancora una sorgente o il titolo pulito. Se l'app viene chiusa a metà,
                 // al riavvio riparte solo da quelli mancanti.
                 val counts = streamProviderDao.getAllProviderCounts().associate { it.movieId to it.count }
-                val needsWork = all.filter { it.cleanName.isNullOrBlank() || (counts[it.id] ?: 0) == 0 }
+                // Serve lavoro anche sui film il cui `cleanName` non è (più) allineato al
+                // titolo ripulito: es. "Matrix 3D" → "Matrix", o righe legacy il cui
+                // titolo conserva ancora anno/qualità. Senza questo il loro `groupKey`
+                // restava diverso da quello dei doppioni e non si univano.
+                val needsWork = all.filter {
+                    val current = it.cleanName
+                    current.isNullOrBlank() ||
+                        (counts[it.id] ?: 0) == 0 ||
+                        current != titleFor(current)
+                }
                 Log.i(TAG, "First-time movie unification: ${needsWork.size} movies need providers/cleanName")
-                backfillProvidersAndKeys(needsWork, counts)
+                // Le righe aggiornate tornano indietro: la fusione deve lavorare sui dati
+                // NUOVI, non sulla lista letta prima del backfill (con `cleanName` ancora
+                // nullo raggruppava per nome grezzo → nessun doppione veniva unito).
+                val updatedRows = backfillProvidersAndKeys(needsWork, counts)
 
                 // Unificazione per playlist (dai film già in memoria: nessuna
                 // scansione aggiuntiva della tabella)
-                all.groupBy { it.playlistId }.forEach { (playlistId, movies) ->
+                val coherent = if (updatedRows.isEmpty()) all
+                    else all.map { m -> updatedRows[m.id] ?: m }
+                coherent.groupBy { it.playlistId }.forEach { (playlistId, movies) ->
                     unifyPlaylistLocked(playlistId, movies)
                 }
                 }
 
                 contentCache.clearHomeSessionData()
-                userPreferences.setMoviesUnifiedV1(true)
+                userPreferences.setMoviesUnifiedV2(true)
                 Log.i(TAG, "First-time movie unification completed")
             } catch (e: Exception) {
                 Log.e(TAG, "First-time movie unification failed", e)
@@ -814,9 +824,12 @@ class MovieUnificationService @Inject constructor(
     private suspend fun backfillProvidersAndKeys(
         movies: List<Movie>,
         knownCounts: Map<Long, Int>
-    ) {
+    ): Map<Long, Movie> {
         val providers = ArrayList<StreamProvider>(FLUSH_BATCH)
         val updated = ArrayList<Movie>(FLUSH_BATCH)
+        /** Righe effettivamente modificate, per id: la fusione deve usarle al posto
+         *  di quelle lette prima del backfill (vedi `runFirstTimeIfNeeded`). */
+        val updatedById = HashMap<Long, Movie>(movies.size)
         val startedAt = System.currentTimeMillis()
         var processed = 0
 
@@ -861,11 +874,15 @@ class MovieUnificationService @Inject constructor(
                 )
             }
 
-            val cleanName = m.cleanName?.takeIf { it.isNotBlank() } ?: titleFor(m.name)
+            // Il titolo viene SEMPRE ripassato dal cleaner: `cleanName` può essere
+            // nullo (righe legacy) o non allineato ("Matrix 3D").
+            val cleanName = groupTitleOf(m.cleanName, m.name)
             val groupKey = ContentKey.groupKey(cleanName, m.year)
             val count = maxOf(existingCount, 1)
             if (m.cleanName != cleanName || m.groupKey != groupKey || m.streamCount != count) {
-                updated += m.copy(cleanName = cleanName, groupKey = groupKey, streamCount = count)
+                val fixed = m.copy(cleanName = cleanName, groupKey = groupKey, streamCount = count)
+                updated += fixed
+                updatedById[m.id] = fixed
             }
 
             flush()
@@ -876,7 +893,20 @@ class MovieUnificationService @Inject constructor(
         if (providers.isNotEmpty()) streamProviderDao.insertAll(providers)
         if (updated.isNotEmpty()) movieDao.updateList(updated)
         Log.i(TAG, "backfill: FINE ${movies.size} film in ${System.currentTimeMillis() - startedAt}ms")
+        return updatedById
     }
+
+    /**
+     * Titolo da usare per le chiavi di gruppo (normalizzazione, fusione, ricerca
+     * del film canonico), **sempre** ripulito dal parser.
+     *
+     * Usare `cleanName` o `name` così com'è lasciava anno/qualità nel titolo
+     * ("Matrix (1999)" → chiave `matrix 1999` invece di `matrix`): lo stesso film
+     * finiva in due gruppi diversi, quindi i doppioni non si univano e a ogni
+     * refresh nascevano righe nuove.
+     */
+    private fun groupTitleOf(cleanName: String?, name: String): String =
+        titleFor(cleanName?.takeIf { it.isNotBlank() } ?: name)
 
     /** Garantisce che un movie abbia una sorgente, cleanName/groupKey/streamCount
      *  e le appartenenze di categoria coerenti. */
