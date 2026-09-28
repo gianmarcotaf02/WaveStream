@@ -3312,16 +3312,26 @@ private fun AddToListButton(
             }
         }
         
+        // Menu "liquid glass" coerente con il design system (fill semitrasparente
+        // + bordo gradiente): il container Material resta trasparente e senza
+        // ombra/elevazione, la superficie reale è la GlassSurface interna.
         DropdownMenu(
             expanded = showDropdown,
             onDismissRequest = { showDropdown = false },
-            shape = RoundedCornerShape(12.dp),
-            containerColor = WaveStreamColors.BackgroundSecondary,
+            shape = GlassTokens.RadiusMedium,
+            containerColor = Color.Transparent,
             tonalElevation = 0.dp,
-            shadowElevation = 8.dp,
-            border = BorderStroke(1.dp, WaveStreamColors.SurfaceBorderStrong),
-            modifier = Modifier.width(280.dp)
+            shadowElevation = 0.dp,
+            border = null,
+            modifier = Modifier.width(300.dp)
         ) {
+            GlassSurface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = GlassTokens.RadiusMedium,
+                fill = GlassTokens.SurfaceFillStrong,
+                stroke = GlassTokens.StrokeGradient
+            ) {
+            Column {
             Text(
                 text = "Aggiungi a lista",
                 style = MaterialTheme.typography.titleSmall,
@@ -3330,7 +3340,7 @@ private fun AddToListButton(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
             
-            HorizontalDivider(color = WaveStreamColors.BackgroundTertiary, thickness = 1.dp)
+            HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
             
             if (customLists.isEmpty()) {
                 Text(
@@ -3370,7 +3380,7 @@ private fun AddToListButton(
                 }
             }
             
-            HorizontalDivider(color = WaveStreamColors.BackgroundTertiary, thickness = 1.dp)
+            HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
             
             DropdownMenuItem(
                 text = {
@@ -3381,6 +3391,8 @@ private fun AddToListButton(
                 },
                 onClick = { showDropdown = false; showCreateDialog = true }
             )
+            }
+            }
         }
     }
     
