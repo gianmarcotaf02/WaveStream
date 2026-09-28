@@ -426,11 +426,18 @@ class MovieUnificationService @Inject constructor(
     /** Corpo di [unifyPlaylist] su una lista di film già in memoria: evita una
      *  scansione completa della playlist quando i film sono già stati caricati. */
     private suspend fun unifyPlaylistLocked(playlistId: Long, movies: List<Movie>) {
-        mergeByTitleAndYear(movies)
-        unifyByTmdbIdLocked(movies)
+        // I merge CANCELLANO righe da `movies` (mergeDuplicatesInto → movieDao.delete):
+        // gli id rimossi vanno esclusi dal passo di integrità, altrimenti si prova a
+        // creare una sorgente per un film appena eliminato e l'insert viola la FK
+        // `movieId → movies.id` con "FOREIGN KEY constraint failed", facendo fallire
+        // l'INTERA transazione. Con una libreria preesistente (cleanName nullo su
+        // tutti i film) significa che l'unificazione non si completava mai.
+        val removed = mergeByTitleAndYear(movies)
+        removed += unifyByTmdbIdLocked(movies, removed)
         // Integrità: solo per i film senza sorgente o senza cleanName (economico).
         val counts = streamProviderDao.getProviderCountsByPlaylist(playlistId).associate { it.movieId to it.count }
         movies.forEach { m ->
+            if (m.id in removed) return@forEach
             if (m.cleanName.isNullOrBlank() || (counts[m.id] ?: 0) == 0) ensureMovieIntegrity(m)
         }
     }
@@ -443,24 +450,50 @@ class MovieUnificationService @Inject constructor(
         }
     }
 
-    private suspend fun unifyByTmdbIdLocked(movies: List<Movie>) {
+    /**
+     * Unisce i film che condividono lo stesso `tmdbId`.
+     *
+     * @param skip id già rimossi da una fusione precedente sulla stessa lista
+     *        (evita di lavorare su righe che non esistono più).
+     * @return gli id dei film **eliminati** dalla fusione: la lista [movies]
+     *         passata dal chiamante resta stantia dopo un merge e non va più usata
+     *         per l'ultimo passo di integrità (vedi [unifyPlaylistLocked]).
+     */
+    private suspend fun unifyByTmdbIdLocked(
+        movies: List<Movie>,
+        skip: Set<Long> = emptySet()
+    ): MutableSet<Long> {
+        val removed = HashSet<Long>()
         // Filtro prima del groupBy: i film senza tmdbId (la maggioranza) non
         // entrano nelle mappe temporanee.
-        for ((_, group) in movies.filter { it.tmdbId != null }.groupBy { it.tmdbId!! }) {
+        for ((_, group) in movies.filter { it.tmdbId != null && it.id !in skip }.groupBy { it.tmdbId!! }) {
             if (group.size > 1) {
                 val canonical = group.minByOrNull { it.id } ?: continue
-                mergeDuplicatesInto(canonical.id, group.filter { it.id != canonical.id })
+                val duplicates = group.filter { it.id != canonical.id }
+                mergeDuplicatesInto(canonical.id, duplicates)
+                duplicates.forEach { removed.add(it.id) }
             }
         }
+        return removed
     }
 
-    private suspend fun mergeByTitleAndYear(movies: List<Movie>) {
+    /**
+     * Unisce i doppioni per titolo+anno.
+     *
+     * @return gli id dei film eliminati (date le implicazioni descritte in
+     *         [unifyPlaylistLocked]).
+     */
+    private suspend fun mergeByTitleAndYear(movies: List<Movie>): MutableSet<Long> {
+        val removed = HashSet<Long>()
         for (group in ContentKey.groupByTitleAndYear(movies, { it.cleanName ?: it.name }, { it.year })) {
             if (group.size > 1) {
                 val canonical = group.minByOrNull { it.id } ?: continue
-                mergeDuplicatesInto(canonical.id, group.filter { it.id != canonical.id })
+                val duplicates = group.filter { it.id != canonical.id }
+                mergeDuplicatesInto(canonical.id, duplicates)
+                duplicates.forEach { removed.add(it.id) }
             }
         }
+        return removed
     }
 
     /** Unifica tutte le playlist (usato dopo un refresh completo). */
