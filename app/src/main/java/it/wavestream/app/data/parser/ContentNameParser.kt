@@ -112,6 +112,17 @@ class ContentNameParser @Inject constructor() {
     
     // HDR patterns
     private val hdrPatterns = listOf("hdr", "hdr10", "dolby vision", "dv")
+
+    /**
+     * Formati di distribuzione che fanno parte della **versione**, non del titolo:
+     * vanno rimossi dal titolo (per il raggruppamento e per la ricerca TMDB) ma NON
+     * devono impostare `isExtended` né essere confusi con la qualità.
+     *
+     * Senza questo "Matrix 3D" produceva la chiave `matrix 3d` e restava una scheda
+     * separata da "Matrix": un doppione che non veniva mai unificato (e su cui la
+     * ricerca TMDB falliva, quindi niente copertina/trama).
+     */
+    private val formatTags = listOf("3d")
     
     // Common suffixes to remove
     private val removePatterns = listOf(
@@ -157,7 +168,8 @@ class ContentNameParser @Inject constructor() {
             languagePatterns.values.flatten() +
             extendedPatterns +
             hdrPatterns +
-            codecTags).joinToString("|") { Regex.escape(it) }})\\b",
+            codecTags +
+            formatTags).joinToString("|") { Regex.escape(it) }})\\b",
         RegexOption.IGNORE_CASE
     )
 

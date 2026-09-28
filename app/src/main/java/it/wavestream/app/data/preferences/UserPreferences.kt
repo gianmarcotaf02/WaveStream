@@ -105,6 +105,15 @@ class UserPreferences @Inject constructor(
         // Unificazione film (doppioni/versioni) — eseguita una sola volta
         private val MOVIES_UNIFIED_V1 = booleanPreferencesKey("movies_unified_v1")
 
+        /**
+         * Seconda passata dell'unificazione film: la V1 raggruppava per titolo
+         * **non ripulito** (`cleanName` era ancora nullo nella lista in memoria),
+         * quindi sulle librerie preesistenti i doppioni tipo "Matrix" /
+         * "Matrix (1999)" restavano separati. La V2 riparte una volta sola con le
+         * chiavi normalizzate.
+         */
+        private val MOVIES_UNIFIED_V2 = booleanPreferencesKey("movies_unified_v2")
+
         // Pulizia dei marcatori di doppione del provider nei titoli ("Iron Man 2 (4)")
         // — eseguita una sola volta
         private val MOVIE_TITLES_CLEANED_V1 = booleanPreferencesKey("movie_titles_cleaned_v1")
@@ -575,6 +584,14 @@ class UserPreferences @Inject constructor(
 
     suspend fun setMoviesUnifiedV1(done: Boolean) {
         dataStore.edit { it[MOVIES_UNIFIED_V1] = done }
+    }
+
+    suspend fun isMoviesUnifiedV2(): Boolean {
+        return dataStore.data.first()[MOVIES_UNIFIED_V2] ?: false
+    }
+
+    suspend fun setMoviesUnifiedV2(done: Boolean) {
+        dataStore.edit { it[MOVIES_UNIFIED_V2] = done }
     }
 
     // Pulizia dei marcatori di doppione nei titoli (una-tantum)
