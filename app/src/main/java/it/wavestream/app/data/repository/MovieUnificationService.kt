@@ -537,7 +537,7 @@ class MovieUnificationService @Inject constructor(
                 val counts = streamProviderDao.getAllProviderCounts().associate { it.movieId to it.count }
                 val needsWork = all.filter { it.cleanName.isNullOrBlank() || (counts[it.id] ?: 0) == 0 }
                 Log.i(TAG, "First-time movie unification: ${needsWork.size} movies need providers/cleanName")
-                needsWork.forEach { ensureMovieIntegrity(it) }
+                backfillProvidersAndKeys(needsWork, counts)
 
                 // Unificazione per playlist (dai film già in memoria: nessuna
                 // scansione aggiuntiva della tabella)
@@ -797,6 +797,85 @@ class MovieUnificationService @Inject constructor(
         val updated = canonical.copy(streamCount = maxOf(count, 1))
         movieDao.update(updated)
         return updated
+    }
+
+    /**
+     * Backfill in batch delle sorgenti mancanti e di `cleanName`/`groupKey`/`streamCount`.
+     *
+     * [ensureMovieIntegrity] per ogni film esegue ~2 query + ~5 statement: su una
+     * libreria preesistente (~69k VOD, tutti con `cleanName` nullo) erano ~350.000
+     * statement dentro un'unica transazione — minuti di lavoro con la connessione di
+     * scrittura occupata e il resto dell'app bloccato. Qui i conteggi arrivano già dal
+     * chiamante (nessuna query per film) e le scritture procedono a blocchi.
+     *
+     * Le appartenenze a `movie_categories` non vengono toccate: la migrazione 31→32 ha
+     * già inserito la categoria primaria di ogni film (`INSERT OR IGNORE`).
+     */
+    private suspend fun backfillProvidersAndKeys(
+        movies: List<Movie>,
+        knownCounts: Map<Long, Int>
+    ) {
+        val providers = ArrayList<StreamProvider>(FLUSH_BATCH)
+        val updated = ArrayList<Movie>(FLUSH_BATCH)
+        val startedAt = System.currentTimeMillis()
+        var processed = 0
+
+        suspend fun flush() {
+            if (providers.size >= FLUSH_BATCH) {
+                streamProviderDao.insertAll(providers)
+                providers.clear()
+            }
+            if (updated.size >= FLUSH_BATCH) {
+                movieDao.updateList(updated)
+                updated.clear()
+            }
+        }
+
+        for (m in movies) {
+            val existingCount = knownCounts[m.id] ?: 0
+            if (existingCount == 0) {
+                val parsed = contentNameParser.parse(m.name)
+                val quality = contentNameParser.detectQuality(m.name)
+                providers += StreamProvider(
+                    movieId = m.id,
+                    playlistId = m.playlistId,
+                    streamUrl = m.streamUrl,
+                    originalName = m.name,
+                    category = m.category,
+                    categoryId = m.categoryId,
+                    xtreamStreamId = m.xtreamStreamId,
+                    containerExtension = m.containerExtension,
+                    logoUrl = m.logoUrl,
+                    year = m.year,
+                    quality = quality,
+                    qualityRank = contentNameParser.qualityRank(quality),
+                    resolution = contentNameParser.detectResolution(m.name),
+                    language = parsed.language,
+                    isExtended = parsed.isExtended,
+                    isHdr = parsed.isHdr,
+                    is4K = quality == StreamQuality.UHD || quality == StreamQuality.UHD_4K,
+                    durationSeconds = m.duration,
+                    playlistOrder = m.playlistOrder,
+                    isPrimary = true,
+                    addedAt = m.addedAt
+                )
+            }
+
+            val cleanName = m.cleanName?.takeIf { it.isNotBlank() } ?: titleFor(m.name)
+            val groupKey = ContentKey.groupKey(cleanName, m.year)
+            val count = maxOf(existingCount, 1)
+            if (m.cleanName != cleanName || m.groupKey != groupKey || m.streamCount != count) {
+                updated += m.copy(cleanName = cleanName, groupKey = groupKey, streamCount = count)
+            }
+
+            flush()
+            if (++processed % 2000 == 0) {
+                Log.i(TAG, "backfill: $processed/${movies.size} film in ${System.currentTimeMillis() - startedAt}ms")
+            }
+        }
+        if (providers.isNotEmpty()) streamProviderDao.insertAll(providers)
+        if (updated.isNotEmpty()) movieDao.updateList(updated)
+        Log.i(TAG, "backfill: FINE ${movies.size} film in ${System.currentTimeMillis() - startedAt}ms")
     }
 
     /** Garantisce che un movie abbia una sorgente, cleanName/groupKey/streamCount
