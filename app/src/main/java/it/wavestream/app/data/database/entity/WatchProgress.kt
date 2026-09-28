@@ -65,11 +65,5 @@ data class WatchProgress(
 
         /** Sotto questo minutaggio basta qualsiasi posizione > 0 (contenuti brevi). */
         const val SHORT_CONTENT_MS = 60_000L
-
-        /**
-         * Distanza dalla fine entro cui un contenuto è considerato "davvero finito".
-         * Usata dalla riparazione dei dati legacy e dal player.
-         */
-        const val COMPLETION_TAIL_MS = 30_000L
     }
 }

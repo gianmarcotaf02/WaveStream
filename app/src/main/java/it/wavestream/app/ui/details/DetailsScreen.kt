@@ -129,6 +129,8 @@ data class DetailsState(
     // Watch progress (for resume button)
     val resumeMinutes: Int? = null,  // Remaining minutes if watching in progress
     val resumeProgress: Float? = null, // 0f to 1f progress
+    // Contenuto già visto (fine o titoli di coda): il CTA diventa "Visto".
+    val isWatched: Boolean = false,
     val resumeEpisodeSeason: Int? = null,  // Season number for series resume
     val resumeEpisodeNumber: Int? = null,  // Episode number for series resume
     // Episode progress map (episodeId -> progress)
