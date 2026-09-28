@@ -508,6 +508,15 @@ class DetailsActivity : ComponentActivity() {
     }
     
     /**
+     * Un contenuto è "visto" quando il flag isCompleted è true (fine o titoli di
+     * coda) oppure quando mancano ≤ 6 minuti alla fine: stessa soglia usata dal
+     * player, così il CTA mostra "Visto" anche per i progressi scritti senza flag.
+     */
+    private fun isWatchedState(progress: it.wavestream.app.data.database.entity.WatchProgress): Boolean =
+        progress.isCompleted ||
+            (progress.duration > 0 && progress.duration - progress.position <= 6 * 60 * 1000)
+
+    /**
      * Aggiorna SOLO lo stato di visione (resume/progressi) a partire dal DB,
      * senza ricaricare la scheda: niente skeleton, niente rete, niente rail.
      *
@@ -517,8 +526,8 @@ class DetailsActivity : ComponentActivity() {
      */
     private suspend fun refreshWatchProgress(current: DetailsState): DetailsState = when (contentType) {
         ContentType.MOVIE -> {
-            val progress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
-                ?.takeIf { it.isResumable }
+            val rawProgress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
+            val progress = rawProgress?.takeIf { it.isResumable }
             current.copy(
                 resumeMinutes = progress?.let {
                     val remaining = (it.duration - it.position) / 60000
@@ -527,7 +536,8 @@ class DetailsActivity : ComponentActivity() {
                 resumeProgress = progress?.let {
                     if (it.duration > 0) (it.position.toFloat() / it.duration.toFloat()).coerceIn(0f, 1f)
                     else null
-                }
+                },
+                isWatched = rawProgress?.let { isWatchedState(it) } == true
             )
         }
         ContentType.SERIES -> {
@@ -750,6 +760,7 @@ class DetailsActivity : ComponentActivity() {
                         (it.position.toFloat() / it.duration.toFloat()).coerceIn(0f, 1f)
                     } else null
                 },
+                isWatched = fastProgress?.let { isWatchedState(it) } == true,
                 isDownloaded = downloadManager.isContentDownloaded(ContentType.MOVIE, contentId)
             )
         )
@@ -857,8 +868,8 @@ class DetailsActivity : ComponentActivity() {
         // isResumable: senza soglia, una riga position=0 (player aperto e chiuso
         // prima della riproduzione) o un film già completato proponevano "Riprendi"
         // con i minuti rimasti pari alla durata totale / quasi finita.
-        val watchProgress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
-            ?.takeIf { it.isResumable }
+        val rawProgress = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
+        val watchProgress = rawProgress?.takeIf { it.isResumable }
         val resumeMinutes = watchProgress?.let { 
             val remaining = (it.duration - it.position) / 60000
             remaining.toInt().coerceAtLeast(1)
@@ -870,8 +881,12 @@ class DetailsActivity : ComponentActivity() {
             } else null
         }
         
-        // Include resumeMinutes and resumeProgress in the state directly
-        state = state.copy(resumeMinutes = resumeMinutes, resumeProgress = resumeProgress)
+        // Include resumeMinutes, resumeProgress e stato "visto" nello state
+        state = state.copy(
+            resumeMinutes = resumeMinutes,
+            resumeProgress = resumeProgress,
+            isWatched = rawProgress?.let { isWatchedState(it) } == true
+        )
         
         // Check if content is downloaded
         val isDownloaded = downloadManager.isContentDownloaded(ContentType.MOVIE, contentId)
