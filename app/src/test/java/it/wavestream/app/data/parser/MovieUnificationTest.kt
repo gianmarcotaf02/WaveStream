@@ -62,8 +62,26 @@ class MovieUnificationTest {
         assertEquals("Iron Man 2", parser.cleanTitle("Iron Man 2 (2010) FHD ITA"))
         assertEquals("Matrix", parser.cleanTitle("Matrix (1999) 4K HDR ITA"))
         assertEquals("The Matrix", parser.cleanTitle("The Matrix 1999 1080p"))
+        assertEquals("Inception", parser.cleanTitle("Inception 2010 4K"))
         assertEquals("Matrix", parser.cleanTitle("Matrix 3D"))
         assertEquals("Matrix", parser.cleanTitle("Matrix FHD"))
+    }
+
+    @Test
+    fun `i seguiti e i titoli con numero finale non vengono mutilati`() {
+        assertEquals("Iron Man 2", parser.cleanTitle("Iron Man 2"))
+        assertEquals("Terminator 2", parser.cleanTitle("Terminator 2 FHD ITA"))
+        assertEquals("Blade Runner 2049", parser.cleanTitle("Blade Runner 2049"))
+        assertEquals("1917", parser.cleanTitle("1917 (2019) FHD"))
+        assertEquals("2012", parser.cleanTitle("2012 (2009) HD"))
+    }
+
+    @Test
+    fun `l'anno senza parentesi viene recuperato prima di ripulire il nome`() {
+        assertEquals(2010, parser.extractBareYear("Inception 2010 4K"))
+        assertEquals(1999, parser.extractBareYear("The Matrix 1999 FHD ITA"))
+        assertEquals(null, parser.extractBareYear("Blade Runner 2049"))
+        assertEquals(null, parser.extractBareYear("Iron Man 2"))
     }
 
     @Test

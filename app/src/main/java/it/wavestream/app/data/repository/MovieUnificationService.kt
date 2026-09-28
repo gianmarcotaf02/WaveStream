@@ -933,8 +933,11 @@ class MovieUnificationService @Inject constructor(
         var processed = 0
         for (r in rows) {
             val cleanName = titleFor(r.name)
-            // L'anno va estratto PRIMA di ripulire il nome: dopo non c'è più.
-            val year = r.year ?: contentNameParser.extractReleaseYear(r.name)
+            // L'anno va letto PRIMA di ripulire il nome: dopo, l'informazione non c'è più.
+            // `extractBareYear` copre il caso senza parentesi ("Inception 2010 4K").
+            val year = r.year
+                ?: contentNameParser.extractReleaseYear(r.name)
+                ?: contentNameParser.extractBareYear(r.name)
             if (r.name != cleanName || r.cleanName != cleanName || r.year != year) {
                 movieDao.updateTitleFields(
                     id = r.id,
