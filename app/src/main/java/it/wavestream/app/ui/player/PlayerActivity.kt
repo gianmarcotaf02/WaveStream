@@ -245,7 +245,7 @@ class PlayerActivity : ComponentActivity() {
     // Sostituisce per i FILM la vecchia regola "≤ 6 minuti rimanenti": un film
     // interrotto a 4-5 minuti dalla fine veniva marcato completato, il "Riprendi"
     // spariva dal dettaglio e il titolo usciva da "Continua a guardare".
-    private val COMPLETION_TAIL_MS = 30_000L
+    private val COMPLETION_TAIL_MS = WatchProgress.COMPLETION_TAIL_MS
 
     // Finestra iniziale in cui il monitor audio cerca la sigla (Fase 4).
     private val INTRO_SCAN_MS = 15 * 60 * 1000L

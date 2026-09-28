@@ -54,12 +54,7 @@ data class WatchProgress(
      */
     val isResumable: Boolean
         get() = when {
-            duration <= 0 -> false
-            // Riga marcata "completata" ma con la riproduzione ancora lontana dalla
-            // fine reale: è il vecchio criterio "≤ 6 minuti rimanenti" scritto dalle
-            // versioni precedenti (che cancellava il "Riprendi" a 4-5 minuti dalla
-            // fine). La trattiamo come riprendibile: self-healing dei dati già in DB.
-            isCompleted -> position >= MIN_RESUME_MS && position < duration - COMPLETION_TAIL_MS
+            isCompleted || duration <= 0 -> false
             duration <= SHORT_CONTENT_MS -> position > 0
             else -> position >= MIN_RESUME_MS
         }
@@ -73,7 +68,7 @@ data class WatchProgress(
 
         /**
          * Distanza dalla fine entro cui un contenuto è considerato "davvero finito".
-         * Oltre questa soglia la posizione è ancora riprendibile.
+         * Usata dalla riparazione dei dati legacy e dal player.
          */
         const val COMPLETION_TAIL_MS = 30_000L
     }

@@ -7,6 +7,7 @@ import dagger.hilt.android.HiltAndroidApp
 import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.DatabaseCheckpointManager
 import it.wavestream.app.data.database.dao.FtsSearchDao
+import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.repository.FtsSearchRepository
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.theme.AccentColor
@@ -40,6 +41,9 @@ class WaveStreamApplication : Application() {
 
     @Inject
     lateinit var ftsSearchRepository: FtsSearchRepository
+
+    @Inject
+    lateinit var watchProgressDao: WatchProgressDao
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -106,6 +110,16 @@ class WaveStreamApplication : Application() {
         // Periodic WAL checkpoint: guarantees playlist/watch data survives sudden
         // TV power-off, not only onTrimMemory/onLowMemory callbacks
         checkpointManager.startPeriodicCheckpoint()
+
+        // Riparazione una tantum dei progressi scritti dalle versioni precedenti:
+        // il vecchio criterio "≤ 6 minuti rimanenti" marcava come visti i film
+        // ancora in corso, facendo sparire il "Riprendi" e la voce da "Continua a
+        // guardare". Idempotente, gira in background a ogni avvio.
+        applicationScope.launch {
+            try {
+                watchProgressDao.repairLegacyMovieCompletion()
+            } catch (_: Exception) { }
+        }
 
         // FASE 4 — Backfill FTS5. Gira UNA VOLTA SOLA (vedi rebuildFtsIndexIfNeeded):
         // prima rifaceva l'indice completo a ogni avvio, e su cataloghi grandi era
