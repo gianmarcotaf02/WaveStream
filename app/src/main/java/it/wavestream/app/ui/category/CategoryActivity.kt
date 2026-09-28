@@ -39,8 +39,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.dao.MovieDao
 import it.wavestream.app.data.database.dao.SeriesDao
+import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.repository.EpgRepository
+import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.epg.EPGScreen
 import it.wavestream.app.ui.epg.EpgProgram
@@ -49,6 +51,8 @@ import it.wavestream.app.ui.components.ContentSortFilterBar
 import it.wavestream.app.ui.components.ContentSortField
 import it.wavestream.app.ui.components.SortDirection
 import it.wavestream.app.ui.components.SortFilterState
+import it.wavestream.app.ui.components.applyWatchedKeys
+import it.wavestream.app.ui.components.loadWatchedKeys
 import it.wavestream.app.ui.player.PlayerActivity
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.GlassSurface
@@ -73,6 +77,8 @@ class CategoryActivity : ComponentActivity() {
     @Inject lateinit var seriesDao: SeriesDao
     @Inject lateinit var channelDao: ChannelDao
     @Inject lateinit var epgRepository: EpgRepository
+    @Inject lateinit var watchProgressDao: WatchProgressDao
+    @Inject lateinit var userPreferences: UserPreferences
     
     private var categoryName: String = ""
     private var contentType: String = "" // "CATEGORY_MOVIE", "CATEGORY_SERIES", "CATEGORY_LIVE", "SEE_ALL"
@@ -111,7 +117,7 @@ class CategoryActivity : ComponentActivity() {
     }
     
     private suspend fun loadCategoryItems(): List<CarouselItem> {
-        return withContext(Dispatchers.IO) {
+        val raw = withContext(Dispatchers.IO) {
             // "Vedi tutto" path: the home carousel passed the exact item list
             // (ids + types) so we can reproduce the same grid without relying on
             // category names that may not exist in the DB.
@@ -201,6 +207,16 @@ class CategoryActivity : ComponentActivity() {
                 else -> emptyList()
             }
         }
+        return enrichWatched(raw)
+    }
+
+    /** Applica il badge "visto" alle card della griglia (film completati / serie finite). */
+    private suspend fun enrichWatched(items: List<CarouselItem>): List<CarouselItem> {
+        if (items.isEmpty()) return items
+        if (items.none { it.contentType == "MOVIE" || it.contentType == "SERIES" }) return items
+        val profileId = userPreferences.getCurrentProfileId() ?: 1L
+        val keys = loadWatchedKeys(profileId, watchProgressDao)
+        return items.applyWatchedKeys(keys)
     }
     
     /**

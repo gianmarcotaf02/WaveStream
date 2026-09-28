@@ -741,10 +741,12 @@ class DetailsActivity : ComponentActivity() {
                 logoUrl = movie.titleLogoUrl,
                 contentType = ContentType.MOVIE,
                 isFavorite = isFavorite,
-                // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
-                // oppure se c'è una rail TMDB da caricare: così carosello e scheda
-                // si svelano INSIEME, senza il pop-in del carosello dopo lo skeleton.
-                isLoading = movie.plot.isNullOrEmpty() || movie.tmdbVoteAverage == null || movie.tmdbId != null,
+                // Mantieni la skeleton SOLO se mancano dati essenziali (trama o voto).
+                // Prima la condizione includeva `movie.tmdbId != null`, quindi OGNI film
+                // già arricchito mostrava la skeleton a ogni apertura (il "ricarica"
+                // continuo): ora i dettagli già in DB (cache locale) appaiono subito,
+                // mentre rail/arricchimento si completano in background.
+                isLoading = movie.plot.isNullOrEmpty() || movie.tmdbVoteAverage == null,
                 tmdbRating = movie.tmdbVoteAverage,
                 imdbRating = movie.omdbImdbRating,
                 rottenTomatoesScore = movie.omdbRottenTomatoesScore,
@@ -1162,10 +1164,10 @@ class DetailsActivity : ComponentActivity() {
                 logoUrl = series.titleLogoUrl,
                 contentType = ContentType.SERIES,
                 isFavorite = dbIsFavorite,
-                // Mantieni la skeleton se mancano dati essenziali (trama o votazione)
-                // oppure se c'è una rail TMDB da caricare, così scheda e carosello
-                // appaiono insieme (niente pop-in dopo lo skeleton).
-                isLoading = series.plot.isNullOrEmpty() || series.tmdbVoteAverage == null || series.tmdbId != null,
+                // Mantieni la skeleton SOLO se mancano dati essenziali (trama o voto).
+                // Vedi loadMovie: niente skeleton forzata per la sola presenza del
+                // tmdbId, così riaprire una serie già in cache è istantaneo.
+                isLoading = series.plot.isNullOrEmpty() || series.tmdbVoteAverage == null,
                 tmdbRating = series.tmdbVoteAverage,
                 imdbRating = series.omdbImdbRating,
                 rottenTomatoesScore = series.omdbRottenTomatoesScore,
