@@ -1,0 +1,7 @@
+**Novità e correzioni di questa 1.1.5**
+
+- **"Continua a guardare" sistemato:** il contenuto che hai guardato viene ora riconosciuto correttamente. Il pulsante principale del dettaglio mostra **"Visto"** (bianco, con spunta) quando il film è stato finito, invece di sembrare mai visto.
+- **Visti di recente:** i contenuti completati tornano a comparire nella riga "Visti di recente".
+- **Serie TV:** l'ultimo episodio dell'ultima stagione non viene più marcato "visto" appena aperto, quindi la serie non sparisce più da "Continua a guardare" perdendo il punto di ripresa.
+- **Dettaglio più fluido:** non viene più ricaricato da capo a ogni ritorno dal player (niente più skeleton/refresh inutile): si aggiorna solo lo stato di visione.
+- **Menu "Aggiungi a lista" a tema:** la tendina ora ha una superficie scura e leggibile, coerente con il vetro dell'app.
