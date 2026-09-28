@@ -1027,14 +1027,14 @@ private fun ModernPlayerControls(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 GlassSurface(
-                    shape = RoundedCornerShape(22.dp),
+                    shape = RoundedCornerShape(18.dp),
                     fill = GlassTokens.SurfaceFill,
                     stroke = GlassTokens.StrokeGradient,
                     strokeWidth = 1.dp
                 ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Speed button
@@ -1058,7 +1058,7 @@ private fun ModernPlayerControls(
                         icon = Icons.Default.Subtitles,
                         contentDescription = "Sottotitoli",
                         onClick = onSubtitles,
-                        size = 36.dp
+                        size = 32.dp
                     )
 
                     // Timer "dormire" (mezzaluna): pausa + uscita automatica
@@ -1074,13 +1074,13 @@ private fun ModernPlayerControls(
                             icon = Icons.Default.BookmarkAdd,
                             contentDescription = "Segna inizio titoli di coda",
                             onClick = onMarkCredits,
-                            size = 36.dp
+                            size = 32.dp
                         )
                         ModernIconButton(
                             icon = Icons.Default.PlaylistAdd,
                             contentDescription = "Segna inizio sigla",
                             onClick = onMarkIntro,
-                            size = 36.dp
+                            size = 32.dp
                         )
                     }
                     
@@ -1090,7 +1090,7 @@ private fun ModernPlayerControls(
                             icon = Icons.Default.Apps,
                             contentDescription = "Lista canali",
                             onClick = onToggleMiniPlayer,
-                            size = 36.dp
+                            size = 32.dp
                         )
                     }
                     
