@@ -943,6 +943,7 @@ class HomeViewModel @Inject constructor(
                         HomeContentType.LISTS -> loadListsContent(contentRows)
                         HomeContentType.HISTORY -> loadHistoryContent(contentRows)
                     }
+                    enrichRowsWithWatchedBadges(contentRows)
                     contentRows
                 } catch (e: Exception) {
                     Log.e("HomeViewModel", "Error loading fast rows for $contentType", e)
@@ -996,6 +997,7 @@ class HomeViewModel @Inject constructor(
                             HomeContentType.SERIES -> loadSeriesContent(contentRows)
                             else -> contentRows
                         }
+                        enrichRowsWithWatchedBadges(contentRows)
                         contentRows
                     } catch (e: Exception) {
                         Log.e("HomeViewModel", "Error loading full rows for $contentType", e)
@@ -1115,6 +1117,7 @@ class HomeViewModel @Inject constructor(
                             HomeContentType.SERIES -> loadSeriesContent(contentRows, fastOnly = true)
                             else -> {}
                         }
+                        enrichRowsWithWatchedBadges(contentRows)
                         contentRows
                     } catch (e: Exception) {
                         Log.e("HomeViewModel", "Error preloading fast rows for $contentType", e)
@@ -1135,6 +1138,7 @@ class HomeViewModel @Inject constructor(
                             HomeContentType.SERIES -> loadSeriesContent(contentRows)
                             else -> {}
                         }
+                        enrichRowsWithWatchedBadges(contentRows)
                         contentRows
                     } catch (e: Exception) {
                         Log.e("HomeViewModel", "Error preloading full rows for $contentType", e)
@@ -3697,6 +3701,23 @@ class HomeViewModel @Inject constructor(
                 Log.e("HomeViewModel", "Error loading recently watched: ${e.message}")
                 null
             }
+        }
+    }
+
+    /**
+     * Applica il badge "visto" a tutte le card delle righe. Un'unica lettura dei
+     * progressi per profilo (film completati + serie finite) poi confronto in
+     * memoria: così il badge compare su qualsiasi carosello, non solo in
+     * "Visti di recente".
+     */
+    private suspend fun enrichRowsWithWatchedBadges(rows: MutableList<CarouselRow>) {
+        if (rows.isEmpty()) return
+        val keys = it.wavestream.app.ui.components.loadWatchedKeys(currentProfileId, watchProgressDao)
+        if (keys.isEmpty) return
+        for (i in rows.indices) {
+            rows[i] = rows[i].copy(
+                items = it.wavestream.app.ui.components.applyWatchedKeys(rows[i].items, keys)
+            )
         }
     }
 
