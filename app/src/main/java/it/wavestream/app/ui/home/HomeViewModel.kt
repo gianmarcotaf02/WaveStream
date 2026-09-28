@@ -3686,15 +3686,13 @@ class HomeViewModel @Inject constructor(
                 val watchHistory = watchProgressDao.getRecentlyWatched(currentProfileId, 50)
                 Log.d("HomeViewModel", "Recently watched items found: ${watchHistory.size}")
                 
-                // 6 minutes in milliseconds (threshold for "completed" excluding credits)
-                val completedThresholdMs = 6 * 60 * 1000L
-
+                // La soglia "minuti rimanenti" è stata rimossa: un film messo in pausa
+                // a 4-5 minuti dalla fine NON è "visto", deve restare in "Continua a
+                // guardare" e non comparire anche qui. Il flag isCompleted è ora
+                // affidabile (per i film viene scritto solo a fine reale).
                 watchHistory
                     .filter { progress ->
-                        // Only include COMPLETED content
-                        // Completed = isCompleted flag OR remaining time <= 8 minutes
-                        val remainingMs = progress.duration - progress.position
-                        val isEffectivelyCompleted = progress.isCompleted || remainingMs <= completedThresholdMs
+                        val isEffectivelyCompleted = progress.isCompleted
                         
                         if (!isEffectivelyCompleted) return@filter false
                         
