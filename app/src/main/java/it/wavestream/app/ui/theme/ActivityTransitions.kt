@@ -2,6 +2,7 @@ package it.wavestream.app.ui.theme
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.os.Bundle
 import androidx.core.app.ActivityOptionsCompat
@@ -69,7 +70,28 @@ object ActivityTransitions {
     fun start(context: Context, intent: Intent, category: MotionCategory = categoryFor(intent)) {
         attachExpandOrigin(intent, category)
         val opts = options(context, category)
-        if (opts != null) context.startActivity(intent, opts) else context.startActivity(intent)
+        if (opts != null) {
+            context.startActivity(intent, opts)
+            return
+        }
+        context.startActivity(intent)
+        // Nessuna animazione di window richiesta (EXPAND, oppure motion ridotto).
+        // Va disattivata ESPLICITAMENTE: il tema DeviceDefault applica la sua
+        // transizione di default (fade/scale) che si somma all'animazione interna
+        // (ExpandHeroOverlay) e rende l'apertura "a scatti", con la schermata di
+        // origine che traspare sotto. `overridePendingTransition(0, 0)` va chiamato
+        // subito dopo lo start, dall'Activity che avvia.
+        findActivity(context)?.overridePendingTransition(0, 0)
+    }
+
+    /** Risale la catena dei ContextWrapper per trovare l'Activity che ha avviato. */
+    private fun findActivity(context: Context): Activity? {
+        var current: Context? = context
+        while (current is ContextWrapper) {
+            if (current is Activity) return current
+            current = current.baseContext
+        }
+        return null
     }
 
     /**
