@@ -9,8 +9,10 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -75,9 +77,15 @@ private const val T_WORD_START = 720f        // cascade del wordmark
 private const val T_WORD_STAGGER = 28f
 private const val T_WORD_DUR = 280f
 private const val T_CRASH_START = 1420f      // l'ondata si alza e si schianta
-private const val T_COVER = 2030f            // schermo completamente coperto
-private const val T_DRAIN_MS = 420           // la cresta si ritira scoprendo i profili
 private const val T_MAX_HOLD_MS = 4000L      // rete di sicurezza: si procede comunque
+
+/** Istante (ms) in cui l'ondata copre completamente lo schermo. */
+const val SplashCoveredMs = 2030
+
+/** Durata (ms) della ritirata che scopre la destinazione. */
+const val SplashDrainMs = 420
+
+private val T_COVER = SplashCoveredMs.toFloat()
 
 /** Geometria del blocco marchio (vedi [SplashMark]) — 480x340 dp, centrato. */
 private const val MarkWidth = 480
@@ -171,7 +179,7 @@ fun SplashScreen(
         if (drainStarted || !(ready || forcedReady)) return@LaunchedEffect
         drainStarted = true
         onRevealStart()
-        drain.animateTo(1f, tween(T_DRAIN_MS, easing = LinearEasing))
+        drain.animateTo(1f, tween(SplashDrainMs, easing = LinearEasing))
         onComplete()
     }
 
@@ -327,14 +335,12 @@ private fun Wordmark(t: Float, modifier: Modifier = Modifier) {
 }
 
 /** Bordo vetro luminoso (`GlassTokens.StrokeGradient`) senza `RenderEffect`. */
-private fun Modifier.androidxBorderGlass(): Modifier = this.then(
-    androidx.compose.foundation.border(
-        width = 1.dp,
-        brush = Brush.linearGradient(
-            listOf(Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.05f))
-        ),
-        shape = RoundedCornerShape(26),
-    )
+private fun Modifier.androidxBorderGlass(): Modifier = this.border(
+    width = 1.dp,
+    brush = Brush.linearGradient(
+        listOf(Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.05f))
+    ),
+    shape = RoundedCornerShape(26),
 )
 
 // ======================================================================
@@ -349,7 +355,7 @@ private fun CanvasSurface(
     scrollPhase: Float,
     breath: Float,
 ) {
-    androidx.compose.foundation.Canvas(modifier = modifier) {
+    Canvas(modifier = modifier) {
         if (emit <= 0f || smallWaveAlpha <= 0f) return@Canvas
         val w = size.width
         val h = size.height
@@ -413,7 +419,7 @@ private fun CanvasSurface(
  */
 @Composable
 private fun Canvas3dSurge(crashP: Float, drainP: Float, phase: Float) {
-    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
 
