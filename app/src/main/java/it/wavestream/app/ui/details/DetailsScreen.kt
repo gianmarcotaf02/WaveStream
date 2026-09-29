@@ -386,15 +386,18 @@ fun DetailsScreen(
             .background(WaveStreamColors.BackgroundDark)
     ) {
         // EXPAND poster→hero (Motion Contract): overlay una sola volta, sopra il
-        // contenuto grazie a zIndex. Degrada a fade normale con motion ridotto.
+        // contenuto grazie a zIndex. Degrada a fade normale con motion ridotto o
+        // quando la card non aveva un'immagine da espandere.
+        // Si usa SOLO l'immagine della card (già nota all'apertura): dipendere dallo
+        // state asincrono faceva partire la richiesta con URL nullo/cambiato a metà.
         val reducedMotion = it.wavestream.app.ui.theme.rememberReducedMotion()
         var expandActive by remember {
-            mutableStateOf(expandOrigin != null && !reducedMotion)
+            mutableStateOf(expandOrigin != null && !expandImage.isNullOrBlank() && !reducedMotion)
         }
         if (expandActive && expandOrigin != null) {
             ExpandHeroOverlay(
                 origin = expandOrigin,
-                imageUrl = expandImage ?: state.posterUrl ?: state.backdropUrl,
+                imageUrl = expandImage,
                 onFinished = { expandActive = false },
                 modifier = Modifier.zIndex(10f)
             )
