@@ -79,16 +79,25 @@ private const val T_WAVE_IN_END = 700f
 private const val T_WORD_START = 720f        // cascade del wordmark
 private const val T_WORD_STAGGER = 28f
 private const val T_WORD_DUR = 280f
-private const val T_CRASH_START = 1420f      // l'ondata si alza, si arriccia e si schianta
+private const val T_CRASH_START = 1420f      // l'ondata comincia a sollevarsi
 private const val T_MAX_HOLD_MS = 4000L      // rete di sicurezza: si procede comunque
 
+/**
+ * Quanto ci mette la cresta a FORMARSI (arricciarsi, prendere volume).
+ * È l'anticipazione: la forma compare presto e resta, così il rotolo si legge.
+ */
+private const val T_REAR_UP_MS = 500f
+
 /** Istante (ms) in cui l'ondata copre completamente lo schermo. */
-const val SplashCoveredMs = 2030
+const val SplashCoveredMs = 2370
 
 /** Durata (ms) della ritirata che scopre la destinazione. */
-const val SplashDrainMs = 420
+const val SplashDrainMs = 530
 
 private val T_COVER = SplashCoveredMs.toFloat()
+
+/** Frazione della finestra di schianto occupata dalla sola formazione della cresta. */
+private val RearUpFraction = (T_REAR_UP_MS / (T_COVER - T_CRASH_START)).coerceIn(0.05f, 1f)
 
 /** Geometria del blocco marchio ([SplashMark]) — 480x340 dp, centrato. */
 private const val MarkWidth = 480
@@ -207,7 +216,7 @@ fun SplashScreen(
     val phaseProvider: () -> Float = remember(scrollPhase) { { scrollPhase.value } }
     val breathProvider: () -> Float = remember(breath) { { breath.value } }
     val crashProvider: () -> Float = remember(approach) {
-        { eased(tProvider(), T_CRASH_START, T_COVER, AppAnimations.EmphasizedDecelerate) }
+        { progress(tProvider(), T_CRASH_START, T_COVER) }
     }
     val drainProvider: () -> Float = remember(drain) { { drain.value } }
 
@@ -460,8 +469,16 @@ private fun CanvasSurface(
  *  6. rim luminoso sul bordo (sostituisce il blur, che è vietato)
  *  7. spruzzi
  *
- * `near` (0 lontano → 1 vicino) pilota la prospettiva: ampiezza, labbro e spruzzi
- * crescono man mano che l'ondata arriva addosso.
+ * ## Anticipazione (il punto che fa leggere l'onda)
+ * La FORMA della cresta e l'AVANZATA dell'acqua non usano la stessa curva:
+ *
+ *  - `near` (ampiezza, labbro, spruzzi) → [AppAnimations.EmphasizedDecelerate]:
+ *    la forma compare subito e poi resta, così il rotolo ha il tempo di leggersi.
+ *  - `adv` (avanzata di `front`) → [AppAnimations.EmphasizedAccelerate]: l'acqua
+ *    prima resta sospesa, poi si abbatte di colpo.
+ *
+ * Con un'unica curva per entrambe (com'era prima) la cresta si forma e avanza
+ * insieme: si legge come una tenda che sale, non come un'onda che si schianta.
  */
 @Composable
 private fun Canvas3dSurge(
@@ -477,17 +494,21 @@ private fun Canvas3dSurge(
         // il centro dello schermo + 1dp (vedi la geometria di [SplashMark]).
         val waveLineY = h / 2f + 1.dp.toPx()
 
-        val drainP = drainProvider()
-        val near = crashProvider()
+        val raw = crashProvider()
 
-        // Prima dello schianto `near` è 0: senza questa guardia l'ondata disegnerebbe
+        // Prima dello schianto `raw` è 0: senza questa guardia l'ondata disegnerebbe
         // il riempimento dal centro in giù fin dal primo frame.
-        if (near <= 0f) return@Canvas
+        if (raw <= 0f) return@Canvas
 
+        val drainP = drainProvider()
         val draining = drainP > 0f
 
+        val near = AppAnimations.EmphasizedDecelerate
+            .transform((raw / RearUpFraction).coerceIn(0f, 1f))
+        val adv = AppAnimations.EmphasizedAccelerate.transform(raw)
+
         val front = if (!draining) {
-            lerp(waveLineY, -h * 0.35f, near)
+            lerp(waveLineY, -h * 0.35f, adv)
         } else {
             lerp(-h * 0.35f, h * 1.2f, AppAnimations.Emphasized.transform(drainP))
         }
