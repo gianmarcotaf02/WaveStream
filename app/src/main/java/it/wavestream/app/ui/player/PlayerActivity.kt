@@ -1585,6 +1585,11 @@ class PlayerActivity : ComponentActivity() {
         hideNextEpisodeOverlay()
         _creditsSeekGeneration.intValue++
         loadCreditsMarker()
+        // Ricarica i metadati dell'overlay "in pausa": cambia il contenuto (es. prossimo
+        // episodio) e le info devono aggiornarsi (stagione/episodio/trama correnti).
+        if (contentType != ContentType.CHANNEL) {
+            lifecycleScope.launch { _pauseInfo.value = loadPauseInfo() }
+        }
     }
 
     /**
@@ -1640,6 +1645,38 @@ class PlayerActivity : ComponentActivity() {
             android.util.Log.w("PlayerActivity", "loadPauseInfo failed: ${e.message}")
             null
         }
+    }
+
+    /**
+     * Risolve l'episodio attualmente in riproduzione per l'overlay "in pausa":
+     * - EPISODE → episodio per id (con fallback su stagione/episodio);
+     * - SERIES → episodio da stagione/episodio dell'intent, dal progresso di
+     *   visione o, in ultima istanza, il primo episodio della serie.
+     */
+    private suspend fun resolvePauseEpisode(): it.wavestream.app.data.database.entity.Episode? {
+        if (contentType == ContentType.EPISODE) {
+            episodeDao.getEpisodeById(contentId)?.let { return it }
+        }
+        val sid = seriesId ?: contentId
+        val s = season
+        val e = episode
+        if (s != null && e != null) {
+            episodeDao.getEpisode(sid, s, e)?.let { return it }
+        }
+        // Fallback: episodio salvato nel progresso di visione.
+        runCatching {
+            watchProgressDao.getProgress(profileId, contentType, contentId)
+        }.getOrNull()?.let { p ->
+            p.contentId.takeIf { it > 0 }?.let { pid ->
+                episodeDao.getEpisodeById(pid)?.let { return it }
+            }
+            val ps = p.season
+            val pe = p.episode
+            if (ps != null && pe != null && ps > 0 && pe > 0) {
+                episodeDao.getEpisode(sid, ps, pe)?.let { return it }
+            }
+        }
+        return null
     }
 
     /**
