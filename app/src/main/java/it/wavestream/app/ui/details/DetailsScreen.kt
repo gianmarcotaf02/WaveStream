@@ -201,9 +201,6 @@ fun DetailsScreen(
     onDownloadSeason: (Int) -> Unit = {},  // Season number
     // AI: spiega il finale (solo film). L'attività inietta MovieEndingRepository.
     onExplainEnding: (suspend (MovieEndingRequest) -> MovieEnding)? = null,
-    // EXPAND poster→hero: rect di origine (coordinate di window) + immagine, dall'Activity.
-    expandOrigin: androidx.compose.ui.geometry.Rect? = null,
-    expandImage: String? = null,
     modifier: Modifier = Modifier
 ) {
     // FocusRequester for automatic focus on Play button
@@ -385,24 +382,6 @@ fun DetailsScreen(
             .fillMaxSize()
             .background(WaveStreamColors.BackgroundDark)
     ) {
-        // EXPAND poster→hero (Motion Contract): overlay una sola volta, sopra il
-        // contenuto grazie a zIndex. Degrada a fade normale con motion ridotto o
-        // quando la card non aveva un'immagine da espandere.
-        // Si usa SOLO l'immagine della card (già nota all'apertura): dipendere dallo
-        // state asincrono faceva partire la richiesta con URL nullo/cambiato a metà.
-        val reducedMotion = it.wavestream.app.ui.theme.rememberReducedMotion()
-        var expandActive by remember {
-            mutableStateOf(expandOrigin != null && !expandImage.isNullOrBlank() && !reducedMotion)
-        }
-        if (expandActive && expandOrigin != null) {
-            ExpandHeroOverlay(
-                origin = expandOrigin,
-                imageUrl = expandImage,
-                onFinished = { expandActive = false },
-                modifier = Modifier.zIndex(10f)
-            )
-        }
-
         // Skeleton loader while fetching content
         AnimatedVisibility(
             visible = state.isLoading,
