@@ -1603,13 +1603,12 @@ class PlayerActivity : ComponentActivity() {
                         durationMinutes = m.tmdbRuntime
                             ?: m.duration?.takeIf { it > 0 }?.let { (it / 60).toInt() },
                         genres = m.genre,
-                        isSeries = false
+                        isSeries = false,
+                        plot = m.plot?.takeIf { it.isNotBlank() }
                     )
                 }
                 ContentType.EPISODE, ContentType.SERIES -> {
-                    val ep = if (contentType == ContentType.EPISODE) {
-                        episodeDao.getEpisodeById(contentId)
-                    } else null
+                    val ep = resolvePauseEpisode()
                     val sid = ep?.seriesId ?: seriesId ?: contentId
                     val s = seriesDao.getSeriesById(sid) ?: return@withContext null
                     val epTitle = ep?.let { item ->

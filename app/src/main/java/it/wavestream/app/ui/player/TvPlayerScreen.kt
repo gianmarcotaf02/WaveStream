@@ -211,12 +211,15 @@ fun TvPlayerScreen(
         }
     }
 
-    // Auto-hide controls after 3 seconds di INATTIVIT\u00c0 (nessun tasto premuto).
+    // Auto-hide controls dopo un periodo di INATTIVIT\u00c0 (nessun tasto premuto).
     // Non nasconde mentre si cerca, si naviga i controlli o \u00e8 aperto il menu del timer.
+    // In riproduzione spariscono dopo 3s; in pausa restano 10s e poi si nascondono con
+    // la stessa animazione. L'overlay "in pausa" NON dipende da controlsVisible: resta
+    // visibile anche quando i controlli svaniscono.
     LaunchedEffect(controlsVisible, isPlaying, seekIndicatorVisible, cumulativeSeekSeconds, lastKeyInteraction, sleepMenuOpen) {
         if (controlsVisible && !sleepMenuOpen) {
-            delay(3000)
-            if (isPlaying && !seekIndicatorVisible && cumulativeSeekSeconds == 0) {
+            delay(if (isPlaying) 3_000L else 10_000L)
+            if (!seekIndicatorVisible && cumulativeSeekSeconds == 0 && !sleepMenuOpen) {
                 onControlsVisibilityChanged(false)
             }
         }
@@ -363,10 +366,11 @@ fun TvPlayerScreen(
         }
         
         // Overlay "in pausa" stile Netflix (solo VOD): logo del titolo TMDB +
-        // metadati. Mostrato immediatamente quando il player è in pausa (e i
-        // controlli sono visibili); si dissolve al resume.
+        // metadati. Mostrato quando il player è in pausa; si dissolve al resume.
+        // Volutamente indipendente da controlsVisible: quando i controlli si nascondono
+        // dopo 10s di pausa l'overlay resta a schermo.
         val showPauseInfo = pauseInfo != null && !isPlaying && !isLoading &&
-            controlsVisible && !isLiveChannel && !isMiniPlayer && nextEpisode == null
+            !isLiveChannel && !isMiniPlayer && nextEpisode == null
         AnimatedVisibility(
             visible = showPauseInfo,
             enter = fadeIn(tween(AppAnimations.FadeEnterMs))
@@ -654,19 +658,19 @@ private fun PauseInfoOverlay(
                 }
             }
 
-            if (info.isSeries) {
-                info.plot?.takeIf { it.isNotBlank() }?.let { plot ->
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = plot,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White.copy(alpha = 0.8f),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                        maxLines = 4,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+            // Trama: per i film è quella del film, per le serie quella dell'episodio
+            // in corso (fallback alla trama della serie).
+            info.plot?.takeIf { it.isNotBlank() }?.let { plot ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = plot,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.8f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
