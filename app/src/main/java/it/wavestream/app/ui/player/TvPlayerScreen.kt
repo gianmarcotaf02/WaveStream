@@ -377,6 +377,10 @@ fun TvPlayerScreen(
         // Alpha e micro-slide sono letti dentro graphicsLayer (nessuna recomposition
         // per frame); il composable resta montato solo per la durata della pausa.
         val pauseOverlayAnim = remember { Animatable(0f) }
+        // Scostamento verticale: quando i controlli sono visibili l'overlay sta al
+        // centro; quando svaniscono scende di poco, così resta bilanciato nello
+        // spazio libero lasciato dalla barra. Animato e letto in graphicsLayer.
+        val pauseOverlayShiftDp = remember { Animatable(0f) }
         var pauseOverlayRendered by remember { mutableStateOf(false) }
         LaunchedEffect(showPauseInfo) {
             if (showPauseInfo) {
@@ -390,6 +394,21 @@ fun TvPlayerScreen(
                 pauseOverlayRendered = false
             }
         }
+        LaunchedEffect(controlsVisible, showPauseInfo) {
+            if (!showPauseInfo) {
+                // Overlay non visibile: riazzera senza animare, così alla prossima
+                // pausa riparte dal centro e non "sale" da una posizione vecchia.
+                pauseOverlayShiftDp.snapTo(0f)
+            } else {
+                pauseOverlayShiftDp.animateTo(
+                    targetValue = if (controlsVisible) 0f else 56f,
+                    animationSpec = tween(
+                        AppAnimations.OverlayEnterMs,
+                        easing = AppAnimations.Emphasized
+                    )
+                )
+            }
+        }
         if (pauseOverlayRendered) {
             pauseInfo?.let { info ->
                 Box(
@@ -399,7 +418,7 @@ fun TvPlayerScreen(
                         .graphicsLayer {
                             val a = pauseOverlayAnim.value
                             alpha = a
-                            translationY = (1f - a) * 24f
+                            translationY = (1f - a) * 24f + pauseOverlayShiftDp.value.dp.toPx()
                         }
                 ) {
                     PauseInfoOverlay(
