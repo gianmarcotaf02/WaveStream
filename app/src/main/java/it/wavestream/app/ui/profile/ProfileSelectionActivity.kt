@@ -80,29 +80,33 @@ class ProfileSelectionActivity : ComponentActivity() {
 
                 val showProfiles = startup as? Startup.ShowProfiles
 
-                // La destinazione è composta SOTTO la splash: non c'è dissolvenza tra le
-                // due schermate, è la cresta dell'ondata a rivelarla ritirandosi.
-                if (showProfiles != null) {
-                    ProfileSelectionContent(
-                        initialProfiles = showProfiles.profiles,
-                        initialLastProfileId = showProfiles.lastId,
-                        entrance = { entrance.value },
-                    )
-                }
+                // Box esplicito: garantisce che la splash stia SOPRA la destinazione
+                // (l'ordine dei figli è l'ordine di disegno).
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // La destinazione è composta SOTTO la splash: non c'è dissolvenza tra
+                    // le due schermate, è la cresta dell'ondata a rivelarla ritirandosi.
+                    if (showProfiles != null) {
+                        ProfileSelectionContent(
+                            initialProfiles = showProfiles.profiles,
+                            initialLastProfileId = showProfiles.lastId,
+                            entrance = { entrance.value },
+                        )
+                    }
 
-                if (splashVisible) {
-                    SplashScreen(
-                        ready = showProfiles != null,
-                        onRevealStart = {
-                            scope.launch {
-                                entrance.animateTo(
-                                    targetValue = 1f,
-                                    animationSpec = tween(SplashDrainMs, easing = LinearEasing),
-                                )
-                            }
-                        },
-                        onComplete = { splashVisible = false },
-                    )
+                    if (splashVisible) {
+                        SplashScreen(
+                            ready = showProfiles != null,
+                            onRevealStart = {
+                                scope.launch {
+                                    entrance.animateTo(
+                                        targetValue = 1f,
+                                        animationSpec = tween(SplashDrainMs, easing = LinearEasing),
+                                    )
+                                }
+                            },
+                            onComplete = { splashVisible = false },
+                        )
+                    }
                 }
             }
         }
