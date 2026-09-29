@@ -1,169 +1,610 @@
 package it.wavestream.app.ui.loading
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.*
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import it.wavestream.app.R
-import it.wavestream.app.ui.theme.WaveStreamColors
+import it.wavestream.app.ui.components.WaveForm
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.SoraFontFamily
+import it.wavestream.app.ui.theme.WaveStreamColors
 import kotlinx.coroutines.delay
+import kotlin.math.PI
+import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.sin
+
+// ======================================================================
+//  Timeline della splash (ms)
+// ======================================================================
+
+/** Scorrimento continuo dell'onda (identico al player). */
+private const val AmbientScrollMs = 1600
+
+/** "Respiro" dell'ampiezza (identico al player). */
+private const val AmbientBreathMs = 1100
+
+private const val T_BG_END = 360f            // Corrente + alone + logo entrano
+private const val T_WAVE_IN_START = 360f     // l'onda emerge da dietro il marchio
+private const val T_WAVE_IN_END = 700f
+private const val T_WORD_START = 720f        // cascade del wordmark
+private const val T_WORD_STAGGER = 28f
+private const val T_WORD_DUR = 280f
+private const val T_CRASH_START = 1420f      // l'ondata si alza e si schianta
+private const val T_COVER = 2030f            // schermo completamente coperto
+private const val T_DRAIN_MS = 420           // la cresta si ritira scoprendo i profili
+private const val T_MAX_HOLD_MS = 4000L      // rete di sicurezza: si procede comunque
+
+/** Geometria del blocco marchio (vedi [SplashMark]) — 480x340 dp, centrato. */
+private const val MarkWidth = 480
+private const val MarkHeight = 340
+private const val MarkLogoSize = 152
+private const val WaveBandTop = 96           // offset Y dell'onda dentro il blocco
+private const val WaveBandHeight = 150
+private const val WordmarkTop = 214
+
+// 3D finto dell'ondata (2.5D). Valori volutamente contenuti: "più piano".
+private const val CrashAmpMax = 46f
+private const val CrashLipMax = 78f
+private const val CrashSegments = 72
+private const val CrashSlope = -0.17f        // cresta inclinata: scopre da sinistra
+
+// ======================================================================
+//  Utilità di timeline
+// ======================================================================
+
+private fun progress(t: Float, from: Float, to: Float): Float =
+    if (to <= from) 1f else ((t - from) / (to - from)).coerceIn(0f, 1f)
+
+private fun eased(t: Float, from: Float, to: Float, curve: Easing): Float =
+    curve.transform(progress(t, from, to))
+
+private fun lerp(a: Float, b: Float, p: Float) = a + (b - a) * p
 
 /**
- * Animated Splash Screen with dynamic logo and text reveal
- * 
- * Animation sequence:
- * 1. Logo appears centered with scale-in
- * 2. Logo slides left with smooth spring animation
- * 3. "WaveStream" text slides in from the right
- * 4. Motto fades in below
- * 5. onComplete is called after animation finishes
+ * Splash screen WaveStream.
+ *
+ * Sequenza unica e continua, in quattro atti:
+ *
+ *  1. **Affiorare** — la Corrente entra, l'alone accent si accende, il marchio
+ *     compare in vetro.
+ *  2. **Onda** — le tre sinusoidi di [WaveForm] emergono da dietro il marchio,
+ *     rivelate dal centro verso i lati.
+ *  3. **Marchio** — il wordmark entra lettera per lettera (cascade).
+ *  4. **Schianto** — l'onda monta dalla *stessa linea* su cui stava, si arriccia
+ *     (labbro + barile + riflesso speculare + spruzzi) e travolge lo schermo.
+ *     Poi la cresta recede, inclinata, scoprendo la selezione profili composta
+ *     sotto: **non c'è dissolvenza tra le due schermate**, le rivela l'onda.
+ *
+ * La fase 4 non parte finché [ready] non è `true`, così la cresta non si ritira
+ * su una schermata ancora vuota. Oltre [T_MAX_HOLD_MS] si procede comunque.
+ *
+ * Vincoli rispettati: nessun blur / `RenderEffect`, nessuna animazione di layout
+ * (solo `graphicsLayer` e disegno su Canvas), nessun loop infinito non decorativo.
  */
 @Composable
 fun SplashScreen(
+    ready: Boolean,
+    onRevealStart: () -> Unit,
     onComplete: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    // Animation states
-    var animationPhase by remember { mutableStateOf(0) }
-    
-    // Initial logo scale animation (entrance)
-    val logoScale by animateFloatAsState(
-        targetValue = if (animationPhase >= 0) 1f else 0.8f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
+    // ---- Onda ambientale: scorrimento e respiro (loop decorativi, come nel player)
+    val ambient = rememberInfiniteTransition(label = "splashAmbient")
+    val scrollPhase by ambient.animateFloat(
+        initialValue = 0f,
+        targetValue = (2.0 * PI).toFloat(),
+        animationSpec = infiniteRepeatable(
+            animation = tween(AmbientScrollMs, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
         ),
-        label = "logoScale"
+        label = "scrollPhase",
     )
-    
-    // Logo horizontal offset - using spring for natural motion
-    val logoOffset by animateIntOffsetAsState(
-        targetValue = when {
-            animationPhase >= 1 -> IntOffset(-80, 0) // Move left slightly (centered with motto)
-            else -> IntOffset(0, 0) // Centered
-        },
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessMediumLow
+    val breath by ambient.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(AmbientBreathMs, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
         ),
-        label = "logoOffset"
+        label = "breath",
     )
-    
-    // Text visibility
-    val textVisible = animationPhase >= 1
-    
-    // Animation sequence controller
+
+    // ---- Le due fasi coreografate
+    val approach = remember { Animatable(0f) }
+    val drain = remember { Animatable(0f) }
+    var drainStarted by remember { mutableStateOf(false) }
+    var forcedReady by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
-        delay(800) // Show centered logo briefly
-        animationPhase = 1 // Start logo slide + text reveal
-        delay(1000) // Wait for spring animation to settle
-        animationPhase = 2
+        approach.animateTo(1f, tween(T_COVER.toInt(), easing = LinearEasing))
+    }
+    LaunchedEffect(Unit) {
+        delay(T_MAX_HOLD_MS)
+        forcedReady = true
+    }
+    LaunchedEffect(ready, forcedReady) {
+        if (drainStarted || !(ready || forcedReady)) return@LaunchedEffect
+        drainStarted = true
+        onRevealStart()
+        drain.animateTo(1f, tween(T_DRAIN_MS, easing = LinearEasing))
         onComplete()
     }
-    
+
+    val t = approach.value * T_COVER
+    val crashP = eased(t, T_CRASH_START, T_COVER, AppAnimations.EmphasizedDecelerate)
+    val drainP = drain.value
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(WaveStreamColors.BackgroundDark),
-        contentAlignment = Alignment.Center
+            .background(Color.Black),
     ) {
-        // Background glow effect
+        // ---------- Atto 1 · Corrente ----------
         Box(
-            modifier = Modifier
-                .size(500.dp)
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer { alpha = eased(t, 0f, T_BG_END, AppAnimations.EmphasizedDecelerate) }
+                .background(WaveStreamColors.BackgroundGradient)
+        )
+
+        // ---------- Alone accent ----------
+        // Gradiente radiale "finto": nessun blur (regola GPU del redesign).
+        val glowBase = eased(t, 60f, T_BG_END + 120f, AppAnimations.EmphasizedDecelerate)
+        val glowOut = eased(t, T_CRASH_START, T_CRASH_START + 380f, AppAnimations.Emphasized)
+        Box(
+            Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth(0.56f)
+                .aspectRatio(1f)
+                .graphicsLayer {
+                    alpha = glowBase * (1f - glowOut)
+                    val s = lerp(0.86f, 1f, glowBase)
+                    scaleX = s
+                    scaleY = s
+                }
                 .background(
-                    brush = Brush.radialGradient(
+                    Brush.radialGradient(
                         colors = listOf(
-                            WaveStreamColors.Accent.copy(alpha = 0.15f),
-                            Color.Transparent
+                            WaveStreamColors.Accent.copy(alpha = 0.16f),
+                            Color.Transparent,
                         )
                     )
                 )
         )
-        
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Logo + Text Row
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.offset { logoOffset }
-            ) {
-                // Logo with scale animation
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .graphicsLayer {
-                scaleX = logoScale
-                scaleY = logoScale
-            }
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(WaveStreamColors.BackgroundSecondary)
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.logo),
-                        contentDescription = "WaveStream Logo",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                
-                // "WaveStream" text - slides in with spring animation
-                AnimatedVisibility(
-                    visible = textVisible,
-                    enter = slideInHorizontally(
-                        initialOffsetX = { -80 },
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMedium
-                        )
-                    ) + fadeIn(
-                        animationSpec = tween(
-                            durationMillis = 400,
-                            easing = FastOutSlowInEasing
-                        )
-                    )
-                ) {
-                    Text(
-                        text = "WaveStream",
-                        // Aurora: wordmark in Sora, tracking stretto (v1: 56sp Inter-style)
-                        fontFamily = SoraFontFamily,
-                        fontSize = 48.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = WaveStreamColors.TextPrimary,
-                        modifier = Modifier.padding(start = 16.dp),
-                        letterSpacing = (-0.5).sp
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
+
+        // ---------- Atti 2-3 · il marchio ----------
+        SplashMark(
+            t = t,
+            scrollPhase = scrollPhase,
+            breath = breath,
+            modifier = Modifier.align(Alignment.Center),
+        )
+
+        // ---------- Atto 4 · l'ondata ----------
+        // Sopra tutto: copre marchio e wordmark, e poi li sostituisce con i profili.
+        if (t >= T_CRASH_START) {
+            Canvas3dSurge(crashP = crashP, drainP = drainP, phase = scrollPhase)
         }
     }
 }
 
+// ======================================================================
+//  Blocco marchio: logo + banda dell'onda + wordmark
+// ======================================================================
 
+@Composable
+private fun SplashMark(
+    t: Float,
+    scrollPhase: Float,
+    breath: Float,
+    modifier: Modifier = Modifier,
+) {
+    val logoP = eased(t, 60f, 480f, AppAnimations.EmphasizedDecelerate)
+    val emit = eased(t, T_WAVE_IN_START, T_WAVE_IN_END, AppAnimations.EmphasizedDecelerate)
+    val smallWaveAlpha =
+        if (t < T_CRASH_START) 1f
+        else 1f - eased(t, T_CRASH_START, T_CRASH_START + 130f, AppAnimations.Emphasized)
+
+    Box(modifier = modifier.size(MarkWidth.dp, MarkHeight.dp)) {
+        // Banda dell'onda — sotto il logo (z-order), emerge dai suoi fianchi.
+        CanvasSurface(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = WaveBandTop.dp)
+                .width(MarkWidth.dp)
+                .height(WaveBandHeight.dp),
+            emit = emit,
+            smallWaveAlpha = smallWaveAlpha,
+            scrollPhase = scrollPhase,
+            breath = breath,
+        )
+
+        // Logo — vetro, non più il box grigio della v1.
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .size(MarkLogoSize.dp)
+                .graphicsLayer {
+                    val s = lerp(0.92f, 1f, logoP)
+                    scaleX = s
+                    scaleY = s
+                    alpha = logoP
+                }
+                .clip(RoundedCornerShape(26))
+                .background(Color(0xFF05080E))
+                .androidxBorderGlass(),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.logo),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+            )
+        }
+
+        // Wordmark — cascade, lettera per lettera.
+        Wordmark(
+            t = t,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = WordmarkTop.dp),
+        )
+    }
+}
+
+@Composable
+private fun Wordmark(t: Float, modifier: Modifier = Modifier) {
+    val letters = remember { "WaveStream".toCharArray().map { it.toString() } }
+    val letterHeightPx = with(androidx.compose.ui.platform.LocalDensity.current) { 12.dp.toPx() }
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        letters.forEachIndexed { index, letter ->
+            val start = T_WORD_START + index * T_WORD_STAGGER
+            val p = eased(t, start, start + T_WORD_DUR, AppAnimations.EmphasizedDecelerate)
+            Text(
+                text = letter,
+                fontFamily = SoraFontFamily,
+                fontSize = 44.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.5).sp,
+                color = WaveStreamColors.TextPrimary,
+                modifier = Modifier.graphicsLayer {
+                    alpha = p
+                    translationY = (1f - p) * letterHeightPx
+                },
+            )
+        }
+    }
+}
+
+/** Bordo vetro luminoso (`GlassTokens.StrokeGradient`) senza `RenderEffect`. */
+private fun Modifier.androidxBorderGlass(): Modifier = this.then(
+    androidx.compose.foundation.border(
+        width = 1.dp,
+        brush = Brush.linearGradient(
+            listOf(Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.05f))
+        ),
+        shape = RoundedCornerShape(26),
+    )
+)
+
+// ======================================================================
+//  L'onda (atti 2-3)
+// ======================================================================
+
+@Composable
+private fun CanvasSurface(
+    modifier: Modifier,
+    emit: Float,
+    smallWaveAlpha: Float,
+    scrollPhase: Float,
+    breath: Float,
+) {
+    androidx.compose.foundation.Canvas(modifier = modifier) {
+        if (emit <= 0f || smallWaveAlpha <= 0f) return@Canvas
+        val w = size.width
+        val h = size.height
+
+        // Reveal dal centro verso i lati: l'onda "esce" da dietro il marchio.
+        val cw = w * emit
+        clipRect(
+            left = w / 2f - cw / 2f,
+            top = 0f,
+            right = w / 2f + cw / 2f,
+            bottom = h,
+        ) {
+            // Le tre passate identiche al player: fasi 0 / 0.9 / 1.8,
+            // ampiezze 1.0 / 0.7 / 0.5, spessori 5.5 / 3.5 / 2.5 dp.
+            val passes = listOf(
+                Triple(0.0f, 1.0f, 5.5f),
+                Triple(0.9f, 0.7f, 3.5f),
+                Triple(1.8f, 0.5f, 2.5f),
+            )
+            passes.forEachIndexed { index, (phaseOffset, ampFactor, strokeDp) ->
+                val amp = h * 0.24f * ampFactor * breath * emit
+                val color = when (index) {
+                    0 -> WaveStreamColors.Accent.copy(alpha = 0.95f * smallWaveAlpha)
+                    1 -> WaveStreamColors.Accent.copy(alpha = 0.45f * smallWaveAlpha)
+                    else -> Color.White.copy(alpha = 0.20f * smallWaveAlpha)
+                }
+                drawPath(
+                    path = WaveForm.wavePath(
+                        width = w,
+                        centerY = h / 2f,
+                        amplitude = amp,
+                        phase = scrollPhase,
+                        phaseOffset = phaseOffset,
+                    ),
+                    color = color,
+                    style = Stroke(width = strokeDp.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round),
+                )
+            }
+        }
+    }
+}
+
+// ======================================================================
+//  L'ondata che si schianta (atto 4) — 2.5D
+// ======================================================================
+
+/**
+ * Disegna l'ondata. La profondità NON viene da OpenGL (impossibile con minSdk 26
+ * su GPU TV) ma da geometria e gradienti:
+ *
+ *  1. strato di fondo in parallasse (più lontano, più scuro)
+ *  2. faccia dell'onda (cresta → fondo) con gradiente verticale
+ *  3. barile — sacca scura sotto la cresta: è ciò che dà VOLUME al rotolo
+ *  4. labbro arricciato verso chi guarda
+ *  5. riflesso speculare sulla faccia
+ *  6. rim luminoso sul bordo (sostituisce il blur, che è vietato)
+ *  7. spruzzi
+ *
+ * `near` (0 lontano → 1 vicino) pilota la prospettiva: ampiezza, labbro e
+ * spruzzi crescono man mano che l'ondata arriva addosso.
+ */
+@Composable
+private fun Canvas3dSurge(crashP: Float, drainP: Float, phase: Float) {
+    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+        val w = size.width
+        val h = size.height
+
+        // La linea da cui nasce l'ondata è la stessa su cui poggiava l'onda piccola.
+        val waveLineY = h / 2f + 1.dp.toPx()
+
+        val draining = drainP > 0f
+        val front = if (!draining) {
+            lerp(waveLineY, -h * 0.35f, crashP)
+        } else {
+            lerp(-h * 0.35f, h * 1.2f, AppAnimations.Emphasized.transform(drainP))
+        }
+
+        if (front > h + 140f) return@Canvas
+        val near = crashP
+        val slope = if (draining) CrashSlope else 0f
+
+        drawSurge(w, h, front, near, slope, phase, WaveStreamColors.Accent)
+    }
+}
+
+private fun DrawScope.drawSurge(
+    w: Float,
+    h: Float,
+    front: Float,
+    near: Float,
+    slope: Float,
+    phase: Float,
+    accent: Color,
+) {
+    val amp = 10f + CrashAmpMax * near          // prospettiva
+    val lipH = CrashLipMax * near
+    val seg = CrashSegments
+
+    fun env(u: Float): Float {
+        val s = sin(u * PI).toFloat()
+        return 0.35f + 0.65f * s
+    }
+
+    fun crestY(u: Float): Float =
+        front + slope * (u - 0.5f) * w +
+            sin(u * 2f * PI.toFloat() * 1.35f + phase) * amp * env(u)
+
+    fun lipY(u: Float): Float = crestY(u) - lipH * env(u).pow(0.85f)
+
+    // Path riusati da più passate
+    val crestPath = Path().apply {
+        moveTo(0f, crestY(0f))
+        for (i in 1..seg) {
+            val u = i.toFloat() / seg
+            lineTo(u * w, crestY(u))
+        }
+    }
+    val lipPath = Path().apply {
+        moveTo(0f, lipY(0f))
+        for (i in 1..seg) {
+            val u = i.toFloat() / seg
+            lineTo(u * w, lipY(u))
+        }
+    }
+    val facePath = Path().apply {
+        addPath(crestPath)
+        lineTo(w, h)
+        lineTo(0f, h)
+        close()
+    }
+    fun bodyPath(bottomY: Float) = Path().apply {
+        addPath(crestPath)
+        lineTo(w, bottomY)
+        lineTo(0f, bottomY)
+        close()
+    }
+
+    // ---- 1 · strato di fondo, in parallasse ----
+    if (near > 0.10f) {
+        val bAmp = amp * 0.55f
+        val bFront = front - 30f * near
+        val backPath = Path().apply {
+            moveTo(0f, bFront + slope * -0.5f * w)
+            for (i in 1..seg) {
+                val u = i.toFloat() / seg
+                val y = bFront + slope * (u - 0.5f) * w +
+                    sin(u * 2f * PI.toFloat() * 1.35f + phase * 0.6f) * bAmp * env(u)
+                lineTo(u * w, y)
+            }
+            lineTo(w, front + 180f * near)
+            lineTo(0f, front + 180f * near)
+            close()
+        }
+        drawPath(backPath, Color(0xFF091826).copy(alpha = 0.9f))
+    }
+
+    // ---- 2 · faccia dell'onda ----
+    drawPath(
+        path = facePath,
+        brush = Brush.verticalGradient(
+            colorStops = arrayOf(
+                0f to accent.copy(alpha = 0.46f),
+                0.16f to accent.copy(alpha = 0.16f),
+                0.38f to Color(0xFF081420),
+                1f to Color(0xFF02050A),
+            ),
+            startY = front - amp - lipH,
+            endY = max(front + 560f, h),
+        ),
+    )
+
+    // ---- 3 · barile: volume del rotolo ----
+    if (near > 0.12f) {
+        val bottom = front + 40f + 170f * near + amp * 2f
+        clipPath(bodyPath(bottom)) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to Color.Black.copy(alpha = 0.62f * near),
+                        0.55f to Color.Black.copy(alpha = 0.22f * near),
+                        1f to Color.Transparent,
+                    ),
+                    startY = front - amp,
+                    endY = bottom,
+                ),
+                topLeft = Offset(0f, front - amp * 2f),
+                size = Size(w, bottom - front + amp * 4f),
+            )
+        }
+    }
+
+    // ---- 4 · labbro arricciato ----
+    if (near > 0.10f) {
+        val lipFill = Path().apply {
+            addPath(lipPath)
+            // ritorno lungo la cresta
+            for (i in seg downTo 0) {
+                val u = i.toFloat() / seg
+                lineTo(u * w, crestY(u))
+            }
+            close()
+        }
+        drawPath(
+            path = lipFill,
+            brush = Brush.verticalGradient(
+                colorStops = arrayOf(
+                    0f to Color.White.copy(alpha = 0.34f * near),
+                    0.42f to accent.copy(alpha = 0.60f * near),
+                    1f to accent.copy(alpha = 0.08f * near),
+                ),
+                startY = front - amp - lipH,
+                endY = front + amp * 0.5f,
+            ),
+        )
+    }
+
+    // ---- 5 · riflesso speculare ----
+    if (near > 0.20f) {
+        val hSpec = 110f * near
+        clipPath(bodyPath(front + hSpec)) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colorStops = arrayOf(
+                        0f to accent.copy(alpha = 0.50f * near),
+                        1f to Color.Transparent,
+                    ),
+                    startY = front,
+                    endY = front + hSpec,
+                ),
+                topLeft = Offset(0f, front - 60f),
+                size = Size(w, hSpec + 60f),
+            )
+        }
+    }
+
+    // ---- 6 · rim luminoso sul labbro ----
+    drawPath(
+        path = lipPath,
+        color = Color(0xFFE8F6FF).copy(alpha = 0.80f),
+        style = Stroke(width = 1.6f + 3.4f * near),
+    )
+
+    // ---- 7 · spruzzi ----
+    if (near > 0.30f) {
+        val n = (30f * near).toInt()
+        for (i in 0 until n) {
+            val u = ((i * 0.6180339887f) + phase * 0.05f) % 1f
+            val k = (i * 0.3819660113f) % 1f
+            val radius = 0.7f + 2.6f * k * near
+            val y = lipY(u) - (4f + 30f * k) * near
+            drawCircle(
+                color = Color(0xFFECF9FF).copy(alpha = (0.30f + 0.55f * k) * near),
+                radius = radius,
+                center = Offset(u * w, y),
+            )
+        }
+    }
+}
