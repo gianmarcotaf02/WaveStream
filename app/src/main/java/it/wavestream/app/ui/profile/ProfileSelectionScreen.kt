@@ -56,6 +56,13 @@ fun ProfileSelectionScreen(
     onProfileLongClick: (Profile) -> Unit,
     onAddProfile: () -> Unit,
     preSelectedProfileId: Long? = null,
+    /**
+     * Progresso 0..1 della rivelazione da parte dell'ondata della splash.
+     * È un provider (e non un Float) di proposito: viene letto dentro
+     * `graphicsLayer`, così durante i 420 ms della ritirata si aggiorna solo il
+     * layer e non si ricompone l'intera schermata (LazyRow inclusa).
+     */
+    entrance: () -> Float = { 1f },
     modifier: Modifier = Modifier
 ) {
     var focusedProfile by remember { mutableStateOf<Profile?>(null) }
@@ -77,6 +84,12 @@ fun ProfileSelectionScreen(
         modifier = modifier
             .fillMaxSize()
             .background(WaveStreamColors.BackgroundDark)
+            .graphicsLayer {
+                // Salita breve mentre la cresta dell'ondata scopre la schermata.
+                val e = entrance()
+                translationY = (1f - e) * 26.dp.toPx()
+                alpha = 0.6f + 0.4f * e
+            }
     ) {
         // Background (static subtle glow)
         ProfileSelectionBackground()
