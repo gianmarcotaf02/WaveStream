@@ -30,6 +30,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -174,19 +175,28 @@ fun SplashScreen(
     // ---- Le due fasi coreografate
     val approach = remember { Animatable(0f) }
     val drain = remember { Animatable(0f) }
-    var drainStarted by remember { mutableStateOf(false) }
     var forcedReady by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        approach.animateTo(1f, tween(SplashCoveredMs, easing = LinearEasing))
-    }
+    // rememberUpdatedState: la coroutine deve leggere il valore CORRENTE di `ready`,
+    // non quello catturato al momento del lancio.
+    val readyState = rememberUpdatedState(ready)
+    val forcedReadyState = rememberUpdatedState(forcedReady)
+
     LaunchedEffect(Unit) {
         delay(T_MAX_HOLD_MS)
         forcedReady = true
     }
-    LaunchedEffect(ready, forcedReady) {
-        if (drainStarted || !(ready || forcedReady)) return@LaunchedEffect
-        drainStarted = true
+
+    LaunchedEffect(Unit) {
+        // 1 · l'ondata monta e copre lo schermo
+        approach.animateTo(1f, tween(SplashCoveredMs, easing = LinearEasing))
+
+        // 2 · la ritirata aspetta DUE cose: copertura completa, e destinazione pronta.
+        //     Partire prima farebbe saltare `front` dal centro schermo a sopra il
+        //     bordo in un frame; partire con i profili non pronti scoprirebbe il vuoto.
+        while (!readyState.value && !forcedReadyState.value) delay(16)
+
+        // 3 · la cresta si ritira e scopre la selezione profili
         onRevealStart()
         drain.animateTo(1f, tween(SplashDrainMs, easing = LinearEasing))
         onComplete()
@@ -310,7 +320,7 @@ private fun SplashMark(
                     scaleY = s
                     alpha = p
                 }
-                .clip(RoundedCornerShape(26))
+                .clip(RoundedCornerShape(26.dp))
                 .background(Color(0xFF05080E))
                 .glassBorder(),
         ) {
@@ -338,7 +348,7 @@ private fun Modifier.glassBorder(): Modifier = this.border(
     brush = Brush.linearGradient(
         listOf(Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.05f))
     ),
-    shape = RoundedCornerShape(26),
+    shape = RoundedCornerShape(26.dp),
 )
 
 @Composable
@@ -391,6 +401,8 @@ private fun CanvasSurface(
         val h = size.height
         val breath = breathProvider()
         val scrollPhase = scrollPhaseProvider()
+        // Riferimento del player: tela 240x84 dp, tratti 5.5/3.5/2.5 dp.
+        val strokeScale = h / (84.dp.toPx())
 
         // Reveal dal centro verso i lati: l'onda "esce" da dietro il marchio.
         val cw = w * emit
@@ -423,7 +435,9 @@ private fun CanvasSurface(
                         phaseOffset = phaseOffset,
                     ),
                     color = color,
-                    style = Stroke(width = strokeDp.dp.toPx(), cap = StrokeCap.Round),
+                    // Il player disegna su una tela alta 84dp: qui è più alta, quindi
+                    // lo spessore va scalato, altrimenti l'onda risulta dimezzata.
+                    style = Stroke(width = strokeDp.dp.toPx() * strokeScale, cap = StrokeCap.Round),
                 )
             }
         }
@@ -465,6 +479,11 @@ private fun Canvas3dSurge(
 
         val drainP = drainProvider()
         val near = crashProvider()
+
+        // Prima dello schianto `near` è 0: senza questa guardia l'ondata disegnerebbe
+        // il riempimento dal centro in giù fin dal primo frame.
+        if (near <= 0f) return@Canvas
+
         val draining = drainP > 0f
 
         val front = if (!draining) {
@@ -499,6 +518,10 @@ private fun DrawScope.drawSurge(
     val amp = 10f + CrashAmpMax * near          // prospettiva
     val lipH = CrashLipMax * near
     val seg = CrashSegments
+
+    // Entrata morbida: la faccia è trasparente quando l'onda è ancora bassa, così
+    // il riempimento non "scatta" di colpo sotto la linea dell'onda.
+    val onset = (near / 0.15f).coerceIn(0f, 1f)
 
     fun env(u: Float): Float {
         val s = sin(u * PI).toFloat()
@@ -557,8 +580,8 @@ private fun DrawScope.drawSurge(
         path = bodyPath(h),
         brush = Brush.verticalGradient(
             colorStops = arrayOf(
-                0f to accent.copy(alpha = 0.46f),
-                0.16f to accent.copy(alpha = 0.16f),
+                0f to accent.copy(alpha = 0.46f * onset),
+                0.16f to accent.copy(alpha = 0.16f * onset),
                 0.38f to Color(0xFF081420),
                 1f to Color(0xFF02050A),
             ),
@@ -632,11 +655,13 @@ private fun DrawScope.drawSurge(
     }
 
     // ---- 6 · rim luminoso sul labbro ----
-    drawPath(
-        path = lipPath,
-        color = Color(0xFFE8F6FF).copy(alpha = 0.80f),
-        style = Stroke(width = 1.6f + 3.4f * near),
-    )
+    if (near > 0.02f) {
+        drawPath(
+            path = lipPath,
+            color = Color(0xFFE8F6FF).copy(alpha = 0.80f * onset),
+            style = Stroke(width = 1.6f + 3.4f * near),
+        )
+    }
 
     // ---- 7 · spruzzi ----
     if (near > 0.30f) {
