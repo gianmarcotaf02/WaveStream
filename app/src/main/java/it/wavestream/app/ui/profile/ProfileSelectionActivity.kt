@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
@@ -14,6 +17,8 @@ import it.wavestream.app.data.database.dao.ProfileDao
 import it.wavestream.app.data.database.entity.Profile
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.service.NotificationHelper
+import it.wavestream.app.ui.loading.SplashCoveredMs
+import it.wavestream.app.ui.loading.SplashDrainMs
 import it.wavestream.app.ui.loading.SplashScreen
 import it.wavestream.app.ui.setup.SetupActivity
 import it.wavestream.app.ui.theme.WaveStreamTheme
@@ -29,6 +34,20 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class ProfileSelectionActivity : ComponentActivity() {
+
+    /**
+     * Esito della fase di avvio.
+     *
+     * [AutoStart] non naviga da sé: restituisce l'azione da eseguire, e il chiamante
+     * la invoca quando la splash ha coperto lo schermo (evita ANR e tagli a metà).
+     */
+    private sealed interface Startup {
+        /** Auto-start sull'ultimo profilo, oppure onboarding obbligatorio. */
+        data class AutoStart(val navigate: () -> Unit) : Startup
+
+        /** C'è da mostrare la selezione profili. */
+        data class ShowProfiles(val profiles: List<Profile>, val lastId: Long?) : Startup
+    }
     
     @Inject lateinit var profileDao: ProfileDao
     @Inject lateinit var userPreferences: UserPreferences
@@ -39,29 +58,49 @@ class ProfileSelectionActivity : ComponentActivity() {
 
         setContent {
             WaveStreamTheme {
-                var showSplash by remember { mutableStateOf(true) }
-                // Profiles are loaded once during splash; passed directly to avoid a second IO call
-                var loadedProfiles by remember { mutableStateOf<List<Profile>>(emptyList()) }
-                var loadedLastProfileId by remember { mutableStateOf<Long?>(null) }
+                // La decisione di avvio (auto-start vs mostra profili) si risolve subito:
+                // è solo IO. La NAVIGAZIONE invece attende che l'ondata abbia coperto lo
+                // schermo: così non si taglia l'animazione a metà e la window ha
+                // certamente il focus (startActivity prima del focus causa un ANR).
+                var startup by remember { mutableStateOf<Startup?>(null) }
+                var splashVisible by remember { mutableStateOf(true) }
+                val entrance = remember { Animatable(0f) }
+                val scope = rememberCoroutineScope()
 
-                if (showSplash) {
-                    SplashScreen(
-                        onComplete = {
-                            android.util.Log.d("WaveStreamDebug", "Splash complete - checking auto-start")
-                            // Navigation happens here, AFTER the window is already visible & focused.
-                            // Calling startActivity before the window has focus causes an ANR.
-                            checkAutoStartAndLoadProfiles { profiles, lastId ->
-                                android.util.Log.d("WaveStreamDebug", "No auto-start, profiles=${profiles.size}")
-                                loadedProfiles = profiles
-                                loadedLastProfileId = lastId
-                                showSplash = false
-                            }
-                        }
-                    )
-                } else {
+                LaunchedEffect(Unit) {
+                    val resolved = withContext(Dispatchers.IO) { resolveStartup() }
+                    android.util.Log.d("WaveStreamDebug", "Startup resolved: $resolved")
+                    startup = resolved
+                    if (resolved is Startup.AutoStart) {
+                        delay((SplashCoveredMs + 120).toLong())
+                        resolved.navigate()
+                    }
+                }
+
+                val showProfiles = startup as? Startup.ShowProfiles
+
+                // La destinazione è composta SOTTO la splash: non c'è dissolvenza tra le
+                // due schermate, è la cresta dell'ondata a rivelarla ritirandosi.
+                if (showProfiles != null) {
                     ProfileSelectionContent(
-                        initialProfiles = loadedProfiles,
-                        initialLastProfileId = loadedLastProfileId
+                        initialProfiles = showProfiles.profiles,
+                        initialLastProfileId = showProfiles.lastId,
+                        entrance = { entrance.value },
+                    )
+                }
+
+                if (splashVisible) {
+                    SplashScreen(
+                        ready = showProfiles != null,
+                        onRevealStart = {
+                            scope.launch {
+                                entrance.animateTo(
+                                    targetValue = 1f,
+                                    animationSpec = tween(SplashDrainMs, easing = LinearEasing),
+                                )
+                            }
+                        },
+                        onComplete = { splashVisible = false },
                     )
                 }
             }
@@ -103,7 +142,8 @@ class ProfileSelectionActivity : ComponentActivity() {
     @Composable
     private fun ProfileSelectionContent(
         initialProfiles: List<Profile>,
-        initialLastProfileId: Long?
+        initialLastProfileId: Long?,
+        entrance: () -> Float = { 1f },
     ) {
         // Profiles are pre-loaded during splash; no extra IO call needed here
         var profiles by remember { mutableStateOf(initialProfiles) }
@@ -127,7 +167,8 @@ class ProfileSelectionActivity : ComponentActivity() {
             onAddProfile = {
                 showAddDialog = true
             },
-            preSelectedProfileId = lastUsedProfileId  // Pre-focus last used profile
+            preSelectedProfileId = lastUsedProfileId,  // Pre-focus last used profile
+            entrance = entrance
         )
         
         // Dialogs
@@ -188,63 +229,46 @@ class ProfileSelectionActivity : ComponentActivity() {
         )
     }
     
-    private fun checkAutoStartAndLoadProfiles(onProfilesLoaded: (List<Profile>, Long?) -> Unit) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            var profiles = profileDao.getAllProfiles().first()
-            
-            // Fetch last used profile ID on IO
-            val lastProfileId = userPreferences.getCurrentProfileId()
-            
-            if (profiles.isEmpty()) {
-                // Create default profile first
-                val defaultProfile = Profile(
-                    name = "Principale",
-                    avatarIndex = 0,
-                    isDefault = true
-                )
-                profileDao.insert(defaultProfile)
-                profiles = profileDao.getAllProfiles().first()
-            }
-            
-            // Auto-start with last profile if enabled
-            val autoStartMode = userPreferences.getAutoStartMode()
-            if (autoStartMode == "last") {
-                if (lastProfileId != null && lastProfileId > 0) {
-                    val profile = profileDao.getProfileById(lastProfileId)
-                    if (profile != null) {
-                        withContext(Dispatchers.Main) {
-                            goToMain(profile)
-                        }
-                        return@launch
-                    }
-                }
-            }
-            
-            // If only one profile (default "Principale") and onboarding not done,
-            // skip profile selection screen and go directly to onboarding
-            if (profiles.size == 1) {
-                val welcomeShown = userPreferences.isWelcomeShown()
-                val termsAccepted = userPreferences.isTermsAccepted()
-                
-                if (!welcomeShown || !termsAccepted) {
-                    // Save as last used before navigating
-                    userPreferences.setCurrentProfileId(profiles.first().id)
-                    withContext(Dispatchers.Main) {
-                        if (!welcomeShown) {
-                            goToWelcome()
-                        } else {
-                            goToTerms()
-                        }
-                    }
-                    return@launch
-                }
-            }
-            
-            // Show profile selection
-            withContext(Dispatchers.Main) {
-                onProfilesLoaded(profiles, lastProfileId)
+    /**
+     * Risolve la fase di avvio SENZA navigare: la navigazione la esegue il chiamante
+     * quando la splash ha coperto lo schermo. Eseguire `startActivity` prima che la
+     * window abbia il focus causa un ANR.
+     */
+    private suspend fun resolveStartup(): Startup {
+        var profiles = profileDao.getAllProfiles().first()
+        val lastProfileId = userPreferences.getCurrentProfileId()
+
+        if (profiles.isEmpty()) {
+            // Create default profile first
+            profileDao.insert(
+                Profile(name = "Principale", avatarIndex = 0, isDefault = true)
+            )
+            profiles = profileDao.getAllProfiles().first()
+        }
+
+        // Auto-start with last profile if enabled
+        val autoStartMode = userPreferences.getAutoStartMode()
+        if (autoStartMode == "last" && lastProfileId != null && lastProfileId > 0) {
+            val profile = profileDao.getProfileById(lastProfileId)
+            if (profile != null) {
+                return Startup.AutoStart { goToMain(profile) }
             }
         }
+
+        // If only one profile (default "Principale") and onboarding not done,
+        // skip profile selection screen and go directly to onboarding
+        if (profiles.size == 1) {
+            val welcomeShown = userPreferences.isWelcomeShown()
+            val termsAccepted = userPreferences.isTermsAccepted()
+            if (!welcomeShown || !termsAccepted) {
+                userPreferences.setCurrentProfileId(profiles.first().id)
+                return Startup.AutoStart {
+                    if (!welcomeShown) goToWelcome() else goToTerms()
+                }
+            }
+        }
+
+        return Startup.ShowProfiles(profiles, lastProfileId)
     }
     
     private fun selectProfile(profile: Profile) {
