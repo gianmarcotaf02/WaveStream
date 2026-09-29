@@ -63,8 +63,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import it.wavestream.app.player.CreditsDetector
 import it.wavestream.app.player.ScreenFrameCapture
-import it.wavestream.app.ui.theme.WaveStreamColors
+import it.wavestream.app.ui.components.WaveForm
 import it.wavestream.app.ui.theme.AppAnimations
+import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.theme.GlassTokens
 import kotlinx.coroutines.delay
@@ -2716,35 +2717,27 @@ private fun ModernLoadingIndicator() {
         )
 
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val w = size.width
             val h = size.height
-            val centerY = h / 2f
-            val segments = 72
 
-            fun drawWave(phaseOffset: Double, ampFactor: Float, color: Color, strokeWidth: Float) {
-                val amp = h * 0.24f * ampFactor * amplitude
-                val path = Path()
-                var i = 0
-                while (i <= segments) {
-                    val t = i / segments.toDouble()
-                    val x = (t * w).toFloat()
-                    // Envelope: l'onda nasce e muore ai bordi, senza tagli netti.
-                    val envelope = kotlin.math.sin(t * kotlin.math.PI)
-                    val angle = t * 2.0 * kotlin.math.PI * 1.5 + phase.toDouble() + phaseOffset
-                    val y = centerY + (kotlin.math.sin(angle) * amp * envelope).toFloat()
-                    if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-                    i++
-                }
+            // La geometria dell'onda vive in [WaveForm]: è la stessa usata dalla
+            // splash screen, così le due schermate non possono divergere.
+            fun drawWave(phaseOffset: Float, ampFactor: Float, color: Color, strokeWidth: Float) {
                 drawPath(
-                    path = path,
+                    path = WaveForm.wavePath(
+                        width = size.width,
+                        centerY = h / 2f,
+                        amplitude = h * 0.24f * ampFactor * amplitude,
+                        phase = phase,
+                        phaseOffset = phaseOffset,
+                    ),
                     color = color,
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                 )
             }
 
-            drawWave(0.0, 1.0f, WaveStreamColors.Accent.copy(alpha = 0.95f), 5.5f)
-            drawWave(0.9, 0.7f, WaveStreamColors.Accent.copy(alpha = 0.45f), 3.5f)
-            drawWave(1.8, 0.5f, Color.White.copy(alpha = 0.20f), 2.5f)
+            drawWave(0f, 1.0f, WaveStreamColors.Accent.copy(alpha = 0.95f), 5.5f)
+            drawWave(0.9f, 0.7f, WaveStreamColors.Accent.copy(alpha = 0.45f), 3.5f)
+            drawWave(1.8f, 0.5f, Color.White.copy(alpha = 0.20f), 2.5f)
         }
     }
 }
