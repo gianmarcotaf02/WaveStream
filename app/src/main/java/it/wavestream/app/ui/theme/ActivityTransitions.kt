@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.core.app.ActivityOptionsCompat
 import it.wavestream.app.R
@@ -79,9 +80,18 @@ object ActivityTransitions {
         // Va disattivata ESPLICITAMENTE: il tema DeviceDefault applica la sua
         // transizione di default (fade/scale) che si somma all'animazione interna
         // (ExpandHeroOverlay) e rende l'apertura "a scatti", con la schermata di
-        // origine che traspare sotto. `overridePendingTransition(0, 0)` va chiamato
-        // subito dopo lo start, dall'Activity che avvia.
-        findActivity(context)?.overridePendingTransition(0, 0)
+        // origine che traspare sotto. Va chiamato subito dopo lo start, dall'Activity
+        // che avvia.
+        findActivity(context)?.let { activity ->
+            @Suppress("DEPRECATION")
+            activity.overridePendingTransition(0, 0)
+            // API 34: la vecchia overridePendingTransition è deprecata; quella nuova
+            // copre anche le transizioni aperte/chiuse a livello di Activity.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                activity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN, 0, 0)
+                activity.overrideActivityTransition(Activity.OVERRIDE_TRANSITION_CLOSE, 0, 0)
+            }
+        }
     }
 
     /** Risale la catena dei ContextWrapper per trovare l'Activity che ha avviato. */
