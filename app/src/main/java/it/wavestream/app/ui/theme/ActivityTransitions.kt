@@ -19,9 +19,6 @@ data class WindowAnimation(val enterRes: Int, val exitRes: Int)
  *   così i chiamanti non devono specificarla.
  * - Applica la scala animazioni tramite [MotionResolver]: se l'utente ha ridotto
  *   le animazioni, nessuna animazione di window.
- * - La categoria [MotionCategory.EXPAND] **non** applica animazioni di window:
- *   l'apertura dei dettagli è gestita internamente da `DetailsScreen` (regola R2
- *   del Motion Contract) per evitare la doppia animazione.
  *
  * Le animazioni sono deliberate a livello di window (transform+alpha), quindi
  * economiche per la GPU delle TV.
@@ -46,8 +43,7 @@ object ActivityTransitions {
 
     /** Animazioni di window per categoria. `null` = nessuna animazione custom. */
     fun windowAnimationFor(category: MotionCategory): WindowAnimation? = when (category) {
-        // R2: l'apertura dettagli è animata in DetailsScreen (EXPAND), non a livello window.
-        MotionCategory.EXPAND -> null
+        MotionCategory.EXPAND -> WindowAnimation(R.anim.fade_in, R.anim.fade_out)
         MotionCategory.ZOOM -> WindowAnimation(R.anim.zoom_in_enter, R.anim.zoom_in_exit)
         MotionCategory.FADE -> WindowAnimation(R.anim.fade_in, R.anim.fade_out)
         MotionCategory.AXIS_Y -> WindowAnimation(R.anim.slide_in_bottom, R.anim.slide_out_up)
@@ -66,22 +62,20 @@ object ActivityTransitions {
 
     /**
      * Avvia un'Activity con l'animazione della categoria inferita da [intent]
-     * (o esplicita). Con motion ridotto o categoria EXPAND, avvia senza animazione.
+     * (o esplicita). Con motion ridotto, avvia senza animazione.
      */
     fun start(context: Context, intent: Intent, category: MotionCategory = categoryFor(intent)) {
-        attachExpandOrigin(intent, category)
         val opts = options(context, category)
         if (opts != null) {
             context.startActivity(intent, opts)
             return
         }
         context.startActivity(intent)
-        // Nessuna animazione di window richiesta (EXPAND, oppure motion ridotto).
+        // Nessuna animazione di window richiesta (motion ridotto).
         // Va disattivata ESPLICITAMENTE: il tema DeviceDefault applica la sua
-        // transizione di default (fade/scale) che si somma all'animazione interna
-        // (ExpandHeroOverlay) e rende l'apertura "a scatti", con la schermata di
-        // origine che traspare sotto. Va chiamato subito dopo lo start, dall'Activity
-        // che avvia.
+        // transizione di default (fade/scale) che si sommerebbe a quella interna
+        // della schermata di destinazione, rendendo l'apertura "a scatti".
+        // Va chiamato subito dopo lo start, dall'Activity che avvia.
         findActivity(context)?.let { activity ->
             @Suppress("DEPRECATION")
             activity.overridePendingTransition(0, 0)
@@ -102,22 +96,6 @@ object ActivityTransitions {
             current = current.baseContext
         }
         return null
-    }
-
-    /**
-     * Se la transizione è EXPAND e c'è un'origine recente (card cliccata),
-     * allega rect + immagine all'Intent per l'animazione poster→hero.
-     */
-    private fun attachExpandOrigin(intent: Intent, category: MotionCategory) {
-        if (category != MotionCategory.EXPAND || !ExpandOrigin.isFresh()) return
-        ExpandOrigin.rect?.let { r ->
-            intent.putExtra(
-                ExpandHeroExtras.KEY_ORIGIN,
-                intArrayOf(r.left.toInt(), r.top.toInt(), r.right.toInt(), r.bottom.toInt())
-            )
-        }
-        intent.putExtra(ExpandHeroExtras.KEY_IMAGE, ExpandOrigin.imageUrl)
-        ExpandOrigin.clear()
     }
 
     /**
