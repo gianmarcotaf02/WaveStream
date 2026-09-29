@@ -371,14 +371,44 @@ fun TvPlayerScreen(
         // dopo 10s di pausa l'overlay resta a schermo.
         val showPauseInfo = pauseInfo != null && !isPlaying && !isLoading &&
             !isLiveChannel && !isMiniPlayer && nextEpisode == null
-        AnimatedVisibility(
-            visible = showPauseInfo,
-            enter = fadeIn(tween(AppAnimations.FadeEnterMs))
-                + slideInVertically(initialOffsetY = { it / 18 }),
-            exit = fadeOut(tween(AppAnimations.FadeExitMs)),
-            modifier = Modifier.fillMaxSize()
-        ) {
-            pauseInfo?.let { PauseInfoOverlay(info = it, currentPosition = currentPosition, duration = duration) }
+        // L'overlay è un layer composito STABILE (figlio diretto del Box), non un
+        // AnimatedVisibility: così l'animazione di uscita dei controlli non può
+        // riposizionarlo (prima scivolava verso il basso durante la transizione).
+        // Alpha e micro-slide sono letti dentro graphicsLayer (nessuna recomposition
+        // per frame); il composable resta montato solo per la durata della pausa.
+        val pauseOverlayAnim = remember { Animatable(0f) }
+        var pauseOverlayRendered by remember { mutableStateOf(false) }
+        LaunchedEffect(showPauseInfo) {
+            if (showPauseInfo) {
+                pauseOverlayRendered = true
+                pauseOverlayAnim.animateTo(
+                    1f,
+                    tween(AppAnimations.FadeEnterMs, easing = AppAnimations.Emphasized)
+                )
+            } else {
+                pauseOverlayAnim.animateTo(0f, tween(AppAnimations.FadeExitMs))
+                pauseOverlayRendered = false
+            }
+        }
+        if (pauseOverlayRendered) {
+            pauseInfo?.let { info ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.TopStart)
+                        .graphicsLayer {
+                            val a = pauseOverlayAnim.value
+                            alpha = a
+                            translationY = (1f - a) * 24f
+                        }
+                ) {
+                    PauseInfoOverlay(
+                        info = info,
+                        currentPosition = currentPosition,
+                        duration = duration
+                    )
+                }
+            }
         }
 
         // Controls overlay
