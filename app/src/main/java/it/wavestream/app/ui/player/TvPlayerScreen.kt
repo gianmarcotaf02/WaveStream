@@ -373,14 +373,10 @@ fun TvPlayerScreen(
             !isLiveChannel && !isMiniPlayer && nextEpisode == null
         // L'overlay è un layer composito STABILE (figlio diretto del Box), non un
         // AnimatedVisibility: così l'animazione di uscita dei controlli non può
-        // riposizionarlo (prima scivolava verso il basso durante la transizione).
-        // Alpha e micro-slide sono letti dentro graphicsLayer (nessuna recomposition
-        // per frame); il composable resta montato solo per la durata della pausa.
+        // riposizionarlo. Qui si gestisce SOLO la dissolvenza del layer; il blocco
+        // testuale (logo/info/trama) si muove all'interno di PauseInfoOverlay,
+        // mentre gli scrim di sfondo restano fissi.
         val pauseOverlayAnim = remember { Animatable(0f) }
-        // Scostamento verticale: quando i controlli sono visibili l'overlay sta al
-        // centro; quando svaniscono scende di poco, così resta bilanciato nello
-        // spazio libero lasciato dalla barra. Animato e letto in graphicsLayer.
-        val pauseOverlayShiftDp = remember { Animatable(0f) }
         var pauseOverlayRendered by remember { mutableStateOf(false) }
         LaunchedEffect(showPauseInfo) {
             if (showPauseInfo) {
@@ -394,37 +390,19 @@ fun TvPlayerScreen(
                 pauseOverlayRendered = false
             }
         }
-        LaunchedEffect(controlsVisible, showPauseInfo) {
-            if (!showPauseInfo) {
-                // Overlay non visibile: riazzera senza animare, così alla prossima
-                // pausa riparte dal centro e non "sale" da una posizione vecchia.
-                pauseOverlayShiftDp.snapTo(0f)
-            } else {
-                pauseOverlayShiftDp.animateTo(
-                    targetValue = if (controlsVisible) 0f else 56f,
-                    animationSpec = tween(
-                        AppAnimations.OverlayEnterMs,
-                        easing = AppAnimations.Emphasized
-                    )
-                )
-            }
-        }
         if (pauseOverlayRendered) {
             pauseInfo?.let { info ->
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .align(Alignment.TopStart)
-                        .graphicsLayer {
-                            val a = pauseOverlayAnim.value
-                            alpha = a
-                            translationY = (1f - a) * 24f + pauseOverlayShiftDp.value.dp.toPx()
-                        }
+                        .graphicsLayer { alpha = pauseOverlayAnim.value }
                 ) {
                     PauseInfoOverlay(
                         info = info,
                         currentPosition = currentPosition,
-                        duration = duration
+                        duration = duration,
+                        contentAtBottom = !controlsVisible
                     )
                 }
             }
@@ -601,7 +579,8 @@ private fun formatRemainingLabel(minutes: Int): String =
 private fun PauseInfoOverlay(
     info: PlayerPauseInfo,
     currentPosition: Long,
-    duration: Long
+    duration: Long,
+    contentAtBottom: Boolean = false
 ) {
     val remainingMinutes = if (duration > 0L) {
         ((duration - currentPosition) / 60000L).toInt().coerceAtLeast(0)
@@ -609,6 +588,7 @@ private fun PauseInfoOverlay(
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Scrim grigio semi-trasparente: oscura lievemente il frame in pausa.
+        // Gli scrim restano FISSI: si sposta solo il blocco testuale.
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -626,100 +606,128 @@ private fun PauseInfoOverlay(
                 )
         )
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .fillMaxHeight()
-                .fillMaxWidth(0.52f)
-                .padding(horizontal = 48.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Logo TMDB (clear logo) allineato a sinistra, sulla stessa x dell'anno;
-            // fallback al testo.
-            if (!info.logoUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = info.logoUrl,
-                    contentDescription = info.title,
-                    alignment = Alignment.CenterStart,
-                    contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+        // Posizione del blocco testuale: centrato a sinistra quando i controlli
+        // sono visibili; nell'angolo in basso a sinistra quando svaniscono.
+        // Il Layout misura prima il contenuto (nessuna stima) e lo colloca con
+        // una posizione animata: movimento preciso e fluido, scrim fermi.
+        val bottomPaddingPx = with(LocalDensity.current) { 48.dp.toPx() }
+        val positionProgress = animateFloatAsState(
+            targetValue = if (contentAtBottom) 1f else 0f,
+            animationSpec = tween(
+                AppAnimations.OverlayEnterMs,
+                easing = AppAnimations.Emphasized
+            ),
+            label = "pauseContentPosition"
+        )
+        Layout(
+            content = {
+                Column(
                     modifier = Modifier
-                        .height(88.dp)
-                        .fillMaxWidth(0.80f)
-                )
-            } else {
-                Text(
-                    text = info.title,
-                    style = MaterialTheme.typography.displaySmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+                        .fillMaxWidth(0.52f)
+                        .padding(horizontal = 48.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    // Logo TMDB (clear logo) allineato a sinistra, sulla stessa x dell'anno;
+                    // fallback al testo.
+                    if (!info.logoUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = info.logoUrl,
+                            contentDescription = info.title,
+                            alignment = Alignment.CenterStart,
+                            contentScale = androidx.compose.ui.layout.ContentScale.Fit,
+                            modifier = Modifier
+                                .height(88.dp)
+                                .fillMaxWidth(0.80f)
+                        )
+                    } else {
+                        Text(
+                            text = info.title,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
 
-            Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-            // Riga meta: anno • durata • generi • minuti rimasti
-            val metaParts = buildList {
-                info.year?.let { add(it.toString()) }
-                info.durationMinutes?.takeIf { it > 0 }?.let { add(formatDurationLabel(it)) }
-                info.genres?.takeIf { it.isNotBlank() }?.let { add(it) }
-                remainingMinutes?.takeIf { it > 0 }?.let { add(formatRemainingLabel(it)) }
-            }
-            if (metaParts.isNotEmpty()) {
-                Text(
-                    text = metaParts.joinToString("   •   "),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = Color.White.copy(alpha = 0.88f),
-                    fontWeight = FontWeight.Medium,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
+                    // Riga meta: anno • durata • generi • minuti rimasti
+                    val metaParts = buildList {
+                        info.year?.let { add(it.toString()) }
+                        info.durationMinutes?.takeIf { it > 0 }?.let { add(formatDurationLabel(it)) }
+                        info.genres?.takeIf { it.isNotBlank() }?.let { add(it) }
+                        remainingMinutes?.takeIf { it > 0 }?.let { add(formatRemainingLabel(it)) }
+                    }
+                    if (metaParts.isNotEmpty()) {
+                        Text(
+                            text = metaParts.joinToString("   •   "),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.White.copy(alpha = 0.88f),
+                            fontWeight = FontWeight.Medium,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
 
-            // Serie: stagione/episodio in corso + titolo episodio + trama
-            if (info.isSeries && info.seasonNumber != null && info.episodeNumber != null) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "Stagione ${info.seasonNumber}   •   Episodio ${info.episodeNumber}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = WaveStreamColors.Accent,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                info.episodeTitle?.takeIf { it.isNotBlank() }?.let { epTitle ->
-                    Text(
-                        text = epTitle,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    // Serie: stagione/episodio in corso + titolo episodio + trama
+                    if (info.isSeries && info.seasonNumber != null && info.episodeNumber != null) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = "Stagione ${info.seasonNumber}   •   Episodio ${info.episodeNumber}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = WaveStreamColors.Accent,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        info.episodeTitle?.takeIf { it.isNotBlank() }?.let { epTitle ->
+                            Text(
+                                text = epTitle,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+
+                    // Trama: per i film è quella del film, per le serie quella dell'episodio
+                    // in corso (fallback alla trama della serie).
+                    info.plot?.takeIf { it.isNotBlank() }?.let { plot ->
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = plot,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White.copy(alpha = 0.8f),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-            }
-
-            // Trama: per i film è quella del film, per le serie quella dell'episodio
-            // in corso (fallback alla trama della serie).
-            info.plot?.takeIf { it.isNotBlank() }?.let { plot ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = plot,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.8f),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                    maxLines = 4,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
-                )
+            },
+            modifier = Modifier.fillMaxSize()
+        ) { measurables, constraints ->
+            val placeable = measurables.first().measure(
+                constraints.copy(minWidth = 0, minHeight = 0)
+            )
+            val containerHeight = constraints.maxHeight
+            val centeredTop = ((containerHeight - placeable.height) / 2).coerceAtLeast(0)
+            val bottomTop = (containerHeight - placeable.height -
+                bottomPaddingPx.toInt()).coerceAtLeast(0)
+            val top = centeredTop +
+                ((bottomTop - centeredTop) * positionProgress.value).toInt()
+            layout(constraints.maxWidth, containerHeight) {
+                placeable.placeRelative(0, top)
             }
         }
     }
