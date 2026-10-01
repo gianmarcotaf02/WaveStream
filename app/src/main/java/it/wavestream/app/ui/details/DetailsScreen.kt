@@ -3761,48 +3761,6 @@ private fun AddToListButton(
         }
     }
 
-    // Rinomina lista: il dialog mancava, quindi il tasto matita non faceva nulla.
-    renamingListId?.let { renamingId ->
-        val list = customLists.firstOrNull { it.id == renamingId }
-        if (list != null) {
-            var renameText by remember(renamingId) { mutableStateOf(list.name) }
-            AlertDialog(
-                onDismissRequest = { renamingListId = null },
-                containerColor = GlassTokens.SurfaceFillOpaque,
-                shape = GlassTokens.RadiusMedium,
-                title = { Text("Rinomina lista", color = WaveStreamColors.TextPrimary) },
-                text = {
-                    OutlinedTextField(
-                        value = renameText,
-                        onValueChange = { renameText = it },
-                        label = { Text("Nome lista") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = WaveStreamColors.TextPrimary,
-                            unfocusedTextColor = WaveStreamColors.TextPrimary,
-                            focusedBorderColor = WaveStreamColors.Accent,
-                            unfocusedBorderColor = WaveStreamColors.BackgroundTertiary
-                        )
-                    )
-                },
-                confirmButton = {
-                    TextButton(onClick = {
-                        val trimmed = renameText.trim()
-                        if (trimmed.isNotEmpty()) onRenameList(renamingId, trimmed)
-                        renamingListId = null
-                    }) {
-                        Text("Salva", color = WaveStreamColors.Accent)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { renamingListId = null }) { Text("Annulla", color = WaveStreamColors.TextSecondary) }
-                }
-            )
-        }
-    }
-}
-    
     if (showCreateDialog) {
         var listName by remember { mutableStateOf("") }
         AlertDialog(
