@@ -205,6 +205,9 @@ fun TvCarouselRow(
             val density = LocalDensity.current
             val leftMarginPx = with(density) { CAROUSEL_LEFT_MARGIN.toPx() }
             val viewportWidthPx = with(density) { maxWidth.toPx() }
+            // Padding finale di sicurezza: se il viewport non è finito (constraint
+            // unbounded), niente padding per non rischiare un valore infinito.
+            val endPivotPadding = if (maxWidth.value.isFinite()) maxWidth else 0.dp
             val focusPivotFraction = if (viewportWidthPx.isFinite() && viewportWidthPx > 0f) {
                 (leftMarginPx / viewportWidthPx).coerceIn(0f, 1f)
             } else {
@@ -213,7 +216,11 @@ fun TvCarouselRow(
 
         TvLazyRow(
             state = listState,
-            contentPadding = PaddingValues(start = CAROUSEL_LEFT_MARGIN, end = 40.dp),
+            // Padding finale ampio quanto il viewport: garantisce a QUALSIASI item
+            // (anche nelle righe corte, es. "Continua a guardare") di poter scorrere
+            // fino al primo slot a sinistra. Senza, le righe che entrano tutte nello
+            // schermo non hanno margine di scroll e il focus non si "blocca".
+            contentPadding = PaddingValues(start = CAROUSEL_LEFT_MARGIN, end = endPivotPadding),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             pivotOffsets = PivotOffsets(
                 parentFraction = focusPivotFraction,
