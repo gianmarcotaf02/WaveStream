@@ -77,7 +77,8 @@ fun CategoryCard(
             .width(180.dp)
             .height(100.dp)
             .clip(RoundedCornerShape(12.dp))
-            .border(2.dp, borderColor, RoundedCornerShape(12.dp))
+            // Focus: ring accent 3dp ben visibile (idle sottile)
+            .border(if (isFocused) 3.dp else 1.dp, borderColor, RoundedCornerShape(12.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(
