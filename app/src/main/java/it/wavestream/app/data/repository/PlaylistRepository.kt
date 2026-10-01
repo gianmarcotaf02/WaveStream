@@ -332,39 +332,60 @@ class PlaylistRepository @Inject constructor(
     /**
      * Load episodes for a series on-demand from Xtream API
      */
+    /**
+     * Carica (o aggiorna) gli episodi di una serie dal provider Xtream.
+     *
+     * Comportamento:
+     * - se gli episodi sono già in DB e il refresh non è "scaduto" (TTL) e non è
+     *   richiesto `forceRefresh`, non contatta il provider;
+     * - altrimenti scarica `get_series_info` e fa una **merge**: inserisce SOLO gli
+     *   episodi nuovi, senza cancellare quelli esistenti. Così gli id restano stabili
+     *   e i progressi di visione (`watch_progress.contentId`) non si rompono;
+     * - con `forceRefresh = true` sostituisce l'intera lista (usa con cautela).
+     *
+     * @return true se la lista episodi è (o è diventata) disponibile, false su errore
+     *         o se la serie non è gestita dal provider.
+     */
     suspend fun loadSeriesEpisodes(seriesId: Long, forceRefresh: Boolean = false): Boolean = withContext(Dispatchers.IO) {
         val series = seriesDao.getSeriesById(seriesId) ?: return@withContext false
         val xtreamSeriesId = series.xtreamSeriesId ?: return@withContext false
-        
+
         val existingCount = episodeDao.getCountBySeries(seriesId)
-        if (existingCount > 0 && !forceRefresh) return@withContext true
+        val stale = System.currentTimeMillis() - (series.episodesLastFetchedAt ?: 0L) > EPISODES_REFRESH_TTL_MS
+        // Con 0 episodi si tenta sempre (per intercettare quelli che compaiono in seguito);
+        // altrimenti solo se il refresh è scaduto o esplicitamente forzato.
+        val shouldFetch = forceRefresh || existingCount == 0 || stale
+        if (!shouldFetch) return@withContext true
         if (forceRefresh && existingCount > 0) episodeDao.deleteBySeries(seriesId)
-        
+
         val playlist = playlistDao.getPlaylistById(series.playlistId) ?: return@withContext false
         if (playlist.type != "xtream") return@withContext false
-        
+
         val baseUrl = playlist.url.trimEnd('/')
         val username = playlist.username ?: return@withContext false
         val password = playlist.password ?: return@withContext false
-        
+
         try {
             val apiUrl = "$baseUrl/player_api.php?username=$username&password=$password&action=get_series_info&series_id=$xtreamSeriesId"
             val response = downloadContent(apiUrl)
             val seriesInfoResult = xtreamParser.parseSeriesInfo(response)
             if (seriesInfoResult == null) return@withContext false
-            
-            // Save info back to Series DB
+
+            // Riga serie aggiornata cumulativamente (info + latest episode): un solo
+            // update finale evita che il secondo sovrascriva i campi del primo.
+            var seriesRow = series
+
             val info = seriesInfoResult.info
             if (info != null) {
-                seriesDao.update(series.copy(
-                    xtreamPlot = info.plot ?: series.xtreamPlot,
-                    xtreamCast = info.cast ?: series.xtreamCast,
-                    xtreamDirector = info.director ?: series.xtreamDirector,
-                    xtreamGenre = info.genre ?: series.xtreamGenre,
-                    xtreamRating = info.rating ?: series.xtreamRating
-                ))
+                seriesRow = seriesRow.copy(
+                    xtreamPlot = info.plot ?: seriesRow.xtreamPlot,
+                    xtreamCast = info.cast ?: seriesRow.xtreamCast,
+                    xtreamDirector = info.director ?: seriesRow.xtreamDirector,
+                    xtreamGenre = info.genre ?: seriesRow.xtreamGenre,
+                    xtreamRating = info.rating ?: seriesRow.xtreamRating
+                )
             }
-            
+
             val episodeEntities = mutableListOf<Episode>()
             seriesInfoResult.episodes?.forEach { (seasonKey, episodeList) ->
                 val seasonNum = seasonKey.toIntOrNull() ?: 1
@@ -373,7 +394,7 @@ class PlaylistRepository @Inject constructor(
                     val episodeId = ep.id.toIntOrNull() ?: return@forEach
                     val extension = ep.extension ?: "mp4"
                     val streamUrl = "$baseUrl/series/$username/$password/$episodeId.$extension"
-                    
+
                     episodeEntities.add(Episode(
                         seriesId = seriesId,
                         name = ep.title ?: "Episode $episodeNum",
@@ -393,15 +414,26 @@ class PlaylistRepository @Inject constructor(
                     ))
                 }
             }
-            
-            if (episodeEntities.isNotEmpty()) {
-                episodeDao.insertAll(episodeEntities)
+
+            // MERGE: se non è un replace totale, inserisci solo gli episodi non ancora
+            // presenti (per stagione+episodio), preservando gli id esistenti.
+            val toInsert = if (forceRefresh || existingCount == 0) {
+                episodeEntities
+            } else {
+                val existingKeys = episodeDao.getEpisodesBySeriesList(seriesId)
+                    .mapTo(HashSet()) { it.seasonNumber to it.episodeNumber }
+                episodeEntities.filterNot { (it.seasonNumber to it.episodeNumber) in existingKeys }
+            }
+
+            if (toInsert.isNotEmpty()) {
+                episodeDao.insertAll(toInsert)
                 // Trame episodi da TMDB (it-IT) subito dopo il sync dal provider:
                 // senza questo passaggio la trama comparirebbe solo dopo un
                 // "Aggiorna playlist" manuale o riaprendo la serie. Fallimento
                 // silenzioso: il provider resta comunque la fonte primaria.
-                runCatching { tmdbService.enrichEpisodesFromTMDB(series) }
+                runCatching { tmdbService.enrichEpisodesFromTMDB(seriesRow) }
                     .onFailure { Log.w(TAG, "TMDB episode enrichment failed for ${series.name}", it) }
+
                 val latest = episodeEntities.maxByOrNull { it.episodeNumber * 100 + it.seasonNumber }
                 if (latest != null) {
                     // Timestamp di inserimento DEL SERVER per l'episodio più recente
@@ -410,23 +442,28 @@ class PlaylistRepository @Inject constructor(
                     val latestProviderAdded = seriesInfoResult.episodes?.get(latest.seasonNumber.toString())
                         ?.firstOrNull { it.episodeNum == latest.episodeNumber }
                         ?.added?.let { it * 1000L }
-                    val changed = series.latestEpisodeSeason != latest.seasonNumber ||
-                        series.latestEpisodeNumber != latest.episodeNumber
+                    val changed = seriesRow.latestEpisodeSeason != latest.seasonNumber ||
+                        seriesRow.latestEpisodeNumber != latest.episodeNumber
                     // Con il timestamp del provider quest'ultimo è la fonte di verità:
                     // si riallinea anche se è più vecchio di quello memorizzato in locale
                     // (es. memorizzato in passato come "ora del sync").
                     val tsChanged = latestProviderAdded != null &&
-                        latestProviderAdded != series.latestEpisodeAddedAt
+                        latestProviderAdded != seriesRow.latestEpisodeAddedAt
                     if (changed || tsChanged) {
-                        seriesDao.update(series.copy(
+                        seriesRow = seriesRow.copy(
                             latestEpisodeSeason = latest.seasonNumber,
                             latestEpisodeNumber = latest.episodeNumber,
                             latestEpisodeAddedAt = latestProviderAdded ?: System.currentTimeMillis()
-                        ))
+                        )
                     }
                 }
+                Log.d(TAG, "loadSeriesEpisodes: '${series.name}' → ${toInsert.size} nuovi episodi (provider=${episodeEntities.size}, existing=$existingCount)")
             }
-            return@withContext episodeEntities.isNotEmpty()
+
+            // Segna sempre il momento del fetch, anche se il provider non ha (nuovi) episodi:
+            // evita di interrogarlo a ogni apertura; dopo il TTL si riprova.
+            seriesDao.update(seriesRow.copy(episodesLastFetchedAt = System.currentTimeMillis()))
+            return@withContext true
         } catch (e: Exception) {
             Log.e(TAG, "Error loading episodes for series ${series.name}", e)
             return@withContext false
