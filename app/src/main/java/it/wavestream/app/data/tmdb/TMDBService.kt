@@ -1681,7 +1681,6 @@ class TMDBService @Inject constructor(
         val numberOfSeasons = details.optInt("number_of_seasons", 0)
         val numberOfEpisodes = details.optInt("number_of_episodes", 0)
         val status = details.optString("status", "").takeIf { it.isNotEmpty() }
-        @Suppress("UNUSED_VARIABLE") // extractedYear kept for future use
         val extractedYear = firstAirDate?.take(4)?.toIntOrNull()
         
         // Extract genres
@@ -1780,6 +1779,9 @@ class TMDBService @Inject constructor(
             tmdbNumberOfSeasons = numberOfSeasons.takeIf { it > 0 },
             tmdbNumberOfEpisodes = numberOfEpisodes.takeIf { it > 0 },
             tmdbStatus = status,
+            // Come per i film: se la playlist non aveva l'anno, usa first_air_date di TMDB.
+            // Prima era calcolato ma mai salvato (anno vuoto nelle serie).
+            year = series.year ?: extractedYear,
             tmdbLastFetchAt = System.currentTimeMillis()
         )
     }
