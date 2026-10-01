@@ -299,23 +299,23 @@ class SettingsActivity : ComponentActivity() {
                     contentFocusRequester = contentFocusRequester
                 ) {
                 when (selectedMenuId) {
-                    "profile" -> ProfileSettings(profileDao, userPreferences, contentFocusRequester)
-                    "account" -> AccountSettings(playlistDao, playlistRepository, contentFocusRequester)
-                    "playlist" -> PlaylistSettings(playlistDao, playlistRepository, userPreferences, contentFocusRequester)
-                    "preferences" -> PreferencesSettings(userPreferences, contentFocusRequester)
-                    "player" -> PlayerSettings(userPreferences, contentFocusRequester)
-                    "subtitles" -> SubtitlesSettings(openSubtitlesRepository, userPreferences, contentFocusRequester)
-                    "movieending" -> MovieEndingSettings(userPreferences, contentFocusRequester)
-                    "assistant" -> AssistantSettings(userPreferences, ttsManager, sherpaTts, contentFocusRequester)
-                    "epg" -> EpgSettings(userPreferences, epgRepository, playlistDao, contentFocusRequester)
+                    "profile" -> ProfileSettings(profileDao, userPreferences)
+                    "account" -> AccountSettings(playlistDao, playlistRepository)
+                    "playlist" -> PlaylistSettings(playlistDao, playlistRepository, userPreferences)
+                    "preferences" -> PreferencesSettings(userPreferences)
+                    "player" -> PlayerSettings(userPreferences)
+                    "subtitles" -> SubtitlesSettings(openSubtitlesRepository, userPreferences)
+                    "movieending" -> MovieEndingSettings(userPreferences)
+                    "assistant" -> AssistantSettings(userPreferences, ttsManager, sherpaTts)
+                    "epg" -> EpgSettings(userPreferences, epgRepository, playlistDao)
                     "appearance" -> AppearanceSettings(userPreferences)
                     "storage" -> StorageSettings(profileDao, playlistDao, userPreferences)
                     "vpn" -> if (VpnFeature.ENABLED) {
-                        VpnSettings(userPreferences, vpnManager, contentFocusRequester)
+                        VpnSettings(userPreferences, vpnManager)
                     } else {
-                        PreferencesSettings(userPreferences, contentFocusRequester)
+                        PreferencesSettings(userPreferences)
                     }
-                    "updates" -> UpdateSettings(appUpdateManager, contentFocusRequester)
+                    "updates" -> UpdateSettings(appUpdateManager)
                     "about" -> AboutSettings()
                     else -> {
                         Text(
@@ -830,8 +830,7 @@ private fun SettingsMenuItemRow(
 @Composable
 private fun ProfileSettings(
     profileDao: ProfileDao,
-    userPreferences: UserPreferences,
-    contentFocusRequester: FocusRequester? = null
+    userPreferences: UserPreferences
 ) {
     val coroutineScope = rememberCoroutineScope()
     var currentProfile by remember { mutableStateOf<Profile?>(null) }
@@ -1000,8 +999,7 @@ private fun ProfileSettings(
 @Composable
 private fun AccountSettings(
     playlistDao: PlaylistDao,
-    playlistRepository: it.wavestream.app.data.repository.PlaylistRepository,
-    contentFocusRequester: FocusRequester? = null
+    playlistRepository: it.wavestream.app.data.repository.PlaylistRepository
 ) {
     val coroutineScope = rememberCoroutineScope()
     var xtreamPlaylist by remember { mutableStateOf<Playlist?>(null) }
@@ -1263,8 +1261,7 @@ private fun AccountDetailRow(
 private fun PlaylistSettings(
     playlistDao: PlaylistDao,
     playlistRepository: it.wavestream.app.data.repository.PlaylistRepository,
-    userPreferences: UserPreferences,
-    contentFocusRequester: FocusRequester? = null
+    userPreferences: UserPreferences
 ) {
     val coroutineScope = rememberCoroutineScope()
     val playlists by playlistDao.getAllPlaylists().collectAsState(initial = emptyList())
@@ -1788,7 +1785,7 @@ private fun PlaylistEditDialog(
 }
 
 @Composable
-private fun PreferencesSettings(userPreferences: UserPreferences, contentFocusRequester: FocusRequester? = null) {
+private fun PreferencesSettings(userPreferences: UserPreferences) {
     val coroutineScope = rememberCoroutineScope()
     var liveLayoutMode by remember { mutableStateOf("grid") }
     
@@ -1817,7 +1814,7 @@ private fun PreferencesSettings(userPreferences: UserPreferences, contentFocusRe
 }
 
 @Composable
-private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequester: FocusRequester? = null) {
+private fun PlayerSettings(userPreferences: UserPreferences) {
     val coroutineScope = rememberCoroutineScope()
     
     val audioLanguage by userPreferences.getDefaultAudioLanguageFlow().collectAsState(initial = "ita")
@@ -1929,8 +1926,7 @@ private fun PlayerSettings(userPreferences: UserPreferences, contentFocusRequest
 @Composable
 private fun SubtitlesSettings(
     openSubtitlesRepo: it.wavestream.app.data.repository.OpenSubtitlesRepository,
-    userPreferences: UserPreferences,
-    contentFocusRequester: FocusRequester? = null
+    userPreferences: UserPreferences
 ) {
     val coroutineScope = rememberCoroutineScope()
     
@@ -2171,8 +2167,7 @@ private fun SubtitlesSettings(
 private fun EpgSettings(
     userPreferences: UserPreferences,
     epgRepository: it.wavestream.app.data.repository.EpgRepository,
-    playlistDao: PlaylistDao,
-    contentFocusRequester: FocusRequester? = null
+    playlistDao: PlaylistDao
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -2552,7 +2547,7 @@ private fun StorageSettings(
 }
 
 @Composable
-private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateManager, contentFocusRequester: FocusRequester? = null) {
+private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateManager) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var isChecking by remember { mutableStateOf(false) }
@@ -3387,8 +3382,7 @@ private fun VpnActionButton(
 @Composable
 private fun VpnSettings(
     userPreferences: UserPreferences,
-    vpnManager: VpnManager,
-    contentFocusRequester: FocusRequester? = null
+    vpnManager: VpnManager
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -3732,8 +3726,7 @@ private fun VpnSettings(
  */
 @Composable
 private fun MovieEndingSettings(
-    userPreferences: UserPreferences,
-    contentFocusRequester: FocusRequester? = null
+    userPreferences: UserPreferences
 ) {
     val scope = rememberCoroutineScope()
 
@@ -3832,8 +3825,7 @@ private fun MovieEndingSettings(
 private fun AssistantSettings(
     userPreferences: UserPreferences,
     ttsManager: it.wavestream.app.voice.TtsManager,
-    sherpaTts: it.wavestream.app.voice.SherpaTtsManager,
-    contentFocusRequester: FocusRequester? = null
+    sherpaTts: it.wavestream.app.voice.SherpaTtsManager
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
