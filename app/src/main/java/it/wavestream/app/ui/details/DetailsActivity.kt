@@ -344,6 +344,43 @@ class DetailsActivity : ComponentActivity() {
                     state = refreshWatchProgress(state)
                 }
             },
+            // Segna manualmente come "visto" (film / serie: tutta o selezione episodi)
+            onMarkWatchedClick = {
+                lifecycleScope.launch {
+                    markCurrentContentWatched()
+                    android.widget.Toast.makeText(
+                        this@DetailsActivity,
+                        "Segnato come già visto",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    state = refreshWatchProgress(state)
+                }
+            },
+            onMarkEpisodesWatched = { episodeIds ->
+                if (episodeIds.isNotEmpty()) {
+                    lifecycleScope.launch {
+                        markEpisodesWatched(episodeIds)
+                        android.widget.Toast.makeText(
+                            this@DetailsActivity,
+                            "Segnati ${episodeIds.size} episodi come visti",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                        state = refreshWatchProgress(state)
+                    }
+                }
+            },
+            // Segna come "non visto": cancella lo stato di visione
+            onUnmarkWatchedClick = {
+                lifecycleScope.launch {
+                    unmarkCurrentContentWatched()
+                    android.widget.Toast.makeText(
+                        this@DetailsActivity,
+                        "Segnato come non visto",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    state = refreshWatchProgress(state)
+                }
+            },
             // Download callbacks
             onDownloadClick = {
                 if (contentType == ContentType.MOVIE) {
@@ -541,6 +578,82 @@ class DetailsActivity : ComponentActivity() {
             )
         }
         else -> current
+    }
+
+    /**
+     * Durata (>0) da salvare su una riga "vista" creata a mano.
+     *
+     * La query del badge richiede `duration > 0`, quindi non si può usare 0. Se non
+     * conosciamo la durata reale si usa un valore sentinella di 1 ms: con
+     * `isCompleted = true` il contenuto risulta comunque visto e, avendo
+     * `position = duration`, non entra mai in "Continua a guardare".
+     */
+    private fun watchedDuration(existingDuration: Long, fallbackMs: Long?): Long =
+        existingDuration.takeIf { it > 0 }
+            ?: fallbackMs?.takeIf { it > 0 }
+            ?: 1L
+
+    /** Segna come visto il contenuto corrente: film oppure tutta la serie. */
+    private suspend fun markCurrentContentWatched() {
+        when (contentType) {
+            ContentType.MOVIE -> {
+                val existing = watchProgressDao.getProgress(profileId, ContentType.MOVIE, contentId)
+                val runtimeMs = movieDao.getMovieById(contentId)?.tmdbRuntime?.let { it * 60_000L }
+                val duration = watchedDuration(existing?.duration ?: 0L, runtimeMs)
+                watchProgressDao.upsert(
+                    WatchProgress(
+                        profileId = profileId,
+                        contentType = ContentType.MOVIE,
+                        contentId = contentId,
+                        position = duration,
+                        duration = duration,
+                        isCompleted = true,
+                        lastWatchedAt = System.currentTimeMillis()
+                    )
+                )
+            }
+            ContentType.SERIES, ContentType.EPISODE -> {
+                val seriesId = currentSeriesId.takeIf { it > 0 } ?: contentId
+                markEpisodesWatched(episodeDao.getEpisodesBySeriesList(seriesId).map { it.id })
+            }
+            else -> Unit
+        }
+    }
+
+    /** Segna come visti gli episodi indicati (crea/aggiorna la riga di progresso). */
+    private suspend fun markEpisodesWatched(episodeIds: Collection<Long>) {
+        episodeIds.forEach { epId ->
+            val ep = episodeDao.getEpisodeById(epId) ?: return@forEach
+            val existing = watchProgressDao.getProgress(profileId, ContentType.EPISODE, epId)
+            val duration = watchedDuration(existing?.duration ?: 0L, null)
+            watchProgressDao.upsert(
+                WatchProgress(
+                    profileId = profileId,
+                    contentType = ContentType.EPISODE,
+                    contentId = epId,
+                    seriesId = ep.seriesId,
+                    season = ep.seasonNumber,
+                    episode = ep.episodeNumber,
+                    position = duration,
+                    duration = duration,
+                    isCompleted = true,
+                    lastWatchedAt = System.currentTimeMillis()
+                )
+            )
+        }
+    }
+
+    /** Cancella lo stato di visione del contenuto corrente (film o tutta la serie). */
+    private suspend fun unmarkCurrentContentWatched() {
+        when (contentType) {
+            ContentType.MOVIE ->
+                watchProgressDao.deleteProgress(profileId, ContentType.MOVIE, contentId)
+            ContentType.SERIES, ContentType.EPISODE -> {
+                val seriesId = currentSeriesId.takeIf { it > 0 } ?: contentId
+                watchProgressDao.deleteProgressBySeriesId(profileId, seriesId)
+            }
+            else -> Unit
+        }
     }
 
     private fun loadContent(onStateUpdate: (DetailsState) -> Unit) {
