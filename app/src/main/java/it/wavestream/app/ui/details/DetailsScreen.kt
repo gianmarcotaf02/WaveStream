@@ -753,6 +753,23 @@ fun DetailsScreen(
                                 onClick = { showMarkAsWatchedDialog = true }
                             )
                         }
+
+                        // Segna come visto / non visto (film e serie, sempre disponibile)
+                        if (state.contentType == ContentType.MOVIE ||
+                            state.contentType == ContentType.SERIES
+                        ) {
+                            MarkWatchedButton(
+                                isWatched = state.isWatched,
+                                onClick = {
+                                    when {
+                                        state.isWatched -> showUnmarkWatchedDialog = true
+                                        state.contentType == ContentType.SERIES ->
+                                            showSeriesWatchedDialog = true
+                                        else -> showMarkMovieWatchedDialog = true
+                                    }
+                                }
+                            )
+                        }
                         
                         // Download button (only for movies, not series)
                         if (state.contentType == ContentType.MOVIE) {
@@ -790,6 +807,49 @@ fun DetailsScreen(
                             containerColor = WaveStreamColors.BackgroundSecondary,
                             titleContentColor = WaveStreamColors.TextPrimary,
                             textContentColor = WaveStreamColors.TextSecondary
+                        )
+                    }
+
+                    // Conferma "segna come visto" (film)
+                    if (showMarkMovieWatchedDialog) {
+                        WatchedConfirmDialog(
+                            title = "Segna come già visto",
+                            message = "Vuoi segnare questo contenuto come già visto?",
+                            confirmLabel = "Sì",
+                            onConfirm = {
+                                showMarkMovieWatchedDialog = false
+                                onMarkWatchedClick()
+                            },
+                            onDismiss = { showMarkMovieWatchedDialog = false }
+                        )
+                    }
+
+                    // Conferma "segna come non visto"
+                    if (showUnmarkWatchedDialog) {
+                        WatchedConfirmDialog(
+                            title = "Segna come non visto",
+                            message = "Vuoi rimuovere lo stato di visione da questo contenuto?",
+                            confirmLabel = "Sì",
+                            onConfirm = {
+                                showUnmarkWatchedDialog = false
+                                onUnmarkWatchedClick()
+                            },
+                            onDismiss = { showUnmarkWatchedDialog = false }
+                        )
+                    }
+
+                    // Selezione episodi/stagioni da segnare come visti (serie)
+                    if (showSeriesWatchedDialog) {
+                        MarkWatchedSeriesDialog(
+                            episodes = state.allEpisodes,
+                            alreadyWatchedIds = state.episodeProgress
+                                .filterValues { it.isCompleted }
+                                .keys,
+                            onConfirm = { ids ->
+                                showSeriesWatchedDialog = false
+                                onMarkEpisodesWatched(ids)
+                            },
+                            onDismiss = { showSeriesWatchedDialog = false }
                         )
                     }
 
