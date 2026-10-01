@@ -583,7 +583,9 @@ class HomeViewModel @Inject constructor(
                     if (currentHeroes.isEmpty()) {
                         currentHeroes = cachedHeroItems[contentType]?.heroes ?: emptyList()
                     }
-                    val refreshedHeroes = refreshHeroItemsRatings(currentHeroes).let { refreshHeroItemsWatchProgress(it) }
+                    val refreshedHeroes = refreshHeroItemsCoreFields(currentHeroes)
+                        .let { refreshHeroItemsRatings(it) }
+                        .let { refreshHeroItemsWatchProgress(it) }
                     // Gli hero nati da "Continua a guardare" che non hanno più progresso
                     // (contenuto rimosso dall'utente) vanno eliminati. Ricostruiamo gli
                     // hero per riempire lo slot con una nuova raccomandazione: senza
@@ -799,6 +801,7 @@ class HomeViewModel @Inject constructor(
                 
                 // Refresh ratings + watch progress for cached heroes on load
                 val refreshedHeroes = cachedHero?.heroes
+                    ?.let { refreshHeroItemsCoreFields(it) }
                     ?.let { refreshHeroItemsRatings(it) }
                     ?.let { refreshHeroItemsWatchProgress(it) }
                     ?: emptyList()
@@ -2221,6 +2224,46 @@ class HomeViewModel @Inject constructor(
             null
         }
     }
+
+    /**
+     * Riallinea i campi "core" dell'hero (titolo, anno, immagini) con i dati in DB.
+     *
+     * Le voci hero persistite in cache possono essere incomplete: scritte prima che
+     * l'arricchimento TMDB finisse, oppure deserializzate da JSON di versioni
+     * precedenti con campi mancanti (Gson/Unsafe). Senza questo passaggio l'hero
+     * restava con titolo/anno/backdrop vuoti anche se il DB li aveva.
+     */
+    private suspend fun refreshHeroItemsCoreFields(heroes: List<HeroItem>): List<HeroItem> =
+        withContext(Dispatchers.IO) {
+            heroes.map { hero ->
+                when (hero.contentType) {
+                    ContentType.MOVIE.name -> {
+                        val movie = movieDao.getMovieById(hero.id) ?: return@map hero
+                        hero.copy(
+                            title = hero.title.ifBlank { movie.title },
+                            year = hero.year ?: movie.year,
+                            backdropUrl = hero.backdropUrl ?: movie.backdropUrl ?: movie.posterUrl,
+                            posterUrl = hero.posterUrl ?: movie.posterUrl,
+                            logoUrl = hero.logoUrl ?: movie.titleLogoUrl
+                        )
+                    }
+                    ContentType.SERIES.name -> {
+                        val series = seriesDao.getSeriesById(hero.id) ?: return@map hero
+                        hero.copy(
+                            title = hero.title.ifBlank { series.title },
+                            // Fallback anno: la playlist spesso non lo fornisce e l'enrich
+                            // lo salvava solo dal fix (v. fetchSeriesDetails).
+                            year = hero.year ?: series.year
+                                ?: series.tmdbFirstAirDate?.take(4)?.toIntOrNull(),
+                            backdropUrl = hero.backdropUrl ?: series.backdropUrl ?: series.posterUrl,
+                            posterUrl = hero.posterUrl ?: series.posterUrl,
+                            logoUrl = hero.logoUrl ?: series.titleLogoUrl
+                        )
+                    }
+                    else -> hero
+                }
+            }
+        }
 
     private suspend fun refreshHeroItemsWatchProgress(heroes: List<HeroItem>): List<HeroItem> {
         return withContext(Dispatchers.IO) {
