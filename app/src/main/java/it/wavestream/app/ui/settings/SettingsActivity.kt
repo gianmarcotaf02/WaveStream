@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -161,15 +162,16 @@ class SettingsActivity : ComponentActivity() {
         // Focus requester for content area - to focus on first interactive element when section changes
         val contentFocusRequester = remember { FocusRequester() }
         
-        // Auto-focus on content area when switching sections
+        // Porta il focus DENTRO il contenuto della sezione appena aperta.
+        // `contentFocusRequester` è agganciato al focus group che avvolge la scheda della
+        // sezione (vedi [SettingsDetail]): il group non è focusabile di per sé, quindi
+        // `requestFocus()` entra nel primo controllo della sezione. Senza questo il focus
+        // finisce sull'unico elemento focusabile fuori dalla scheda, cioè la freccia
+        // "indietro" in alto a sinistra (che è anche il bersaglio della ricerca di focus
+        // automatica di Android quando il controllo selezionato viene rimosso).
         LaunchedEffect(selectedMenuId) {
             if (selectedMenuId != null) {
-                kotlinx.coroutines.delay(200) // Wait for content to compose
-                try {
-                    contentFocusRequester.requestFocus()
-                } catch (e: Exception) {
-                    // Ignore focus errors
-                }
+                contentFocusRequester.requestFocusWhenReady()
             }
         }
 
@@ -293,7 +295,8 @@ class SettingsActivity : ComponentActivity() {
             } else {
                 SettingsDetail(
                     title = menuItems.firstOrNull { it.id == selectedMenuId }?.title ?: "Impostazioni",
-                    onBack = { selectedMenuId = null }
+                    onBack = { selectedMenuId = null },
+                    contentFocusRequester = contentFocusRequester
                 ) {
                 when (selectedMenuId) {
                     "profile" -> ProfileSettings(profileDao, userPreferences, contentFocusRequester)
@@ -639,6 +642,7 @@ private fun SettingsBackButton(onClick: () -> Unit) {
 private fun SettingsDetail(
     title: String,
     onBack: () -> Unit,
+    contentFocusRequester: FocusRequester? = null,
     content: @Composable () -> Unit
 ) {
     Box(
@@ -676,7 +680,23 @@ private fun SettingsDetail(
                 )
             }
             Spacer(modifier = Modifier.height(20.dp))
-            content()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .then(
+                        if (contentFocusRequester != null) {
+                            // `focusGroup()` rende il contenitore non focusabile (canFocus = false)
+                            // ma con un FocusTarget: `contentFocusRequester.requestFocus()`
+                            // delega quindi al primo controllo focusabile della sezione.
+                            Modifier.focusRequester(contentFocusRequester).focusGroup()
+                        } else {
+                            Modifier
+                        }
+                    )
+            ) {
+                content()
+            }
         }
     }
 }
@@ -2023,9 +2043,7 @@ private fun SubtitlesSettings(
                             focusedLabelColor = WaveStreamColors.Accent,
                             unfocusedLabelColor = WaveStreamColors.TextSecondary
                         ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .then(if (contentFocusRequester != null) Modifier.focusRequester(contentFocusRequester) else Modifier)
+                        modifier = Modifier.fillMaxWidth()
                     )
                     
                     // Password
@@ -3711,9 +3729,6 @@ private fun MovieEndingSettings(
     }
 
     SettingsSection {
-        var firstModifier: Modifier = Modifier
-        if (contentFocusRequester != null) firstModifier = firstModifier.focusRequester(contentFocusRequester)
-
         SettingsInfo(
             text = "Nel dettaglio di un film trovi il pulsante AI che spiega il finale. " +
                 "La spiegazione si basa sul testo di Wikipedia (fonte verificabile) riassunto da un modello " +
@@ -3747,7 +3762,7 @@ private fun MovieEndingSettings(
                     focusedTextColor = WaveStreamColors.TextPrimary,
                     unfocusedTextColor = WaveStreamColors.TextPrimary
                 ),
-                modifier = Modifier.weight(1f).then(firstModifier)
+                modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Button(
@@ -3828,9 +3843,6 @@ private fun AssistantSettings(
     }
 
     SettingsSection {
-        var firstModifier: Modifier = Modifier
-        if (contentFocusRequester != null) firstModifier = firstModifier.focusRequester(contentFocusRequester)
-
         SettingsInfo(
             text = "L'assistente vocale usa il microfono per capire le tue richieste e Gemini (free tier) " +
                 "per cercare nella tua libreria. Genera una API key gratuita su aistudio.google.com/apikey"
@@ -3947,7 +3959,7 @@ private fun AssistantSettings(
         Spacer(modifier = Modifier.height(28.dp))
 
         // ---- Risposta vocale ----
-        Box(modifier = firstModifier) {
+        Box {
             SettingsSwitch(
                 label = "Risposta vocale dell'assistente",
                 checked = ttsEnabled,
