@@ -411,7 +411,7 @@ private fun TvSeeAllCard(
             .width(122.dp)
             .height(183.dp)
             .clip(RoundedCornerShape(12.dp))
-            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+            .border(if (isFocused) 3.dp else 1.dp, borderColor, RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .onFocusChanged { if (it.isFocused) onFocused?.invoke() }
             .onKeyEvent { event ->
