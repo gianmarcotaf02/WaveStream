@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.painterResource
@@ -3724,49 +3725,83 @@ private fun AddToListButton(
             } else {
                 customLists.forEach { list ->
                     val isSelected = selectedListIds.contains(list.id)
-                    DropdownMenuItem(
-                        text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = list.name,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = WaveStreamColors.TextPrimary,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                IconButton(onClick = { renamingListId = list.id }, modifier = Modifier.size(32.dp)) {
-                                    Icon(Icons.Default.Edit, "Modifica", tint = WaveStreamColors.TextTertiary, modifier = Modifier.size(16.dp))
-                                }
-                                Checkbox(
-                                    checked = isSelected,
-                                    onCheckedChange = null,
-                                    colors = CheckboxDefaults.colors(checkedColor = WaveStreamColors.Accent, uncheckedColor = WaveStreamColors.TextTertiary)
-                                )
-                            }
-                        },
-                        onClick = { if (isSelected) onRemoveFromList(list.id) else onAddToList(list.id) }
-                    )
+                    GlassMenuRow(
+                        onClick = {
+                            if (isSelected) onRemoveFromList(list.id) else onAddToList(list.id)
+                        }
+                    ) {
+                        Text(
+                            text = list.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = WaveStreamColors.TextPrimary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        EditListButton(onClick = { renamingListId = list.id })
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Checkbox(
+                            checked = isSelected,
+                            onCheckedChange = null,
+                            colors = CheckboxDefaults.colors(checkedColor = WaveStreamColors.Accent, uncheckedColor = WaveStreamColors.TextTertiary)
+                        )
+                    }
                 }
             }
             
             HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 1.dp)
             
-            DropdownMenuItem(
-                text = {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(Icons.Default.Add, null, tint = WaveStreamColors.Accent, modifier = Modifier.size(20.dp))
-                        Text("Crea nuova lista", style = MaterialTheme.typography.bodyMedium, color = WaveStreamColors.Accent, fontWeight = FontWeight.Medium)
-                    }
-                },
-                onClick = { showDropdown = false; showCreateDialog = true }
-            )
+            GlassMenuRow(onClick = { showDropdown = false; showCreateDialog = true }) {
+                Icon(Icons.Default.Add, null, tint = WaveStreamColors.Accent, modifier = Modifier.size(20.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Crea nuova lista", style = MaterialTheme.typography.bodyMedium, color = WaveStreamColors.Accent, fontWeight = FontWeight.Medium)
+            }
             }
             }
         }
     }
+
+    // Rinomina lista: il dialog mancava, quindi il tasto matita non faceva nulla.
+    renamingListId?.let { renamingId ->
+        val list = customLists.firstOrNull { it.id == renamingId }
+        if (list != null) {
+            var renameText by remember(renamingId) { mutableStateOf(list.name) }
+            AlertDialog(
+                onDismissRequest = { renamingListId = null },
+                containerColor = GlassTokens.SurfaceFillOpaque,
+                shape = GlassTokens.RadiusMedium,
+                title = { Text("Rinomina lista", color = WaveStreamColors.TextPrimary) },
+                text = {
+                    OutlinedTextField(
+                        value = renameText,
+                        onValueChange = { renameText = it },
+                        label = { Text("Nome lista") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = WaveStreamColors.TextPrimary,
+                            unfocusedTextColor = WaveStreamColors.TextPrimary,
+                            focusedBorderColor = WaveStreamColors.Accent,
+                            unfocusedBorderColor = WaveStreamColors.BackgroundTertiary
+                        )
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val trimmed = renameText.trim()
+                        if (trimmed.isNotEmpty()) onRenameList(renamingId, trimmed)
+                        renamingListId = null
+                    }) {
+                        Text("Salva", color = WaveStreamColors.Accent)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { renamingListId = null }) { Text("Annulla", color = WaveStreamColors.TextSecondary) }
+                }
+            )
+        }
+    }
+}
     
     if (showCreateDialog) {
         var listName by remember { mutableStateOf("") }
