@@ -124,6 +124,8 @@ data class DetailsState(
     val seasons: List<Int> = emptyList(),
     val selectedSeason: Int = 1,
     val episodes: List<Episode> = emptyList(),
+    // Tutti gli episodi della serie (tutte le stagioni): usati dal dialog "segna come visto"
+    val allEpisodes: List<Episode> = emptyList(),
     // Watch progress (for resume button)
     val resumeMinutes: Int? = null,  // Remaining minutes if watching in progress
     val resumeProgress: Float? = null, // 0f to 1f progress
@@ -189,6 +191,10 @@ fun DetailsScreen(
     onCreateList: (String) -> Unit = {},
     onRenameList: (Long, String) -> Unit = { _, _ -> },
     onMarkAsWatchedClick: () -> Unit = {},
+    // Segna manualmente come visto/non visto (bottone dedicato)
+    onMarkWatchedClick: () -> Unit = {},
+    onMarkEpisodesWatched: (Set<Long>) -> Unit = {},
+    onUnmarkWatchedClick: () -> Unit = {},
     onPersonClick: (personId: Int, personName: String) -> Unit = { _, _ -> },
     onRelatedClick: (contentId: Long, contentType: ContentType) -> Unit = { _, _ -> },
     // Download callbacks
@@ -209,6 +215,10 @@ fun DetailsScreen(
     
     // Dialog state for mark as watched confirmation
     var showMarkAsWatchedDialog by remember { mutableStateOf(false) }
+    // Dialog per il nuovo "segna come visto/non visto"
+    var showMarkMovieWatchedDialog by remember { mutableStateOf(false) }
+    var showUnmarkWatchedDialog by remember { mutableStateOf(false) }
+    var showSeriesWatchedDialog by remember { mutableStateOf(false) }
 
     // Stato del popup "finale del film" (AI)
     var endingState by remember { mutableStateOf<MovieEndingUiState>(MovieEndingUiState.Idle) }
