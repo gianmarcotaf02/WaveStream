@@ -2942,7 +2942,7 @@ private fun HeroListPickerDialog(
                         singleLine = true,
                         interactionSource = fieldInteraction,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                        keyboardActions = KeyboardActions(onDone = { createNewList() }),
+                        keyboardActions = KeyboardActions(onDone = { submitForm() }),
                         decorationBox = { innerTextField ->
                             Box(
                                 contentAlignment = Alignment.CenterStart,
