@@ -94,6 +94,10 @@ data class Series(
     val latestEpisodeAddedAt: Long? = null,
     val latestEpisodeSeason: Int? = null,
     val latestEpisodeNumber: Int? = null,
+    // Ultima volta che la lista episodi è stata ri-scaricata dal provider.
+    // Serve a capire quando riprovare a cercare nuovi episodi (TTL), senza
+    // riscaricarli a ogni apertura della serie.
+    val episodesLastFetchedAt: Long? = null,
 
     // OMDB cached ratings
     val omdbImdbRating: String? = null,
