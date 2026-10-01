@@ -2326,6 +2326,113 @@ private fun MarkAsWatchedButton(
 }
 
 /**
+ * Bottone "segna come visto / non visto" (film e serie).
+ *  - non visto → spunta vuota: segna il contenuto come visto;
+ *  - visto → spunta piena in accent: apre la conferma per rimuovere lo stato.
+ *
+ * Separato dall'occhio (che serve a togliere il contenuto da "Continua a guardare").
+ */
+@Composable
+private fun MarkWatchedButton(
+    isWatched: Boolean,
+    onClick: () -> Unit,
+    label: String? = null
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val focusScale by animateFloatAsState(
+        targetValue = if (isFocused) AppAnimations.GlassPillFocusScale else 1f,
+        animationSpec = AppAnimations.SpringCardFocus,
+        label = "watchScale"
+    )
+
+    val borderColor by animateColorAsState(
+        targetValue = when {
+            isFocused -> Color.White.copy(alpha = 0.30f)
+            isWatched -> WaveStreamColors.Accent.copy(alpha = 0.55f)
+            else -> Color.White.copy(alpha = 0.10f)
+        },
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "watchBorder"
+    )
+
+    val backgroundColor by animateColorAsState(
+        targetValue = when {
+            isFocused -> Color.White.copy(alpha = 0.16f)
+            isWatched -> WaveStreamColors.Accent.copy(alpha = 0.22f)
+            else -> GlassTokens.SurfaceFill
+        },
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "watchBg"
+    )
+
+    val iconTint by animateColorAsState(
+        targetValue = if (isWatched) WaveStreamColors.AccentLight else WaveStreamColors.TextSecondary,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "watchColor"
+    )
+
+    Box(
+        modifier = Modifier
+            .graphicsLayer {
+                scaleX = focusScale
+                scaleY = focusScale
+            }
+            .then(if (label != null) Modifier.height(44.dp) else Modifier.size(44.dp))
+            .clip(actionShape(label))
+            .background(backgroundColor)
+            .border(1.dp, borderColor, actionShape(label))
+            .then(if (label != null) Modifier.padding(horizontal = 14.dp) else Modifier)
+            .focusable(interactionSource = interactionSource)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        ActionBody(label = label, tint = iconTint) {
+            Icon(
+                imageVector = if (isWatched) Icons.Default.CheckCircle else Icons.Default.Check,
+                contentDescription = if (isWatched) "Segna come non visto" else "Segna come già visto",
+                tint = iconTint,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
+/** Dialog di conferma per segnare come visto / non visto. */
+@Composable
+private fun WatchedConfirmDialog(
+    title: String,
+    message: String,
+    confirmLabel: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = { Text(message) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(confirmLabel, color = WaveStreamColors.Accent)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Annulla", color = WaveStreamColors.TextSecondary)
+            }
+        },
+        containerColor = WaveStreamColors.BackgroundSecondary,
+        titleContentColor = WaveStreamColors.TextPrimary,
+        textContentColor = WaveStreamColors.TextSecondary
+    )
+}
+
+/**
  * Download button with progress and delete states
  */
 @Composable
@@ -2670,7 +2777,7 @@ private fun SeasonDownloadDialog(
                 Spacer(modifier = Modifier.height(18.dp))
 
                 if (!selecting) {
-                    DownloadChoiceRow(
+                    GlassChoiceRow(
                         icon = Icons.Default.Download,
                         title = "Tutta la stagione",
                         subtitle = "Scarica tutti i ${episodes.size} episodi",
@@ -2681,7 +2788,7 @@ private fun SeasonDownloadDialog(
                         }
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    DownloadChoiceRow(
+                    GlassChoiceRow(
                         icon = Icons.AutoMirrored.Filled.List,
                         title = "Seleziona episodi",
                         subtitle = "Scegli quali episodi scaricare",
@@ -2736,7 +2843,7 @@ private fun SeasonDownloadDialog(
 
 /** Riga-scelta del dialog download (tutta la stagione / seleziona episodi). */
 @Composable
-private fun DownloadChoiceRow(
+private fun GlassChoiceRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     subtitle: String,
