@@ -3152,6 +3152,7 @@ class HomeViewModel @Inject constructor(
      * Crea una nuova lista e vi aggiunge subito [hero].
      */
     fun createListWithHero(hero: HeroItem, name: String, onCreated: () -> Unit = {}) {
+        viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
                     val groupId = customGroupDao.insertGroup(
