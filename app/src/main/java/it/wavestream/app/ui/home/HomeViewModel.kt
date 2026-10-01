@@ -2148,7 +2148,9 @@ class HomeViewModel @Inject constructor(
             tmdbRating = currentSeries.tmdbVoteAverage,
             resumeMinutes = actualResumeMinutes,
             progressPercent = actualProgressPercent,
-            year = currentSeries.year,
+            // Fallback: se la playlist non ha l'anno, usa first_air_date TMDB (l'anno
+            // non veniva salvato dall'arricchimento serie, quindi resta vuoto su DB vecchi).
+            year = currentSeries.year ?: currentSeries.tmdbFirstAirDate?.take(4)?.toIntOrNull(),
             duration = null,  // Series don't have single duration
             genres = genres,
             seasonCount = currentSeries.tmdbNumberOfSeasons ?: currentSeries.seasonCount.takeIf { it > 0 },
