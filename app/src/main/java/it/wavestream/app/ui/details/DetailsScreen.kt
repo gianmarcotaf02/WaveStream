@@ -787,8 +787,8 @@ fun DetailsScreen(
                     if (showMarkAsWatchedDialog) {
                         AlertDialog(
                             onDismissRequest = { showMarkAsWatchedDialog = false },
-                            title = { Text("Conferma") },
-                            text = { Text("Sei sicuro di eliminare il contenuto dai \"Continua a guardare\"?") },
+                            title = { Text("Rimuovi da Continua a guardare") },
+                            text = { Text("Vuoi togliere questo contenuto dalla lista \"Continua a guardare\"? Il contenuto tornerà a comparire come non iniziato.") },
                             confirmButton = {
                                 TextButton(
                                     onClick = {
@@ -2317,7 +2317,7 @@ private fun MarkAsWatchedButton(
         ActionBody(label = label, tint = iconTint) {
             Icon(
                 painter = painterResource(R.drawable.ic_eye),
-                contentDescription = "Segna come già visto",
+                contentDescription = "Rimuovi da Continua a guardare",
                 tint = iconTint,
                 modifier = Modifier.size(24.dp)
             )
