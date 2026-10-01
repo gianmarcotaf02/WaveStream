@@ -91,6 +91,7 @@ import androidx.tv.foundation.lazy.grid.items as tvGridItems
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.compose.ui.focus.onFocusChanged
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import it.wavestream.app.R
 import it.wavestream.app.ui.home.CarouselItem
 import it.wavestream.app.ui.home.CarouselRow
@@ -1129,13 +1130,27 @@ fun HeroBanner(
                         // Su TV la larghezza massima è più generosa per non rimpicciolire
                         // i loghi orizzontali (che altrimenti restano alti pochi pixel).
                         if (!hero.logoUrl.isNullOrEmpty()) {
-                            AsyncImage(
+                            // Se il clear logo non si carica (URL morto, rete assente) NON deve
+                            // restare vuoto: lo slot `error` ricade sul titolo testuale, come
+                            // per i contenuti senza logo. Prima l'AsyncImage senza fallback
+                            // lasciava l'hero senza titolo.
+                            SubcomposeAsyncImage(
                                 model = hero.logoUrl,
                                 contentDescription = hero.title,
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
                                     .heightIn(max = 88.dp)
-                                    .widthIn(max = 560.dp)
+                                    .widthIn(max = 560.dp),
+                                error = {
+                                    Text(
+                                        text = hero.title,
+                                        style = MaterialTheme.typography.displaySmall,
+                                        color = WaveStreamColors.TextPrimary,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             )
                         } else {
                             Text(
