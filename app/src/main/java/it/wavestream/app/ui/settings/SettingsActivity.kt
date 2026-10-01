@@ -3113,6 +3113,21 @@ private fun SettingsDropdown(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
+    // Ripristino del focus alla chiusura del menu: un DropdownMenu vive in un Popup (finestra
+    // separata). Quando si chiude, Android rifà la ricerca del focus sul primo elemento
+    // focusabile della schermata, cioè la freccia "indietro". Riportiamo quindi il focus sul
+    // campo che ha aperto la tendina.
+    val triggerFocusRequester = remember { FocusRequester() }
+    var wasExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(expanded) {
+        if (expanded) {
+            wasExpanded = true
+        } else if (wasExpanded) {
+            withFrameNanos { /* lascia rimuovere il Popup prima di ridare il focus */ }
+            triggerFocusRequester.requestFocusWhenReady()
+        }
+    }
+
     // Passo 3 — riga in vetro: una sola animazione (fill) + bordo accent su focus.
     // Prima era un pannello opaco (SurfaceDark) con bordo netto accent: "rettangolo
     // appoggiato sopra" la scheda. Ora usa gli stessi token di GlassCard/ContentSortFilter.
@@ -3151,6 +3166,7 @@ private fun SettingsDropdown(
                         scaleX = scale
                         scaleY = scale
                     }
+                    .focusRequester(triggerFocusRequester)
                     .focusable(interactionSource = interactionSource)
                     .clickable(
                         interactionSource = interactionSource,
