@@ -2847,6 +2847,8 @@ private fun HeroListPickerDialog(
     var isLoading by remember { mutableStateOf(true) }
     var showCreate by remember { mutableStateOf(false) }
     var newListName by remember { mutableStateOf("") }
+    var renamingListId by remember { mutableStateOf<Long?>(null) }
+    var renamingName by remember { mutableStateOf("") }
     val newListFocusRequester = remember { FocusRequester() }
 
     fun reload() {
@@ -2981,15 +2983,33 @@ private fun HeroListPickerDialog(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(lists, key = { it.id }) { list ->
-                                ListPickerRow(
-                                    name = list.name,
-                                    isSelected = selectedIds.contains(list.id),
+                                val isSelected = selectedIds.contains(list.id)
+                                GlassMenuRow(
                                     onClick = {
                                         viewModel.toggleHeroInList(hero, list.id) { added ->
                                             selectedIds = if (added) selectedIds + list.id else selectedIds - list.id
                                         }
                                     }
-                                )
+                                ) {
+                                    Text(
+                                        text = list.name,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = WaveStreamColors.TextPrimary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    EditListButton(onClick = { renamingListId = list.id })
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    if (isSelected) {
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = WaveStreamColors.Accent,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
