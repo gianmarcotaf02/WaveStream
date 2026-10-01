@@ -42,7 +42,8 @@ class PlaylistRepository @Inject constructor(
     private val contentNameParser: ContentNameParser,
     private val contentCache: ContentCache,
     private val tmdbService: TMDBService,
-    private val movieUnificationService: MovieUnificationService
+    private val movieUnificationService: MovieUnificationService,
+    private val watchProgressDao: WatchProgressDao
 ) {
     companion object {
         private const val TAG = "PlaylistRepo"
@@ -54,6 +55,9 @@ class PlaylistRepository @Inject constructor(
          * è considerata fresca). Vedi [loadSeriesEpisodes].
          */
         private const val EPISODES_REFRESH_TTL_MS = 3L * 60 * 60 * 1000 // 3 ore
+
+        /** Max serie "seguite" di cui aggiornare gli episodi durante un refresh playlist. */
+        private const val MAX_FOLLOWED_EPISODE_REFRESH = 40
     }
     
     private val httpClient = OkHttpClient.Builder()
@@ -199,10 +203,40 @@ class PlaylistRepository @Inject constructor(
         }
 
         playlistDao.updateLastUpdated(playlistId, System.currentTimeMillis())
+
+        // Dopo il refresh del catalogo: aggiorna (merge) gli episodi delle serie che
+        // l'utente sta seguendo. Così un episodio appena uscito compare subito dopo
+        // "Aggiorna playlist", senza aspettare l'apertura della serie né il TTL.
+        if (playlist.type == "xtream") {
+            runCatching { refreshFollowedSeriesEpisodes(playlistId) }
+                .onFailure { Log.w(TAG, "Followed-series episode refresh failed for playlist $playlistId", it) }
+        }
         
         // Content may have changed (M3U re-inserts with new ids, Xtream removes gone items):
         // the home session cache would keep showing stale ids for up to 10 days.
         contentCache.clearHomeSessionData()
+    }
+
+    /**
+     * Aggiorna (merge) gli episodi delle serie seguite di una playlist Xtream:
+     * quelle che hanno almeno un progresso di visione. Set limitato a
+     * [MAX_FOLLOWED_EPISODE_REFRESH] per non generare centinaia di richieste.
+     */
+    private suspend fun refreshFollowedSeriesEpisodes(playlistId: Long) {
+        val followedIds = watchProgressDao.getAllProgress()
+            .mapNotNull { it.seriesId }
+            .distinct()
+        if (followedIds.isEmpty()) return
+
+        val targets = seriesDao.getSeriesByIds(followedIds)
+            .filter { it.playlistId == playlistId && it.xtreamSeriesId != null }
+            .take(MAX_FOLLOWED_EPISODE_REFRESH)
+
+        Log.d(TAG, "refreshFollowedSeriesEpisodes: ${targets.size} serie seguite da aggiornare (playlist=$playlistId)")
+        targets.forEach { series ->
+            runCatching { refreshSeriesEpisodes(series.id) }
+                .onFailure { Log.w(TAG, "Episode refresh failed for ${series.name}", it) }
+        }
     }
     
     /**
@@ -348,15 +382,33 @@ class PlaylistRepository @Inject constructor(
      */
     suspend fun loadSeriesEpisodes(seriesId: Long, forceRefresh: Boolean = false): Boolean = withContext(Dispatchers.IO) {
         val series = seriesDao.getSeriesById(seriesId) ?: return@withContext false
-        val xtreamSeriesId = series.xtreamSeriesId ?: return@withContext false
-
         val existingCount = episodeDao.getCountBySeries(seriesId)
         val stale = System.currentTimeMillis() - (series.episodesLastFetchedAt ?: 0L) > EPISODES_REFRESH_TTL_MS
         // Con 0 episodi si tenta sempre (per intercettare quelli che compaiono in seguito);
         // altrimenti solo se il refresh è scaduto o esplicitamente forzato.
         val shouldFetch = forceRefresh || existingCount == 0 || stale
         if (!shouldFetch) return@withContext true
-        if (forceRefresh && existingCount > 0) episodeDao.deleteBySeries(seriesId)
+        fetchSeriesEpisodes(series, existingCount, replaceAll = forceRefresh)
+    }
+
+    /**
+     * Forza il refresh (merge, senza cancellare) della lista episodi ignorando il TTL.
+     * Usato dopo "Aggiorna playlist" per le serie seguite: così i nuovi episodi
+     * compaiono subito, senza aspettare il TTL e senza rompere i progressi.
+     */
+    suspend fun refreshSeriesEpisodes(seriesId: Long): Boolean = withContext(Dispatchers.IO) {
+        val series = seriesDao.getSeriesById(seriesId) ?: return@withContext false
+        fetchSeriesEpisodes(series, episodeDao.getCountBySeries(seriesId), replaceAll = false)
+    }
+
+    private suspend fun fetchSeriesEpisodes(
+        series: Series,
+        existingCount: Int,
+        replaceAll: Boolean
+    ): Boolean = withContext(Dispatchers.IO) {
+        val seriesId = series.id
+        val xtreamSeriesId = series.xtreamSeriesId ?: return@withContext false
+        if (replaceAll && existingCount > 0) episodeDao.deleteBySeries(seriesId)
 
         val playlist = playlistDao.getPlaylistById(series.playlistId) ?: return@withContext false
         if (playlist.type != "xtream") return@withContext false
@@ -417,7 +469,7 @@ class PlaylistRepository @Inject constructor(
 
             // MERGE: se non è un replace totale, inserisci solo gli episodi non ancora
             // presenti (per stagione+episodio), preservando gli id esistenti.
-            val toInsert = if (forceRefresh || existingCount == 0) {
+            val toInsert = if (replaceAll || existingCount == 0) {
                 episodeEntities
             } else {
                 val existingKeys = episodeDao.getEpisodesBySeriesList(seriesId)
