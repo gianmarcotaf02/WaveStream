@@ -364,9 +364,6 @@ class PlaylistRepository @Inject constructor(
     }
     
     /**
-     * Load episodes for a series on-demand from Xtream API
-     */
-    /**
      * Carica (o aggiorna) gli episodi di una serie dal provider Xtream.
      *
      * Comportamento:
