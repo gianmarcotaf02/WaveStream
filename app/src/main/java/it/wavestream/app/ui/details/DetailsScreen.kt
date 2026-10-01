@@ -3835,6 +3835,124 @@ private fun AddToListButton(
             }
         )
     }
+
+    // Rinomina lista: il dialog mancava, quindi il tasto matita non faceva nulla.
+    renamingListId?.let { renamingId ->
+        val list = customLists.firstOrNull { it.id == renamingId }
+        if (list != null) {
+            var renameText by remember(renamingId) { mutableStateOf(list.name) }
+            AlertDialog(
+                onDismissRequest = { renamingListId = null },
+                containerColor = GlassTokens.SurfaceFillOpaque,
+                shape = GlassTokens.RadiusMedium,
+                title = { Text("Rinomina lista", color = WaveStreamColors.TextPrimary) },
+                text = {
+                    OutlinedTextField(
+                        value = renameText,
+                        onValueChange = { renameText = it },
+                        label = { Text("Nome lista") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = WaveStreamColors.TextPrimary,
+                            unfocusedTextColor = WaveStreamColors.TextPrimary,
+                            focusedBorderColor = WaveStreamColors.Accent,
+                            unfocusedBorderColor = WaveStreamColors.BackgroundTertiary
+                        )
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val trimmed = renameText.trim()
+                        if (trimmed.isNotEmpty()) onRenameList(renamingId, trimmed)
+                        renamingListId = null
+                    }) {
+                        Text("Salva", color = WaveStreamColors.Accent)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { renamingListId = null }) { Text("Annulla", color = WaveStreamColors.TextSecondary) }
+                }
+            )
+        }
+    }
+}
+
+/**
+ * Riga focusabile del menu "aggiungi a lista".
+ *
+ * I `DropdownMenuItem` Material3 non mostrano alcun anello di focus col D-pad:
+ * questa riga disegna un bordo accent (stesso linguaggio delle altre card) e usa
+ * il focus per il click, come il resto dell'app.
+ */
+@Composable
+private fun GlassMenuRow(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) GlassTokens.accentFill(WaveStreamColors.Accent) else Color.Transparent,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "glassMenuRowFill"
+    )
+    val stroke = if (isFocused) {
+        GlassTokens.accentStroke(WaveStreamColors.Accent)
+    } else {
+        SolidColor(Color.Transparent)
+    }
+
+    GlassSurface(
+        shape = RoundedCornerShape(10.dp),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = 1.5.dp,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .focusable(interactionSource = interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            content = content
+        )
+    }
+}
+
+/** Icona "modifica" focusabile (anello accent col D-pad), usata nel menu liste. */
+@Composable
+private fun EditListButton(onClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) Color.White.copy(alpha = 0.20f) else Color.Transparent,
+        label = "editListFill"
+    )
+    val border = if (isFocused) WaveStreamColors.Accent else Color.Transparent
+
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(fill)
+            .border(1.5.dp, border, RoundedCornerShape(8.dp))
+            .focusable(interactionSource = interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Edit,
+            contentDescription = "Modifica nome lista",
+            tint = if (isFocused) WaveStreamColors.TextPrimary else WaveStreamColors.TextTertiary,
+            modifier = Modifier.size(16.dp)
+        )
+    }
 }
 
 @Preview(
