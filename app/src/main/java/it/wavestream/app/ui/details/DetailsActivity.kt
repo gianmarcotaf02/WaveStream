@@ -530,6 +530,8 @@ class DetailsActivity : ComponentActivity() {
             val ws = computeSeriesWatchState(contentId)
             current.copy(
                 episodeProgress = ws.episodeProgress,
+                allEpisodes = ws.allEpisodes,
+                isWatched = ws.allWatched,
                 resumeMinutes = ws.resumeMinutes,
                 resumeProgress = ws.resumeProgress,
                 resumeEpisodeSeason = ws.resumeEpisodeSeason,
@@ -971,6 +973,8 @@ class DetailsActivity : ComponentActivity() {
         val seasons: List<Int>,
         val selectedSeason: Int,
         val episodes: List<Episode>,
+        /** Tutti gli episodi della serie (tutte le stagioni), per il dialog "segna come visti". */
+        val allEpisodes: List<Episode>,
         val episodeProgress: Map<Long, EpisodeProgress>,
         val resumeMinutes: Int?,
         val resumeProgress: Float?,
@@ -978,7 +982,9 @@ class DetailsActivity : ComponentActivity() {
         val resumeEpisodeNumber: Int?,
         val nextEpisodeInfo: String?,
         val nextEpisodeId: Long?,
-        val scrollToEpisodeIndex: Int?
+        val scrollToEpisodeIndex: Int?,
+        /** Vero solo se TUTTI gli episodi risultano visti (stessa regola del badge). */
+        val allWatched: Boolean
     )
 
     /**
@@ -1091,10 +1097,16 @@ class DetailsActivity : ComponentActivity() {
             sortedSeasonEpisodes.indexOfFirst { it.id == lastWatchedEpisode!!.id }.takeIf { it >= 0 }
         } else null
 
+        // Serie "vista" quando ogni episodio risulta completato (o a ≤ 6 min dalla
+        // fine): stessa regola della query getFullyWatchedSeriesIds usata per il badge.
+        val allWatched = allEpisodes.isNotEmpty() &&
+            allEpisodes.all { episodeProgressMap[it.id]?.isCompleted == true }
+
         return SeriesWatchState(
             seasons = seasons,
             selectedSeason = selectedSeason,
             episodes = episodes,
+            allEpisodes = allEpisodes,
             episodeProgress = episodeProgressMap,
             resumeMinutes = resumeMinutes,
             resumeProgress = resumeProgress,
@@ -1102,7 +1114,8 @@ class DetailsActivity : ComponentActivity() {
             resumeEpisodeNumber = lastWatchedEpisode?.episodeNumber,
             nextEpisodeInfo = nextEpisodeInfo,
             nextEpisodeId = nextEpisodeId,
-            scrollToEpisodeIndex = scrollToEpisodeIndex
+            scrollToEpisodeIndex = scrollToEpisodeIndex,
+            allWatched = allWatched
         )
     }
 
@@ -1173,7 +1186,9 @@ class DetailsActivity : ComponentActivity() {
                 resumeEpisodeNumber = fastWatchState.resumeEpisodeNumber,
                 nextEpisodeInfo = fastWatchState.nextEpisodeInfo,
                 nextEpisodeId = fastWatchState.nextEpisodeId,
-                scrollToEpisodeIndex = fastWatchState.scrollToEpisodeIndex
+                scrollToEpisodeIndex = fastWatchState.scrollToEpisodeIndex,
+                allEpisodes = fastWatchState.allEpisodes,
+                isWatched = fastWatchState.allWatched
             )
         )
         
@@ -1246,6 +1261,8 @@ class DetailsActivity : ComponentActivity() {
             nextEpisodeInfo = watchState.nextEpisodeInfo,
             nextEpisodeId = watchState.nextEpisodeId,
             scrollToEpisodeIndex = watchState.scrollToEpisodeIndex,
+            allEpisodes = watchState.allEpisodes,
+            isWatched = watchState.allWatched,
             // Use cached OMDB ratings immediately for instant display
             imdbRating = series.omdbImdbRating,
             rottenTomatoesScore = series.omdbRottenTomatoesScore,
