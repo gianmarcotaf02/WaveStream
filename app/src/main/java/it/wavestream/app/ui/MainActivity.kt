@@ -2848,7 +2848,6 @@ private fun HeroListPickerDialog(
     var showCreate by remember { mutableStateOf(false) }
     var newListName by remember { mutableStateOf("") }
     var renamingListId by remember { mutableStateOf<Long?>(null) }
-    var renamingName by remember { mutableStateOf("") }
     val newListFocusRequester = remember { FocusRequester() }
 
     fun reload() {
@@ -2861,16 +2860,28 @@ private fun HeroListPickerDialog(
 
     LaunchedEffect(hero) { reload() }
 
-    LaunchedEffect(showCreate) {
-        if (showCreate) newListFocusRequester.requestFocusWhenReady()
+    LaunchedEffect(showCreate, renamingListId) {
+        if (showCreate || renamingListId != null) newListFocusRequester.requestFocusWhenReady()
     }
 
-    fun createNewList() {
-        if (newListName.isBlank()) return
-        val name = newListName.trim()
+    fun closeForm() {
         newListName = ""
         showCreate = false
-        viewModel.createListWithHero(hero, name) { reload() }
+        renamingListId = null
+    }
+
+    fun submitForm() {
+        val name = newListName.trim()
+        if (name.isBlank()) return
+        val renamingId = renamingListId
+        newListName = ""
+        showCreate = false
+        renamingListId = null
+        if (renamingId != null) {
+            viewModel.renameList(renamingId, name) { reload() }
+        } else {
+            viewModel.createListWithHero(hero, name) { reload() }
+        }
     }
 
     GlassDialog(
@@ -2885,7 +2896,11 @@ private fun HeroListPickerDialog(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = if (showCreate) "Nuova lista" else "Aggiungi a lista",
+                text = when {
+                    showCreate -> "Nuova lista"
+                    renamingListId != null -> "Rinomina lista"
+                    else -> "Aggiungi a lista"
+                },
                 style = MaterialTheme.typography.titleLarge,
                 color = WaveStreamColors.TextPrimary,
                 fontWeight = FontWeight.Bold
@@ -2893,7 +2908,7 @@ private fun HeroListPickerDialog(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            if (showCreate) {
+            if (showCreate || renamingListId != null) {
                 val fieldInteraction = remember { MutableInteractionSource() }
                 val fieldFocused by fieldInteraction.collectIsFocusedAsState()
                 val fieldBorder by animateColorAsState(
@@ -2947,11 +2962,11 @@ private fun HeroListPickerDialog(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    DialogActionButton(text = "Annulla", primary = false) {
-                        newListName = ""
-                        showCreate = false
-                    }
-                    DialogActionButton(text = "Crea", primary = true) { createNewList() }
+                    DialogActionButton(text = "Annulla", primary = false) { closeForm() }
+                    DialogActionButton(
+                        text = if (renamingListId != null) "Salva" else "Crea",
+                        primary = true
+                    ) { submitForm() }
                 }
             } else {
                 when {
@@ -2999,7 +3014,10 @@ private fun HeroListPickerDialog(
                                         overflow = TextOverflow.Ellipsis,
                                         modifier = Modifier.weight(1f)
                                     )
-                                    EditListButton(onClick = { renamingListId = list.id })
+                                    EditListButton(onClick = {
+                                        newListName = list.name
+                                        renamingListId = list.id
+                                    })
                                     Spacer(modifier = Modifier.width(6.dp))
                                     if (isSelected) {
                                         Icon(
