@@ -128,7 +128,7 @@ fun TvCarouselRow(
             ) {
                 try {
                     listState.animateScrollToItem(focusedIndex, 0)
-                } catch (_: Exception) {
+                } catch (_: IllegalStateException) {
                     // Il nodo potrebbe non essere ancora pronto al primo frame.
                 }
             }
