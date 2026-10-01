@@ -47,6 +47,13 @@ class PlaylistRepository @Inject constructor(
     companion object {
         private const val TAG = "PlaylistRepo"
         private const val RETRY_BACKOFF_MS = 800L
+
+        /**
+         * Dopo quanto ri-scaricare la lista episodi di una serie dal provider per
+         * individuare episodi nuovi. Sotto non si contatta la rete (la lista in DB
+         * è considerata fresca). Vedi [loadSeriesEpisodes].
+         */
+        private const val EPISODES_REFRESH_TTL_MS = 3L * 60 * 60 * 1000 // 3 ore
     }
     
     private val httpClient = OkHttpClient.Builder()
