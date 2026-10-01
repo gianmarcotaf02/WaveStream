@@ -2900,11 +2900,48 @@ private fun GlassChoiceRow(
     }
 }
 
-/** Riga episodio con checkbox per la selezione multipla nel dialog download. */
+/** Checkbox custom in stile vetro, adatta al D-pad (la Checkbox M3 non lo è). */
+@Composable
+private fun SelectCheckbox(checked: Boolean, partial: Boolean = false) {
+    Box(
+        modifier = Modifier
+            .size(22.dp)
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (checked) WaveStreamColors.Accent else Color.Transparent)
+            .border(
+                width = 1.5.dp,
+                color = when {
+                    checked -> WaveStreamColors.Accent
+                    partial -> WaveStreamColors.AccentLight
+                    else -> WaveStreamColors.TextTertiary
+                },
+                shape = RoundedCornerShape(6.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        when {
+            checked -> Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(15.dp)
+            )
+            partial -> Icon(
+                imageVector = Icons.Default.Remove,
+                contentDescription = null,
+                tint = WaveStreamColors.AccentLight,
+                modifier = Modifier.size(15.dp)
+            )
+        }
+    }
+}
+
+/** Riga episodio con checkbox per la selezione multipla (download / segna come visto). */
 @Composable
 private fun EpisodeSelectRow(
     episode: Episode,
     checked: Boolean,
+    alreadyWatched: Boolean = false,
     focusRequester: FocusRequester? = null,
     onToggle: () -> Unit
 ) {
@@ -2934,36 +2971,206 @@ private fun EpisodeSelectRow(
                 .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Checkbox custom: la Checkbox M3 non è pensata per il D-pad.
-            Box(
-                modifier = Modifier
-                    .size(22.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(if (checked) WaveStreamColors.Accent else Color.Transparent)
-                    .border(
-                        width = 1.5.dp,
-                        color = if (checked) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
-                        shape = RoundedCornerShape(6.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (checked) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(15.dp)
-                    )
-                }
-            }
+            SelectCheckbox(checked = checked)
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = "E${episode.episodeNumber} · ${episode.name}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = WaveStreamColors.TextPrimary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
             )
+            if (alreadyWatched) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "Visto",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = WaveStreamColors.AccentLight,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}
+
+/** Intestazione di stagione con checkbox per selezionare/deselezionare tutti i suoi episodi. */
+@Composable
+private fun SeasonSelectRow(
+    seasonNumber: Int,
+    selectedCount: Int,
+    total: Int,
+    checked: Boolean,
+    onToggle: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+    val fill by animateColorAsState(
+        targetValue = if (isFocused) GlassTokens.accentFill(WaveStreamColors.Accent) else GlassTokens.SurfaceFillStrong,
+        animationSpec = AppAnimations.SpringCardFocusColor,
+        label = "seasonSelectFill"
+    )
+    val stroke = if (isFocused) GlassTokens.accentStroke(WaveStreamColors.Accent) else GlassTokens.StrokeGradient
+
+    GlassSurface(
+        shape = RoundedCornerShape(12.dp),
+        fill = fill,
+        stroke = stroke,
+        strokeWidth = if (isFocused) 1.5.dp else 1.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusable(interactionSource = interactionSource)
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onToggle)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            SelectCheckbox(checked = checked, partial = selectedCount in 1 until total)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Stagione $seasonNumber",
+                style = MaterialTheme.typography.bodyLarge,
+                color = WaveStreamColors.TextPrimary,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "$selectedCount/$total",
+                style = MaterialTheme.typography.bodySmall,
+                color = WaveStreamColors.TextSecondary
+            )
+        }
+    }
+}
+
+/**
+ * Dialog "segna come visti" per le serie: tutta la serie, intere stagioni o singoli
+ * episodi (es. tutto fino a un certo episodio).
+ */
+@Composable
+private fun MarkWatchedSeriesDialog(
+    episodes: List<Episode>,
+    alreadyWatchedIds: Set<Long>,
+    onConfirm: (Set<Long>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    // Episodi raggruppati per stagione (ordine crescente).
+    val bySeason = remember(episodes) {
+        episodes.groupBy { it.seasonNumber }.toSortedMap()
+    }
+    var selectedIds by remember { mutableStateOf(emptySet<Long>()) }
+    val firstFocus = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(120)
+        runCatching { firstFocus.requestFocus() }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        GlassSurface(
+            shape = RoundedCornerShape(22.dp),
+            fill = WaveStreamColors.BackgroundSecondary.copy(alpha = 0.96f),
+            stroke = GlassTokens.StrokeGradient,
+            strokeWidth = 1.dp,
+            modifier = Modifier.width(720.dp)
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Text(
+                    text = "Segna come visti",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = WaveStreamColors.TextPrimary,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Scegli cosa hai già visto: tutta la serie, intere stagioni o i singoli episodi.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = WaveStreamColors.TextSecondary
+                )
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                if (episodes.isEmpty()) {
+                    Text(
+                        text = "Episodi non ancora disponibili.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = WaveStreamColors.TextTertiary
+                    )
+                } else {
+                    GlassChoiceRow(
+                        icon = Icons.Default.Check,
+                        title = "Tutta la serie",
+                        subtitle = "Segna tutti i ${episodes.size} episodi come visti",
+                        focusRequester = firstFocus,
+                        onClick = { selectedIds = episodes.map { it.id }.toSet() }
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 2.dp),
+                        modifier = Modifier.heightIn(max = 380.dp)
+                    ) {
+                        bySeason.forEach { (season, seasonEpisodes) ->
+                            val sortedEps = seasonEpisodes.sortedBy { it.episodeNumber }
+                            val episodeIds = sortedEps.map { it.id }
+                            val selectedInSeason = episodeIds.count { it in selectedIds }
+                            val seasonChecked = episodeIds.isNotEmpty() && selectedInSeason == episodeIds.size
+
+                            item(key = "season_$season") {
+                                SeasonSelectRow(
+                                    seasonNumber = season,
+                                    selectedCount = selectedInSeason,
+                                    total = episodeIds.size,
+                                    checked = seasonChecked,
+                                    onToggle = {
+                                        selectedIds = if (seasonChecked) {
+                                            selectedIds - episodeIds.toSet()
+                                        } else {
+                                            selectedIds + episodeIds.toSet()
+                                        }
+                                    }
+                                )
+                            }
+                            items(sortedEps, key = { it.id }) { ep ->
+                                EpisodeSelectRow(
+                                    episode = ep,
+                                    checked = ep.id in selectedIds,
+                                    alreadyWatched = ep.id in alreadyWatchedIds,
+                                    onToggle = {
+                                        selectedIds = if (ep.id in selectedIds) {
+                                            selectedIds - ep.id
+                                        } else {
+                                            selectedIds + ep.id
+                                        }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    GlassTextAction("Annulla", onClick = onDismiss)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    GlassPrimaryAction(
+                        text = if (selectedIds.isEmpty()) "Conferma" else "Conferma (${selectedIds.size})",
+                        enabled = selectedIds.isNotEmpty()
+                    ) {
+                        onConfirm(selectedIds)
+                    }
+                }
+            }
         }
     }
 }
