@@ -129,6 +129,8 @@ import it.wavestream.app.ui.theme.AccentColor
 import it.wavestream.app.ui.tv.TvHomeScreen
 import it.wavestream.app.ui.components.ExpandableNavRail
 import it.wavestream.app.ui.components.GlassDialog
+import it.wavestream.app.ui.components.EditListButton
+import it.wavestream.app.ui.components.GlassMenuRow
 import androidx.tv.foundation.lazy.list.TvLazyColumn
 import androidx.tv.foundation.lazy.list.itemsIndexed
 import androidx.tv.foundation.lazy.list.rememberTvLazyListState
@@ -3040,60 +3042,6 @@ private fun HeroListPickerDialog(
                     DialogActionButton(text = "Chiudi", primary = true, onClick = onDismiss)
                 }
             }
-        }
-    }
-}
-
-/**
- * Riga selezionabile del selettore liste: mostra il nome e la spunta se il
- * contenuto è già presente. Con bordo bianco quando è focalizzata dal D-pad.
- */
-@Composable
-private fun ListPickerRow(
-    name: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-
-    val background by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.BackgroundTertiary else Color.Transparent,
-        label = "listRowBg"
-    )
-    val border by animateColorAsState(
-        targetValue = if (isFocused) Color.White else WaveStreamColors.TextTertiary.copy(alpha = 0.5f),
-        label = "listRowBorder"
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(background)
-            .border(if (isFocused) 2.dp else 1.dp, border, RoundedCornerShape(10.dp))
-            .focusable(interactionSource = interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.bodyLarge,
-            color = WaveStreamColors.TextPrimary,
-            modifier = Modifier.weight(1f)
-        )
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = WaveStreamColors.Accent,
-                modifier = Modifier.size(20.dp)
-            )
         }
     }
 }

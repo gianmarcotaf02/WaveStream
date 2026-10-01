@@ -3152,7 +3152,6 @@ class HomeViewModel @Inject constructor(
      * Crea una nuova lista e vi aggiunge subito [hero].
      */
     fun createListWithHero(hero: HeroItem, name: String, onCreated: () -> Unit = {}) {
-        viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
                     val groupId = customGroupDao.insertGroup(
@@ -3176,6 +3175,26 @@ class HomeViewModel @Inject constructor(
             }
             refreshListKeys()
             onCreated()
+        }
+    }
+
+    /** Rinomina la lista [listId]. [onDone] è chiamata dopo l'update (per ricaricare). */
+    fun renameList(listId: Long, newName: String, onDone: () -> Unit = {}) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    val group = customGroupDao.getGroupById(listId)
+                    group?.let {
+                        customGroupDao.updateGroup(
+                            it.copy(name = newName, updatedAt = System.currentTimeMillis())
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.e("HomeViewModel", "Error renaming list $listId", e)
+                }
+            }
+            refreshListKeys()
+            onDone()
         }
     }
 
