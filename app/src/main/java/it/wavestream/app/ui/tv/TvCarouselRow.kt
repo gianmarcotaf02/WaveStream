@@ -183,7 +183,7 @@ fun TvCarouselRow(
             val density = LocalDensity.current
             val leftMarginPx = with(density) { CAROUSEL_LEFT_MARGIN.toPx() }
             val viewportWidthPx = with(density) { maxWidth.toPx() }
-            val focusPivotFraction = if (viewportWidthPx > 0f) {
+            val focusPivotFraction = if (viewportWidthPx.isFinite() && viewportWidthPx > 0f) {
                 (leftMarginPx / viewportWidthPx).coerceIn(0f, 1f)
             } else {
                 0f
