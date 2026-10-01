@@ -622,15 +622,20 @@ class DetailsActivity : ComponentActivity() {
 
     /** Segna come visti gli episodi indicati (crea/aggiorna la riga di progresso). */
     private suspend fun markEpisodesWatched(episodeIds: Collection<Long>) {
-        episodeIds.forEach { epId ->
-            val ep = episodeDao.getEpisodeById(epId) ?: return@forEach
-            val existing = watchProgressDao.getProgress(profileId, ContentType.EPISODE, epId)
+        if (episodeIds.isEmpty()) return
+        // Una sola query per la serie: gli id arrivano dal dialog, che usa la stessa lista.
+        val seriesId = currentSeriesId.takeIf { it > 0 } ?: contentId
+        val byId = episodeDao.getEpisodesBySeriesList(seriesId).associateBy { it.id }
+        val targets = episodeIds.mapNotNull { byId[it] }
+            .ifEmpty { episodeIds.mapNotNull { episodeDao.getEpisodeById(it) } }
+        targets.forEach { ep ->
+            val existing = watchProgressDao.getProgress(profileId, ContentType.EPISODE, ep.id)
             val duration = watchedDuration(existing?.duration ?: 0L, null)
             watchProgressDao.upsert(
                 WatchProgress(
                     profileId = profileId,
                     contentType = ContentType.EPISODE,
-                    contentId = epId,
+                    contentId = ep.id,
                     seriesId = ep.seriesId,
                     season = ep.seasonNumber,
                     episode = ep.episodeNumber,
