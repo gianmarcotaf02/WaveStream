@@ -25,9 +25,11 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.TvLazyListScope
 import androidx.tv.foundation.lazy.list.items
@@ -50,6 +52,13 @@ import kotlinx.coroutines.delay
  * Oltre questo indice la riga prosegue senza numero.
  */
 private const val RANK_MAX = 10
+
+/**
+ * Margine sinistro dei caroselli. È anche la posizione in cui il pivot "blocca"
+ * la card in focus: premendo destra/sinistra il blocco di focus resta ancorato
+ * a questo primo slot a sinistra e scorre solo la fila dietro di esso.
+ */
+private val CAROUSEL_LEFT_MARGIN = 40.dp
 
 /**
  * Fascia riservata al numero di classifica (a sinistra della card).
@@ -166,11 +175,28 @@ fun TvCarouselRow(
                 )
             }
         } else {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            // Il pivot ancora la card in focus al primo slot a sinistra: il "blocco"
+            // di focus (bordo accent + card più grande) resta fermo mentre la fila
+            // scorre dietro di esso. La frazione è calcolata sul viewport reale perché
+            // la larghezza in px dipende dalla densità dello schermo.
+            val density = LocalDensity.current
+            val leftMarginPx = with(density) { CAROUSEL_LEFT_MARGIN.toPx() }
+            val viewportWidthPx = with(density) { maxWidth.toPx() }
+            val focusPivotFraction = if (viewportWidthPx > 0f) {
+                (leftMarginPx / viewportWidthPx).coerceIn(0f, 1f)
+            } else {
+                0f
+            }
+
         TvLazyRow(
             state = listState,
-            contentPadding = PaddingValues(start = 40.dp, end = 40.dp),
+            contentPadding = PaddingValues(start = CAROUSEL_LEFT_MARGIN, end = 40.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            pivotOffsets = androidx.tv.foundation.PivotOffsets(parentFraction = 0.1f),
+            pivotOffsets = PivotOffsets(
+                parentFraction = focusPivotFraction,
+                childFraction = 0f
+            ),
             modifier = Modifier
                 .focusRequester(focusRequester)
         ) {
@@ -272,6 +298,7 @@ fun TvCarouselRow(
                     )
                 }
             }
+        }
         }
         }
     }
