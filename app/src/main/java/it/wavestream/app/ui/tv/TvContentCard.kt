@@ -114,7 +114,8 @@ fun TvContentCard(
                 focusedScale = 1.08f,
                 pressedScale = 0.98f
             ),
-            // Aurora: idle con bordo sottile (definizione su Surface 0), focus con ring 2dp
+            // Aurora: idle con bordo sottile (definizione su Surface 0), focus con
+            // ring accent 3dp ben visibile (non solo il glow dietro la card).
             border = CardDefaults.border(
                 border = Border(
                     border = androidx.compose.foundation.BorderStroke(
@@ -125,7 +126,7 @@ fun TvContentCard(
                 ),
                 focusedBorder = Border(
                     border = androidx.compose.foundation.BorderStroke(
-                        width = 2.dp,
+                        width = 3.dp,
                         color = WaveStreamColors.Accent
                     ),
                     shape = RoundedCornerShape(12.dp)

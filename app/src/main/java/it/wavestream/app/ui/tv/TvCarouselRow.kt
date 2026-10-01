@@ -112,7 +112,29 @@ fun TvCarouselRow(
     
     var isRowFocused by remember { mutableStateOf(false) }
     var isFirstItemFocused by remember { mutableStateOf(false) }
-    
+
+    // Indice dell'item attualmente in focus nella riga. Serve ad ancorare
+    // esplicitamente la card al primo slot a sinistra, in aggiunta al pivot:
+    // il bringIntoView di sistema, da solo, a volte non scatta (item già
+    // visibile), quindi alcune righe non restavano "bloccate" a sinistra.
+    // L'indice = row.items.size rappresenta la card "Vedi tutto".
+    var focusedIndex by remember { mutableIntStateOf(-1) }
+
+    LaunchedEffect(isRowFocused, focusedIndex) {
+        if (isRowFocused && focusedIndex >= 0) {
+            // Già ancorato: nessuno scroll inutile (evita micro-jitter sul D-pad).
+            if (listState.firstVisibleItemIndex != focusedIndex ||
+                listState.firstVisibleItemScrollOffset != 0
+            ) {
+                try {
+                    listState.animateScrollToItem(focusedIndex, 0)
+                } catch (_: Exception) {
+                    // Il nodo potrebbe non essere ancora pronto al primo frame.
+                }
+            }
+        }
+    }
+
     LaunchedEffect(isRowFocused) {
         onFocusChanged?.invoke(isRowFocused)
     }
@@ -248,7 +270,10 @@ fun TvCarouselRow(
                         .focusRequester(itemFocusRequester)
                         .onFocusChanged { focusState ->
                             isFocused.value = focusState.isFocused
-                            if (focusState.hasFocus) focusMemory?.onFocused(focusKey)
+                            if (focusState.hasFocus) {
+                                focusMemory?.onFocused(focusKey)
+                                focusedIndex = index
+                            }
                             if (isFirst) {
                                 isFirstItemFocused = focusState.isFocused
                             }
@@ -294,7 +319,10 @@ fun TvCarouselRow(
                     TvSeeAllCard(
                         onClick = onSeeAllClick,
                         modifier = Modifier.focusRequester(seeAllRequester),
-                        onFocused = { focusMemory?.onFocused(seeAllKey) }
+                        onFocused = {
+                            focusMemory?.onFocused(seeAllKey)
+                            focusedIndex = row.items.size
+                        }
                     )
                 }
             }
