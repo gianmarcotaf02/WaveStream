@@ -1272,7 +1272,7 @@ class DetailsActivity : ComponentActivity() {
         onStateUpdate(
             DetailsState(
                 title = series.name,
-                year = series.year?.toString() ?: "",
+                year = series.year?.toString() ?: series.tmdbFirstAirDate?.take(4) ?: "",
                 overview = series.plot ?: "",
                 genres = series.genre ?: "",
                 cast = series.cast,
@@ -1353,7 +1353,7 @@ class DetailsActivity : ComponentActivity() {
         var state = DetailsState(
             relatedContent = related,
             title = series.name,
-            year = series.year?.toString() ?: "",
+            year = series.year?.toString() ?: series.tmdbFirstAirDate?.take(4) ?: "",
             overview = series.plot ?: "",
             genres = series.genre ?: "",
             cast = series.cast,
