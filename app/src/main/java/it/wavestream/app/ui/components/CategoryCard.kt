@@ -45,11 +45,14 @@ fun CategoryCard(
     modifier: Modifier = Modifier,
     // Nei caroselli il "blocco" di focus è la cornice fissa sovrapposta:
     // qui il ring per-carta va spento per non disegnarne due.
-    showFocusRing: Boolean = true
+    showFocusRing: Boolean = true,
+    // Avvisato quando la card prende il focus (vedi TvContentCard.onFocused).
+    onFocused: (() -> Unit)? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    
+
+    if (isFocused) onFocused?.invoke()
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.08f else 1f,
         animationSpec = spring(stiffness = 300f),
