@@ -2936,6 +2936,10 @@ private fun ModernNextEpisodeOverlay(
                         containerColor = if (primaryFocused) WaveStreamColors.Accent else WaveStreamColors.Accent.copy(alpha = 0.85f),
                         contentColor = Color.White
                     ),
+                    // Bordo di focus bianco SOLO su "Guarda ora" (pulsante principale
+                    // dell'overlay "Prossimo episodio"): all'apparizione l'autofocus
+                    // cade qui, quindi l'indicatore è subito visibile.
+                    border = if (primaryFocused) BorderStroke(2.dp, Color.White) else null,
                     modifier = Modifier
                         .weight(1f)
                         .focusRequester(primaryFocus)
