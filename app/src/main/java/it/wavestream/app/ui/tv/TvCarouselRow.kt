@@ -378,7 +378,7 @@ fun TvCarouselRow(
                         x = CAROUSEL_LEFT_MARGIN + slotRankInset - growX,
                         y = -growY
                     )
-                    .size(slotCardW + 2 * growX, slotCardH + 2 * growY)
+                    .size(slotCardW + growX * 2f, slotCardH + growY * 2f)
                     .border(
                         width = 3.dp,
                         color = WaveStreamColors.Accent,
