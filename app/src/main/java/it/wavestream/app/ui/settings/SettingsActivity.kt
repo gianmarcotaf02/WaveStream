@@ -195,7 +195,11 @@ class SettingsActivity : ComponentActivity() {
         }
         LaunchedEffect(Unit) {
             openRouterConfigured = withContext(Dispatchers.IO) {
-                !userPreferences.getOpenRouterApiKey().isNullOrBlank()
+                // Vale sia la chiave personale dell'utente sia quella preconfigurata
+                // nell'app (BuildConfig.OPENROUTER_API_KEY): la sezione "Finale dei film"
+                // le considera entrambe, quindi anche la tile deve farlo.
+                !userPreferences.getOpenRouterApiKey().isNullOrBlank() ||
+                    it.wavestream.app.BuildConfig.OPENROUTER_API_KEY.isNotBlank()
             }
             subtitlesAuthenticated = withContext(Dispatchers.IO) {
                 openSubtitlesRepository.isAuthenticated()
