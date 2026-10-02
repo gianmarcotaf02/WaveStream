@@ -444,10 +444,8 @@ private fun TvSeeAllCard(
         label = "seeAllCardScale"
     )
     
-    val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorderStrong,
-        label = "seeAllCardBorder"
-    )
+    // Nessun bordo di focus su questa card: il "blocco" accent è la cornice
+    // fissa sovrapposta di TvCarouselRow.
     
     val backgroundColor by animateColorAsState(
         targetValue = if (isFocused) WaveStreamColors.Accent.copy(alpha = 0.15f) else WaveStreamColors.BackgroundTertiary,
