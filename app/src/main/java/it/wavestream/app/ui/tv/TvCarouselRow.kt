@@ -113,11 +113,9 @@ fun TvCarouselRow(
     var isRowFocused by remember { mutableStateOf(false) }
     var isFirstItemFocused by remember { mutableStateOf(false) }
 
-    // Indice dell'item attualmente in focus nella riga. Serve ad ancorare
-    // esplicitamente la card al primo slot a sinistra, in aggiunta al pivot:
-    // il bringIntoView di sistema, da solo, a volte non scatta (item già
-    // visibile), quindi alcune righe non restavano "bloccate" a sinistra.
-    // L'indice = row.items.size rappresenta la card "Vedi tutto".
+    // Indice dell'item attualmente in focus nella riga: è la card stessa a
+    // dichiararlo (TvContentCard.onFocused) quando prende il focus. L'indice
+    // row.items.size rappresenta la card "Vedi tutto".
     var focusedIndex by remember { mutableIntStateOf(-1) }
 
     LaunchedEffect(focusedIndex) {
