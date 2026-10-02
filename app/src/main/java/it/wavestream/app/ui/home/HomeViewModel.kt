@@ -590,12 +590,21 @@ class HomeViewModel @Inject constructor(
                     // (contenuto rimosso dall'utente) vanno eliminati. Ricostruiamo gli
                     // hero per riempire lo slot con una nuova raccomandazione: senza
                     // rebuild il contenuto resterebbe "fermo" anche dopo il riavvio.
-                    val freshHeroes = if (refreshedHeroes.any { it.isStaleCwDerivedHero() }) {
+                    //
+                    // Stesso rebuild serve anche nel caso opposto: un titolo APPENA
+                    // INIZIATO compare subito in "Continua a guardare" ma non negli hero
+                    // (che erano raccomandazioni/popolari, quindi nessun hero CW da
+                    // eliminare). Senza questo secondo controllo il nuovo titolo restava
+                    // fuori dall'hero pur essendo nel carosello.
+                    val cwMissingFromHeroes = cwItems.isNotEmpty() &&
+                        cwItems.any { cw -> refreshedHeroes.none { it.representsContinueWatching(cw) } }
+                    val needsHeroRebuild = refreshedHeroes.any { it.isStaleCwDerivedHero() } || cwMissingFromHeroes
+                    val freshHeroes = if (needsHeroRebuild) {
                         try {
                             loadFreshHeroesFor(contentType)?.heroes
                                 ?: refreshedHeroes.filterNot { it.isStaleCwDerivedHero() }
                         } catch (e: Exception) {
-                            Log.e("HomeViewModel", "Error rebuilding heroes after CW removal", e)
+                            Log.e("HomeViewModel", "Error rebuilding heroes after CW change", e)
                             refreshedHeroes.filterNot { it.isStaleCwDerivedHero() }
                         }
                     } else {
@@ -712,6 +721,18 @@ class HomeViewModel @Inject constructor(
      */
     private fun HeroItem.isStaleCwDerivedHero(): Boolean =
         isCwDerived && resumeMinutes == null && resumeEpisodeSeason == null
+
+    /**
+     * True se l'hero rappresenta lo stesso contenuto della voce "Continua a guardare".
+     * Per le serie il match è sull'id della serie (l'hero CW usa il seriesId),
+     * per i film sull'id del contenuto.
+     */
+    private fun HeroItem.representsContinueWatching(cw: ContinueWatchingData): Boolean =
+        if (cw.seriesId != null) {
+            contentType == ContentType.SERIES.name && id == cw.seriesId
+        } else {
+            id == cw.contentId
+        }
 
     /**
      * Ricostruisce da zero gli hero del tab indicato (Continua a guardare + taste
