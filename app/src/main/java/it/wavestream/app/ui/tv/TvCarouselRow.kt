@@ -120,13 +120,16 @@ fun TvCarouselRow(
     // L'indice = row.items.size rappresenta la card "Vedi tutto".
     var focusedIndex by remember { mutableIntStateOf(-1) }
 
-    LaunchedEffect(isRowFocused, focusedIndex) {
-        if (isRowFocused && focusedIndex >= 0) {
+    LaunchedEffect(focusedIndex) {
+        if (focusedIndex >= 0) {
             // Già ancorato: nessuno scroll inutile (evita micro-jitter sul D-pad).
             if (listState.firstVisibleItemIndex != focusedIndex ||
                 listState.firstVisibleItemScrollOffset != 0
             ) {
                 try {
+                    // Ancoraggio esplicito: NON dipendiamo dal bringIntoView di sistema,
+                    // che non scorre mai se l'item è già interamente visibile
+                    // (ContentInViewNode.bringChildIntoView fa early-return su isMaxVisible).
                     listState.animateScrollToItem(focusedIndex, 0)
                 } catch (_: IllegalStateException) {
                     // Il nodo potrebbe non essere ancora pronto al primo frame.
