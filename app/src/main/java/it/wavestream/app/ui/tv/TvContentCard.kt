@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -114,23 +115,13 @@ fun TvContentCard(
                 focusedScale = 1.08f,
                 pressedScale = 0.98f
             ),
-            // Aurora: idle con bordo sottile (definizione su Surface 0), focus con
-            // ring accent 3dp ben visibile (non solo il glow dietro la card).
+            // Il bordo di focus non è più gestito dal componente Card (che su API
+            // e densità diverse risultava poco visibile): lo disegniamo noi come
+            // overlay sopra l'immagine, dentro la card (scala col focus).
             border = CardDefaults.border(
-                border = Border(
-                    border = androidx.compose.foundation.BorderStroke(
-                        width = 1.dp,
-                        color = WaveStreamColors.SurfaceBorder
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ),
-                focusedBorder = Border(
-                    border = androidx.compose.foundation.BorderStroke(
-                        width = 3.dp,
-                        color = WaveStreamColors.Accent
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                )
+                border = Border.None,
+                focusedBorder = Border.None,
+                pressedBorder = Border.None
             ),
             shape = CardDefaults.shape(
                 shape = RoundedCornerShape(12.dp),
@@ -296,6 +287,24 @@ fun TvContentCard(
                         }
                     }
                 }
+
+                // Focus ring: bordo accent disegnato SOPRA l'immagine/badge/progress,
+                // dentro la card (quindi scala col focus). Inset di 1dp per non farlo
+                // tagliare dal clip della shape: il "board" accent è sempre visibile.
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .padding(1.dp)
+                        .border(
+                            width = 1.dp + 2.dp * focusProgress,
+                            color = androidx.compose.ui.graphics.lerp(
+                                WaveStreamColors.SurfaceBorder,
+                                WaveStreamColors.Accent,
+                                focusProgress
+                            ),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                )
             }
         }
 
