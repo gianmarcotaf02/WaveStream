@@ -25,11 +25,9 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.*
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.tv.foundation.PivotOffsets
 import androidx.tv.foundation.lazy.list.TvLazyRow
 import androidx.tv.foundation.lazy.list.TvLazyListScope
 import androidx.tv.foundation.lazy.list.items
@@ -201,34 +199,24 @@ fun TvCarouselRow(
             }
         } else {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // Il pivot ancora la card in focus al primo slot a sinistra: il "blocco"
-            // di focus (bordo accent + card più grande) resta fermo mentre la fila
-            // scorre dietro di esso. La frazione è calcolata sul viewport reale perché
-            // la larghezza in px dipende dalla densità dello schermo.
-            val density = LocalDensity.current
-            val leftMarginPx = with(density) { CAROUSEL_LEFT_MARGIN.toPx() }
-            val viewportWidthPx = with(density) { maxWidth.toPx() }
-            // Padding finale di sicurezza: se il viewport non è finito (constraint
-            // unbounded), niente padding per non rischiare un valore infinito.
-            val endPivotPadding = if (maxWidth.value.isFinite()) maxWidth else 0.dp
-            val focusPivotFraction = if (viewportWidthPx.isFinite() && viewportWidthPx > 0f) {
-                (leftMarginPx / viewportWidthPx).coerceIn(0f, 1f)
-            } else {
-                0f
-            }
+            // La riga NON scorre da sola: con `userScrollEnabled = false` disattiviamo
+            // il bring-into-view di sistema, che ignora gli item già visibili
+            // (ContentInViewNode fa early-return su isMaxVisible) e che quindi non
+            // ancorava le card normali. L'ancoraggio al primo slot è ora gestito
+            // ESCLUSIVAMENTE da animateScrollToItem(focusedIndex, 0).
+            //
+            // Padding finale: dà range di scroll sufficiente anche alle righe corte
+            // (es. "Continua a guardare") restando sempre <= viewport, così lo spazio
+            // disponibile sul main axis non diventa negativo.
+            val endPivotPadding =
+                (maxWidth - CAROUSEL_LEFT_MARGIN - 1.dp).coerceAtLeast(0.dp)
 
         TvLazyRow(
             state = listState,
-            // Padding finale ampio quanto il viewport: garantisce a QUALSIASI item
-            // (anche nelle righe corte, es. "Continua a guardare") di poter scorrere
-            // fino al primo slot a sinistra. Senza, le righe che entrano tutte nello
-            // schermo non hanno margine di scroll e il focus non si "blocca".
             contentPadding = PaddingValues(start = CAROUSEL_LEFT_MARGIN, end = endPivotPadding),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            pivotOffsets = PivotOffsets(
-                parentFraction = focusPivotFraction,
-                childFraction = 0f
-            ),
+            // Scroll manuale: il posizionamento è deciso solo dal codice qui sotto.
+            userScrollEnabled = false,
             modifier = Modifier
                 .focusRequester(focusRequester)
         ) {
