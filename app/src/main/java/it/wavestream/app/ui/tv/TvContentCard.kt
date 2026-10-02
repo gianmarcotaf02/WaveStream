@@ -111,7 +111,13 @@ fun TvContentCard(
                 .onFocusChanged { focusState ->
                     val focused = focusState.isFocused
                     isFocused = focused
-                    if (focused) onFocused?.invoke()
+                    if (focused) {
+                        android.util.Log.d(
+                            "CarouselRow",
+                            "  card focused ${item.contentType}/${item.id}"
+                        )
+                        onFocused?.invoke()
+                    }
                 }
                 .graphicsLayer {
                     // Focus glow via shadow - derived from focusProgress

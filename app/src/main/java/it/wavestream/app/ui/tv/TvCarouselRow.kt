@@ -48,6 +48,7 @@ import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.cascadeIn
 import kotlinx.coroutines.delay
 import kotlin.math.abs
+import android.util.Log
 
 /**
  * Numero massimo di posizioni classificate nelle righe "Top 10".
@@ -125,6 +126,13 @@ fun TvCarouselRow(
 
     LaunchedEffect(focusedIndex) {
         if (focusedIndex >= 0) {
+            Log.d(
+                "CarouselRow",
+                "anchor row='${row.title}' idx=$focusedIndex " +
+                    "first=${listState.firstVisibleItemIndex} " +
+                    "visible=${listState.layoutInfo.visibleItemsInfo.size} " +
+                    "scrolling=${listState.isScrollInProgress}"
+            )
             // Ancoraggio allo slot di sinistra calcolato sull'offset REALE dell'item:
             // non passiamo dal motore di animateScrollToItem (che, a seconda dei casi,
             // può early-returnare o correggere in modo imprevedibile) ma chiediamo
@@ -136,6 +144,7 @@ fun TvCarouselRow(
                 .firstOrNull { it.index == focusedIndex }
             if (current == null) {
                 // Item fuori dal range di composizione: snap diretto e basta.
+                Log.d("CarouselRow", "   item NOT visible -> scrollToItem($focusedIndex)")
                 try {
                     listState.scrollToItem(focusedIndex, 0)
                 } catch (_: IllegalStateException) {
@@ -143,6 +152,7 @@ fun TvCarouselRow(
                 }
             } else {
                 val delta = current.offset - slotPx
+                Log.d("CarouselRow", "   itemX=${current.offset} slotX=$slotPx delta=$delta")
                 if (abs(delta) > 0.5f) {
                     listState.animateScrollBy(delta)
                 }
