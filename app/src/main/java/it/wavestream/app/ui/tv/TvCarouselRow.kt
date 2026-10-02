@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
@@ -46,6 +47,7 @@ import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.cascadeIn
 import kotlinx.coroutines.delay
 import android.util.Log
+import kotlin.math.abs
 
 /**
  * Numero massimo di posizioni classificate nelle righe "Top 10".
@@ -120,21 +122,39 @@ fun TvCarouselRow(
 
     LaunchedEffect(focusedIndex) {
         if (focusedIndex < 0) return@LaunchedEffect
+        // Ancoraggio allo slot di sinistra calcolato sull'offset REALE dell'item.
+        //
+        // `visibleItemsInfo.offset` in tv-foundation NON è affidabile come sistema
+        // di riferimento (può includere o meno il contentPadding a seconda del
+        // punto): lo trattiamo quindi in modo AUTO-CALIBRANTE. La coordinata dello
+        // slot è, per definizione, `offset del primo item visibile + quanto è già
+        // scorso` — vale in qualunque convenzione.
+        val layout = listState.layoutInfo
+        val first = layout.visibleItemsInfo.firstOrNull {
+            it.index == listState.firstVisibleItemIndex
+        }
+        val item = layout.visibleItemsInfo.firstOrNull { it.index == focusedIndex }
         Log.d(
             "CarouselRow",
-            "anchor row='${row.title}' idx=$focusedIndex " +
-                "first=${listState.firstVisibleItemIndex} " +
-                "visible=${listState.layoutInfo.visibleItemsInfo.size}"
+            "anchor row='${row.title}' idx=$focusedIndex firstX=${first?.offset} " +
+                "fo=${listState.firstVisibleItemScrollOffset} itemX=${item?.offset}"
         )
-        try {
-            // API canonica: mette l'item in focus all'inizio della lista, cioè nel
-            // primo slot a sinistra (dopo il contentPadding). Gestisce da sé la
-            // geometria di ogni tipo di item (poster, categorie, canali, "Vedi
-            // tutto", inset delle righe "Top 10") senza dipendere dalla
-            // convenzione di coordinate di visibleItemsInfo.offset.
-            listState.animateScrollToItem(focusedIndex, 0)
-        } catch (_: IllegalStateException) {
-            // Il nodo potrebbe non essere ancora pronto al primo frame.
+        if (first != null && item != null) {
+            val slotCoord = first.offset + listState.firstVisibleItemScrollOffset
+            val delta = item.offset - slotCoord
+            if (abs(delta) > 0.5f) {
+                // animateScrollBy è affidabile anche con userScrollEnabled = false
+                // (a differenza di animateScrollToItem, che non si muove).
+                listState.animateScrollBy(delta)
+            }
+        } else if (item == null) {
+            // Item fuori dal range di composizione: snap diretto, poi la composizione
+            // lo renderà visibile nello slot.
+            try {
+                listState.scrollToItem(focusedIndex, 0)
+            } catch (_: IllegalStateException) {
+                // Il nodo potrebbe non essere ancora pronto al primo frame.
+            }
         }
     }
 
