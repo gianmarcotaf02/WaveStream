@@ -63,7 +63,10 @@ fun TvContentCard(
     // Nei caroselli (TvCarouselRow) il "blocco" di focus è la cornice fissa
     // sovrapposta allo slot: qui il ring per-carta va spento, altrimenti ne
     // vedresti due (quello che scorre con la card + quello fisso).
-    showFocusRing: Boolean = true
+    showFocusRing: Boolean = true,
+    // Avvisato quando la card prende il focus: è il modo più affidabile per
+    // far sapere al carosello qual è l'indice da ancorare allo slot.
+    onFocused: (() -> Unit)? = null
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -105,7 +108,11 @@ fun TvContentCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .then(if (fillWidth) Modifier.aspectRatio(cardAspect) else Modifier.height(cardHeight))
-                .onFocusChanged { isFocused = it.isFocused }
+                .onFocusChanged { focusState ->
+                    val focused = focusState.isFocused
+                    isFocused = focused
+                    if (focused) onFocused?.invoke()
+                }
                 .graphicsLayer {
                     // Focus glow via shadow - derived from focusProgress
                     shadowElevation = AppAnimations.UnfocusedGlowElevation +

@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
@@ -26,6 +27,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.*
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -45,6 +47,7 @@ import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.cascadeIn
 import kotlinx.coroutines.delay
+import kotlin.math.abs
 
 /**
  * Numero massimo di posizioni classificate nelle righe "Top 10".
@@ -118,20 +121,30 @@ fun TvCarouselRow(
     // visibile), quindi alcune righe non restavano "bloccate" a sinistra.
     // L'indice = row.items.size rappresenta la card "Vedi tutto".
     var focusedIndex by remember { mutableIntStateOf(-1) }
+    val slotDensity = LocalDensity.current
 
     LaunchedEffect(focusedIndex) {
         if (focusedIndex >= 0) {
-            // Già ancorato: nessuno scroll inutile (evita micro-jitter sul D-pad).
-            if (listState.firstVisibleItemIndex != focusedIndex ||
-                listState.firstVisibleItemScrollOffset != 0
-            ) {
+            // Ancoraggio allo slot di sinistra calcolato sull'offset REALE dell'item:
+            // non passiamo dal motore di animateScrollToItem (che, a seconda dei casi,
+            // può early-returnare o correggere in modo imprevedibile) ma chiediamo
+            // esattamente lo scarto mancante. `visibleItemsInfo.offset` è la posizione
+            // dell'item rispetto al viewport, quindi per portarla a CAROUSEL_LEFT_MARGIN
+            // basta scorrere di (offset - margine).
+            val slotPx = with(slotDensity) { CAROUSEL_LEFT_MARGIN.toPx() }
+            val current = listState.layoutInfo.visibleItemsInfo
+                .firstOrNull { it.index == focusedIndex }
+            if (current == null) {
+                // Item fuori dal range di composizione: snap diretto e basta.
                 try {
-                    // Ancoraggio esplicito: NON dipendiamo dal bringIntoView di sistema,
-                    // che non scorre mai se l'item è già interamente visibile
-                    // (ContentInViewNode.bringChildIntoView fa early-return su isMaxVisible).
-                    listState.animateScrollToItem(focusedIndex, 0)
+                    listState.scrollToItem(focusedIndex, 0)
                 } catch (_: IllegalStateException) {
                     // Il nodo potrebbe non essere ancora pronto al primo frame.
+                }
+            } else {
+                val delta = current.offset - slotPx
+                if (abs(delta) > 0.5f) {
+                    listState.animateScrollBy(delta)
                 }
             }
         }
