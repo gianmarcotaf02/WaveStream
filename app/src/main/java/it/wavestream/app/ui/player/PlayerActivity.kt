@@ -2410,7 +2410,11 @@ class PlayerActivity : ComponentActivity() {
      * il long-press (che avanza/arretra con continuità) funziona in modo affidabile.
      */
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        // L'overlay "Prossimo episodio" ha la PRIORITÀ sul seek: finché è a schermo
+        // le frecce L/R devono navigare i suoi pulsanti (Guarda ora / Ignora),
+        // non avviare il seek a barra nascosta.
         if (!_controlsVisible.value && !_isMiniPlayer.value &&
+            _nextEpisode.value == null &&
             (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT || event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
         ) {
             when (event.action) {
@@ -2467,6 +2471,9 @@ class PlayerActivity : ComponentActivity() {
             // l'azione: mai mettere in pausa "di sorpresa" premendo OK.
             // Quando i controlli sono visibili, gestisce Compose (click sui bottoni).
             KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
+                // Overlay "Prossimo episodio" visibile: OK deve premere il pulsante
+                // focalizzato (Guarda ora / Ignora), non mostrare i controlli.
+                if (_nextEpisode.value != null) return false
                 if (!_controlsVisible.value) {
                     stopHiddenSeekRepeat()
                     _controlsVisible.value = true
@@ -2477,6 +2484,10 @@ class PlayerActivity : ComponentActivity() {
             }
             // D-pad up/down to show controls
             KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN -> {
+                // Con l'overlay "Prossimo episodio" visibile non forziamo i controlli:
+                // far comparire la barra sposterebbe il focus sul Play, rubandolo
+                // all'overlay. Lascia gestire la navigazione del focus a Compose.
+                if (_nextEpisode.value != null) return false
                 stopHiddenSeekRepeat()
                 _controlsVisible.value = true
                 return false  // Let Compose handle focus navigation
