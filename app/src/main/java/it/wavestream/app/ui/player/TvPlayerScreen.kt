@@ -258,8 +258,10 @@ fun TvPlayerScreen(
         // durante la navigazione dei controlli riporterebbe il focus sul Play.
         if (controlsVisible) focusPending = true
     }
-    LaunchedEffect(controlsVisible, isLoading, focusPending) {
-        if (controlsVisible && !isLoading && focusPending) {
+    LaunchedEffect(controlsVisible, isLoading, focusPending, nextEpisode) {
+        // Con l'overlay "Prossimo episodio" a schermo il focus appartiene all'overlay:
+        // niente autofocus sul Play/Pausa, altrimenti il telecomando finirebbe lì.
+        if (controlsVisible && !isLoading && focusPending && nextEpisode == null) {
             // Piccolo retry: al primo frame il bottone potrebbe non essere ancora
             // agganciato al FocusRequester.
             repeat(5) {
@@ -2839,9 +2841,13 @@ private fun ModernNextEpisodeOverlay(
     }
 
     // Autofocus sul pulsante principale quando compare l'overlay.
+    // Retry robusto: il primo frame potrebbe non avere ancora il nodo agganciato.
     LaunchedEffect(title) {
-        delay(80)
-        runCatching { primaryFocus.requestFocus() }
+        repeat(10) {
+            delay(60)
+            val focused = runCatching { primaryFocus.requestFocus() }.isSuccess
+            if (focused) return@LaunchedEffect
+        }
     }
 
     // Il numero segue il countdown reale del player (garantisce i 10 s), mentre l'anello
