@@ -42,7 +42,10 @@ fun CategoryCard(
     item: CarouselItem,
     onClick: () -> Unit,
     isFavorite: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // Nei caroselli il "blocco" di focus è la cornice fissa sovrapposta:
+    // qui il ring per-carta va spento per non disegnarne due.
+    showFocusRing: Boolean = true
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -54,7 +57,7 @@ fun CategoryCard(
     )
     
     val borderColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
+        targetValue = if (isFocused && showFocusRing) WaveStreamColors.Accent else WaveStreamColors.SurfaceBorder,
         label = "categoryCardBorder"
     )
     
@@ -78,7 +81,7 @@ fun CategoryCard(
             .height(100.dp)
             .clip(RoundedCornerShape(12.dp))
             // Focus: ring accent 3dp ben visibile (idle sottile)
-            .border(if (isFocused) 3.dp else 1.dp, borderColor, RoundedCornerShape(12.dp))
+            .border(if (isFocused && showFocusRing) 3.dp else 1.dp, borderColor, RoundedCornerShape(12.dp))
             .background(
                 Brush.linearGradient(
                     colors = listOf(
