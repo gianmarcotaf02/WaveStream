@@ -395,22 +395,29 @@ fun TvCarouselRow(
                 animationSpec = AppAnimations.SpringCardFocus,
                 label = "focusBlockAlpha"
             )
-            Box(
-                modifier = Modifier
-                    // La card scalata ha il centro invariato: la sua fascia parte
-                    // dal margine meno lo stacco dello scaling.
-                    .offset(
-                        x = CAROUSEL_LEFT_MARGIN + slotRankInset - growX,
-                        y = -growY
-                    )
-                    .size(slotCardW + growX * 2f, slotCardH + growY * 2f)
-                    .border(
-                        width = 3.dp,
-                        color = WaveStreamColors.Accent,
-                        shape = RoundedCornerShape(14.dp)
-                    )
-                    .graphicsLayer { alpha = frameAlpha }
-            )
+            // Solo quando la riga ha davvero il focus disegniamo la cornice:
+            // le righe non focalizzate non devono mostrare nessun "board" accent.
+            if (frameAlpha > 0.01f) {
+                Box(
+                    modifier = Modifier
+                        // La card scalata ha il centro invariato: la sua fascia parte
+                        // dal margine meno lo stacco dello scaling.
+                        .offset(
+                            x = CAROUSEL_LEFT_MARGIN + slotRankInset - growX,
+                            y = -growY
+                        )
+                        .size(slotCardW + growX * 2f, slotCardH + growY * 2f)
+                        // IMPORTANTE: l'alpha DEVE stare prima del bordo. Messo dopo,
+                        // il bordo viene disegnato fuori dal layer e resta sempre
+                        // opaco (bug: cornice visibile anche sulle righe senza focus).
+                        .graphicsLayer { alpha = frameAlpha }
+                        .border(
+                            width = 3.dp,
+                            color = WaveStreamColors.Accent,
+                            shape = RoundedCornerShape(14.dp)
+                        )
+                )
+            }
         }
         }
     }
