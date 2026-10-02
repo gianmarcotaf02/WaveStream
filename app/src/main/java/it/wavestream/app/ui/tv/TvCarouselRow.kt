@@ -3,6 +3,7 @@ package it.wavestream.app.ui.tv
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -292,13 +293,17 @@ fun TvCarouselRow(
                             CategoryCard(
                                 item = item,
                                 isFavorite = item.isFavorite,
-                                onClick = { onItemClick(item) }
+                                onClick = { onItemClick(item) },
+                                // Il "blocco" di focus è la cornice fissa sovrapposta
+                                // (vedi sotto): il ring per-carta va spento.
+                                showFocusRing = false
                             )
                         }
                         else -> {
                             TvContentCard(
                                 item = item,
-                                onClick = { onItemClick(item) }
+                                onClick = { onItemClick(item) },
+                                showFocusRing = false
                             )
                         }
                     }
@@ -324,6 +329,63 @@ fun TvCarouselRow(
                     )
                 }
             }
+        }
+
+            // ------------------------------------------------------------------
+            // BLOCCO DI FOCUS FISSO (stile Prime Video)
+            // ------------------------------------------------------------------
+            // Cornice accent sovrapposta alla fila: la sua posizione NON cambia
+            // mai, resta sempre ancorata al primo slot a sinistra e solo le card
+            // scorrono dietro. È disegnata DOPO la TvLazyRow, quindi finisce sopra
+            // le card (incluso il momento in cui stanno scivolando nello slot).
+            //
+            // Avvolge la card INGRANDITA (le card in focus scalano 1.08 attorno
+            // al centro, quindi la loro fascia visibile è la grandezza naturale
+            // più lo "stacco" dello scaling): così, una volta che la card è
+            // arrivata nello slot, la cornice risulta incollata al suo bordo.
+            val slotItem = row.items.getOrNull(focusedIndex)
+            val slotCardW = when {
+                slotItem == null -> 122.dp                  // vedi: card "Vedi tutto"
+                slotItem.contentType.startsWith("CATEGORY_") -> 180.dp
+                slotItem.contentType == "CHANNEL" -> 90.dp
+                else -> 122.dp
+            }
+            val slotCardH = when {
+                slotItem == null -> 183.dp
+                slotItem.contentType.startsWith("CATEGORY_") -> 100.dp
+                slotItem.contentType == "CHANNEL" -> 70.dp
+                else -> 183.dp
+            }
+            // Righe "Top 10": la card è rientrata dietro il numero di classifica,
+            // la cornice deve seguirne l'inset altrimenti non la centrerebbe.
+            val slotRankInset = if (row.isRanked && focusedIndex in 0 until RANK_MAX) {
+                if (focusedIndex + 1 >= 10) RANK_CARD_INSET_TEN else RANK_CARD_INSET
+            } else {
+                0.dp
+            }
+            val growX = slotCardW * (AppAnimations.CardFocusScale - 1f) / 2f
+            val growY = slotCardH * (AppAnimations.CardFocusScale - 1f) / 2f
+            val frameAlpha by animateFloatAsState(
+                targetValue = if (isRowFocused && focusedIndex >= 0) 1f else 0f,
+                animationSpec = AppAnimations.SpringCardFocus,
+                label = "focusBlockAlpha"
+            )
+            Box(
+                modifier = Modifier
+                    // La card scalata ha il centro invariato: la sua fascia parte
+                    // dal margine meno lo stacco dello scaling.
+                    .offset(
+                        x = CAROUSEL_LEFT_MARGIN + slotRankInset - growX,
+                        y = -growY
+                    )
+                    .size(slotCardW + 2 * growX, slotCardH + 2 * growY)
+                    .border(
+                        width = 3.dp,
+                        color = WaveStreamColors.Accent,
+                        shape = RoundedCornerShape(14.dp)
+                    )
+                    .graphicsLayer { alpha = frameAlpha }
+            )
         }
         }
         }
@@ -402,7 +464,9 @@ private fun TvSeeAllCard(
             .width(122.dp)
             .height(183.dp)
             .clip(RoundedCornerShape(12.dp))
-            .border(if (isFocused) 3.dp else 1.dp, borderColor, RoundedCornerShape(12.dp))
+            // Nessun bordo di focus su questa card: il "blocco" accent è la cornice
+            // fissa sovrapposta di TvCarouselRow, che resta ancorata allo slot.
+            .border(1.dp, WaveStreamColors.SurfaceBorderStrong, RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .onFocusChanged { if (it.isFocused) onFocused?.invoke() }
             .onKeyEvent { event ->

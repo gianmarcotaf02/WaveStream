@@ -59,7 +59,11 @@ fun TvContentCard(
     customWidth: androidx.compose.ui.unit.Dp? = null,
     customHeight: androidx.compose.ui.unit.Dp? = null,
     // In griglia: la card riempie la cella mantenendo l'aspect ratio (poster verticale)
-    fillWidth: Boolean = false
+    fillWidth: Boolean = false,
+    // Nei caroselli (TvCarouselRow) il "blocco" di focus è la cornice fissa
+    // sovrapposta allo slot: qui il ring per-carta va spento, altrimenti ne
+    // vedresti due (quello che scorre con la card + quello fisso).
+    showFocusRing: Boolean = true
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -291,20 +295,22 @@ fun TvContentCard(
                 // Focus ring: bordo accent disegnato SOPRA l'immagine/badge/progress,
                 // dentro la card (quindi scala col focus). Inset di 1dp per non farlo
                 // tagliare dal clip della shape: il "board" accent è sempre visibile.
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .padding(1.dp)
-                        .border(
-                            width = 1.dp + 2.dp * focusProgress,
-                            color = androidx.compose.ui.graphics.lerp(
-                                WaveStreamColors.SurfaceBorder,
-                                WaveStreamColors.Accent,
-                                focusProgress
-                            ),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                )
+                if (showFocusRing) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(1.dp)
+                            .border(
+                                width = 1.dp + 2.dp * focusProgress,
+                                color = androidx.compose.ui.graphics.lerp(
+                                    WaveStreamColors.SurfaceBorder,
+                                    WaveStreamColors.Accent,
+                                    focusProgress
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            )
+                    )
+                }
             }
         }
 
