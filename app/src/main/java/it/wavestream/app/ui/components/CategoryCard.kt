@@ -52,7 +52,9 @@ fun CategoryCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    if (isFocused) onFocused?.invoke()
+    // Lato-effect: il callback non va mai invocato durante la composizione.
+    LaunchedEffect(isFocused) { if (isFocused) onFocused?.invoke() }
+
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.08f else 1f,
         animationSpec = spring(stiffness = 300f),

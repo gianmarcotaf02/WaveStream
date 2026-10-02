@@ -309,14 +309,16 @@ fun TvCarouselRow(
                                 onClick = { onItemClick(item) },
                                 // Il "blocco" di focus è la cornice fissa sovrapposta
                                 // (vedi sotto): il ring per-carta va spento.
-                                showFocusRing = false
+                                showFocusRing = false,
+                                onFocused = { focusedIndex = index }
                             )
                         }
                         else -> {
                             TvContentCard(
                                 item = item,
                                 onClick = { onItemClick(item) },
-                                showFocusRing = false
+                                showFocusRing = false,
+                                onFocused = { focusedIndex = index }
                             )
                         }
                     }
