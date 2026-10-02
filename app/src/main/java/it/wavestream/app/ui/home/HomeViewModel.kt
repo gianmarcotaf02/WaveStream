@@ -625,6 +625,10 @@ class HomeViewModel @Inject constructor(
                                 it.copy(
                                     carouselRows = updatedRows,
                                     heroItems = freshHeroes,
+                                    // Se abbiamo ricostruito gli hero, il primo è il contenuto
+                                    // appena ripreso: riporta l'indice su di lui, altrimenti
+                                    // la slide resterebbe sulla raccomandazione precedente.
+                                    currentHeroIndex = if (needsHeroRebuild) 0 else it.currentHeroIndex,
                                     isContinueWatchingHero = hasAnyCW
                                 ) 
                             }
