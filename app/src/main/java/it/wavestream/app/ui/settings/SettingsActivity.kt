@@ -2577,6 +2577,16 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
     val downloadButtonFocusRequester = remember { FocusRequester() }
     val installButtonFocusRequester = remember { FocusRequester() }
     val retryButtonFocusRequester = remember { FocusRequester() }
+
+    // Bordo di focus sul pulsante "Controlla aggiornamenti": il container è già accent,
+    // quindi usiamo un contorno bianco per rendere evidente il focus col telecomando.
+    val checkButtonInteraction = remember { MutableInteractionSource() }
+    val isCheckButtonFocused by checkButtonInteraction.collectIsFocusedAsState()
+    val checkButtonBorder by animateColorAsState(
+        targetValue = if (isCheckButtonFocused) Color.White else Color.Transparent,
+        animationSpec = tween(150),
+        label = "checkButtonBorder"
+    )
     
     // Smart focus: move focus to appropriate button when state changes
     LaunchedEffect(downloadState, updateInfo) {
@@ -2660,6 +2670,8 @@ private fun UpdateSettings(updateManager: it.wavestream.app.update.AppUpdateMana
                 },
                 enabled = !isChecking && downloadState !is it.wavestream.app.update.DownloadState.Downloading,
                 colors = ButtonDefaults.buttonColors(containerColor = WaveStreamColors.Accent),
+                interactionSource = checkButtonInteraction,
+                border = BorderStroke(2.dp, checkButtonBorder),
                 modifier = Modifier
                     .fillMaxWidth()
                     .focusRequester(checkButtonFocusRequester)
