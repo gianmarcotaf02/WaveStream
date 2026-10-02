@@ -93,7 +93,15 @@ data class EpisodeProgress(
     val episodeId: Long,
     val progress: Float,           // 0f to 1f
     val remainingMinutes: Int,     // Minutes remaining
-    val isCompleted: Boolean       // True if watched > 95%
+    val isCompleted: Boolean,      // True if watched > 95%
+    /**
+     * Vero se c'è davvero qualcosa da riprendere, con la stessa soglia usata dal
+     * resto dell'app ([it.wavestream.app.data.database.entity.WatchProgress.isResumable],
+     * ≥ 15s di visione). Prima la UI usava una soglia locale dell'1%: un episodio
+     * aperto pochi secondi risultava sia non-riprendibile sia non-visto, mentre il
+     * CTA lo scambiava per "completato" e saltava all'episodio successivo.
+     */
+    val isResumable: Boolean = false
 )
 
 /**
@@ -341,8 +349,7 @@ fun DetailsScreen(
             -1
         } else {
             val inProgress = eps.indexOfFirst { ep ->
-                val p = state.episodeProgress[ep.id]
-                p != null && p.progress > 0.01f && !p.isCompleted
+                state.episodeProgress[ep.id]?.isResumable == true
             }
             if (inProgress >= 0) {
                 inProgress
@@ -3329,7 +3336,8 @@ private fun EpisodeCarouselCard(
     var pressStartTime by remember { mutableStateOf(0L) }
     val longPressThreshold = 500L
 
-    val hasProgress = progress != null && progress.progress > 0.01f && !progress.isCompleted
+    // Stessa soglia di resume del CTA/player: niente più 1% "locale".
+    val hasProgress = progress?.isResumable == true
     val isWatched = progress?.isCompleted == true ||
         (progress != null && progress.remainingMinutes <= 7 && progress.progress > 0.9f)
     val progressFraction: Float? =

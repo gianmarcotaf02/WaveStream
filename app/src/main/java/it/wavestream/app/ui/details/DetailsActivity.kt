@@ -1113,8 +1113,14 @@ class DetailsActivity : ComponentActivity() {
         val seasons = episodeDao.getSeasonNumbers(seriesId)
         val allEpisodes = episodeDao.getEpisodesBySeriesList(seriesId)
         val episodeProgressMap = mutableMapOf<Long, EpisodeProgress>()
+        // Ultimo episodio con un progresso "significativo" (completato o davvero
+        // riprendibile): è quello che decide resume / episodio successivo.
         var lastWatchedEpisode: Episode? = null
         var lastWatchedProgress: it.wavestream.app.data.database.entity.WatchProgress? = null
+        // Ultimo episodio toccato anche solo per pochi secondi (sotto la soglia di
+        // resume): serve solo come fallback per non saltare al successivo.
+        var lastTouchedEpisode: Episode? = null
+        var lastTouchedProgress: it.wavestream.app.data.database.entity.WatchProgress? = null
         var nextEpisodeInfo: String? = null
         var nextEpisodeId: Long? = null
         var resumeMinutes: Int? = null
@@ -1145,13 +1151,27 @@ class DetailsActivity : ComponentActivity() {
                     episodeId = ep.id,
                     progress = progressPercent,
                     remainingMinutes = remainingMin,
-                    isCompleted = effectivelyCompleted
+                    isCompleted = effectivelyCompleted,
+                    isResumable = !effectivelyCompleted && progress.isResumable
                 )
 
-                // Track the most recently watched episode
-                if (lastWatchedProgress == null || progress.lastWatchedAt > lastWatchedProgress!!.lastWatchedAt) {
-                    lastWatchedEpisode = ep
-                    lastWatchedProgress = progress
+                // Ultimo episodio toccato, anche solo pochi secondi: fallback.
+                if (lastTouchedProgress == null || progress.lastWatchedAt > lastTouchedProgress!!.lastWatchedAt) {
+                    lastTouchedEpisode = ep
+                    lastTouchedProgress = progress
+                }
+
+                // Per decidere resume/successivo conta SOLO un progresso
+                // significativo: completato (anche per soglia titoli di coda) oppure
+                // riprendibile con la stessa regola del resto dell'app
+                // (WatchProgress.isResumable, ≥ 15s). Senza questo filtro una riga
+                // scritta aprendo l'episodio per pochi secondi veniva scambiata per
+                // "episodio completato" e faceva saltare a quello successivo.
+                if (effectivelyCompleted || progress.isResumable) {
+                    if (lastWatchedProgress == null || progress.lastWatchedAt > lastWatchedProgress!!.lastWatchedAt) {
+                        lastWatchedEpisode = ep
+                        lastWatchedProgress = progress
+                    }
                 }
             }
         }
@@ -1165,8 +1185,9 @@ class DetailsActivity : ComponentActivity() {
             val remainingMin = (remainingMs / 60000).toInt().coerceAtLeast(1)
             val effectivelyCompleted = lastWatchedProgress!!.isCompleted || remainingMs <= 6 * 60 * 1000
 
-            if (!effectivelyCompleted && progressPercent > 0.01f) {
-                // Episode is in progress - show resume
+            if (!effectivelyCompleted) {
+                // Episodio in corso: qui il progresso è per forza riprendibile
+                // (i blip sotto soglia non entrano in lastWatched*).
                 resumeMinutes = remainingMin
                 resumeProgress = progressPercent
                 // Keep lastWatchedEpisode pointing to this episode
@@ -1191,6 +1212,15 @@ class DetailsActivity : ComponentActivity() {
                     }
                 }
             }
+        } else if (lastTouchedEpisode != null) {
+            // Nessun episodio completato né riprendibile: è stato solo APERTO un
+            // episodio per pochi secondi. Si propone di ripartire da QUEL episodio,
+            // mai il successivo (era il bug: S1E1 visto + S1E2 aperto pochi secondi
+            // → "Riproduci S1E3", saltando S1E2).
+            val touched = lastTouchedEpisode!!
+            nextEpisodeInfo = "Riproduci S${touched.seasonNumber}E${touched.episodeNumber}"
+            nextEpisodeId = touched.id
+            lastWatchedEpisode = touched
         } else {
             // No watch progress at all - default to first episode
             val firstEp = sortedEpisodes.firstOrNull()
