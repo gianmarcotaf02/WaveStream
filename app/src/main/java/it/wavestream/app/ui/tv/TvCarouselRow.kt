@@ -145,7 +145,7 @@ fun TvCarouselRow(
             if (abs(delta) > 0.5f) {
                 // animateScrollBy è affidabile anche con userScrollEnabled = false
                 // (a differenza di animateScrollToItem, che non si muove).
-                listState.animateScrollBy(delta)
+                listState.animateScrollBy(delta.toFloat())
             }
         } else if (item == null) {
             // Item fuori dal range di composizione: snap diretto, poi la composizione
