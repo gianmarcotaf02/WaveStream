@@ -388,7 +388,6 @@ fun TvCarouselRow(
             )
         }
         }
-        }
     }
 }
 
