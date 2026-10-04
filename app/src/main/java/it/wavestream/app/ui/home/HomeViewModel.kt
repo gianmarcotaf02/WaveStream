@@ -574,41 +574,10 @@ class HomeViewModel @Inject constructor(
                         Log.e("HomeViewModel", "Error refreshing popular series row", e)
                     }
 
-                    // Refresh "Visti di recente" in-place: un titolo appena completato
-                    // deve comparire subito senza attendere la scadenza della cache
-                    // (10 giorni) né un reload completo della Home/playlist.
-                    val recentFilter = when (contentType) {
-                        HomeContentType.MOVIES -> ContentType.MOVIE
-                        HomeContentType.SERIES -> ContentType.SERIES
-                        else -> null
-                    }
-                    try {
-                        val recentItems = loadRecentlyWatched(recentFilter).orEmpty()
-                        applyRowUpdate(
-                            rows = updatedRows,
-                            title = "Visti di recente",
-                            newItems = recentItems,
-                            insertAfter = "Continua a guardare"
-                        )
-                    } catch (e: Exception) {
-                        Log.e("HomeViewModel", "Error refreshing recently watched row", e)
-                    }
-
-                    // Stesso discorso per "Prossimo episodio" (solo tab Serie):
-                    // completare una puntata cambia l'episodio suggerito.
-                    if (contentType == HomeContentType.SERIES) {
-                        try {
-                            val nextEpisodes = loadNextEpisodesForTab(limit = 8).orEmpty()
-                            applyRowUpdate(
-                                rows = updatedRows,
-                                title = "Prossimo episodio",
-                                newItems = nextEpisodes,
-                                insertAfter = "Continua a guardare"
-                            )
-                        } catch (e: Exception) {
-                            Log.e("HomeViewModel", "Error refreshing next episode row", e)
-                        }
-                    }
+                    // Righe dipendenti dall'ATTIVITÀ dell'utente (non dalla playlist):
+                    // "Visti di recente", "Prossimo episodio" e badge "visto".
+                    // Senza questo patch restavano congelate fino al reload completo.
+                    patchUserActivityRows(updatedRows, contentType)
                     
                     // Update cache with the patched rows
                     cachedCarouselRows[contentType] = updatedRows
@@ -697,14 +666,16 @@ class HomeViewModel @Inject constructor(
         rows: MutableList<CarouselRow>,
         title: String,
         newItems: List<CarouselItem>,
-        insertAfter: String? = null
+        insertAfterTitles: List<String> = emptyList()
     ) {
         val index = rows.indexOfFirst { it.title == title }
         when {
             index >= 0 && newItems.isNotEmpty() -> rows[index] = rows[index].copy(items = newItems)
             index >= 0 -> rows.removeAt(index)
             newItems.isNotEmpty() -> {
-                val anchor = insertAfter?.let { a -> rows.indexOfFirst { it.title == a } } ?: -1
+                val anchor = insertAfterTitles.firstNotNullOfOrNull { candidate ->
+                    rows.indexOfFirst { it.title == candidate }.takeIf { it >= 0 }
+                } ?: -1
                 rows.add(if (anchor >= 0) anchor + 1 else 0, CarouselRow(title = title, items = newItems))
             }
         }
@@ -941,11 +912,16 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                 }
-                // Le righe arrivano da cache (fino a 10 giorni): la riga "Continua a guardare"
-                // va rigenerata dal DB, altrimenti il badge episodio resta quello vecchio.
+                // Le righe arrivano da cache di sessione: vanno rigenerate dal DB tutte
+                // le righe che dipendono dall'attività dell'utente (Continua a guardare,
+                // Visti di recente, Prossimo episodio) più i badge "visto" più recenti,
+                // altrimenti restano congelate fino al reload completo.
                 launch(Dispatchers.IO) {
                     try {
-                        val patched = patchContinueWatchingRow(cachedRows, contentType)
+                        val patched = patchUserActivityRows(
+                            patchContinueWatchingRow(cachedRows, contentType).toMutableList(),
+                            contentType
+                        )
                         cachedCarouselRows[contentType] = patched
                         if (currentContentType == contentType) {
                             withContext(Dispatchers.Main) {
@@ -1167,12 +1143,16 @@ class HomeViewModel @Inject constructor(
             val existingRows = cachedCarouselRows[contentType]
             val existingHeroes = cachedHeroItems[contentType]
             if (existingRows != null && existingRows.isNotEmpty() && existingHeroes != null && existingHeroes.heroes.isNotEmpty()) {
-                // Righe e hero già in cache: aggiorna comunque la riga "Continua a guardare"
-                // (badge episodio) prima di saltare il resto del preload.
+                // Righe e hero già in cache: aggiorna comunque le righe che dipendono
+                // dall'attività dell'utente (badge episodio, Visti di recente, ...)
+                // prima di saltare il resto del preload.
                 try {
-                    cachedCarouselRows[contentType] = patchContinueWatchingRow(existingRows, contentType)
+                    cachedCarouselRows[contentType] = patchUserActivityRows(
+                        patchContinueWatchingRow(existingRows, contentType).toMutableList(),
+                        contentType
+                    )
                 } catch (e: Exception) {
-                    Log.e("HomeViewModel", "preloadTabIntoCache: CW patch failed", e)
+                    Log.e("HomeViewModel", "preloadTabIntoCache: activity patch failed", e)
                 }
                 Log.d("HomeViewModel", "preloadTabIntoCache: $contentType already cached, skipping")
                 return
@@ -3577,6 +3557,64 @@ class HomeViewModel @Inject constructor(
             idx < 0 && fresh != null -> updated.add(0, fresh)
         }
         return updated
+    }
+
+    /**
+     * Rigenera dal DB le righe che dipendono dall'ATTIVITÀ dell'utente e non dalla
+     * playlist, mutando [rows] e restituendola:
+     *  - "Visti di recente" (contenuti completati: cambia appena finisci un titolo)
+     *  - "Prossimo episodio" (solo tab Serie: cambia appena finisci una puntata)
+     *  - badge "visto" su TUTTE le righe (le righe ricostruite, es. il trending,
+     *    nascono senza badge perché arrivano da query DB neutre)
+     *
+     * Usata da tutti i percorsi di refresh diversi dal reload completo: cache-hit di
+     * [loadContent], soft refresh ([forceRefresh]) e preload dei tab.
+     */
+    private suspend fun patchUserActivityRows(
+        rows: MutableList<CarouselRow>,
+        contentType: HomeContentType
+    ): MutableList<CarouselRow> {
+        val recentFilter = when (contentType) {
+            HomeContentType.MOVIES -> ContentType.MOVIE
+            HomeContentType.SERIES -> ContentType.SERIES
+            else -> null
+        }
+        try {
+            applyRowUpdate(
+                rows = rows,
+                title = "Visti di recente",
+                newItems = loadRecentlyWatched(recentFilter).orEmpty(),
+                // Ordine del tab Serie: CW → Prossimo episodio → Visti di recente.
+                insertAfterTitles = if (contentType == HomeContentType.SERIES) {
+                    listOf("Prossimo episodio", "Continua a guardare")
+                } else {
+                    listOf("Continua a guardare")
+                }
+            )
+        } catch (e: Exception) {
+            Log.e("HomeViewModel", "Error patching recently watched row", e)
+        }
+
+        if (contentType == HomeContentType.SERIES) {
+            try {
+                applyRowUpdate(
+                    rows = rows,
+                    title = "Prossimo episodio",
+                    newItems = loadNextEpisodesForTab(limit = 8).orEmpty(),
+                    insertAfterTitles = listOf("Continua a guardare")
+                )
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error patching next episode row", e)
+            }
+        }
+
+        try {
+            enrichRowsWithWatchedBadges(rows)
+        } catch (e: Exception) {
+            Log.e("HomeViewModel", "Error patching watched badges", e)
+        }
+
+        return rows
     }
 
     /**
