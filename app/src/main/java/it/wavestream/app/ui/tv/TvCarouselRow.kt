@@ -101,7 +101,11 @@ fun TvCarouselRow(
     focusRequester: FocusRequester = remember { FocusRequester() },
     onUpPressed: (() -> Unit)? = null,
     onFocusChanged: ((Boolean) -> Unit)? = null,
-    onLeftOnFirstItem: (() -> Unit)? = null
+    onLeftOnFirstItem: (() -> Unit)? = null,
+    // Sezione Liste: la scritta "Vedi tutto →" accanto al titolo diventa una semplice
+    // etichetta non focusabile e non cliccabile (il "Vedi tutto" vero resta la card
+    // in fondo alla riga). Default true = comportamento invariato altrove.
+    seeAllHeaderInteractive: Boolean = true
 ) {
     val listState = rememberTvLazyListState()
     // Registro di focus: consente di riprendere sull'elemento da cui si è entrati
@@ -185,17 +189,23 @@ fun TvCarouselRow(
             )
             
             if (row.showSeeAll) {
-                val headerKey = "${row.title}|seeall_header"
-                val headerRequester = remember { FocusRequester() }
-                DisposableEffect(headerKey) {
-                    focusMemory?.register(headerKey, headerRequester)
-                    onDispose { focusMemory?.unregister(headerKey) }
+                if (seeAllHeaderInteractive) {
+                    val headerKey = "${row.title}|seeall_header"
+                    val headerRequester = remember { FocusRequester() }
+                    DisposableEffect(headerKey) {
+                        focusMemory?.register(headerKey, headerRequester)
+                        onDispose { focusMemory?.unregister(headerKey) }
+                    }
+                    TvSeeAllButton(
+                        onClick = onSeeAllClick,
+                        modifier = Modifier.focusRequester(headerRequester),
+                        onFocused = { focusMemory?.onFocused(headerKey) }
+                    )
+                } else {
+                    // Solo scritta: nessun focusRequester, nessuna registrazione nel
+                    // registro di focus, nessun onClick.
+                    TvSeeAllLabel()
                 }
-                TvSeeAllButton(
-                    onClick = onSeeAllClick,
-                    modifier = Modifier.focusRequester(headerRequester),
-                    onFocused = { focusMemory?.onFocused(headerKey) }
-                )
             }
         }
         
@@ -427,33 +437,6 @@ fun TvCarouselRow(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun TvSeeAllButton(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    onFocused: (() -> Unit)? = null
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    
-    val textColor by animateColorAsState(
-        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
-        label = "seeAllColor"
-    )
-    
-    Text(
-        text = "Vedi tutto →",
-        style = MaterialTheme.typography.labelLarge,
-        color = textColor,
-        modifier = modifier
-            .onFocusChanged { if (it.isFocused) onFocused?.invoke() }
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-            .focusable(interactionSource = interactionSource)
-            .padding(8.dp)
-    )
-}
 
 /**
  * See all card - displayed as last item in carousel for D-pad accessibility
