@@ -46,6 +46,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -133,6 +136,22 @@ class LiveActivity : ComponentActivity() {
         var channelCounts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
         var searchQuery by remember { mutableStateOf("") }
         var isSearchActive by remember { mutableStateOf(false) }
+
+        // Ritorno in foreground (es. dal player). Serve perché la composizione resta viva:
+        // senza questo, la categoria "Visti di recente" (conteggio e lista canali) si
+        // aggiornava solo al riavvio dell'app.
+        var resumeTick by remember { mutableIntStateOf(0) }
+        var isFirstResume by remember { mutableStateOf(true) }
+        val liveLifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(liveLifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    if (isFirstResume) isFirstResume = false else resumeTick++
+                }
+            }
+            liveLifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { liveLifecycleOwner.lifecycle.removeObserver(observer) }
+        }
         
         // D-pad/system back: go back to the category grid first, then exit.
         // Also releases the heavy per-category data (channels + EPG map) so the
@@ -201,6 +220,19 @@ class LiveActivity : ComponentActivity() {
             isLoading = false
             // Don't auto-select — start with category grid view
         }
+
+        // Al ritorno in foreground aggiorna SOLO il conteggio mostrato sulle card della
+        // griglia (in particolare "Visti di recente"). L'elenco delle categorie non
+        // cambia senza un refresh playlist e riassegnarlo farebbe ripartire i
+        // LaunchedEffect che gestiscono il focus sulla griglia.
+        LaunchedEffect(resumeTick) {
+            if (resumeTick == 0) return@LaunchedEffect
+            val cutoff = System.currentTimeMillis() - RECENT_WINDOW_MS
+            recentlyWatchedDao.cleanupOlderThan(cutoff)
+            channelCounts = channelCounts.toMutableMap().apply {
+                this[RECENT_CATEGORY] = recentlyWatchedDao.getRecentChannelIds(cutoff).size
+            }
+        }
         
         // NOTA: qui NON si carica mai l'EPG dalla rete — l'aggiornamento avviene
         // rigorosamente e solo nella LoadingActivity (con progresso visibile).
@@ -208,8 +240,9 @@ class LiveActivity : ComponentActivity() {
         // loading) si mostrano i canali senza guida e l'EPG verrà ricaricato al
         // prossimo avvio dell'app.
         
-        // Load channels and EPG when category changes
-        LaunchedEffect(selectedCategory, isEpgLoading) {
+        // Load channels and EPG when category changes (o al ritorno in foreground:
+        // dentro "Visti di recente" la lista deve includere il canale appena guardato).
+        LaunchedEffect(selectedCategory, isEpgLoading, resumeTick) {
             if (isEpgLoading) return@LaunchedEffect
             
             selectedCategory?.let { cat ->

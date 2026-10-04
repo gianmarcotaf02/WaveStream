@@ -26,10 +26,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
 import androidx.tv.foundation.lazy.grid.TvGridCells
 import androidx.tv.foundation.lazy.grid.TvGridItemSpan
@@ -226,6 +229,20 @@ class HistoryActivity : ComponentActivity() {
                 selectedKeys = emptySet()
                 loadEntries(profileId)
             }
+        }
+
+        // Ricarica la cronologia ad ogni ritorno sull'Activity (es. dal player):
+        // senza questo la composizione resta viva e la lista mostrava i dati vecchi.
+        var isFirstResume by remember { mutableStateOf(true) }
+        val historyLifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(historyLifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) {
+                    if (isFirstResume) isFirstResume = false else reload()
+                }
+            }
+            historyLifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { historyLifecycleOwner.lifecycle.removeObserver(observer) }
         }
 
         LaunchedEffect(Unit) {
