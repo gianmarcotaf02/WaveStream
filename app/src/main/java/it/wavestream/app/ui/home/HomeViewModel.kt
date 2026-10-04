@@ -3580,29 +3580,35 @@ class HomeViewModel @Inject constructor(
             else -> null
         }
         try {
-            applyRowUpdate(
-                rows = rows,
-                title = "Visti di recente",
-                newItems = loadRecentlyWatched(recentFilter).orEmpty(),
-                // Ordine del tab Serie: CW → Prossimo episodio → Visti di recente.
-                insertAfterTitles = if (contentType == HomeContentType.SERIES) {
-                    listOf("Prossimo episodio", "Continua a guardare")
-                } else {
-                    listOf("Continua a guardare")
-                }
-            )
+            // `null` = errore di lettura: NON toccare la riga esistente. Lista vuota =
+            // nessun contenuto completato: la riga va rimossa.
+            loadRecentlyWatched(recentFilter)?.let { recentItems ->
+                applyRowUpdate(
+                    rows = rows,
+                    title = "Visti di recente",
+                    newItems = recentItems,
+                    // Ordine del tab Serie: CW → Prossimo episodio → Visti di recente.
+                    insertAfterTitles = if (contentType == HomeContentType.SERIES) {
+                        listOf("Prossimo episodio", "Continua a guardare")
+                    } else {
+                        listOf("Continua a guardare")
+                    }
+                )
+            }
         } catch (e: Exception) {
             Log.e("HomeViewModel", "Error patching recently watched row", e)
         }
 
         if (contentType == HomeContentType.SERIES) {
             try {
-                applyRowUpdate(
-                    rows = rows,
-                    title = "Prossimo episodio",
-                    newItems = loadNextEpisodesForTab(limit = 8).orEmpty(),
-                    insertAfterTitles = listOf("Continua a guardare")
-                )
+                loadNextEpisodesForTab(limit = 8)?.let { nextEpisodes ->
+                    applyRowUpdate(
+                        rows = rows,
+                        title = "Prossimo episodio",
+                        newItems = nextEpisodes,
+                        insertAfterTitles = listOf("Continua a guardare")
+                    )
+                }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error patching next episode row", e)
             }
