@@ -573,6 +573,42 @@ class HomeViewModel @Inject constructor(
                     } catch (e: Exception) {
                         Log.e("HomeViewModel", "Error refreshing popular series row", e)
                     }
+
+                    // Refresh "Visti di recente" in-place: un titolo appena completato
+                    // deve comparire subito senza attendere la scadenza della cache
+                    // (10 giorni) né un reload completo della Home/playlist.
+                    val recentFilter = when (contentType) {
+                        HomeContentType.MOVIES -> ContentType.MOVIE
+                        HomeContentType.SERIES -> ContentType.SERIES
+                        else -> null
+                    }
+                    try {
+                        val recentItems = loadRecentlyWatched(recentFilter).orEmpty()
+                        applyRowUpdate(
+                            rows = updatedRows,
+                            title = "Visti di recente",
+                            newItems = recentItems,
+                            insertAfter = "Continua a guardare"
+                        )
+                    } catch (e: Exception) {
+                        Log.e("HomeViewModel", "Error refreshing recently watched row", e)
+                    }
+
+                    // Stesso discorso per "Prossimo episodio" (solo tab Serie):
+                    // completare una puntata cambia l'episodio suggerito.
+                    if (contentType == HomeContentType.SERIES) {
+                        try {
+                            val nextEpisodes = loadNextEpisodesForTab(limit = 8).orEmpty()
+                            applyRowUpdate(
+                                rows = updatedRows,
+                                title = "Prossimo episodio",
+                                newItems = nextEpisodes,
+                                insertAfter = "Continua a guardare"
+                            )
+                        } catch (e: Exception) {
+                            Log.e("HomeViewModel", "Error refreshing next episode row", e)
+                        }
+                    }
                     
                     // Update cache with the patched rows
                     cachedCarouselRows[contentType] = updatedRows
@@ -647,6 +683,30 @@ class HomeViewModel @Inject constructor(
             cachedCarouselRowsTime.remove(contentType)
             cachedHeroItems.remove(contentType)
             loadContent(contentType)
+        }
+    }
+
+    /**
+     * Aggiorna in-place una riga del carosello preservando l'ordine delle altre:
+     * - riga presente e items non vuoti  → sostituisce gli items
+     * - riga presente e items vuoti      → rimuove la riga
+     * - riga assente e items non vuoti   → la inserisce subito dopo [insertAfter]
+     *   (o in testa se l'ancora non esiste)
+     */
+    private fun applyRowUpdate(
+        rows: MutableList<CarouselRow>,
+        title: String,
+        newItems: List<CarouselItem>,
+        insertAfter: String? = null
+    ) {
+        val index = rows.indexOfFirst { it.title == title }
+        when {
+            index >= 0 && newItems.isNotEmpty() -> rows[index] = rows[index].copy(items = newItems)
+            index >= 0 -> rows.removeAt(index)
+            newItems.isNotEmpty() -> {
+                val anchor = insertAfter?.let { a -> rows.indexOfFirst { it.title == a } } ?: -1
+                rows.add(if (anchor >= 0) anchor + 1 else 0, CarouselRow(title = title, items = newItems))
+            }
         }
     }
     
