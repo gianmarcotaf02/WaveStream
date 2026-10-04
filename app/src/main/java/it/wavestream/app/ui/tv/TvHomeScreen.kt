@@ -812,7 +812,8 @@ private fun TvHomeScreenContent(
                                         onSeeAllClick = seeAllForRow,
                                         focusRequester = rowFocusRequester,
                                         onFocusChanged = { focused -> if (focused) focusedRowKey = row.title },
-                                        onLeftOnFirstItem = onRailFocusRequest
+                                        onLeftOnFirstItem = onRailFocusRequest,
+                                        seeAllHeaderInteractive = !state.isListsTab
                                     )
                                 }
                             } else {
@@ -825,7 +826,8 @@ private fun TvHomeScreenContent(
                                     onSeeAllClick = seeAllForRow,
                                     focusRequester = rowFocusRequester,
                                     onFocusChanged = { focused -> if (focused) focusedRowKey = row.title },
-                                    onLeftOnFirstItem = onRailFocusRequest
+                                    onLeftOnFirstItem = onRailFocusRequest,
+                                    seeAllHeaderInteractive = !state.isListsTab
                                 )
                             }
                         }

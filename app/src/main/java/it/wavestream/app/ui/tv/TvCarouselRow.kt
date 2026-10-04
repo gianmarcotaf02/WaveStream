@@ -437,6 +437,49 @@ fun TvCarouselRow(
 @OptIn(ExperimentalTvMaterial3Api::class)
 @Composable
 private fun TvSeeAllButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onFocused: (() -> Unit)? = null
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val textColor by animateColorAsState(
+        targetValue = if (isFocused) WaveStreamColors.Accent else WaveStreamColors.TextTertiary,
+        label = "seeAllColor"
+    )
+
+    Text(
+        text = "Vedi tutto →",
+        style = MaterialTheme.typography.labelLarge,
+        color = textColor,
+        modifier = modifier
+            .onFocusChanged { if (it.isFocused) onFocused?.invoke() }
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .focusable(interactionSource = interactionSource)
+            .padding(8.dp)
+    )
+}
+
+/**
+ * Variante SOLO TESTO della scritta "Vedi tutto →" (sezione Liste):
+ * nessun onClick, nessun focusable — non è raggiungibile col D-pad.
+ * Stesso stile/padding della versione focusabile, così l'allineamento non cambia.
+ */
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun TvSeeAllLabel() {
+    Text(
+        text = "Vedi tutto →",
+        style = MaterialTheme.typography.labelLarge,
+        color = WaveStreamColors.TextTertiary,
+        modifier = Modifier.padding(8.dp)
+    )
+}
 
 /**
  * See all card - displayed as last item in carousel for D-pad accessibility
