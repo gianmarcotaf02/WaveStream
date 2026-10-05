@@ -42,6 +42,20 @@ suspend fun loadWatchedKeys(
 }
 
 /**
+ * True se il contenuto indicato è "visto" per il profilo corrente.
+ * Il contentType è la stringa usata da [CarouselItem]/`HeroItem` ("MOVIE"/"SERIES").
+ */
+fun WatchedKeys.contains(contentId: Long, contentType: String): Boolean = when (contentType) {
+    "MOVIE" -> contentId in movieIds
+    "SERIES" -> contentId in seriesIds
+    else -> false
+}
+
+/** True se la card rappresenta un contenuto già visto (flag già presente o chiave). */
+fun WatchedKeys.contains(item: CarouselItem): Boolean =
+    item.isWatched || contains(item.id, item.contentType)
+
+/**
  * Marca come "visti" i [CarouselItem] già completati. Non tocca gli item che
  * hanno già `isWatched` (es. la riga "Visti di recente").
  */

@@ -102,6 +102,11 @@ data class HeroItem(
     val seasonCount: Int? = null,  // Number of seasons (for series only)
     val totalDurationMinutes: Int? = null, // Total duration in minutes (for "xx min left of yy min")
     val isFavorite: Boolean = false,
+    // True se il contenuto è già stato visto per intero (film completato / serie
+    // finita). Serve al pulsante "visto" dell'hero (per proporre "non visto") ed
+    // è raro: gli hero già visti vengono filtrati, restano solo quelli con
+    // progresso da finire.
+    val isWatched: Boolean = false,
     val trailerKey: String? = null,
     val resumeEpisodeSeason: Int? = null,  // Season number for resume (series only)
     val resumeEpisodeNumber: Int? = null,  // Episode number for resume (series only)
