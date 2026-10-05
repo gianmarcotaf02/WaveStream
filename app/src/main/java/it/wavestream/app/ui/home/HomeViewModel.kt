@@ -3587,7 +3587,7 @@ class HomeViewModel @Inject constructor(
                 val progressList = watchProgressDao.getContinueWatching(currentProfileId, 30)
                 Log.d("HomeViewModel", "WatchProgress items found: ${progressList.size}")
                 
-                progressList.mapNotNull { progress ->
+                val resumed = progressList.mapNotNull { progress ->
                     // Enrich with title and poster from database
                     when (progress.contentType) {
                         ContentType.MOVIE -> {
@@ -3630,16 +3630,38 @@ class HomeViewModel @Inject constructor(
                 // Deduplicate: for series, keep only the most recently watched episode (first in list since sorted by lastWatchedAt DESC)
                 // Movies are deduplicated by contentId, series by seriesId
                 .distinctBy { data ->
-                    if (data.contentType == ContentType.SERIES && data.seriesId != null) {
-                        "SERIES_${data.seriesId}"  // Group by series ID
-                    } else {
-                        "MOVIE_${data.contentId}"  // Movies by content ID
+                        if (data.contentType == ContentType.SERIES && data.seriesId != null) {
+                            "SERIES_${data.seriesId}"  // Group by series ID
+                        } else {
+                            "MOVIE_${data.contentId}"  // Movies by content ID
+                        }
                     }
-                }
+
+                // Serie col prossimo episodio: l'ultimo episodio è stato completato ma
+                // la serie non è finita. La query "continua a guardare" esclude i
+                // progressi completati, quindi senza questo la serie spariva dalla riga
+                // (e dall'hero) pur avendo ancora puntate da vedere.
+                val alreadyListed = resumed.mapNotNull { it.seriesId }.toHashSet()
+                val upNext = loadUpNextSeries(limit = 10)
+                    .filterNot { (series, _) -> series.id in alreadyListed }
+                    .map { (series, next) ->
+                        ContinueWatchingData(
+                            contentId = next.id,
+                            seriesId = series.id,
+                            contentType = ContentType.SERIES,
+                            title = series.title,
+                            posterUrl = series.posterUrl,
+                            position = 0L,
+                            duration = 0L,
+                            seasonNumber = next.seasonNumber,
+                            episodeNumber = next.episodeNumber
+                        )
+                    }
+
                 // NB: niente auto-completamento dell'ultimo episodio dell'ultima
                 // stagione: la serie resta in "Continua a guardare" finché l'episodio
                 // non è realmente finito (vedi loadHeroItems).
-                .take(10)  // Limit to 10 items after deduplication
+                (resumed + upNext).take(10)  // Limit to 10 items after deduplication
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading continue watching: ${e.message}")
                 null
