@@ -3629,7 +3629,7 @@ class HomeViewModel @Inject constructor(
                 }
                 // Deduplicate: for series, keep only the most recently watched episode (first in list since sorted by lastWatchedAt DESC)
                 // Movies are deduplicated by contentId, series by seriesId
-                .distinctBy { data ->
+                    .distinctBy { data ->
                         if (data.contentType == ContentType.SERIES && data.seriesId != null) {
                             "SERIES_${data.seriesId}"  // Group by series ID
                         } else {
@@ -4153,6 +4153,10 @@ class HomeViewModel @Inject constructor(
     )
 
     private fun ContinueWatchingData.toCarouselItem(): CarouselItem {
+        // Un item senza progresso (resume assente o serie riproposta dal prossimo
+        // episodio) non deve mostrare barra e "minuti rimasti": resta solo il
+        // badge con l'episodio da vedere.
+        val hasProgress = duration > 0 && position > 0
         val progressPercent = if (duration > 0) position.toFloat() / duration.toFloat() else 0f
         val remaining = ((duration - position) / 60000).toInt()
         val episodeLabel = if (seasonNumber != null && episodeNumber != null) {
@@ -4169,8 +4173,8 @@ class HomeViewModel @Inject constructor(
             posterUrl = posterUrl,
             backdropUrl = null,
             contentType = contentType.name,
-            progressPercent = progressPercent.coerceIn(0f, 1f),
-            remainingMinutes = remaining.coerceAtLeast(0),
+            progressPercent = if (hasProgress) progressPercent.coerceIn(0f, 1f) else null,
+            remainingMinutes = if (hasProgress) remaining.coerceAtLeast(0) else null,
             episodeLabel = episodeLabel
         )
     }
