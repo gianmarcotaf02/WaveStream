@@ -2125,6 +2125,10 @@ class PlayerActivity : ComponentActivity() {
     }
     
     private fun playNextEpisode(isAutoPlay: Boolean = false) {
+        // Salva il progresso del contenuto CORRENTE prima di cambiare episodio:
+        // senza questo gli ultimi secondi/minuti di visione andavano persi e
+        // l'episodio appena finito non risultava completato.
+        saveProgress()
         lifecycleScope.launch {
             // Check Still Watching limit only for auto-plays
             if (isAutoPlay) {
@@ -2176,6 +2180,7 @@ class PlayerActivity : ComponentActivity() {
     }
 
     private fun playPreviousEpisode() {
+        saveProgress()
         lifecycleScope.launch {
             resetAutoPlayCounter()  // Manual navigation resets counter
             
@@ -2368,30 +2373,41 @@ class PlayerActivity : ComponentActivity() {
             // (finestra titoli di coda). Il contenuto viene poi mostrato come
             // "Visto" nel dettaglio e compare in "Visti di recente".
             val isCompleted = currentPos > (totalDur * 0.95) || remainingMs <= 6 * 60 * 1000
-            
+
+            // Snapshot del contenuto corrente: la scrittura è asincrona e i campi
+            // sono mutabili. Passando all'episodio successivo (o chiudendo il player)
+            // la coroutine poteva trovare già il NUOVO contentId/season/episode e
+            // salvare il progresso sull'episodio sbagliato.
+            val snapshotProfileId = profileId
+            val snapshotContentType = contentType
+            val snapshotContentId = contentId
+            val snapshotSeriesId = seriesId
+            val snapshotSeason = season
+            val snapshotEpisode = episode
+
             lifecycleScope.launch {
                 // Nessun progresso irrisore: se il player è stato aperto e chiuso prima
                 // che la riproduzione parta, salvare position~0 lasciava righe che
                 // l'home presentava come "Riprendi" con i minuti rimasti pari alla
                 // durata totale (es. "2h 24m rimasti" su un film mai visto).
                 if (currentPos < WatchProgress.MIN_RESUME_MS) {
-                    val existing = watchProgressDao.getProgress(profileId, contentType, contentId)
+                    val existing = watchProgressDao.getProgress(snapshotProfileId, snapshotContentType, snapshotContentId)
                     if (existing != null && existing.position >= WatchProgress.MIN_RESUME_MS) {
                         // Progresso reale già registrato: non azzerarlo con un position~0
                         return@launch
                     }
                     // Righe fantasma: eliminale invece di crearle
-                    watchProgressDao.deleteProgress(profileId, contentType, contentId)
+                    watchProgressDao.deleteProgress(snapshotProfileId, snapshotContentType, snapshotContentId)
                     return@launch
                 }
 
                 val progress = WatchProgress(
-                    profileId = profileId,
-                    contentType = contentType,
-                    contentId = contentId,
-                    seriesId = seriesId,
-                    season = season,
-                    episode = episode,
+                    profileId = snapshotProfileId,
+                    contentType = snapshotContentType,
+                    contentId = snapshotContentId,
+                    seriesId = snapshotSeriesId,
+                    season = snapshotSeason,
+                    episode = snapshotEpisode,
                     position = currentPos,
                     duration = totalDur,
                     isCompleted = isCompleted,

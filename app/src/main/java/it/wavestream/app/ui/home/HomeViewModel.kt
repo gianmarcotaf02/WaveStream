@@ -1584,47 +1584,30 @@ class HomeViewModel @Inject constructor(
 
                 // === Priority 2: Next episode after completion (SERIES only) ===
                 if (filterType == ContentType.SERIES) {
-                    val recentAll = watchProgressDao.getRecentlyWatched(currentProfileId, 10)
-                    val recentCompleted = recentAll.filter {
-                        it.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) && it.isCompleted
-                    }
-                    Log.d("HomeViewModel", "loadHeroItems: recentCompleted series=${recentCompleted.size}")
+                    // Stessa sorgente della riga "Prossimo episodio" e della home:
+                    // serie con l'ultimo episodio completato ma NON finite.
+                    val upNext = loadUpNextSeries(limit = 5)
+                    Log.d("HomeViewModel", "loadHeroItems: up-next series=${upNext.size}")
 
-                    for (progress in recentCompleted) {
+                    for ((series, nextEpisode) in upNext) {
                         if (mergedHeroes.size >= 10) break
-                        val seriesId = progress.seriesId ?: continue
-                        val season = progress.season ?: continue
-                        val episode = progress.episode ?: continue
+                        if (seenIds.any { it.first == series.id && it.second == ContentType.SERIES.name }) continue
 
-                        if (seenIds.any { it.first == seriesId && it.second == ContentType.SERIES.name }) continue
-
-                        val totalEpisodes = episodeDao.getCountBySeries(seriesId)
-                        val allSeriesProgress = watchProgressDao.getRecentlyWatched(currentProfileId, 200)
-                            .filter { it.seriesId == seriesId && it.isCompleted }
-                            .distinctBy { Pair(it.season, it.episode) }
-                        if (allSeriesProgress.size >= totalEpisodes && totalEpisodes > 0) {
-                            Log.d("HomeViewModel", "loadHeroItems: Series $seriesId fully watched, skipping")
-                            continue
+                        var enrichedSeries = series
+                        if (enrichedSeries.tmdbTrailerKey == null) {
+                            try { enrichedSeries = tmdbService.enrichSeriesDetails(enrichedSeries) } catch (_: Exception) {}
                         }
 
-                        val nextEpisode = episodeDao.getNextEpisode(seriesId, season, episode) ?: continue
-                        Log.d("HomeViewModel", "loadHeroItems: found next episode S${nextEpisode.seasonNumber}E${nextEpisode.episodeNumber} for seriesId=$seriesId")
-
-                        var series = seriesDao.getSeriesById(seriesId) ?: continue
-
-                        if (series.tmdbTrailerKey == null) {
-                            try { series = tmdbService.enrichSeriesDetails(series) } catch (_: Exception) {}
-                        }
-
-                        val heroItem = buildHeroItemFromSeries(
-                            series,
-                            resumeMinutes = null,
-                            progressPercent = null,
-                            resumeEpisodeSeason = nextEpisode.seasonNumber,
-                            resumeEpisodeNumber = nextEpisode.episodeNumber
-                        ).copy(isCwDerived = true)
-                        addHero(heroItem)
-                        Log.d("HomeViewModel", "loadHeroItems: next-episode hero added for seriesId=$seriesId")
+                        addHero(
+                            buildHeroItemFromSeries(
+                                enrichedSeries,
+                                resumeMinutes = null,
+                                progressPercent = null,
+                                resumeEpisodeSeason = nextEpisode.seasonNumber,
+                                resumeEpisodeNumber = nextEpisode.episodeNumber
+                            ).copy(isCwDerived = true)
+                        )
+                        Log.d("HomeViewModel", "loadHeroItems: next-episode hero added for seriesId=${series.id}")
                     }
                 }
 
@@ -2626,6 +2609,18 @@ class HomeViewModel @Inject constructor(
                 }
                 cwHeroes.forEach { addHero(it) }
                 Log.d("HomeViewModel", "loadHomeHeroItems: CW heroes added=${cwHeroes.size}")
+
+                // Priority 1b: serie il cui ultimo episodio è completato ma che NON sono
+                // finite. La query "continua a guardare" esclude i progressi completati,
+                // quindi senza questo l'hero perdeva il contenuto appena finita una
+                // puntata. `buildHeroItemFromSeries` propone già il PROSSIMO episodio.
+                val cwSeriesIds = cwHeroes.filter { it.contentType == ContentType.SERIES.name }
+                    .map { it.id }
+                    .toHashSet()
+                loadUpNextSeries(limit = 5)
+                    .filterNot { (series, _) -> series.id in cwSeriesIds }
+                    .forEach { (series, _) -> addHero(buildHeroItemFromSeries(series).copy(isCwDerived = true)) }
+                Log.d("HomeViewModel", "loadHomeHeroItems: up-next heroes, total now=${mergedHeroes.size}")
 
                 // Priority 2: Taste-based recommendations
                 if (mergedHeroes.size < 10) {
