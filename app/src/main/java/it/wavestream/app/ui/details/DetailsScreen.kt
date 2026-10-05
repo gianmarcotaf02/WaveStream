@@ -745,9 +745,22 @@ fun DetailsScreen(
                                                 MovieEndingUiState.Error(
                                                     e.message ?: "Informazioni non disponibili."
                                                 )
-                                            } catch (e: Exception) {
+                                            } catch (e: kotlinx.coroutines.CancellationException) {
+                                                // La schermata è stata chiusa: la cancellazione deve propagare.
+                                                throw e
+                                            } catch (e: Throwable) {
+                                                // Non è una feature critica: un errore fatale (Error, non
+                                                // Exception) NON deve abbattere l'app. Lo logghiamo, lo
+                                                // mostriamo nel popup con la sua classe così da poterlo
+                                                // diagnosticare, e l'utente resta sulla scheda.
+                                                android.util.Log.e(
+                                                    "DetailsScreen",
+                                                    "Errore nella spiegazione del finale",
+                                                    e
+                                                )
                                                 MovieEndingUiState.Error(
-                                                    "Impossibile recuperare la spiegazione. " +
+                                                    "Impossibile recuperare la spiegazione " +
+                                                        "(${e.javaClass.simpleName}). " +
                                                         "Controlla la connessione e la chiave OpenRouter nelle impostazioni."
                                                 )
                                             }
@@ -2097,11 +2110,15 @@ private fun EndingDialog(
                     if (url != null) {
                         TextButton(onClick = {
                             runCatching {
+                                // FLAG_ACTIVITY_NEW_TASK obbligatorio: il click parte dal
+                                // context del Dialog (non dall'Activity) e senza il flag
+                                // startActivity lancia AndroidRuntimeException (e il
+                                // runCatching la inghiottiva: il tasto non faceva nulla).
                                 context.startActivity(
                                     android.content.Intent(
                                         android.content.Intent.ACTION_VIEW,
                                         android.net.Uri.parse(url)
-                                    )
+                                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                                 )
                             }
                         }) {
