@@ -813,9 +813,13 @@ private fun MainActivityScreen(
                         onToggleCategoryFilter = { category -> homeViewModel.toggleCategoryFilter(category) },
                         onSelectAllCategories = { homeViewModel.selectAllCategories() },
                         onClearCategoryFilters = { homeViewModel.clearCategoryFilters() },
-                        onMarkAsWatchedClick = { heroItem ->
-                            homeViewModel.markAsWatched(heroItem)
-                            android.widget.Toast.makeText(context, "Rimosso da Continua a guardare", android.widget.Toast.LENGTH_SHORT).show()
+                        onSetHeroWatched = { heroItem, watched ->
+                            homeViewModel.setHeroWatched(heroItem, watched)
+                            android.widget.Toast.makeText(
+                                context,
+                                if (watched) "Segnato come già visto" else "Segnato come non visto",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
                         },
                         onRailFocusRequest = {
                             // Fase 2.3b — "sinistra" dal contenuto porta alla pillola di
