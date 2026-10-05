@@ -4018,6 +4018,19 @@ class HomeViewModel @Inject constructor(
                 // 6 minutes in milliseconds (threshold for "completed" excluding credits)
                 val completedThresholdMs = 6 * 60 * 1000L
 
+                // Una SERIE entra tra i "visti di recente" solo quando è FINITA
+                // (tutti gli episodi visti). Con un solo episodio completato la serie
+                // è ancora "in corso" — appartiene a "Continua a guardare" — e
+                // mostrarla qui con il badge "visto" era un falso positivo
+                // (es. S1E2 finito su una serie di 8 episodi).
+                val finishedSeriesIds = if (filterType == ContentType.MOVIE) {
+                    emptySet()
+                } else {
+                    runCatching { watchProgressDao.getFullyWatchedSeriesIds(currentProfileId) }
+                        .getOrDefault(emptyList())
+                        .toHashSet()
+                }
+
                 watchHistory
                     .filter { progress ->
                         // Completed = isCompleted flag OR remaining time <= 6 minutes
@@ -4030,6 +4043,16 @@ class HomeViewModel @Inject constructor(
                         when (filterType) {
                             ContentType.MOVIE -> progress.contentType == ContentType.MOVIE
                             ContentType.SERIES -> progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE)
+                            else -> true
+                        } && when (progress.contentType) {
+                            ContentType.SERIES, ContentType.EPISODE -> {
+                                val seriesId = progress.seriesId ?: progress.contentId
+                                // Riga "segnaposto" che rappresenta l'intera serie
+                                // (senza stagione/episodio): la consideriamo finita.
+                                val isWholeSeriesRow = progress.contentType == ContentType.SERIES &&
+                                    progress.season == null && progress.episode == null
+                                isWholeSeriesRow || seriesId in finishedSeriesIds
+                            }
                             else -> true
                         }
                     }
