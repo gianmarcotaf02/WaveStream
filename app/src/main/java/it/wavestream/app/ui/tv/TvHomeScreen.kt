@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
@@ -155,7 +156,8 @@ fun TvHomeScreen(
     onToggleHeroFavorite: (HeroItem) -> Unit = {},
     onAddHeroToPlaylist: (HeroItem) -> Unit = {},
     onTrailerClick: (HeroItem) -> Unit = {},
-    onMarkAsWatchedClick: (HeroItem) -> Unit = {},
+    // `watched = true` → segna come visto, `false` → segna come non visto.
+    onSetHeroWatched: (HeroItem, Boolean) -> Unit = { _, _ -> },
     onRailFocusRequest: () -> Unit = {},  // Called when LEFT from first carousel item
     onManageHistoryClick: () -> Unit = {},  // Apre la schermata di gestione cronologia
     modifier: Modifier = Modifier
@@ -183,7 +185,7 @@ fun TvHomeScreen(
         onToggleHeroFavorite = onToggleHeroFavorite,
         onAddHeroToPlaylist = onAddHeroToPlaylist,
         onTrailerClick = onTrailerClick,
-        onMarkAsWatchedClick = onMarkAsWatchedClick,
+        onSetHeroWatched = onSetHeroWatched,
         onRailFocusRequest = onRailFocusRequest,
         onManageHistoryClick = onManageHistoryClick,
         modifier = modifier
@@ -210,7 +212,7 @@ private fun TvHomeScreenContent(
     onToggleHeroFavorite: (HeroItem) -> Unit = {},
     onAddHeroToPlaylist: (HeroItem) -> Unit = {},
     onTrailerClick: (HeroItem) -> Unit = {},
-    onMarkAsWatchedClick: (HeroItem) -> Unit = {},
+    onSetHeroWatched: (HeroItem, Boolean) -> Unit = { _, _ -> },
     onRailFocusRequest: () -> Unit = {},
     onManageHistoryClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -711,7 +713,7 @@ private fun TvHomeScreenContent(
                                         "${if (hero.contentType == "MOVIE") "MOVIE" else "SERIES"}:${hero.id}"
                                     ),
                                     onTrailerClick = { onTrailerClick(hero) },
-                                    onMarkAsWatchedClick = { onMarkAsWatchedClick(hero) },
+                                    onSetHeroWatched = onSetHeroWatched,
                                     playButtonFocusRequester = heroPlayButtonFocusRequester,
                                     onFocusChanged = { /* Handled by internal logic if needed */ },
                                     topBarFocusRequester = topBarFocusRequester,
@@ -980,7 +982,7 @@ fun HeroBanner(
     onAddToPlaylistClick: (HeroItem) -> Unit = {},
     /** Stato del contenuto nella lista "Da guardare" (per il pulsante + ↔ spunta). */
     isInList: Boolean = false,
-    onMarkAsWatchedClick: (HeroItem) -> Unit = {},
+    onSetHeroWatched: (HeroItem, Boolean) -> Unit = { _, _ -> },
     playButtonFocusRequester: FocusRequester? = null,
     onFocusChanged: (Boolean) -> Unit = {},
     topBarFocusRequester: FocusRequester? = null,
@@ -1567,15 +1569,28 @@ fun HeroBanner(
                                 )
                             }
                             
-                            // Mark as watched button (only for in-progress items)
-                            if (isInProgress) {
+                            // Pulsante "visto": ora sempre disponibile (non solo sugli hero
+                            // in ripresa), così si può segnare come visto anche un titolo
+                            // proposto come raccomandazione. Una volta segnato sparisce da
+                            // caroselli e hero; se il titolo è già visto (hero con progresso
+                            // da finire) il pulsante lo riporta a "non visto".
+                            if (hero.contentType != "SERIEA_MATCH") {
                                 Spacer(modifier = Modifier.width(4.dp))
-                                HeroIconButton(
-                                    icon = painterResource(id = R.drawable.ic_eye),
-                                    contentDescription = "Segna come già visto",
-                                    onClick = { showMarkAsWatchedDialog = true },
-                                    onFocusChange = { if (it) isPaused = true }
-                                )
+                                if (hero.isWatched) {
+                                    HeroIconButton(
+                                        icon = Icons.Default.CheckCircle,
+                                        contentDescription = "Segna come non visto",
+                                        onClick = { showMarkAsWatchedDialog = true },
+                                        onFocusChange = { if (it) isPaused = true }
+                                    )
+                                } else {
+                                    HeroIconButton(
+                                        icon = painterResource(id = R.drawable.ic_eye),
+                                        contentDescription = "Segna come già visto",
+                                        onClick = { showMarkAsWatchedDialog = true },
+                                        onFocusChange = { if (it) isPaused = true }
+                                    )
+                                }
                             }
                         }
 
@@ -1587,15 +1602,23 @@ fun HeroBanner(
         
         // Mark as watched confirmation dialog
         if (showMarkAsWatchedDialog) {
+            val markWatched = !heroItem.isWatched
             AlertDialog(
                 onDismissRequest = { showMarkAsWatchedDialog = false },
-                title = { Text("Conferma") },
-                text = { Text("Sei sicuro di eliminare il contenuto dai \"Continua a guardare\"?") },
+                title = { Text(if (markWatched) "Segna come visto" else "Segna come non visto") },
+                text = {
+                    Text(
+                        if (markWatched)
+                            "Vuoi segnare «${heroItem.title}» come già visto? Non comparirà più nei caroselli e negli hero."
+                        else
+                            "Vuoi togliere lo stato di visione a «${heroItem.title}»? Tornerà a comparire nei caroselli."
+                    )
+                },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             showMarkAsWatchedDialog = false
-                            onMarkAsWatchedClick(heroItem)
+                            onSetHeroWatched(heroItem, markWatched)
                         }
                     ) {
                         Text("Sì", color = WaveStreamColors.Accent)
