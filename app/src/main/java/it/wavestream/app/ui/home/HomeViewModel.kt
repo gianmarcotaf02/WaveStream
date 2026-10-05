@@ -3821,55 +3821,74 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
+     * Serie "da proseguire": l'ultimo episodio guardato risulta COMPLETATO ma la
+     * serie NON è finita, quindi il contenuto da proporre non è più l'episodio
+     * completato (escluso da `getContinueWatching`) bensì il SUCCESSIVO.
+     *
+     * Senza questo, finito un episodio la serie spariva da "Continua a guardare"
+     * pur continuando a comparire tra i "visti di recente" con il badge "visto",
+     * anche se all'utente mancavano ancora puntate da guardare.
+     *
+     * Restituisce coppie (serie, prossimo episodio) ordinate per ultima visione.
+     */
+    private suspend fun loadUpNextSeries(limit: Int = 8): List<Pair<Series, Episode>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val recentCompleted = watchProgressDao.getRecentlyWatched(currentProfileId, 200)
+                    .filter {
+                        it.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) &&
+                            it.isCompleted && it.seriesId != null && it.season != null && it.episode != null
+                    }
+                // Solo le serie FINITE (tutti gli episodi visti) escono dalla rotazione:
+                // stessa regola usata per il badge "visto".
+                val finished = runCatching { watchProgressDao.getFullyWatchedSeriesIds(currentProfileId) }
+                    .getOrDefault(emptyList())
+                    .toHashSet()
+
+                val result = mutableListOf<Pair<Series, Episode>>()
+                val seen = mutableSetOf<Long>()
+                for (progress in recentCompleted) {
+                    if (result.size >= limit) break
+                    val seriesId = progress.seriesId ?: continue
+                    if (!seen.add(seriesId)) continue
+                    if (seriesId in finished) continue
+
+                    val nextEpisode = episodeDao.getNextEpisode(seriesId, progress.season!!, progress.episode!!)
+                        ?: continue
+                    val series = seriesDao.getSeriesById(seriesId) ?: continue
+                    result.add(series to nextEpisode)
+                }
+                result
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error loading up-next series", e)
+                emptyList()
+            }
+        }
+
+    /**
      * Load next unwatched episodes for series (SERIES tab only)
      * For each series with at least one completed episode, find the next unwatched episode
      */
-    private suspend fun loadNextEpisodesForTab(limit: Int = 8): List<CarouselItem>? {
-        return withContext(Dispatchers.IO) {
+    private suspend fun loadNextEpisodesForTab(limit: Int = 8): List<CarouselItem>? =
+        withContext(Dispatchers.IO) {
             try {
-                val recentCompleted = watchProgressDao.getRecentlyWatched(currentProfileId, 200)
-                    .filter { it.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) && it.isCompleted }
-                    .distinctBy { it.seriesId }
-
-                val items = mutableListOf<CarouselItem>()
-                for (progress in recentCompleted) {
-                    if (items.size >= limit) break
-                    val seriesId = progress.seriesId ?: continue
-                    val season = progress.season ?: continue
-                    val episode = progress.episode ?: continue
-
-                    // Check if all episodes are watched
-                    val totalEpisodes = episodeDao.getCountBySeries(seriesId)
-                    val allSeriesProgress = watchProgressDao.getRecentlyWatched(currentProfileId, 200)
-                        .filter { it.seriesId == seriesId && it.isCompleted }
-                        .distinctBy { Pair(it.season, it.episode) }
-                    if (allSeriesProgress.size >= totalEpisodes && totalEpisodes > 0) continue
-
-                    val nextEpisode = episodeDao.getNextEpisode(seriesId, season, episode) ?: continue
-                    val series = seriesDao.getSeriesById(seriesId) ?: continue
-
-                    // Skip if already in items
-                    if (items.any { it.id == series.id }) continue
-
-                    val label = "S${nextEpisode.seasonNumber} E${nextEpisode.episodeNumber}"
-                    items.add(CarouselItem(
+                loadUpNextSeries(limit).map { (series, next) ->
+                    CarouselItem(
                         id = series.id,
                         title = series.title,
                         posterUrl = series.posterUrl,
                         backdropUrl = series.backdropUrl,
                         contentType = ContentType.SERIES.name,
-                        nextEpisodeLabel = label,
+                        nextEpisodeLabel = "S${next.seasonNumber} E${next.episodeNumber}",
                         seasonCount = series.tmdbNumberOfSeasons ?: series.seasonCount.takeIf { it > 0 },
                         rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating
-                    ))
-                }
-                items.ifEmpty { null }
+                    )
+                }.ifEmpty { null }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading next episodes", e)
                 null
             }
         }
-    }
 
     /**
      * Load series with recent new episodes (SERIES tab only).
