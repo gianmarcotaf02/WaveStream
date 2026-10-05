@@ -571,6 +571,39 @@ private fun formatRemainingLabel(minutes: Int): String =
         if (m > 0) "${h}h ${m}m rimasti" else "${h}h rimaste"
     } else "$minutes min rimasti"
 
+/** Caratteri non alfanumerici rimossi per confrontare i titoli episodio "vuoti". */
+private val EPISODE_TITLE_COMPACT = Regex("[^a-z0-9]")
+
+/**
+ * Titolo dell'episodio da mostrare nella riga bianca sotto "Stagione X • Episodio Y",
+ * oppure `null` quando quel testo non aggiunge nulla.
+ *
+ * `TitleCleaner.resolveEpisodeDisplayTitle` ripiega su **"Episodio N"** quando il
+ * titolo non esiste (playlist Xtream/M3U senza nomi episodio, o TMDB non ancora
+ * arricchito): in quel caso la riga bianca ripeterebbe parola per parola la riga
+ * accent, quindi non va mostrata. Se invece esiste un titolo vero (es. "Fallout"),
+ * la riga resta.
+ */
+private fun episodeTitleToShow(info: PlayerPauseInfo): String? {
+    val title = info.episodeTitle?.trim().orEmpty()
+    if (title.isEmpty()) return null
+    val number = info.episodeNumber ?: return title
+    val n = number.toString()
+    val compact = title.lowercase().replace(EPISODE_TITLE_COMPACT, "")
+    val redundantForms = buildSet {
+        add(n)
+        add("0$n")
+        add("episodio$n")
+        add("episodio0$n")
+        add("episode$n")
+        add("episode0$n")
+        add("ep$n")
+        add("eps$n")
+        info.seasonNumber?.let { add("s${it}e$n") }
+    }
+    return title.takeIf { compact !in redundantForms }
+}
+
 /**
  * Overlay mostrato quando il player è in pausa (stile Netflix).
  *
@@ -690,7 +723,7 @@ private fun PauseInfoOverlay(
                             textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        info.episodeTitle?.takeIf { it.isNotBlank() }?.let { epTitle ->
+                        episodeTitleToShow(info)?.let { epTitle ->
                             Text(
                                 text = epTitle,
                                 style = MaterialTheme.typography.titleMedium,
