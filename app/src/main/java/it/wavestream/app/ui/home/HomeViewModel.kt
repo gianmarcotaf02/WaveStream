@@ -19,7 +19,9 @@ import android.util.Log
 import it.wavestream.app.data.tmdb.TMDBService
 import it.wavestream.app.data.repository.ImdbRatingsRepository
 import it.wavestream.app.data.api.XtreamApiService
+import it.wavestream.app.ui.components.WatchedKeys
 import it.wavestream.app.ui.components.applyWatchedKeys
+import it.wavestream.app.ui.components.contains
 import it.wavestream.app.ui.components.loadWatchedKeys
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -76,6 +78,19 @@ class HomeViewModel @Inject constructor(
         /** Oltre questa età la cache squadra→canali del picker Serie A viene
          *  ricostruita con una scansione completa della playlist. */
         private const val SERIE_A_CHANNEL_CACHE_TTL_MS = 6 * 60 * 60 * 1000L
+
+        /**
+         * Righe che restano anche se contengono contenuti "visti":
+         *  - "Visti di recente" → è per definizione la lista dei contenuti visti;
+         *  - "Continua a guardare" / "Prossimo episodio" → righe di progresso: un
+         *    film a ≤ 6 minuti dalla fine conta come "visto" (soglia titoli di
+         *    coda) ma deve restare raggiungibile per finirlo.
+         */
+        private val WATCHED_ROWS_KEPT = setOf(
+            "Visti di recente",
+            "Continua a guardare",
+            "Prossimo episodio"
+        )
     }
 
     private val _uiState = MutableStateFlow(HomeScreenState())
@@ -591,6 +606,12 @@ class HomeViewModel @Inject constructor(
                     val refreshedHeroes = refreshHeroItemsCoreFields(currentHeroes)
                         .let { refreshHeroItemsRatings(it) }
                         .let { refreshHeroItemsWatchProgress(it) }
+                    // I titoli segnati come visti non restano negli hero: oltre a
+                    // sparire, lo slot va riempito con una nuova raccomandazione
+                    // (stesso rebuild già usato per "Continua a guardare").
+                    val watchedFilteredHeroes = refreshedHeroes
+                        .applyWatchedKeysToHeroes(loadWatchedKeys(currentProfileId, watchProgressDao))
+                    val watchedHeroesRemoved = watchedFilteredHeroes.size < refreshedHeroes.size
                     // Gli hero nati da "Continua a guardare" che non hanno più progresso
                     // (contenuto rimosso dall'utente) vanno eliminati. Ricostruiamo gli
                     // hero per riempire lo slot con una nuova raccomandazione: senza
@@ -602,18 +623,19 @@ class HomeViewModel @Inject constructor(
                     // eliminare). Senza questo secondo controllo il nuovo titolo restava
                     // fuori dall'hero pur essendo nel carosello.
                     val cwMissingFromHeroes = cwItems.isNotEmpty() &&
-                        cwItems.any { cw -> refreshedHeroes.none { it.representsContinueWatching(cw) } }
-                    val needsHeroRebuild = refreshedHeroes.any { it.isStaleCwDerivedHero() } || cwMissingFromHeroes
+                        cwItems.any { cw -> watchedFilteredHeroes.none { it.representsContinueWatching(cw) } }
+                    val needsHeroRebuild = watchedHeroesRemoved ||
+                        watchedFilteredHeroes.any { it.isStaleCwDerivedHero() } || cwMissingFromHeroes
                     val freshHeroes = if (needsHeroRebuild) {
                         try {
                             loadFreshHeroesFor(contentType)?.heroes
-                                ?: refreshedHeroes.filterNot { it.isStaleCwDerivedHero() }
+                                ?: watchedFilteredHeroes.filterNot { it.isStaleCwDerivedHero() }
                         } catch (e: Exception) {
                             Log.e("HomeViewModel", "Error rebuilding heroes after CW change", e)
-                            refreshedHeroes.filterNot { it.isStaleCwDerivedHero() }
+                            watchedFilteredHeroes.filterNot { it.isStaleCwDerivedHero() }
                         }
                     } else {
-                        refreshedHeroes
+                        watchedFilteredHeroes
                     }
                     val hasAnyCW = freshHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                     
@@ -681,6 +703,98 @@ class HomeViewModel @Inject constructor(
         }
     }
     
+    /**
+     * Segna l'hero come visto / non visto.
+     *
+     * - `watched = true` → crea il progresso "completato" (stessa semantica del
+     *   pulsante nella scheda dettaglio): per i film `position = duration`, per le
+     *   serie TUTTI gli episodi completati. Il titolo sparisce da caroselli e hero.
+     * - `watched = false` → elimina il progresso: torna "non visto" e riappare.
+     */
+    fun setHeroWatched(hero: HeroItem, watched: Boolean) {
+        if (!watched) {
+            // Percorso storico: rimuove il progresso e aggiorna cache + UI.
+            markAsWatched(hero)
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                markHeroAsWatched(hero)
+                dropHeroFromHeroCaches(hero)
+                withContext(Dispatchers.Main) { forceRefresh() }
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error marking hero as watched: ${hero.title}", e)
+            }
+        }
+    }
+
+    /**
+     * Scrive il progresso "completato" del contenuto: film con `position = duration`
+     * (durata reale, oppure sentinella 1 ms se sconosciuta) e serie con tutti gli
+     * episodi visti — esattamente come "Segna come già visto" nella scheda dettaglio.
+     */
+    private suspend fun markHeroAsWatched(hero: HeroItem) {
+        if (hero.contentType == ContentType.MOVIE.name) {
+            val existing = watchProgressDao.getProgress(currentProfileId, ContentType.MOVIE, hero.id)
+            val runtimeMs = movieDao.getMovieById(hero.id)?.tmdbRuntime?.let { it * 60_000L }
+            val duration = existing?.duration?.takeIf { it > 0 }
+                ?: runtimeMs?.takeIf { it > 0 }
+                ?: 1L
+            watchProgressDao.upsert(
+                WatchProgress(
+                    profileId = currentProfileId,
+                    contentType = ContentType.MOVIE,
+                    contentId = hero.id,
+                    position = duration,
+                    duration = duration,
+                    isCompleted = true,
+                    lastWatchedAt = System.currentTimeMillis()
+                )
+            )
+            Log.d("HomeViewModel", "Hero marked as watched (movie): ${hero.title} (id=${hero.id})")
+        } else {
+            val episodes = episodeDao.getEpisodesBySeriesList(hero.id)
+            episodes.forEach { ep ->
+                val existing = watchProgressDao.getProgress(currentProfileId, ContentType.EPISODE, ep.id)
+                val duration = existing?.duration?.takeIf { it > 0 } ?: 1L
+                watchProgressDao.upsert(
+                    WatchProgress(
+                        profileId = currentProfileId,
+                        contentType = ContentType.EPISODE,
+                        contentId = ep.id,
+                        seriesId = ep.seriesId,
+                        season = ep.seasonNumber,
+                        episode = ep.episodeNumber,
+                        position = duration,
+                        duration = duration,
+                        isCompleted = true,
+                        lastWatchedAt = System.currentTimeMillis()
+                    )
+                )
+            }
+            Log.d("HomeViewModel", "Hero marked as watched (series): ${hero.title} (${episodes.size} episodi)")
+        }
+    }
+
+    /**
+     * Toglie l'hero appena segnato come visto dalle cache in memoria di tutti i tab.
+     * Righe e riempimento dello slot li gestisce [forceRefresh] (il filtro sui visti
+     * li elimina comunque a ogni lettura).
+     */
+    private fun dropHeroFromHeroCaches(hero: HeroItem) {
+        HomeContentType.entries.forEach { tab ->
+            cachedHeroItems[tab]?.let { cached ->
+                val filtered = cached.heroes.filterNot { it.id == hero.id && it.contentType == hero.contentType }
+                if (filtered.size != cached.heroes.size) {
+                    cachedHeroItems[tab] = HeroPairData(
+                        filtered,
+                        filtered.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
+                    )
+                }
+            }
+        }
+    }
+
     /**
      * Mark content as watched (remove from "Continue Watching")
      * Deletes the WatchProgress entry for the given hero item and refreshes the UI
@@ -862,8 +976,10 @@ class HomeViewModel @Inject constructor(
                     ?.let { refreshHeroItemsWatchProgress(it) }
                     ?: emptyList()
                 // Rimuovi subito gli hero nati da "Continua a guardare" che non hanno
-                // più progresso (contenuto rimosso dall'utente).
+                // più progresso (contenuto rimosso dall'utente) e quelli già visti:
+                // un titolo segnato come visto non va più proposto.
                 val freshHeroes = refreshedHeroes.filterNot { it.isStaleCwDerivedHero() }
+                    .applyWatchedKeysToHeroes(loadWatchedKeys(currentProfileId, watchProgressDao))
                 val hasAnyCW = freshHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                 
                 // Update cachedHeroItems with the fresh progress so the cache stays synced
@@ -1640,6 +1756,7 @@ class HomeViewModel @Inject constructor(
                 // da raccomandazione/popolari mostrano così "Riprendi SxEy" invece del
                 // fallback S1E1 (bug: hero senza resume info pur avendo contenuti in corso).
                 val enrichedHeroes = ensureHeroTitleLogos(refreshHeroItemsWatchProgress(mergedHeroes.toList()))
+                    .applyWatchedKeysToHeroes(loadWatchedKeys(currentProfileId, watchProgressDao))
                 val hasAnyCW = enrichedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                 Log.d("HomeViewModel", "loadHeroItems: final mergedHeroes=${enrichedHeroes.size}, hasAnyCW=$hasAnyCW")
                 HeroPairData(enrichedHeroes, hasAnyCW)
@@ -2552,6 +2669,7 @@ class HomeViewModel @Inject constructor(
 
                 // Arricchisce TUTTI gli hero col progresso reale dal DB (anche raccomandazioni)
                 val enrichedHeroes = ensureHeroTitleLogos(refreshHeroItemsWatchProgress(mergedHeroes.toList()))
+                    .applyWatchedKeysToHeroes(loadWatchedKeys(currentProfileId, watchProgressDao))
                 val hasAnyCW = enrichedHeroes.any { it.resumeMinutes != null || it.resumeEpisodeSeason != null }
                 Log.d("HomeViewModel", "loadHomeHeroItems: final mergedHeroes=${enrichedHeroes.size}, hasAnyCW=$hasAnyCW")
                 if (enrichedHeroes.isNotEmpty()) HeroPairData(enrichedHeroes, hasAnyCW) else null
@@ -3906,25 +4024,58 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Applica il badge "visto" a tutte le card delle righe. Un'unica lettura dei
-     * progressi per profilo (film completati + serie finite) poi confronto in
-     * memoria: così il badge compare su qualsiasi carosello, non solo in
-     * "Visti di recente".
+     * Applica il badge "visto" a tutte le card delle righe e TOGLIE dai caroselli
+     * i contenuti già visti (film completati / serie finite): un titolo segnato come
+     * visto non deve più essere proposto.
+     *
+     * Fanno eccezione le righe in [WATCHED_ROWS_KEPT] (vedi costante).
      */
     private suspend fun enrichRowsWithWatchedBadges(rows: MutableList<CarouselRow>) {
         if (rows.isEmpty()) return
-        val hasMovies = rows.any { r -> r.items.any { it.contentType == "MOVIE" && !it.isWatched } }
-        val hasSeries = rows.any { r -> r.items.any { it.contentType == "SERIES" && !it.isWatched } }
-        if (!hasMovies && !hasSeries) return
+        val needMovies = rows.any { r -> r.items.any { it.contentType == "MOVIE" } }
+        val needSeries = rows.any { r -> r.items.any { it.contentType == "SERIES" } }
+        if (!needMovies && !needSeries) return
         val keys = loadWatchedKeys(
             profileId = currentProfileId,
             watchProgressDao = watchProgressDao,
-            needMovies = hasMovies,
-            needSeries = hasSeries
+            needMovies = needMovies,
+            needSeries = needSeries
         )
         if (keys.isEmpty) return
-        for (i in rows.indices) {
-            rows[i] = rows[i].copy(items = rows[i].items.applyWatchedKeys(keys))
+
+        val updated = rows.mapNotNull { row ->
+            val badged = row.items.applyWatchedKeys(keys)
+            if (row.title in WATCHED_ROWS_KEPT || row.isSectionHeader) {
+                row.copy(items = badged)
+            } else {
+                val filtered = badged.filterNot { keys.contains(it) }
+                // Riga svuotata del tutto → la togliamo (niente titolo senza card).
+                if (filtered.isEmpty() && row.items.isNotEmpty()) null else row.copy(items = filtered)
+            }
+        }.toMutableList()
+        rows.clear()
+        rows.addAll(updated)
+    }
+
+    /**
+     * Nasconde dagli hero i contenuti già visti e marca `isWatched` su quelli che
+     * restano.
+     *
+     * Un titolo segnato come visto non deve più comparire nell'hero (né come
+     * raccomandazione né come popolare). Fanno eccezione gli hero con progresso da
+     * finire (`isCwDerived` o con resume): un film a metà — o a ≤ 6 minuti dalla
+     * fine — resta raggiungibile e il pulsante diventa "segna come non visto".
+     */
+    private fun List<HeroItem>.applyWatchedKeysToHeroes(keys: WatchedKeys): List<HeroItem> {
+        if (keys.isEmpty) return this
+        return mapNotNull { hero ->
+            val watched = keys.contains(hero.id, hero.contentType)
+            val resumable = hero.resumeMinutes != null || hero.resumeEpisodeSeason != null
+            when {
+                !watched -> hero
+                hero.isCwDerived || resumable -> hero.copy(isWatched = true)
+                else -> null
+            }
         }
     }
 
