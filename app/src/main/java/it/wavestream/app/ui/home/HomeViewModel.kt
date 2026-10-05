@@ -1125,7 +1125,12 @@ class HomeViewModel @Inject constructor(
                         HomeContentType.LISTS -> loadListsContent(contentRows)
                         HomeContentType.HISTORY -> loadHistoryContent(contentRows)
                     }
-                    enrichRowsWithWatchedBadges(contentRows)
+                    enrichRowsWithWatchedBadges(
+                        contentRows,
+                        hideWatched = contentType == HomeContentType.HOME ||
+                            contentType == HomeContentType.MOVIES ||
+                            contentType == HomeContentType.SERIES
+                    )
                     contentRows
                 } catch (e: Exception) {
                     Log.e("HomeViewModel", "Error loading fast rows for $contentType", e)
@@ -3733,7 +3738,12 @@ class HomeViewModel @Inject constructor(
         }
 
         try {
-            enrichRowsWithWatchedBadges(rows)
+            enrichRowsWithWatchedBadges(
+                rows,
+                hideWatched = contentType == HomeContentType.HOME ||
+                    contentType == HomeContentType.MOVIES ||
+                    contentType == HomeContentType.SERIES
+            )
         } catch (e: Exception) {
             Log.e("HomeViewModel", "Error patching watched badges", e)
         }
@@ -4024,13 +4034,20 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Applica il badge "visto" a tutte le card delle righe e TOGLIE dai caroselli
-     * i contenuti già visti (film completati / serie finite): un titolo segnato come
-     * visto non deve più essere proposto.
+     * Applica il badge "visto" a tutte le card delle righe e — solo quando
+     * [hideWatched] è true — TOGLIE dai caroselli i contenuti già visti (film
+     * completati / serie finite): un titolo segnato come visto non deve più essere
+     * proposto dai tab di scoperta (Home/Film/Serie).
      *
-     * Fanno eccezione le righe in [WATCHED_ROWS_KEPT] (vedi costante).
+     * Con [hideWatched] = false (Preferiti, Liste, Cronologia) il contenuto resta:
+     * sono liste curate dall'utente o lo storico dei visti.
+     *
+     * Fanno comunque eccezione le righe in [WATCHED_ROWS_KEPT] (vedi costante).
      */
-    private suspend fun enrichRowsWithWatchedBadges(rows: MutableList<CarouselRow>) {
+    private suspend fun enrichRowsWithWatchedBadges(
+        rows: MutableList<CarouselRow>,
+        hideWatched: Boolean = true
+    ) {
         if (rows.isEmpty()) return
         val needMovies = rows.any { r -> r.items.any { it.contentType == "MOVIE" } }
         val needSeries = rows.any { r -> r.items.any { it.contentType == "SERIES" } }
@@ -4045,7 +4062,7 @@ class HomeViewModel @Inject constructor(
 
         val updated = rows.mapNotNull { row ->
             val badged = row.items.applyWatchedKeys(keys)
-            if (row.title in WATCHED_ROWS_KEPT || row.isSectionHeader) {
+            if (!hideWatched || row.title in WATCHED_ROWS_KEPT || row.isSectionHeader) {
                 row.copy(items = badged)
             } else {
                 val filtered = badged.filterNot { keys.contains(it) }
