@@ -1637,21 +1637,17 @@ class DetailsActivity : ComponentActivity() {
             if (sourceProviderId != null && sourceProviderId > 0) {
                 putExtra("source_provider_id", sourceProviderId)
             }
-            // Title: series name + episode title
-            // Priority: tmdbName > extract from playlist
+            // Title: "Nome serie • Titolo episodio" (fallback "Episodio X") — stesso
+            // formato mostrato dal player, così non c'è alcuno scarto all'apertura.
             val displayTitle = episode?.let {
-                val cleanEpTitle = TitleCleaner.getFormattedEpisodeTitle(
-                    originalName = it.tmdbName ?: it.name,
+                val cleanEpTitle = TitleCleaner.resolveEpisodeDisplayTitle(
+                    providerName = it.name,
+                    tmdbName = it.tmdbName,
                     episodeNumber = it.episodeNumber,
                     seriesName = contentTitle
                 )
-                
-                // If the cleaner just returned "Episodio X", standard fallback
-                if (cleanEpTitle == "Episodio ${it.episodeNumber}") {
-                    contentTitle
-                } else {
-                    "$contentTitle - $cleanEpTitle"
-                }
+
+                "$contentTitle • $cleanEpTitle"
             } ?: contentTitle
             putExtra("title", displayTitle)
             episode?.let {
