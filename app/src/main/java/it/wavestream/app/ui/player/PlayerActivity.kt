@@ -35,6 +35,7 @@ import it.wavestream.app.data.database.entity.WatchProgress
 import it.wavestream.app.player.PlayNextManager
 import it.wavestream.app.player.SubtitleManager
 import it.wavestream.app.ui.theme.WaveStreamTheme
+import it.wavestream.app.util.TitleCleaner
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.isActive
@@ -1718,7 +1719,7 @@ class PlayerActivity : ComponentActivity() {
 
         val epNumber = ep?.episodeNumber ?: episode
         val epTitle = ep?.let {
-            it.wavestream.app.util.TitleCleaner.resolveEpisodeDisplayTitle(
+            TitleCleaner.resolveEpisodeDisplayTitle(
                 providerName = it.name,
                 tmdbName = it.tmdbName,
                 episodeNumber = it.episodeNumber,
