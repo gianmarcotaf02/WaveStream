@@ -1186,6 +1186,7 @@ class PlayerActivity : ComponentActivity() {
                 resetAutoPlayCounter()
 
                 android.util.Log.d("PlayerActivity", "Mini player switching to channel: ${channel.name}")
+                refreshPlayerTitle()
                 player.setMediaItem(MediaItem.fromUri(Uri.parse(channel.streamUrl)))
                 player.prepare()
                 player.play()
