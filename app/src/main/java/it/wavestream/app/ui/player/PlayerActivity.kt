@@ -2209,54 +2209,53 @@ class PlayerActivity : ComponentActivity() {
         saveProgress()
         lifecycleScope.launch {
             try {
-            // Check Still Watching limit only for auto-plays
-            if (isAutoPlay) {
-                consecutiveAutoPlays++
-                if (consecutiveAutoPlays >= MAX_AUTO_PLAYS) {
-                    android.util.Log.d("PlayerActivity", "Still Watching limit reached ($consecutiveAutoPlays/$MAX_AUTO_PLAYS)")
-                    player.pause()
-                    _showStillWatching.value = true
-                    hideNextEpisodeOverlay()
-                    return@launch
+                // Check Still Watching limit only for auto-plays
+                if (isAutoPlay) {
+                    consecutiveAutoPlays++
+                    if (consecutiveAutoPlays >= MAX_AUTO_PLAYS) {
+                        android.util.Log.d("PlayerActivity", "Still Watching limit reached ($consecutiveAutoPlays/$MAX_AUTO_PLAYS)")
+                        player.pause()
+                        _showStillWatching.value = true
+                        hideNextEpisodeOverlay()
+                        return@launch
+                    }
+                } else {
+                    // Manual next resets counter
+                    resetAutoPlayCounter()
                 }
-            } else {
-                // Manual next resets counter
-                resetAutoPlayCounter()
-            }
-            
-            // ... existing playNext logic ...
-            val next = playNextManager.getNext(
-                contentType = contentType,
-                contentId = contentId,
-                seriesId = seriesId,
-                season = season,
-                episode = episode,
-                groupId = groupId
-            )
-            
-            next?.let {
-                // Update current content
-                streamUrl = it.streamUrl
-                title = it.title
-                subtitle = it.subtitle
-                contentId = it.contentId
-                contentType = it.contentType
-                
-                // Update season and episode from NextContent fields
-                season = it.season
-                episode = it.episode
-                android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
 
-                onPlaybackContentChanged()
-                // Titolo nel formato unico anche per il passaggio a "Prossimo" episodio.
-                refreshPlayerTitle()
+                val next = playNextManager.getNext(
+                    contentType = contentType,
+                    contentId = contentId,
+                    seriesId = seriesId,
+                    season = season,
+                    episode = episode,
+                    groupId = groupId
+                )
 
-                // Play new content
-                val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
-                player.setMediaItem(mediaItem)
-                player.prepare()
-                player.play()
-            }
+                next?.let {
+                    // Update current content
+                    streamUrl = it.streamUrl
+                    title = it.title
+                    subtitle = it.subtitle
+                    contentId = it.contentId
+                    contentType = it.contentType
+
+                    // Update season and episode from NextContent fields
+                    season = it.season
+                    episode = it.episode
+                    android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
+
+                    onPlaybackContentChanged()
+                    // Titolo nel formato unico anche per il passaggio a "Prossimo" episodio.
+                    refreshPlayerTitle()
+
+                    // Play new content
+                    val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
+                    player.setMediaItem(mediaItem)
+                    player.prepare()
+                    player.play()
+                }
             } finally {
                 contentSwitchInFlight = false
             }
@@ -2272,42 +2271,9 @@ class PlayerActivity : ComponentActivity() {
         saveProgress()
         lifecycleScope.launch {
             try {
-            resetAutoPlayCounter()  // Manual navigation resets counter
-            
-            val prev = playNextManager.getPrevious(
-                contentType = contentType,
-                contentId = contentId,
-                seriesId = seriesId,
-                season = season,
-                episode = episode,
-                groupId = groupId
-            )
-            
-            prev?.let {
-                // Update current content
-                streamUrl = it.streamUrl
-                title = it.title
-                subtitle = it.subtitle
-                contentId = it.contentId
-                contentType = it.contentType
-                
-                // Update season and episode from NextContent fields
-                season = it.season
-                episode = it.episode
-                android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
+                resetAutoPlayCounter()  // Manual navigation resets counter
 
-                onPlaybackContentChanged()
-                // Titolo nel formato unico anche per il passaggio a "Precedente" episodio.
-                refreshPlayerTitle()
-
-                // Play previous content
-                val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
-                player.setMediaItem(mediaItem)
-                player.prepare()
-                player.play()
-                
-                // Re-check if there's still a previous episode
-                val stillHasPrev = playNextManager.getPrevious(
+                val prev = playNextManager.getPrevious(
                     contentType = contentType,
                     contentId = contentId,
                     seriesId = seriesId,
@@ -2315,18 +2281,54 @@ class PlayerActivity : ComponentActivity() {
                     episode = episode,
                     groupId = groupId
                 )
-                _hasPreviousEpisode.value = stillHasPrev != null
-                
-                // Also update hasNext in case we're no longer at the end
-                val hasNext = playNextManager.getNext(
-                    contentType = contentType,
-                    contentId = contentId,
-                    seriesId = seriesId,
-                    season = season,
-                    episode = episode,
-                    groupId = groupId
-                )
-                _hasNextEpisode.value = hasNext != null
+
+                prev?.let {
+                    // Update current content
+                    streamUrl = it.streamUrl
+                    title = it.title
+                    subtitle = it.subtitle
+                    contentId = it.contentId
+                    contentType = it.contentType
+
+                    // Update season and episode from NextContent fields
+                    season = it.season
+                    episode = it.episode
+                    android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
+
+                    onPlaybackContentChanged()
+                    // Titolo nel formato unico anche per il passaggio a "Precedente" episodio.
+                    refreshPlayerTitle()
+
+                    // Play previous content
+                    val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
+                    player.setMediaItem(mediaItem)
+                    player.prepare()
+                    player.play()
+
+                    // Re-check if there's still a previous episode
+                    val stillHasPrev = playNextManager.getPrevious(
+                        contentType = contentType,
+                        contentId = contentId,
+                        seriesId = seriesId,
+                        season = season,
+                        episode = episode,
+                        groupId = groupId
+                    )
+                    _hasPreviousEpisode.value = stillHasPrev != null
+
+                    // Also update hasNext in case we're no longer at the end
+                    val hasNext = playNextManager.getNext(
+                        contentType = contentType,
+                        contentId = contentId,
+                        seriesId = seriesId,
+                        season = season,
+                        episode = episode,
+                        groupId = groupId
+                    )
+                    _hasNextEpisode.value = hasNext != null
+                }
+            } finally {
+                contentSwitchInFlight = false
             }
         }
     }
