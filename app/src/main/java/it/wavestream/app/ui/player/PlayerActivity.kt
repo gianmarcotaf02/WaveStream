@@ -206,6 +206,11 @@ class PlayerActivity : ComponentActivity() {
     private var nextEpisodeTriggered = false  // Prevent double trigger
     private var nextEpisodeLookupInFlight = false // Evita lookup concorrenti ripetute
     private var nextEpisodeUnavailable = false    // Nessun episodio successivo: stop ai retry
+    // Evita switch di contenuto concorrenti: il countdown dell'overlay (tick a 0) e
+    // `onPlaybackEnded` possono scattare nello stesso istante e avviare due volte la
+    // stessa commutazione (doppio `setMediaItem` e contatore autoplay falsato, con
+    // rischio di saltare un episodio).
+    private var contentSwitchInFlight = false
     private var creditsTriggerLogged = false      // Diagnosi: log una volta per episodio
     private var creditsDetected = false       // Titoli di coda rilevati dall'analisi frame
     private var creditsDismissed = false      // L'utente ha ignorato l'overlay: non riproporlo per questo contenuto
@@ -2084,6 +2089,13 @@ class PlayerActivity : ComponentActivity() {
     }
     
     private fun onPlaybackEnded() {
+        // Il listener è agganciato allo stesso player: mentre è già in corso il cambio
+        // episodio (countdown arrivato a 0) può arrivare un STATE_ENDED "in ritardo".
+        // Ignorarlo evita una seconda commutazione che salterebbe un episodio.
+        if (contentSwitchInFlight) {
+            android.util.Log.i("CreditsDiag", "playbackEnded ignorato: cambio contenuto in corso")
+            return
+        }
         // L'utente ha ignorato l'overlay: alla fine del file NON si passa all'episodio
         // successivo, si chiude il player.
         if (creditsDismissed) {
@@ -2186,11 +2198,17 @@ class PlayerActivity : ComponentActivity() {
     }
     
     private fun playNextEpisode(isAutoPlay: Boolean = false) {
+        if (contentSwitchInFlight) {
+            android.util.Log.d("PlayerActivity", "playNextEpisode ignorato: cambio contenuto già in corso")
+            return
+        }
+        contentSwitchInFlight = true
         // Salva il progresso del contenuto CORRENTE prima di cambiare episodio:
         // senza questo gli ultimi secondi/minuti di visione andavano persi e
         // l'episodio appena finito non risultava completato.
         saveProgress()
         lifecycleScope.launch {
+            try {
             // Check Still Watching limit only for auto-plays
             if (isAutoPlay) {
                 consecutiveAutoPlays++
@@ -2239,12 +2257,21 @@ class PlayerActivity : ComponentActivity() {
                 player.prepare()
                 player.play()
             }
+            } finally {
+                contentSwitchInFlight = false
+            }
         }
     }
 
     private fun playPreviousEpisode() {
+        if (contentSwitchInFlight) {
+            android.util.Log.d("PlayerActivity", "playPreviousEpisode ignorato: cambio contenuto già in corso")
+            return
+        }
+        contentSwitchInFlight = true
         saveProgress()
         lifecycleScope.launch {
+            try {
             resetAutoPlayCounter()  // Manual navigation resets counter
             
             val prev = playNextManager.getPrevious(
