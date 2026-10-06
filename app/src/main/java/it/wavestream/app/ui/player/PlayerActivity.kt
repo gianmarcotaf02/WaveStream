@@ -156,6 +156,12 @@ class PlayerActivity : ComponentActivity() {
     // Metadati per l'overlay "in pausa" (stile Netflix). Solo VOD.
     private val _pauseInfo = mutableStateOf<PlayerPauseInfo?>(null)
 
+    // Titolo mostrato in alto nel player. Per gli episodi il formato è **sempre**
+    // "Nome serie • Titolo episodio" (fallback "Episodio X" quando il provider non
+    // fornisce un titolo reale). Viene ricalcolato da `refreshPlayerTitle()` ad ogni
+    // cambio di contenuto: apertura, "Prossimo" e "Precedente".
+    private val _playerTitle = mutableStateOf("")
+
     // Sorgente (stream_providers.id) in riproduzione: serve a salvarne la qualità reale
     // al primo onVideoSizeChanged. -1 = non nota (es. serie/canali).
     private var sourceProviderId: Long = -1L
@@ -453,6 +459,9 @@ class PlayerActivity : ComponentActivity() {
         groupId = intent.getLongExtra("group_id", -1).takeIf { it > 0 }
         sourceProviderId = intent.getLongExtra("source_provider_id", -1L)
         
+        // Titolo subito disponibile: verrà raffinato in "Nome serie • Titolo episodio"
+        // appena l'episodio in riproduzione è risolto dal DB.
+        _playerTitle.value = title
         android.util.Log.d("PlayerActivity", "Intent: contentId=$contentId, type=$contentType, streamUrl=$streamUrl, title=$title")
         
         // Register receiver for headphone unplugged events
@@ -523,6 +532,9 @@ class PlayerActivity : ComponentActivity() {
                 
                 // Start playback now that we have the URL
                 startPlayback()
+                // La serie è stata risolta nell'episodio da riprodurre: aggiorna subito
+                // il titolo nel formato "Nome serie • Titolo episodio".
+                _playerTitle.value = computePlayerTitle()
             }
             
             // Check for downloaded content (only for VOD) and switch to cache if found
@@ -591,6 +603,10 @@ class PlayerActivity : ComponentActivity() {
                 groupId = groupId
             )
             _hasPreviousEpisode.value = prev != null
+
+            // Titolo uniforme anche quando il player si apre direttamente su un episodio
+            // (dettaglio, "guarda ora", download) invece che passando dal hero.
+            _playerTitle.value = computePlayerTitle()
         }
         
         setContent {
@@ -614,7 +630,7 @@ class PlayerActivity : ComponentActivity() {
                 
                 TvPlayerScreen(
                     player = player,
-                    title = title,
+                    title = _playerTitle.value,
                     subtitle = if (contentType == ContentType.CHANNEL) _liveCategory.value else subtitle,
                     videoQuality = videoQuality,
                     isLoading = isLoading,
@@ -1677,6 +1693,49 @@ class PlayerActivity : ComponentActivity() {
             }
         }
         return null
+    }
+
+    /**
+     * Titolo mostrato in alto nel player.
+     *
+     * Per le serie è **sempre** "Nome serie • Titolo episodio", dove il titolo
+     * dell'episodio usa il fallback "Episodio X" (X = numero episodio in corso).
+     * Per film e canali resta il titolo del contenuto.
+     *
+     * Unico punto di verità: qualunque sia la provenienza (hero, dettaglio,
+     * "guarda ora", "Prossimo"/"Precedente") il titolo passa da qui.
+     */
+    private suspend fun computePlayerTitle(): String = withContext(Dispatchers.IO) {
+        if (contentType != ContentType.EPISODE && contentType != ContentType.SERIES) {
+            return@withContext title
+        }
+
+        val ep = resolvePauseEpisode()
+        val sid = ep?.seriesId ?: seriesId ?: contentId
+        val seriesName = runCatching {
+            seriesDao.getSeriesById(sid)?.name?.takeIf { it.isNotBlank() }
+        }.getOrNull()
+
+        val epNumber = ep?.episodeNumber ?: episode
+        val epTitle = ep?.let {
+            it.wavestream.app.util.TitleCleaner.resolveEpisodeDisplayTitle(
+                providerName = it.name,
+                tmdbName = it.tmdbName,
+                episodeNumber = it.episodeNumber,
+                seriesName = seriesName
+            )
+        } ?: epNumber?.let { "Episodio $it" }
+
+        when {
+            epTitle == null -> seriesName ?: title
+            seriesName == null -> epTitle
+            else -> "$seriesName • $epTitle"
+        }
+    }
+
+    /** Ricalcola e applica il titolo del player ("Nome serie • Titolo episodio"). */
+    private fun refreshPlayerTitle() {
+        lifecycleScope.launch { _playerTitle.value = computePlayerTitle() }
     }
 
     /**
