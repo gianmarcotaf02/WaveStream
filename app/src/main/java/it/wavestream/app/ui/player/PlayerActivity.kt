@@ -2228,6 +2228,8 @@ class PlayerActivity : ComponentActivity() {
                 android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
 
                 onPlaybackContentChanged()
+                // Titolo nel formato unico anche per il passaggio a "Prossimo" episodio.
+                refreshPlayerTitle()
 
                 // Play new content
                 val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))
@@ -2266,6 +2268,8 @@ class PlayerActivity : ComponentActivity() {
                 android.util.Log.d("PlayerActivity", "Updated season=$season, episode=$episode")
 
                 onPlaybackContentChanged()
+                // Titolo nel formato unico anche per il passaggio a "Precedente" episodio.
+                refreshPlayerTitle()
 
                 // Play previous content
                 val mediaItem = MediaItem.fromUri(Uri.parse(it.streamUrl))

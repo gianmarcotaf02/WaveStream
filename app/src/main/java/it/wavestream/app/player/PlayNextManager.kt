@@ -4,7 +4,9 @@ import it.wavestream.app.data.database.dao.CustomGroupDao
 import it.wavestream.app.data.database.dao.EpisodeDao
 import it.wavestream.app.data.database.dao.SeriesDao
 import it.wavestream.app.data.database.entity.ContentType
+import it.wavestream.app.data.database.entity.Episode
 import it.wavestream.app.data.database.entity.GroupItem
+import it.wavestream.app.util.TitleCleaner
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -32,6 +34,20 @@ class PlayNextManager @Inject constructor(
     )
     
     /**
+     * Titolo uniforme per gli episodi: "Nome serie • Titolo episodio", con fallback
+     * "Episodio X" quando il provider/TMDB non forniscono un titolo reale.
+     */
+    private fun episodeDisplayTitle(episode: Episode, seriesName: String): String {
+        val epTitle = TitleCleaner.resolveEpisodeDisplayTitle(
+            providerName = episode.name,
+            tmdbName = episode.tmdbName,
+            episodeNumber = episode.episodeNumber,
+            seriesName = seriesName
+        )
+        return if (seriesName.isBlank()) epTitle else "$seriesName • $epTitle"
+    }
+
+    /**
      * Get next episode in a series
      */
     suspend fun getNextEpisode(seriesId: Long, currentSeason: Int, currentEpisode: Int): NextContent? {
@@ -41,17 +57,11 @@ class PlayNextManager @Inject constructor(
         // Try next episode in same season
         val nextInSeason = episodeDao.getEpisode(seriesId, currentSeason, currentEpisode + 1)
         if (nextInSeason != null) {
-            val rawEpTitle = nextInSeason.tmdbName ?: nextInSeason.name
-            val displayTitle = if (rawEpTitle.isBlank()) {
-                seriesName
-            } else {
-                "$seriesName - $rawEpTitle"
-            }
             return NextContent(
                 contentType = ContentType.EPISODE,
                 contentId = nextInSeason.id,
                 streamUrl = nextInSeason.streamUrl,
-                title = displayTitle,
+                title = episodeDisplayTitle(nextInSeason, seriesName),
                 subtitle = "Stagione $currentSeason Episodio ${currentEpisode + 1}",
                 season = currentSeason,
                 episode = currentEpisode + 1
@@ -61,17 +71,11 @@ class PlayNextManager @Inject constructor(
         // Try first episode of next season
         val firstOfNextSeason = episodeDao.getEpisode(seriesId, currentSeason + 1, 1)
         if (firstOfNextSeason != null) {
-            val rawEpTitle = firstOfNextSeason.tmdbName ?: firstOfNextSeason.name
-            val displayTitle = if (rawEpTitle.isBlank()) {
-                seriesName
-            } else {
-                "$seriesName - $rawEpTitle"
-            }
             return NextContent(
                 contentType = ContentType.EPISODE,
                 contentId = firstOfNextSeason.id,
                 streamUrl = firstOfNextSeason.streamUrl,
-                title = displayTitle,
+                title = episodeDisplayTitle(firstOfNextSeason, seriesName),
                 subtitle = "Stagione ${currentSeason + 1} Episodio 1",
                 season = currentSeason + 1,
                 episode = 1
@@ -92,17 +96,11 @@ class PlayNextManager @Inject constructor(
             // Try previous episode in same season
             val prevInSeason = episodeDao.getEpisode(seriesId, currentSeason, currentEpisode - 1)
             if (prevInSeason != null) {
-                val rawEpTitle = prevInSeason.tmdbName ?: prevInSeason.name
-                val displayTitle = if (rawEpTitle.isBlank()) {
-                    seriesName
-                } else {
-                    "$seriesName - $rawEpTitle"
-                }
                 return NextContent(
                     contentType = ContentType.EPISODE,
                     contentId = prevInSeason.id,
                     streamUrl = prevInSeason.streamUrl,
-                    title = displayTitle,
+                    title = episodeDisplayTitle(prevInSeason, seriesName),
                     subtitle = "Stagione $currentSeason Episodio ${currentEpisode - 1}",
                     season = currentSeason,
                     episode = currentEpisode - 1
@@ -114,17 +112,11 @@ class PlayNextManager @Inject constructor(
             // Try last episode of previous season
             val lastOfPrevSeason = episodeDao.getLastEpisodeOfSeason(seriesId, currentSeason - 1)
             if (lastOfPrevSeason != null) {
-                val rawEpTitle = lastOfPrevSeason.tmdbName ?: lastOfPrevSeason.name
-                val displayTitle = if (rawEpTitle.isBlank()) {
-                    seriesName
-                } else {
-                    "$seriesName - $rawEpTitle"
-                }
                 return NextContent(
                     contentType = ContentType.EPISODE,
                     contentId = lastOfPrevSeason.id,
                     streamUrl = lastOfPrevSeason.streamUrl,
-                    title = displayTitle,
+                    title = episodeDisplayTitle(lastOfPrevSeason, seriesName),
                     subtitle = "Stagione ${currentSeason - 1} Episodio ${lastOfPrevSeason.episodeNumber}",
                     season = currentSeason - 1,
                     episode = lastOfPrevSeason.episodeNumber
