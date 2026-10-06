@@ -194,9 +194,9 @@ class PlayerActivity : ComponentActivity() {
     private var hiddenSeekRepeatSeconds = 0
     private var hiddenSeekAccumulatedSeconds = 0
     
-    // Countdown overlay "Prossimo episodio" (uniforme: 10s)
-    private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 10
-    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 10
+    // Countdown overlay "Prossimo episodio" (uniforme: 15s)
+    private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 15
+    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 15
 
     private val progressHandler = Handler(Looper.getMainLooper())
     private val nextEpisodeHandler = Handler(Looper.getMainLooper())
