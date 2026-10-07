@@ -639,7 +639,7 @@ private fun PauseInfoOverlay(
                 .background(
                     Brush.horizontalGradient(
                         0.00f to Color.Black.copy(alpha = 0.45f),
-                        0.55f to Color.Transparent
+                        0.68f to Color.Transparent
                     )
                 )
         )
@@ -661,7 +661,9 @@ private fun PauseInfoOverlay(
             content = {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.52f)
+                        // Blocco info un po' più largo: la riga meta sta su una sola riga
+                        // e la trama si estende a destra senza andare a capo troppo presto.
+                        .fillMaxWidth(0.62f)
                         .padding(horizontal = 48.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -692,12 +694,18 @@ private fun PauseInfoOverlay(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Riga meta: anno • durata • generi • minuti rimasti
+                    // Riga meta: anno • durata • generi • minuti rimasti.
+                    // Per le serie i minuti rimasti vivono sulla riga stagione/episodio,
+                    // così la riga meta resta su una sola riga; per i film restano qui.
+                    val hasEpisodeLine = info.isSeries &&
+                        info.seasonNumber != null && info.episodeNumber != null
                     val metaParts = buildList {
                         info.year?.let { add(it.toString()) }
                         info.durationMinutes?.takeIf { it > 0 }?.let { add(formatDurationLabel(it)) }
                         info.genres?.takeIf { it.isNotBlank() }?.let { add(it) }
-                        remainingMinutes?.takeIf { it > 0 }?.let { add(formatRemainingLabel(it)) }
+                        if (!hasEpisodeLine) {
+                            remainingMinutes?.takeIf { it > 0 }?.let { add(formatRemainingLabel(it)) }
+                        }
                     }
                     if (metaParts.isNotEmpty()) {
                         Text(
@@ -712,23 +720,41 @@ private fun PauseInfoOverlay(
                         )
                     }
 
-                    // Serie: stagione/episodio in corso + titolo episodio + trama
-                    if (info.isSeries && info.seasonNumber != null && info.episodeNumber != null) {
+                    // Serie: stagione/episodio in corso (+ minuti rimasti sulla stessa
+                    // riga, in bianco e con lo stesso corpo) + titolo episodio + trama
+                    if (hasEpisodeLine) {
                         Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = "Stagione ${info.seasonNumber}   •   Episodio ${info.episodeNumber}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = WaveStreamColors.Accent,
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Stagione ${info.seasonNumber}   •   Episodio ${info.episodeNumber}",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = WaveStreamColors.Accent,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Start
+                            )
+                            remainingMinutes?.takeIf { it > 0 }?.let { mins ->
+                                Spacer(modifier = Modifier.width(14.dp))
+                                Text(
+                                    text = "•   ${formatRemainingLabel(mins)}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.White.copy(alpha = 0.88f),
+                                    fontWeight = FontWeight.SemiBold,
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
                         episodeTitleToShow(info)?.let { epTitle ->
+                            // Staccato dalla riga stagione/episodio (gap + interlinea più
+                            // ariosa) così risulta più legato alla trama che segue.
+                            Spacer(modifier = Modifier.height(6.dp))
                             Text(
                                 text = epTitle,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = Color.White,
                                 fontWeight = FontWeight.SemiBold,
+                                lineHeight = 26.sp,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Start,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -746,7 +772,7 @@ private fun PauseInfoOverlay(
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.White.copy(alpha = 0.8f),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Start,
-                            maxLines = 4,
+                            maxLines = 6,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.fillMaxWidth()
                         )
