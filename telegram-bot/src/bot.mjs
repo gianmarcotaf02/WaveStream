@@ -621,6 +621,7 @@ const invokedDirectly = process.argv[1] && process.argv[1].replace(/\\/g, '/').e
 if (invokedDirectly) {
   main().catch((err) => {
     console.error('❌ Errore fatale:', err?.description ?? err?.message ?? err)
+    if (err?.stack) console.error(err.stack)
     process.exit(1)
   })
 }
