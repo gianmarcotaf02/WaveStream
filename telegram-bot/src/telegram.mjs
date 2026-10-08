@@ -1,5 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { stripTags } from './markdown.mjs'
+
+export { stripTags }
 
 const DEFAULT_API = 'https://api.telegram.org'
 const RETRYABLE_CODES = new Set([429, 500, 502, 503, 504])
@@ -259,14 +262,3 @@ function cleanParams(params) {
   return out
 }
 
-/** Rimuove i tag HTML per il fallback in testo semplice. */
-export function stripTags(text) {
-  return String(text ?? '')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/?(b|i|u|s|code|pre|a|blockquote)(\s[^>]*)?>/gi, '')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, '&')
-}
