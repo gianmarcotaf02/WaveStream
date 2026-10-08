@@ -12,20 +12,20 @@ export const SHORT_DESCRIPTION =
 export const DESCRIPTION = [
   '🎬 WaveStream — aggiornamenti ufficiali',
   '',
-  'Questo bot ti avvisa ogni volta che esce una nuova versione di WaveStream, il player IPTV per Android TV: ricevi le novità già scritte e impaginate per Telegram, con il pulsante per scaricare subito l\'APK firmato.',
+  'Questo bot ti avvisa quando esce una nuova versione di WaveStream, il player IPTV per Android TV: novità già impaginate per Telegram e APK sempre a un tap.',
   '',
   'Cosa ricevi:',
-  '✨ release notes ordinate, con emoji e punti elenco',
+  '✨ release notes ordinate, con emoji',
   '📥 link diretto all\'ultima versione (APK)',
-  '🐛 fix, miglioramenti e funzioni nuove evidenziati',
+  '🐛 fix e miglioramenti evidenziati',
   '',
   'Comandi:',
   '/start — iscriviti alle notifiche',
-  '/latest — ultima versione disponibile',
-  '/app — come aggiornare WaveStream',
-  '/stop — disattiva le notifiche',
+  '/latest — ultima versione',
+  '/app — come aggiornare',
+  '/stop — disattiva',
   '',
-  'Zero spam: solo quando esce davvero una nuova versione.',
+  'Zero spam: scrivo solo quando esce davvero una nuova versione.',
 ].join('\n')
 
 export const COMMANDS = [
