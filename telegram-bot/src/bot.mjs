@@ -57,7 +57,8 @@ class WaveStreamBot {
   }
 
   async start() {
-    const { cfg, logger } = this
+    const cfg = this.#cfg
+    const logger = this.#logger
     logger.info(`[bot] avviato @${this.#me.username} (id ${this.#me.id}) · repo ${cfg.repo} · admin: ${cfg.adminIds.join(', ') || 'nessuno'}`)
     this.#store.setState({ botUsername: this.#me.username, botId: this.#me.id })
     await this.#syncCommands()
@@ -76,7 +77,8 @@ class WaveStreamBot {
   // --- Setup -------------------------------------------------------------
 
   async #syncCommands() {
-    const { cfg, logger } = this
+    const cfg = this.#cfg
+    const logger = this.#logger
     const hash = `${USER_COMMANDS.length}|${ADMIN_COMMANDS.length}|${cfg.adminIds.join(',')}`
     if (this.#store.getState().commandsHash !== hash) {
       try {
@@ -100,7 +102,7 @@ class WaveStreamBot {
   // --- Loop di polling ---------------------------------------------------
 
   async #pollLoop() {
-    const { logger } = this
+    const logger = this.#logger
     let offset = this.#store.getState().updateOffset ?? 0
     let failures = 0
 
@@ -128,7 +130,8 @@ class WaveStreamBot {
   }
 
   async #releaseLoop() {
-    const { cfg, logger } = this
+    const cfg = this.#cfg
+    const logger = this.#logger
     await sleep(5000)
     while (!this.#stopping) {
       try {
@@ -485,7 +488,8 @@ class WaveStreamBot {
    * Al primo avvio imposta solo la baseline (per non spammare una release vecchia).
    */
   async checkForNewRelease({ force = false } = {}) {
-    const { cfg, logger } = this
+    const cfg = this.#cfg
+    const logger = this.#logger
     const release = await this.#gh.getLatestRelease({ includePrerelease: cfg.includePrerelease, apkAssetName: cfg.apkAssetName })
     this.#store.setState({ lastCheckAt: new Date().toISOString() })
     if (!release) return { release: null, announced: false, reason: 'nessuna release' }
@@ -510,7 +514,8 @@ class WaveStreamBot {
 
   /** Invia la card della release a tutti (con guardia contro invii concorrenti). */
   async #runBroadcast({ chatId = null, messageId = null, release = null, text = null, updateBaseline = false, context = 'manual' }) {
-    const { cfg, logger } = this
+    const cfg = this.#cfg
+    const logger = this.#logger
     if (this.#broadcasting) {
       logger.warn('[bot] broadcast già in corso: richiesta ignorata')
       if (chatId) await this.#tg.sendMessage(chatId, '⏳ Un invio è già in corso, riprova tra qualche secondo.').catch(() => null)
