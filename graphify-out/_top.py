@@ -2,28 +2,20 @@ import json
 from pathlib import Path
 from collections import Counter
 
-d = json.loads(Path('graphify-out/.graphify_detect.json').read_text(encoding='utf-8'))
+p = Path('graphify-out/.graphify_detect.json')
+d = json.loads(p.read_text(encoding='utf-8'))
 root = d['scan_root'].replace(chr(92), '/').rstrip('/')
-files = []
-cats = {}
-for cat in ('code', 'document', 'paper', 'image', 'video'):
-    for f in d['files'].get(cat, []):
-        f = f.replace(chr(92), '/')
-        if f.startswith(root + '/graphify-out/'):
-            continue
-        files.append(f)
-        cats[f] = cat
 
-for depth in (1, 2, 3, 4):
-    c = Counter()
-    for f in files:
-        rel = f[len(root) + 1:] if f.startswith(root + '/') else f
-        parts = rel.split('/')
-        key = '/'.join(parts[:depth]) if len(parts) > depth else ('(root)' if len(parts) == 1 else '/'.join(parts[:-1]))
-        c[key] += 1
-    print(f'--- depth {depth} ---')
-    for k, v in c.most_common(12):
-        print('  ', v, k)
-print('--- by category ---')
-for k, v in Counter(cats.values()).most_common():
-    print('  ', v, k)
+print('keys:', sorted(d.keys()))
+print('--- code extensions ---')
+print(Counter(Path(f).suffix.lower() for f in d['files']['code']).most_common())
+print('--- documents ---')
+for f in d['files']['document']:
+    print('  ', f.replace(chr(92), '/'))
+print('--- top-level keys present in files ---', list(d['files'].keys()))
+print('total_files', d['total_files'], 'total_words', d['total_words'])
+print('--- image extensions ---')
+print(Counter(Path(f).suffix.lower() for f in d['files']['image']).most_common())
+print('--- first 5 code ---')
+for f in d['files']['code'][:5]:
+    print('  ', f.replace(chr(92), '/'))
