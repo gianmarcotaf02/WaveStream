@@ -7,6 +7,11 @@ logs/
 *.log
 
 # Node
+dist/
 node_modules/
 npm-debug.log*
 package-lock.json
+
+# La cartella principale ignora *.md: qui la documentazione del bot va versionata
+!README.md
+!BOTFATHER.md
