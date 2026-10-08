@@ -1,0 +1,12 @@
+# graphify: escludi le immagini dalla knowledge graph.
+# Le icone/drawable/loghi (366 file in app/src/main/res) non aggiungono valore
+# strutturale e costano un subagent di vision ciascuna.
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.bmp
+*.svg
+*.ico
+*.avif
