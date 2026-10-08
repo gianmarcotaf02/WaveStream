@@ -11,19 +11,23 @@
  */
 import fs from 'node:fs'
 import path from 'node:path'
-import { ConfigError, loadConfig } from './config.mjs'
+import { ConfigError, loadConfig, ROOT } from './config.mjs'
 import { createLogger } from './logger.mjs'
 import { Telegram } from './telegram.mjs'
-import { BOT_NAME, COMMANDS, DESCRIPTION, ROOT, SHORT_DESCRIPTION, validateProfileTexts } from './profile.mjs'
+import { BOT_NAME, COMMANDS, DESCRIPTION, SHORT_DESCRIPTION, validateProfileTexts } from './profile.mjs'
 
 function parseArgs(argv) {
   const flags = new Set()
   const values = {}
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i]
-    if (arg === '--photo' || arg === '--remove-photo' || arg === '--lang') {
-      values[arg] = arg === '--remove-photo' ? true : argv[i + 1]
-      if (arg !== '--remove-photo') i += 1
+    if (arg === '--photo' || arg === '--remove-photo') {
+      if (arg === '--remove-photo') {
+        values[arg] = true
+      } else {
+        values[arg] = argv[i + 1]
+        i += 1
+      }
     } else if (arg.startsWith('--')) {
       flags.add(arg)
     }
