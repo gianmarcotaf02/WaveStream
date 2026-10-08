@@ -1,0 +1,25 @@
+[Unit]
+Description=WaveStream Telegram Bot (notifiche nuove versioni)
+Documentation=https://github.com/gianmarcotaf02/WaveStream
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/wavestream-telegram-bot
+ExecStart=/usr/bin/node src/bot.mjs
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=NODE_ENV=production
+Environment=LOG_LEVEL=info
+# Crea l'utente con: sudo useradd --system --home /opt/wavestream-telegram-bot wavestream
+User=wavestream
+Group=wavestream
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

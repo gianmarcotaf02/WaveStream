@@ -41,7 +41,7 @@ async function main() {
 
   let cfg
   try {
-    cfg = loadConfig()
+    cfg = loadConfig({ requireToken: !dryRun })
   } catch (err) {
     if (err instanceof ConfigError) {
       console.error(`\n⚠️  ${err.message}\n`)
@@ -56,8 +56,8 @@ async function main() {
   }
 
   const logger = createLogger({ logFile: null, level: 'info' })
-  const tg = new Telegram(cfg.botToken, { logger })
-  const me = await tg.getMe()
+  const tg = dryRun ? null : new Telegram(cfg.botToken, { logger })
+  const me = tg ? await tg.getMe() : { username: '(dry-run)', id: 0 }
 
   console.log(`\n🤖 Bot: @${me.username} (${me.id})${dryRun ? ' — DRY RUN' : ''}\n`)
 

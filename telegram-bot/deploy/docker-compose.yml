@@ -1,0 +1,20 @@
+services:
+  wavestream-bot:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: wavestream-telegram-bot
+    restart: unless-stopped
+    environment:
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:?definisci TELEGRAM_BOT_TOKEN in deploy/.env}
+      TELEGRAM_ADMIN_IDS: ${TELEGRAM_ADMIN_IDS:-}
+      TELEGRAM_CHANNEL_ID: ${TELEGRAM_CHANNEL_ID:-}
+      GITHUB_REPO: ${GITHUB_REPO:-gianmarcotaf02/WaveStream}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      POLL_MINUTES: ${POLL_MINUTES:-10}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    volumes:
+      # Stato del bot (iscritti, baseline release, log): indispensabile per non perdere nulla.
+      - ../data:/app/data
+      # Opzionale: monta un config.json già compilato al posto delle variabili d'ambiente.
+      # - ../config.json:/app/config.json:ro
