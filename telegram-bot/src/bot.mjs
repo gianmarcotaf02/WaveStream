@@ -389,35 +389,24 @@ class WaveStreamBot {
       botName: this.#cfg.botName,
       limit: TELEGRAM_TEXT_LIMIT - 260,
     })
-    await this.#tg.sendMessage(
-      chatId,
+    const previewText = truncateHtml(
       [
         '🔎 <b>Anteprima broadcast</b>',
         `Destinatari attivi: <b>${stats.active}</b> (${stats.total} iscritti totali)`,
         DIVIDER,
         '',
         previewCard,
-      ].join('\n')
-        ? truncateHtml(
-            [
-              '🔎 <b>Anteprima broadcast</b>',
-              `Destinatari attivi: <b>${stats.active}</b> (${stats.total} iscritti totali)`,
-              DIVIDER,
-              '',
-              previewCard,
-            ].join('\n'),
-            TELEGRAM_TEXT_LIMIT
-          )
-        : previewCard,
-      {
-        replyMarkup: {
-          inline_keyboard: [
-            [{ text: '✅ Invia a tutti', callback_data: `send:${release.tag}` }],
-            [{ text: '❌ Annulla', callback_data: 'cancel' }],
-          ],
-        },
-      }
+      ].join('\n'),
+      TELEGRAM_TEXT_LIMIT
     )
+    await this.#tg.sendMessage(chatId, previewText, {
+      replyMarkup: {
+        inline_keyboard: [
+          [{ text: '✅ Invia a tutti', callback_data: `send:${release.tag}` }],
+          [{ text: '❌ Annulla', callback_data: 'cancel' }],
+        ],
+      },
+    })
     this.#logger.info(`[bot] anteprima release ${release.tag} richiesta da ${user.id}`)
   }
 
