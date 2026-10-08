@@ -13,7 +13,7 @@
     "notify:latest": "node src/notify-release.mjs latest",
     "dry-run": "node src/notify-release.mjs latest --dry-run",
     "setup": "node src/setup-bot.mjs",
-    "test": "node --test test/"
+    "test": "node --test \"test/*.test.mjs\""
   },
   "dependencies": {},
   "license": "UNLICENSED"

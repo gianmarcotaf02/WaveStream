@@ -60,17 +60,13 @@ function parseAdmins(value) {
  * delle variabili d'ambiente. Le env vincono sempre sul file.
  */
 export function loadConfig({ env = process.env, requireToken = true } = {}) {
+  let createdFromTemplate = false
   if (!fs.existsSync(CONFIG_PATH)) {
     if (!fs.existsSync(EXAMPLE_PATH)) {
       throw new ConfigError(`config.json non trovato e template mancante (${EXAMPLE_PATH})`)
     }
     fs.copyFileSync(EXAMPLE_PATH, CONFIG_PATH)
-    throw new ConfigError(
-      [
-        'Ho creato telegram-bot/config.json dal template.',
-        `Apri ${CONFIG_PATH} e inserisci il token di BotFather nella voce "botToken", poi riavvia.`,
-      ].join('\n')
-    )
+    createdFromTemplate = true
   }
 
   let fileCfg
@@ -110,8 +106,8 @@ export function loadConfig({ env = process.env, requireToken = true } = {}) {
     if (requireToken) {
       throw new ConfigError(
         [
-          'Token del bot mancante o non valido.',
-          `Inserisci in ${CONFIG_PATH} la voce "botToken": "<id>:<segreto>" (te lo dà @BotFather).`,
+          createdFromTemplate ? 'Ho creato telegram-bot/config.json dal template.' : 'Token del bot mancante o non valido.',
+          `Apri ${CONFIG_PATH} e inserisci in "botToken" il token di @BotFather (formato <id>:<segreto>), poi riavvia.`,
           'In alternativa puoi esportare la variabile d\'ambiente TELEGRAM_BOT_TOKEN.',
         ].join('\n')
       )
