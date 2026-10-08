@@ -18,7 +18,9 @@ import {
   buildUnsubscribedText,
   buildWelcomeText,
   formatRelativeDateIt,
+  TELEGRAM_TEXT_LIMIT,
 } from './message.mjs'
+import { truncateHtml } from './markdown.mjs'
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -224,7 +226,7 @@ class WaveStreamBot {
       case 'test':
         return this.#assertAdmin(chatId, user) && this.#cmdTest(chatId)
       default:
-        return this.#tg.sendMessage(chatId, `🤔 Comando \`/${escapeHtml(parsed.command)}\` non riconosciuto. Usa /help.`)
+        return this.#tg.sendMessage(chatId, `🤔 Comando <code>/${escapeHtml(parsed.command)}</code> non riconosciuto. Usa /help.`)
     }
   }
 
@@ -382,6 +384,11 @@ class WaveStreamBot {
       return
     }
     const stats = this.#store.stats()
+    const previewCard = buildReleaseText(release, {
+      variant: 'announce',
+      botName: this.#cfg.botName,
+      limit: TELEGRAM_TEXT_LIMIT - 260,
+    })
     await this.#tg.sendMessage(
       chatId,
       [
@@ -389,8 +396,19 @@ class WaveStreamBot {
         `Destinatari attivi: <b>${stats.active}</b> (${stats.total} iscritti totali)`,
         DIVIDER,
         '',
-        buildReleaseText(release, { variant: 'announce', botName: this.#cfg.botName }),
-      ].join('\n'),
+        previewCard,
+      ].join('\n')
+        ? truncateHtml(
+            [
+              '🔎 <b>Anteprima broadcast</b>',
+              `Destinatari attivi: <b>${stats.active}</b> (${stats.total} iscritti totali)`,
+              DIVIDER,
+              '',
+              previewCard,
+            ].join('\n'),
+            TELEGRAM_TEXT_LIMIT
+          )
+        : previewCard,
       {
         replyMarkup: {
           inline_keyboard: [
@@ -408,7 +426,7 @@ class WaveStreamBot {
       await this.#tg.sendMessage(chatId, 'Uso: <code>/broadcast testo del messaggio</code>')
       return
     }
-    const text = ['📣 <b>Comunicazione da WaveStream</b>', '', escapeHtml(args).replace(/\\n/g, '\n')].join('\n')
+    const text = truncateHtml(['📣 <b>Comunicazione da WaveStream</b>', '', escapeHtml(args).replace(/\\n/g, '\n')].join('\n'), TELEGRAM_TEXT_LIMIT)
     const stats = this.#store.stats()
     const message = await this.#tg.sendMessage(chatId, `🚀 Invio a <b>${stats.active}</b> iscritti…`)
     this.#logger.info(`[bot] /broadcast da ${user.id} (${args.length} caratteri)`)
