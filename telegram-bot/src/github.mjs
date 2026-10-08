@@ -54,7 +54,7 @@ export class GitHub {
   }
 
   /** Normalizza la release in un oggetto stabile per il bot. */
-  static normalize(json, { apkAssetName = 'WaveStream.apk' } = {}) {
+  static normalize(json, { apkAssetName = 'WaveStream.apk', repo = '' } = {}) {
     if (!json) return null
     const assets = (json.assets ?? []).map((a) => ({
       name: a.name,
@@ -74,13 +74,13 @@ export class GitHub {
       isDraft: Boolean(json.draft),
       assets,
       apk: apkLike,
-      apkUrl: apkLike?.downloadUrl ?? `https://github.com/${json.html_url?.split('/').slice(3, 5).join('/')}/releases/latest`,
+      apkUrl: apkLike?.downloadUrl ?? (repo ? `https://github.com/${repo}/releases/latest` : json.html_url),
     }
   }
 
   async getReleaseByTag(tag) {
     const json = await this.#request(`/releases/tags/${encodeURIComponent(tag)}`)
-    return GitHub.normalize(json)
+    return GitHub.normalize(json, { repo: this.#repo })
   }
 
   /** Ultima release (esclude draft e, di default, le prerelease). */
@@ -90,7 +90,7 @@ export class GitHub {
     const release = list.find(
       (r) => !r.draft && (includePrerelease || !r.prerelease) && r.tag_name
     )
-    return release ? GitHub.normalize(release, { apkAssetName }) : null
+    return release ? GitHub.normalize(release, { apkAssetName, repo: this.#repo }) : null
   }
 
   /** Ritorna la release per tag oppure l'ultima disponibile. */
