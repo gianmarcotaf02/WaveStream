@@ -24,6 +24,7 @@ const BULLET_EMOJI = [
   [/\b(preferit\w*|profil\w*|watchlist|continua a guardare)\b/i, '⭐'],
   [/\b(aggiornament\w*|update|versione|release)\b/i, '📦'],
   [/\b(miglior\w*|nuov\w*|aggiunt\w*|introduc\w*|support\w*|ora (puoi|si|sono|è|compare))\b/i, '✨'],
+  [/\bpiù (veloce|fluido|chiaro|leggibile|semplice|preciso|tempo|reattivo|stabile|ordinat\w*)\b/i, '✨'],
 ]
 
 const HEADING_EMOJI = [
@@ -64,10 +65,13 @@ export function headingEmoji(text) {
 
 /** Emoji (o punto elenco) scelta in base alla parola chiave di una voce di changelog. */
 export function bulletMarker(text, { indented = false } = {}) {
-  const label = extractLeadingLabel(text)
   if (indented) return '– '
-  for (const [re, emoji] of BULLET_EMOJI) {
-    if (re.test(label)) return `${emoji} `
+  const label = extractLeadingLabel(text)
+  const haystacks = label === text ? [label] : [label, String(text).slice(0, 200)]
+  for (const haystack of haystacks) {
+    for (const [re, emoji] of BULLET_EMOJI) {
+      if (re.test(haystack)) return `${emoji} `
+    }
   }
   return '• '
 }

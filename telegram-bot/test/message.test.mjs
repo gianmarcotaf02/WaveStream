@@ -39,7 +39,7 @@ test('la card di release contiene intestazione, emoji, APK e footer', () => {
   assert.ok(text.includes('🏷 <b>WaveStream 1.1.11</b>'))
   assert.ok(text.includes('📦 24,3 MB'), 'dimensione APK formattata in italiano')
   assert.ok(!text.includes('Novità della 1.1.11'), 'titolo ridondante rimosso')
-  assert.ok(text.includes('🐛 <b>Titolo dell\'episodio sempre completo nel player:</b>'))
+  assert.ok(text.includes('✨ <b>Titolo dell\'episodio sempre completo nel player:</b>'))
   assert.ok(text.includes('/stop'))
   assert.ok(text.length <= TELEGRAM_TEXT_LIMIT, `lunghezza ${text.length}`)
 })
@@ -89,8 +89,8 @@ test('utility di formattazione', () => {
 
 test('parseCommand gestisce bot name e argomenti', () => {
   assert.deepEqual(parseCommand('/start'), { command: 'start', args: '' })
-  assert.deepEqual(parseCommand('/release@WaveStreamBot 1.1.11'), { command: 'release', args: '1.1.11' })
+  assert.deepEqual(parseCommand('/release@WaveStreamBot 1.1.11', 'WaveStreamBot'), { command: 'release', args: '1.1.11' })
   assert.deepEqual(parseCommand('/broadcast ciao a tutti'), { command: 'broadcast', args: 'ciao a tutti' })
-  assert.equal(parseCommand('/start@AltroBot'), null)
+  assert.equal(parseCommand('/start@AltroBot', 'WaveStreamBot'), null)
   assert.equal(parseCommand('ciao, come va?'), null)
 })
