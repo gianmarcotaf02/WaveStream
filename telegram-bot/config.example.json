@@ -1,0 +1,18 @@
+{
+  "_commento": "Copia questo file in config.json e compila botToken. Le variabili d'ambiente (TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_IDS, TELEGRAM_CHANNEL_ID, GITHUB_TOKEN, GITHUB_REPO, POLL_MINUTES) hanno la precedenza sui valori qui sotto.",
+
+  "botToken": "",
+  "botName": "WaveStream",
+  "repo": "gianmarcotaf02/WaveStream",
+  "githubToken": "",
+  "adminIds": [],
+  "channelId": "",
+  "autoPoll": true,
+  "pollMinutes": 10,
+  "announceOnFirstRun": false,
+  "includePrerelease": false,
+  "apkAssetName": "WaveStream.apk",
+  "dataDir": "data",
+  "logFile": "data/bot.log",
+  "logLevel": "info"
+}

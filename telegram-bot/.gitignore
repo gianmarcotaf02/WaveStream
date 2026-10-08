@@ -1,0 +1,12 @@
+# Config reale (contiene il token del bot)
+config.json
+
+# Stato runtime: iscritti, offset update, log
+data/
+logs/
+*.log
+
+# Node
+node_modules/
+npm-debug.log*
+package-lock.json

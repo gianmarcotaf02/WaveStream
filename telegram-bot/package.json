@@ -1,0 +1,20 @@
+{
+  "name": "wavestream-telegram-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bot Telegram che notifica le nuove versioni di WaveStream (Android TV) agli iscritti, con release notes formattate per Telegram.",
+  "type": "module",
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "start": "node src/bot.mjs",
+    "notify": "node src/notify-release.mjs",
+    "notify:latest": "node src/notify-release.mjs latest",
+    "dry-run": "node src/notify-release.mjs latest --dry-run",
+    "setup": "node src/setup-bot.mjs",
+    "test": "node --test test/"
+  },
+  "dependencies": {},
+  "license": "UNLICENSED"
+}
