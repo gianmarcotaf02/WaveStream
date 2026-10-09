@@ -56,6 +56,47 @@ class IntroDbSegmentTest {
         assertNull(CreditsSegmentEstimator.estimateCreditsStart(reference, 0L))
     }
 
+    // --- fitToDuration: validazione del marker contro la durata reale dello stream ---
+
+    @Test
+    fun `fitToDuration keeps a marker inside the file`() {
+        val fit = CreditsSegmentEstimator.fitToDuration(startMs = 2945000L, endMs = 3005000L, durationMs = 3050000L)
+        assertEquals(CreditsSegmentEstimator.MarkerFit.InRange(2945000L, 3005000L), fit)
+    }
+
+    @Test
+    fun `fitToDuration skips validation when duration is unknown`() {
+        val fit = CreditsSegmentEstimator.fitToDuration(startMs = 9_999_999L, endMs = 10_000_000L, durationMs = 0L)
+        assertEquals(CreditsSegmentEstimator.MarkerFit.InRange(9_999_999L, 10_000_000L), fit)
+    }
+
+    @Test
+    fun `fitToDuration re-anchors a marker beyond EOF to the tail`() {
+        // Caso reale Dexter (2006) S01E01 via CherryTV: outro IntroDB 3088s->3190s,
+        // file lungo 3050s. Coda = 102s -> nuovo inizio 2948s.
+        val fit = CreditsSegmentEstimator.fitToDuration(
+            startMs = 3088000L,
+            endMs = 3190000L,
+            durationMs = 3050000L
+        )
+        assertEquals(CreditsSegmentEstimator.MarkerFit.Reanchored(2948000L, 3050000L), fit)
+    }
+
+    @Test
+    fun `fitToDuration discards a marker without a valid length`() {
+        val noEnd = CreditsSegmentEstimator.fitToDuration(startMs = 4000L, endMs = null, durationMs = 3000L)
+        assertEquals(CreditsSegmentEstimator.MarkerFit.Unusable, noEnd)
+
+        val inverted = CreditsSegmentEstimator.fitToDuration(startMs = 4000L, endMs = 3000L, durationMs = 3000L)
+        assertEquals(CreditsSegmentEstimator.MarkerFit.Unusable, inverted)
+    }
+
+    @Test
+    fun `fitToDuration discards a segment longer than the file`() {
+        val fit = CreditsSegmentEstimator.fitToDuration(startMs = 5000L, endMs = 9000L, durationMs = 3000L)
+        assertEquals(CreditsSegmentEstimator.MarkerFit.Unusable, fit)
+    }
+
     private fun mediaSegment(startMs: Long, durationMs: Long) = MediaSegment(
         contentType = ContentType.EPISODE,
         type = SegmentType.CREDITS,
