@@ -38,8 +38,8 @@ android {
         applicationId = "it.wavestream.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 36
-        versionName = "1.1.11"
+        versionCode = 37
+        versionName = "1.1.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
