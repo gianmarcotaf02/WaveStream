@@ -125,3 +125,11 @@ image.png
 # Session dump / file di lavoro pi (mai versionare)
 pi-session-*.html
 .tmp-session/
+
+# graphify: cache rigenerabile e backup datati del grafo (non versionare)
+/graphify-out/cache/
+/graphify-out/20*/
+
+# Screenshot di test incollati in root (evidenze, non asset di progetto)
+/emulatore.png
+/skip intro.png
