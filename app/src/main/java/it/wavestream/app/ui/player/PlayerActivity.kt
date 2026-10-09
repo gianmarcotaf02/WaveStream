@@ -198,6 +198,12 @@ class PlayerActivity : ComponentActivity() {
     private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 15
     private val CREDITS_NEXT_COUNTDOWN_SECONDS = 15
 
+    // L'overlay "Prossimo episodio" scatta solo nella coda finale dell'episodio.
+    // I titoli di coda possono durare 60-100s: armare la card al loro inizio la faceva
+    // comparire troppo presto, coprendo i titoli e saltandoli se non si premeva "Ignora".
+    // Durante i titoli resta il pulsante non invasivo "Salta titoli di coda".
+    private val CREDITS_AUTOPLAY_TAIL_MS = 15_000L
+
     private val progressHandler = Handler(Looper.getMainLooper())
     private val nextEpisodeHandler = Handler(Looper.getMainLooper())
     private val bufferingHandler = Handler(Looper.getMainLooper())
@@ -1439,6 +1445,37 @@ class PlayerActivity : ComponentActivity() {
 
                     // Titoli di coda: mostra "Salta titoli di coda" mentre si è dentro
                     // la finestra nota (IntroDB/marker). Indipendente dall'autoplay.
+                    //
+                    // Prima dell'uso il marker viene validato contro la durata reale: i marker
+                    // comunitari (IntroDB) sono misurati su una release che può non essere la
+                    // nostra, quindi l'inizio può cadere oltre la fine del file. In quel caso va
+                    // ri-ancorato alla coda, altrimenti il pulsante non compare mai.
+                    val rawMarkerStart = creditsMarkerStartMs
+                    if (player.duration > 0 && rawMarkerStart != null) {
+                        when (val fit = CreditsSegmentEstimator.fitToDuration(
+                            rawMarkerStart, creditsMarkerEndMs, player.duration
+                        )) {
+                            is CreditsSegmentEstimator.MarkerFit.Reanchored -> {
+                                android.util.Log.i(
+                                    "CreditsDiag",
+                                    "creditsMarkerReanchored start=$rawMarkerStart -> ${fit.startMs} " +
+                                        "end=${fit.endMs} duration=${player.duration}"
+                                )
+                                creditsMarkerStartMs = fit.startMs
+                                creditsMarkerEndMs = fit.endMs
+                            }
+                            CreditsSegmentEstimator.MarkerFit.Unusable -> {
+                                android.util.Log.i(
+                                    "CreditsDiag",
+                                    "creditsMarkerUnusable start=$rawMarkerStart end=$creditsMarkerEndMs " +
+                                        "duration=${player.duration}: scartato"
+                                )
+                                creditsMarkerStartMs = null
+                                creditsMarkerEndMs = null
+                            }
+                            is CreditsSegmentEstimator.MarkerFit.InRange -> Unit
+                        }
+                    }
                     val cStart = creditsMarkerStartMs
                     val cEnd = creditsMarkerEndMs
                     if (cStart != null && cEnd != null && cEnd > cStart) {
@@ -1478,9 +1515,13 @@ class PlayerActivity : ComponentActivity() {
                             onCreditsDetected()
                         }
                         val remainingMs = player.duration - player.currentPosition
+                        // L'overlay auto-advance non deve comparire all'INIZIO dei titoli di coda:
+                        // si arma solo nella coda finale (CREDITS_AUTOPLAY_TAIL_MS). Durante i
+                        // titoli resta il pulsante "Salta titoli di coda" (sopra), non invasivo.
                         val creditsTrigger = creditsDetected &&
                             _creditsDetectionEnabled.value &&
-                            _autoPlayNextEnabled.value
+                            _autoPlayNextEnabled.value &&
+                            remainingMs in 1..CREDITS_AUTOPLAY_TAIL_MS
                         if (creditsTrigger && !creditsTriggerLogged) {
                             creditsTriggerLogged = true
                             android.util.Log.i(
