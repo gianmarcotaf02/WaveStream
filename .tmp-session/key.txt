@@ -1,0 +1,417 @@
+
+########## 20 [09:33:31] assistant ##########
+Sì, ma attenzione: **"skipdb" è un nome ambiguo**, tre cose diverse. Quella rilevante per WaveStream è la prima.
+
+## 1. SkipDB (skipdb.tv) — database aperto di skip timestamp ⭐
+
+Progetto open e *crowdsourced* di marcatori temporali per **intro, recap, outro e "next-time preview"** di film e serie TV. Contenuto contribuito e votato dalla community, pubblicato apertamente.
+
+- **Sito:** https://skipdb.tv — **API:** `https://api.skipdb.tv`
+- **Licenza dati:** ODbL 1.0 **+ clausola di reciprocità** (codice AGPL-3.0)
+- Dump completo pubblicato ogni giorno su GitHub Releases: il dato non può essere reso proprietario
+- Repo: `SkipDB-TV/skipdb`
+
+### API in breve
+
+| Endpoint | Auth | Rate | Cosa fa |
+|---|---|---|---|
+| `GET /api/segments` | nessuna | 120/min | miglior segmento per tipo, adattato alla durata |
+| `GET /api/titles/search?q=` | nessuna | 30/min | ricerca per nome o IMDb id (proxy TMDB) |
+| `GET /api/titles/{imdbId}` | nessuna | 30/min | metadati + matrice di copertura per episodio |
+| `GET /api/dump` | nessuna | 6/min | dump completo dei segmenti approvati |
+| `POST /api/segments` | key/sessione | 30/min | invia un segmento |
+| `POST /api/keys/anonymous` | nessuna | 5/h per IP | key anonima (può scrivere, non votare) |
+
+Parametri di lettura: `imdb_id`, `season`+`episode` (oppure nessuno dei due = film), `type`, `duration` (**fortemente consigliato**), `adjust` = `conservative|greedy|none`.
+
+Tipi supportati: **`intro | recap | outro | preview`**.
+
+Cose interessanti rispetto a IntroDB:
+- **duration matching / shifting**: se la durata dello stream differisce di poco, gli timestamp vengono spostati; `match` = `exact | shifted | agnostic | out-of-range`
+- **`confidence` 0–1** e `offset_ms`
+- **`intro_length_estimate_ms`**: mediana della stagione → puoi mostrare un pulsante "Salta ~Xs" anche se il segmento di quell'episodio non c'è ancora
+- **sentinella** `start_ms:0, end_ms:0` = "confermato: questa puntata non ha segmento di questo tipo" (diverso da "assente")
+- `duration` in secondi o in stringa orologio (`"47:00"`)
+
+### Rilevanza per WaveStream
+
+Oggi il progetto usa **IntroDB**, non SkipDB: `app/src/main/java/it/wavestream/app/data/api/IntroDbService.kt` (`BASE_URL = "https://api.introdb.app/"`), consumato da `data/repository/MediaSegmentRepository.kt`. Schema simile (`segments` con intro/recap/outro/post_credits), lettura anonima.
+
+SkipDB sarebbe quindi un **provider alternativo o aggiuntivo**, con due differenze sostanziali da valutare prima di integrarlo:
+1. offre `duration`-aware shifting + `intro_length_estimate_ms`, che IntroDB non espone;
+2. usa `preview` invece di `post_credits` e ha la licenza **ODbL + reciprocità** (vincoli di attribuzione/condivisione da verificare, non è "public domain").
+
+Se vuoi, posso analizzare `MediaSegmentRepository` e ipotizzare un'integrazione come fallback (stesso pattern di `IntroDbService`, senza toccare la logica di skip).
+
+---
+
+## 2. al8n/skipdb — engine DB in Rust (niente a che vedere)
+
+Crate Rust: database **in-memory, embedded, zero-copy, ACID/MVCC, quasi lock-free, serializable snapshot isolation** (stesso modello SSI di badger). Offre `OptimisticDb` e `SerializableDb`. Solo Rust, nessun binding Android/Kotlin — irrilevante per un'app Android.
+
+## 3. Skip / SkipSQL (skip.dev) — framework Swift→Android (niente a che vedere)
+
+`skiptools/skip-sql` è un layer SQLite per app Skip (Swift transpilato su Android). Anche qui nessun nesso con WaveStream, e nulla a che vedere con un "database di skip".
+
+---
+
+Quale intendevi? Se è la prima, dimmi se vuoi che valuti l'integrazione in WaveStream.
+
+########## 45 [09:37:18] assistant ##########
+Grazie. Ho usato il grafo per la mappa codice (`MediaSegmentRepository`, `CreditsDetector`, `.triggerNextEpisode()`, `.loadCreditsMarker()`, `.persistDetectedCredits()`) e ho letto solo quei punti. Ecco cosa ho trovato.
+
+## 1. SkipDB non ti risolve il problema (verificato sui dati reali)
+
+Ho interrogato entrambe le API su Dexter (`tt0773262`, S1), chiedendo a SkipDB la stessa durata del file (~3200s):
+
+| Episodio | IntroDB outro (start→end) | SkipDB outro (start→end) | Note |
+|---|---|---|---|
+| S1E1 | 3088.0 → 3190.0 | 3088.3 → 3183.2 | identici (stessa fonte) |
+| S1E2 | 3232.0 → 3285.0 | 3182.8 → 3279.3 | **SkipDB 49s prima** |
+| S1E3 | 3010.0 → 3062.0 | `null` | SkipDB non ha il dato |
+| S1E4 | 3418.0 → 3470.0 | 3413.4 → 3466.5 | ~5s prima |
+| S1E5 | 3291.0 → 3343.0 | 3288.0 → 3339.4 | ~3s prima |
+
+E SkipDB marca **tutti** i segmenti Dexter con `"match":"out-of-range"` e `"confidence":0.6`, con `offset_ms` che rivela la sua durata di riferimento (es. S1E2: 3279s, S1E4: 3466s) — cioè **SkipDB ha misurato Dexter su release diverse dalla tua**. IntroDB invece ha `confidence: 1` e l'intro "ci ha preso quasi perfettamente", quindi la tua release combacia con IntroDB.
+
+Conclusione: **su Dexter IntroDB è la fonte migliore e SkipDB è peggiore**. Cambiare provider non è la strada.
+
+## 2. Cosa ti serve davvero da SkipDB (una sola cosa)
+
+L'unica cosa che SkipDB fa e IntroDB no, ed è **esattamente il tuo problema**, è dichiarare l'affidabilità dell'ancoraggio temporale:
+
+- `duration` in input → `match: exact | shifted | agnostic | out-of-range`
+- `offset_ms` = differenza tra la durata che hai chiesto e quella su cui il marker è stato misurato
+- `adjusted` / `confidence`
+
+Oggi WaveStream **passa `durationMs` a `getExact()` e poi lo butta**: `IntroDbService.getSegments()` non riceve la durata e il marker viene usato come verità assoluta. Non esiste alcun modo di sapere se il `start_ms` di IntroDB vale per la *tua* durata. **Questo è il buco.**
+
+Nota: `adjust=conservative` di SkipDB sposta *più presto* — per l'outro è la direzione sbagliata rispetto al tuo fastidio; servirebbe `none` o `greedy`.
+
+## 3. Perché l'overlay esce in anticipo: le cause nel codice
+
+Nel progress handler (`PlayerActivity.kt` L1443-1495) ci sono **due sorgenti di verità concorrenti** che armano lo stesso overlay, senza nessuna conferma:
+
+1. **Marker esatto** → `if (markerStart != null && !creditsDetected && player.currentPosition >= markerStart) onCreditsDetected()`
+   Trigger **istantaneo, senza lead né grace period**: un errore di pochi secondi del provider diventa subito overlay.
+2. **`CreditsDetector`** (watchdog frame, euristico: sfondo scuro + testo allineato) → `creditsTrigger = creditsDetected && detectionEnabled && autoPlayNext` → `triggerNextEpisode()`.
+   Dexter ha molte scene scure con testo a schermo: questo può scattare **prima** dei credits veri. E quando scatta, `persistDetectedCredits()` (L1518-1550) salva un marker `DETECTOR` con `startMs = player.currentPosition` — cioè **il momento della detection, non l'inizio reale dei titoli**. Quel marker anticipato resta in Room e diventa anche `seriesCreditsReference` per gli episodi successivi via `estimateCreditsStart`.
+
+Manca poi la sola invariante che ti salverebbe: `remainingMs`. Se il marker è anticipato, `remainingMs` è grande — un guardrail tipo "non mostrare l'overlay se `remainingMs > 120-150s`" lo bloccherebbe a costo zero. Non c'è.
+
+## 4. Diagnostica: 30 secondi per avere la risposta certa
+
+Hai già i log giusti. Riproduci l'episodio e filtra:
+
+```
+adb logcat -s CreditsDiag
+```
+
+Le righe che discriminano:
+- `introdbHit ... type=CREDITS startMs=... endMs=... confidence=...` → cosa ha dato IntroDB
+- `markerFound type=CREDITS startMs=... source=EXTERNAL_DB|DETECTOR` → cosa è finito in cache
+- `markerTrigger pos=... marker=...` → è scattato il marker esatto (allora i crediti veri sono altrove → taglio/release diversa)
+- `creditsTrigger armed pos=... remaining=...` → **è stato `CreditsDetector`**, non il provider
+- `nextEpisodeOverlay fromCredits=true|false` → se `false`, è solo la finestra degli ultimi 10s
+- `detectedMarkerSaved type=CREDITS startMs=...` → un marker anticipato è stato scritto in Room
+
+Se legge `creditsTrigger armed` con `remaining` grande, il colpevole è il detector, non IntroDB — e la correzione sta in WaveStream, non nel provider.
+
+## 5. Cosa proporrei (fix lato codice, provider invariato)
+
+1. **Grace period**: armare l'overlay solo a `currentPosition >= markerStart + 1_500..2_000` (o dopo 2 tick consecutivi), non al primo millisecondo.
+2. **Guardrail `remainingMs`**: non armare da marker se `remainingMs > MAX_CREDITS_TAIL` (es. 150s) — un marker "troppo anticipato" non attiva nulla.
+3. **Una sola sorgente di verità**: se esiste un marker esatto, `CreditsDetector` diventa solo *conferma* (non può anticipare); senza marker, resta il comportamento attuale.
+4. **Non salvare DETECTOR con l'errore sistematico**: salvare la posizione della detection con `confidence` bassa **e** escluderla da `getSeriesCreditsReference` (oggi `estimateCreditsStart` propaga l'errore su tutta la serie).
+5. **Usare il `confidence`** di IntroDB per decidere se il marker può armare l'overlay da solo.
+6. **Opzionale, per l'ancoraggio**: query addizionale a SkipDB solo come validatore (`match`/`offset_ms`) e scarto del marker se `out-of-range`; oppure, meglio, salvare nel marker locale anche la durata di riferimento del provider come `durationMs` e usare sempre `estimateCreditsStart` (àncora alla coda) invece dello `start_ms` assoluto.
+
+Il punto 6 + i punti 1-2 rendono il sistema robusto **qualunque sia la release dello stream**, che è il vero problema.
+
+---
+
+Vuoi che parta da qui? Posso:
+- **(A)** analizzare i tuoi log `CreditsDiag` se me li incolli, per attribuire con certezza la causa (provider vs detector);
+- **(B)** preparare una patch ai punti 1-4 in `PlayerActivity.kt` come primo intervento chirurgico, lasciando l'opzione SkipDB per dopo.
+
+########## 112 [12:54:18] assistant ##########
+Ground truth acquisita. Ora il quadro è **chiaro e sconvolgente**:
+
+- **t=5s / 15s**: ident Showtime + "SHOWTIME Presents" → **t=25s: title card "DEXTER"** ⇒ IntroDB intro `1s→28s` è **corretta** (conferma la tua sensazione).
+- **t=3000s**: primi crediti ("Production Designer MICHAEL CORENBLITH") ⇒ i titoli di coda veri iniziano **tra 2900s e 3000s**.
+- File: **3050s**. IntroDB outro S1E1: **3088s→3190s** = **38s OLTRE la fine del file**. Su questa release non può *mai* scattare.
+
+Quindi l'overlay anticipato **non può venire da IntroDB** su S1E1 con questa release. Verifico le costanti del watchdog.
+
+[TOOL bash] {}
+
+
+########## 264 [13:39:55] assistant ##########
+Risultato **molto** informativo. Sul provider attuale l'S1E1 dura 3050s e il marker IntroDB (3088s) cade **oltre la fine**, quindi l'overlay è arrivato solo negli ultimi 10s (`fromCredits=false`) — nessun trigger anticipato. Il detector ha fatto 1 solo `hit=true` (2933s), sotto la soglia.
+
+Verifico le durate reali degli altri episodi per trovare quello dove il marker è *dentro* il file (il caso dell'utente).
+
+[TOOL bash] {}
+
+
+########## 268 [13:40:48] assistant ##########
+Ora il confronto **durata reale vs marker IntroDB** su Dexter S1:
+
+| Ep | Durata reale file | IntroDB CREDITS start | Rif. |
+|---|---|---|---|
+| S1E1 | 3050.1s | 3088.0s | **+38s oltre EOF** |
+| S1E2 | 3143.1s | 3232.0s | **+89s oltre EOF** |
+| S1E3 | 2930.0s | 3010.0s | **+80s oltre EOF** |
+| S1E4 | 3322.1s | 3418.0s | **+96s oltre EOF** |
+| S1E5 | 3201.1s | 3291.0s | **+90s oltre EOF** |
+
+Recupero la curva del detector dal log per capire dove cadono davvero i crediti.
+
+[TOOL bash] {}
+
+
+########## 278 [13:42:45] assistant ##########
+Test completato. Ecco il quadro, tutto verificato con dati.
+
+## 1. Perché ci metteva così tanto (non è colpa dell'app)
+
+L'avvio restava piantato su `LoadingActivity` per **DNS dell'emulatore rotto**: il tuo host è su **hotspot iPhone** e sta usando un DNS IPv6 link-local (`fe80::fc31:...`) che va in timeout. OkHttp **non ha timeout sul DNS lookup** → le 5 chiamate TMDB di `enrichHeroContent` non tornavano mai e la loading non navigava mai.
+
+Fix: avviare l'emulatore con `-dns-server 8.8.8.8,1.1.1.1`. Fatto, ora parte in pochi secondi. "Di solito non fa mai così" → confermato: è l'ambiente, non il codice.
+
+## 2. Come ho testato (senza aspettare 50 minuti)
+
+`PlayerActivity` **non è exported**, quindi niente `am start` diretto. Ho iniettato nel DB dell'app (via adb) e poi navigato da UI:
+
+- `playlists.lastUpdated = now` → salta la risincronizzazione dei 74k contenuti
+- `series 3049 (Dexter): tmdbImdbId = tt0773262, tmdbId = 1405` ← **mancava l'IMDb**, quindi IntroDB non veniva nemmeno interrogata
+- episodio S1E1 + `watch_progress` a **2880s** → resume a 170s dalla fine
+
+Poi: Home → "Visti di recente" → Dexter → Episodio 1, con `adb logcat -s CreditsDiag`.
+
+## 3. Cosa dicono i dati (S1, durate reali con `ffprobe`)
+
+| Ep | Durata reale file | IntroDB CREDITS start | Delta |
+|---|---|---|---|
+| 1 | 3050.1s | 3088.0s | **+38s oltre la fine** |
+| 2 | 3143.1s | 3232.0s | **+89s oltre** |
+| 3 | 2930.0s | 3010.0s | **+80s oltre** |
+| 4 | 3322.1s | 3418.0s | **+96s oltre** |
+| 5 | 3201.1s | 3291.0s | **+90s oltre** |
+
+E dalla metrica pixel del detector (crediti reali = `text=1,000 peak=1,000 static≈0,93`):
+
+- **crediti veri: 2963s → 3041s** (78 secondi!)
+- **INTRO corretta**: frame a 5s/15s = ident Showtime, **a 25s = title card "DEXTER"** → IntroDB `1→28s` giusta ✅
+- **L'overlay è arrivato come `nextEpisodeOverlay fromCredits=false`** → cioè dalla regola degli **ultimi 10 secondi**, non dai crediti
+- a 2987s i crediti scorrevano e **non c'era nessun pulsante "Salta titoli di coda"** (screenshot `mon_1.png`)
+- **il `CreditsDetector` non può riconoscere questi crediti**: `dark=0,671 < MIN_DARKNESS=0,72` (sfondo oliva chiaro, luma 84). Il suo **unico `hit=true`** è a **2933,7s**, una scena scura normale **30s prima dei crediti**
+
+Su CherryTV quindi il marker IntroDB cade *fuori dal file*: non può generare un trigger anticipato — anzi **disattiva del tutto** il pulsante "Salta titoli di coda".
+
+## 4. Quindi perché da te "SEMPRE in anticipo"?
+
+L'overlay con countdown viene armato da `creditsTrigger`, cioè quando `creditsDetected` diventa true — e `creditsDetected` diventa true **appena iniziano i crediti**, non alla fine. Con crediti lunghi 78-100s, il messaggio arriva **all'inizio dei titoli di coda** e devi premere "ignora" per vederli → "in anticipo", ogni episodio.
+
+Due strade possibili, e la discriminante è una riga di log:
+- `nextEpisodeOverlay fromCredits=**true**` → l'ha armato il rilevamento crediti (marker o watchdog)
+- `nextEpisodeOverlay fromCredits=**false**` → è la regola degli ultimi 10s
+
+Il tuo caso è quasi certamente il primo (dovevi premere "ignora" per *non skippare*, quindi i crediti erano ancora in corso). Sul mio stream non l'ho riprodotto solo perché il marker IntroDB cade oltre EOF.
+
+## 5. Difetti reali trovati nel codice
+
+1. **Nessuna validazione del marker contro la durata reale.** `creditsMarkerStartMs = 3088000` viene accettato con `duration = 3050000`: un marker fuori dal file blocca in silenzio il pulsante e la stima ancorata alla coda. È esattamente la semantica `match: out-of-range` / `offset_ms` di SkipDB — **l'unica cosa davvero utile di SkipDB**, che però su Dexter ha marker peggiori dei tuoi (stessa fonte, `match=out-of-range` su tutto, S1E3 senza outro). Quindi: non cambiare provider, **copiare l'idea**.
+2. **`CreditsDetector.MIN_DARKNESS=0,72` presuppone crediti neri**: così *manca* i crediti chiari (Dexter) e può solo produrre **falsi positivi** su scene scure statiche — come il `hit=true` a 2933,7s. Se 5 campioni su 8 colpiscono, `creditsTrigger` scatta **116 secondi prima della fine**.
+3. **Nessun guardrail su `remainingMs`**: un hit troppo lontano dalla fine non dovrebbe armare l'auto-advance.
+4. **Precedenza marker**: `cacheRemoteSegment` non sovrascrive mai un marker `DETECTOR` con quello comunitario `EXTERNAL_DB`, e `getSeriesCreditsReference` usa anche i `DETECTOR` come riferimento per `estimateCreditsStart` → un rilevamento anticipato si propaga a **tutta la serie** ("SEMPRE").
+5. Il `post_credits` di IntroDB non viene mai usato.
+
+Reperti salvati in `.opencode/dexter-test/` (README con tutti i numeri, screenshot, `creditsdiag.log`).
+
+## 6. Come procediamo
+
+Ti chiedo una cosa sola per chiudere la diagnosi, poi il fix è chiaro:
+
+1. **Sul tuo TV, riproduci un episodio di Dexter** con `adb logcat -s CreditsDiag` (o dimmi solo quando appare il messaggio): **i crediti stanno già scorrendo** o sei ~10s dalla fine? E la riga `nextEpisodeOverlay fromCredits=` dice `true` o `false`?
+2. **Quale sorgente usi** su quel TV? Se è CherryTV, allora il tuo caso non è il marker ma il watchdog.
+
+Fix che propongo (in ordine di valore, tutti lato WaveStream):
+- **A.** scartare (o ri-ancorare alla coda) i marker con `startMs` fuori dal file — risolve il "pulsante che non compare mai" su CherryTV
+- **B.** non armare l'overlay auto-advance all'inizio dei crediti: solo negli ultimi ~15-20s, e semmai mostrare un **pulsante "Salta titoli di coda"** invece del countdown — risolve il tuo "SEMPRE in anticipo"
+- **C.** ramo "crediti chiari" nel detector (alta `textDensity` + `peakRowDensity` + `static`) così riconosce i crediti tipo Dexter e smette di dare falsi positivi
+- **D.** far vincere `EXTERNAL_DB` (confidence 1.0) su un `DETECTOR`, ed escludere i `DETECTOR` da `getSeriesCreditsReference`
+
+Nota: ho lasciato il DB dell'emulatore modificato (episodio 66 + resume + IMDb di Dexter). Se vuoi lo ripristino.
+
+Quale preferisci: mi incolli il log/diciamo il punto 1 e 2, oppure parto direttamente con **A+B** (sono indipendenti e a basso rischio)?
+
+########## 289 [14:02:06] assistant ##########
+**Trovato il caso riproducibile!** Le altre "Dexter" hanno il marker **dentro** il file:
+
+| Titolo | Durata reale | IntroDB CREDITS start | Reachable? |
+|---|---|---|---|
+| Dexter (2006) | 3050s | 3088s | ❌ oltre EOF |
+| **Dexter: Original Sin** | **3005.9s** | **2945.0s** | ✅ **61s prima di EOF** |
+| **Dexter: Resurrection** | **3154.9s** | **3000.0s** | ✅ **155s prima di EOF** |
+
+Questo è il tuo caso. Riproduco con Original Sin.
+
+[TOOL bash] {}
+
+
+########## 319 [14:12:46] assistant ##########
+**RIPRODOTTO — è esattamente il tuo caso.** Ecco il log chiave:
+
+```
+markerFound   type=CREDITS startMs=2945000 endMs=3005000 source=EXTERNAL_DB confidence=1.0
+markerTrigger pos=2945135 marker=2945000
+creditsTrigger armed pos=2945135 remaining=60753 markerStart=2945000
+nextEpisodeOverlay fromCredits=true  title=Dexter: Original Sin (2024) • Un bambino in un negozio di caramelle
+```
+
+Vediamo l'overlay a schermo.
+
+[TOOL read] {}
+
+
+########## 325 [14:13:57] assistant ##########
+Risposta diretta, perché hai ragione a contestare.
+
+## Dove ho sbagliato io
+
+La frase "mancava l'IMDb, quindi IntroDB non veniva interrogata" descriveva **lo stato del DB dell'emulatore**, non il tuo dispositivo. Nel DB dell'emulatore `series 3049 (Dexter)` aveva `tmdbImdbId = NULL` (nessuna enrichment TMDB ancora eseguita) → `resolveContentIdentity()` restituisce `null` → `fetchRemoteSegment()` esce subito (`imdb.startsWith("tt")` falso) → **zero chiamate a IntroDB, e di conseguenza nemmeno il "Salta sigla"** (per questo ho dovuto iniettare `tt0773262` per far funzionare il test).
+
+Sul tuo dispositivo invece la serie ha l'IMDb id (`TMDBRepository.enrichSeries` lo riempie da TMDB `external_ids.imdb_id`) → **IntroDB viene interrogata**, come dici tu.
+
+E c'è un dettaglio che va nella tua direzione: `IntroDbService.getSegments()` restituisce **intro + recap + outro + post_credits in una sola risposta**. Quindi nel momento in cui "Salta sigla" funziona, il marker dei titoli di coda è **già dentro lo stesso payload** — `loadCreditsMarker()` chiede `CREDITS` e lo mette in cache. Intro e coda viaggiano insieme: non esiste una lookup separata.
+
+## Ho riprodotto il tuo caso end-to-end
+
+Su **Dexter: Original Sin S1E1** il marker è dentro il file (durata 3005.9s, outro 2945→3005s). Log:
+
+```
+markerFound    type=CREDITS startMs=2945000 endMs=3005000 source=EXTERNAL_DB confidence=1.0
+markerTrigger  pos=2945135 marker=2945000
+creditsTrigger armed pos=2945135 remaining=60753 markerStart=2945000
+nextEpisodeOverlay fromCredits=true  title=Dexter: Original Sin (2024) • Un bambino in un negozio di caramelle
+```
+
+Screenshot (`overlay_original_sin_credits.png`): i titoli stanno scorrendo ("Dexter Main Title Theme by ROLFE KENT / Additional Music by DANIEL LICHT") e sopra c'è la card **"PROSSIMO EPISODIO"** con countdown arrivato a **4** e i pulsanti **"Guarda ora" / "Ignora"**.
+
+## Quindi la causa reale (non è il marker)
+
+- IntroDB è **corretta**: i titoli di coda vanno davvero da 2945s a 3005s.
+- Il difetto è **dove l'app mette l'overlay**: al **marker start**, cioè all'**inizio** dei titoli di coda, con **60,7 secondi di episodio ancora da vedere**. Il commento nel codice lo dice esplicitamente: *"overlay: ultimi 10s del file, oppure appena vengono rilevati i titoli di coda"*.
+- Con titoli di coda lunghi (Dexter: 60-100s) significa che la card compare **60-100s prima della fine**, copre i titoli e — se non premi "Ignora" entro 15s — salta tutta la sequenza. **"SEMPRE in anticipo" + "dovevo premere ignora" = esattamente questo.** ✔
+
+E su **Dexter 2006 (CherryTV)** succede l'opposto: outro 3088s con file da 3050s → marker **oltre la fine**, quindi niente trigger *e nemmeno il pulsante "Salta titoli di coda"*. È il secondo bug: il marker non viene mai validato contro la `duration`.
+
+## Fix proposto
+
+1. **Spostare l'auto-advance**: `creditsTrigger` non deve armare la card "prossimo episodio" all'inizio dei titoli; va armata solo negli ultimi ~15s (`remainingMs`). Ai titoli rilevati si mostra il pulsante **non invasivo "Salta titoli di coda"** (che esiste già: `_showSkipCredits`), non la card con countdown.
+2. **Ri-ancorare i marker fuori dal file**: la durata del segmento IntroDB è **sempre nota** (`endMs - startMs`) → se `startMs` cade oltre la fine, spostare a `duration - (endMs - startMs)`. Per Dexter 2006 su CherryTV: 3050 − 102 = **2948s** (i crediti reali misurati sono 2963→3041, quindi ci si avvicina molto). È la stessa idea di `match: shifted`/`offset_ms` di SkipDB, ma usando solo IntroDB — quindi **SkipDB non serve**.
+3. **Bonus**: ramo "crediti chiari" nel `CreditsDetector` (`MIN_DARKNESS=0,72` non vede i titoli di Dexter, sfondo oliva) e precedenza `EXTERNAL_DB` (confidence 1.0) su `DETECTOR`.
+
+Evidenze salvate in `.opencode/dexter-test/` (log, screenshot, README aggiornato con il caso Original Sin).
+
+Procedo con **1 + 2**? Sono due modifiche contenute: `PlayerActivity` (guardrail su `remainingMs`) e `MediaSegmentRepository` (validazione/ri-ancoraggio del marker), con unit test JVM sul ri-ancoraggio in `app/src/test/`.
+
+########## 335 [14:20:39] assistant ##########
+Hai ragione sul meccanismo, ma i dati dicono che **non è quello che è successo**. Verifica fatta:
+
+## Cosa dicono i dati (DB emulatore, 7466 serie)
+
+```
+serie totali                    7466
+con tmdbId                        55
+con voto TMDB                     54
+con tmdbImdbId                    54   ← 54 su 54 di quelli con voto
+voto TMDB ma SENZA imdbId           1   ← l'unica eccezione
+```
+
+L'unica eccezione è **id 1179 "Monster: The Lizzie Borden Story"** (tmdbId 299939). Ho chiesto direttamente a TMDB:
+
+```
+tmdb 299939  "Monster: The Lizzie Borden Story"  vote: 7.0  imdb_id: ""
+```
+
+**TMDB non ha l'imdb_id per quella serie**: l'app si è comportata correttamente, è un buco di TMDB. Quindi la tua ipotesi ("l'enrichment fallisce l'imdbId") è ragionevole ma *non* si verifica: quando TMDB ha l'imdb_id, l'enrichment lo salva (54/54). Ho anche controllato `SeriesDao.upsertByXtream`: preserva esplicitamente `tmdbId`, `tmdbImdbId` e tutti i voti al refresh della playlist → un resync **non** li cancella.
+
+## Quindi perché nell'emulatore IntroDB non veniva interrogata
+
+Perché **Dexter (3049) non era mai stato arricchito**, non perché l'imdbId fosse "fallito":
+
+| | prima del test | dopo aver aperto la scheda |
+|---|---|---|
+| tmdbId | `NULL` | 1405 |
+| tmdbVoteAverage | `NULL` | 8.2 |
+| tmdbLastFetchAt | `NULL` | oggi |
+| tmdbImdbId | `NULL` | tt0773262 |
+
+Ed è la correzione al tuo presupposto: **l'enrichment non è "sempre eseguito"**. Su 7466 serie ne sono arricchite **55**: quelle in *trending/hero* (`enrichHeroContent`) più quelle di cui apri la scheda. Dexter non era né trending né mai aperto (in quel DB non c'era nemmeno una riga di progresso) → zero dati TMDB → zero imdbId → `fetchRemoteSegment` esce subito.
+
+**Sul tuo dispositivo** invece la scheda di Dexter l'hai aperta, quindi l'enrichment è girato, l'imdbId c'è e IntroDB viene interrogata — come dici tu, ed è coerente col "Salta sigla" che vedi sempre. La mia frase era corretta sullo *stato* di quel DB, non sul comportamento dell'app.
+
+## Nota collaterale (bug latente, secondario)
+
+Resta un caso limite reale: `resolveContentIdentity()` legge **solo dal DB**. Se avvii un episodio senza che la scheda sia mai stata aperta e la serie non è mai stata in trending/hero, al momento del play l'imdbId può mancare → **nessun marker IntroDB** (né sigla né coda). Si risolverebbe facendo risolvere l'imdb on-demand al player (TMDB search → external_ids) e non solo via enrichment. È raro nel flusso reale (per avere un "Continua a guardare" la scheda l'hai aperta), quindi lo terrei come hardening, non come fix primario.
+
+---
+
+La diagnosi principale **non cambia** e non dipende da questo: nella riproduzione con Original Sin ho passato io `tt32252772` e tutto ha funzionato — marker IntroDB corretto (2945→3005s) e overlay "PROSSIMO EPISODIO" mostrato a 2945s con **60,7s di episodio ancora da riprodurre**, sopra i titoli di coda ancora in scorrimento.
+
+Procedo con i fix **1 (overlay solo negli ultimi ~15s + pulsante "Salta titoli di coda")** e **2 (ri-ancoraggio `duration - (endMs - startMs)` / scarto dei marker fuori dal file)**?
+
+########## 347 [14:24:46] assistant ##########
+Ho verificato tutto. Ti do i fatti, e alla fine c'è una domanda.
+
+## Cosa c'era davvero nell'emulatore prima del mio test
+
+`watch_progress` conteneva **solo 3 contenuti**: Gomorra S1E1, Gomorra S1E2 e 2 film. `media_segments` aveva **una sola riga**: `CREDITS/DETECTOR` di Gomorra S1E1. Nessun marker INTRO, nessun fingerprint.
+
+E IntroDB per Gomorra (che era arricchita, `tmdbImdbId = tt2049116`) risponde così:
+
+```json
+{"imdb_id":"tt2049116","season":1,"episode":1,
+ "intro":null,"recap":null,"outro":null,"post_credits":null}
+```
+
+Identico per S1E2. **Zero dati.** Quindi su Gomorra — l'unica serie che era stata guardata lì — la "salta sigla" non poteva venire da IntroDB.
+
+## Ma hai ragione che sull'emulatore può funzionare
+
+**55 serie su 7466** erano arricchite, e **54 su 54 di quelle con voto avevano anche l'imdbId** (l'unica eccezione, "Monster: The Lizzie Borden Story", non ha l'imdb_id nemmeno su TMDB — l'ho verificato). Per tutte quelle IntroDB viene interrogata e la **"salta sigla" compare regolarmente**.
+
+Quindi entrambe le cose stanno in piedi: l'emulatore *può* mostrarti la salta sigla (sulle serie arricchite), ma **non** su Dexter 2006 / Original Sin / New Blood / Resurrection (avevano tutti `tmdbImdbId = NULL`) né su Gomorra (dati IntroDB assenti).
+
+## La riga che lo dice con certezza
+
+`adb logcat -s CreditsDiag` distingue la provenienza:
+
+| riga | provenienza |
+|---|---|
+| `introdbHit ... type=INTRO` + `markerFound type=INTRO ... source=EXTERNAL_DB` | **IntroDB** |
+| `markerFound type=INTRO ... source=USER_MARK` / `DETECTOR` | marker locale |
+| `introDetectedByFingerprint` | impronta audio appresa |
+| `introEstimated` | stima dalla serie |
+
+## Check positivo nel frattempo
+
+Ho verificato anche il sospetto più subdolo — che un refresh della playlist cancellasse i dati TMDB (e quindi rompesse IntroDB): **non succede**. Nel path Xtream il refresh fa `existing.copy(...)` + `seriesDao.updateList()` (cioè `@Update`, non `@Replace`), e `upsertByXtream` preserva esplicitamente `tmdbId`, `tmdbImdbId` e i voti. Il refresh è safe.
+
+## La domanda
+
+**Su quale contenuto hai visto la salta sigla sull'emulatore?** Perché:
+- se era una serie del carosello/trending (Lanterns, Ted Lasso…) → tutto regolare, era IntroDB
+- se era **Dexter**, allora c'è qualcosa che non torna e voglio capirlo: nel DB non c'erano marker INTRO e l'imdbId era assente, quindi la sigla sarebbe dovuta arrivare da un percorso locale che non vedo. In quel caso mi serve il log di quella riproduzione (basta `adb logcat -s CreditsDiag` mentre parte la sigla) e lo chiudiamo.
+
+Nel frattempo la diagnosi del problema vero non cambia: nella riproduzione con Original Sin il marker IntroDB è **corretto** e l'overlay "PROSSIMO EPISODIO" è arrivato a 2945s con **60,7s di episodio ancora da vedere**, sopra i titoli di coda che scorrevano.
+
+Se vuoi intanto procedo con i fix **1** (overlay solo negli ultimi ~15s + pulsante non invasivo "Salta titoli di coda") e **2** (ri-ancoraggio `duration − (endMs − startMs)` / scarto dei marker fuori dal file)?
+
+########## 353 [15:07:05] assistant ##########
+Verifico una cosa prima di risponderti: le uniche 4 sorgenti possibili della "salta sigla" sono tutte in `PlayerActivity` (marker IntroDB/locale, stima di serie, impronta audio, marcatura manuale) e nel DB attuale nessuna ha dati per Dexter. Ma con l'imdbId iniettato IntroDB ora *è* attiva per Dexter: te lo dimostro dal vivo, partendo dall'inizio dell'episodio.
+
+[TOOL bash] {}
+

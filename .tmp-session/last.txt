@@ -1,0 +1,115 @@
+
+########## 396 [15:38:10] assistant ##########
+
+[TOOL bash] {}
+
+
+########## 397 [15:38:10] toolResult ##########
+pid=10059
+--------- beginning of main
+10-09 16:30:02.000 10059 10080 D DBCheckpoint: WAL checkpoint completed
+10-09 16:30:02.234 10059 10059 D WaveStreamDebug: ProfileSelectionActivity onResume
+10-09 16:30:02.497 10059 10090 I EGL_emulation: Opening libGLESv1_CM_emulation.so
+10-09 16:30:02.502 10059 10090 I EGL_emulation: Opening libGLESv2_emulation.so
+10-09 16:30:02.531 10059 10090 W HWUI    : Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+10-09 16:30:02.532 10059 10090 W HWUI    : Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-09 16:30:02.720 10059 10078 D DBCheckpoint: WAL checkpoint completed
+10-09 16:30:02.721 10059 10085 D DBCheckpoint: WAL checkpoint completed
+10-09 16:30:31.964 10059 10080 D DBCheckpoint: WAL checkpoint completed
+10-09 16:31:01.969 10059 10080 D DBCheckpoint: WAL checkpoint completed
+10-09 16:31:31.972 10059 10082 D DBCheckpoint: WAL checkpoint completed
+10-09 16:32:01.972 10059 10082 D DBCheckpoint: WAL checkpoint completed
+10-09 16:32:31.973 10059 10080 D DBCheckpoint: WAL checkpoint completed
+=== crash ===
+=== surfaceflinger/gfx errori ===
+
+
+########## 398 [15:39:05] assistant ##########
+Rendering rotto dopo il ripristino dello snapshot. Faccio un **cold boot** (senza snapshot).
+
+[TOOL bash] {}
+
+
+########## 399 [15:40:01] toolResult ##########
+OK: killing emulator, bye bye
+OK
+0
+List of devices attached
+emulator-5554	device
+
+
+
+########## 400 [15:40:34] assistant ##########
+
+
+########## 402 [15:42:15] assistant ##########
+
+[TOOL bash] {}
+
+
+########## 403 [15:42:21] toolResult ##########
+1 boot=1
+PING api.themoviedb.org (108.139.210.27) 56(84) bytes of data.
+
+-rw-r--r-- 1 Gianmarco 197609 1693569 Oct  9 17:42 /tmp/boot1.png
+
+
+########## 404 [15:43:48] assistant ##########
+Rendering OK. Riavvio il flusso.
+
+[TOOL bash] {}
+
+
+########## 405 [15:44:08] toolResult ##########
+3049|66|0
+3049|67|300464
+Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity }
+it.wavestream.app/.ui.profile.ProfileSelectionActivity
+
+
+########## 406 [15:44:57] assistant ##########
+
+[TOOL read] {}
+
+
+########## 407 [15:44:57] toolResult ##########
+Read image file [image/png]
+[IMAGE]
+
+########## 408 [15:48:31] assistant ##########
+
+
+########## 410 [15:48:35] assistant ##########
+
+
+########## 412 [16:24:10] assistant ##########
+
+
+########## 414 [16:24:43] assistant ##########
+Rendering a posto. Entro nel profilo e vado su "Continua a guardare".
+
+[TOOL bash] {}
+
+
+########## 415 [16:25:04] toolResult ##########
+MAIN (1)
+ok
+
+
+########## 416 [16:25:28] assistant ##########
+
+[TOOL read] {}
+
+
+########## 417 [16:25:28] toolResult ##########
+Read image file [image/png]
+[IMAGE]
+
+########## 418 [16:25:29] assistant ##########
+
+
+########## 420 [16:25:38] user ##########
+riprendi
+
+########## 421 [16:25:39] assistant ##########
+
