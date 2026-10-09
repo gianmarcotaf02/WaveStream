@@ -44,6 +44,7 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.common.util.UnstableApi
 import it.wavestream.app.data.repository.DownloadContentManager
+import it.wavestream.app.data.repository.CreditsSegmentEstimator
 import it.wavestream.app.data.repository.MediaSegmentRepository
 import it.wavestream.app.data.database.entity.SegmentType
 import it.wavestream.app.data.database.entity.MediaSegment
