@@ -1,0 +1,398 @@
+   3 [09:33:02] system    :: 
+   4 [09:33:02] user      :: conosci skipdb? informati
+   5 [09:33:04] assistant :: <TOOL web_search> 
+   7 [09:33:07] toolResult :: **Providers used:** Query 1: exa; Query 2: exa; Query 3: exa ## Query: "skipdb Android library" # al8n/skipdb An embedded, in-memory, zero-copy, atomicity, consistency, isolation, MVCC, almost lock-free and serializable snapshot isolation database engine. ... ## README --> SkipDB & Watermark & Txn T
+   8 [09:33:08] assistant :: <TOOL web_search> 
+  10 [09:33:09] toolResult :: **Providers used:** Query 1: unknown; Query 2: exa; Query 3: unknown ## Query: ""skipdb" android library database" Error: No search provider available. Either: 1. Use /login to sign in with a Codex subscription for OpenAI web search 2. Set openaiApiKey, braveApiKey, parallelApiKey, tinyfishApiKey, s
+  11 [09:33:11] assistant :: <TOOL fetch_content> 
+  13 [09:33:16] toolResult :: ## Fetched URLs - API docs · SkipDB (10646 chars) - About · SkipDB (3558 chars) --- Use get_search_content({ responseId: "mv0rpdsyzsw67f", urlIndex: 0 }) to retrieve bounded content slices.
+  14 [09:33:18] assistant :: <TOOL get_search_content> 
+  15 [09:33:18] toolResult :: # API docs · SkipDB Base URL: `https://api.skipdb.tv`. All timestamps are in milliseconds (\_ms suffix) unless noted otherwise. Data is licensed [ODbL 1.0 + reciprocity](/license) unless you have explicit permission. Fields marked \* are required. Every segment belongs to exactly one of these four s
+  16 [09:33:20] assistant :: <TOOL bash> 
+  17 [09:33:20] toolResult :: BackupRepository.kt CreditsSegmentEstimator.kt DownloadContentManager.kt EpgRepository.kt FtsSearchRepository.kt ImdbRatingsRepository.kt ImdbScraper.kt MediaSegmentRepository.kt MetacriticScraper.kt MovieSourceResolver.kt MovieUnificationService.kt OpenSubtitlesRepository.kt PlaylistRepository.kt R
+  18 [09:33:21] assistant :: <TOOL bash> 
+  19 [09:33:23] toolResult :: ./app/src/main/java/it/wavestream/app/data/api/IntroDbService.kt --- package it.wavestream.app.data.api import com.squareup.moshi.JsonClass import retrofit2.Response import retrofit2.http.GET import retrofit2.http.Query /** * IntroDB Service — database comunitario e gratuito di marker temporali * (s
+  20 [09:33:31] assistant :: Sì, ma attenzione: **"skipdb" è un nome ambiguo**, tre cose diverse. Quella rilevante per WaveStream è la prima. ## 1. SkipDB (skipdb.tv) — database aperto di skip timestamp ⭐ Progetto open e *crowdsourced* di marcatori temporali per **intro, recap, outro e "next-time preview"** di film e serie TV. 
+  21 [09:36:19] user      :: si intendevo la prima. ti espongo il mio problema. introdb per ora l'ho testata solo su Dexter, serie tv che ha sia intro sia titoli di coda. sulla intro ci ha preso perfettamente (o quasi, solo per un episodio leggermente dopo) ; sui titoli di coda pessimi: usciva il messaggio di prossimo episodio 
+  22 [09:36:21] assistant :: <TOOL read> 
+  23 [09:36:21] toolResult :: package it.wavestream.app.data.repository import it.wavestream.app.data.api.IntroDbService import it.wavestream.app.data.database.dao.MediaSegmentDao import it.wavestream.app.data.database.entity.ContentType import it.wavestream.app.data.database.entity.MediaSegment import it.wavestream.app.data.dat
+  24 [09:36:23] assistant :: <TOOL bash> 
+  25 [09:36:23] toolResult :: app/src/main/java/it/wavestream/app/data/database/Converters.kt app/src/main/java/it/wavestream/app/data/database/dao/MediaSegmentDao.kt app/src/main/java/it/wavestream/app/data/database/entity/MediaSegment.kt app/src/main/java/it/wavestream/app/data/preferences/UserPreferences.kt app/src/main/java/
+  26 [09:36:25] assistant :: <TOOL bash> 
+  27 [09:36:25] toolResult :: app/src/main/java/it/wavestream/app/ui/player/PlayerActivity.kt:50:import it.wavestream.app.credits.CreditsAudioMonitor app/src/main/java/it/wavestream/app/ui/player/PlayerActivity.kt:51:import it.wavestream.app.credits.CreditsRenderersFactory app/src/main/java/it/wavestream/app/ui/player/PlayerActi
+  28 [09:36:26] assistant :: <TOOL read> 
+  29 [09:36:26] toolResult :: updateLiveState() } if (player.duration > 0) { _currentPosition.longValue = player.currentPosition _duration.longValue = player.duration // Auto-save progress every 30 seconds for data safety // This ensures minimal progress loss on unexpected TV shutdown autoSaveCounter++ if (autoSaveCounter >= 30)
+  30 [09:36:30] assistant :: Ottima info di contesto. Prima di darti pareri, faccio una verifica concreta: confronto i dati reali dei due provider su Dexter. | <TOOL bash> 
+  31 [09:36:33] toolResult :: === S1E1 — IntroDB === {"imdb_id":"tt0773262","media_type":"tv","is_movie":false,"season":1,"episode":1,"intro":{"start_sec":1,"end_sec":28,"start_ms":1000,"end_ms":28000,"confidence":1,"submission_count":1,"updated_at":"2026-04-10T21:03:09.278Z"},"recap":null,"outro":{"start_sec":3088,"end_sec":319
+  32 [09:36:40] assistant :: <TOOL bash> 
+  33 [09:36:40] toolResult :: 98: private var creditsMarkerLoaded = false 1461: if (creditsMarkerStartMs == null && seriesCreditsReference != null && player.duration > 0) { 1463: creditsMarkerStartMs = it 1545: creditsMarkerStartMs = position 1546: creditsMarkerLoaded = true 1594: creditsMarkerStartMs = null 1596: creditsMarkerL
+  34 [09:36:42] assistant :: <TOOL read> 
+  35 [09:36:42] toolResult :: private fun loadCreditsMarker() { lifecycleScope.launch { try { val (tmdbId, imdbId) = resolveContentIdentity() val duration = if (::player.isInitialized) player.duration else 0L val seg = mediaSegmentRepository.getExact( contentType = contentType, contentId = contentId, seriesId = seriesId, season 
+  36 [09:36:48] assistant :: <TOOL bash> 
+  37 [09:36:49] toolResult :: package it.wavestream.app.player import android.graphics.Bitmap import android.graphics.Canvas import android.graphics.Paint import android.graphics.Rect import android.os.Handler import android.os.Looper import android.util.Log import android.view.PixelCopy import android.view.SurfaceView import ko
+  38 [09:36:55] assistant :: <TOOL bash> 
+  39 [09:36:55] toolResult :: 2052: private fun triggerNextEpisode(fromCredits: Boolean = false) { 2053- if (nextEpisodeTriggered || creditsDismissed || nextEpisodeUnavailable || nextEpisodeLookupInFlight) return 2054- nextEpisodeLookupInFlight = true 2055- lifecycleScope.launch { 2056- try { 2057- val next = playNextManager.get
+  40 [09:36:55] user      :: ricordati di usare il grafo per cercare file e leggere informazioni, invece di consumare tanti token
+  41 [09:36:56] assistant :: Hai ragione, chiedo scusa. Uso il grafo. | <TOOL bash> 
+  42 [09:36:57] toolResult :: Node: MediaSegmentRepository ID: src_main_java_it_wavestream_app_data_repository_mediasegmentrepository_mediasegmentrepository Source: src/main/java/it/wavestream/app/data/repository/MediaSegmentRepository.kt L19 Type: code Community: Media Segment Repository Degree: 18 Connections (18): <-- PlayerA
+  43 [09:36:59] assistant :: <TOOL bash> 
+  44 [09:37:00] toolResult :: Node: CreditsDetector ID: src_main_java_it_wavestream_app_player_creditsdetector_creditsdetector Source: src/main/java/it/wavestream/app/player/CreditsDetector.kt L38 Type: code Community: Credits Detection Degree: 19 Connections (19): <-- TvPlayerScreen.kt [imports] [EXTRACTED] src/main/java/it/wav
+  45 [09:37:18] assistant :: Grazie. Ho usato il grafo per la mappa codice (`MediaSegmentRepository`, `CreditsDetector`, `.triggerNextEpisode()`, `.loadCreditsMarker()`, `.persistDetectedCredits()`) e ho letto solo quei punti. Ecco cosa ho trovato. ## 1. SkipDB non ti risolve il problema (verificato sui dati reali) Ho interroga
+  46 [12:50:04] user      :: magari proviamo da emulatore con dexter ok?
+  47 [12:50:08] assistant :: Ottimo, procediamo. Prima verifico l'ambiente (adb, emulatori, app installata). | <TOOL bash> 
+  48 [12:50:11] toolResult :: --- adb --- Android Debug Bridge version 1.0.41 Version 37.0.0-14910828 Installed as C:\Users\Gianmarco\AppData\Local\Android\Sdk\platform-tools\adb.exe --- devices --- * daemon not running; starting now at tcp:5037 * daemon started successfully List of devices attached --- avd list --- android-info
+  49 [12:50:13] assistant :: Ci sono 3 AVD: `Google_TV`, `Television_1080p`, `Medium_Phone_API_36`. Per WaveStream (app TV) uso `Google_TV`. Lo avvio. | <TOOL bash> 
+  50 [12:50:22] toolResult :: --- emu log --- INFO | Android emulator version 36.5.11.0 (build_id 15261927) (CL:N/A) INFO | Graphics backend: gfxstream INFO | Found systemPath C:/Users/Gianmarco/AppData/Local/Android/Sdk\system-images\android-36\google-tv\x86_64\ WARNING | Please update the emulator to one that supports the feat
+  51 [12:50:25] assistant :: Emulatore avviato, attendo il boot completo. | <TOOL bash> 
+  52 [12:50:27] toolResult :: attempt 1: boot_completed='1' List of devices attached emulator-5554 device product:sdk_google_atv64_amati_x86_64 model:sdk_google_atv64_amati_x86_64 device:emu64xa transport_id:1
+  53 [12:50:32] assistant :: <TOOL bash> 
+  54 [12:50:34] toolResult :: --- app installata? --- package:it.wavestream.app (exit 0) --- apk debug esistente --- --- sdcard --- ls: C:/Program: No such file or directory ls: Files/Git/sdcard/: No such file or directory
+  55 [12:50:41] assistant :: L'app è già installata. Verifico versione, dati e se c'è una playlist/sorgente configurata. | <TOOL bash> 
+  56 [12:50:46] toolResult :: versionCode=35 minSdk=26 targetSdk=34 versionName=1.1.10 lastUpdateTime=2026-10-07 22:26:38 --- files --- * daemon not running; starting now at tcp:5037 * daemon started successfully adb.exe: device offline
+  57 [12:50:52] assistant :: <TOOL bash> 
+  58 [12:50:56] toolResult :: List of devices attached emulator-5554 device --- retry --- app_sslcache app_textures app_webview cache code_cache databases files no_backup shared_prefs --- databases --- total 81876 drwxrwx--x 2 u0_a93 u0_a93 4096 2026-10-01 19:29 . drwx------ 11 u0_a93 u0_a93 4096 2026-09-27 19:27 .. -rw-rw---- 1
+  59 [12:50:59] assistant :: C'è un DB da 83 MB (playlist già importata). Verifico se Dexter è presente e cosa c'è nella tabella dei segmenti. | <TOOL bash> 
+  61 [12:51:00] toolResult :: === .tables === run-as: exec failed for sqlite3: No such file or directory === series Dexter === run-as: exec failed for sqlite3: No such file or directory === counts === /system/bin/sh: syntax error: unexpected '(' === media_segment === run-as: exec failed for sqlite3: No such file or directory Com
+  62 [12:51:05] assistant :: Niente `sqlite3` sul device: estraggo il DB e lo interrogo in locale. | <TOOL bash> 
+  63 [12:51:11] toolResult :: -rw-r--r-- 1 Gianmarco 197609 84115974 Oct 9 14:51 ws.db ws.db: SQLite 3.x database, user version 36, last written using SQLite version 3044005, writer version 2, read version 2, file counter 164, database pages 20453, cookie 0x66, schema 4, largest root page 106, UTF-8, version-valid-for 164 --- sq
+  64 [12:51:13] assistant :: <TOOL bash> 
+  65 [12:51:13] toolResult :: Traceback (most recent call last): File "<string>", line 1, in <module> import sqlite3;c=sqlite3.connect('ws.db');[print(r) for r in c.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")] ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ sqlite3.Data
+  66 [12:51:16] assistant :: <TOOL bash> 
+  67 [12:51:17] toolResult :: === integrity === Error: in prepare, database disk image is malformed (11) === tables === Error: database disk image is malformed
+  68 [12:51:20] assistant :: Il problema è classico: `adb shell` su Windows corrompe i binari. Uso `exec-out`. | <TOOL bash> 
+  69 [12:51:30] toolResult :: -rw-r--r-- 1 Gianmarco 197609 83775488 Oct 9 14:51 ws.db ok === tables === android_metadata movies categories playlists channels profiles custom_groups recently_watched_channels downloaded_content room_master_table epg_programs serie_a_matches episodes serie_a_team_channels favorite_categories serie
+  70 [12:51:34] assistant :: DB integro. Ora guardo i segmenti salvati e Dexter. | <TOOL bash> 
+  71 [12:51:35] toolResult :: === schema media_segments === CREATE TABLE `media_segments` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `contentType` TEXT NOT NULL, `type` TEXT NOT NULL, `contentId` INTEGER, `seriesId` INTEGER, `seasonNumber` INTEGER, `episodeNumber` INTEGER, `tmdbId` INTEGER, `imdbId` TEXT, `startMs` INTEGE
+  72 [12:51:37] assistant :: <TOOL bash> 
+  73 [12:51:37] toolResult :: === l'unico segmento === id contentType type contentId seriesId seasonNumber episodeNumber tmdbId imdbId startMs endMs durationMs source confidence fingerprint createdAt updatedAt -- ----------- ------- --------- -------- ------------ ------------- ------ --------- ------- ----- ---------- -------- 
+  74 [12:51:42] assistant :: Trovato qualcosa di importante. Indago. | <TOOL bash> 
+  75 [12:51:42] toolResult :: === series con imdb tt2049116 === 6346|Gomorra - La Serie|tt2049116|61068 === series id 6346 esiste? === 6346|Gomorra - La Serie === episode contentId=8 === 8|6346|1|1|Gomorra - La Serie - S01E01 - Il clan dei Savastano === range id series === 1|7466|7466 === playlist === 1|CherryTV|xtream
+  76 [12:51:50] assistant :: Scoperta chiave: l'unico marker in DB è di **Gomorra S01E01** (non Dexter). Cerco però le tracce di Dexter in `watch_progress` per ricavare la **durata reale** del loro stream. | <TOOL bash> 
+  77 [12:51:50] toolResult :: === schema watch_progress === CREATE TABLE `watch_progress` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `profileId` INTEGER NOT NULL, `contentType` TEXT NOT NULL, `contentId` INTEGER NOT NULL, `seriesId` INTEGER, `season` INTEGER, `episode` INTEGER, `position` INTEGER NOT NULL, `duration` INTE
+  78 [12:51:54] assistant :: <TOOL bash> 
+  79 [12:51:55] toolResult :: === progressi recenti === contentType contentId seriesId season episode pos_s dur_s isCompleted when_ ----------- --------- -------- ------ ------- ----- ----- ----------- ------------------- EPISODE 9 6346 1 2 16 3438 0 2026-10-05 16:16:00 EPISODE 8 6346 1 1 3116 3262 1 2026-10-02 12:29:40 MOVIE 33
+  80 [12:52:00] assistant :: <TOOL bash> 
+  81 [12:52:00] toolResult :: === episodes per le varie Dexter === === totali === 65 === imdb delle Dexter === id name tmdbImdbId tmdbId episodeCount episodesLastFetchedAt ---- --------------------------- ---------- ------ ------------ --------------------- 2211 Dexter: Original Sin (2024) 0 3049 Dexter 0 3538 Dexter: New Blood 
+  82 [12:52:09] assistant :: Dexter non ha ancora episodi scaricati (fetch lazy all'apertura), e la playlist è `CherryTV` (Xtream). Verifico subito se le sorgenti sono ancora raggiungibili dall'emulatore. | <TOOL bash> 
+  83 [12:52:13] toolResult :: === playlists === id name type url username password epgUrl isEnabled lastUpdated channelCount movieCount seriesCount createdAt -- -------- ------ ----------------------- --------- --------- ------ --------- ------------- ------------ ---------- ----------- ------------- 1 CherryTV xtream http://che
+  84 [12:52:16] assistant :: <TOOL bash> 
+  85 [12:52:23] toolResult :: === host -> xtream === http_code=200 time=5.619696 === risposta breve === [{"num":1,"name":"Hot Skull (2022)","series_id":8304,"cover":"https:\/\/image.tmdb.org\/t\/p\/w600_and_h900_bestv2\/dt1RGQTZs1wqywXSdygWU62zCmX.jpg","plot":"In un mondo distopico colpito da un'epidemia che si diffonde attraver
+  86 [12:52:28] assistant :: La playlist risponde. Prendo l'`xtreamSeriesId` di Dexter dal DB e chiedo al provider gli episodi con la **durata reale**. | <TOOL bash> 
+  87 [12:52:28] toolResult :: === xtream ids === id name xtreamSeriesId playlistId ---- --------------------------- -------------- ---------- 2211 Dexter: Original Sin (2024) 6939 1 3049 Dexter 578 1 3538 Dexter: New Blood 3162 1 5301 Dexter: Resurrection (2025) 7931 1
+  88 [12:52:33] assistant :: <TOOL bash> 
+  89 [12:52:35] toolResult :: -rw-r--r-- 1 Gianmarco 197609 42348 Oct 9 14:52 /tmp/dexter_s1.json Traceback (most recent call last): File "<stdin>", line 2, in <module> FileNotFoundError: [Errno 2] No such file or directory: '/tmp/dexter_s1.json' Command exited with code 1
+  90 [12:52:38] assistant :: <TOOL bash> 
+  91 [12:52:39] toolResult :: TMP: C:\Users\GIANMA~1\AppData\Local\Temp /tmp/dexter_s1.json C:\Users\GIANMA~1\AppData\Local\Temp\dexter_s1.json
+  92 [12:52:41] assistant :: <TOOL bash> 
+  93 [12:52:41] toolResult :: keys: ['seasons', 'info', 'episodes'] seasons: ['1', '2', '3', '4', '5', '6', '7', '8'] --- season 1 --- E1 | Dexter - S01E01 - Dexter | dur=00:50:00 | ext=mp4 E2 | Dexter - S01E02 - Lacrime di coccodrillo | dur=00:50:00 | ext=mp4 E3 | Dexter - S01E03 - La prima volta | dur=00:50:00 | ext=mp4 E4 | D
+  94 [12:52:51] assistant :: Il provider dichiara 50:00 (nominale). Mi serve la **durata reale** dello stream: recupero l'URL e provo a sondarlo. | <TOOL bash> 
+  95 [12:52:52] toolResult :: { "id": "112508", "episode_num": 1, "title": "Dexter - S01E01 - Dexter", "container_extension": "mp4", "info": { "releasedate": "2006-10-01", "plot": "", "duration_secs": 3000, "duration": "00:50:00", "movie_image": "https://image.tmdb.org/t/p/w300/JuCgM3T2FWgZxqdSGJr9nY6Tul.jpg", "video": [], "audi
+  96 [12:52:55] assistant :: <TOOL bash> 
+  97 [12:52:55] toolResult :: --- HEAD http://cherrytv.coip.cc/series/cHmcferSb/bS3DYYwHW/112508.mp4 --- HTTP/1.1 302 Found Date: Fri, 09 Oct 2026 12:52:56 GMT Content-Type: text/html; charset=UTF-8 Connection: keep-alive Server: cloudflare Nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800} Access-Control-Allow-
+  98 [12:52:58] assistant :: <TOOL bash> 
+  99 [12:53:02] toolResult :: === ffprobe durata reale === codec_name=h264 width=608 height=336 codec_name=aac duration=3050.080000 size=186040982 bit_rate=487963
+ 100 [12:53:10] assistant :: **Dato decisivo**: la durata reale dello stream è **3050s**, mentre IntroDB dà l'outro S1E1 a **3088→3190s** — *oltre la fine del file*. Verifico il contenuto reale con ffmpeg (ground truth visivo). | <TOOL bash> 
+ 101 [12:53:43] toolResult :: total 1744 drwxr-xr-x 1 Gianmarco 197609 0 Oct 9 14:53 . drwxr-xr-x 1 Gianmarco 197609 0 Oct 9 14:53 .. -rw-r--r-- 1 Gianmarco 197609 82783 Oct 9 14:53 t130.png -rw-r--r-- 1 Gianmarco 197609 8159 Oct 9 14:53 t15.png -rw-r--r-- 1 Gianmarco 197609 117354 Oct 9 14:53 t200.png -rw-r--r-- 1 Gianmarco 197
+ 102 [12:53:47] assistant :: <TOOL bash> 
+ 103 [12:53:48] toolResult :: -rw-r--r-- 1 Gianmarco 197609 725985 Oct 9 14:53 fr/sheet_end.png -rw-r--r-- 1 Gianmarco 197609 276784 Oct 9 14:53 fr/sheet_start.png
+ 104 [12:53:50] assistant :: <TOOL read> 
+ 105 [12:53:50] toolResult :: ENOENT: no such file or directory, access 'C:\tmp\fr\sheet_start.png'
+ 106 [12:53:53] assistant :: <TOOL bash> 
+ 107 [12:53:53] toolResult :: C:\Users\GIANMA~1\AppData\Local\Temp\fr\sheet_start.png C:\Users\GIANMA~1\AppData\Local\Temp\fr\sheet_end.png
+ 108 [12:53:55] assistant :: <TOOL read> 
+ 109 [12:53:56] toolResult :: Read image file [image/png] | [IMAGE]
+ 110 [12:54:05] assistant :: <TOOL read> 
+ 111 [12:54:06] toolResult :: Read image file [image/png] | [IMAGE]
+ 112 [12:54:18] assistant :: Ground truth acquisita. Ora il quadro è **chiaro e sconvolgente**: - **t=5s / 15s**: ident Showtime + "SHOWTIME Presents" → **t=25s: title card "DEXTER"** ⇒ IntroDB intro `1s→28s` è **corretta** (conferma la tua sensazione). - **t=3000s**: primi crediti ("Production Designer MICHAEL CORENBLITH") ⇒ i
+ 113 [12:54:21] toolResult :: No node matching 'CreditsDetector.analyze' found. === costanti === 32: * 5. servono [MIN_CONSECUTIVE_HITS] campioni consecutivi positivi (persistenza ~6s) 350: private const val TAG = "CreditsDetector" 353: const val GRID_W = 96 354: const val GRID_H = 54 357: const val SAMPLE_INTERVAL_MS = 2_000L 3
+ 114 [12:54:30] assistant :: Il watchdog è armato negli ultimi 5 minuti (`WINDOW_MS = 5min`) e richiede `MIN_DARKNESS = 0.72`: ma i crediti di Dexter hanno **sfondo chiaro/oliva** (frame t=3000) → il detector **non può** riconoscerli. Vediamo come si cerca nel player per pianificare il test. | <TOOL bash> 
+ 115 [12:54:32] toolResult :: Graph: graphify-out/graph.json (4311 nodes) | Traversal: BFS depth=2 | Start: ['Event', 'Player', 'key', 'ModernPlayerControls()', 'fastoutslowineasing', '.getSeekForwardSecondsFlow()', 'padding', 'positioninroot', 'seekparameters'] | 285 nodes found [!] TRUNCATED: showing 38 of 285 nodes (~1500-tok
+ 116 [12:54:37] assistant :: <TOOL bash> 
+ 117 [12:54:37] toolResult :: === seek refs in TvPlayerScreen === 92: onSeek: (Int) -> Unit, 93: onSeekConfirm: () -> Unit, 94: onSeekCancel: () -> Unit, 95: onSeekBack: () -> Unit = {}, 96: onSeekForward: () -> Unit = {}, 101: isLiveSeekable: Boolean = false, 139: cumulativeSeekSeconds: Int = 0, 140: seekIndicatorVisible: Boole
+ 118 [12:54:40] assistant :: <TOOL bash> 
+ 119 [12:54:41] toolResult :: 177: private var seekForwardSeconds = 10 // Loaded from preferences in onCreate 185: private val _hiddenSeekSeconds = mutableIntStateOf(0) 186: private val hiddenSeekHandler = Handler(Looper.getMainLooper()) 187: private val hiddenSeekClearRunnable = Runnable { _hiddenSeekSeconds.intValue = 0 } 192:
+ 120 [12:55:02] assistant :: Ora ho un'ipotesi solida e completa. La verifico sull'emulatore. Avvio l'app. | <TOOL bash> 
+ 121 [12:55:16] toolResult :: Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity } -rw-r--r-- 1 Gianmarco 197609 359206 Oct 9 14:55 /tmp/shot1.png --- top activity --- topResumedActivity=ActivityRecord{36028861 u0 it.wavestream.app/.ui.loading.LoadingActivity t310}
+ 122 [12:55:24] assistant :: <TOOL bash> 
+ 123 [12:55:34] toolResult :: topResumedActivity=ActivityRecord{36028861 u0 it.wavestream.app/.ui.loading.LoadingActivity t310} --- log CreditsDiag/IntroDB --- --- crash? ---
+ 124 [12:55:36] assistant :: <TOOL read> 
+ 125 [12:55:37] toolResult :: Read image file [image/png] | [IMAGE]
+ 126 [12:55:46] assistant :: L'app sta sincronizzando `CherryTV` (74k contenuti). Attendo. | <TOOL bash> 
+ 127 [13:00:53] toolResult :: 1: topResumedActivity=ActivityRecord{36028861 u0 it.wavestream.app/.ui.loading.LoadingActivity t310} 2: topResumedActivity=ActivityRecord{36028861 u0 it.wavestream.app/.ui.loading.LoadingActivity t310} 3: topResumedActivity=ActivityRecord{36028861 u0 it.wavestream.app/.ui.loading.LoadingActivity t31
+ 128 [13:00:59] assistant :: <TOOL bash> 
+ 129 [13:01:00] toolResult :: === log recente app === 10-09 15:00:43.347 6990 6990 W Choreographer: Frame time is 0.056801 ms in the future! Check that graphics HAL is generating vsync timestamps using the correct timebase. 10-09 15:00:43.413 6990 6990 W Choreographer: Frame time is 0.986806 ms in the future! Check that graphics
+ 130 [13:01:06] assistant :: <TOOL bash> 
+ 131 [13:01:07] toolResult :: pid=6990 === log del processo (non-Choreographer) === 10-09 14:55:04.619 6990 6995 W .wavestream.app: Cleared Reference was only reachable from finalizer (only reported once) 10-09 14:55:04.693 6990 7081 D HomeViewModel: WatchProgress items found: 3 10-09 14:55:04.734 6990 7087 D HomeViewModel: Rece
+ 132 [13:01:12] assistant :: <TOOL bash> 
+ 133 [13:01:14] toolResult :: Node: LoadingActivity ID: src_main_java_it_wavestream_app_ui_loading_loadingactivity_loadingactivity Source: src/main/java/it/wavestream/app/ui/loading/LoadingActivity.kt L54 Type: code Community: Loading Activity Bootstrap Degree: 34 Connections (34): --> UserPreferences [references] [EXTRACTED] sr
+ 134 [13:01:24] assistant :: <TOOL bash> 
+ 135 [13:01:24] toolResult :: LoadingContent(forceRefresh = forceRefresh) } } } @Composable private fun LoadingContent(forceRefresh: Boolean) { var loadingState by remember { mutableStateOf( LoadingState( status = getString(R.string.loading), detail = "", progress = 0, showProgress = false ) ) } var profileLoaded by remember { m
+ 136 [13:01:33] assistant :: La sincronizzazione (74k contenuti) è troppo lenta. La velocizzo marcando la playlist come aggiornata nel DB. | <TOOL bash> 
+ 137 [13:01:33] toolResult :: === extras accettati dal PlayerActivity === 451: contentId = intent.getLongExtra("content_id", 0) 452: contentType = ContentType.valueOf(intent.getStringExtra("content_type") ?: "MOVIE") 453: streamUrl = intent.getStringExtra("stream_url") ?: "" 454: title = intent.getStringExtra("title") ?: "" 455:
+ 138 [13:01:41] assistant :: Il player accetta gli extra via intent. Ottimo: salto la navigazione UI. | <TOOL bash> 
+ 139 [13:01:42] toolResult :: if (::player.isInitialized && player.isPlaying) { player.pause() } } } } override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState) // Get intent data contentId = intent.getLongExtra("content_id", 0) contentType = ContentType.valueOf(intent.getStringExtra("content_type")
+ 140 [13:01:52] assistant :: <TOOL bash> 
+ 141 [13:01:53] toolResult :: === resume da watch_progress === 66: @Inject lateinit var watchProgressDao: WatchProgressDao 574: watchProgressDao.getProgress(profileId, contentType, contentId) 578: player.seekTo(it.position) 656: player.seekTo(0) 963: val progress = watchProgressDao.getSeriesProgress(profileId, contentId) 1045: v
+ 142 [13:01:58] assistant :: <TOOL bash> 
+ 143 [13:01:58] toolResult :: return dataStore.data.map { it[CREDITS_AUDIO_ENABLED] ?: true } } /** * IntroDB (introdb.app): database comunitario di marker sigla/recap/titoli di coda. * Letture anonime e gratuite. Se attivo, i marker vengono cercati anche online * (con cache locale) prima di ricadere sulla stima per serie e sul 
+ 144 [13:02:05] assistant :: <TOOL bash> 
+ 145 [13:02:05] toolResult :: * invece che negli ultimi 10 secondi del file. */ suspend fun setCreditsDetectionEnabled(enabled: Boolean) { dataStore.edit { it[CREDITS_DETECTION_ENABLED] = enabled } } suspend fun getCreditsDetectionEnabled(): Boolean { return dataStore.data.first()[CREDITS_DETECTION_ENABLED] ?: true } fun getCred
+ 146 [13:02:12] assistant :: Entrambe le pref sono `true` di default → condizioni ideali per riprodurre. Inietto ora il setup nel DB (skip sync + IMDb di Dexter + posizione di resume a 2880s). | <TOOL bash> 
+ 147 [13:02:25] toolResult :: -rw-r--r-- 1 Gianmarco 197609 83775488 Oct 9 15:02 ws2.db ok === conteggi === series|7466 movies|54935 episodes|65 media_segments|1 watch_progress|4
+ 148 [13:02:30] assistant :: <TOOL bash> 
+ 149 [13:02:31] toolResult :: === notnull episodes === id notnull=1 dflt= tipo=INTEGER seriesId notnull=1 dflt= tipo=INTEGER name notnull=1 dflt= tipo=TEXT streamUrl notnull=1 dflt= tipo=TEXT seasonNumber notnull=1 dflt= tipo=INTEGER episodeNumber notnull=1 dflt= tipo=INTEGER xtreamEpisodeId notnull=0 dflt= tipo=INTEGER plot not
+ 150 [13:02:38] assistant :: <TOOL bash> 
+ 151 [13:02:39] toolResult :: NOW=1791550958751 EPISODE_ID=66 === verifica === id seriesId seasonNumber episodeNumber substr(streamUrl,1,70) -- -------- ------------ ------------- ------------------------------------------------------------- 66 3049 1 1 http://cherrytv.coip.cc/series/cHmcferSb/bS3DYYwHW/112508.mp4 contentId pos_
+ 152 [13:02:45] assistant :: Ora push del DB modificato. | <TOOL bash> 
+ 153 [13:02:49] toolResult :: ws2.db: 1 file pushed, 0 skipped. 52.6 MB/s (83775488 bytes in 1.519s) -rw-rw-rw- 1 shell shell 83775488 2026-10-09 13:02 /data/local/tmp/ws2.db ls: /data/data/it.wavestream.app/databases/: Permission denied
+ 154 [13:02:55] assistant :: <TOOL bash> 
+ 155 [13:03:05] toolResult :: -rw-r--r-- 1 Gianmarco 197609 83775488 Oct 9 15:02 chk.db ok id seriesId seasonNumber episodeNumber -- -------- ------------ ------------- 66 3049 1 1 contentId pos_s --------- ----- 66 2880 tt0773262 0
+ 156 [13:03:11] assistant :: DB iniettato e verificato. Lancio ora il player direttamente su **Dexter S01E01** (resume a 2880s = 2m50s dalla fine dei crediti reali). | <TOOL bash> 
+ 157 [13:03:32] toolResult :: Starting: Intent { act=android.intent.action.MAIN cat=[android.intent.category.LAUNCHER] pkg=S01E01 cmp=it.wavestream.app/.ui.player.PlayerActivity (has extras) } Exception occurred while executing 'start': java.lang.SecurityException: Permission Denial: starting Intent { act=android.intent.action.M
+ 158 [13:03:41] assistant :: `PlayerActivity` non è exported. Provo a lanciarla **dall'uid dell'app** con `run-as`. | <TOOL bash> 
+ 159 [13:03:57] toolResult :: at android.os.Binder.onTransact(Binder.java:953) at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:5763) at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:2735) at android.os.Binder.execTransactInternal(Binder.java:1426) at android.os.Binder.e
+ 160 [13:04:12] assistant :: <TOOL bash> 
+ 161 [13:04:12] toolResult :: 72: android:exported="false" 79: android:exported="true" 91: android:exported="false" 98: android:exported="false" 108: android:exported="false" 115: android:exported="false" 122: android:exported="false" 129: android:exported="false" 136: android:exported="false" 140: android:exported="false" 147: 
+ 162 [13:04:20] assistant :: <TOOL bash> 
+ 163 [13:04:26] toolResult :: adbd cannot run as root in production builds List of devices attached emulator-5554 device uid=2000(shell) gid=2000(shell) groups=2000(shell),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats
+ 164 [13:04:37] assistant :: Serve la navigazione UI. Lancio l'app: con `lastUpdated` aggiornato il boot sarà veloce, e il progresso iniettato a 2880s dovrebbe comparire in "Continua a guardare". | <TOOL bash> 
+ 165 [13:04:54] toolResult :: Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity } topResumedActivity=ActivityRecord{193302146 u0 it.wavestream.app/.ui.profile.ProfileSelectionActivity t311}
+ 166 [13:04:58] assistant :: <TOOL read> 
+ 167 [13:04:59] toolResult :: Read image file [image/png] | [IMAGE]
+ 168 [13:05:03] assistant :: <TOOL bash> 
+ 169 [13:08:29] toolResult :: 1: topResumedActivity=ActivityRecord{53536704 2: topResumedActivity=ActivityRecord{53536704 3: topResumedActivity=ActivityRecord{53536704 4: topResumedActivity=ActivityRecord{53536704 5: topResumedActivity=ActivityRecord{53536704 6: topResumedActivity=ActivityRecord{53536704 7: topResumedActivity=Ac
+ 170 [13:08:53] assistant :: <TOOL bash> 
+ 171 [13:08:54] toolResult :: topResumedActivity=ActivityRecord{53536704 u0 it.wavestream.app/.ui.loading.LoadingActivity t311} === ultimi log app === 10-09 15:04:52.415 7403 7427 I okhttp.OkHttpClient: --> GET https://api.themoviedb.org/3/tv/108978?api_key=5f275659e4e6975d78d510255857dbf8&language=it-IT&append_to_response=credi
+ 172 [13:08:59] assistant :: <TOOL read> 
+ 173 [13:09:00] toolResult :: Read image file [image/png] | [IMAGE]
+ 174 [13:09:10] assistant :: Sta preparando la tab Serie TV. Attendo. | <TOOL bash> 
+ 175 [13:11:31] toolResult :: 1: it.wavestream.app/.ui.loading.LoadingActivity 2: it.wavestream.app/.ui.loading.LoadingActivity 3: it.wavestream.app/.ui.loading.LoadingActivity 4: it.wavestream.app/.ui.loading.LoadingActivity 5: it.wavestream.app/.ui.loading.LoadingActivity 6: it.wavestream.app/.ui.loading.LoadingActivity 7: it.
+ 176 [13:11:31] assistant :: 
+ 178 [13:11:32] user      :: possibile che ci sta mettendo cosi tanto? di solito non fa mai cosi
+ 179 [13:11:40] assistant :: <TOOL bash> 
+ 180 [13:11:41] toolResult :: pid=7403 === ultimi log (tutti, no noise) === 10-09 15:04:52.240 7403 7403 D ViewRootImpl: Skipping stats log for color mode 10-09 15:04:52.265 7403 7403 D InsetsController: hide(ime(), fromIme=false) 10-09 15:04:52.267 7403 7403 I ImeTracker: it.wavestream.app:7c0327a2: onCancelled at PHASE_CLIENT_
+ 181 [13:11:56] assistant :: Il blocco è qui: 5 chiamate TMDB partite alle 15:04:52 e **mai ritornate** (nessuna risposta nei log). Verifico la connettività dell'emulatore verso TMDB. | <TOOL bash> 
+ 182 [13:12:07] toolResult :: === host -> TMDB === code=200 t=1.821188 === tool sul device === /system/bin/nc /system/bin/toybox === prova connessione TCP 443 da device === nc_exit=1 === DNS device === [init.svc.mdnsd]: [running]
+ 183 [13:12:17] assistant :: <TOOL bash> 
+ 184 [13:12:36] toolResult :: === dns props === === risoluzione nome (toybox) === toybox: Unknown command nslookup (see "toybox --help") === nc su IP diretto:443 === ip=108.139.210.66 ip443_exit=0 === nc porta 80 cherrytv === p80_exit=1 === nc 443 google === google443_exit=1
+ 185 [13:12:45] assistant :: <TOOL bash> 
+ 186 [13:12:48] toolResult :: Node: NetworkModule ID: src_main_java_it_wavestream_app_di_networkmodule_networkmodule Source: src/main/java/it/wavestream/app/di/NetworkModule.kt L30 Type: code Community: Hilt Network Providers Degree: 13 Connections (13): <-- NetworkModule.kt [contains] [EXTRACTED] src/main/java/it/wavestream/app
+ 187 [13:13:02] assistant :: Faccio un thread dump per vedere dove è bloccata. | <TOOL bash> 
+ 188 [13:13:10] toolResult :: pid=7403 === stack del main ===
+ 189 [13:13:17] assistant :: <TOOL bash> 
+ 190 [13:13:26] toolResult :: === run-as kill test === kill_exit=0 === logcat size === 139 === cerca dump === 10-09 15:12:51.583 7403 7404 I .wavestream.app: Thread[2,tid=7404,WaitingInMainSignalCatcherLoop,Thread*=0x70716f4834b0,peer=0x2001148,"Signal Catcher"]: reacting to signal 3 10-09 15:13:05.779 7403 7404 I .wavestream.ap
+ 191 [13:13:40] assistant :: La UI è viva (Choreographer attivo) → non è il main thread, ma una coroutine in attesa di rete. Verifico DNS/HTTPS dall'emulatore. | <TOOL bash> 
+ 193 [13:16:41] toolResult :: === DNS via ping (risolve il nome) === Command timed out after 180 seconds
+ 194 [13:16:51] assistant :: **Trovato il colpevole**: il DNS dell'emulatore è rotto — `ping api.themoviedb.org` resta appeso sulla risoluzione del nome. OkHttp non ha timeout sul DNS lookup → `enrichHeroContent` attende per sempre → la LoadingActivity non naviga mai. Verifico il DNS dell'host e riavvio l'emulatore con DNS espl
+ 195 [13:16:55] toolResult :: === DNS host (Windows) === Server: UnKnown Address: fe80::fc31:5dff:feb2:5864 DNS request timed out. timeout was 2 seconds. Nome: api.themoviedb.org Addresses: 2600:9000:2306:b000:c:174a:c400:93a1 2600:9000:2306:5600:c:174a:c400:93a1 === interfaccia/gateway host === Indirizzo IPv4. . . . . . . . . .
+ 196 [13:17:02] assistant :: **Causa radice individuata**: l'host è su **hotspot iPhone** e usa un DNS IPv6 link-local (`fe80::fc31:...`) che va in timeout. L'emulatore eredita quel DNS → ogni risoluzione di nome si blocca. Non è un problema dell'app (ecco perché "di solito non fa mai così"). Riavvio l'emulatore con DNS IPv4 es
+ 197 [13:17:30] toolResult :: OK: killing emulator, bye bye OK emulator.exe 14096 Console 1 11.992 K emulator.exe 8180 Console 1 11.708 K emulator.exe 3424 Console 1 11.712 K --- avvio con DNS espliciti --- List of devices attached
+ 198 [13:17:34] assistant :: <TOOL bash> 
+ 199 [13:24:15] toolResult :: Command timed out after 400 seconds
+ 200 [13:24:20] assistant :: <TOOL bash> 
+ 201 [13:24:22] toolResult :: List of devices attached === emu log === INFO | Android emulator version 36.5.11.0 (build_id 15261927) (CL:N/A) INFO | Graphics backend: gfxstream INFO | Found systemPath C:/Users/Gianmarco/AppData/Local/Android/Sdk\system-images\android-36\google-tv\x86_64\ WARNING | Please update the emulator to o
+ 202 [13:24:31] assistant :: <TOOL bash> 
+ 203 [13:24:56] toolResult :: List of devices attached emulator-5554 device INFO | Warning: QObject::connect: (receiver name: 'ToolControls') (:0, ) INFO | Created extended window in 3.19864s INFO | Successfully loaded snapshot 'default_boot' using 3968 ms
+ 204 [13:25:02] assistant :: <TOOL bash> 
+ 205 [13:25:06] toolResult :: boot ok (1) === test DNS === PING api.themoviedb.org (108.139.210.27) 56(84) bytes of data.
+ 206 [13:25:13] assistant :: DNS risolto. Rilancio l'app. | <TOOL bash> 
+ 207 [13:25:50] toolResult :: Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity } Warning: Activity not started, intent has been delivered to currently running top-most instance. it.wavestream.app/.ui.MainActivity it.wavestream.app/.ui.MainActivity
+ 208 [13:26:00] assistant :: <TOOL read> 
+ 209 [13:26:01] toolResult :: Read image file [image/png] | [IMAGE]
+ 210 [13:26:07] assistant :: Perfetto: Home caricata con l'hero **DEXTER** e il pulsante **"Riprendi S1E1"** (il resume iniettato funziona). Avvio la riproduzione con logcat pulito. | <TOOL bash> 
+ 211 [13:26:43] toolResult :: it.wavestream.app/.ui.MainActivity === CreditsDiag / PlayerActivity / IntroDB ===
+ 212 [13:26:48] assistant :: <TOOL read> 
+ 213 [13:26:49] toolResult :: Read image file [image/png] | [IMAGE]
+ 214 [13:26:58] assistant :: La hero ha ruotato. Navigo in basso fino a "Continua a guardare". | <TOOL bash> 
+ 215 [13:27:06] toolResult :: done
+ 216 [13:27:11] assistant :: <TOOL read> 
+ 217 [13:27:13] toolResult :: Read image file [image/png] | [IMAGE]
+ 218 [13:27:21] assistant :: <TOOL bash> 
+ 219 [13:27:33] toolResult :: done
+ 220 [13:27:38] assistant :: <TOOL read> 
+ 221 [13:27:39] toolResult :: Read image file [image/png] | [IMAGE]
+ 222 [13:27:51] assistant :: Il focus resta nella hero (che ruota da sola). Provo a scendere con più pressioni. | <TOOL bash> 
+ 223 [13:28:04] toolResult :: done
+ 224 [13:28:23] assistant :: 
+ 226 [13:28:34] assistant :: <TOOL read> 
+ 227 [13:28:35] toolResult :: Read image file [image/png] | [IMAGE]
+ 228 [13:28:52] assistant :: <TOOL bash> 
+ 229 [13:29:04] toolResult :: done
+ 230 [13:29:11] assistant :: <TOOL read> 
+ 231 [13:29:12] toolResult :: Read image file [image/png] | [IMAGE]
+ 232 [13:29:39] assistant :: <TOOL bash> 
+ 233 [13:29:47] toolResult :: done
+ 234 [13:30:05] assistant :: <TOOL read> 
+ 235 [13:30:06] toolResult :: Read image file [image/png] | [IMAGE]
+ 236 [13:30:29] assistant :: <TOOL bash> 
+ 237 [13:30:37] toolResult :: done
+ 238 [13:30:50] assistant :: <TOOL read> 
+ 239 [13:30:51] toolResult :: Read image file [image/png] | [IMAGE]
+ 240 [13:31:00] assistant :: **Dexter** è in focus in "Visti di recente". Apro la scheda. | <TOOL bash> 
+ 241 [13:31:24] toolResult :: it.wavestream.app/.ui.MainActivity done
+ 242 [13:31:33] assistant :: <TOOL read> 
+ 243 [13:31:34] toolResult :: Read image file [image/png] | [IMAGE]
+ 244 [13:31:46] assistant :: Scheda Dexter aperta. Scendo all'elenco episodi per scegliere S1E1. | <TOOL bash> 
+ 245 [13:31:54] toolResult :: done
+ 246 [13:32:05] assistant :: <TOOL read> 
+ 247 [13:32:06] toolResult :: Read image file [image/png] | [IMAGE]
+ 248 [13:32:24] assistant :: <TOOL bash> 
+ 249 [13:32:33] toolResult :: done
+ 250 [13:32:52] assistant :: <TOOL read> 
+ 251 [13:32:53] toolResult :: Read image file [image/png] | [IMAGE]
+ 252 [13:33:08] assistant :: <TOOL bash> 
+ 253 [13:33:16] toolResult :: done
+ 254 [13:33:27] assistant :: <TOOL read> 
+ 255 [13:33:28] toolResult :: Read image file [image/png] | [IMAGE]
+ 256 [13:33:52] assistant :: Focus sulla riga Episodi. Vado su S1E1 e avvio con logcat pulito. | <TOOL bash> 
+ 257 [13:33:56] toolResult :: --- screen saved ---
+ 258 [13:34:21] assistant :: <TOOL read> 
+ 259 [13:34:23] toolResult :: Read image file [image/png] | [IMAGE]
+ 260 [13:34:44] assistant :: Su **Episodio 1**. Avvio la riproduzione. | <TOOL bash> 
+ 261 [13:35:22] toolResult :: it.wavestream.app/.ui.details.DetailsActivity === CreditsDiag/PlayerActivity/IntroDB === 10-09 15:27:21.277 7403 8425 I CreditsDiag: audioCandidate quietMs=921 rmsDb=-28,2 flux=0,426 zcr=0,223 10-09 15:27:21.277 7403 8425 D CreditsDiag: audioMetrics rmsDb=-28,2 zcr=0,223 flux=0,4256 speech=false can
+ 262 [13:35:40] assistant :: **Stiamo riproducendo il caso!** Il player è a 2912s (95.5%), 137s dalla fine, con il CreditsDetector che campiona. Monitoro fino alla fine dell'episodio. | <TOOL bash> 
+ 263 [13:39:20] toolResult :: [1] pos=2987753 rem=62311 [2] pos=3031408 rem=18656 [3] pos=1250 rem=3141814 [4] pos=1250 rem=3141814 [5] pos=1250 rem=3141814 [6] pos=1250 rem=3141814 [7] pos=1250 rem=3141814 [8] pos=1250 rem=3141814 [9] pos=1250 rem=3141814 [10] pos=1250 rem=3141814 === EVENTI CHIAVE === 10-09 15:26:53.542 7403 7
+ 264 [13:39:55] assistant :: Risultato **molto** informativo. Sul provider attuale l'S1E1 dura 3050s e il marker IntroDB (3088s) cade **oltre la fine**, quindi l'overlay è arrivato solo negli ultimi 10s (`fromCredits=false`) — nessun trigger anticipato. Il detector ha fatto 1 solo `hit=true` (2933s), sotto la soglia. Verifico l
+ 265 [13:39:56] toolResult :: 1 112508 2 112509 3 112510 4 112511 5 112512 6 112513
+ 266 [13:40:11] assistant :: <TOOL bash> 
+ 267 [13:40:19] toolResult :: 112509 -> duration=3143.080000 s 112510 -> duration=2930.040000 s 112511 -> duration=3322.080000 s 112512 -> duration=3201.080000 s
+ 268 [13:40:48] assistant :: Ora il confronto **durata reale vs marker IntroDB** su Dexter S1: | Ep | Durata reale file | IntroDB CREDITS start | Rif. | |---|---|---|---| | S1E1 | 3050.1s | 3088.0s | **+38s oltre EOF** | | S1E2 | 3143.1s | 3232.0s | **+89s oltre EOF** | | S1E3 | 2930.0s | 3010.0s | **+80s oltre EOF** | | S1E4 |
+ 269 [13:40:48] toolResult :: 2880874 luma=82,6 dark=0,676 text=0,6143 peak=0,771 rows=43 static=28808740 hit=28808741 2882931 luma=53,3 dark=0,791 text=0,7083 peak=0,885 rows=43 static=28829310 hit=28829311 2885979 luma=51,6 dark=0,797 text=0,7851 peak=0,948 rows=43 static=28859790 hit=28859791 2887999 luma=47,8 dark=0,812 text
+ 270 [13:41:07] assistant :: Il mio `awk` ha rovinato le ultime colonne. Riestraggo **hit** e **static** correttamente — è decisivo. | <TOOL bash> 
+ 271 [13:41:07] toolResult :: 2880874 | luma=82,6 dark=0,676 text=0,6143 peak=0,771 rows=43 static=0,700 HIT=false 2882931 | luma=53,3 dark=0,791 text=0,7083 peak=0,885 rows=43 static=0,000 HIT=false 2885979 | luma=51,6 dark=0,797 text=0,7851 peak=0,948 rows=43 static=0,296 HIT=false 2887999 | luma=47,8 dark=0,812 text=0,7185 pe
+ 272 [13:41:35] assistant :: <TOOL read> 
+ 273 [13:41:36] toolResult :: Read image file [image/png] | [IMAGE]
+ 274 [13:41:59] assistant :: Ho la risposta completa e le prove. Salvo i reperti nel workspace. | <TOOL bash> 
+ 275 [13:42:00] toolResult :: total 86164 drwxr-xr-x 1 Gianmarco 197609 0 Oct 9 15:42 . drwxr-xr-x 1 Gianmarco 197609 0 Oct 9 15:41 .. -rw-r--r-- 1 Gianmarco 197609 55846 Oct 9 15:42 creditsdiag.log -rw-r--r-- 1 Gianmarco 197609 1952257 Oct 9 15:42 mon_1.png -rw-r--r-- 1 Gianmarco 197609 1425466 Oct 9 15:42 play1.png -rw-r--r-- 
+ 276 [13:42:19] assistant :: <TOOL bash> 
+ 277 [13:42:19] toolResult :: total 4356 drwxr-xr-x 1 Gianmarco 197609 0 Oct 9 15:42 . drwxr-xr-x 1 Gianmarco 197609 0 Oct 9 15:41 .. -rw-r--r-- 1 Gianmarco 197609 55846 Oct 9 15:42 creditsdiag.log -rw-r--r-- 1 Gianmarco 197609 1952257 Oct 9 15:42 mon_1.png -rw-r--r-- 1 Gianmarco 197609 1425466 Oct 9 15:42 play1.png -rw-r--r-- 1
+ 278 [13:42:45] assistant :: Test completato. Ecco il quadro, tutto verificato con dati. ## 1. Perché ci metteva così tanto (non è colpa dell'app) L'avvio restava piantato su `LoadingActivity` per **DNS dell'emulatore rotto**: il tuo host è su **hotspot iPhone** e sta usando un DNS IPv6 link-local (`fe80::fc31:...`) che va in t
+ 280 [14:00:17] user      :: come faceva introdb a non venire mai interrogato quando invece esce sempre il "salta sigla" appena parte la sigla
+ 281 [14:00:37] assistant :: Giusta obiezione — e mi sono spiegato male. Verifico il percorso esatto per non sbagliare di nuovo. | <TOOL bash> 
+ 282 [14:00:38] toolResult :: === dove viene scritto tmdbImdbId === app/src/main/java/it/wavestream/app/data/database/dao/SeriesDao.kt:172: tmdbImdbId = existing.tmdbImdbId ?: series.tmdbImdbId, app/src/main/java/it/wavestream/app/data/repository/MovieUnificationService.kt:1051: tmdbImdbId = a.tmdbImdbId ?: b.tmdbImdbId, app/src
+ 283 [14:00:58] assistant :: Hai ragione, e la mia frase era imprecisa: parlavo **dello stato del DB dell'emulatore**, non del tuo dispositivo. Verifico il percorso esatto prima di risponderti. | <TOOL bash> 
+ 284 [14:01:01] toolResult :: Dexter tmdb= 1405 imdb=tt0773262 first_air=2006-10-01 Dexter: New Blood tmdb= 131927 imdb=tt14164730 first_air=2021-11-07 Dexter: Original Sin tmdb= 219937 imdb=tt32252772 first_air=2024-12-15 Dexter: Resurrection tmdb= 259909 imdb=tt33043892 first_air=2025-07-13
+ 285 [14:01:23] assistant :: <TOOL bash> 
+ 286 [14:01:26] toolResult :: SERIES 3162 tt14164730 S 1 E 1 xtream 316123 provider_dur 00:57:52 SERIES 6939 tt32252772 S 1 E 1 xtream 621225 provider_dur 00:50:05 SERIES 7931 tt33043892 S 1 E 1 xtream 668409 provider_dur 00:52:34
+ 287 [14:01:40] assistant :: <TOOL bash> 
+ 288 [14:01:45] toolResult :: New Blood | durata= | introdb={"imdb_id":"tt14164730","media_type":"tv","is_movie":false,"season":1,"episode":1,"intro":null,"recap":null,"outro":{"start_sec":3352,"end_sec":3475,"start_ms":3352000,"end_ms":3475000,"confidence":1,"submission_count":1,"updated_at":"2026-05-18T21:21:29.630Z"},"post_cr
+ 289 [14:02:06] assistant :: **Trovato il caso riproducibile!** Le altre "Dexter" hanno il marker **dentro** il file: | Titolo | Durata reale | IntroDB CREDITS start | Reachable? | |---|---|---|---| | Dexter (2006) | 3050s | 3088s | ❌ oltre EOF | | **Dexter: Original Sin** | **3005.9s** | **2945.0s** | ✅ **61s prima di EOF** | 
+ 290 [14:02:15] toolResult :: ok EPID_ORIGINALSIN=162 === verifica === id seriesId episodeNumber substr(name,1,40) --- -------- ------------- ---------------------------------------- 162 2211 1 Dexter: Original Sin - S01E01 66 3049 1 Dexter - S01E01 - Dexter 67 3049 2 Dexter - S01E02 - Lacrime di coccodrillo 68 3049 3 Dexter - S
+ 291 [14:02:30] assistant :: <TOOL bash> 
+ 292 [14:02:34] toolResult :: ws3.db: 1 file pushed, 0 skipped. 92.7 MB/s (83828736 bytes in 0.863s) ok tt32252772 162|2880
+ 293 [14:02:47] assistant :: DB pronta. Riavvio l'app. | <TOOL bash> 
+ 294 [14:03:10] toolResult :: Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity } 1: it.wavestream.app/.ui.MainActivity >> MAIN
+ 295 [14:03:26] assistant :: <TOOL bash> 
+ 296 [14:03:32] toolResult :: done
+ 297 [14:03:46] assistant :: <TOOL read> 
+ 298 [14:03:46] toolResult :: Read image file [image/png] | [IMAGE]
+ 299 [14:04:04] assistant :: Original Sin non appare in "Continua a guardare" (95,8% è oltre la soglia di completamento). Correggo la `duration` del progresso per farlo trattare come "in corso", mantenendo il resume a 2880s. | <TOOL bash> 
+ 300 [14:04:12] toolResult :: seriesId contentId pos_s dur_s ratio -------- --------- ----- ----- ----- 3049 67 300 3143 0.096 3049 66 3050 3050 1.0 2211 162 2880 4000 0.72 6346 9 16 3438 0.005 ws4.db: 1 file pushed, 0 skipped. 168.2 MB/s (83832832 bytes in 0.475s) pushed
+ 301 [14:04:39] assistant :: <TOOL bash> 
+ 302 [14:05:18] toolResult :: seriesId contentId lastWatchedAt datetime(lastWatchedAt/1000,'unixepoch') -------- --------- ------------- ---------------------------------------- 3049 67 1791559901409 2026-10-09 15:31:41 3049 66 1791559728609 2026-10-09 15:28:48 2211 162 1791554650916 2026-10-09 14:04:10 6346 9 1791216960892 2026
+ 303 [14:05:38] assistant :: <TOOL read> 
+ 304 [14:05:39] toolResult :: Read image file [image/png] | [IMAGE]
+ 305 [14:06:00] assistant :: <TOOL bash> 
+ 306 [14:06:50] toolResult :: seriesId contentId ratio ts -------- --------- ----- ------------------- 2211 162 0.72 2026-10-09 15:32:41 3049 67 0.096 2026-10-09 15:31:41 3049 66 1.0 2026-10-09 15:28:48 6346 9 0.005 2026-10-05 16:16:00 Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity } done
+ 307 [14:07:05] assistant :: <TOOL read> 
+ 308 [14:07:06] toolResult :: Read image file [image/png] | [IMAGE]
+ 309 [14:07:31] assistant :: **"Continua a guardare" → Dexter: Original Sin S1 E1** (18 min rimasti) in focus. Apro. | <TOOL bash> 
+ 310 [14:07:55] toolResult :: it.wavestream.app/.ui.MainActivity
+ 311 [14:08:17] assistant :: 
+ 313 [14:08:32] assistant :: <TOOL read> 
+ 314 [14:08:33] toolResult :: Read image file [image/png] | [IMAGE]
+ 315 [14:08:51] assistant :: Il pulsante è **"Riprendi S1E1"** (resume riconosciuto). Avvio con logcat pulito e monitoro i 65s fino al marker (2945s). | <TOOL bash> 
+ 316 [14:11:28] toolResult :: [1] pos=2893961 rem=111927 [2] pos=2929176 rem=76712 [3] pos=2961814 rem=44074 [4] pos=2969 rem=2805865 [5] pos=2969 rem=2805865 [6] pos=2969 rem=2805865 [7] pos=2969 rem=2805865 [8] pos=2969 rem=2805865
+ 317 [14:12:14] assistant :: <TOOL bash> 
+ 318 [14:12:14] toolResult :: 10-09 16:00:59.044 9427 9427 I CreditsDiag: introdbHit imdb=tt32252772 s=1 e=1 type=CREDITS startMs=2945000 endMs=3005000 confidence=1.0 submissions=1 10-09 16:00:59.156 9427 9427 I CreditsDiag: introdbHit imdb=tt32252772 s=1 e=1 type=INTRO startMs=163000 endMs=243000 confidence=1.0 submissions=1 10
+ 319 [14:12:46] assistant :: **RIPRODOTTO — è esattamente il tuo caso.** Ecco il log chiave: ``` markerFound type=CREDITS startMs=2945000 endMs=3005000 source=EXTERNAL_DB confidence=1.0 markerTrigger pos=2945135 marker=2945000 creditsTrigger armed pos=2945135 remaining=60753 markerStart=2945000 nextEpisodeOverlay fromCredits=tr
+ 320 [14:12:46] toolResult :: Read image file [image/png] | [IMAGE]
+ 321 [14:13:10] assistant :: <TOOL bash> 
+ 322 [14:13:11] toolResult :: 291 10-09 16:00:59.162 9427 9427 I CreditsDiag: markerFound type=CREDITS startMs=2945000 endMs=3005000 source=EXTERNAL_DB confidence=1.0 durationMs=0 10-09 16:01:45.393 9427 9427 I CreditsDiag: markerTrigger pos=2945135 marker=2945000 10-09 16:01:45.393 9427 9427 I CreditsDiag: creditsTrigger armed 
+ 323 [14:13:32] assistant :: <TOOL bash> 
+ 324 [14:13:32] toolResult :: salvato
+ 325 [14:13:57] assistant :: Risposta diretta, perché hai ragione a contestare. ## Dove ho sbagliato io La frase "mancava l'IMDb, quindi IntroDB non veniva interrogata" descriveva **lo stato del DB dell'emulatore**, non il tuo dispositivo. Nel DB dell'emulatore `series 3049 (Dexter)` aveva `tmdbImdbId = NULL` (nessuna enrichmen
+ 326 [14:18:14] user      :: l enrichment tmdb viene fatto perche nelle votazioni c e il voto. quindi viene sempre eseguito. al massimo da tmdb è fallito l enrichment di imdbid. sbaglio?
+ 327 [14:18:35] assistant :: Ottima osservazione, e verificabile con i dati. Controllo quanti serie hanno il voto TMDB ma **non** l'IMDb id. | <TOOL bash> 
+ 328 [14:18:36] toolResult :: === aggregate === totale|7466 con tmdbId|55 con voto TMDB|54 con tmdbImdbId|54 voto TMDB ma NO imdbId|1 tmdbLastFetchAt NOT NULL|54 === serie 3049 Dexter === id name tmdbId tmdbImdbId tmdbVoteAverage tmdbLastFetchAt omdbImdbRating ov ---- --------------------------- ------ ---------- ---------------
+ 329 [14:19:05] assistant :: <TOOL bash> 
+ 330 [14:19:06] toolResult :: tmdb 299939 name: Monster: The Lizzie Borden Story | vote: 7.0 | imdb_id: === SeriesDao: UPDATE parziali / upsert === 97: @Query("UPDATE series SET tmdbPopularity = :popularity WHERE id = :id") 98: suspend fun updatePopularityScore(id: Long, popularity: Float) 135: @Insert(onConflict = OnConflictStr
+ 331 [14:19:39] assistant :: 
+ 333 [14:20:15] assistant :: Il dato decisivo: | <TOOL bash> 
+ 334 [14:20:15] toolResult :: @Query("SELECT * FROM series WHERE playlistId = :playlistId AND xtreamSeriesId = :xtreamSeriesId LIMIT 1") suspend fun getByXtreamId(playlistId: Long, xtreamSeriesId: Int): Series? @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insert(series: Series): Long @Insert(onConflict = OnConfli
+ 335 [14:20:39] assistant :: Hai ragione sul meccanismo, ma i dati dicono che **non è quello che è successo**. Verifica fatta: ## Cosa dicono i dati (DB emulatore, 7466 serie) ``` serie totali 7466 con tmdbId 55 con voto TMDB 54 con tmdbImdbId 54 ← 54 su 54 di quelli con voto voto TMDB ma SENZA imdbId 1 ← l'unica eccezione ``` 
+ 336 [14:22:32] user      :: boh io ho visto il satla sigla anche sull emulatore sinceramente
+ 337 [14:22:57] assistant :: Fammi verificare — questa è una pista importante. Guardo cosa c'era davvero nel DB dell'emulatore **prima** del mio test e come è inizializzato il flag IntroDB. | <TOOL bash> 
+ 338 [14:22:58] toolResult :: === _introDbEnabled: dichiarazione e assegnazioni === 130: private val _introDbEnabled = mutableStateOf(true) 588: _introDbEnabled.value = userPreferences.getIntroDbEnabled() 1789: allowRemote = _introDbEnabled.value, 1820: allowRemote = _introDbEnabled.value, === ordine: loadCreditsMarker vs load p
+ 339 [14:23:17] assistant :: <TOOL bash> 
+ 340 [14:23:17] toolResult :: === Gomorra tt2049116 S1E1 — IntroDB === {"imdb_id":"tt2049116","media_type":"tv","is_movie":false,"season":1,"episode":1,"intro":null,"recap":null,"outro":null,"post_credits":null} === Gomorra tt2049116 S1E2 — IntroDB === {"imdb_id":"tt2049116","media_type":"tv","is_movie":false,"season":1,"episode
+ 341 [14:23:48] assistant :: IntroDB ha **zero dati** per Gomorra (tutti i campi `null`) — quindi la "salta sigla" che hai visto veniva da un'altra parte. Verifico un sospetto forte: cosa fa il refresh della playlist ai dati TMDB. | <TOOL bash> 
+ 342 [14:23:50] toolResult :: Node: .saveSeries() ID: src_main_java_it_wavestream_app_data_repository_playlistrepository_playlistrepository_saveseries Source: src/main/java/it/wavestream/app/data/repository/PlaylistRepository.kt L1060 Type: code Community: Playlist Refresh & Xtream Sync Degree: 5 Connections (5): <-- PlaylistRep
+ 343 [14:24:04] assistant :: <TOOL bash> 
+ 344 [14:24:04] toolResult :: === chi usa upsertByXtream / insertAll(series) === app/src/main/java/it/wavestream/app/data/database/dao/MovieDao.kt:175: suspend fun upsertByXtream(movie: Movie): Long { app/src/main/java/it/wavestream/app/data/database/dao/PlaylistDao.kt:53: suspend fun updateSeriesCount(id: Long, count: Int) app/
+ 345 [14:24:21] assistant :: <TOOL bash> 
+ 346 [14:24:21] toolResult :: === PlaylistRepository 950-1000 === val existing = currentSeriesMap[xtreamId] val categoryName = seriesCategoryMap[ser.categoryId] ?: "Uncategorized" val playlistOrder = (ser.added ?: index.toLong()).toInt() val derivedYear = contentNameParser.extractReleaseYear(ser.name) ?: existing?.year if (exist
+ 347 [14:24:46] assistant :: Ho verificato tutto. Ti do i fatti, e alla fine c'è una domanda. ## Cosa c'era davvero nell'emulatore prima del mio test `watch_progress` conteneva **solo 3 contenuti**: Gomorra S1E1, Gomorra S1E2 e 2 film. `media_segments` aveva **una sola riga**: `CREDITS/DETECTOR` di Gomorra S1E1. Nessun marker I
+ 348 [15:03:16] user      :: era dexter, che stava gia nell hero continue watching
+ 349 [15:04:29] assistant :: Questo cambia una cosa importante: **hai ragione tu e io ho letto male lo stato attuale del DB.** Verifico un punto. | <TOOL bash> 
+ 350 [15:04:32] toolResult :: Node: .enrichHeroContent() ID: src_main_java_it_wavestream_app_ui_loading_loadingactivity_loadingactivity_enrichherocontent Source: src/main/java/it/wavestream/app/ui/loading/LoadingActivity.kt L533 Type: code Community: Loading Activity Bootstrap Degree: 3 Connections (3): <-- LoadingActivity [meth
+ 351 [15:05:37] assistant :: <TOOL bash> 
+ 352 [15:05:37] toolResult :: === writers di _showSkipIntro / introStartMs === app/src/main/java/it/wavestream/app/ui/player/PlayerActivity.kt:1411: introStartMs = start app/src/main/java/it/wavestream/app/ui/player/PlayerActivity.kt:1425: introStartMs = it.first app/src/main/java/it/wavestream/app/ui/player/PlayerActivity.kt:14
+ 353 [15:07:05] assistant :: Verifico una cosa prima di risponderti: le uniche 4 sorgenti possibili della "salta sigla" sono tutte in `PlayerActivity` (marker IntroDB/locale, stima di serie, impronta audio, marcatura manuale) e nel DB attuale nessuna ha dati per Dexter. Ma con l'imdbId iniettato IntroDB ora *è* attiva per Dexte
+ 355 [15:13:45] toolResult :: * daemon not running; starting now at tcp:5037 * daemon started successfully adb.exe: no devices/emulators found error: no devices/emulators found Error: in prepare, no such table: watch_progress Error: in prepare, no such table: playlists Error: in prepare, no such table: watch_progress adb.exe: no
+ 356 [15:13:48] assistant :: 
+ 358 [15:13:52] assistant :: 
+ 360 [15:13:58] assistant :: 
+ 362 [15:14:08] assistant :: 
+ 364 [15:17:08] user      :: riprendi
+ 365 [15:17:41] assistant :: L'emulatore è caduto. Lo riavvio. | <TOOL bash> 
+ 366 [15:17:41] toolResult :: --- tail emu3.log --- INFO | Wait for emulator (pid 13652) 20 seconds to shutdown gracefully before kill;you can set environment variable ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL(in seconds) to change the default value (20 seconds) INFO | Saving with gfxstream=1 INFO | Saving snapshot 'default_boot' u
+ 367 [15:18:22] assistant :: <TOOL bash> 
+ 368 [15:18:55] toolResult :: * daemon not running; starting now at tcp:5037 * daemon started successfully List of devices attached emulator-5554 authorizing INFO | Warning: QObject::connect: (receiver name: 'ToolControls') (:0, ) INFO | Created extended window in 1.230214s INFO | Successfully loaded snapshot 'default_boot' usin
+ 369 [15:19:50] assistant :: <TOOL bash> 
+ 370 [15:19:54] toolResult :: 1 boot=1 List of devices attached emulator-5554 device --- DNS --- PING api.themoviedb.org (18.65.63.37) 56(84) bytes of data.
+ 371 [15:21:10] assistant :: Emulatore di nuovo su con DNS funzionante. Applico il setup per la demo della sigla. | <TOOL bash> 
+ 372 [15:21:23] toolResult :: -rw-r--r-- 1 Gianmarco 197609 83841024 Oct 9 17:21 ws6.db ok === stato attuale === seriesId contentId position duration ts -------- --------- -------- -------- ------------------- 2211 163 1076552 2808834 2026-10-09 16:13:27 2211 162 2968451 3005888 2026-10-09 16:01:59 3049 67 300464 3143064 2026-10
+ 373 [15:21:59] assistant :: <TOOL bash> 
+ 374 [15:23:48] toolResult :: seriesId contentId position duration -------- --------- -------- -------- 3049 66 0 3050080 2211 163 1076552 2808834 2211 162 2968451 3005888 Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity } ok
+ 375 [15:24:01] assistant :: 
+ 376 [15:24:10] user      :: si era buggato, riprova
+ 377 [15:24:37] assistant :: <TOOL read> 
+ 378 [15:24:38] toolResult :: Read image file [image/png] | [IMAGE]
+ 379 [15:25:10] assistant :: Schermo nero: l'app non è partita. Controllo e riprovo. | <TOOL bash> 
+ 381 [15:28:10] toolResult :: adb.exe: no devices/emulators found adb.exe: no devices/emulators found pid= === crash === - waiting for device - Command timed out after 180 seconds
+ 382 [15:28:54] assistant :: <TOOL bash> 
+ 383 [15:28:55] toolResult :: --- emu4.log tail --- INFO | Loading snapshot 'default_boot'... INFO | Warning: QMetaObject::connectSlotsByName: No matching signal for on_rgbcSensorValueWidget_valueChanged() (:0, ) INFO | Warning: QMetaObject::connectSlotsByName: No matching signal for on_posture_valueChanged(int) (:0, ) INFO | Wa
+ 384 [15:29:55] assistant :: L'emulatore viene chiuso quando termina la sessione shell. Lo rilancio **staccato** dalla shell. | <TOOL bash> 
+ 385 [15:30:20] toolResult :: List of devices attached 0 Command exited with code 1
+ 386 [15:31:28] assistant :: <TOOL bash> 
+ 387 [15:31:59] toolResult :: 1 List of devices attached emulator-5554 device
+ 388 [15:33:35] assistant :: Emulatore su e staccato. Attendo il boot e verifico. | <TOOL bash> 
+ 389 [15:33:39] toolResult :: boot ok (1) PING api.themoviedb.org (18.65.63.37) 56(84) bytes of data. --- DB: stato watch_progress --- 3049|66|0 3049|67|300464
+ 390 [15:34:46] assistant :: <TOOL bash> 
+ 391 [15:34:54] toolResult :: ok seriesId contentId position duration -------- --------- -------- -------- 3049 66 0 3050080 2211 163 1076552 2808834 2211 162 2968451 3005888 3049 67 300464 3143064 tt0773262
+ 392 [15:35:28] assistant :: <TOOL bash> 
+ 393 [15:37:13] toolResult :: Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity } it.wavestream.app/.ui.profile.ProfileSelectionActivity
+ 394 [15:37:27] assistant :: <TOOL read> 
+ 395 [15:37:27] toolResult :: Read image file [image/png] | [IMAGE]
+ 396 [15:38:10] assistant :: <TOOL bash> 
+ 397 [15:38:10] toolResult :: pid=10059 --------- beginning of main 10-09 16:30:02.000 10059 10080 D DBCheckpoint: WAL checkpoint completed 10-09 16:30:02.234 10059 10059 D WaveStreamDebug: ProfileSelectionActivity onResume 10-09 16:30:02.497 10059 10090 I EGL_emulation: Opening libGLESv1_CM_emulation.so 10-09 16:30:02.502 10059
+ 398 [15:39:05] assistant :: Rendering rotto dopo il ripristino dello snapshot. Faccio un **cold boot** (senza snapshot). | <TOOL bash> 
+ 399 [15:40:01] toolResult :: OK: killing emulator, bye bye OK 0 List of devices attached emulator-5554 device
+ 400 [15:40:34] assistant :: 
+ 402 [15:42:15] assistant :: <TOOL bash> 
+ 403 [15:42:21] toolResult :: 1 boot=1 PING api.themoviedb.org (108.139.210.27) 56(84) bytes of data. -rw-r--r-- 1 Gianmarco 197609 1693569 Oct 9 17:42 /tmp/boot1.png
+ 404 [15:43:48] assistant :: Rendering OK. Riavvio il flusso. | <TOOL bash> 
+ 405 [15:44:08] toolResult :: 3049|66|0 3049|67|300464 Starting: Intent { cmp=it.wavestream.app/.ui.profile.ProfileSelectionActivity } it.wavestream.app/.ui.profile.ProfileSelectionActivity
+ 406 [15:44:57] assistant :: <TOOL read> 
+ 407 [15:44:57] toolResult :: Read image file [image/png] | [IMAGE]
+ 408 [15:48:31] assistant :: 
+ 410 [15:48:35] assistant :: 
+ 412 [16:24:10] assistant :: 
+ 414 [16:24:43] assistant :: Rendering a posto. Entro nel profilo e vado su "Continua a guardare". | <TOOL bash> 
+ 415 [16:25:04] toolResult :: MAIN (1) ok
+ 416 [16:25:28] assistant :: <TOOL read> 
+ 417 [16:25:28] toolResult :: Read image file [image/png] | [IMAGE]
+ 418 [16:25:29] assistant :: 
+ 420 [16:25:38] user      :: riprendi
+ 421 [16:25:39] assistant :: 
