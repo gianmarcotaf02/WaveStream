@@ -125,8 +125,34 @@ class MediaSegmentRepository @Inject constructor(
             return null
         } ?: return null
 
-        val startMs = remote.resolvedStartMs ?: return null
-        val endMs = remote.resolvedEndMs
+        val rawStartMs = (remote.resolvedStartMs ?: return null).coerceAtLeast(0)
+        val rawEndMs = remote.resolvedEndMs
+        // Validazione contro la durata reale dello stream: un marker misurato su una
+        // release diversa può cadere oltre la fine del file. Quando la durata è nota
+        // qui ri-ancoriamo subito; altrimenti lo farà il player appena la conosce
+        // (il marker resta in cache, ma non viene mai usato oltre l'EOF).
+        var startMs = rawStartMs
+        var endMs = rawEndMs
+        when (val fit = CreditsSegmentEstimator.fitToDuration(rawStartMs, rawEndMs, durationMs)) {
+            is CreditsSegmentEstimator.MarkerFit.Reanchored -> {
+                android.util.Log.i(
+                    "IntroDB",
+                    "segment out-of-range re-anchored: $rawStartMs/$rawEndMs -> " +
+                        "${fit.startMs}/${fit.endMs} (duration=$durationMs)"
+                )
+                startMs = fit.startMs
+                endMs = fit.endMs
+            }
+            CreditsSegmentEstimator.MarkerFit.Unusable -> {
+                android.util.Log.i(
+                    "IntroDB",
+                    "segment unusable, discarded: start=$rawStartMs end=$rawEndMs " +
+                        "duration=$durationMs $imdb s=$season e=$episode type=$type"
+                )
+                return null
+            }
+            is CreditsSegmentEstimator.MarkerFit.InRange -> Unit
+        }
         val segment = MediaSegment(
             contentType = contentType,
             type = type,
