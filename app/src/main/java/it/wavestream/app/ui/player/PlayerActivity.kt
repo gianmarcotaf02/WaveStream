@@ -212,8 +212,7 @@ class PlayerActivity : ComponentActivity() {
     // rischio di saltare un episodio).
     private var contentSwitchInFlight = false
     private var creditsTriggerLogged = false      // Diagnosi: log una volta per episodio
-    private var creditsDetected = false       // Titoli di coda rilevati dall'analisi frame
-    private var creditsDismissed = false      // L'utente ha ignorato l'overlay: non riproporlo per questo contenuto
+    private var creditsDetected = false       // Titoli di coda rilevati dall'analisi frame    private var creditsDismissed = false      // L'utente ha ignorato l'overlay: non riproporlo per questo contenuto
     private var creditsTunnelLogged = false   // Diagnostica Passo 0: log tunneling una volta per playback
     
     // Auto-retry for live channel buffering
