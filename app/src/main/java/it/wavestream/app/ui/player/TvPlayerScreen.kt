@@ -131,9 +131,6 @@ fun TvPlayerScreen(
     onMarkIntro: () -> Unit = {},
     showSkipIntro: Boolean = false,
     onSkipIntro: () -> Unit = {},
-    /** Pulsante "Salta titoli di coda": mostrato mentre si è dentro i credits noti. */
-    showSkipCredits: Boolean = false,
-    onSkipCredits: () -> Unit = {},
     /** Segnale di corroborazione dal monitor audio (Fase 2). */
     audioCandidate: Boolean = false,
     cumulativeSeekSeconds: Int = 0,
@@ -500,18 +497,6 @@ fun TvPlayerScreen(
         if (showSkipIntro && !isMiniPlayer && !isLiveChannel) {
             SkipIntroOverlay(
                 onClick = onSkipIntro,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(32.dp)
-            )
-        }
-
-        // Skip credits overlay (titoli di coda noti da marker/IntroDB). Nascosto quando è
-        // già visibile l'overlay "Prossimo episodio" (stessa posizione, eviterebbe overlap).
-        if (showSkipCredits && nextEpisode == null && !isMiniPlayer && !isLiveChannel) {
-            SkipIntroOverlay(
-                onClick = onSkipCredits,
-                label = "Salta titoli di coda",
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(32.dp)
@@ -2909,8 +2894,9 @@ private fun ModernNextEpisodeOverlay(
         }
     }
 
-    // Il numero segue il countdown reale del player (garantisce i 10 s), mentre l'anello
-    // `progress` resta fluido e continuo.
+    // Il numero segue il countdown reale del player, mentre l'anello `progress` è UNA sola
+    // animazione lineare su `totalCountdown` secondi: cresce in modo continuo (mai a scatti)
+    // e resta sempre coerente col numero e con la durata dichiarata della card.
     val secondsLeft = countdown.coerceAtLeast(0)
 
     GlassSurface(

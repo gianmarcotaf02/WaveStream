@@ -106,7 +106,6 @@ class PlayerActivity : ComponentActivity() {
     private var seriesIntroReference: MediaSegment? = null
     private var introFingerprintActive = false
     private val _showSkipIntro = mutableStateOf(false)
-    private val _showSkipCredits = mutableStateOf(false)
     // Fase 2: esito del monitor audio, passato al watchdog come corroborazione.
     private val _audioCandidate = mutableStateOf(false)
     // Generazione di sessione: si incrementa ad ogni salto indietro e fa ripartire/re-armare
@@ -195,15 +194,14 @@ class PlayerActivity : ComponentActivity() {
     private var hiddenSeekRepeatSeconds = 0
     private var hiddenSeekAccumulatedSeconds = 0
     
-    // Countdown overlay "Prossimo episodio" (uniforme: 15s)
-    private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 15
-    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 15
+    // Countdown overlay "Prossimo episodio" (uniforme: 20s)
+    private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 20
+    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 20
 
-    // L'overlay "Prossimo episodio" scatta solo nella coda finale dell'episodio.
-    // I titoli di coda possono durare 60-100s: armare la card al loro inizio la faceva
-    // comparire troppo presto, coprendo i titoli e saltandoli se non si premeva "Ignora".
-    // Durante i titoli resta il pulsante non invasivo "Salta titoli di coda".
-    private val CREDITS_AUTOPLAY_TAIL_MS = 15_000L
+    // Finestra finale entro cui la card si arma anche senza un marker affidabile
+    // (fallback: ultimi secondi dell'episodio). Combacia col countdown della card, cosi`
+    // anello e numero restano coerenti.
+    private val CREDITS_AUTOPLAY_TAIL_MS = 20_000L
 
     private val progressHandler = Handler(Looper.getMainLooper())
     private val nextEpisodeHandler = Handler(Looper.getMainLooper())
@@ -690,8 +688,6 @@ class PlayerActivity : ComponentActivity() {
                     onMarkIntro = { markIntroNow() },
                     showSkipIntro = _showSkipIntro.value,
                     onSkipIntro = { skipIntro() },
-                    showSkipCredits = _showSkipCredits.value,
-                    onSkipCredits = { skipCredits() },
                     audioCandidate = _audioCandidate.value,
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
@@ -1478,15 +1474,6 @@ class PlayerActivity : ComponentActivity() {
                             is CreditsSegmentEstimator.MarkerFit.InRange -> Unit
                         }
                     }
-                    val cStart = creditsMarkerStartMs
-                    val cEnd = creditsMarkerEndMs
-                    if (cStart != null && cEnd != null && cEnd > cStart) {
-                        val p = player.currentPosition
-                        _showSkipCredits.value = p >= cStart && p < cEnd - 1_500
-                    } else if (_showSkipCredits.value) {
-                        _showSkipCredits.value = false
-                    }
-
                     // Fase 2: arma il monitor audio solo nella finestra finale del VOD.
                     val inCreditsWindow = contentType != ContentType.CHANNEL &&
                         (player.duration - player.currentPosition) <= CreditsDetector.WINDOW_MS
@@ -1517,19 +1504,24 @@ class PlayerActivity : ComponentActivity() {
                             onCreditsDetected()
                         }
                         val remainingMs = player.duration - player.currentPosition
-                        // L'overlay auto-advance non deve comparire all'INIZIO dei titoli di coda:
-                        // si arma solo nella coda finale (CREDITS_AUTOPLAY_TAIL_MS). Durante i
-                        // titoli resta il pulsante "Salta titoli di coda" (sopra), non invasivo.
+                        // La card "PROSSIMO EPISODIO" compare quando iniziano i titoli di coda,
+                        // ma solo se quel momento e` affidabile:
+                        //   - marker raggiunto (IntroDB validato/ri-ancorato, utente, stima serie), oppure
+                        //   - finestra finale dell'episodio (fallback, quando il marker non c'e`).
+                        // Il solo rilevamento euristico del watchdog NON arma la card in anticipo:
+                        // era la causa della card che usciva prima dei titoli di coda veri.
+                        val markerReached = markerStart != null && player.currentPosition >= markerStart
+                        val inFinalTail = remainingMs in 1..CREDITS_AUTOPLAY_TAIL_MS
                         val creditsTrigger = creditsDetected &&
                             _creditsDetectionEnabled.value &&
                             _autoPlayNextEnabled.value &&
-                            remainingMs in 1..CREDITS_AUTOPLAY_TAIL_MS
+                            (markerReached || inFinalTail)
                         if (creditsTrigger && !creditsTriggerLogged) {
                             creditsTriggerLogged = true
                             android.util.Log.i(
                                 "CreditsDiag",
                                 "creditsTrigger armed pos=${player.currentPosition} remaining=$remainingMs " +
-                                    "markerStart=$creditsMarkerStartMs"
+                                    "markerStart=$creditsMarkerStartMs markerReached=$markerReached tail=$inFinalTail"
                             )
                         }
                         if (remainingMs in 1..10_000 || creditsTrigger) {
@@ -1605,7 +1597,6 @@ class PlayerActivity : ComponentActivity() {
         creditsDismissed = false
         nextEpisodeUnavailable = false
         creditsTriggerLogged = false
-        _showSkipCredits.value = false
         creditsAudioMonitor.reset()
         _audioCandidate.value = false
         hideNextEpisodeOverlay() // resetta nextEpisodeTriggered e creditsDetected
@@ -1643,7 +1634,6 @@ class PlayerActivity : ComponentActivity() {
         introFingerprintActive = false
         creditsAudioMonitor.setIntroReference(null)
         _showSkipIntro.value = false
-        _showSkipCredits.value = false
         creditsAudioMonitor.reset()
         creditsAudioMonitor.windowActive = false
         _audioCandidate.value = false
@@ -2011,23 +2001,6 @@ class PlayerActivity : ComponentActivity() {
             player.seekTo(end)
         }
         _showSkipIntro.value = false
-    }
-
-    /**
-     * "Salta titoli di coda": se la fine dei credits è nota salta lì, altrimenti passa
-     * direttamente all'episodio successivo.
-     */
-    private fun skipCredits() {
-        resetAutoPlayCounter()
-        val end = creditsMarkerEndMs
-        if (end != null && ::player.isInitialized && player.duration > 0) {
-            android.util.Log.i("CreditsDiag", "skipCredits to=$end")
-            player.seekTo(end.coerceAtMost(player.duration))
-        } else {
-            android.util.Log.i("CreditsDiag", "skipCredits -> next episode (end unknown)")
-            triggerNextEpisode(fromCredits = true)
-        }
-        _showSkipCredits.value = false
     }
 
     /**
