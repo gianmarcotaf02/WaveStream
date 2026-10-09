@@ -121,3 +121,7 @@ image.png
 
 # Artefatti di reverse engineering / analisi (APK, jadx, fonti decompilate) — MAI versionare
 .re/
+
+# Session dump / file di lavoro pi (mai versionare)
+pi-session-*.html
+.tmp-session/
