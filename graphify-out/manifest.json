@@ -1,1430 +1,1418 @@
 {
-  "app/build.gradle.kts": {
+  "build.gradle.kts": {
     "mtime": 1791405094.0795932,
-    "seen": 1791486191.3282166,
+    "seen": 1791570587.0950987,
     "ast_hash": "2f6c4bf1c69b3782bc0f1368c0d58329",
-    "semantic_hash": "2f6c4bf1c69b3782bc0f1368c0d58329"
+    "semantic_hash": ""
   },
-  "app/release/release/baselineProfiles/0/WaveStream.dm": {
-    "mtime": 1788023644.5154765,
-    "seen": 1791486191.328221,
-    "ast_hash": "8c44b9f660302770b8108cf80be9edfa",
-    "semantic_hash": "8c44b9f660302770b8108cf80be9edfa"
-  },
-  "app/release/release/baselineProfiles/1/WaveStream.dm": {
-    "mtime": 1788023644.6008303,
-    "seen": 1791486191.3282232,
-    "ast_hash": "c9eddb4ca1713b1e6d50733e6764d1e5",
-    "semantic_hash": "c9eddb4ca1713b1e6d50733e6764d1e5"
-  },
-  "app/release/release/output-metadata.json": {
+  "release/release/output-metadata.json": {
     "mtime": 1788023647.780082,
-    "seen": 1791486191.328224,
+    "seen": 1791570587.0951042,
     "ast_hash": "a38d1158ecfd7d50fe142a77a366bb51",
-    "semantic_hash": "a38d1158ecfd7d50fe142a77a366bb51"
+    "semantic_hash": ""
   },
-  "app/src/main/assets/curiosities.json": {
+  "src/main/assets/curiosities.json": {
     "mtime": 1782992045.8585968,
-    "seen": 1791486191.3282251,
+    "seen": 1791570587.095107,
     "ast_hash": "ef1968a8ad99e5afc8ce15c40ca33823",
-    "semantic_hash": "ef1968a8ad99e5afc8ce15c40ca33823"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/WaveStreamApplication.kt": {
+  "src/main/java/it/wavestream/app/WaveStreamApplication.kt": {
     "mtime": 1790609120.1640034,
-    "seen": 1791486191.3282259,
+    "seen": 1791570587.0951083,
     "ast_hash": "09cd940ac3a24f804a545720839efd2e",
-    "semantic_hash": "09cd940ac3a24f804a545720839efd2e"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ai/AiAssistantService.kt": {
+  "src/main/java/it/wavestream/app/ai/AiAssistantService.kt": {
     "mtime": 1788368828.7917676,
-    "seen": 1791486191.3282268,
+    "seen": 1791570587.0951095,
     "ast_hash": "d6a196145916233cdf45ef32fa7d29c3",
-    "semantic_hash": "d6a196145916233cdf45ef32fa7d29c3"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ai/AiModels.kt": {
+  "src/main/java/it/wavestream/app/ai/AiModels.kt": {
     "mtime": 1788368789.201858,
-    "seen": 1791486191.3282275,
+    "seen": 1791570587.0951104,
     "ast_hash": "fe2e68c710b750bf6b7af367764e0693",
-    "semantic_hash": "fe2e68c710b750bf6b7af367764e0693"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ai/AiTools.kt": {
+  "src/main/java/it/wavestream/app/ai/AiTools.kt": {
     "mtime": 1788368882.5487676,
-    "seen": 1791486191.328228,
+    "seen": 1791570587.0951116,
     "ast_hash": "44513047938c67086f197e08f6967777",
-    "semantic_hash": "44513047938c67086f197e08f6967777"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ai/GeminiApiService.kt": {
+  "src/main/java/it/wavestream/app/ai/GeminiApiService.kt": {
     "mtime": 1788368789.201858,
-    "seen": 1791486191.3282292,
+    "seen": 1791570587.0951126,
     "ast_hash": "9b25c1baf589b1ced6f8545f29d47398",
-    "semantic_hash": "9b25c1baf589b1ced6f8545f29d47398"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ai/MovieEndingModels.kt": {
+  "src/main/java/it/wavestream/app/ai/MovieEndingModels.kt": {
     "mtime": 1789690474.0190308,
-    "seen": 1791486191.32823,
+    "seen": 1791570587.0951135,
     "ast_hash": "365d17580c37c585cbb9cea2bcfb51e2",
-    "semantic_hash": "365d17580c37c585cbb9cea2bcfb51e2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ai/MovieEndingRepository.kt": {
+  "src/main/java/it/wavestream/app/ai/MovieEndingRepository.kt": {
     "mtime": 1789730219.0883543,
-    "seen": 1791486191.3282309,
+    "seen": 1791570587.0951142,
     "ast_hash": "b45c581ae91ef03bb3c45b6fef044739",
-    "semantic_hash": "b45c581ae91ef03bb3c45b6fef044739"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ai/OpenRouterService.kt": {
+  "src/main/java/it/wavestream/app/ai/OpenRouterService.kt": {
     "mtime": 1789695150.230815,
-    "seen": 1791486191.3282313,
+    "seen": 1791570587.0951152,
     "ast_hash": "a0afdbc840bbc870b3747f500cd0e376",
-    "semantic_hash": "a0afdbc840bbc870b3747f500cd0e376"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ai/WikipediaService.kt": {
+  "src/main/java/it/wavestream/app/ai/WikipediaService.kt": {
     "mtime": 1789727694.6789792,
-    "seen": 1791486191.3282323,
+    "seen": 1791570587.0951164,
     "ast_hash": "5f602d75a98a541a6f29530bcaf02ddf",
-    "semantic_hash": "5f602d75a98a541a6f29530bcaf02ddf"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/assistant/NovaFeature.kt": {
+  "src/main/java/it/wavestream/app/assistant/NovaFeature.kt": {
     "mtime": 1789600011.3471606,
-    "seen": 1791486191.328233,
+    "seen": 1791570587.0951176,
     "ast_hash": "c5bdc2831a53751033f50e22405d8eff",
-    "semantic_hash": "c5bdc2831a53751033f50e22405d8eff"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/credits/AudioFingerprintCodec.kt": {
+  "src/main/java/it/wavestream/app/credits/AudioFingerprintCodec.kt": {
     "mtime": 1789427118.712271,
-    "seen": 1791486191.3282337,
+    "seen": 1791570587.0951185,
     "ast_hash": "a661d4b36bcf52f5d3b49e74edc42315",
-    "semantic_hash": "a661d4b36bcf52f5d3b49e74edc42315"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/credits/CreditsAudioMonitor.kt": {
+  "src/main/java/it/wavestream/app/credits/CreditsAudioMonitor.kt": {
     "mtime": 1789428134.3844476,
-    "seen": 1791486191.3282344,
+    "seen": 1791570587.0951195,
     "ast_hash": "1417c1270217943903359d2a4f27906f",
-    "semantic_hash": "1417c1270217943903359d2a4f27906f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/credits/CreditsRenderersFactory.kt": {
+  "src/main/java/it/wavestream/app/credits/CreditsRenderersFactory.kt": {
     "mtime": 1789403325.3593166,
-    "seen": 1791486191.3282351,
+    "seen": 1791570587.0951204,
     "ast_hash": "22bba6574dde2dd0b197e6820e0b19b5",
-    "semantic_hash": "22bba6574dde2dd0b197e6820e0b19b5"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/api/CinemetaService.kt": {
+  "src/main/java/it/wavestream/app/data/api/CinemetaService.kt": {
     "mtime": 1788360255.1128602,
-    "seen": 1791486191.328236,
+    "seen": 1791570587.0951214,
     "ast_hash": "916ea77d994da84d913a4d9fd157cba8",
-    "semantic_hash": "916ea77d994da84d913a4d9fd157cba8"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/api/FootballDataService.kt": {
+  "src/main/java/it/wavestream/app/data/api/FootballDataService.kt": {
     "mtime": 1788546315.5620174,
-    "seen": 1791486191.3282368,
+    "seen": 1791570587.095122,
     "ast_hash": "f135cff8b891d8b8ffc13d91ed247a8f",
-    "semantic_hash": "f135cff8b891d8b8ffc13d91ed247a8f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/api/IntroDbService.kt": {
+  "src/main/java/it/wavestream/app/data/api/IntroDbService.kt": {
     "mtime": 1789993675.6254165,
-    "seen": 1791486191.3282375,
+    "seen": 1791570587.095123,
     "ast_hash": "7db7cffb7472fd850ccf8b6074d8bf9a",
-    "semantic_hash": "7db7cffb7472fd850ccf8b6074d8bf9a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/api/OmdbService.kt": {
+  "src/main/java/it/wavestream/app/data/api/OmdbService.kt": {
     "mtime": 1779463926.831725,
-    "seen": 1791486191.328238,
+    "seen": 1791570587.095124,
     "ast_hash": "521f5727e57e694ca99782cddd390b8c",
-    "semantic_hash": "521f5727e57e694ca99782cddd390b8c"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/api/OpenSubtitlesService.kt": {
+  "src/main/java/it/wavestream/app/data/api/OpenSubtitlesService.kt": {
     "mtime": 1779549394.6869738,
-    "seen": 1791486191.3282397,
+    "seen": 1791570587.095125,
     "ast_hash": "13c962f65900bb0aaa0b6b63e71120b1",
-    "semantic_hash": "13c962f65900bb0aaa0b6b63e71120b1"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/api/SofascoreService.kt": {
+  "src/main/java/it/wavestream/app/data/api/SofascoreService.kt": {
     "mtime": 1788618146.0242615,
-    "seen": 1791486191.3282404,
+    "seen": 1791570587.0951257,
     "ast_hash": "7f9958cf3c4a1552535c9574082f2744",
-    "semantic_hash": "7f9958cf3c4a1552535c9574082f2744"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/api/TMDBApiService.kt": {
+  "src/main/java/it/wavestream/app/data/api/TMDBApiService.kt": {
     "mtime": 1782997864.9522605,
-    "seen": 1791486191.3282409,
+    "seen": 1791570587.0951273,
     "ast_hash": "a2b81fa2e1319fd9ef2589b25bdf135e",
-    "semantic_hash": "a2b81fa2e1319fd9ef2589b25bdf135e"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/api/XtreamApiService.kt": {
+  "src/main/java/it/wavestream/app/data/api/XtreamApiService.kt": {
     "mtime": 1779463926.8743098,
-    "seen": 1791486191.3282418,
+    "seen": 1791570587.095128,
     "ast_hash": "9ef46c294f6a7f277ebd47c57c1e907f",
-    "semantic_hash": "9ef46c294f6a7f277ebd47c57c1e907f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/cache/CacheManager.kt": {
+  "src/main/java/it/wavestream/app/data/cache/CacheManager.kt": {
     "mtime": 1779463926.885495,
-    "seen": 1791486191.3282425,
+    "seen": 1791570587.095129,
     "ast_hash": "2e51d185831310fc885f8ab43e00cdf6",
-    "semantic_hash": "2e51d185831310fc885f8ab43e00cdf6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/cache/ContentCache.kt": {
+  "src/main/java/it/wavestream/app/data/cache/ContentCache.kt": {
     "mtime": 1787929786.1233745,
-    "seen": 1791486191.3282433,
+    "seen": 1791570587.0951302,
     "ast_hash": "71f6962bae159ec61111531ae75eda0b",
-    "semantic_hash": "71f6962bae159ec61111531ae75eda0b"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/cache/DiskCache.kt": {
+  "src/main/java/it/wavestream/app/data/cache/DiskCache.kt": {
     "mtime": 1789727694.659099,
-    "seen": 1791486191.328244,
+    "seen": 1791570587.095131,
     "ast_hash": "9393d6ca8af089eba5e6e150e5ec60b1",
-    "semantic_hash": "9393d6ca8af089eba5e6e150e5ec60b1"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/cache/HttpCacheProvider.kt": {
+  "src/main/java/it/wavestream/app/data/cache/HttpCacheProvider.kt": {
     "mtime": 1779463926.9239147,
-    "seen": 1791486191.3282447,
+    "seen": 1791570587.0951316,
     "ast_hash": "3a6e6c8993e72689614902e6f2e23a5a",
-    "semantic_hash": "3a6e6c8993e72689614902e6f2e23a5a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/cache/NetworkMonitor.kt": {
+  "src/main/java/it/wavestream/app/data/cache/NetworkMonitor.kt": {
     "mtime": 1779463926.9319155,
-    "seen": 1791486191.3282454,
+    "seen": 1791570587.0951326,
     "ast_hash": "581caefd81b578dd8e140acf2e9a7f66",
-    "semantic_hash": "581caefd81b578dd8e140acf2e9a7f66"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/AppDatabase.kt": {
+  "src/main/java/it/wavestream/app/data/database/AppDatabase.kt": {
     "mtime": 1790860477.735774,
-    "seen": 1791486191.3282464,
+    "seen": 1791570587.0951335,
     "ast_hash": "e5f1c86da97f379de5a2f69602e0ffc0",
-    "semantic_hash": "e5f1c86da97f379de5a2f69602e0ffc0"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/Converters.kt": {
+  "src/main/java/it/wavestream/app/data/database/Converters.kt": {
     "mtime": 1789333246.0064802,
-    "seen": 1791486191.3282468,
+    "seen": 1791570587.0951345,
     "ast_hash": "91d8c21b1fa29ee6fe2f33c68c06e7e6",
-    "semantic_hash": "91d8c21b1fa29ee6fe2f33c68c06e7e6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/DatabaseCheckpointManager.kt": {
+  "src/main/java/it/wavestream/app/data/database/DatabaseCheckpointManager.kt": {
     "mtime": 1790528442.1000392,
-    "seen": 1791486191.3282478,
+    "seen": 1791570587.0951352,
     "ast_hash": "a0d9a0612e7b505b53a45a9f3396ae29",
-    "semantic_hash": "a0d9a0612e7b505b53a45a9f3396ae29"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/CategoryDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/CategoryDao.kt": {
     "mtime": 1779463926.9763968,
-    "seen": 1791486191.3282483,
+    "seen": 1791570587.0951362,
     "ast_hash": "50f280f1b0785c93a784c6ecd86a551e",
-    "semantic_hash": "50f280f1b0785c93a784c6ecd86a551e"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/ChannelDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/ChannelDao.kt": {
     "mtime": 1790012445.6915817,
-    "seen": 1791486191.328249,
+    "seen": 1791570587.0951371,
     "ast_hash": "34628c1910cb98f3660d0425e6343f02",
-    "semantic_hash": "34628c1910cb98f3660d0425e6343f02"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/CustomGroupDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/CustomGroupDao.kt": {
     "mtime": 1779463926.9957004,
-    "seen": 1791486191.32825,
+    "seen": 1791570587.0951378,
     "ast_hash": "78baf12e6fbfdb1b671c63996e8e44f0",
-    "semantic_hash": "78baf12e6fbfdb1b671c63996e8e44f0"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/DownloadDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/DownloadDao.kt": {
     "mtime": 1779463927.0112185,
-    "seen": 1791486191.3282506,
+    "seen": 1791570587.0951388,
     "ast_hash": "9acd97a34d667a8d8c341c90ef950dd3",
-    "semantic_hash": "9acd97a34d667a8d8c341c90ef950dd3"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/DownloadedContentDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/DownloadedContentDao.kt": {
     "mtime": 1779463927.0242174,
-    "seen": 1791486191.3282514,
+    "seen": 1791570587.0951395,
     "ast_hash": "e11f8be02cf8ef0a2a66392250dc4356",
-    "semantic_hash": "e11f8be02cf8ef0a2a66392250dc4356"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/EPGDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/EPGDao.kt": {
     "mtime": 1787752187.133034,
-    "seen": 1791486191.328252,
+    "seen": 1791570587.0951407,
     "ast_hash": "1130900a4abef3bca73d1179114d6d61",
-    "semantic_hash": "1130900a4abef3bca73d1179114d6d61"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/EpisodeDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/EpisodeDao.kt": {
     "mtime": 1789304840.28084,
-    "seen": 1791486191.328253,
+    "seen": 1791570587.0951414,
     "ast_hash": "29ae467735c4559ddcc96dc707a53888",
-    "semantic_hash": "29ae467735c4559ddcc96dc707a53888"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/FavoriteCategoryDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/FavoriteCategoryDao.kt": {
     "mtime": 1779463927.0437608,
-    "seen": 1791486191.3282537,
+    "seen": 1791570587.0951424,
     "ast_hash": "1246a694deab81fdcfb51c754bbb5b6b",
-    "semantic_hash": "1246a694deab81fdcfb51c754bbb5b6b"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/FavoriteDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/FavoriteDao.kt": {
     "mtime": 1779463927.0507524,
-    "seen": 1791486191.3282542,
+    "seen": 1791570587.095143,
     "ast_hash": "7f82ae9e87040a1afcb772cf346fe8a8",
-    "semantic_hash": "7f82ae9e87040a1afcb772cf346fe8a8"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/FtsSearchDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/FtsSearchDao.kt": {
     "mtime": 1787751229.227917,
-    "seen": 1791486191.3282554,
+    "seen": 1791570587.0951443,
     "ast_hash": "edc24f63e1c86662bfb6c32297614d73",
-    "semantic_hash": "edc24f63e1c86662bfb6c32297614d73"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/HomeSessionCacheDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/HomeSessionCacheDao.kt": {
     "mtime": 1783334319.775884,
-    "seen": 1791486191.3282566,
+    "seen": 1791570587.095145,
     "ast_hash": "0214021248837268416740132a9e2e95",
-    "semantic_hash": "0214021248837268416740132a9e2e95"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/MediaSegmentDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/MediaSegmentDao.kt": {
     "mtime": 1789994229.2577462,
-    "seen": 1791486191.3282573,
+    "seen": 1791570587.0951462,
     "ast_hash": "8d395ea4ba4aa06b53d5855304f14cd6",
-    "semantic_hash": "8d395ea4ba4aa06b53d5855304f14cd6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/MergeDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/MergeDao.kt": {
     "mtime": 1790085338.5492113,
-    "seen": 1791486191.3282578,
+    "seen": 1791570587.0951474,
     "ast_hash": "d1cacd378018cf427d2c1f947cd54dd2",
-    "semantic_hash": "d1cacd378018cf427d2c1f947cd54dd2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/MovieCategoryDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/MovieCategoryDao.kt": {
     "mtime": 1790085015.4028563,
-    "seen": 1791486191.3282585,
+    "seen": 1791570587.095148,
     "ast_hash": "8f2ffaf76a207dbea85229c57d84db50",
-    "semantic_hash": "8f2ffaf76a207dbea85229c57d84db50"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/MovieDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/MovieDao.kt": {
     "mtime": 1790593317.0777054,
-    "seen": 1791486191.3282592,
+    "seen": 1791570587.095149,
     "ast_hash": "831f48285814d3dbf1a7b18d3d0f9c27",
-    "semantic_hash": "831f48285814d3dbf1a7b18d3d0f9c27"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/PlaylistDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/PlaylistDao.kt": {
     "mtime": 1779463927.0688426,
-    "seen": 1791486191.3282602,
+    "seen": 1791570587.0951498,
     "ast_hash": "b2d63ad7d22abcb5ffbaf5fc498942cb",
-    "semantic_hash": "b2d63ad7d22abcb5ffbaf5fc498942cb"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/ProfileDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/ProfileDao.kt": {
     "mtime": 1779463927.0757527,
-    "seen": 1791486191.328261,
+    "seen": 1791570587.095151,
     "ast_hash": "0c733f392e8a37231ca8864cd1c72296",
-    "semantic_hash": "0c733f392e8a37231ca8864cd1c72296"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/RecentlyWatchedDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/RecentlyWatchedDao.kt": {
     "mtime": 1789401079.0005279,
-    "seen": 1791486191.3282616,
+    "seen": 1791570587.0951517,
     "ast_hash": "b0fdd452f2afd2bea070165209f4646b",
-    "semantic_hash": "b0fdd452f2afd2bea070165209f4646b"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/SerieAMatchDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/SerieAMatchDao.kt": {
     "mtime": 1788576618.9743893,
-    "seen": 1791486191.3282623,
+    "seen": 1791570587.0951526,
     "ast_hash": "0d33508de87e6d7d97884d7a498dbc13",
-    "semantic_hash": "0d33508de87e6d7d97884d7a498dbc13"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/SerieATeamChannelDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/SerieATeamChannelDao.kt": {
     "mtime": 1789427382.0518377,
-    "seen": 1791486191.3282633,
+    "seen": 1791570587.0951533,
     "ast_hash": "a425d78cf18cacbe726d36fdfc4e1a63",
-    "semantic_hash": "a425d78cf18cacbe726d36fdfc4e1a63"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/SeriesDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/SeriesDao.kt": {
     "mtime": 1790386976.5939524,
-    "seen": 1791486191.328264,
+    "seen": 1791570587.0951548,
     "ast_hash": "581c9107edbef5e53ca2dfda9dd604c9",
-    "semantic_hash": "581c9107edbef5e53ca2dfda9dd604c9"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/StreamProviderDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/StreamProviderDao.kt": {
     "mtime": 1790339928.631423,
-    "seen": 1791486191.3282647,
+    "seen": 1791570587.0951555,
     "ast_hash": "5ca4da5f1f6c9e1bfd3441f56c2bcf4a",
-    "semantic_hash": "5ca4da5f1f6c9e1bfd3441f56c2bcf4a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/TMDBCacheDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/TMDBCacheDao.kt": {
     "mtime": 1779463927.114168,
-    "seen": 1791486191.3282654,
+    "seen": 1791570587.0951564,
     "ast_hash": "a5f16c4fe13602be545f4ba878cb448a",
-    "semantic_hash": "a5f16c4fe13602be545f4ba878cb448a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/UserTasteDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/UserTasteDao.kt": {
     "mtime": 1779468415.1687257,
-    "seen": 1791486191.3282661,
+    "seen": 1791570587.0951571,
     "ast_hash": "ad8b33dc1c6b7969512f6761b87288ff",
-    "semantic_hash": "ad8b33dc1c6b7969512f6761b87288ff"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/WatchProgressDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/WatchProgressDao.kt": {
     "mtime": 1790612162.1714792,
-    "seen": 1791486191.328267,
+    "seen": 1791570587.0951583,
     "ast_hash": "60fcca26b657f165be6c1ef35b424772",
-    "semantic_hash": "60fcca26b657f165be6c1ef35b424772"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/dao/WatchStateDao.kt": {
+  "src/main/java/it/wavestream/app/data/database/dao/WatchStateDao.kt": {
     "mtime": 1779463927.1281652,
-    "seen": 1791486191.3282678,
+    "seen": 1791570587.095159,
     "ast_hash": "1224b6e954041cfcd8db0302c5d91335",
-    "semantic_hash": "1224b6e954041cfcd8db0302c5d91335"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Category.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Category.kt": {
     "mtime": 1779463927.1364093,
-    "seen": 1791486191.3282685,
+    "seen": 1791570587.0951598,
     "ast_hash": "7806d6024577a4b0dcb547839725e662",
-    "semantic_hash": "7806d6024577a4b0dcb547839725e662"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Channel.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Channel.kt": {
     "mtime": 1779463927.1460607,
-    "seen": 1791486191.3282692,
+    "seen": 1791570587.0951607,
     "ast_hash": "ae0b953a41dcd724e5017ed8ea14e4ca",
-    "semantic_hash": "ae0b953a41dcd724e5017ed8ea14e4ca"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/ContinueWatchingItem.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/ContinueWatchingItem.kt": {
     "mtime": 1779463927.1530714,
-    "seen": 1791486191.3282702,
+    "seen": 1791570587.0951617,
     "ast_hash": "111db283be218d7a9d067c0a8bd0b9da",
-    "semantic_hash": "111db283be218d7a9d067c0a8bd0b9da"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/CustomGroup.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/CustomGroup.kt": {
     "mtime": 1779463927.161432,
-    "seen": 1791486191.328271,
+    "seen": 1791570587.0951626,
     "ast_hash": "cde458f00dbb6c263c3200ed23c431fa",
-    "semantic_hash": "cde458f00dbb6c263c3200ed23c431fa"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Download.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Download.kt": {
     "mtime": 1779463927.1694317,
-    "seen": 1791486191.3282716,
+    "seen": 1791570587.0951633,
     "ast_hash": "0dc35842f8f1ba7b41ca8cd034e1ee86",
-    "semantic_hash": "0dc35842f8f1ba7b41ca8cd034e1ee86"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/DownloadedContent.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/DownloadedContent.kt": {
     "mtime": 1779463927.1774316,
-    "seen": 1791486191.3282723,
+    "seen": 1791570587.0951643,
     "ast_hash": "65dc28028d1711f29a9473b5bed22eec",
-    "semantic_hash": "65dc28028d1711f29a9473b5bed22eec"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/EPGProgram.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/EPGProgram.kt": {
     "mtime": 1779463927.2190878,
-    "seen": 1791486191.3282733,
+    "seen": 1791570587.0951653,
     "ast_hash": "bbf634600d2cf27d761c3292fd62923c",
-    "semantic_hash": "bbf634600d2cf27d761c3292fd62923c"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Enums.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Enums.kt": {
     "mtime": 1779463927.1844316,
-    "seen": 1791486191.3282743,
+    "seen": 1791570587.0951662,
     "ast_hash": "e60e02255d55d73a53d244a0af81e264",
-    "semantic_hash": "e60e02255d55d73a53d244a0af81e264"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Episode.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Episode.kt": {
     "mtime": 1780316723.6844819,
-    "seen": 1791486191.328275,
+    "seen": 1791570587.095167,
     "ast_hash": "c36c69d264b73d6cc6f2d9736b83a19b",
-    "semantic_hash": "c36c69d264b73d6cc6f2d9736b83a19b"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Favorite.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Favorite.kt": {
     "mtime": 1782742486.2147305,
-    "seen": 1791486191.3282757,
+    "seen": 1791570587.095168,
     "ast_hash": "fea8abf8cc4f7f50b16f8504f783601f",
-    "semantic_hash": "fea8abf8cc4f7f50b16f8504f783601f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/FavoriteCategory.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/FavoriteCategory.kt": {
     "mtime": 1779463927.251107,
-    "seen": 1791486191.3282764,
+    "seen": 1791570587.095169,
     "ast_hash": "d514f021f94cc71a6f76e245fb232119",
-    "semantic_hash": "d514f021f94cc71a6f76e245fb232119"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/GroupItem.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/GroupItem.kt": {
     "mtime": 1779463927.2581048,
-    "seen": 1791486191.3282773,
+    "seen": 1791570587.0951698,
     "ast_hash": "6d343932377b85d43f04651e473ec9c5",
-    "semantic_hash": "6d343932377b85d43f04651e473ec9c5"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/HomeSessionCacheEntity.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/HomeSessionCacheEntity.kt": {
     "mtime": 1783334155.9301488,
-    "seen": 1791486191.328278,
+    "seen": 1791570587.0951707,
     "ast_hash": "6363779fd36d7476fa95e825ddf74fd1",
-    "semantic_hash": "6363779fd36d7476fa95e825ddf74fd1"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/MediaSegment.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/MediaSegment.kt": {
     "mtime": 1789410664.3413663,
-    "seen": 1791486191.3282788,
+    "seen": 1791570587.0951717,
     "ast_hash": "85ae2c52864974d189ad669e5c4001e6",
-    "semantic_hash": "85ae2c52864974d189ad669e5c4001e6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Movie.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Movie.kt": {
     "mtime": 1790559636.7028787,
-    "seen": 1791486191.3282795,
+    "seen": 1791570587.0951726,
     "ast_hash": "0d5aad0717af427058f46bcc7210ec14",
-    "semantic_hash": "0d5aad0717af427058f46bcc7210ec14"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/MovieCategory.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/MovieCategory.kt": {
     "mtime": 1790084995.7815013,
-    "seen": 1791486191.3282802,
+    "seen": 1791570587.0951734,
     "ast_hash": "c12944ae603bcd88026a70e7e7dd4c6b",
-    "semantic_hash": "c12944ae603bcd88026a70e7e7dd4c6b"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Playlist.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Playlist.kt": {
     "mtime": 1779463927.276539,
-    "seen": 1791486191.3282812,
+    "seen": 1791570587.0951743,
     "ast_hash": "257d0e3b30f19697dc7575a8c0f47732",
-    "semantic_hash": "257d0e3b30f19697dc7575a8c0f47732"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Profile.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Profile.kt": {
     "mtime": 1779468402.152109,
-    "seen": 1791486191.3282819,
+    "seen": 1791570587.0951755,
     "ast_hash": "47c37c640595ab79590fb5fde752f460",
-    "semantic_hash": "47c37c640595ab79590fb5fde752f460"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/RecentlyWatchedChannel.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/RecentlyWatchedChannel.kt": {
     "mtime": 1779463927.289543,
-    "seen": 1791486191.3282828,
+    "seen": 1791570587.0951762,
     "ast_hash": "e213eabca30b2842c6650e9c50618540",
-    "semantic_hash": "e213eabca30b2842c6650e9c50618540"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/SerieAMatchEntity.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/SerieAMatchEntity.kt": {
     "mtime": 1788550227.9557345,
-    "seen": 1791486191.3282835,
+    "seen": 1791570587.0951772,
     "ast_hash": "bab4eb0baff572b2978bbdb444e95116",
-    "semantic_hash": "bab4eb0baff572b2978bbdb444e95116"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/SerieATeamChannelEntity.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/SerieATeamChannelEntity.kt": {
     "mtime": 1788617732.5856018,
-    "seen": 1791486191.3282845,
+    "seen": 1791570587.095178,
     "ast_hash": "8c1eee9117cac476374d8ee286a66e99",
-    "semantic_hash": "8c1eee9117cac476374d8ee286a66e99"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/Series.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/Series.kt": {
     "mtime": 1790860453.3848808,
-    "seen": 1791486191.3282852,
+    "seen": 1791570587.095179,
     "ast_hash": "6ac3400b9ef7036748dfcfbd94362959",
-    "semantic_hash": "6ac3400b9ef7036748dfcfbd94362959"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/StreamProvider.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/StreamProvider.kt": {
     "mtime": 1790173145.0150697,
-    "seen": 1791486191.328286,
+    "seen": 1791570587.09518,
     "ast_hash": "a19bd4fc1190b2d6d507b727852246fa",
-    "semantic_hash": "a19bd4fc1190b2d6d507b727852246fa"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/TMDBCache.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/TMDBCache.kt": {
     "mtime": 1779463927.3210669,
-    "seen": 1791486191.3282866,
+    "seen": 1791570587.0951807,
     "ast_hash": "1c9a9abcf2e876d17a9642a94c278031",
-    "semantic_hash": "1c9a9abcf2e876d17a9642a94c278031"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/TasteStatus.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/TasteStatus.kt": {
     "mtime": 1779468396.6362453,
-    "seen": 1791486191.3282876,
+    "seen": 1791570587.095182,
     "ast_hash": "bd2bbfced08704027f2305a91dfe58d3",
-    "semantic_hash": "bd2bbfced08704027f2305a91dfe58d3"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/UserTaste.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/UserTaste.kt": {
     "mtime": 1779468398.4319217,
-    "seen": 1791486191.3282883,
+    "seen": 1791570587.095183,
     "ast_hash": "44f5b096569856f8d3c61c212198dbca",
-    "semantic_hash": "44f5b096569856f8d3c61c212198dbca"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/WatchProgress.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/WatchProgress.kt": {
     "mtime": 1790609123.8422568,
-    "seen": 1791486191.3282895,
+    "seen": 1791570587.0951836,
     "ast_hash": "42c413fb1bfab1e2503d13915e2fca5f",
-    "semantic_hash": "42c413fb1bfab1e2503d13915e2fca5f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/database/entity/WatchState.kt": {
+  "src/main/java/it/wavestream/app/data/database/entity/WatchState.kt": {
     "mtime": 1779463927.3450687,
-    "seen": 1791486191.3282902,
+    "seen": 1791570587.0951846,
     "ast_hash": "97f71169540d91b78cc7c1bd9f666b21",
-    "semantic_hash": "97f71169540d91b78cc7c1bd9f666b21"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/entity/PersonInfo.kt": {
+  "src/main/java/it/wavestream/app/data/entity/PersonInfo.kt": {
     "mtime": 1779993433.0336232,
-    "seen": 1791486191.3282912,
+    "seen": 1791570587.0951862,
     "ast_hash": "3282a962641929799d73023ee7fb940b",
-    "semantic_hash": "3282a962641929799d73023ee7fb940b"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/parser/ContentKey.kt": {
+  "src/main/java/it/wavestream/app/data/parser/ContentKey.kt": {
     "mtime": 1790509969.184618,
-    "seen": 1791486191.328292,
+    "seen": 1791570587.095187,
     "ast_hash": "6ac9c374e7803e4e91093aa40f92d578",
-    "semantic_hash": "6ac9c374e7803e4e91093aa40f92d578"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/parser/ContentNameParser.kt": {
+  "src/main/java/it/wavestream/app/data/parser/ContentNameParser.kt": {
     "mtime": 1790593656.2767704,
-    "seen": 1791486191.3282926,
+    "seen": 1791570587.095188,
     "ast_hash": "c1e94bf8805ebe1111902edf3e2530a3",
-    "semantic_hash": "c1e94bf8805ebe1111902edf3e2530a3"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/parser/EPGParser.kt": {
+  "src/main/java/it/wavestream/app/data/parser/EPGParser.kt": {
     "mtime": 1779463927.4087546,
-    "seen": 1791486191.3282933,
+    "seen": 1791570587.0951886,
     "ast_hash": "cd92f625837d012bd853de8a0d8deb9f",
-    "semantic_hash": "cd92f625837d012bd853de8a0d8deb9f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/parser/M3UParser.kt": {
+  "src/main/java/it/wavestream/app/data/parser/M3UParser.kt": {
     "mtime": 1780240417.5765965,
-    "seen": 1791486191.3282938,
+    "seen": 1791570587.0951898,
     "ast_hash": "859164dc8ebc0583667063a1fbba6a9c",
-    "semantic_hash": "859164dc8ebc0583667063a1fbba6a9c"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/parser/SerieATeamAliases.kt": {
+  "src/main/java/it/wavestream/app/data/parser/SerieATeamAliases.kt": {
     "mtime": 1788709681.6458838,
-    "seen": 1791486191.328295,
+    "seen": 1791570587.0951908,
     "ast_hash": "6c2027620d0a0501db753510f7a5ed24",
-    "semantic_hash": "6c2027620d0a0501db753510f7a5ed24"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/parser/XtreamParser.kt": {
+  "src/main/java/it/wavestream/app/data/parser/XtreamParser.kt": {
     "mtime": 1789587990.1512172,
-    "seen": 1791486191.3282957,
+    "seen": 1791570587.0951915,
     "ast_hash": "c736858b6ac46bdd19c0bc01abc3b5c2",
-    "semantic_hash": "c736858b6ac46bdd19c0bc01abc3b5c2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/preferences/UserPreferences.kt": {
+  "src/main/java/it/wavestream/app/data/preferences/UserPreferences.kt": {
     "mtime": 1790616166.7618308,
-    "seen": 1791486191.3282964,
+    "seen": 1791570587.0951927,
     "ast_hash": "69790fd09da3988124389ca2207bd2ce",
-    "semantic_hash": "69790fd09da3988124389ca2207bd2ce"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/BackupRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/BackupRepository.kt": {
     "mtime": 1779464028.7736478,
-    "seen": 1791486191.3282971,
+    "seen": 1791570587.0951936,
     "ast_hash": "dd9209be31fa5637762509f77d3d1f8f",
-    "semantic_hash": "dd9209be31fa5637762509f77d3d1f8f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/CreditsSegmentEstimator.kt": {
-    "mtime": 1789994085.8229537,
-    "seen": 1791486191.328298,
-    "ast_hash": "1126272720f1922124852b886da7bfcd",
-    "semantic_hash": "1126272720f1922124852b886da7bfcd"
+  "src/main/java/it/wavestream/app/data/repository/CreditsSegmentEstimator.kt": {
+    "mtime": 1791563608.166368,
+    "seen": 1791570587.0951943,
+    "ast_hash": "407bc97b312fa12c00f66e5ca272ef1c",
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/DownloadContentManager.kt": {
+  "src/main/java/it/wavestream/app/data/repository/DownloadContentManager.kt": {
     "mtime": 1779463927.573246,
-    "seen": 1791486191.3282988,
+    "seen": 1791570587.0951953,
     "ast_hash": "a4d14b5272e7fc792ff51ec5a99d3e82",
-    "semantic_hash": "a4d14b5272e7fc792ff51ec5a99d3e82"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/EpgRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/EpgRepository.kt": {
     "mtime": 1787752200.230533,
-    "seen": 1791486191.3282995,
+    "seen": 1791570587.0951962,
     "ast_hash": "bfa4adee170dfdbe25e57984f6dd1a69",
-    "semantic_hash": "bfa4adee170dfdbe25e57984f6dd1a69"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/FtsSearchRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/FtsSearchRepository.kt": {
     "mtime": 1787796032.6296568,
-    "seen": 1791486191.3283002,
+    "seen": 1791570587.0951972,
     "ast_hash": "03d94073fb5b7a4b1f71313e40ed5669",
-    "semantic_hash": "03d94073fb5b7a4b1f71313e40ed5669"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/ImdbRatingsRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/ImdbRatingsRepository.kt": {
     "mtime": 1790614660.2771049,
-    "seen": 1791486191.328301,
+    "seen": 1791570587.0951982,
     "ast_hash": "6bacb641e045f4a89f8bfa9a02538ea5",
-    "semantic_hash": "6bacb641e045f4a89f8bfa9a02538ea5"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/ImdbScraper.kt": {
+  "src/main/java/it/wavestream/app/data/repository/ImdbScraper.kt": {
     "mtime": 1790614036.3398807,
-    "seen": 1791486191.328302,
+    "seen": 1791570587.0951989,
     "ast_hash": "593bc79ce34c9c662ab95bcbc9e023cd",
-    "semantic_hash": "593bc79ce34c9c662ab95bcbc9e023cd"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/MediaSegmentRepository.kt": {
-    "mtime": 1789994229.2577462,
-    "seen": 1791486191.3283026,
-    "ast_hash": "adf43f1a9e9a4a25edb15b69fb572a0a",
-    "semantic_hash": "adf43f1a9e9a4a25edb15b69fb572a0a"
+  "src/main/java/it/wavestream/app/data/repository/MediaSegmentRepository.kt": {
+    "mtime": 1791563616.8846333,
+    "seen": 1791570587.0952,
+    "ast_hash": "6ad355c39b8f55e49133cb310bfb175f",
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/MetacriticScraper.kt": {
+  "src/main/java/it/wavestream/app/data/repository/MetacriticScraper.kt": {
     "mtime": 1787927024.4672434,
-    "seen": 1791486191.3283055,
+    "seen": 1791570587.0952008,
     "ast_hash": "14ed16cc06f68b0ff9f69f2cca26876a",
-    "semantic_hash": "14ed16cc06f68b0ff9f69f2cca26876a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/MovieSourceResolver.kt": {
+  "src/main/java/it/wavestream/app/data/repository/MovieSourceResolver.kt": {
     "mtime": 1790473743.3298554,
-    "seen": 1791486191.3283062,
+    "seen": 1791570587.0952017,
     "ast_hash": "3e0fdccca7497d77f1e79ca5d0f7245a",
-    "semantic_hash": "3e0fdccca7497d77f1e79ca5d0f7245a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/MovieUnificationService.kt": {
+  "src/main/java/it/wavestream/app/data/repository/MovieUnificationService.kt": {
     "mtime": 1790593669.5470023,
-    "seen": 1791486191.328307,
+    "seen": 1791570587.0952024,
     "ast_hash": "25c83bd50fc87f63c76c7c8fd0fdf629",
-    "semantic_hash": "25c83bd50fc87f63c76c7c8fd0fdf629"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/OpenSubtitlesRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/OpenSubtitlesRepository.kt": {
     "mtime": 1787938508.5158935,
-    "seen": 1791486191.3283076,
+    "seen": 1791570587.0952036,
     "ast_hash": "11eaae0ea497d07c4cc01d0e5fa34d47",
-    "semantic_hash": "11eaae0ea497d07c4cc01d0e5fa34d47"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/PlaylistRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/PlaylistRepository.kt": {
     "mtime": 1790860734.8022456,
-    "seen": 1791486191.3283086,
+    "seen": 1791570587.0952046,
     "ast_hash": "3c94a9845818703a5d698976e1391e44",
-    "semantic_hash": "3c94a9845818703a5d698976e1391e44"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/RottenTomatoesScraper.kt": {
+  "src/main/java/it/wavestream/app/data/repository/RottenTomatoesScraper.kt": {
     "mtime": 1787711090.3846233,
-    "seen": 1791486191.3283093,
+    "seen": 1791570587.0952053,
     "ast_hash": "d9bcff496d0e919252c7e668a5b2ccbb",
-    "semantic_hash": "d9bcff496d0e919252c7e668a5b2ccbb"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/SerieAMatchRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/SerieAMatchRepository.kt": {
     "mtime": 1789951660.0906177,
-    "seen": 1791486191.32831,
+    "seen": 1791570587.0952065,
     "ast_hash": "015278199ffcd61333b7464d49ec0822",
-    "semantic_hash": "015278199ffcd61333b7464d49ec0822"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/StreamProbeRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/StreamProbeRepository.kt": {
     "mtime": 1790473740.5828745,
-    "seen": 1791486191.3283107,
+    "seen": 1791570587.0952072,
     "ast_hash": "670f81d5a9a4dea388dd2ec8a70152ab",
-    "semantic_hash": "670f81d5a9a4dea388dd2ec8a70152ab"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/repository/TMDBRepository.kt": {
+  "src/main/java/it/wavestream/app/data/repository/TMDBRepository.kt": {
     "mtime": 1782997876.6045716,
-    "seen": 1791486191.3283114,
+    "seen": 1791570587.0952082,
     "ast_hash": "89ec8d267545f469b3e05b0abfd2c8f8",
-    "semantic_hash": "89ec8d267545f469b3e05b0abfd2c8f8"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/tmdb/RecommendationEngine.kt": {
+  "src/main/java/it/wavestream/app/data/tmdb/RecommendationEngine.kt": {
     "mtime": 1779628577.59284,
-    "seen": 1791486191.3283124,
+    "seen": 1791570587.095209,
     "ast_hash": "8e7ebee5f8a52ed99eb12cf7a6106a5e",
-    "semantic_hash": "8e7ebee5f8a52ed99eb12cf7a6106a5e"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/data/tmdb/TMDBService.kt": {
+  "src/main/java/it/wavestream/app/data/tmdb/TMDBService.kt": {
     "mtime": 1790858151.0482826,
-    "seen": 1791486191.328313,
+    "seen": 1791570587.09521,
     "ast_hash": "4a58a1212c5b2a32f13a89421c6ee9e2",
-    "semantic_hash": "4a58a1212c5b2a32f13a89421c6ee9e2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/di/AiModule.kt": {
+  "src/main/java/it/wavestream/app/di/AiModule.kt": {
     "mtime": 1788361818.9811256,
-    "seen": 1791486191.3283138,
+    "seen": 1791570587.0952108,
     "ast_hash": "89eb569de007c619e640c64368e20711",
-    "semantic_hash": "89eb569de007c619e640c64368e20711"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/di/AppModule.kt": {
+  "src/main/java/it/wavestream/app/di/AppModule.kt": {
     "mtime": 1782994781.3488777,
-    "seen": 1791486191.3283145,
+    "seen": 1791570587.0952117,
     "ast_hash": "8b82c0fc838a8e7d3e234255857912a9",
-    "semantic_hash": "8b82c0fc838a8e7d3e234255857912a9"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/di/DatabaseModule.kt": {
+  "src/main/java/it/wavestream/app/di/DatabaseModule.kt": {
     "mtime": 1790860465.236528,
-    "seen": 1791486191.3283155,
+    "seen": 1791570587.0952127,
     "ast_hash": "89e5f6cb66ad192e2162258fd658f6a1",
-    "semantic_hash": "89e5f6cb66ad192e2162258fd658f6a1"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/di/NetworkModule.kt": {
+  "src/main/java/it/wavestream/app/di/NetworkModule.kt": {
     "mtime": 1789993678.5554438,
-    "seen": 1791486191.3283162,
+    "seen": 1791570587.0952137,
     "ast_hash": "e0d875282bc10f0be01737063c50a7b0",
-    "semantic_hash": "e0d875282bc10f0be01737063c50a7b0"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/domain/FilterBlockedContentUseCase.kt": {
+  "src/main/java/it/wavestream/app/domain/FilterBlockedContentUseCase.kt": {
     "mtime": 1787763298.2467296,
-    "seen": 1791486191.328317,
+    "seen": 1791570587.0952146,
     "ast_hash": "956e612ab8207f879dca6090b3121141",
-    "semantic_hash": "956e612ab8207f879dca6090b3121141"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/player/CreditsDetector.kt": {
+  "src/main/java/it/wavestream/app/player/CreditsDetector.kt": {
     "mtime": 1789994444.5219338,
-    "seen": 1791486191.3283176,
+    "seen": 1791570587.0952156,
     "ast_hash": "73eacc009c1ae8223f95ef1bdb06fa60",
-    "semantic_hash": "73eacc009c1ae8223f95ef1bdb06fa60"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/player/PlayNextManager.kt": {
+  "src/main/java/it/wavestream/app/player/PlayNextManager.kt": {
     "mtime": 1791326981.562265,
-    "seen": 1791486191.3283184,
+    "seen": 1791570587.0952163,
     "ast_hash": "cc4640862c10fcc4b522fa705f9c20a7",
-    "semantic_hash": "cc4640862c10fcc4b522fa705f9c20a7"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/player/SubtitleManager.kt": {
+  "src/main/java/it/wavestream/app/player/SubtitleManager.kt": {
     "mtime": 1779549460.2401092,
-    "seen": 1791486191.328319,
+    "seen": 1791570587.0952175,
     "ast_hash": "a2f987d5b3fc68d7a18471a999f20a15",
-    "semantic_hash": "a2f987d5b3fc68d7a18471a999f20a15"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/service/NotificationHelper.kt": {
+  "src/main/java/it/wavestream/app/service/NotificationHelper.kt": {
     "mtime": 1790528701.1232698,
-    "seen": 1791486191.32832,
+    "seen": 1791570587.0952182,
     "ast_hash": "f6c539b7fee458f80efb96713c606bf9",
-    "semantic_hash": "f6c539b7fee458f80efb96713c606bf9"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/service/VideoDownloadService.kt": {
+  "src/main/java/it/wavestream/app/service/VideoDownloadService.kt": {
     "mtime": 1779464028.8846848,
-    "seen": 1791486191.3283207,
+    "seen": 1791570587.0952191,
     "ast_hash": "25f601c9dbedbe229d494d8c4f7c2cb1",
-    "semantic_hash": "25f601c9dbedbe229d494d8c4f7c2cb1"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/MainActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/MainActivity.kt": {
     "mtime": 1791205540.4223025,
-    "seen": 1791486191.3283212,
+    "seen": 1791570587.0952203,
     "ast_hash": "46d50cb78f28acc0edd40282bc2c16be",
-    "semantic_hash": "46d50cb78f28acc0edd40282bc2c16be"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/assistant/AssistantActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/assistant/AssistantActivity.kt": {
     "mtime": 1790523228.4791808,
-    "seen": 1791486191.3283224,
+    "seen": 1791570587.095221,
     "ast_hash": "fd513a53325bef85d33c3fda56a1dd02",
-    "semantic_hash": "fd513a53325bef85d33c3fda56a1dd02"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/assistant/AssistantOrb.kt": {
+  "src/main/java/it/wavestream/app/ui/assistant/AssistantOrb.kt": {
     "mtime": 1788363809.954646,
-    "seen": 1791486191.3283231,
+    "seen": 1791570587.0952218,
     "ast_hash": "54f5857719a998f79e5ffc5362f4549f",
-    "semantic_hash": "54f5857719a998f79e5ffc5362f4549f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/assistant/AssistantScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/assistant/AssistantScreen.kt": {
     "mtime": 1788363821.2997394,
-    "seen": 1791486191.3283238,
+    "seen": 1791570587.0952227,
     "ast_hash": "b75d518c3b2091f8bacec39d8284d4ff",
-    "semantic_hash": "b75d518c3b2091f8bacec39d8284d4ff"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/assistant/AssistantViewModel.kt": {
+  "src/main/java/it/wavestream/app/ui/assistant/AssistantViewModel.kt": {
     "mtime": 1788368835.1814954,
-    "seen": 1791486191.3283246,
+    "seen": 1791570587.0952237,
     "ast_hash": "e42f45312f4be93587b776b20e7fceaa",
-    "semantic_hash": "e42f45312f4be93587b776b20e7fceaa"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/category/AllCategoriesActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/category/AllCategoriesActivity.kt": {
     "mtime": 1790523487.2222648,
-    "seen": 1791486191.3283253,
+    "seen": 1791570587.0952246,
     "ast_hash": "23e730a5b42ace4e6427f00532c97619",
-    "semantic_hash": "23e730a5b42ace4e6427f00532c97619"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/category/CategoryActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/category/CategoryActivity.kt": {
     "mtime": 1790612317.4534702,
-    "seen": 1791486191.3283262,
+    "seen": 1791570587.0952253,
     "ast_hash": "f1d876eb2b8a197eba2c3a67818408bf",
-    "semantic_hash": "f1d876eb2b8a197eba2c3a67818408bf"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/CategoryCard.kt": {
+  "src/main/java/it/wavestream/app/ui/components/CategoryCard.kt": {
     "mtime": 1790902338.836171,
-    "seen": 1791486191.328327,
+    "seen": 1791570587.0952263,
     "ast_hash": "bfd4d1511d59d581055ea5a986fdb27f",
-    "semantic_hash": "bfd4d1511d59d581055ea5a986fdb27f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/CategoryFavorite.kt": {
+  "src/main/java/it/wavestream/app/ui/components/CategoryFavorite.kt": {
     "mtime": 1789954847.0036788,
-    "seen": 1791486191.3283277,
+    "seen": 1791570587.0952275,
     "ast_hash": "e30a884651f72557b75a729e43bd908c",
-    "semantic_hash": "e30a884651f72557b75a729e43bd908c"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/CategoryRailItem.kt": {
+  "src/main/java/it/wavestream/app/ui/components/CategoryRailItem.kt": {
     "mtime": 1779464007.509958,
-    "seen": 1791486191.3283286,
+    "seen": 1791570587.0952282,
     "ast_hash": "bab9dc9474ffbc5b174baf2e0d4d5f2a",
-    "semantic_hash": "bab9dc9474ffbc5b174baf2e0d4d5f2a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/ContentCards.kt": {
+  "src/main/java/it/wavestream/app/ui/components/ContentCards.kt": {
     "mtime": 1788011917.398829,
-    "seen": 1791486191.3283296,
+    "seen": 1791570587.095229,
     "ast_hash": "2aabd59ecfab8ca73071088ac4cfa139",
-    "semantic_hash": "2aabd59ecfab8ca73071088ac4cfa139"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/ContentQueryBuilder.kt": {
+  "src/main/java/it/wavestream/app/ui/components/ContentQueryBuilder.kt": {
     "mtime": 1790085323.8603148,
-    "seen": 1791486191.32833,
+    "seen": 1791570587.0952299,
     "ast_hash": "adf27c211b0219343557c160cac32119",
-    "semantic_hash": "adf27c211b0219343557c160cac32119"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/ContentSortFilter.kt": {
+  "src/main/java/it/wavestream/app/ui/components/ContentSortFilter.kt": {
     "mtime": 1790034899.6957757,
-    "seen": 1791486191.328331,
+    "seen": 1791570587.0952308,
     "ast_hash": "694d8b3f38d999a5b1bc20a4c38379c9",
-    "semantic_hash": "694d8b3f38d999a5b1bc20a4c38379c9"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/ContinueWatchingCarousel.kt": {
+  "src/main/java/it/wavestream/app/ui/components/ContinueWatchingCarousel.kt": {
     "mtime": 1790523712.7525554,
-    "seen": 1791486191.3283315,
+    "seen": 1791570587.0952315,
     "ast_hash": "4c6d6f8e70e269c097fc68095cbfd169",
-    "semantic_hash": "4c6d6f8e70e269c097fc68095cbfd169"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/ExpandableNavRail.kt": {
+  "src/main/java/it/wavestream/app/ui/components/ExpandableNavRail.kt": {
     "mtime": 1790011566.355626,
-    "seen": 1791486191.3283322,
+    "seen": 1791570587.0952325,
     "ast_hash": "21eaa8861d3ad52a131a5b8c4da39193",
-    "semantic_hash": "21eaa8861d3ad52a131a5b8c4da39193"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/FloatingChip.kt": {
+  "src/main/java/it/wavestream/app/ui/components/FloatingChip.kt": {
     "mtime": 1787749187.4012368,
-    "seen": 1791486191.3283331,
+    "seen": 1791570587.0952332,
     "ast_hash": "b5840733308719f1d1ebee8f220999f2",
-    "semantic_hash": "b5840733308719f1d1ebee8f220999f2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/FocusedButton.kt": {
+  "src/main/java/it/wavestream/app/ui/components/FocusedButton.kt": {
     "mtime": 1780779489.9522924,
-    "seen": 1791486191.3283339,
+    "seen": 1791570587.0952344,
     "ast_hash": "f4861aa08667f80c502e8bd7fdbc6cc2",
-    "semantic_hash": "f4861aa08667f80c502e8bd7fdbc6cc2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/GlassCard.kt": {
+  "src/main/java/it/wavestream/app/ui/components/GlassCard.kt": {
     "mtime": 1787712712.9324272,
-    "seen": 1791486191.3283346,
+    "seen": 1791570587.0952353,
     "ast_hash": "ffa5036a8b1950a766e9c41d4a816f66",
-    "semantic_hash": "ffa5036a8b1950a766e9c41d4a816f66"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/GlassDialog.kt": {
+  "src/main/java/it/wavestream/app/ui/components/GlassDialog.kt": {
     "mtime": 1790603120.7167745,
-    "seen": 1791486191.3283353,
+    "seen": 1791570587.0952363,
     "ast_hash": "fa421bd0b0969a4a37b92329b4085ee4",
-    "semantic_hash": "fa421bd0b0969a4a37b92329b4085ee4"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/GlassListMenu.kt": {
+  "src/main/java/it/wavestream/app/ui/components/GlassListMenu.kt": {
     "mtime": 1790857386.2797344,
-    "seen": 1791486191.3283362,
+    "seen": 1791570587.095237,
     "ast_hash": "be11a8325f8e67a8c78657ca8b13b645",
-    "semantic_hash": "be11a8325f8e67a8c78657ca8b13b645"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/NavRailItem.kt": {
+  "src/main/java/it/wavestream/app/ui/components/NavRailItem.kt": {
     "mtime": 1789581247.8581214,
-    "seen": 1791486191.328337,
+    "seen": 1791570587.0952382,
     "ast_hash": "58d78b4ea9c17a9bc259105ae39db031",
-    "semantic_hash": "58d78b4ea9c17a9bc259105ae39db031"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/OnboardingBackground.kt": {
+  "src/main/java/it/wavestream/app/ui/components/OnboardingBackground.kt": {
     "mtime": 1779894078.316244,
-    "seen": 1791486191.3283377,
+    "seen": 1791570587.095239,
     "ast_hash": "5a8124efd62079954044b6e165f8ae8e",
-    "semantic_hash": "5a8124efd62079954044b6e165f8ae8e"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/WatchedBadges.kt": {
+  "src/main/java/it/wavestream/app/ui/components/WatchedBadges.kt": {
     "mtime": 1791205474.452439,
-    "seen": 1791486191.3283384,
+    "seen": 1791570587.0952399,
     "ast_hash": "2a5108fe4e07668993148a6670502015",
-    "semantic_hash": "2a5108fe4e07668993148a6670502015"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/components/WaveForm.kt": {
+  "src/main/java/it/wavestream/app/ui/components/WaveForm.kt": {
     "mtime": 1790707134.5788755,
-    "seen": 1791486191.328339,
+    "seen": 1791570587.0952406,
     "ast_hash": "2fe92c27ed3647ff6bfbc28181877268",
-    "semantic_hash": "2fe92c27ed3647ff6bfbc28181877268"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/details/DetailsActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/details/DetailsActivity.kt": {
     "mtime": 1791326987.370969,
-    "seen": 1791486191.3283403,
+    "seen": 1791570587.0952418,
     "ast_hash": "541127904b572b11c0f644565daa6628",
-    "semantic_hash": "541127904b572b11c0f644565daa6628"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/details/DetailsScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/details/DetailsScreen.kt": {
     "mtime": 1791195192.5159292,
-    "seen": 1791486191.328341,
+    "seen": 1791570587.0952425,
     "ast_hash": "3dd5851ef83dd55695186127b0e336e6",
-    "semantic_hash": "3dd5851ef83dd55695186127b0e336e6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/dialog/StreamSelectionDialog.kt": {
+  "src/main/java/it/wavestream/app/ui/dialog/StreamSelectionDialog.kt": {
     "mtime": 1790473913.4153912,
-    "seen": 1791486191.3283417,
+    "seen": 1791570587.0952435,
     "ast_hash": "fef65398b56ac6b99627dca37ac1da8f",
-    "semantic_hash": "fef65398b56ac6b99627dca37ac1da8f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/downloads/DownloadsActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/downloads/DownloadsActivity.kt": {
     "mtime": 1790523222.7646883,
-    "seen": 1791486191.3283424,
+    "seen": 1791570587.0952446,
     "ast_hash": "6769f58e2ea7aa94f5e9a137312e3fba",
-    "semantic_hash": "6769f58e2ea7aa94f5e9a137312e3fba"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/downloads/DownloadsScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/downloads/DownloadsScreen.kt": {
     "mtime": 1790523712.7501655,
-    "seen": 1791486191.3283434,
+    "seen": 1791570587.0952454,
     "ast_hash": "6b6fc6ecf59c7cac9bd5e6c1adca835d",
-    "semantic_hash": "6b6fc6ecf59c7cac9bd5e6c1adca835d"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/downloads/DownloadsViewModel.kt": {
+  "src/main/java/it/wavestream/app/ui/downloads/DownloadsViewModel.kt": {
     "mtime": 1779463928.6899703,
-    "seen": 1791486191.328344,
+    "seen": 1791570587.0952463,
     "ast_hash": "fe6dd8ab801f38fa74fed71decdb02e1",
-    "semantic_hash": "fe6dd8ab801f38fa74fed71decdb02e1"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/epg/EPGActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/epg/EPGActivity.kt": {
     "mtime": 1790523222.7646883,
-    "seen": 1791486191.3283446,
+    "seen": 1791570587.0952473,
     "ast_hash": "9d2a6ab0487edfe3f7f91fc5de3fc88b",
-    "semantic_hash": "9d2a6ab0487edfe3f7f91fc5de3fc88b"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/epg/EPGGridView.kt": {
+  "src/main/java/it/wavestream/app/ui/epg/EPGGridView.kt": {
     "mtime": 1779463928.7516322,
-    "seen": 1791486191.3283455,
+    "seen": 1791570587.0952482,
     "ast_hash": "55342b9d7e7451f2a9358bb44f6be42b",
-    "semantic_hash": "55342b9d7e7451f2a9358bb44f6be42b"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/film/FilmActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/film/FilmActivity.kt": {
     "mtime": 1790523487.2272558,
-    "seen": 1791486191.3283463,
+    "seen": 1791570587.0952492,
     "ast_hash": "7fb214012b30a00331680ceede017671",
-    "semantic_hash": "7fb214012b30a00331680ceede017671"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/history/HistoryActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/history/HistoryActivity.kt": {
     "mtime": 1791157384.5796702,
-    "seen": 1791486191.328347,
+    "seen": 1791570587.0952501,
     "ast_hash": "9d198fc905dcd3c131f8b28739237387",
-    "semantic_hash": "9d198fc905dcd3c131f8b28739237387"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/home/HomeFocusMemory.kt": {
+  "src/main/java/it/wavestream/app/ui/home/HomeFocusMemory.kt": {
     "mtime": 1790119806.6172078,
-    "seen": 1791486191.328348,
+    "seen": 1791570587.0952508,
     "ast_hash": "6a1e1e4cc77a37c82afa23a4fe58477a",
-    "semantic_hash": "6a1e1e4cc77a37c82afa23a4fe58477a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/home/HomeScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/home/HomeScreen.kt": {
     "mtime": 1791205479.0767117,
-    "seen": 1791486191.3283484,
+    "seen": 1791570587.095252,
     "ast_hash": "48a093b650f0fcac32236601ba231185",
-    "semantic_hash": "48a093b650f0fcac32236601ba231185"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/home/HomeViewModel.kt": {
+  "src/main/java/it/wavestream/app/ui/home/HomeViewModel.kt": {
     "mtime": 1791223594.3736935,
-    "seen": 1791486191.328349,
+    "seen": 1791570587.0952528,
     "ast_hash": "fe10a24363dbc6503504fb36b092d030",
-    "semantic_hash": "fe10a24363dbc6503504fb36b092d030"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/home/SerieAChannelPickerDialog.kt": {
+  "src/main/java/it/wavestream/app/ui/home/SerieAChannelPickerDialog.kt": {
     "mtime": 1790526080.5726335,
-    "seen": 1791486191.32835,
+    "seen": 1791570587.0952535,
     "ast_hash": "997df8eb0324cd048102b7288a8903fe",
-    "semantic_hash": "997df8eb0324cd048102b7288a8903fe"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/home/SerieAMatchHeroBackdrop.kt": {
+  "src/main/java/it/wavestream/app/ui/home/SerieAMatchHeroBackdrop.kt": {
     "mtime": 1790525502.661065,
-    "seen": 1791486191.3283508,
+    "seen": 1791570587.0952544,
     "ast_hash": "8a752a1ecffa553627b294b9c3b60bd2",
-    "semantic_hash": "8a752a1ecffa553627b294b9c3b60bd2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/home/SerieATeamColors.kt": {
+  "src/main/java/it/wavestream/app/ui/home/SerieATeamColors.kt": {
     "mtime": 1788703342.151992,
-    "seen": 1791486191.3283515,
+    "seen": 1791570587.0952554,
     "ast_hash": "1a059516810899be63904ea181f94641",
-    "semantic_hash": "1a059516810899be63904ea181f94641"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/home/SourceSelectionDialog.kt": {
+  "src/main/java/it/wavestream/app/ui/home/SourceSelectionDialog.kt": {
     "mtime": 1779464007.667181,
-    "seen": 1791486191.3283525,
+    "seen": 1791570587.0952563,
     "ast_hash": "0a16877e241daac1103f90961afeaaf1",
-    "semantic_hash": "0a16877e241daac1103f90961afeaaf1"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/live/LiveActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/live/LiveActivity.kt": {
     "mtime": 1791157384.5746696,
-    "seen": 1791486191.3283532,
+    "seen": 1791570587.095257,
     "ast_hash": "ebe7a8a1aea04919fb428316dd29d107",
-    "semantic_hash": "ebe7a8a1aea04919fb428316dd29d107"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/loading/LoadingActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/loading/LoadingActivity.kt": {
     "mtime": 1790616189.6724577,
-    "seen": 1791486191.3283541,
+    "seen": 1791570587.095258,
     "ast_hash": "c16edbc45f85d9efcd47b6a2bab2d2e8",
-    "semantic_hash": "c16edbc45f85d9efcd47b6a2bab2d2e8"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/loading/LoadingScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/loading/LoadingScreen.kt": {
     "mtime": 1788313775.278727,
-    "seen": 1791486191.3283548,
+    "seen": 1791570587.095259,
     "ast_hash": "a4614f5f17d7e7200beaca8bbd6d97b6",
-    "semantic_hash": "a4614f5f17d7e7200beaca8bbd6d97b6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/loading/SplashScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/loading/SplashScreen.kt": {
     "mtime": 1790708404.5270824,
-    "seen": 1791486191.3283556,
+    "seen": 1791570587.09526,
     "ast_hash": "3a00e6e91b50c5f0c49f92059115cd44",
-    "semantic_hash": "3a00e6e91b50c5f0c49f92059115cd44"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/multiscreen/MultiscreenActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/multiscreen/MultiscreenActivity.kt": {
     "mtime": 1789733630.3996496,
-    "seen": 1791486191.3283565,
+    "seen": 1791570587.0952606,
     "ast_hash": "8c57105b1c92d084601c46ea7a1ebd6a",
-    "semantic_hash": "8c57105b1c92d084601c46ea7a1ebd6a"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/person/PersonActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/person/PersonActivity.kt": {
     "mtime": 1790523222.852143,
-    "seen": 1791486191.3283587,
+    "seen": 1791570587.0952618,
     "ast_hash": "551b2f061f47008ceb54b8d190ad9ea2",
-    "semantic_hash": "551b2f061f47008ceb54b8d190ad9ea2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/person/PersonScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/person/PersonScreen.kt": {
     "mtime": 1790021321.526031,
-    "seen": 1791486191.3283594,
+    "seen": 1791570587.0952628,
     "ast_hash": "6bf7b5ed147266268836281f0210e501",
-    "semantic_hash": "6bf7b5ed147266268836281f0210e501"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/person/PersonViewModel.kt": {
+  "src/main/java/it/wavestream/app/ui/person/PersonViewModel.kt": {
     "mtime": 1779993671.7677252,
-    "seen": 1791486191.32836,
+    "seen": 1791570587.095265,
     "ast_hash": "fe3f5e71cc55c5ac87b3602fa5349253",
-    "semantic_hash": "fe3f5e71cc55c5ac87b3602fa5349253"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/player/PlayerActivity.kt": {
-    "mtime": 1791329182.9720445,
-    "seen": 1791486191.328361,
-    "ast_hash": "17f44a1df873b54ac10412dda49e3209",
-    "semantic_hash": "17f44a1df873b54ac10412dda49e3209"
+  "src/main/java/it/wavestream/app/ui/player/PlayerActivity.kt": {
+    "mtime": 1791570357.9059675,
+    "seen": 1791570587.0952659,
+    "ast_hash": "295bd26655904ee96a4d5226fda75214",
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/player/PlayerPauseInfo.kt": {
+  "src/main/java/it/wavestream/app/ui/player/PlayerPauseInfo.kt": {
     "mtime": 1790612876.5296488,
-    "seen": 1791486191.3283617,
+    "seen": 1791570587.0952668,
     "ast_hash": "90572179e204d08914752e9ecd494bc5",
-    "semantic_hash": "90572179e204d08914752e9ecd494bc5"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/player/TvPlayerScreen.kt": {
-    "mtime": 1791404322.6416554,
-    "seen": 1791486191.3283625,
-    "ast_hash": "0bb8ea4731156985e9f75cb6dd6939e8",
-    "semantic_hash": "0bb8ea4731156985e9f75cb6dd6939e8"
+  "src/main/java/it/wavestream/app/ui/player/TvPlayerScreen.kt": {
+    "mtime": 1791570365.7566164,
+    "seen": 1791570587.0952678,
+    "ast_hash": "05f2b9dcc503c7339ec754a23cea686d",
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/profile/AddProfileDialog.kt": {
+  "src/main/java/it/wavestream/app/ui/profile/AddProfileDialog.kt": {
     "mtime": 1789733611.774689,
-    "seen": 1791486191.3283632,
+    "seen": 1791570587.0952687,
     "ast_hash": "008a1dcc4701318455cff4037644293c",
-    "semantic_hash": "008a1dcc4701318455cff4037644293c"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/profile/ProfileSelectionActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/profile/ProfileSelectionActivity.kt": {
     "mtime": 1790707603.7921987,
-    "seen": 1791486191.3283641,
+    "seen": 1791570587.0952697,
     "ast_hash": "dca037e1bc3a639db4beed3da22873f9",
-    "semantic_hash": "dca037e1bc3a639db4beed3da22873f9"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/profile/ProfileSelectionScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/profile/ProfileSelectionScreen.kt": {
     "mtime": 1790707234.693584,
-    "seen": 1791486191.3283648,
+    "seen": 1791570587.0952706,
     "ast_hash": "fffd2025c6284bd4eb2d398a031aebee",
-    "semantic_hash": "fffd2025c6284bd4eb2d398a031aebee"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/remote/RemoteInputHelper.kt": {
+  "src/main/java/it/wavestream/app/ui/remote/RemoteInputHelper.kt": {
     "mtime": 1779463929.6666102,
-    "seen": 1791486191.3283656,
+    "seen": 1791570587.0952713,
     "ast_hash": "3b8749e6193d9c296d39175b362f35bd",
-    "semantic_hash": "3b8749e6193d9c296d39175b362f35bd"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/search/OnScreenKeyboard.kt": {
+  "src/main/java/it/wavestream/app/ui/search/OnScreenKeyboard.kt": {
     "mtime": 1790022154.9132123,
-    "seen": 1791486191.3283663,
+    "seen": 1791570587.0952725,
     "ast_hash": "25469633e81876fb65e7076914c896f1",
-    "semantic_hash": "25469633e81876fb65e7076914c896f1"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/search/SearchActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/search/SearchActivity.kt": {
     "mtime": 1790532142.9494922,
-    "seen": 1791486191.328367,
+    "seen": 1791570587.0952733,
     "ast_hash": "e15bc0c5c95e84c9030ca34130ce5262",
-    "semantic_hash": "e15bc0c5c95e84c9030ca34130ce5262"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/series/SeriesActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/series/SeriesActivity.kt": {
     "mtime": 1790523487.2272558,
-    "seen": 1791486191.328368,
+    "seen": 1791570587.0952742,
     "ast_hash": "b3c4833e08b829471cd612de03612635",
-    "semantic_hash": "b3c4833e08b829471cd612de03612635"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/settings/SettingsActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/settings/SettingsActivity.kt": {
     "mtime": 1790933574.8600771,
-    "seen": 1791486191.3283687,
+    "seen": 1791570587.095275,
     "ast_hash": "e84db0de786c665e6d0dc49ce26bd537",
-    "semantic_hash": "e84db0de786c665e6d0dc49ce26bd537"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/setup/SetupActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/setup/SetupActivity.kt": {
     "mtime": 1790523228.338387,
-    "seen": 1791486191.3283694,
+    "seen": 1791570587.095276,
     "ast_hash": "d6d7314fd2abb56ab87da76c27ae0b2d",
-    "semantic_hash": "d6d7314fd2abb56ab87da76c27ae0b2d"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/taste/TasteSetupActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/taste/TasteSetupActivity.kt": {
     "mtime": 1790523228.4233897,
-    "seen": 1791486191.32837,
+    "seen": 1791570587.0952768,
     "ast_hash": "908b068518385c8b11e38e000bdc14d3",
-    "semantic_hash": "908b068518385c8b11e38e000bdc14d3"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/taste/TasteSetupViewModel.kt": {
+  "src/main/java/it/wavestream/app/ui/taste/TasteSetupViewModel.kt": {
     "mtime": 1787762331.5150125,
-    "seen": 1791486191.328371,
+    "seen": 1791570587.0952778,
     "ast_hash": "2173a30ce2d828f95bbab21c93d22ed3",
-    "semantic_hash": "2173a30ce2d828f95bbab21c93d22ed3"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/terms/TermsActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/terms/TermsActivity.kt": {
     "mtime": 1790523228.4561827,
-    "seen": 1791486191.3283718,
+    "seen": 1791570587.0952785,
     "ast_hash": "53b6379a26054c7563a5b50c0f50eaef",
-    "semantic_hash": "53b6379a26054c7563a5b50c0f50eaef"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/ActivityTransitions.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/ActivityTransitions.kt": {
     "mtime": 1790688228.692945,
-    "seen": 1791486191.3283725,
+    "seen": 1791570587.0952797,
     "ast_hash": "743a128e82191e4c397a1954123ad1ac",
-    "semantic_hash": "743a128e82191e4c397a1954123ad1ac"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/AppAnimations.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/AppAnimations.kt": {
     "mtime": 1790525447.3377254,
-    "seen": 1791486191.3283732,
+    "seen": 1791570587.0952804,
     "ast_hash": "32a15687c9dd3bb1be94b7eff9f6d419",
-    "semantic_hash": "32a15687c9dd3bb1be94b7eff9f6d419"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/AuroraBackground.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/AuroraBackground.kt": {
     "mtime": 1788659375.424265,
-    "seen": 1791486191.328374,
+    "seen": 1791570587.0952814,
     "ast_hash": "208ad383303ca2a265fabd92a94d2dae",
-    "semantic_hash": "208ad383303ca2a265fabd92a94d2dae"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/Cascade.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/Cascade.kt": {
     "mtime": 1790524289.2027822,
-    "seen": 1791486191.3283749,
+    "seen": 1791570587.095282,
     "ast_hash": "5b8543f07c6a9d8932fe73b461ac404d",
-    "semantic_hash": "5b8543f07c6a9d8932fe73b461ac404d"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/Dimens.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/Dimens.kt": {
     "mtime": 1788011320.6525073,
-    "seen": 1791486191.3283756,
+    "seen": 1791570587.0952833,
     "ast_hash": "90ffae5180d5ad6c3c61b96b62b673b2",
-    "semantic_hash": "90ffae5180d5ad6c3c61b96b62b673b2"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/FocusSystem.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/FocusSystem.kt": {
     "mtime": 1790524034.502208,
-    "seen": 1791486191.3283763,
+    "seen": 1791570587.0952842,
     "ast_hash": "1c04d3d86611102be7cc443e59b02892",
-    "semantic_hash": "1c04d3d86611102be7cc443e59b02892"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/Glass.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/Glass.kt": {
     "mtime": 1790603120.7167745,
-    "seen": 1791486191.328377,
+    "seen": 1791570587.095285,
     "ast_hash": "f2d19e97504587ece98d4b0b94d54425",
-    "semantic_hash": "f2d19e97504587ece98d4b0b94d54425"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/MotionResolver.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/MotionResolver.kt": {
     "mtime": 1790523080.7932067,
-    "seen": 1791486191.328378,
+    "seen": 1791570587.0952861,
     "ast_hash": "27bce2c825fd21d2e39419fff8d6db75",
-    "semantic_hash": "27bce2c825fd21d2e39419fff8d6db75"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/ThemeManager.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/ThemeManager.kt": {
     "mtime": 1779464029.4151287,
-    "seen": 1791486191.3283787,
+    "seen": 1791570587.095287,
     "ast_hash": "c5bf0682a9d52fd1cc460e4247fb765d",
-    "semantic_hash": "c5bf0682a9d52fd1cc460e4247fb765d"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/theme/WaveStreamTheme.kt": {
+  "src/main/java/it/wavestream/app/ui/theme/WaveStreamTheme.kt": {
     "mtime": 1788694681.06415,
-    "seen": 1791486191.3283794,
+    "seen": 1791570587.0952878,
     "ast_hash": "f478560c08edee30d1a74703c18dbd5d",
-    "semantic_hash": "f478560c08edee30d1a74703c18dbd5d"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/tv/SkeletonLoader.kt": {
+  "src/main/java/it/wavestream/app/ui/tv/SkeletonLoader.kt": {
     "mtime": 1788012844.7532208,
-    "seen": 1791486191.32838,
+    "seen": 1791570587.0952888,
     "ast_hash": "ce1c901ba02b03d49b0a085926606574",
-    "semantic_hash": "ce1c901ba02b03d49b0a085926606574"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/tv/TvCarouselRow.kt": {
+  "src/main/java/it/wavestream/app/ui/tv/TvCarouselRow.kt": {
     "mtime": 1791157249.5367708,
-    "seen": 1791486191.3283808,
+    "seen": 1791570587.0952897,
     "ast_hash": "c8fa229e902264fcdeb30f4c2e8db3f3",
-    "semantic_hash": "c8fa229e902264fcdeb30f4c2e8db3f3"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/tv/TvContentCard.kt": {
+  "src/main/java/it/wavestream/app/ui/tv/TvContentCard.kt": {
     "mtime": 1790902421.9631388,
-    "seen": 1791486191.3283818,
+    "seen": 1791570587.0952907,
     "ast_hash": "424cf53bf6e2d59411ff942401507c18",
-    "semantic_hash": "424cf53bf6e2d59411ff942401507c18"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/tv/TvHomeScreen.kt": {
+  "src/main/java/it/wavestream/app/ui/tv/TvHomeScreen.kt": {
     "mtime": 1791205536.513832,
-    "seen": 1791486191.3283825,
+    "seen": 1791570587.0952916,
     "ast_hash": "fcad136f9e09faf9e4103b832bc6fed3",
-    "semantic_hash": "fcad136f9e09faf9e4103b832bc6fed3"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/util/FocusExtensions.kt": {
+  "src/main/java/it/wavestream/app/ui/util/FocusExtensions.kt": {
     "mtime": 1789733585.5986154,
-    "seen": 1791486191.3283834,
+    "seen": 1791570587.0952923,
     "ast_hash": "ba8516f6724dfc55b7b70e6a914024ce",
-    "semantic_hash": "ba8516f6724dfc55b7b70e6a914024ce"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/ui/welcome/WelcomeActivity.kt": {
+  "src/main/java/it/wavestream/app/ui/welcome/WelcomeActivity.kt": {
     "mtime": 1790523228.4595668,
-    "seen": 1791486191.3283842,
+    "seen": 1791570587.0952933,
     "ast_hash": "b8c7628810bcc35e46495d8f625fe80e",
-    "semantic_hash": "b8c7628810bcc35e46495d8f625fe80e"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/update/AppUpdateManager.kt": {
+  "src/main/java/it/wavestream/app/update/AppUpdateManager.kt": {
     "mtime": 1789738341.8205316,
-    "seen": 1791486191.328385,
+    "seen": 1791570587.0952942,
     "ast_hash": "cf9d7aa2325f70a5e3959ff53f33180f",
-    "semantic_hash": "cf9d7aa2325f70a5e3959ff53f33180f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/update/PackageReplacedReceiver.kt": {
+  "src/main/java/it/wavestream/app/update/PackageReplacedReceiver.kt": {
     "mtime": 1790528348.119029,
-    "seen": 1791486191.3283858,
+    "seen": 1791570587.0952952,
     "ast_hash": "4cc7fa616c03cb49aaf0031c57fc743f",
-    "semantic_hash": "4cc7fa616c03cb49aaf0031c57fc743f"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/update/UpdateInfo.kt": {
+  "src/main/java/it/wavestream/app/update/UpdateInfo.kt": {
     "mtime": 1779463930.806386,
-    "seen": 1791486191.3283865,
+    "seen": 1791570587.095296,
     "ast_hash": "487ff491e0f297c8dd489535fcfcb0d6",
-    "semantic_hash": "487ff491e0f297c8dd489535fcfcb0d6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/update/UpdateInstallActivity.kt": {
+  "src/main/java/it/wavestream/app/update/UpdateInstallActivity.kt": {
     "mtime": 1789569192.7941127,
-    "seen": 1791486191.328387,
+    "seen": 1791570587.095297,
     "ast_hash": "a097854da512cfc6964dfe0e601b7319",
-    "semantic_hash": "a097854da512cfc6964dfe0e601b7319"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/update/UpdateInstallReceiver.kt": {
+  "src/main/java/it/wavestream/app/update/UpdateInstallReceiver.kt": {
     "mtime": 1789063809.427605,
-    "seen": 1791486191.3283882,
+    "seen": 1791570587.0952978,
     "ast_hash": "20ec4de43864d84c187c2b776a150bff",
-    "semantic_hash": "20ec4de43864d84c187c2b776a150bff"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/util/CoilImagePreloader.kt": {
+  "src/main/java/it/wavestream/app/util/CoilImagePreloader.kt": {
     "mtime": 1789736785.9329355,
-    "seen": 1791486191.328389,
+    "seen": 1791570587.0952988,
     "ast_hash": "2bb3b040a15b4f8af7ffcc2ea985e191",
-    "semantic_hash": "2bb3b040a15b4f8af7ffcc2ea985e191"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/util/ContentFilters.kt": {
+  "src/main/java/it/wavestream/app/util/ContentFilters.kt": {
     "mtime": 1779463930.8363867,
-    "seen": 1791486191.3283894,
+    "seen": 1791570587.0952995,
     "ast_hash": "0324b640f243a689a4b993405e4dc8a5",
-    "semantic_hash": "0324b640f243a689a4b993405e4dc8a5"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/util/DeviceCapabilities.kt": {
+  "src/main/java/it/wavestream/app/util/DeviceCapabilities.kt": {
     "mtime": 1789740493.3047817,
-    "seen": 1791486191.3283904,
+    "seen": 1791570587.0953007,
     "ast_hash": "ccbd1b1e4b5760defb78c5c3073501f9",
-    "semantic_hash": "ccbd1b1e4b5760defb78c5c3073501f9"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/util/QRCodeGenerator.kt": {
+  "src/main/java/it/wavestream/app/util/QRCodeGenerator.kt": {
     "mtime": 1782854222.2981277,
-    "seen": 1791486191.328391,
+    "seen": 1791570587.0953014,
     "ast_hash": "1681a772b9cdeb8647db7a3437730868",
-    "semantic_hash": "1681a772b9cdeb8647db7a3437730868"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/util/ServerClock.kt": {
+  "src/main/java/it/wavestream/app/util/ServerClock.kt": {
     "mtime": 1788615505.6648853,
-    "seen": 1791486191.328392,
+    "seen": 1791570587.0953023,
     "ast_hash": "22fb9c61b50c3014b6768fcc954dfdef",
-    "semantic_hash": "22fb9c61b50c3014b6768fcc954dfdef"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/util/TitleCleaner.kt": {
+  "src/main/java/it/wavestream/app/util/TitleCleaner.kt": {
     "mtime": 1790365079.4694848,
-    "seen": 1791486191.3283927,
+    "seen": 1791570587.0953035,
     "ast_hash": "7a7d4a56e45726aec176f9f8695bc4d8",
-    "semantic_hash": "7a7d4a56e45726aec176f9f8695bc4d8"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/util/TrailerManager.kt": {
+  "src/main/java/it/wavestream/app/util/TrailerManager.kt": {
     "mtime": 1779463930.8793886,
-    "seen": 1791486191.3283935,
+    "seen": 1791570587.0953043,
     "ast_hash": "8b7a5c5dd0aea8eabf4a60763dc5d261",
-    "semantic_hash": "8b7a5c5dd0aea8eabf4a60763dc5d261"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/util/WaveStreamImageLoaderFactory.kt": {
+  "src/main/java/it/wavestream/app/util/WaveStreamImageLoaderFactory.kt": {
     "mtime": 1789735417.302043,
-    "seen": 1791486191.3283942,
+    "seen": 1791570587.0953052,
     "ast_hash": "9e416dda48380e1c34febcb52976eba4",
-    "semantic_hash": "9e416dda48380e1c34febcb52976eba4"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/voice/AudioRecorder.kt": {
+  "src/main/java/it/wavestream/app/voice/AudioRecorder.kt": {
     "mtime": 1788367583.219601,
-    "seen": 1791486191.328395,
+    "seen": 1791570587.0953062,
     "ast_hash": "59b11aa8a1352e8dbd88d26f17fc3463",
-    "semantic_hash": "59b11aa8a1352e8dbd88d26f17fc3463"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/voice/SherpaTtsManager.kt": {
+  "src/main/java/it/wavestream/app/voice/SherpaTtsManager.kt": {
     "mtime": 1788443841.706454,
-    "seen": 1791486191.3283958,
+    "seen": 1791570587.095307,
     "ast_hash": "1712b9d83d6a68eb4c171f313a71fa91",
-    "semantic_hash": "1712b9d83d6a68eb4c171f313a71fa91"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/voice/TtsManager.kt": {
+  "src/main/java/it/wavestream/app/voice/TtsManager.kt": {
     "mtime": 1788443815.4062614,
-    "seen": 1791486191.3283966,
+    "seen": 1791570587.095308,
     "ast_hash": "27fd933aa0a4a0efc463296e52063f2e",
-    "semantic_hash": "27fd933aa0a4a0efc463296e52063f2e"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/voice/WavEncoder.kt": {
+  "src/main/java/it/wavestream/app/voice/WavEncoder.kt": {
     "mtime": 1788361747.4281633,
-    "seen": 1791486191.3283973,
+    "seen": 1791570587.095309,
     "ast_hash": "ce0cb88dfe0068e86a6291cc6190a0a6",
-    "semantic_hash": "ce0cb88dfe0068e86a6291cc6190a0a6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/vpn/VpnBuiltInConfigs.kt": {
+  "src/main/java/it/wavestream/app/vpn/VpnBuiltInConfigs.kt": {
     "mtime": 1789402389.5108998,
-    "seen": 1791486191.328398,
+    "seen": 1791570587.0953097,
     "ast_hash": "27575e4111b4322b0690ce7ea60ff28d",
-    "semantic_hash": "27575e4111b4322b0690ce7ea60ff28d"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/vpn/VpnConfigFinder.kt": {
+  "src/main/java/it/wavestream/app/vpn/VpnConfigFinder.kt": {
     "mtime": 1787583380.5289478,
-    "seen": 1791486191.328399,
+    "seen": 1791570587.095311,
     "ast_hash": "cb1735d17912feb8a616fcb19e975758",
-    "semantic_hash": "cb1735d17912feb8a616fcb19e975758"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/vpn/VpnFeature.kt": {
+  "src/main/java/it/wavestream/app/vpn/VpnFeature.kt": {
     "mtime": 1789493156.1192813,
-    "seen": 1791486191.3283997,
+    "seen": 1791570587.0953119,
     "ast_hash": "0a794e21bff8415b7f8c093e38eb00a6",
-    "semantic_hash": "0a794e21bff8415b7f8c093e38eb00a6"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/vpn/VpnImportServer.kt": {
+  "src/main/java/it/wavestream/app/vpn/VpnImportServer.kt": {
     "mtime": 1787578474.122627,
-    "seen": 1791486191.3284004,
+    "seen": 1791570587.0953126,
     "ast_hash": "bb083a48837d7a8b517d06cbeb7cdf82",
-    "semantic_hash": "bb083a48837d7a8b517d06cbeb7cdf82"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/vpn/VpnManager.kt": {
+  "src/main/java/it/wavestream/app/vpn/VpnManager.kt": {
     "mtime": 1789492678.8179784,
-    "seen": 1791486191.3284013,
+    "seen": 1791570587.0953135,
     "ast_hash": "b6a7d2a4c0a0ce814490d839b1e9d848",
-    "semantic_hash": "b6a7d2a4c0a0ce814490d839b1e9d848"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/worker/EpgUpdateWorker.kt": {
+  "src/main/java/it/wavestream/app/worker/EpgUpdateWorker.kt": {
     "mtime": 1788311442.414194,
-    "seen": 1791486191.3284023,
+    "seen": 1791570587.0953147,
     "ast_hash": "c3918adebdc76cab9c30baaacebded22",
-    "semantic_hash": "c3918adebdc76cab9c30baaacebded22"
+    "semantic_hash": ""
   },
-  "app/src/main/java/it/wavestream/app/worker/SyncWorker.kt": {
+  "src/main/java/it/wavestream/app/worker/SyncWorker.kt": {
     "mtime": 1788290548.1642592,
-    "seen": 1791486191.328403,
+    "seen": 1791570587.0953155,
     "ast_hash": "08d21e17f6840d4f637c6eafd227a59a",
-    "semantic_hash": "08d21e17f6840d4f637c6eafd227a59a"
+    "semantic_hash": ""
   },
-  "app/src/test/java/it/wavestream/app/CleanTitleEquivalenceTest.kt": {
+  "src/test/java/it/wavestream/app/CleanTitleEquivalenceTest.kt": {
     "mtime": 1790593794.7063937,
-    "seen": 1791486191.3284037,
+    "seen": 1791570587.0953164,
     "ast_hash": "a5478b3edd405825da330eb3c54da132",
-    "semantic_hash": "a5478b3edd405825da330eb3c54da132"
+    "semantic_hash": ""
   },
-  "app/src/test/java/it/wavestream/app/IntroDbSegmentTest.kt": {
-    "mtime": 1789994093.981816,
-    "seen": 1791486191.3284044,
-    "ast_hash": "267512ab241f1cbbbcf88be908f378db",
-    "semantic_hash": "267512ab241f1cbbbcf88be908f378db"
+  "src/test/java/it/wavestream/app/IntroDbSegmentTest.kt": {
+    "mtime": 1791563683.0204594,
+    "seen": 1791570587.0953176,
+    "ast_hash": "2d1b465c0adcd6744c780246a7c505d4",
+    "semantic_hash": ""
   },
-  "app/src/test/java/it/wavestream/app/WatchProgressResumableTest.kt": {
+  "src/test/java/it/wavestream/app/WatchProgressResumableTest.kt": {
     "mtime": 1790270364.593039,
-    "seen": 1791486191.328405,
+    "seen": 1791570587.0953183,
     "ast_hash": "4b18c9a65182fd9a2be6351279d65b50",
-    "semantic_hash": "4b18c9a65182fd9a2be6351279d65b50"
+    "semantic_hash": ""
   },
-  "app/src/test/java/it/wavestream/app/data/parser/ContentKeyTest.kt": {
+  "src/test/java/it/wavestream/app/data/parser/ContentKeyTest.kt": {
     "mtime": 1790340187.1180997,
-    "seen": 1791486191.328406,
+    "seen": 1791570587.0953193,
     "ast_hash": "02f04cb6b30cb5347c145004231e1946",
-    "semantic_hash": "02f04cb6b30cb5347c145004231e1946"
+    "semantic_hash": ""
   },
-  "app/src/test/java/it/wavestream/app/data/parser/ContentNameParserTest.kt": {
+  "src/test/java/it/wavestream/app/data/parser/ContentNameParserTest.kt": {
     "mtime": 1790085727.9157038,
-    "seen": 1791486191.3284068,
+    "seen": 1791570587.0953202,
     "ast_hash": "db3c29101849360dbc7a8eed4b3424fb",
-    "semantic_hash": "db3c29101849360dbc7a8eed4b3424fb"
+    "semantic_hash": ""
   },
-  "app/src/test/java/it/wavestream/app/data/parser/MovieUnificationTest.kt": {
+  "src/test/java/it/wavestream/app/data/parser/MovieUnificationTest.kt": {
     "mtime": 1790593669.5470023,
-    "seen": 1791486191.3284075,
+    "seen": 1791570587.0953212,
     "ast_hash": "6351133916f105732054c68006cd8024",
-    "semantic_hash": "6351133916f105732054c68006cd8024"
+    "semantic_hash": ""
   },
-  "app/src/test/java/it/wavestream/app/ui/theme/ActivityTransitionsTest.kt": {
+  "src/test/java/it/wavestream/app/ui/theme/ActivityTransitionsTest.kt": {
     "mtime": 1790524351.5641277,
-    "seen": 1791486191.3284082,
+    "seen": 1791570587.0953221,
     "ast_hash": "467745547556d7d7257b68cb955ba8a6",
-    "semantic_hash": "467745547556d7d7257b68cb955ba8a6"
+    "semantic_hash": ""
   },
-  "app/src/test/java/it/wavestream/app/util/TitleCleanerTest.kt": {
+  "src/test/java/it/wavestream/app/util/TitleCleanerTest.kt": {
     "mtime": 1790365534.4656627,
-    "seen": 1791486191.3284092,
+    "seen": 1791570587.095323,
     "ast_hash": "e2c3a7b0938d60bf38788a3ba5b4b5ce",
-    "semantic_hash": "e2c3a7b0938d60bf38788a3ba5b4b5ce"
+    "semantic_hash": ""
   },
-  "app/src/main/baseline-prof.txt": {
+  "src/main/baseline-prof.txt": {
     "mtime": 1790008371.3728516,
-    "seen": 1791486191.32841,
+    "seen": 1791570587.0953238,
     "ast_hash": "2e809bb499bce8a26278de420fede455",
-    "semantic_hash": "2e809bb499bce8a26278de420fede455"
+    "semantic_hash": ""
   }
 }
