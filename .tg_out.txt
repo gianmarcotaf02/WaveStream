@@ -1,0 +1,4 @@
+2026-10-09 18:55:11 INFO  [notify] release 1.1.12 — WaveStream 1.1.12 (2026-10-09T18:53:45Z)
+2026-10-09 18:55:11 INFO  [broadcast] invio a 1 iscritti (gianmarcotaf02/WaveStream)
+2026-10-09 18:55:12 INFO  [broadcast] completato: 1 inviati, 0 bloccati, 0 errori
+2026-10-09 18:55:12 INFO  [notify] fatto: 1 inviati, 0 bloccati, 0 errori
