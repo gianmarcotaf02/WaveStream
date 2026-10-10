@@ -1,8 +1,10 @@
 package it.wavestream.app.data.repository
 
 import it.wavestream.app.data.api.FootballDataService
-import it.wavestream.app.data.api.SofascoreIncident
-import it.wavestream.app.data.api.SofascoreLineupPlayer
+import it.wavestream.app.data.api.EspnEvent
+import it.wavestream.app.data.api.EspnKeyEvent
+import it.wavestream.app.data.api.EspnRosterPlayer
+import it.wavestream.app.data.api.EspnStatusType
 import it.wavestream.app.data.api.FootballMatchDto
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.dao.SerieAMatchDao
@@ -38,7 +40,7 @@ import javax.inject.Singleton
 @Singleton
 class SerieAMatchRepository @Inject constructor(
     private val footballDataService: FootballDataService,
-    private val sofascoreService: it.wavestream.app.data.api.SofascoreService,
+    private val espnSoccerService: it.wavestream.app.data.api.EspnSoccerService,
     private val serieAMatchDao: SerieAMatchDao,
     private val serieATeamChannelDao: SerieATeamChannelDao,
     private val channelDao: ChannelDao
@@ -47,52 +49,44 @@ class SerieAMatchRepository @Inject constructor(
     /** Tempo corretto col server (ServerClock, alimentato da tutti i client HTTP). */
     fun adjustedNow(): Long = it.wavestream.app.util.ServerClock.now()
 
-    // =================== SOFASCORE (punteggi live rapidi) ===================
+    // =================== ESPN (punteggi live, cronaca, formazioni) ===================
 
-    private var sofascoreSeasonId: Long? = null
-
-    /** football-data match id → Sofascore event id (popolato dai poll live, in memoria). */
-    private val sofascoreEventIds = java.util.concurrent.ConcurrentHashMap<Long, Long>()
+    /** football-data match id → ESPN event id (risolto per data, tenuto in memoria). */
+    private val espnEventIds = java.util.concurrent.ConcurrentHashMap<Long, Long>()
 
     /**
-     * Aggiorna score e stato delle partite in DB con gli eventi Sofascore del round
-     * corrente (goal quasi in tempo reale, molto più veloci del free tier di
-     * football-data.org). Il calendario di base resta su football-data: qui si
-     * aggiornano SOLO score, stato e lastUpdated delle partite già presenti.
-     * @return true se Sofascore ha risposto (anche con 0 modifiche), false altrimenti.
+     * Aggiorna score e stato delle partite in DB con gli eventi ESPN di ieri e oggi.
+     * Il free tier di football-data.org per la Serie A non copre le partite in
+     * corso (arriva a fine gara): qui si aggiornano SOLO score, stato e lastUpdated
+     * delle partite già presenti, con matching per alias delle due squadre.
+     * @return true se ESPN ha risposto (anche con 0 modifiche), false altrimenti.
      */
-    suspend fun refreshLiveScoresFromSofascore(): Boolean = runCatching {
-        val seasonId = sofascoreSeasonId ?: fetchSofascoreSeasonId()
+    suspend fun refreshLiveScores(): Boolean = runCatching {
         val now = adjustedNow()
+        val days = listOf(now - DAY_MILLIS, now).map { espnDate(it) }.distinct()
+        val events = days.flatMap { day ->
+            runCatching { espnSoccerService.getScoreboard(dates = day).events }
+                .getOrDefault(emptyList())
+        }
+        if (events.isEmpty()) return@runCatching false
 
         val rows = serieAMatchDao.getWindowList(
             from = now - 12L * 60 * 60 * 1000,
             to = now + 5L * 24 * 60 * 60 * 1000
         )
-        // Round corrente: quello di una partita live, altrimenti la giornata più vicina
-        val round = rows.filter { it.matchday != null }
-            .let { list ->
-                list.firstOrNull { it.isLive }?.matchday
-                    ?: list.filter { it.utcDateMillis >= now - 12L * 60 * 60 * 1000 }
-                        .minOfOrNull { it.matchday!! }
-            } ?: return@runCatching false
-
-        val events = sofascoreService.getRoundEvents(seasonId = seasonId, round = round).events
         var updated = 0
 
-        rows.filter { it.matchday == round }.forEach { match ->
-            val homeAliases = SerieATeamAliases.teamAliases(match.homeTla, match.homeShortName)
-            val awayAliases = SerieATeamAliases.teamAliases(match.awayTla, match.awayShortName)
-            val event = events.firstOrNull { e ->
-                SerieATeamAliases.channelMatchesTeam(e.homeTeam?.name.orEmpty(), homeAliases) &&
-                    SerieATeamAliases.channelMatchesTeam(e.awayTeam?.name.orEmpty(), awayAliases)
-            } ?: return@forEach
+        rows.forEach { match ->
+            val event = findEspnEvent(events, match) ?: return@forEach
+            val eventId = event.id ?: return@forEach
+            espnEventIds[match.id] = eventId
 
-            sofascoreEventIds[match.id] = event.id
-
-            val newStatus = mapSofascoreStatus(event.status?.type)
-            val newHome = event.homeScore?.current
-            val newAway = event.awayScore?.current
+            val competition = event.competitions.firstOrNull()
+            val newStatus = mapEspnStatus(competition?.status?.type ?: event.status?.type)
+            val newHome = competition?.competitors
+                ?.firstOrNull { it.homeAway == "home" }?.score?.toIntOrNull()
+            val newAway = competition?.competitors
+                ?.firstOrNull { it.homeAway == "away" }?.score?.toIntOrNull()
             val changed = (newStatus != null && newStatus != match.status) ||
                 (newHome != null && newHome != match.homeScore) ||
                 (newAway != null && newAway != match.awayScore)
@@ -110,61 +104,168 @@ class SerieAMatchRepository @Inject constructor(
                 updated++
             }
         }
-        Log.d(
-            "SerieA",
-            "Sofascore: round $round, ${events.size} events, $updated rows updated"
-        )
+        Log.d("SerieA", "ESPN: ${events.size} events, $updated rows updated")
         true
     }.getOrDefault(false)
 
-    private suspend fun fetchSofascoreSeasonId(): Long {
-        val id = runCatching {
-            sofascoreService.getSeasons().seasons.firstOrNull()?.id
-        }.getOrNull() ?: 95836L // 2026/27
-        sofascoreSeasonId = id
-        Log.d("SerieA", "Sofascore season id: $id")
-        return id
+    /**
+     * Evento ESPN corrispondente alla partita: entrambe le squadre devono
+     * combaciare per alias e la data deve distare meno di 36h dal calcio d'inizio
+     * (evita di agganciare l'andata/ritorno o un'altra giornata).
+     */
+    private fun findEspnEvent(events: List<EspnEvent>, match: SerieAMatchEntity): EspnEvent? {
+        val homeAliases = SerieATeamAliases.teamAliases(match.homeTla, match.homeShortName)
+        val awayAliases = SerieATeamAliases.teamAliases(match.awayTla, match.awayShortName)
+        return events.firstOrNull { event ->
+            val competition = event.competitions.firstOrNull() ?: return@firstOrNull false
+            val home = competition.competitors.firstOrNull { it.homeAway == "home" }
+                ?.team?.displayName.orEmpty()
+            val away = competition.competitors.firstOrNull { it.homeAway == "away" }
+                ?.team?.displayName.orEmpty()
+            if (!SerieATeamAliases.channelMatchesTeam(home, homeAliases) ||
+                !SerieATeamAliases.channelMatchesTeam(away, awayAliases)
+            ) {
+                return@firstOrNull false
+            }
+            val kickoff = parseEspnInstant(event.date) ?: return@firstOrNull true
+            kotlin.math.abs(kickoff - match.utcDateMillis) < 36L * 60 * 60 * 1000
+        }
     }
-
-    private fun mapSofascoreStatus(type: String?): String? = when (type) {
-        "notstarted" -> "TIMED"
-        "inprogress" -> "IN_PLAY"
-        "finished" -> "FINISHED"
-        "postponed" -> "POSTPONED"
-        "canceled" -> "CANCELLED"
-        "suspended" -> "SUSPENDED"
-        else -> null
-    }
-
-    // =================== TABELLINO (incidents + lineups) ===================
 
     /**
-     * Tabellino della partita da Sofascore: gol, cartellini, sostituzioni +
-     * formazioni ufficiali. Richiede che l'event id sia noto: se in memoria non
-     * c'è (es. processo ricreato), riprova con un refresh live.
+     * Id evento ESPN di una partita: dalla cache, altrimenti cercato nei giorni
+     * intorno al calcio d'inizio (±1 per i fusi orari). Non dipende dal round
+     * corrente come i poll live: funziona anche aprendo una partita di domani.
+     */
+    private suspend fun resolveEspnEventId(match: SerieAMatchEntity): Long? {
+        espnEventIds[match.id]?.let { return it }
+        val events = (-1..1).flatMap { offset ->
+            val day = espnDate(match.utcDateMillis + offset * DAY_MILLIS)
+            runCatching { espnSoccerService.getScoreboard(dates = day).events }
+                .getOrDefault(emptyList())
+        }
+        val eventId = findEspnEvent(events, match)?.id ?: return null
+        espnEventIds[match.id] = eventId
+        return eventId
+    }
+
+    /** `type.state`: "pre" → TIMED, "in" → IN_PLAY (PAUSED all'intervallo), "post" → FINISHED. */
+    private fun mapEspnStatus(type: EspnStatusType?): String? {
+        val name = type?.name.orEmpty()
+        val description = type?.description.orEmpty()
+        return when {
+            name.contains("POSTPONED", true) -> "POSTPONED"
+            name.contains("CANCELED", true) || name.contains("CANCELLED", true) -> "CANCELLED"
+            name.contains("SUSPENDED", true) || name.contains("DELAYED", true) -> "SUSPENDED"
+            type?.state == "pre" -> "TIMED"
+            type?.state == "in" -> if (description.contains("Halftime", true)) "PAUSED" else "IN_PLAY"
+            type?.state == "post" -> "FINISHED"
+            else -> null
+        }
+    }
+
+    /** Data ESPN (`yyyyMMdd`) del giorno italiano che contiene [millis]. */
+    private fun espnDate(millis: Long): String = Instant.ofEpochMilli(millis)
+        .atZone(ITALY_ZONE)
+        .toLocalDate()
+        .format(ESPN_DATE_FORMAT)
+
+    private fun parseEspnInstant(date: String?): Long? =
+        date?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
+
+    // =================== TABELLINO (cronaca + formazioni) ===================
+
+    /**
+     * Tabellino della partita da ESPN: cronaca (gol, cartellini, sostituzioni) +
+     * formazioni ufficiali. L'event id si risolve per data, quindi il tabellino
+     * funziona anche per una partita che non è della giornata corrente.
      */
     suspend fun getMatchTabellino(match: SerieAMatchEntity): Result<SerieATabellino> = runCatching {
-        var eventId = sofascoreEventIds[match.id]
-        if (eventId == null) {
-            refreshLiveScoresFromSofascore()
-            eventId = sofascoreEventIds[match.id]
-        }
-        val resolvedEventId = eventId
-            ?: throw IllegalStateException("Nessun evento Sofascore per il match ${match.id}")
+        val eventId = resolveEspnEventId(match)
+            ?: throw IllegalStateException("Nessun evento ESPN per il match ${match.id}")
 
-        val incidents = sofascoreService.getIncidents(resolvedEventId).incidents
-            .filter { it.incidentType in listOf("goal", "card", "substitution", "period") }
+        val summary = espnSoccerService.getSummary(eventId = eventId)
+        val competition = summary.header?.competitions?.firstOrNull()
+        val statusType = competition?.status?.type
+        val homeTeamId = competition?.competitors?.firstOrNull { it.homeAway == "home" }?.team?.id
+        val started = statusType?.state == "in" || statusType?.state == "post"
 
-        val lineups = runCatching { sofascoreService.getLineups(resolvedEventId) }.getOrNull()
+        val homeRoster = summary.rosters.firstOrNull { it.homeAway == "home" }
+        val awayRoster = summary.rosters.firstOrNull { it.homeAway == "away" }
 
         SerieATabellino(
-            incidents = incidents,
-            homeFormation = lineups?.home?.formation,
-            awayFormation = lineups?.away?.formation,
-            homePlayers = lineups?.home?.players.orEmpty(),
-            awayPlayers = lineups?.away?.players.orEmpty(),
-            lineupsConfirmed = lineups?.confirmed == true
+            incidents = summary.keyEvents.mapNotNull { toMatchIncident(it, homeTeamId) },
+            homeFormation = homeRoster?.formation,
+            awayFormation = awayRoster?.formation,
+            homePlayers = homeRoster?.roster.orEmpty().map { it.toLineupPlayer() },
+            awayPlayers = awayRoster?.roster.orEmpty().map { it.toLineupPlayer() },
+            // ESPN pubblica la formazione anche prima del fischio d'inizio (è una
+            // probabile): la si considera ufficiale solo a partita iniziata.
+            lineupsConfirmed = started &&
+                homeRoster?.roster.orEmpty().count { it.starter == true } >= 11 &&
+                awayRoster?.roster.orEmpty().count { it.starter == true } >= 11
         )
+    }
+
+    private fun toLineupPlayer(player: EspnRosterPlayer) = MatchLineupPlayer(
+        player = player.athlete?.displayName?.let { MatchPerson(name = it) },
+        shirtNumber = player.jersey?.toIntOrNull(),
+        substitute = player.starter != true
+    )
+
+    /**
+     * Converte un evento della cronaca ESPN nel modello del match center.
+     * `participants` cambia significato per tipo: gol [marcatore, assist],
+     * sostituzione [entra, esce]. Il resto (rigori, autogol, cartellini) si
+     * ricava da `type.type` e dal testo.
+     */
+    private fun toMatchIncident(event: EspnKeyEvent, homeTeamId: String?): MatchIncident? {
+        val raw = event.type?.type ?: event.type?.text.orEmpty()
+        val text = event.text.orEmpty()
+        val type = when {
+            raw.contains("goal", true) -> "goal"
+            raw.contains("card", true) -> "card"
+            raw.contains("substitution", true) -> "substitution"
+            raw.contains("kickoff", true) || raw.contains("half", true) ||
+                raw.contains("full-time", true) || raw.contains("end-regular", true) -> "period"
+            else -> return null
+        }
+        val names = event.participants.mapNotNull { it.athlete?.displayName }
+        return MatchIncident(
+            incidentType = type,
+            time = parseEspnMinute(event.clock),
+            isHome = homeTeamId != null && event.team?.id == homeTeamId,
+            player = names.getOrNull(0)?.let { MatchPerson(name = it) },
+            playerIn = if (type == "substitution") names.getOrNull(0)?.let { MatchPerson(name = it) } else null,
+            playerOut = if (type == "substitution") names.getOrNull(1)?.let { MatchPerson(name = it) } else null,
+            assist1 = if (type == "goal") names.getOrNull(1)?.let { MatchPerson(name = it) } else null,
+            cardType = if (type == "card") {
+                if (raw.contains("red", true) || text.contains("red card", true)) "red" else "yellow"
+            } else null,
+            incidentClass = when {
+                type != "goal" -> null
+                raw.contains("penalty", true) || text.contains("Penalty", true) -> "penalty"
+                raw.contains("own", true) || text.contains("own goal", true) -> "ownGoal"
+                else -> "regular"
+            },
+            text = if (type == "period") espnPeriodLabel(raw) else event.text
+        )
+    }
+
+    /** Intestazione di periodo in italiano (il match center la mostra così com'è). */
+    private fun espnPeriodLabel(raw: String): String = when {
+        raw.contains("halftime", true) -> "INTERVALLO"
+        raw.contains("kickoff", true) -> "1° TEMPO"
+        raw.contains("start-2nd-half", true) || raw.contains("second-half", true) -> "2° TEMPO"
+        raw.contains("full-time", true) || raw.contains("end-regular", true) ||
+            raw.contains("end-2nd", true) -> "FINE PARTITA"
+        else -> ""
+    }
+
+    /** "45'+3'" → 45, "7'" → 7; fallback sui secondi del clock ESPN. */
+    private fun parseEspnMinute(clock: it.wavestream.app.data.api.EspnClock?): Int? {
+        clock?.displayValue?.takeWhile { it.isDigit() }?.toIntOrNull()?.let { return it }
+        return clock?.value?.let { (it / 60).toInt() }
     }
 
     /**
@@ -373,6 +474,8 @@ class SerieAMatchRepository @Inject constructor(
     companion object {
         private val ITALY_ZONE: ZoneId = ZoneId.of("Europe/Rome")
         private val API_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+        private val ESPN_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.BASIC_ISO_DATE
+        private const val DAY_MILLIS = 24L * 60 * 60 * 1000
         private const val DEFAULT_SYNC_INTERVAL_MILLIS = 4L * 60 * 60 * 1000 // 4 hours
     }
 }
@@ -382,10 +485,38 @@ class SerieAMatchRepository @Inject constructor(
  * cartellini, sostituzioni) + formazioni ufficiali.
  */
 data class SerieATabellino(
-    val incidents: List<SofascoreIncident>,
+    val incidents: List<MatchIncident>,
     val homeFormation: String?,
     val awayFormation: String?,
-    val homePlayers: List<SofascoreLineupPlayer>,
-    val awayPlayers: List<SofascoreLineupPlayer>,
+    val homePlayers: List<MatchLineupPlayer>,
+    val awayPlayers: List<MatchLineupPlayer>,
     val lineupsConfirmed: Boolean
+)
+
+/** Persona citata nella cronaca (marcatore, assist, chi entra/esce). */
+data class MatchPerson(val name: String? = null)
+
+/**
+ * Evento della cronaca, indipendente dalla sorgente dati.
+ * `incidentType`: "goal" / "card" / "substitution" / "period".
+ * `incidentClass` (solo gol): "regular" / "penalty" / "ownGoal".
+ */
+data class MatchIncident(
+    val incidentType: String? = null,
+    val time: Int? = null,
+    val isHome: Boolean? = null,
+    val player: MatchPerson? = null,
+    val playerIn: MatchPerson? = null,
+    val playerOut: MatchPerson? = null,
+    val cardType: String? = null,
+    val incidentClass: String? = null,
+    val assist1: MatchPerson? = null,
+    val text: String? = null
+)
+
+/** Giocatore delle formazioni (titolare o panchina). */
+data class MatchLineupPlayer(
+    val player: MatchPerson? = null,
+    val shirtNumber: Int? = null,
+    val substitute: Boolean? = null
 )

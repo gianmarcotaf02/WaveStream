@@ -57,8 +57,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import it.wavestream.app.R
-import it.wavestream.app.data.api.SofascoreIncident
-import it.wavestream.app.data.api.SofascoreLineupPlayer
+import it.wavestream.app.data.repository.MatchIncident
+import it.wavestream.app.data.repository.MatchLineupPlayer
 import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.data.repository.SerieATabellino
@@ -124,7 +124,7 @@ private enum class SerieAMatchTab(val label: String) {
 /**
  * Match center a schermo pieno: header con il backdrop dell'hero (split
  * diagonale + score), poi tab Canali / Tabellino (gol, cartellini,
- * sostituzioni) / Formazioni ufficiali — dati live da Sofascore.
+ * sostituzioni) / Formazioni ufficiali — dati live da ESPN.
  */
 @Composable
 fun SerieAChannelPickerDialog(
@@ -385,7 +385,7 @@ private fun TabellinoTab(
     when {
         state.loading -> CenterMessage("Caricamento tabellino…")
         state.error || state.tabellino == null -> CenterMessage(
-            "Tabellino non disponibile (Sofascore non raggiungibile o evento non trovato)"
+            "Tabellino non disponibile (dati ESPN non raggiungibili o evento non trovato)"
         )
         state.tabellino.incidents.none { it.incidentType != "period" } -> CenterMessage(
             "Nessun evento registrato per questa partita"
@@ -413,7 +413,7 @@ private fun TabellinoTab(
 
 /** Intestazione di periodo ("1° TEMPO", "2° TEMPO"…). */
 @Composable
-private fun PeriodHeader(incident: SofascoreIncident) {
+private fun PeriodHeader(incident: MatchIncident) {
     val lower = incident.text?.lowercase().orEmpty()
     val text = when {
         lower.contains("half") && (lower.contains("1") || lower.contains("first")) -> "1° TEMPO"
@@ -446,7 +446,7 @@ private fun PeriodHeader(incident: SofascoreIncident) {
  * al focus — come nel layout di SandTV.
  */
 @Composable
-private fun IncidentRow(incident: SofascoreIncident) {
+private fun IncidentRow(incident: MatchIncident) {
     var isFocused by remember { mutableStateOf(false) }
 
     Row(
@@ -505,7 +505,7 @@ private fun EventBubble(
 }
 
 @Composable
-private fun EventContent(incident: SofascoreIncident, alignment: Alignment.Horizontal) {
+private fun EventContent(incident: MatchIncident, alignment: Alignment.Horizontal) {
     Column(horizontalAlignment = alignment) {
         when (incident.incidentType) {
             "goal" -> {
@@ -657,15 +657,25 @@ private fun FormazioniTab(
     when {
         state.loading -> CenterMessage("Caricamento formazioni…")
         state.error || state.tabellino == null -> CenterMessage("Formazioni non disponibili")
-        state.tabellino.lineupsConfirmed.not() -> CenterMessage(
-            "Formazioni ufficiali non ancora pubblicate"
-        )
+        state.tabellino.homePlayers.isEmpty() && state.tabellino.awayPlayers.isEmpty() ->
+            CenterMessage("Formazioni non ancora pubblicate")
         else -> {
             val t = state.tabellino
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(20.dp),
-                modifier = Modifier.fillMaxSize()
-            ) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // ESPN pubblica anche le probabili: si distingue ufficiale da probabile
+                // invece di nascondere tutto fino al fischio d'inizio.
+                Text(
+                    text = if (t.lineupsConfirmed) "FORMAZIONI UFFICIALI" else "FORMAZIONI PROBABILI",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = WaveStreamColors.TextSecondary,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
                 // Ogni formazione è un pannello in vetro: due colonne simmetriche
                 // che si staccano dal fondo Aurora senza bordi netti.
                 GlassSurface(
@@ -706,12 +716,11 @@ private fun FormazioniTab(
         }
     }
 }
-
 @Composable
 private fun LineupColumn(
     teamName: String,
     formation: String?,
-    players: List<SofascoreLineupPlayer>,
+    players: List<MatchLineupPlayer>,
     modifier: Modifier = Modifier
 ) {
     val starters = players.filter { it.substitute != true }
