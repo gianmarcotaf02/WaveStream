@@ -16,7 +16,11 @@
 #
 # Disattivazione: rimuovere l'eseguibilita' da questo file, o il core.hooksPath.
 
-[ -f graphify-out/graph.json ] || exit 0
+# `.graphify_root` e' il marker "progetto inizializzato con graphify". NON usare
+# `graph.json`: non e' piu' versionato, quindi in un clone fresco non esiste ancora e l'hook
+# non partirebbe mai. `graphify update .` lo ricostruisce da zero partendo dal solo marker
+# (verificato: nessun graph.json, nessuna cache, nessun manifest -> grafo ricostruito).
+[ -f graphify-out/.graphify_root ] || exit 0
 command -v graphify >/dev/null 2>&1 || exit 0
 
 root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0

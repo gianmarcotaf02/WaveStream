@@ -129,6 +129,14 @@ pi-session-*.html
 # graphify: cache rigenerabile e backup datati del grafo (non versionare)
 /graphify-out/cache/
 /graphify-out/20*/
+# graphify: artefatti rigenerabili (non versionare). graph.json/graph.html pesano 8,1 MB e 5,7 MB
+# e cambiano a ogni refresh: tenerli in git significava un diff enorme a ogni commit che tocca il
+# codice. manifest.json e .graphify_python sono cache (la seconda contiene il path dell'interprete
+# di QUESTA macchina). Restano versionati solo .graphify_root (marker), le label e cost.json.
+/graphify-out/graph.json
+/graphify-out/graph.html
+/graphify-out/manifest.json
+/graphify-out/.graphify_python
 # graphify: log di osservazione dell'agente e lock del refresh post-commit (non versionare).
 # Necessari: git-checkpoint.ts fa `git add -A` ogni 3 turni, quindi senza queste voci
 # finirebbero nel repo a ogni checkpoint.
