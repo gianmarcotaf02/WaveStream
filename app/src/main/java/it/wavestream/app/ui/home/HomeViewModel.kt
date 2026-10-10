@@ -3597,9 +3597,11 @@ class HomeViewModel @Inject constructor(
      * invece di un ordine casuale.
      *
      * Restituisce coppie (lastWatchedAt, item) così il chiamante può mescolare
-     * serie e film mantenendo un solo ordinamento per ultima visione.
+     * serie e film mantenendo un solo ordinamento per ultima visione. Si ferma a
+     * [limit] serie: le righe candidate possono essere molte di più e ogni voce
+     * costa una lettura della serie (più, se completata, la ricerca del successivo).
      */
-    private suspend fun loadSeriesContinueWatchingItems(): List<Pair<Long, ContinueWatchingData>> {
+    private suspend fun loadSeriesContinueWatchingItems(limit: Int): List<Pair<Long, ContinueWatchingData>> {
         // Le due sorgenti sono complementari: la prima è "tutte le righe recenti"
         // (comprese completate e blip sotto soglia), la seconda garantisce che una
         // serie riprendibile non sparisca se ha superato il tetto delle righe recenti.
@@ -3622,15 +3624,17 @@ class HomeViewModel @Inject constructor(
             .getOrDefault(emptyList())
             .toHashSet()
 
-        return rows.mapNotNull { progress ->
-            val seriesId = progress.seriesId ?: return@mapNotNull null
-            val series = seriesDao.getSeriesById(seriesId) ?: return@mapNotNull null
+        val result = ArrayList<Pair<Long, ContinueWatchingData>>(limit)
+        for (progress in rows) {
+            if (result.size >= limit) break
+            val seriesId = progress.seriesId ?: continue
+            val series = seriesDao.getSeriesById(seriesId) ?: continue
 
             if (!progress.isCompleted) {
                 // Episodio in corso: barra e minuti solo se c'è davvero qualcosa da
                 // riprendere (stessa regola di WatchProgress.isResumable).
                 val resumable = progress.isResumable
-                progress.lastWatchedAt to ContinueWatchingData(
+                result.add(progress.lastWatchedAt to ContinueWatchingData(
                     contentId = progress.contentId,
                     seriesId = seriesId,
                     contentType = ContentType.SERIES,
@@ -3640,16 +3644,16 @@ class HomeViewModel @Inject constructor(
                     duration = if (resumable) progress.duration else 0L,
                     seasonNumber = progress.season,
                     episodeNumber = progress.episode
-                )
+                ))
             } else {
                 // Ultimo episodio completato: si propone il SUCCESSIVO, ma solo se la
                 // serie non è finita e la riga sa da dove ripartire (stagione ed
                 // episodio noti: le serie M3U senza quei tag non li hanno).
-                if (progress.season == null || progress.episode == null) return@mapNotNull null
-                if (seriesId in finished) return@mapNotNull null
+                if (progress.season == null || progress.episode == null) continue
+                if (seriesId in finished) continue
                 val next = findNextEpisodeAfter(seriesId, progress.season, progress.episode)
-                    ?: return@mapNotNull null
-                progress.lastWatchedAt to ContinueWatchingData(
+                    ?: continue
+                result.add(progress.lastWatchedAt to ContinueWatchingData(
                     contentId = next.id,
                     seriesId = seriesId,
                     contentType = ContentType.SERIES,
@@ -3659,9 +3663,10 @@ class HomeViewModel @Inject constructor(
                     duration = 0L,
                     seasonNumber = next.seasonNumber,
                     episodeNumber = next.episodeNumber
-                )
+                ))
             }
         }
+        return result
     }
 
     private suspend fun loadContinueWatching(limit: Int = 10): List<ContinueWatchingData>? {
@@ -3687,7 +3692,7 @@ class HomeViewModel @Inject constructor(
                         )
                     }
 
-                val series = loadSeriesContinueWatchingItems()
+                val series = loadSeriesContinueWatchingItems(limit)
                 Log.d("HomeViewModel", "Continue watching: ${movies.size} film, ${series.size} serie")
 
                 // Un solo ordinamento per ultima visione: prima film e serie erano due
@@ -3822,8 +3827,7 @@ class HomeViewModel @Inject constructor(
         // inchiodava il badge all'episodio precedente (vedi
         // loadSeriesContinueWatchingItems).
         if (filterType == ContentType.SERIES) {
-            return loadSeriesContinueWatchingItems()
-                .take(limit)
+            return loadSeriesContinueWatchingItems(limit)
                 .mapNotNull { it.second.toCarouselItem() }
                 .ifEmpty { null }
         }
