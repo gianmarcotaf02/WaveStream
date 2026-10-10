@@ -3575,88 +3575,129 @@ class HomeViewModel @Inject constructor(
         }
     }
     
-    private suspend fun loadContinueWatching(): List<ContinueWatchingData>? {
+    /**
+     * Righe "continua a guardare" delle serie, con la stessa derivazione usata dal
+     * dettaglio (`DetailsActivity.computeSeriesWatchState`).
+     *
+     * La sorgente NON può essere `getContinueWatching()`: quella query esclude le
+     * righe completate e quelle sotto la soglia dei 15 s. Se l'ultima riga della
+     * serie è una di quelle (episodio finito, oppure appena avviato), il badge
+     * restava inchiodato sull'episodio riprendibile PIÙ VECCHIO — la card diceva
+     * S1E3 mentre l'utente era a S2E1, e nessun refresh poteva correggerlo perché
+     * la derivazione era deterministica sul dato sbagliato.
+     *
+     * Qui si parte dalla riga più recente ESISTENTE della serie:
+     *  - non completata → è quella (con barra solo se davvero riprendibile);
+     *  - completata    → il primo episodio successivo, senza barra (la serie resta
+     *                    in "Continua a guardare" finché ha puntate da vedere).
+     *
+     * Ordine: per `lastWatchedAt` decrescente, con tie-break esplicito su
+     * (stagione, episodio): a parità di istante — succede quando "segna come visto"
+     * scrive più righe nello stesso millisecondo — vince l'episodio più avanzato,
+     * invece di un ordine casuale.
+     *
+     * Restituisce coppie (lastWatchedAt, item) così il chiamante può mescolare
+     * serie e film mantenendo un solo ordinamento per ultima visione.
+     */
+    private suspend fun loadSeriesContinueWatchingItems(): List<Pair<Long, ContinueWatchingData>> {
+        // Le due sorgenti sono complementari: la prima è "tutte le righe recenti"
+        // (comprese completate e blip sotto soglia), la seconda garantisce che una
+        // serie riprendibile non sparisca se ha superato il tetto delle righe recenti.
+        val rows = (
+            watchProgressDao.getRecentlyWatched(currentProfileId, 200) +
+                watchProgressDao.getContinueWatching(currentProfileId, 30)
+            )
+            .filter {
+                it.contentType in listOf(ContentType.SERIES, ContentType.EPISODE) &&
+                    it.seriesId != null
+            }
+            .sortedWith(
+                compareByDescending<WatchProgress> { it.lastWatchedAt }
+                    .thenByDescending { (it.season ?: 0) * 1_000 + (it.episode ?: 0) }
+            )
+            // Dopo l'ordinamento: per ogni serie resta la riga più recente.
+            .distinctBy { it.seriesId }
+
+        val finished = runCatching { watchProgressDao.getFullyWatchedSeriesIds(currentProfileId) }
+            .getOrDefault(emptyList())
+            .toHashSet()
+
+        return rows.mapNotNull { progress ->
+            val seriesId = progress.seriesId ?: return@mapNotNull null
+            val series = seriesDao.getSeriesById(seriesId) ?: return@mapNotNull null
+
+            if (!progress.isCompleted) {
+                // Episodio in corso: barra e minuti solo se c'è davvero qualcosa da
+                // riprendere (stessa regola di WatchProgress.isResumable).
+                val resumable = progress.isResumable
+                progress.lastWatchedAt to ContinueWatchingData(
+                    contentId = progress.contentId,
+                    seriesId = seriesId,
+                    contentType = ContentType.SERIES,
+                    title = series.title,
+                    posterUrl = series.posterUrl,
+                    position = if (resumable) progress.position else 0L,
+                    duration = if (resumable) progress.duration else 0L,
+                    seasonNumber = progress.season,
+                    episodeNumber = progress.episode
+                )
+            } else {
+                // Ultimo episodio completato: si propone il SUCCESSIVO, ma solo se la
+                // serie non è finita e la riga sa da dove ripartire (stagione ed
+                // episodio noti: le serie M3U senza quei tag non li hanno).
+                if (progress.season == null || progress.episode == null) return@mapNotNull null
+                if (seriesId in finished) return@mapNotNull null
+                val next = findNextEpisodeAfter(seriesId, progress.season, progress.episode)
+                    ?: return@mapNotNull null
+                progress.lastWatchedAt to ContinueWatchingData(
+                    contentId = next.id,
+                    seriesId = seriesId,
+                    contentType = ContentType.SERIES,
+                    title = series.title,
+                    posterUrl = series.posterUrl,
+                    position = 0L,
+                    duration = 0L,
+                    seasonNumber = next.seasonNumber,
+                    episodeNumber = next.episodeNumber
+                )
+            }
+        }
+    }
+
+    private suspend fun loadContinueWatching(limit: Int = 10): List<ContinueWatchingData>? {
         return withContext(Dispatchers.IO) {
             try {
-                // Load more items to account for duplicates that will be filtered out
-                val progressList = watchProgressDao.getContinueWatching(currentProfileId, 30)
-                Log.d("HomeViewModel", "WatchProgress items found: ${progressList.size}")
-                
-                val resumed = progressList.mapNotNull { progress ->
-                    // Enrich with title and poster from database
-                    when (progress.contentType) {
-                        ContentType.MOVIE -> {
-                            val movie = movieDao.getMovieById(progress.contentId)
-                            movie?.let {
-                                ContinueWatchingData(
-                                    contentId = progress.contentId,
-                                    seriesId = null,  // Movies don't have seriesId
-                                    contentType = ContentType.MOVIE,
-                                    title = it.title,
-                                    posterUrl = it.posterUrl,
-                                    position = progress.position,
-                                    duration = progress.duration,
-                                    seasonNumber = null,
-                                    episodeNumber = null
-                                )
-                            }
-                        }
-                        ContentType.SERIES, ContentType.EPISODE -> {
-                            // Get the series ID (either from progress.seriesId or use contentId as fallback)
-                            val resolvedSeriesId = progress.seriesId ?: progress.contentId
-                            val series = seriesDao.getSeriesById(resolvedSeriesId)
-                            series?.let {
-                                ContinueWatchingData(
-                                    contentId = progress.contentId,
-                                    seriesId = resolvedSeriesId,  // Store series ID for deduplication and navigation
-                                    contentType = ContentType.SERIES,
-                                    title = it.title,
-                                    posterUrl = it.posterUrl,
-                                    position = progress.position,
-                                    duration = progress.duration,
-                                    seasonNumber = progress.season,
-                                    episodeNumber = progress.episode
-                                )
-                            }
-                        }
-                        else -> null
-                    }
-                }
-                // Deduplicate: for series, keep only the most recently watched episode (first in list since sorted by lastWatchedAt DESC)
-                // Movies are deduplicated by contentId, series by seriesId
-                    .distinctBy { data ->
-                        if (data.contentType == ContentType.SERIES && data.seriesId != null) {
-                            "SERIES_${data.seriesId}"  // Group by series ID
-                        } else {
-                            "MOVIE_${data.contentId}"  // Movies by content ID
-                        }
-                    }
-
-                // Serie col prossimo episodio: l'ultimo episodio è stato completato ma
-                // la serie non è finita. La query "continua a guardare" esclude i
-                // progressi completati, quindi senza questo la serie spariva dalla riga
-                // (e dall'hero) pur avendo ancora puntate da vedere.
-                val alreadyListed = resumed.mapNotNull { it.seriesId }.toHashSet()
-                val upNext = loadUpNextSeries(limit = 10)
-                    .filterNot { (series, _) -> series.id in alreadyListed }
-                    .map { (series, next) ->
-                        ContinueWatchingData(
-                            contentId = next.id,
-                            seriesId = series.id,
-                            contentType = ContentType.SERIES,
-                            title = series.title,
-                            posterUrl = series.posterUrl,
-                            position = 0L,
-                            duration = 0L,
-                            seasonNumber = next.seasonNumber,
-                            episodeNumber = next.episodeNumber
+                // Film: la query "riprendibile" resta la sorgente giusta (il badge
+                // episodio non esiste: servono solo posizione e minuti rimasti).
+                val movies = watchProgressDao.getContinueWatching(currentProfileId, 30)
+                    .filter { it.contentType == ContentType.MOVIE }
+                    .distinctBy { it.contentId }
+                    .mapNotNull { progress ->
+                        val movie = movieDao.getMovieById(progress.contentId) ?: return@mapNotNull null
+                        progress.lastWatchedAt to ContinueWatchingData(
+                            contentId = progress.contentId,
+                            seriesId = null,  // Movies don't have seriesId
+                            contentType = ContentType.MOVIE,
+                            title = movie.title,
+                            posterUrl = movie.posterUrl,
+                            position = progress.position,
+                            duration = progress.duration,
+                            seasonNumber = null,
+                            episodeNumber = null
                         )
                     }
 
-                // NB: niente auto-completamento dell'ultimo episodio dell'ultima
-                // stagione: la serie resta in "Continua a guardare" finché l'episodio
-                // non è realmente finito (vedi loadHeroItems).
-                (resumed + upNext).take(10)  // Limit to 10 items after deduplication
+                val series = loadSeriesContinueWatchingItems()
+                Log.d("HomeViewModel", "Continue watching: ${movies.size} film, ${series.size} serie")
+
+                // Un solo ordinamento per ultima visione: prima film e serie erano due
+                // blocchi accodati, quindi le serie del secondo blocco non erano ordinate.
+                // `sortedByDescending` è stabile: a parità di istante l'ordine resta
+                // quello di inserimento (quindi deterministico).
+                (movies + series)
+                    .sortedByDescending { it.first }
+                    .map { it.second }
+                    .take(limit)
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading continue watching: ${e.message}")
                 null
@@ -3772,63 +3813,44 @@ class HomeViewModel @Inject constructor(
      * Load continue watching items filtered by content type (MOVIE or SERIES)
      * Deduplicates series by seriesId, movies by contentId
      */
+    /**
+     * Load continue watching items filtered by content type (MOVIE or SERIES)
+     * Deduplicates series by seriesId, movies by contentId
+     */
     private suspend fun loadContinueWatchingForTab(filterType: ContentType, limit: Int = 10): List<CarouselItem>? {
+        // Le serie passano dalla derivazione unificata: la sola query "riprendibile"
+        // inchiodava il badge all'episodio precedente (vedi
+        // loadSeriesContinueWatchingItems).
+        if (filterType == ContentType.SERIES) {
+            return loadSeriesContinueWatchingItems()
+                .take(limit)
+                .mapNotNull { it.second.toCarouselItem() }
+                .ifEmpty { null }
+        }
         return withContext(Dispatchers.IO) {
             try {
-                val progressList = watchProgressDao.getContinueWatching(currentProfileId, 30)
-                progressList
-                    .filter { progress ->
-                        when (filterType) {
-                            ContentType.MOVIE -> progress.contentType == ContentType.MOVIE
-                            ContentType.SERIES -> progress.contentType in listOf(ContentType.SERIES, ContentType.EPISODE)
-                            else -> false
-                        }
-                    }
-                    // NB: niente auto-completamento dell'ultimo episodio dell'ultima
-                    // stagione: la serie resta in "Continua a guardare" finché
-                    // l'episodio non è realmente finito.
+                watchProgressDao.getContinueWatching(currentProfileId, 30)
+                    .filter { it.contentType == ContentType.MOVIE }
+                    .distinctBy { it.contentId }
                     .take(limit)
                     .mapNotNull { progress ->
-                        when (progress.contentType) {
-                            ContentType.MOVIE -> {
-                                val movie = movieDao.getMovieById(progress.contentId) ?: return@mapNotNull null
-                                val progressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
-                                val remaining = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(0)
-                                CarouselItem(
-                                    id = movie.id,
-                                    title = movie.title,
-                                    posterUrl = movie.posterUrl,
-                                    backdropUrl = movie.backdropUrl,
-                                    contentType = ContentType.MOVIE.name,
-                                    progressPercent = progressPercent.coerceIn(0f, 1f),
-                                    remainingMinutes = remaining,
-                                    rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating
-                                )
-                            }
-                            ContentType.SERIES, ContentType.EPISODE -> {
-                                val seriesId = progress.seriesId ?: progress.contentId
-                                val series = seriesDao.getSeriesById(seriesId) ?: return@mapNotNull null
-                                val progressPercent = if (progress.duration > 0) progress.position.toFloat() / progress.duration.toFloat() else 0f
-                                val remaining = ((progress.duration - progress.position) / 60000).toInt().coerceAtLeast(0)
-                                val episodeLabel = if (progress.season != null && progress.episode != null) {
-                                    "S${progress.season} E${progress.episode}"
-                                } else null
-                                CarouselItem(
-                                    id = series.id,
-                                    title = series.title,
-                                    posterUrl = series.posterUrl,
-                                    backdropUrl = series.backdropUrl,
-                                    contentType = ContentType.SERIES.name,
-                                    progressPercent = progressPercent.coerceIn(0f, 1f),
-                                    remainingMinutes = remaining,
-                                    episodeLabel = episodeLabel,
-                                    rating = series.tmdbVoteAverage?.takeIf { it > 0f } ?: series.rating
-                                )
-                            }
-                            else -> null
-                        }
+                        val movie = movieDao.getMovieById(progress.contentId)
+                            ?: return@mapNotNull null
+                        val progressPercent = if (progress.duration > 0)
+                            progress.position.toFloat() / progress.duration.toFloat() else 0f
+                        val remaining = ((progress.duration - progress.position) / 60000).toInt()
+                            .coerceAtLeast(0)
+                        CarouselItem(
+                            id = movie.id,
+                            title = movie.title,
+                            posterUrl = movie.posterUrl,
+                            backdropUrl = movie.backdropUrl,
+                            contentType = ContentType.MOVIE.name,
+                            progressPercent = progressPercent.coerceIn(0f, 1f),
+                            remainingMinutes = remaining,
+                            rating = movie.tmdbVoteAverage?.takeIf { it > 0f } ?: movie.rating
+                        )
                     }
-                    .distinctBy { it.id }
                     .ifEmpty { null }
             } catch (e: Exception) {
                 Log.e("HomeViewModel", "Error loading continue watching for tab: ${e.message}")
