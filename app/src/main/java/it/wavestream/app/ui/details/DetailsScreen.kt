@@ -63,6 +63,7 @@ import it.wavestream.app.data.database.entity.Episode
 import it.wavestream.app.data.entity.PersonInfo
 import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.components.EditListButton
+import it.wavestream.app.ui.components.AgeRatingBadge
 import it.wavestream.app.ui.components.GlassMenuRow
 import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
@@ -562,12 +563,12 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // META su una sola riga: anno · durata · generi.
+                    // META su una sola riga: anno · età · durata · generi.
                     // La durata era una riga separata e "Valutazioni" era un heading
                     // ridondante: entrambi spariscono e la colonna guadagna due righe
-                    // verticali. Ordine NON casuale: il chip sta SUBITO dopo l'anno,
-                    // nella zona sinistra ancora scura — appoggiato in coda alla riga dei
-                    // generi finiva sull'arte chiara del backdrop e diventava illeggibile.
+                    // verticali. Ordine NON casuale: i chip stanno SUBITO dopo l'anno,
+                    // nella zona sinistra ancora scura — appoggiati in coda alla riga dei
+                    // generi finivano sull'arte chiara del backdrop e diventavano illeggibili.
                     // I generi sono l'unico elemento che può accorciarsi (ellissi).
                     FlowRow(
                         modifier = Modifier.fillMaxWidth(),
@@ -581,6 +582,10 @@ fun DetailsScreen(
                                 color = WaveStreamColors.TextSecondary
                             )
                         }
+
+                        // Età consigliata (visto censura TMDB): non disegna nulla
+                        // se il visto non è disponibile.
+                        AgeRatingBadge(rating = state.ageRating)
                         
                         state.duration?.let { duration ->
                             Row(

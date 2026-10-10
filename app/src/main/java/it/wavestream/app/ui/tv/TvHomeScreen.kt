@@ -107,6 +107,7 @@ import it.wavestream.app.ui.home.SerieAKickoffChip
 import it.wavestream.app.ui.home.serieAKickoffLabel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.ui.home.PosterCard
+import it.wavestream.app.ui.components.AgeRatingBadge
 import it.wavestream.app.ui.theme.WaveStreamColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -1171,7 +1172,7 @@ fun HeroBanner(
                         
                         Spacer(modifier = Modifier.height(6.dp))
                         
-                        // Metadata row: Year, Duration/Seasons
+                        // Metadata row: Year, Age rating, Duration/Seasons
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -1182,6 +1183,12 @@ fun HeroBanner(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = WaveStreamColors.TextSecondary
                                 )
+                            }
+                            // Età consigliata (visto censura TMDB): pillola in vetro,
+                            // nascosta del tutto se il visto non è disponibile.
+                            // Esclusa dall'hero partita, che non ha un visto.
+                            if (hero.contentType != "SERIEA_MATCH") {
+                                AgeRatingBadge(rating = hero.ageRating)
                             }
                             hero.duration?.let {
                                 Text(
