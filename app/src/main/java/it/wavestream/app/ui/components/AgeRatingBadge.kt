@@ -51,11 +51,14 @@ fun AgeRatingBadge(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            // bodyMedium come la riga che lo ospita (anno, durata, generi): un
+            // labelMedium da 11sp accanto a testo da 13sp si sarebbe letto come un
+            // elemento di seconda importanza, mentre il visto è un'informazione pari.
+            style = MaterialTheme.typography.bodyMedium,
             color = Color.White.copy(alpha = 0.95f),
             fontWeight = FontWeight.Bold,
             maxLines = 1,
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 1.dp)
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 1.dp)
         )
     }
 }
