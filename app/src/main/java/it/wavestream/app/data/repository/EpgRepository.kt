@@ -423,7 +423,7 @@ class EpgRepository @Inject constructor(
                             end = e.endTime,
                             category = e.category
                         )
-                    }
+                    })
                 }
                 lastUpdate = System.currentTimeMillis()
             }
