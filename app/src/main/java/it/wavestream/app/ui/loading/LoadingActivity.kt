@@ -261,8 +261,8 @@ class LoadingActivity : ComponentActivity() {
                 val serieASyncJob = applicationScope.launch(Dispatchers.IO) {
                     runCatching { serieAMatchRepository.syncIfStale() }
                         .onFailure { Log.e("LoadingActivity", "Serie A calendar sync failed", it) }
-                    // Primi score rapidi da Sofascore (calendario di base già in DB)
-                    runCatching { serieAMatchRepository.refreshLiveScoresFromSofascore() }
+                    // Primi score rapidi da ESPN (calendario di base già in DB)
+                    runCatching { serieAMatchRepository.refreshLiveScores() }
                 }
                 
                 // Invalida la cache di sessione solo se i dati sono effettivamente cambiati

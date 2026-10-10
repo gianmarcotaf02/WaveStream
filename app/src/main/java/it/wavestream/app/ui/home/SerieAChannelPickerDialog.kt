@@ -712,10 +712,12 @@ private fun FormazioniTab(
                             .padding(16.dp)
                     )
                 }
+                }
             }
         }
     }
 }
+
 @Composable
 private fun LineupColumn(
     teamName: String,
