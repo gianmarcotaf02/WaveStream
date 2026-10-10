@@ -57,10 +57,13 @@ object SerieATeamAliases {
      * Alias di una singola squadra (pubblico, usato anche per il matching
      * degli eventi Sofascore con le partite football-data).
      */
+    /** TLA (sigle a 3 lettere dei canali: "GEN-FIO", "DAZN 10 GEN") + nome esteso. */
     fun teamAliases(tla: String?, shortName: String): List<String> {
-        val fromTla = tla?.let { TLA_ALIASES[it.trim().uppercase()] }
+        val key = tla?.trim()?.uppercase()
+        val fromTla = key?.let { TLA_ALIASES[it] }
         val fromShortName = normalize(shortName).takeIf { it.isNotBlank() }
-        return ((fromTla ?: emptyList()) + listOfNotNull(fromShortName)).distinct()
+        val fromCode = key?.lowercase()?.takeIf { it.length == 3 && it.all { ch -> ch in 'a'..'z' } }
+        return ((fromTla ?: emptyList()) + listOfNotNull(fromShortName, fromCode)).distinct()
     }
 
     private fun aliasesForTeam(tla: String?, shortName: String): List<String> = teamAliases(tla, shortName)

@@ -332,6 +332,20 @@ class SerieAMatchRepository @Inject constructor(
      * per nome non contengono le squadre ma sono il canale che manda il match:
      * vengono aggiunti sempre.
      */
+    /**
+     * Playlist channels (all playlists) da proporre per [match].
+     *
+     * Tre livelli di confidenza, nell'ordine in cui vengono restituiti (la UI
+     * raggruppa per categoria conservando l'ordine):
+     *  1. canali che nominano **entrambe** le squadre (match inequivocabile);
+     *  2. canali che nominano **una sola** squadra: molti provider espongono la
+     *     partita come due feed per squadra ("Genoa FHD" / "Fiorentina FHD",
+     *     "DAZN SERIE A 10 FHD GENOA" / "… 11 … FIORENTINA");
+     *  3. canali evento DAZN 1 (non contengono il nome delle squadre).
+     *
+     * Nota: filtrare per l'intersezione casa ∩ ospite — come si faceva prima —
+     * svuotava la lista per tutte le playlist che usano i feed per squadra.
+     */
     suspend fun findChannelsForMatch(match: SerieAMatchEntity): List<Channel> = withContext(Dispatchers.IO) {
         val homeAliases = SerieATeamAliases.teamAliases(match.homeTla, match.homeShortName)
         val awayAliases = SerieATeamAliases.teamAliases(match.awayTla, match.awayShortName)
@@ -350,13 +364,21 @@ class SerieAMatchRepository @Inject constructor(
         val matchedHome = matchChannelsForTeam(allChannels, match.homeTla, match.homeShortName)
         val matchedAway = matchChannelsForTeam(allChannels, match.awayTla, match.awayShortName)
 
-        // Intersezione per streamUrl: solo i canali che matchano ENTRAMBE le squadre.
         val homeUrls = matchedHome.map { it.streamUrl }.toSet()
-        val bothTeams = matchedAway.filter { it.streamUrl in homeUrls }.distinctBy { it.streamUrl }
+        val awayUrls = matchedAway.map { it.streamUrl }.toSet()
+        val bothTeamUrls = homeUrls intersect awayUrls
 
-        return@withContext (bothTeams + daznEvent)
+        val bothTeams = (matchedHome + matchedAway)
+            .filter { it.streamUrl in bothTeamUrls }
             .distinctBy { it.streamUrl }
             .sortedBy { it.name.lowercase() }
+        val oneTeam = (matchedHome + matchedAway)
+            .filter { it.streamUrl !in bothTeamUrls }
+            .distinctBy { it.streamUrl }
+            .sortedBy { it.name.lowercase() }
+
+        return@withContext (bothTeams + oneTeam + daznEvent)
+            .distinctBy { it.streamUrl }
     }
 
     /**
@@ -373,10 +395,10 @@ class SerieAMatchRepository @Inject constructor(
     }
 
     /**
-     * Canali salvati localmente per le due squadre (lettura istantanea dal DB).
-     * Usata per mostrare subito i canali prima della ricerca di aggiornamento.
-     * Vengono restituiti solo i canali presenti per ENTRAMBE le squadre
-     * (intersezione casa ∩ ospite), perché solo quelli nominano il match.
+     * Canali salvati localmente per le due squadre (lettura istantanea dal DB),
+     * con lo stesso ordine di priorità di [findChannelsForMatch]: prima i canali
+     * che nominano entrambe le squadre, poi i feed di una sola squadra, infine i
+     * canali evento DAZN 1 (sempre aggiunti).
      */
     suspend fun getSavedChannelsForMatch(match: SerieAMatchEntity): List<Channel> = withContext(Dispatchers.IO) {
         // I canali evento DAZN 1 non sono mappati a una squadra (il nome non la
@@ -393,17 +415,21 @@ class SerieAMatchRepository @Inject constructor(
         val links = serieATeamChannelDao.getByTeams(listOf(homeTla, awayTla))
         val homeUrls = links.filter { it.teamTla == homeTla }.map { it.channelStreamUrl }.toSet()
         val awayUrls = links.filter { it.teamTla == awayTla }.map { it.channelStreamUrl }.toSet()
-        // Intersezione: canali salvati per casa E per ospite.
-        val bothUrls = homeUrls intersect awayUrls
+        val bothTeamUrls = homeUrls intersect awayUrls
+        // UNIONE (non intersezione): i feed di una sola squadra sono spesso l'unico
+        // modo in cui il provider espone la partita.
+        val allUrls = homeUrls + awayUrls
         // Query mirata per streamUrl: NON si carica l'intera playlist (decine di
         // migliaia di canali) solo per filtrare i pochi salvati. È il collo di
         // bottiglia che rende lenta l'apertura del picker canali.
-        val saved = if (bothUrls.isEmpty()) emptyList()
-            else channelDao.getChannelsByStreamUrls(bothUrls.toList())
-        return@withContext (saved + daznEvent)
-            .filter { !it.isExcludedCategory() }
+        val saved = if (allUrls.isEmpty()) emptyList()
+            else channelDao.getChannelsByStreamUrls(allUrls.toList())
+                .filter { !it.isExcludedCategory() }
+        val (bothTeams, oneTeam) = saved.partition { it.streamUrl in bothTeamUrls }
+        return@withContext (bothTeams.sortedBy { it.name.lowercase() } +
+            oneTeam.sortedBy { it.name.lowercase() } +
+            daznEvent)
             .distinctBy { it.streamUrl }
-            .sortedBy { it.name.lowercase() }
     }
 
     /** Categorie escluse dalla ricerca canali dei match (campionati minori con

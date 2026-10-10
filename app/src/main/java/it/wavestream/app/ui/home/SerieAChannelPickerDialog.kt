@@ -96,24 +96,12 @@ private val COUNTRY_WORDS = listOf(
 /** Categorie consentite anche se contengono parole della lista paesi. */
 private val ALLOWED_CATEGORY_WORDS = listOf("dazn hermes", "dazn kali")
 
-/** true se la categoria è un canale DAZN italiano (esclude DAZN di altri paesi). */
-private fun isItalianDaznCategory(category: String): Boolean {
-    val c = category.lowercase()
-    if (ALLOWED_CATEGORY_WORDS.any { c.contains(it) }) return true
-    return c.contains("dazn") && COUNTRY_WORDS.none { c.contains(it) }
-}
-
 /** true se la categoria è "ammessa": non è esclusa dalla lista paesi. */
 private fun isAllowedCategory(category: String): Boolean {
     val c = category.lowercase()
+    if (ALLOWED_CATEGORY_WORDS.any { c.contains(it) }) return true
     return COUNTRY_WORDS.none { c.contains(it) }
 }
-
-/** true se il canale si chiama "DAZN 1" (es. "DAZN 1", "DAZN 1 HD", "IT: DAZN 1").
- *  Esclude i canali numerati diversamente (es. "DAZN 10", "DAZN 11"). */
-private val DAZN1_REGEX = Regex("""dazn\s*1(?!\d)""")
-private fun isDazn1Channel(channel: Channel): Boolean =
-    DAZN1_REGEX.containsMatchIn(channel.name.lowercase())
 
 private enum class SerieAMatchTab(val label: String) {
     CANALI("Canali"),
@@ -274,21 +262,12 @@ private fun ChannelsTab(
         channels
             .groupBy { it.category?.trim()?.takeUnless { c -> c.isEmpty() } ?: "Altri canali" }
             .map { (category, chans) -> category to chans.sortedBy { it.name.lowercase() } }
-            .mapNotNull { (category, chans) ->
-                when {
-                    // Categoria DAZN italiana: mostra tutti i canali
-                    isItalianDaznCategory(category) -> category to chans
-                    // Categoria ammessa (non esclusa) che contiene canali "DAZN ":
-                    // mostra solo quelli, così DAZN 1 compare anche fuori dalle
-                    // categorie DAZN dedicate
-                    isAllowedCategory(category) -> {
-                        val dazn1 = chans.filter { isDazn1Channel(it) }
-                        if (dazn1.isNotEmpty()) category to dazn1 else null
-                    }
-                    else -> null
-                }
-            }
-            .sortedBy { it.first.lowercase() }
+            // La lista arriva GIÀ filtrata dal repository (canali che nominano le
+            // squadre + canali evento DAZN): qui si scartano solo le categorie
+            // "straniere" (es. 🇩🇪 DAZN GERMANIA). L'ordine dei gruppi è quello di
+            // arrivo — prima i canali della partita, poi i feed di squadra — quindi
+            // NON si riordina per nome.
+            .filter { (category, _) -> isAllowedCategory(category) }
     }
 
     when {
