@@ -96,6 +96,9 @@ data class Movie(
     val tmdbCrewJson: String? = null,    // JSON array of {id, name, job, department, profile_path}
     val tmdbImdbId: String? = null, // IMDB ID from TMDB external_ids
     val tmdbTrailerKey: String? = null, // YouTube video key
+    // Visto censura TMDB (release_dates, paese IT → US → primo disponibile).
+    // Mostrato come badge "età consigliata" in dettaglio e nell'hero.
+    val tmdbAgeRating: String? = null,
     // Clear logo / title treatment (TMDb, PNG trasparente) + lista candidati alternativi
     // in JSON ({path, lang, ar, vote}) per un eventuale selettore del titolo grafico.
     val tmdbLogoPath: String? = null,
