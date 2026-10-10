@@ -76,8 +76,11 @@ class HomeViewModel @Inject constructor(
         private const val FORCE_SERIEA_HERO_DEBUG = false
 
         /** Oltre questa età la cache squadra→canali del picker Serie A viene
-         *  ricostruita con una scansione completa della playlist. */
-        private const val SERIE_A_CHANNEL_CACHE_TTL_MS = 6 * 60 * 60 * 1000L
+         *  ricostruita con una scansione completa della playlist. TTL corto (2 min):
+         *  la lista canali deve riflettere la playlist attuale già alla prima
+         *  apertura dopo un aggiornamento, senza aspettare ore. Il valore serve solo
+         *  a non ri-scansionare se l'utente apre/chiude il picker più volte di fila. */
+        private const val SERIE_A_CHANNEL_CACHE_TTL_MS = 2 * 60 * 1000L
 
         /**
          * Righe che restano anche se contengono contenuti "visti":
@@ -377,9 +380,11 @@ class HomeViewModel @Inject constructor(
             // 2. Ricerca aggiornata (auto-aggiorna il mapping salvato: nuovi canali
             //    col nome squadra entrano, quelli spariti con la playlist escono).
             //    La scansione completa dell'intera playlist (decine di migliaia di
-            //    canali + regex per alias) è costosa: si esegue solo quando la cache
-            //    per queste squadre non esiste o è vecchia (> 6h). Così una partita
-            //    successiva della stessa squadra si apre immediatamente.
+            //    canali + regex per alias) si esegue a ogni apertura del picker
+            //    (TTL 2 min): così i canali aggiunti con un aggiornamento della
+            //    playlist compaiono subito. I canali salvati restano visibili nel
+            //    frattempo — la lista salvata viene mostrata prima, quella fresca
+            //    la sostituisce quando arriva.
             val cacheAge = runCatching { serieAMatchRepository.savedChannelsAge(match) }
                 .getOrDefault(Long.MAX_VALUE)
             val needsFullScan = cacheAge > SERIE_A_CHANNEL_CACHE_TTL_MS
