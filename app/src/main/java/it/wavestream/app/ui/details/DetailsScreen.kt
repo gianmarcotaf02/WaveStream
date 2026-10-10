@@ -114,6 +114,9 @@ data class DetailsState(
     val overview: String = "",
     val genres: String = "",
     val duration: String? = null,
+    // Visto censura TMDB (es. "T", "12+", "VM14"): badge "età consigliata"
+    // nella riga delle info. null = nessun visto disponibile.
+    val ageRating: String? = null,
     val director: String? = null,
     val cast: String? = null,
     val castPeople: List<it.wavestream.app.data.entity.PersonInfo> = emptyList(),

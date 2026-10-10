@@ -2088,6 +2088,7 @@ class HomeViewModel @Inject constructor(
             year = currentMovie.year,
             duration = durationStr,
             genres = genres,
+            ageRating = currentMovie.tmdbAgeRating,
             totalDurationMinutes = currentMovie.tmdbRuntime,
             isFavorite = try {
                 favoriteDao.isFavorite(currentProfileId, ContentType.MOVIE, currentMovie.id)
@@ -2333,6 +2334,7 @@ class HomeViewModel @Inject constructor(
             year = currentSeries.year ?: currentSeries.tmdbFirstAirDate?.take(4)?.toIntOrNull(),
             duration = null,  // Series don't have single duration
             genres = genres,
+            ageRating = currentSeries.tmdbAgeRating,
             seasonCount = currentSeries.tmdbNumberOfSeasons ?: currentSeries.seasonCount.takeIf { it > 0 },
             isFavorite = try {
                 favoriteDao.isFavorite(currentProfileId, ContentType.SERIES, currentSeries.id)

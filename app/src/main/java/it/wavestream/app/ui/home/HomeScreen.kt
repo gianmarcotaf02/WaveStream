@@ -99,6 +99,9 @@ data class HeroItem(
     val year: Int?,
     val duration: String?,  // e.g., "2h 15m"
     val genres: String?,  // Comma-separated genres
+    // Visto censura TMDB (es. "T", "12+", "VM14"): badge "età consigliata"
+    // accanto alle altre info dell'hero. null = nessun visto disponibile.
+    val ageRating: String? = null,
     val seasonCount: Int? = null,  // Number of seasons (for series only)
     val totalDurationMinutes: Int? = null, // Total duration in minutes (for "xx min left of yy min")
     val isFavorite: Boolean = false,

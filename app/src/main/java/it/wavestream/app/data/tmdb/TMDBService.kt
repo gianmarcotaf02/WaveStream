@@ -1308,13 +1308,58 @@ class TMDBService @Inject constructor(
         }
     }
 
+    /**
+     * Etichette che significano "nessun visto assegnato": non sono un'età e non
+     * vanno mostrate come badge (TMDB le restituisce spesso per gli USA).
+     */
+    private val EMPTY_CERTIFICATIONS = setOf("NR", "UR", "N/A", "NA", "UNRATED", "NOT RATED")
+
+    /**
+     * Visto censura TMDB a partire dal blocco per paese.
+     *
+     * - Film: `release_dates.results[]` → `release_dates[].certification`
+     * - Serie: `content_ratings.results[]` → `rating`
+     *
+     * Preferenza **Italia → USA → primo paese con un valore valido**: il pubblico
+     * dell'app è italiano, quindi un visto italiano (T / 12+ / VM14 / VM18) è
+     * sempre preferibile a quello americano (PG-13 / R), che resta come ripiego.
+     */
+    private fun extractCertification(
+        results: org.json.JSONArray?,
+        nestedArrayKey: String?,
+        nestedValueKey: String
+    ): String? {
+        if (results == null) return null
+        val byCountry = LinkedHashMap<String, String>()
+        for (i in 0 until results.length()) {
+            val entry = results.optJSONObject(i) ?: continue
+            val country = entry.optString("iso_3166_1", "")
+            if (country.isEmpty()) continue
+
+            val value = if (nestedArrayKey != null) {
+                val nested = entry.optJSONArray(nestedArrayKey)
+                (0 until (nested?.length() ?: 0))
+                    .asSequence()
+                    .mapNotNull { nested?.optJSONObject(it)?.optString(nestedValueKey, "") }
+                    .firstOrNull { isValidCertification(it) }
+            } else {
+                entry.optString(nestedValueKey, "").takeIf { isValidCertification(it) }
+            }
+            if (value != null) byCountry[country] = value
+        }
+        return byCountry["IT"] ?: byCountry["US"] ?: byCountry.values.firstOrNull()
+    }
+
+    private fun isValidCertification(value: String?): Boolean =
+        !value.isNullOrBlank() && value.trim().uppercase() !in EMPTY_CERTIFICATIONS
+
     private fun fetchMovieDetails(movie: Movie, tmdbId: Int): Movie {
         // Il blocco `images` pesa ~+38% sulla risposta: lo chiediamo solo finché non abbiamo
         // mai controllato i loghi (marker nullo), così le chiamate successive restano leggere.
         val needsLogo = movie.tmdbLogoOptionsJson == null
         val imagesParam = if (needsLogo) ",images" else ""
         val imagesLanguageParam = if (needsLogo) "&include_image_language=$IMAGE_LANGUAGE" else ""
-        val detailsUrl = "$BASE_URL/movie/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,external_ids,videos$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
+        val detailsUrl = "$BASE_URL/movie/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,external_ids,videos,release_dates$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
         Log.d(TAG, "Fetching: $detailsUrl")
         val detailsResponse = fetchUrl(detailsUrl)
         val details = JSONObject(detailsResponse)
@@ -1430,6 +1475,13 @@ class TMDBService @Inject constructor(
         // Clear logo / titolo grafico (presente solo se abbiamo chiesto `images`)
         val (logoPath, logoOptionsJson) = selectTitleLogo(details)
 
+        // Visto censura (append_to_response=release_dates)
+        val ageRating = extractCertification(
+            results = details.optJSONObject("release_dates")?.optJSONArray("results"),
+            nestedArrayKey = "release_dates",
+            nestedValueKey = "certification"
+        )
+
         // Update movie entity (keep original name unchanged!)
         return movie.copy(
             tmdbId = tmdbId,
@@ -1437,6 +1489,7 @@ class TMDBService @Inject constructor(
             tmdbOriginalTitle = tmdbOriginalTitle,  // For OMDB fallback
             tmdbImdbId = imdbId,  // For direct OMDB lookup by ID
             tmdbTrailerKey = trailerKey,
+            tmdbAgeRating = ageRating ?: movie.tmdbAgeRating,
             tmdbLogoPath = logoPath ?: movie.tmdbLogoPath,
             tmdbLogoOptionsJson = logoOptionsJson ?: movie.tmdbLogoOptionsJson,
             tmdbOverview = overview,
@@ -1668,7 +1721,7 @@ class TMDBService @Inject constructor(
         val needsLogo = series.tmdbLogoOptionsJson == null
         val imagesParam = if (needsLogo) ",images" else ""
         val imagesLanguageParam = if (needsLogo) "&include_image_language=$IMAGE_LANGUAGE" else ""
-        val detailsUrl = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,videos,external_ids$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
+        val detailsUrl = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE&append_to_response=credits,videos,external_ids,content_ratings$imagesParam&include_video_language=it,en,null$imagesLanguageParam"
         val detailsResponse = fetchUrl(detailsUrl)
         val details = JSONObject(detailsResponse)
         
@@ -1760,11 +1813,19 @@ class TMDBService @Inject constructor(
         // Clear logo / titolo grafico (presente solo se abbiamo chiesto `images`)
         val (logoPath, logoOptionsJson) = selectTitleLogo(details)
 
+        // Visto censura (append_to_response=content_ratings)
+        val ageRating = extractCertification(
+            results = details.optJSONObject("content_ratings")?.optJSONArray("results"),
+            nestedArrayKey = null,
+            nestedValueKey = "rating"
+        )
+
         // Update series entity
         return series.copy(
             tmdbId = tmdbId,
             tmdbImdbId = imdbId,
             tmdbTrailerKey = trailerKey,
+            tmdbAgeRating = ageRating ?: series.tmdbAgeRating,
             tmdbLogoPath = logoPath ?: series.tmdbLogoPath,
             tmdbLogoOptionsJson = logoOptionsJson ?: series.tmdbLogoOptionsJson,
             tmdbOverview = overview,
