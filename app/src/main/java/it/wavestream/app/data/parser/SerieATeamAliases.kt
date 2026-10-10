@@ -55,29 +55,40 @@ object SerieATeamAliases {
 
     /**
      * Alias di una singola squadra (pubblico, usato anche per il matching
-     * degli eventi Sofascore con le partite football-data).
+     * degli eventi ESPN con le partite football-data).
+     *
+     * I nomi estesi sono normalizzati (minuscoli, senza accenti); la **sigla a 3
+     * lettere resta in maiuscolo** perché viene confrontata case-sensitive
+     * (vedi [channelMatchesTeam]).
      */
-    /** TLA (sigle a 3 lettere dei canali: "GEN-FIO", "DAZN 10 GEN") + nome esteso. */
     fun teamAliases(tla: String?, shortName: String): List<String> {
         val key = tla?.trim()?.uppercase()
         val fromTla = key?.let { TLA_ALIASES[it] }
         val fromShortName = normalize(shortName).takeIf { it.isNotBlank() }
-        val fromCode = key?.lowercase()?.takeIf { it.length == 3 && it.all { ch -> ch in 'a'..'z' } }
+        val fromCode = key?.takeIf { it.length == 3 && it.all { ch -> ch in 'A'..'Z' } }
         return ((fromTla ?: emptyList()) + listOfNotNull(fromShortName, fromCode)).distinct()
     }
 
     private fun aliasesForTeam(tla: String?, shortName: String): List<String> = teamAliases(tla, shortName)
 
     /**
-     * True if the channel name contains at least one alias of the teams
-     * (word-boundary match, so "inter" doesn't match "internazionale" channel names
-     * wrongly and "roma" doesn't match "romagna").
+     * True se il nome del canale contiene almeno un alias della squadra.
+     *
+     * I nomi estesi matchano come **parole intere** (così "inter" non matcha
+     * "internazionale" per sbaglio e "roma" non matcha "romagna").
+     * Le **sigle** (alias tutti maiuscoli, es. "GEN") matchano invece
+     * **case-sensitive** sul nome originale: i canali scrivono `GEN-FIO`, mentre un
+     * nome inglese con "Mon" (lunedì) non deve diventare un match di Monza.
      */
     fun channelMatchesTeam(channelName: String, aliases: List<String>): Boolean {
+        if (channelName.isBlank()) return false
         val name = normalize(channelName)
-        if (name.isBlank()) return false
         return aliases.any { alias ->
-            alias.isNotBlank() && name.containsWord(alias)
+            when {
+                alias.isBlank() -> false
+                alias.all { it in 'A'..'Z' } -> containsCode(channelName, alias)
+                else -> name.containsWord(alias)
+            }
         }
     }
 
@@ -112,5 +123,13 @@ object SerieATeamAliases {
 
     private fun String.containsWord(word: String): Boolean {
         return wordRegex(word).containsMatchIn(this)
+    }
+
+    /** Sigla (tutto maiuscolo) come parola intera, sul nome NON normalizzato. */
+    private fun containsCode(rawName: String, code: String): Boolean {
+        val regex = regexCache.getOrPut("CASE:$code") {
+            Regex("(?<![A-Za-z0-9])${Regex.escape(code)}(?![A-Za-z0-9])")
+        }
+        return regex.containsMatchIn(rawName)
     }
 }
