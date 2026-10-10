@@ -1,0 +1,41 @@
+#!/bin/sh
+# post-commit — mantiene fresco il knowledge graph di graphify (WaveStream).
+#
+# Perche' esiste: dopo una modifica al codice il grafo e' stale, e finora l'aggiornamento
+# dipendeva dal fatto che l'agente se ne ricordasse. Questo hook lo rende automatico.
+#
+# Regole di sicurezza:
+#   - non blocca MAI il commit: il refresh parte in background e ogni errore e' ignorato
+#   - esce subito se il commit non tocca codice Kotlin (non c'e' nulla da re-estrarre)
+#   - lock in graphify-out/.graph-update.lock per non accumulare refresh sovrapposti
+#     (questo repo ha git-checkpoint.ts che auto-committa ogni 3 turni: senza lock
+#      partirebbero piu' `graphify update` in parallelo sullo stesso graph.json)
+#
+# Attivazione (una volta sola, per repo):
+#   git config core.hooksPath .githooks
+#
+# Disattivazione: rimuovere l'eseguibilita' da questo file, o il core.hooksPath.
+
+[ -f graphify-out/graph.json ] || exit 0
+command -v graphify >/dev/null 2>&1 || exit 0
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+cd "$root" || exit 0
+
+# Niente file Kotlin nel commit => il grafo non cambia: evita 10s di AST a vuoto.
+git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null | grep -qE '\.kts?$' || exit 0
+
+lock="graphify-out/.graph-update.lock"
+
+# Lock rimasto da un processo ucciso: dopo 10 minuti lo consideriamo abbandonato.
+if [ -d "$lock" ]; then
+    find "$lock" -maxdepth 0 -mmin +10 -exec rmdir {} \; 2>/dev/null
+fi
+mkdir "$lock" 2>/dev/null || exit 0
+
+(
+    trap 'rmdir "$lock" 2>/dev/null' EXIT HUP INT TERM
+    graphify update . >/dev/null 2>&1 || true
+) &
+
+exit 0
