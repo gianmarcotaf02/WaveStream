@@ -207,10 +207,10 @@ class SerieAMatchRepository @Inject constructor(
         )
     }
 
-    private fun toLineupPlayer(player: EspnRosterPlayer) = MatchLineupPlayer(
-        player = player.athlete?.displayName?.let { MatchPerson(name = it) },
-        shirtNumber = player.jersey?.toIntOrNull(),
-        substitute = player.starter != true
+    private fun EspnRosterPlayer.toLineupPlayer() = MatchLineupPlayer(
+        player = athlete?.displayName?.let { MatchPerson(name = it) },
+        shirtNumber = jersey?.toIntOrNull(),
+        substitute = starter != true
     )
 
     /**
