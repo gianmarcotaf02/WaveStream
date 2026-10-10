@@ -98,7 +98,15 @@ data class Movie(
     val tmdbTrailerKey: String? = null, // YouTube video key
     // Visto censura TMDB (release_dates, paese IT → US → primo disponibile).
     // Mostrato come badge "età consigliata" in dettaglio e nell'hero.
+    // null = visto non ancora cercato oppure assente su TMDB: la differenza la fa
+    // [tmdbAgeRatingCheckedAt], perché il badge deve poter distinguere i due casi
+    // senza costringere un re-fetch a ogni apertura.
     val tmdbAgeRating: String? = null,
+    // Quando il visto è stato cercato (valorizzato anche se TMDB non ne ha).
+    // È il marker che fa scattare UNA sola chiamata extra sui cataloghi
+    // arricchiti prima di questa feature (stesso ruolo di tmdbLogoOptionsJson
+    // per i titoli grafici).
+    val tmdbAgeRatingCheckedAt: Long? = null,
     // Clear logo / title treatment (TMDb, PNG trasparente) + lista candidati alternativi
     // in JSON ({path, lang, ar, vote}) per un eventuale selettore del titolo grafico.
     val tmdbLogoPath: String? = null,

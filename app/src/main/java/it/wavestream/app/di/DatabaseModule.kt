@@ -628,15 +628,18 @@ object DatabaseModule {
 
     /**
      * Migration from version 36 to 37 (badge età consigliata):
-     * - Add tmdbAgeRating column to movies and series.
+     * - Add tmdbAgeRating + tmdbAgeRatingCheckedAt columns to movies and series.
      * Visto censura TMDB (release_dates per i film, content_ratings per le serie),
-     * mostrato come badge in dettaglio e nell'hero. La colonna nasce NULL: si
-     * popola all'arricchimento successivo, senza forzare un re-fetch di massa.
+     * mostrato come badge in dettaglio e nell'hero. Le colonne nascono NULL: il
+     * marker `tmdbAgeRatingCheckedAt` resta nullo sui cataloghi già arricchiti,
+     * quindi la prima apertura di un contenuto fa UNA chiamata extra e poi tace.
      */
     private val MIGRATION_36_37 = object : Migration(36, 37) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL("ALTER TABLE movies ADD COLUMN tmdbAgeRating TEXT DEFAULT NULL")
+            db.execSQL("ALTER TABLE movies ADD COLUMN tmdbAgeRatingCheckedAt INTEGER DEFAULT NULL")
             db.execSQL("ALTER TABLE series ADD COLUMN tmdbAgeRating TEXT DEFAULT NULL")
+            db.execSQL("ALTER TABLE series ADD COLUMN tmdbAgeRatingCheckedAt INTEGER DEFAULT NULL")
         }
     }
 

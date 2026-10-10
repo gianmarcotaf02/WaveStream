@@ -927,10 +927,14 @@ class TMDBService @Inject constructor(
         // tmdbLogoOptionsJson è richiesto perché i cataloghi già arricchiti prima dei titoli
         // grafici devono fare UNA sola chiamata extra per recuperare il clear logo (il marker
         // resta valorizzato anche quando il logo non esiste, quindi non si ripete).
+        // Stesso discorso per tmdbAgeRatingCheckedAt (visto censura): è il marker, non il
+        // valore, a dire "già cercato" — così un film senza visto non viene ri-fetchato
+        // a ogni apertura.
         val hasRealData = movie.tmdbId != null && movie.tmdbOverview != null &&
             movie.tmdbOriginalTitle != null && movie.tmdbVoteAverage != null
         if (hasRealData && movie.tmdbLastFetchAt != null && 
             movie.tmdbLogoOptionsJson != null &&
+            movie.tmdbAgeRatingCheckedAt != null &&
             System.currentTimeMillis() - movie.tmdbLastFetchAt < 7 * 24 * 60 * 60 * 1000) {  // 7 days cache
             Log.d(TAG, "SKIP: Movie '${movie.name}' already enriched, returning cached (rating=${movie.tmdbVoteAverage})")
             // Return fresh data from DB to ensure all fields are populated (in case movie passed is stale)
@@ -1490,6 +1494,7 @@ class TMDBService @Inject constructor(
             tmdbImdbId = imdbId,  // For direct OMDB lookup by ID
             tmdbTrailerKey = trailerKey,
             tmdbAgeRating = ageRating ?: movie.tmdbAgeRating,
+            tmdbAgeRatingCheckedAt = System.currentTimeMillis(),
             tmdbLogoPath = logoPath ?: movie.tmdbLogoPath,
             tmdbLogoOptionsJson = logoOptionsJson ?: movie.tmdbLogoOptionsJson,
             tmdbOverview = overview,
@@ -1577,9 +1582,11 @@ class TMDBService @Inject constructor(
         // a partial enrichment without tmdbVoteAverage is re-fetched).
         // tmdbLogoOptionsJson: vedi enrichMovieDetails — una sola chiamata extra per il
         // titolo grafico sui cataloghi arricchiti prima di questa feature.
+        // tmdbAgeRatingCheckedAt: stesso marker per il visto censura.
         val hasRealData = series.tmdbId != null && series.tmdbOverview != null && series.tmdbVoteAverage != null
         if (hasRealData && series.tmdbLastFetchAt != null &&
             series.tmdbLogoOptionsJson != null &&
+            series.tmdbAgeRatingCheckedAt != null &&
             System.currentTimeMillis() - series.tmdbLastFetchAt < 24 * 60 * 60 * 1000) {
             Log.d(TAG, "Series '${series.name}' already enriched with data, skipping")
             val freshFromDb = seriesDao.getSeriesById(series.id)
@@ -1826,6 +1833,7 @@ class TMDBService @Inject constructor(
             tmdbImdbId = imdbId,
             tmdbTrailerKey = trailerKey,
             tmdbAgeRating = ageRating ?: series.tmdbAgeRating,
+            tmdbAgeRatingCheckedAt = System.currentTimeMillis(),
             tmdbLogoPath = logoPath ?: series.tmdbLogoPath,
             tmdbLogoOptionsJson = logoOptionsJson ?: series.tmdbLogoOptionsJson,
             tmdbOverview = overview,
