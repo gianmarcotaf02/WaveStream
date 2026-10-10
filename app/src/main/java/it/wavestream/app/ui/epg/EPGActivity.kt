@@ -45,6 +45,7 @@ import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import kotlinx.coroutines.delay
+import it.wavestream.app.util.ServerClock
 import kotlinx.coroutines.flow.first
 import java.text.SimpleDateFormat
 import java.util.*
@@ -98,7 +99,9 @@ class EPGActivity : ComponentActivity() {
     private fun EPGScreenContent() {
         var channels by remember { mutableStateOf<List<Channel>>(emptyList()) }
         var channelPrograms by remember { mutableStateOf<Map<Long, List<EpgProgram>>>(emptyMap()) }
-        var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+        // Orologio corretto col server: la guida TV è allineata ai tempi reali dei
+        // programmi, non al clock (spesso sballato) del dispositivo.
+        var currentTime by remember { mutableStateOf(ServerClock.now()) }
         var isLoading by remember { mutableStateOf(true) }
         
         // Load channels and EPG
@@ -119,7 +122,7 @@ class EPGActivity : ComponentActivity() {
         LaunchedEffect(Unit) {
             while (true) {
                 delay(60_000)
-                currentTime = System.currentTimeMillis()
+                currentTime = ServerClock.now()
             }
         }
         

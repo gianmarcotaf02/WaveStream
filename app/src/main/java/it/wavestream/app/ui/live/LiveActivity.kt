@@ -62,6 +62,7 @@ import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.RecentlyWatchedChannel
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.data.repository.EpgRepository
+import it.wavestream.app.util.ServerClock
 import it.wavestream.app.util.channelLogoRequest
 import it.wavestream.app.ui.epg.EpgProgram
 import it.wavestream.app.ui.multiscreen.MultiscreenActivity
@@ -131,7 +132,10 @@ class LiveActivity : ComponentActivity() {
         var isGridMode by remember { mutableStateOf(true) }
         var isLoading by remember { mutableStateOf(true) }
         var isEpgLoading by remember { mutableStateOf(false) }
-        var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+        // Orologio corretto col server: il clock dei TV box è spesso sballato e
+        // la riga "ora corrente" + il programma in onda devono seguire i tempi
+        // reali dell'EPG, non l'orologio del dispositivo.
+        var currentTime by remember { mutableStateOf(ServerClock.now()) }
         var favoriteCategories by remember { mutableStateOf<Set<String>>(emptySet()) }
         var channelCounts by remember { mutableStateOf<Map<String, Int>>(emptyMap()) }
         var searchQuery by remember { mutableStateOf("") }
@@ -300,7 +304,7 @@ class LiveActivity : ComponentActivity() {
         LaunchedEffect(Unit) {
             while (true) {
                 delay(60_000)
-                currentTime = System.currentTimeMillis()
+                currentTime = ServerClock.now()
             }
         }
         

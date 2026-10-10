@@ -8,6 +8,7 @@ import it.wavestream.app.data.database.dao.EPGDao
 import it.wavestream.app.data.database.dao.PlaylistDao
 import it.wavestream.app.data.database.entity.EPGProgram
 import it.wavestream.app.ui.epg.EpgProgram
+import it.wavestream.app.util.ServerClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -40,6 +41,14 @@ class EpgRepository @Inject constructor(
     companion object {
         private const val TAG = "EpgRepository"
         private const val MAX_PROGRAMS_PER_CHANNEL = 24 // ~today + tomorrow
+
+        /**
+         * Due voci dello stesso canale sono considerate lo stesso programma se il
+         * titolo coincide e l'inizio dista al massimo questo intervallo: molti
+         * provider ripubblicano l'evento con 5 minuti di scarto (es.
+         * "Chelsea - Bournemouth 13:55-16:00" e "14:00-16:00").
+         */
+        private const val DEDUPE_START_TOLERANCE_MS = 15 * 60 * 1000L
     }
     
     private val httpClient = OkHttpClient.Builder()
@@ -176,8 +185,8 @@ class EpgRepository @Inject constructor(
                     }
                     
                     if (programs.isNotEmpty()) {
-                        epgCache[channel.xtreamEpgChannelId ?: channel.name] = programs.sortedBy { it.start }
-                        epgCache[channel.name] = programs.sortedBy { it.start }
+                        epgCache[channel.xtreamEpgChannelId ?: channel.name] = dedupePrograms(programs)
+                        epgCache[channel.name] = dedupePrograms(programs)
                         loadedCount++
                     }
                 }
@@ -224,7 +233,7 @@ class EpgRepository @Inject constructor(
             
             // Cache it
             if (programs.isNotEmpty()) {
-                epgCache[channelId] = programs
+                epgCache[channelId] = dedupePrograms(programs)
             }
             
             return@withContext programs
@@ -323,7 +332,7 @@ class EpgRepository @Inject constructor(
      */
     suspend fun getCurrentProgram(channelId: String): EpgProgram? {
         val programs = getProgramsForChannel(channelId)
-        val now = System.currentTimeMillis()
+        val now = ServerClock.now()
         return programs.find { it.start <= now && it.end > now }
     }
     
@@ -332,8 +341,34 @@ class EpgRepository @Inject constructor(
      */
     suspend fun getNextProgram(channelId: String): EpgProgram? {
         val programs = getProgramsForChannel(channelId)
-        val now = System.currentTimeMillis()
+        val now = ServerClock.now()
         return programs.find { it.start > now }
+    }
+
+    /**
+     * Deduplica i programmi di un canale e li ordina per inizio.
+     *
+     * I provider ripubblicano spesso lo stesso evento due volte (stesso titolo,
+     * orario di inizio spostato di pochi minuti) e ogni ri-download dell'EPG
+     * accoda il palinsesto a quello già in cache: senza questo passaggio la
+     * griglia mostra blocchi doppi sovrapposti. Si tiene la prima occorrenza e si
+     * allarga la fine all'ultima, così il blocco copre la finestra reale.
+     */
+    private fun dedupePrograms(programs: List<EpgProgram>): List<EpgProgram> {
+        if (programs.size < 2) return programs.sortedBy { it.start }
+        val merged = ArrayList<EpgProgram>(programs.size)
+        programs.sortedBy { it.start }.forEach { program ->
+            val previous = merged.lastOrNull()
+            val sameEvent = previous != null &&
+                previous.title.trim().equals(program.title.trim(), ignoreCase = true) &&
+                program.start - previous.start <= DEDUPE_START_TOLERANCE_MS
+            if (sameEvent) {
+                merged[merged.lastIndex] = previous.copy(end = maxOf(previous.end, program.end))
+            } else {
+                merged.add(program)
+            }
+        }
+        return merged
     }
 
     /**
@@ -379,7 +414,7 @@ class EpgRepository @Inject constructor(
             if (all.isNotEmpty()) {
                 epgCache.clear()
                 all.groupBy { it.epgChannelId }.forEach { (key, list) ->
-                    epgCache[key] = list.map { e ->
+                    epgCache[key] = dedupePrograms(list.map { e ->
                         EpgProgram(
                             channelId = e.epgChannelId,
                             title = e.title,
@@ -454,7 +489,7 @@ class EpgRepository @Inject constructor(
                                 if (currentChannelId != null && currentTitle != null && 
                                     currentStart != null && currentEnd != null) {
                                     
-                                    val now = System.currentTimeMillis()
+                                    val now = ServerClock.now()
                                     val cutoff24h = now + (24 * 60 * 60 * 1000L)
                                     
                                     if (currentEnd > now && currentStart < cutoff24h) {
@@ -491,7 +526,7 @@ class EpgRepository @Inject constructor(
                 if (programs.isNotEmpty()) {
                     val existing = epgCache[channelId]?.toMutableList() ?: mutableListOf()
                     existing.addAll(programs)
-                    epgCache[channelId] = existing.sortedBy { it.start }
+                    epgCache[channelId] = dedupePrograms(existing)
                     savedChannelsCount++
                 }
             }

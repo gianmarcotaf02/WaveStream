@@ -435,7 +435,9 @@ class HomeViewModel @Inject constructor(
      */
     private suspend fun loadSerieAEpgFor(channels: List<it.wavestream.app.data.database.entity.Channel>) {
         if (channels.isEmpty()) return
-        val now = System.currentTimeMillis()
+        // Orologio corretto col server: il "programma in onda" deve seguire i tempi
+        // reali dell'EPG anche se il clock del box è sballato.
+        val now = it.wavestream.app.util.ServerClock.now()
         val result = java.util.concurrent.ConcurrentHashMap<Long, it.wavestream.app.ui.epg.EpgProgram>()
         coroutineScope {
             channels.map { channel ->

@@ -371,7 +371,9 @@ private fun CategoryScreen(
     var channelPrograms by remember { mutableStateOf<Map<Long, List<EpgProgram>>>(emptyMap()) }
     var isLoading by remember { mutableStateOf(true) }
     var viewMode by remember { mutableStateOf("grid") } // "grid" or "epg" (for Live only)
-    var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+    // Orologio corretto col server (vedi ServerClock): la griglia EPG deve
+    // allinearsi ai tempi reali dei programmi anche se il clock del box è sballato.
+    var currentTime by remember { mutableStateOf(it.wavestream.app.util.ServerClock.now()) }
     var sortFilter by remember { mutableStateOf(SortFilterState()) }
     
     val isLiveCategory = contentType == "CATEGORY_LIVE"
@@ -423,7 +425,7 @@ private fun CategoryScreen(
     LaunchedEffect(Unit) {
         while (true) {
             delay(60_000)
-            currentTime = System.currentTimeMillis()
+            currentTime = it.wavestream.app.util.ServerClock.now()
         }
     }
     
