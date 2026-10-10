@@ -23,7 +23,9 @@ root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
 cd "$root" || exit 0
 
 # Niente file Kotlin nel commit => il grafo non cambia: evita 10s di AST a vuoto.
-git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null | grep -qE '\.kts?$' || exit 0
+# `--root` e' necessario: senza, il commit iniziale di un repo fresco non elenca file e il
+# refresh non partirebbe mai.
+git diff-tree --root --no-commit-id --name-only -r HEAD 2>/dev/null | grep -qE '\.kts?$' || exit 0
 
 lock="graphify-out/.graph-update.lock"
 
