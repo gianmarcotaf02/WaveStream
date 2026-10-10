@@ -1050,6 +1050,11 @@ class MovieUnificationService @Inject constructor(
         tmdbCrewJson = a.tmdbCrewJson ?: b.tmdbCrewJson,
         tmdbImdbId = a.tmdbImdbId ?: b.tmdbImdbId,
         tmdbTrailerKey = a.tmdbTrailerKey ?: b.tmdbTrailerKey,
+        // Visto censura + marker: il duplicato può essere quello già arricchito, quindi
+        // vanno unificati come tutti gli altri campi TMDB (il marker viaggia col valore,
+        // altrimenti il film unificato verrebbe ri-arricchito inutilmente).
+        tmdbAgeRating = a.tmdbAgeRating ?: b.tmdbAgeRating,
+        tmdbAgeRatingCheckedAt = maxOfNullable(a.tmdbAgeRatingCheckedAt, b.tmdbAgeRatingCheckedAt),
         duration = a.duration ?: b.duration,
         videoCodec = a.videoCodec ?: b.videoCodec,
         audioCodec = a.audioCodec ?: b.audioCodec,
