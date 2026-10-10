@@ -290,7 +290,7 @@ class HomeViewModel @Inject constructor(
         manageSerieAPolling(matches.isNotEmpty())
     }
 
-    /** Mentre un match è in finestra hero, ri-sync ogni 60s: prima Sofascore
+    /** Mentre un match è in finestra hero, ri-sync ogni 60s: prima ESPN
      *  (goal quasi real-time), con fallback automatico su football-data.org. */
     private fun manageSerieAPolling(active: Boolean) {
         if (active) {
@@ -298,10 +298,10 @@ class HomeViewModel @Inject constructor(
                 serieAPollingJob = viewModelScope.launch {
                     while (isActive) {
                         delay(60_000L)
-                        val viaSofascore = runCatching {
-                            serieAMatchRepository.refreshLiveScoresFromSofascore()
+                        val viaEspn = runCatching {
+                            serieAMatchRepository.refreshLiveScores()
                         }.getOrDefault(false)
-                        if (!viaSofascore) {
+                        if (!viaEspn) {
                             runCatching { serieAMatchRepository.syncMatches() }
                         }
                     }
