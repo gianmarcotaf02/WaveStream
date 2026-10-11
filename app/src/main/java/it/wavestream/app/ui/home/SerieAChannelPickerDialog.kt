@@ -168,10 +168,12 @@ fun SerieAChannelPickerDialog(
             ) {
                 SerieAMatchHeroBackdrop(
                     match = match,
-                    modifier = Modifier.fillMaxSize(),
-                    // Stemmi più distanziati: lo stemma di casa va più a sx,
-                    // lontano dalla slash
-                    crestSpacing = 110.dp
+                    modifier = Modifier.fillMaxSize()
+                    // Nessun override della distanza dalla slash: gli stemmi sono
+                    // ancorati a essa in modo speculare (vedi SerieAMatchHeroBackdrop),
+                    // quindi casa e ospite sono già equidistanti. Il vecchio
+                    // crestSpacing = 110dp era un rattoppo per allontanare a mano
+                    // lo stemma di casa dalla slash.
                 )
                 // Fade in basso verso lo sfondo del dialog
                 Box(
