@@ -1975,6 +1975,19 @@ class HomeViewModel @Inject constructor(
 
         // Check if OMDB ratings need refresh (logic from DetailsActivity)
         var currentMovie = movie
+        // Visto censura (badge età): l'hero legge dal DB e non arricchisce, mentre la
+        // scheda contenuto sì — quindi senza questa richiesta il badge restava assente
+        // nell'hero finché non aprivi la scheda, che scrive il visto ma non ricostruisce
+        // gli hero già in cache (da lì il caso "nel dettaglio c'è, nell'hero no").
+        // Il marker `tmdbAgeRatingCheckedAt` rende la chiamata una tantum per contenuto,
+        // anche quando TMDB non ha un visto (e la negative cache copre i non trovati).
+        if (movie.tmdbAgeRatingCheckedAt == null) {
+            try {
+                currentMovie = tmdbService.enrichMovieDetails(movie)
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error enriching movie for age rating: ${movie.name}", e)
+            }
+        }
         val hasAnyOmdbRating = movie.omdbImdbRating != null || 
             movie.omdbRottenTomatoesScore != null || 
             movie.omdbMetacriticScore != null
@@ -2010,7 +2023,9 @@ class HomeViewModel @Inject constructor(
                 }
 
                 if (ratings != null) {
-                    currentMovie = movie.copy(
+                    // `currentMovie`, non `movie`: altrimenti si perderebbe l'arricchimento
+                    // TMDB fatto sopra (visto censura) e qualunque altro accumulato prima.
+                    currentMovie = currentMovie.copy(
                         omdbImdbRating = ratings.getFormattedImdbRating(),
                         omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
                         omdbMetacriticScore = ratings.metacriticScore,
@@ -2193,6 +2208,15 @@ class HomeViewModel @Inject constructor(
 
         // Check if OMDB ratings need refresh (logic from DetailsActivity)
         var currentSeries = series
+        // Visto censura (badge età) — vedi la nota gemella in buildHeroItemFromMovie:
+        // la scheda contenuto arricchisce, l'hero no, quindi il recupero va fatto qui.
+        if (series.tmdbAgeRatingCheckedAt == null) {
+            try {
+                currentSeries = tmdbService.enrichSeriesDetails(series)
+            } catch (e: Exception) {
+                Log.e("HomeViewModel", "Error enriching series for age rating: ${series.name}", e)
+            }
+        }
         val hasAnyOmdbRating = series.omdbImdbRating != null || 
             series.omdbRottenTomatoesScore != null || 
             series.omdbMetacriticScore != null
@@ -2227,7 +2251,8 @@ class HomeViewModel @Inject constructor(
                 }
 
                 if (ratings != null) {
-                    currentSeries = series.copy(
+                    // `currentSeries`, non `series`: vedi la nota nel ramo movie.
+                    currentSeries = currentSeries.copy(
                         omdbImdbRating = ratings.getFormattedImdbRating(),
                         omdbRottenTomatoesScore = ratings.rottenTomatoesScore,
                         omdbMetacriticScore = ratings.metacriticScore,
