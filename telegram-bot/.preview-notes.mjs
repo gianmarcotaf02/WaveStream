@@ -4,7 +4,7 @@ import { stripTags } from './src/telegram.mjs'
 
 export const BODY = `**Novità della 1.1.14**
 
-- **Età consigliata su ogni contenuto:** film e serie mostrano ora il visto di età — T, 6+, 12+, 14+, 18+ — come pillola in vetro accanto ai generi, sia nella scheda contenuto sia nell'hero, compreso "Continua a guardare". Il colore segue la fascia: verde per tutti, ambra per i ragazzi, rosso per i contenuti per adulti. La scala è sempre quella italiana: quando TMDb non ha il visto italiano — succede quasi sempre per le serie — quello americano viene convertito, arrotondando per eccesso, mai al ribasso.
+- **Età consigliata in tutta l'interfaccia:** film e serie mostrano ora il visto di età — T, 6+, 12+, 14+, 18+ — come pillola in vetro accanto ai generi, sia nella scheda contenuto sia nell'hero, compreso "Continua a guardare". Il colore segue la fascia: verde per tutti, ambra per i ragazzi, rosso per i contenuti per adulti. La scala è sempre quella italiana: quando TMDb non ha il visto italiano — succede quasi sempre per le serie — quello americano viene convertito, arrotondando per eccesso, mai al ribasso.
 
 - **Serie A — solo canali DAZN nella scheda partita:** la ricerca canali tiene ora solo le categorie che contengono "DAZN", quindi i feed non collegati al match non entrano più in lista. Sono esclusi anche i canali esteri (aggiunta l'Albania) e le categorie di Champions League e Prime Video.
 
