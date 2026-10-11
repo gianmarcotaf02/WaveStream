@@ -821,6 +821,14 @@ private fun MainActivityScreen(
                                 android.widget.Toast.LENGTH_SHORT
                             ).show()
                         },
+                        onRemoveFromContinueWatching = { heroItem ->
+                            homeViewModel.removeFromContinueWatching(heroItem)
+                            android.widget.Toast.makeText(
+                                context,
+                                "Rimosso da Continua a guardare",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        },
                         onRailFocusRequest = {
                             // Fase 2.3b — "sinistra" dal contenuto porta alla pillola di
                             // navigazione. try/catch: se il nodo non è ancora attachato

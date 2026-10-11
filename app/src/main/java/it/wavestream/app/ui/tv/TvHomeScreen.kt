@@ -159,6 +159,8 @@ fun TvHomeScreen(
     onTrailerClick: (HeroItem) -> Unit = {},
     // `watched = true` → segna come visto, `false` → segna come non visto.
     onSetHeroWatched: (HeroItem, Boolean) -> Unit = { _, _ -> },
+    // Pulsante a occhio: toglie il contenuto da "Continua a guardare".
+    onRemoveFromContinueWatching: (HeroItem) -> Unit = {},
     onRailFocusRequest: () -> Unit = {},  // Called when LEFT from first carousel item
     onManageHistoryClick: () -> Unit = {},  // Apre la schermata di gestione cronologia
     modifier: Modifier = Modifier
@@ -187,6 +189,7 @@ fun TvHomeScreen(
         onAddHeroToPlaylist = onAddHeroToPlaylist,
         onTrailerClick = onTrailerClick,
         onSetHeroWatched = onSetHeroWatched,
+        onRemoveFromContinueWatching = onRemoveFromContinueWatching,
         onRailFocusRequest = onRailFocusRequest,
         onManageHistoryClick = onManageHistoryClick,
         modifier = modifier
@@ -214,6 +217,7 @@ private fun TvHomeScreenContent(
     onAddHeroToPlaylist: (HeroItem) -> Unit = {},
     onTrailerClick: (HeroItem) -> Unit = {},
     onSetHeroWatched: (HeroItem, Boolean) -> Unit = { _, _ -> },
+    onRemoveFromContinueWatching: (HeroItem) -> Unit = {},
     onRailFocusRequest: () -> Unit = {},
     onManageHistoryClick: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -715,6 +719,7 @@ private fun TvHomeScreenContent(
                                     ),
                                     onTrailerClick = { onTrailerClick(hero) },
                                     onSetHeroWatched = onSetHeroWatched,
+                                    onRemoveFromContinueWatching = onRemoveFromContinueWatching,
                                     playButtonFocusRequester = heroPlayButtonFocusRequester,
                                     onFocusChanged = { /* Handled by internal logic if needed */ },
                                     topBarFocusRequester = topBarFocusRequester,
@@ -984,6 +989,8 @@ fun HeroBanner(
     /** Stato del contenuto nella lista "Da guardare" (per il pulsante + ↔ spunta). */
     isInList: Boolean = false,
     onSetHeroWatched: (HeroItem, Boolean) -> Unit = { _, _ -> },
+    /** Rimuove il contenuto da "Continua a guardare" (pulsante a occhio). */
+    onRemoveFromContinueWatching: (HeroItem) -> Unit = {},
     playButtonFocusRequester: FocusRequester? = null,
     onFocusChanged: (Boolean) -> Unit = {},
     topBarFocusRequester: FocusRequester? = null,
@@ -1185,11 +1192,7 @@ fun HeroBanner(
                                 )
                             }
                             // Età consigliata (visto censura TMDB): pillola in vetro,
-                            // nascosta del tutto se il visto non è disponibile.
-                            // Esclusa dall'hero partita, che non ha un visto.
-                            if (hero.contentType != "SERIEA_MATCH") {
-                                AgeRatingBadge(rating = hero.ageRating)
-                            }
+                            // mostrata nella riga del genere (vedi sotto), non qui.
                             hero.duration?.let {
                                 Text(
                                     text = it,
@@ -1266,16 +1269,31 @@ fun HeroBanner(
                             }
                         }
                         
-                        // Genres
-                        hero.genres?.let { genres ->
+                        // Generi ed età consigliata sulla stessa riga: il visto censura
+                        // sta accanto al genere, non nella riga di anno/durata. La riga
+                        // esiste anche senza generi, così il badge non si perde.
+                        if (hero.genres != null || hero.ageRating != null) {
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = genres,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = WaveStreamColors.TextTertiary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                hero.genres?.let { genres ->
+                                    Text(
+                                        text = genres,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = WaveStreamColors.TextTertiary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        // fill = false: il testo prende la sua larghezza
+                                        // naturale e si accorcia solo se serve spazio al badge
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                }
+                                if (hero.contentType != "SERIEA_MATCH") {
+                                    AgeRatingBadge(rating = hero.ageRating)
+                                }
+                            }
                         }
 
                         // Punteggio live/finito sotto data e orario (solo hero partita)
@@ -1576,6 +1594,21 @@ fun HeroBanner(
                                 )
                             }
                             
+                            // Pulsante a occhio (solo hero "in Continua a guardare"):
+                            // toglie il contenuto dalla lista cancellandone il progresso —
+                            // stessa icona e stessa semantica della scheda dettaglio.
+                            // Il criterio è "ha un progresso da riprendere", lo stesso che
+                            // HomeViewModel usa per marcare un hero come CW-derived.
+                            if (hero.resumeMinutes != null || hero.resumeEpisodeSeason != null) {
+                                Spacer(modifier = Modifier.width(4.dp))
+                                HeroIconButton(
+                                    icon = painterResource(id = R.drawable.ic_eye),
+                                    contentDescription = "Rimuovi da Continua a guardare",
+                                    onClick = { onRemoveFromContinueWatching(hero) },
+                                    onFocusChange = { if (it) isPaused = true }
+                                )
+                            }
+
                             // Pulsante "visto": ora sempre disponibile (non solo sugli hero
                             // in ripresa), così si può segnare come visto anche un titolo
                             // proposto come raccomandazione. Una volta segnato sparisce da
