@@ -1210,6 +1210,34 @@ fun HeroBanner(
                         
                         Spacer(modifier = Modifier.height(8.dp))
                         
+                        // Generi ed età consigliata sulla stessa riga: il visto censura
+                        // sta esattamente accanto al testo del genere, come nella scheda
+                        // dettaglio. La riga esiste anche senza generi, così il badge non
+                        // si perde. Sta SOPRA la striscia dei rating (prima era sotto):
+                        // l'ordine ora è anno/stagioni · generi+età · rating · trama.
+                        if (hero.genres != null || hero.ageRating != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                hero.genres?.let { genres ->
+                                    Text(
+                                        text = genres,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = WaveStreamColors.TextTertiary,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        // fill = false: il testo prende la sua larghezza
+                                        // naturale e si accorcia solo se serve spazio al badge
+                                        modifier = Modifier.weight(1f, fill = false)
+                                    )
+                                }
+                                if (hero.contentType != "SERIEA_MATCH") {
+                                    AgeRatingBadge(rating = hero.ageRating)
+                                }
+                            }
+                        }
+                        
                         // Ratings — nascoste per l'hero partita (nessun dato)
                         if (hero.contentType != "SERIEA_MATCH") Row(
                             // 16dp (era 20): con 5 badge la riga arrivava vicina al bordo destro.
@@ -1264,33 +1292,6 @@ fun HeroBanner(
                                     value = String.format("%.1f", tmdbRating),
                                     label = "TMDb"
                                 )
-                            }
-                        }
-                        
-                        // Generi ed età consigliata sulla stessa riga: il visto censura
-                        // sta accanto al genere, non nella riga di anno/durata. La riga
-                        // esiste anche senza generi, così il badge non si perde.
-                        if (hero.genres != null || hero.ageRating != null) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                hero.genres?.let { genres ->
-                                    Text(
-                                        text = genres,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = WaveStreamColors.TextTertiary,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis,
-                                        // fill = false: il testo prende la sua larghezza
-                                        // naturale e si accorcia solo se serve spazio al badge
-                                        modifier = Modifier.weight(1f, fill = false)
-                                    )
-                                }
-                                if (hero.contentType != "SERIEA_MATCH") {
-                                    AgeRatingBadge(rating = hero.ageRating)
-                                }
                             }
                         }
 
