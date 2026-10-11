@@ -1,58 +1,87 @@
 package it.wavestream.app.util
 
 /**
- * Visto censura (certification) TMDB: normalizzazione per la UI.
+ * Età consigliata **in scala italiana**.
  *
- * TMDB espone il dato per paese — `release_dates` per i film (`certification`) e
- * `content_ratings` per le serie (`rating`) — e la scelta del paese è già fatta a
- * monte in `TMDBService` (Italia, poi USA, poi primo valore disponibile).
+ * TMDB espone il visto per paese — `release_dates` per i film (`certification`) e
+ * `content_ratings` per le serie (`rating`) — e la preferenza di paese (Italia →
+ * USA → primo disponibile) è già applicata a monte in `TMDBService`.
  *
- * Qui resta solo la presentazione: l'etichetta compatta del badge e la fascia
- * d'età che ne determina il colore. Nessuna interpretazione creativa: un formato
- * extra-UE (es. "PG-13") resta quello, viene solo reso leggibile.
+ * Qui il visto viene **portato nella classificazione italiana**, che è l'unica
+ * scala mostrata all'utente: `T`, `6+`, `12+`, `14+`, `18+` (AGCOM / Ministero
+ * della Cultura, in vigore dal 2021). Serve perché per le serie TMDB non ha quasi
+ * mai visti italiani — gli `TV-MA` / `TV-14` arrivano tutti dal ripiego USA — e
+ * perché le sigle vecchie (`VM14`, `VM18`) non sono più quelle che l'utente
+ * incontra. Senza la conversione il badge sarebbe assente su oltre metà catalogo
+ * o mescolerebbe scale diverse (`PG-13` accanto a `14+`).
+ *
+ * La conversione **arrotonda sempre per eccesso**: si sceglie la classe italiana
+ * più bassa che copre l'età dichiarata dal visto di partenza. Mai "a meno" —
+ * l'app non deve risultare più permissiva della fonte.
  */
 object AgeRating {
 
-    /** Fascia a cui appartiene il visto: guida il colore del badge. */
+    /** Fascia del badge: determina il colore. */
     enum class Level { ALL, TEEN, MATURE }
 
-    /** Primo numero presente nell'etichetta: "VM14" → 14, "PG-13" → 13. */
-    private val AGE_IN_LABEL = Regex("\\d+")
-
-    /** Etichette "per tutti", senza età: Italia (T/TP) e anglosassoni (G, TV-Y, TV-G). */
-    private val ALL_AGES = setOf("T", "TP", "G", "TV-Y", "TV-Y7", "TV-G", "0")
+    /** Classi italiane oltre a "T" (che vale "per tutti"), in ordine crescente. */
+    private val IT_CLASSES = listOf(6, 12, 14, 18)
 
     /**
-     * Etichetta compatta da mostrare nel badge, o `null` se non c'è un visto.
+     * Visti che valgono "per tutti" — Italia (`T`, `TP`) e anglosassoni
+     * (`G`, `TV-Y`, `TV-Y7`, `TV-G`). `0` è il grado tedesco/FSK "nessuna restrizione".
+     */
+    private val ALL_AGES = setOf("T", "TP", "G", "TV-Y", "TV-Y7", "TV-G", "0")
+
+    /** Visti senza età numerica equivalenti a "vietato ai minori". */
+    private val MATURE_ONLY = setOf("R", "NC-17", "X", "TV-MA")
+
+    /** Visti senza età numerica equivalenti a "visione con la guida di un adulto". */
+    private val WITH_GUIDANCE = setOf("PG", "TV-PG")
+
+    /** Primo numero presente nell'etichetta: `"VM14"` → 14, `"PG-13"` → 13. */
+    private val AGE_IN_LABEL = Regex("\\d+")
+
+    /**
+     * Classe italiana da mostrare nel badge, o `null` se il visto non è
+     * interpretabile (in quel caso il badge non viene disegnato affatto).
      *
-     * - `"T"` / `"TP"` (tutti) → `"T"`
-     * - numero nudo (`"12"`) → `"12+"`: i certificati italiani arrivano a volte
-     *   senza il `+`, e il `+` è la forma che l'utente riconosce
-     * - il resto resta invariato ma in maiuscolo (`"vm14"` → `"VM14"`)
+     * Tabella di conversione completa, dal visto sorgente alla classe italiana:
+     *
+     * | visto | → | motivo |
+     * |---|---|---|
+     * | `T`, `TP`, `G`, `TV-G`, `TV-Y`, `TV-Y7`, `0` | **`T`** | nessuna restrizione |
+     * | `PG`, `TV-PG` | **`6+`** | guida genitoriale, non una restrizione |
+     * | `7+`, `10+`, `12+`, `VM12` | **`12+`** | classe più bassa che copre il numero |
+     * | `PG-13` (13) | **`14+`** | classe successiva a 13 |
+     * | `14+`, `VM14`, `TV-14` | **`14+`** | coincidono |
+     * | `R`, `NC-17`, `X`, `TV-MA` | **`18+`** | vietato ai minori (`R` = under 17) |
+     * | `16+`, `18+`, `VM18`, oltre 18 | **`18+`** | cap alla classe più restrittiva |
+     * | non numerico sconosciuto (es. `BA`) | *nessun badge* | non si inventa un'età |
      */
     fun label(raw: String?): String? {
-        val value = raw?.trim()?.takeIf { it.isNotEmpty() } ?: return null
-        val normalized = value.uppercase()
-        if (normalized == "T" || normalized == "TP") return "T"
-        if (normalized.all { it.isDigit() }) return "$normalized+"
-        return normalized
+        val value = raw?.trim()?.uppercase()?.takeIf { it.isNotEmpty() } ?: return null
+        if (value in ALL_AGES) return "T"
+        if (value in MATURE_ONLY) return "18+"
+        if (value in WITH_GUIDANCE) return "6+"
+
+        val age = AGE_IN_LABEL.find(value)?.value?.toIntOrNull() ?: return null
+        if (age <= 0) return "T"
+        // Arrotondamento per eccesso; se supera l'ultima classe si resta su 18+.
+        val itClass = IT_CLASSES.firstOrNull { it >= age } ?: IT_CLASSES.last()
+        return "$itClass+"
     }
 
     /**
-     * Fascia d'età a partire dall'etichetta normalizzata.
+     * Fascia del badge per una classe italiana: `T` e `6+` condividono il verde
+     * (fascia "famiglia"), `12+` e `14+` l'ambra, `18+` il rosso.
      *
-     * Si estrae il primo numero presente (`"VM14"` → 14, `"PG-13"` → 13): la soglia
-     * 16 separa i contenuti per adulti (VM18 / R / 18+) da quelli per ragazzi, che
-     * restano ambra. Un'etichetta senza numeri e diversa da "T" è trattata come
-     * restrittiva, così non finisce verde per errore.
+     * L'`else` copre le classi non previste e si tiene la più restrittiva: un
+     * colore sbagliato in eccesso di prudenza è preferibile al contrario.
      */
-    fun level(label: String): Level {
-        val upper = label.uppercase()
-        if (upper in ALL_AGES) return Level.ALL
-        val age = AGE_IN_LABEL.find(upper)?.value?.toIntOrNull()
-        if (age != null) return if (age < 16) Level.TEEN else Level.MATURE
-        // Etichette senza età numerica: le più permissive restano ambra, il resto rosso.
-        if (upper == "PG" || upper == "TV-PG") return Level.TEEN
-        return Level.MATURE
+    fun level(label: String): Level = when (label.uppercase()) {
+        "T", "6+" -> Level.ALL
+        "12+", "14+" -> Level.TEEN
+        else -> Level.MATURE
     }
 }

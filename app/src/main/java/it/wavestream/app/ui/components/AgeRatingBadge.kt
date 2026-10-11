@@ -19,11 +19,13 @@ import it.wavestream.app.util.AgeRating
 /**
  * Badge "età consigliata" in stile liquid glass.
  *
- * Pillola in vetro (fill colorato translucido + bordo gradiente) con il visto
- * censura compatto — `T`, `12+`, `14+`, `18+`. Il colore segue la fascia d'età
- * ([AgeRating.Level]): verde per tutti, ambra per i ragazzi, rosso per i
- * contenuti per adulti. Il vetro è lo stesso di [it.wavestream.app.ui.theme.GlassTokens],
- * così il badge resta coerente su hero, dettaglio e card.
+ * Pillola in vetro (fill colorato translucido + bordo gradiente) con la classe
+ * italiana compatta — `T`, `6+`, `12+`, `14+`, `18+`. `label()` converte già il
+ * visto TMDB (anche estero) in questa scala, quindi qui arriva sempre una delle
+ * cinque classi. Il colore segue la fascia ([AgeRating.Level]): verde per `T`/`6+`,
+ * ambra per `12+`/`14+`, rosso per `18+`. Il vetro è lo stesso di
+ * [it.wavestream.app.ui.theme.GlassTokens], così il badge resta coerente su hero,
+ * dettaglio e card.
  *
  * Non disegna nulla se [rating] è vuoto o non interpretabile: chi la usa non deve
  * gestire il caso "nessun visto".
