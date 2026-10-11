@@ -537,6 +537,11 @@ class LoadingActivity : ComponentActivity() {
             var ratingsUpdated = false
             // True se almeno un titolo grafico (clear logo) è stato salvato nel DB
             var logosUpdated = false
+            // True se almeno un visto censura (badge età) è comparso per la prima
+            // volta nel DB. Serve perché la cache hero è serializzata: senza
+            // invalidazione il badge resterebbe invisibile fino al refresh successivo
+            // (stesso motivo di ratingsUpdated/logosUpdated).
+            var ageRatingsUpdated = false
             withContext(Dispatchers.IO) {
                 val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
                 
@@ -578,6 +583,10 @@ class LoadingActivity : ComponentActivity() {
                             async(Dispatchers.IO) {
                                 try {
                                     val enrichedMovie = tmdbService.enrichMovieDetails(movie)
+                                    // Badge età comparso ora per questo titolo?
+                                    if (movie.tmdbAgeRating == null && enrichedMovie.tmdbAgeRating != null) {
+                                        ageRatingsUpdated = true
+                                    }
                                     // Backoff: se un tentativo rating è stato fatto negli ultimi 7 giorni,
                                     // non ritentare (evita centinaia di chiamate inutili a ogni avvio per
                                     // titoli che semplicemente non hanno voti RT/Metacritic).
@@ -700,6 +709,9 @@ class LoadingActivity : ComponentActivity() {
                             async(Dispatchers.IO) {
                                 try {
                                     val enrichedSeries = tmdbService.enrichSeriesDetails(series)
+                                    if (series.tmdbAgeRating == null && enrichedSeries.tmdbAgeRating != null) {
+                                        ageRatingsUpdated = true
+                                    }
                                     // Stesso backoff di 7 giorni dei film
                                     val ratingsAttemptedRecently = enrichedSeries.omdbLastFetchAt != null && enrichedSeries.omdbLastFetchAt >= sevenDaysAgo
                                     if (!ratingsAttemptedRecently && (
@@ -840,14 +852,14 @@ class LoadingActivity : ComponentActivity() {
             // un voto comparso nelle API dopo la prima enrichment diventa visibile in home.
             // Idem per i titoli grafici appena salvati: senza invalidazione la cache
             // serializzata continuerebbe a servire hero senza logo.
-            if (ratingsUpdated || logosUpdated) {
+            if (ratingsUpdated || logosUpdated || ageRatingsUpdated) {
                 // NB: le chiavi reali degli hero sono "hero_v2_<TIPO>" (vedi HomeViewModel);
                 // con "hero_HOME"/"hero_MOVIES"/"hero_SERIES" l'invalidazione era un no-op.
                 listOf("hero_v2_HOME", "hero_v2_MOVIES", "hero_v2_SERIES").forEach { key ->
                     contentCache.removeHomeSessionData(key)
                 }
                 android.util.Log.d("LoadingActivity",
-                    "Cache hero invalidata (ratingsUpdated=$ratingsUpdated, logosUpdated=$logosUpdated)")
+                    "Cache hero invalidata (ratingsUpdated=$ratingsUpdated, logosUpdated=$logosUpdated, ageRatingsUpdated=$ageRatingsUpdated)")
             }
             
             android.util.Log.d("LoadingActivity", "Hero content enrichment complete")
