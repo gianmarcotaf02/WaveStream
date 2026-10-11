@@ -83,24 +83,38 @@ data class SerieATabellinoState(
     val error: Boolean = false
 )
 
-/** Categorie canali da escludere (canali DAZN di altri paesi). */
+/**
+ * Categorie che fanno SCARTARE il canale. Due famiglie:
+ *  - DAZN di altri paesi (il match di Serie A è sul feed italiano);
+ *  - competizioni/servizi che non c'entrano col match center di Serie A.
+ */
 private val COUNTRY_WORDS = listOf(
     "germania", "spagna", "francia", "inghilterra", "england", "portogallo",
     "olanda", "belgio", "turchia", "grecia", "svizzera", "austria",
     "danimarca", "svezia", "norvegia", "finlandia", "polonia", "croazia",
     "serbia", "romania", "bulgaria", "ungheria", "usa", "argentina",
     "brasile", "giappone", "cina", "india", "marocco", "algeria", "tunisia",
-    "egitto", "world", "mundial"
+    "egitto", "albania", "world", "mundial",
+    "champions", "prime"
 )
 
-/** Categorie consentite anche se contengono parole della lista paesi. */
-private val ALLOWED_CATEGORY_WORDS = listOf("dazn hermes", "dazn kali")
+/**
+ * Parola che la categoria DEVE contenere per essere ammessa: la Serie A in Italia
+ * passa dai canali DAZN, quindi tutto il resto (Sky, Prime, categorie generiche
+ * "Sport"/"Calcio" e categoria vuota) resta fuori dal picker.
+ */
+private const val REQUIRED_CATEGORY_WORD = "dazn"
 
-/** true se la categoria è "ammessa": non è esclusa dalla lista paesi. */
+/**
+ * true se la categoria è "ammessa": deve contenere "dazn" **e** non contenere
+ * nessuna delle [COUNTRY_WORDS].
+ *
+ * Il controllo è case-insensitive (`DAZN`, `Dazn`, `dazn`): il confronto avviene
+ * sulla categoria resa minuscola.
+ */
 private fun isAllowedCategory(category: String): Boolean {
     val c = category.lowercase()
-    if (ALLOWED_CATEGORY_WORDS.any { c.contains(it) }) return true
-    return COUNTRY_WORDS.none { c.contains(it) }
+    return c.contains(REQUIRED_CATEGORY_WORD) && COUNTRY_WORDS.none { c.contains(it) }
 }
 
 private enum class SerieAMatchTab(val label: String) {
