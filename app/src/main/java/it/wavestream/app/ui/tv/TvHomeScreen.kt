@@ -1179,7 +1179,7 @@ fun HeroBanner(
                         
                         Spacer(modifier = Modifier.height(6.dp))
                         
-                        // Metadata row: Year, Age rating, Duration/Seasons
+                        // Metadata row: Year, Duration/Seasons
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -1191,8 +1191,6 @@ fun HeroBanner(
                                     color = WaveStreamColors.TextSecondary
                                 )
                             }
-                            // Età consigliata (visto censura TMDB): pillola in vetro,
-                            // mostrata nella riga del genere (vedi sotto), non qui.
                             hero.duration?.let {
                                 Text(
                                     text = it,
