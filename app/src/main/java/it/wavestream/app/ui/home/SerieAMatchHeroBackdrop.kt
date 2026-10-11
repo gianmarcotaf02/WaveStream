@@ -10,9 +10,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -48,11 +50,34 @@ import it.wavestream.app.ui.theme.rememberReducedMotion
 private val SerieALiveRed = Color(0xFFFF3B30)
 
 /**
+ * Punti di arrivo della slash bianca (frazioni della larghezza): in basso e in alto.
+ */
+private const val SLASH_BOTTOM_FRACTION = 0.62f
+private const val SLASH_TOP_FRACTION = 0.80f
+
+/**
+ * Posizione della slash all'altezza degli stemmi (centro verticale dell'hero).
+ * La slash è un segmento rettilineo, quindi al centro passa esattamente a metà
+ * fra i due estremi: da qui si derivano le posizioni degli stemmi, così resto e
+ * disegno non possono disallinearsi se un giorno si sposta la diagonale.
+ */
+private const val SLASH_MID_FRACTION = (SLASH_BOTTOM_FRACTION + SLASH_TOP_FRACTION) / 2f
+
+/** Dimensione nominale degli stemmi. */
+private val CrestSize = 150.dp
+
+/**
  * Backdrop dell'hero "partita Serie A": split diagonale da basso-sx ad alto-dx,
  * gradienti squadre (casa alto-sx, ospite basso-dx) e slash bianco al centro.
  * Viene renderizzato nella HeroBanner della home e mascherato come i backdrop
  * dei film/serie (nero verso sinistra, feathering ai quattro bordi): i crest
  * stanno quindi sulla metà destra visibile.
+ *
+ * Gli stemmi sono ancorati **alla slash**, non al bordo destro: la distanza fra
+ * la slash e lo stemma di casa è identica a quella fra la slash e lo stemma
+ * ospite. Con l'ancoraggio al bordo (com'era prima) su schermi 1080p (960dp di
+ * larghezza) la slash cadeva addosso allo stemma di casa e la coppia risultava
+ * asimmetrica.
  *
  * FASE REDESIGN — il backdrop resta volutamente "brand": i colori delle due
  * squadre sono dati (non token di tema). L'allineamento al nuovo tema avviene
@@ -63,17 +88,28 @@ private val SerieALiveRed = Color(0xFFFF3B30)
 fun SerieAMatchHeroBackdrop(
     match: SerieAMatchEntity,
     modifier: Modifier = Modifier,
-    crestSpacing: Dp = 56.dp,
+    /** Distanza fra la slash e CIASCUNO dei due stemmi (speculare). */
+    crestSlashGap: Dp = 56.dp,
+    /** Margine minimo a destra: la coppia non invade il bordo dello schermo. */
     crestEndPadding: Dp = 72.dp
 ) {
-    Box(modifier) {
+    BoxWithConstraints(modifier) {
+        val slashMidX = maxWidth * SLASH_MID_FRACTION
+        // Il gap richiesto è un massimo: se la coppia non entrasse (schermi
+        // stretti, o gap richiesto molto largo) si stringe il gap invece di
+        // tagliare gli stemmi. La specularità resta intatta.
+        val slashGap = minOf(
+            crestSlashGap,
+            maxWidth - crestEndPadding - slashMidX - CrestSize
+        ).coerceAtLeast(0.dp)
+
         // Split diagonale + slash. La diagonale è più inclinata (verticale) rispetto
         // alla piena larghezza: passa fra i due crest sulla metà destra dell'hero.
         Canvas(modifier = Modifier.fillMaxSize()) {
             val w = size.width
             val h = size.height
-            val slashBottomX = w * 0.62f   // punto di arrivo in basso
-            val slashTopX = w * 0.80f      // punto di arrivo in alto — passa fra i due crest
+            val slashBottomX = w * SLASH_BOTTOM_FRACTION   // punto di arrivo in basso
+            val slashTopX = w * SLASH_TOP_FRACTION         // punto di arrivo in alto
 
             // Quadrilatero casa (a sinistra della slash) e ospite (a destra)
             val homePath = Path().apply {
@@ -113,25 +149,23 @@ fun SerieAMatchHeroBackdrop(
             drawLine(Color.White.copy(alpha = 0.95f), a, b, strokeWidth = h * 0.016f, cap = StrokeCap.Butt)
         }
 
-        // Crest delle due squadre sulla zona visibile (destra)
-        Row(
+        // Crest delle due squadre sulla zona visibile (destra), speculari alla slash.
+        AsyncImage(
+            model = match.homeCrest,
+            contentDescription = match.homeName,
             modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = crestEndPadding),
-            horizontalArrangement = Arrangement.spacedBy(crestSpacing),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            AsyncImage(
-                model = match.homeCrest,
-                contentDescription = match.homeName,
-                modifier = Modifier.size(150.dp)
-            )
-            AsyncImage(
-                model = match.awayCrest,
-                contentDescription = match.awayName,
-                modifier = Modifier.size(150.dp)
-            )
-        }
+                .align(Alignment.CenterStart)
+                .offset(x = slashMidX - slashGap - CrestSize)
+                .size(CrestSize)
+        )
+        AsyncImage(
+            model = match.awayCrest,
+            contentDescription = match.awayName,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .offset(x = slashMidX + slashGap)
+                .size(CrestSize)
+        )
     }
 }
 
