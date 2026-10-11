@@ -1581,6 +1581,10 @@ fun HeroBanner(
                             // proposto come raccomandazione. Una volta segnato sparisce da
                             // caroselli e hero; se il titolo è già visto (hero con progresso
                             // da finire) il pulsante lo riporta a "non visto".
+                            // Icone allineate alla scheda dettaglio: spunta semplice per
+                            // "segna come già visto", spunta in cerchio per "non visto".
+                            // Prima qui c'era l'occhio, che era l'icona del vecchio
+                            // "rimuovi da Continua a guardare": fuorviante.
                             if (hero.contentType != "SERIEA_MATCH") {
                                 Spacer(modifier = Modifier.width(4.dp))
                                 if (hero.isWatched) {
@@ -1592,7 +1596,7 @@ fun HeroBanner(
                                     )
                                 } else {
                                     HeroIconButton(
-                                        icon = painterResource(id = R.drawable.ic_eye),
+                                        icon = Icons.Default.Check,
                                         contentDescription = "Segna come già visto",
                                         onClick = { showMarkAsWatchedDialog = true },
                                         onFocusChange = { if (it) isPaused = true }
