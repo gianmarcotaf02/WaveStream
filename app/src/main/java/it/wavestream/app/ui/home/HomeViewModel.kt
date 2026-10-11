@@ -721,7 +721,7 @@ class HomeViewModel @Inject constructor(
     fun setHeroWatched(hero: HeroItem, watched: Boolean) {
         if (!watched) {
             // Percorso storico: rimuove il progresso e aggiorna cache + UI.
-            markAsWatched(hero)
+            removeFromContinueWatching(hero)
             return
         }
         viewModelScope.launch(Dispatchers.IO) {
@@ -803,13 +803,14 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Mark content as watched (remove from "Continue Watching")
-     * Deletes the WatchProgress entry for the given hero item and refreshes the UI
-     * 
-     * Note: For series, WatchProgress stores the episode with contentType=EPISODE 
-     * and seriesId pointing to the series. So we need to delete by seriesId for series content.
+     * Rimuove il contenuto da "Continua a guardare": cancella la voce di progresso
+     * e aggiorna cache + UI. È l'azione del pulsante a occhio (hero e scheda
+     * dettaglio) — NON segna il contenuto come visto.
+     *
+     * Nota: per le serie WatchProgress è salvato con contentType=EPISODE e
+     * seriesId che punta alla serie, quindi la cancellazione va fatta per seriesId.
      */
-    fun markAsWatched(hero: HeroItem) {
+    fun removeFromContinueWatching(hero: HeroItem) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 if (hero.contentType == ContentType.MOVIE.name) {
@@ -857,7 +858,7 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("HomeViewModel", "markAsWatched: errore aggiornando le cache persistite", e)
+                    Log.e("HomeViewModel", "removeFromContinueWatching: errore aggiornando le cache persistite", e)
                 }
                 
                 // Force refresh to update the UI
