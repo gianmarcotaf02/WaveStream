@@ -526,7 +526,8 @@ class LoadingActivity : ComponentActivity() {
     
     /**
      * Enrich ALL trending content with full TMDB metadata + OMDB/RT ratings.
-     * Skips items already enriched within 7 days.
+     * Skips items already enriched within 7 days (ma il visto censura per il badge
+     * età viene recuperato una volta sola anche sui titoli già arricchiti).
      * Concurrency limited to 5 parallel API calls to avoid rate limits.
      * This ensures trending content has complete metadata for heroes + carousels.
      */
@@ -544,7 +545,12 @@ class LoadingActivity : ComponentActivity() {
                 // senza backoff verrebbero ri-tentati (8+ chiamate rete l'uno) a ogni avvio.
                 val allTrendingMovies = movieDao.getByTrendingCategory("Film Popolari")
                 val moviesToEnrich = allTrendingMovies.filter { movie ->
-                    val needsTmdb = movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo || movie.tmdbVoteAverage == null
+                    val needsTmdb = movie.tmdbLastFetchAt == null || movie.tmdbLastFetchAt < sevenDaysAgo ||
+                        movie.tmdbVoteAverage == null ||
+                        // Visto censura (badge età) mai cercato. Il marker dice "già
+                        // cercato", non "trovato": un titolo senza visto non resta
+                        // fuori per sempre, e chi ha già il visto non viene ricaricato.
+                        movie.tmdbAgeRatingCheckedAt == null
                     val hasAllRatings = movie.omdbImdbRating != null && movie.omdbRottenTomatoesScore != null && movie.omdbMetacriticScore != null
                     val ratingsAttemptedRecently = movie.omdbLastFetchAt != null && movie.omdbLastFetchAt >= sevenDaysAgo
                     needsTmdb || (!hasAllRatings && !ratingsAttemptedRecently)
@@ -664,7 +670,10 @@ class LoadingActivity : ComponentActivity() {
                 // Stesso backoff rating di 7 giorni dei film
                 val allTrendingSeries = seriesDao.getByTrendingCategory("Serie Popolari")
                 val seriesToEnrich = allTrendingSeries.filter { series ->
-                    val needsTmdb = series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo || series.tmdbVoteAverage == null
+                    val needsTmdb = series.tmdbLastFetchAt == null || series.tmdbLastFetchAt < sevenDaysAgo ||
+                        series.tmdbVoteAverage == null ||
+                        // Visto censura (badge età) mai cercato — vedi il filtro dei film.
+                        series.tmdbAgeRatingCheckedAt == null
                     val hasAllRatings = series.omdbImdbRating != null && series.omdbRottenTomatoesScore != null && series.omdbMetacriticScore != null
                     val ratingsAttemptedRecently = series.omdbLastFetchAt != null && series.omdbLastFetchAt >= sevenDaysAgo
                     needsTmdb || (!hasAllRatings && !ratingsAttemptedRecently)

@@ -563,7 +563,7 @@ fun DetailsScreen(
                     
                     Spacer(modifier = Modifier.height(8.dp))
                     
-                    // META su una sola riga: anno · età · durata · generi.
+                    // META su una sola riga: anno · durata · generi · età.
                     // La durata era una riga separata e "Valutazioni" era un heading
                     // ridondante: entrambi spariscono e la colonna guadagna due righe
                     // verticali. Ordine NON casuale: i chip stanno SUBITO dopo l'anno,
@@ -582,10 +582,6 @@ fun DetailsScreen(
                                 color = WaveStreamColors.TextSecondary
                             )
                         }
-
-                        // Età consigliata (visto censura TMDB): non disegna nulla
-                        // se il visto non è disponibile.
-                        AgeRatingBadge(rating = state.ageRating)
                         
                         state.duration?.let { duration ->
                             Row(
@@ -618,6 +614,10 @@ fun DetailsScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
+
+                        // Età consigliata (visto censura TMDB), in coda al genere:
+                        // non disegna nulla se il visto non è disponibile.
+                        AgeRatingBadge(rating = state.ageRating)
                     }
                     
                     // Rating: striscia inline, NESSUN heading. FlowRow resta volutamente
