@@ -166,24 +166,27 @@ class HomeViewModel @Inject constructor(
         override val size: Int get() = 0
         override fun containsKey(key: HomeContentType): Boolean = get(key) != null
         override fun containsValue(value: HeroPairData): Boolean = false
-        // Chiave v2: gli hero v1 non hanno il flag isCwDerived e non permettono di
-        // ripulire i contenuti rimossi da "Continua a guardare". Il bump invalida
-        // le cache vecchie (che altrimenti resterebbero bloccate).
-        override fun get(key: HomeContentType): HeroPairData? = contentCache.getHeroPair("hero_v2_${key.name}")
+        // Chiave v3: gli hero v3 portano il visto censura (badge età) e il campo
+        // non esisteva nei v2. Il bump invalida le cache vecchie, che altrimenti
+        // resterebbero bloccate con ageRating = null — e Gson non serializza i
+        // null, quindi non c'è modo di distinguere "campo assente" da "valore
+        // assente" leggendo il JSON salvato.
+        // (v2 era stato introdotto per il flag isCwDerived, che i v1 non avevano.)
+        override fun get(key: HomeContentType): HeroPairData? = contentCache.getHeroPair("hero_v3_${key.name}")
         override fun isEmpty(): Boolean = size == 0
         override val entries: MutableSet<MutableMap.MutableEntry<HomeContentType, HeroPairData>> get() = mutableSetOf()
         override val keys: MutableSet<HomeContentType> get() = mutableSetOf()
         override val values: MutableCollection<HeroPairData> get() = mutableListOf()
         override fun clear() {}
         override fun put(key: HomeContentType, value: HeroPairData): HeroPairData? {
-            contentCache.putHeroPair("hero_v2_${key.name}", value)
+            contentCache.putHeroPair("hero_v3_${key.name}", value)
             return null
         }
         override fun putAll(from: Map<out HomeContentType, HeroPairData>) {
             from.forEach { (k, v) -> put(k, v) }
         }
         override fun remove(key: HomeContentType): HeroPairData? {
-            contentCache.removeHomeSessionData("hero_v2_${key.name}")
+            contentCache.removeHomeSessionData("hero_v3_${key.name}")
             return null
         }
     }

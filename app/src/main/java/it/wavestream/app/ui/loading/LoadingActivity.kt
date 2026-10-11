@@ -853,9 +853,9 @@ class LoadingActivity : ComponentActivity() {
             // Idem per i titoli grafici appena salvati: senza invalidazione la cache
             // serializzata continuerebbe a servire hero senza logo.
             if (ratingsUpdated || logosUpdated || ageRatingsUpdated) {
-                // NB: le chiavi reali degli hero sono "hero_v2_<TIPO>" (vedi HomeViewModel);
+                // NB: le chiavi reali degli hero sono "hero_v3_<TIPO>" (vedi HomeViewModel);
                 // con "hero_HOME"/"hero_MOVIES"/"hero_SERIES" l'invalidazione era un no-op.
-                listOf("hero_v2_HOME", "hero_v2_MOVIES", "hero_v2_SERIES").forEach { key ->
+                listOf("hero_v3_HOME", "hero_v3_MOVIES", "hero_v3_SERIES").forEach { key ->
                     contentCache.removeHomeSessionData(key)
                 }
                 android.util.Log.d("LoadingActivity",
