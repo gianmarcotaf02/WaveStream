@@ -277,10 +277,13 @@ private fun ChannelsTab(
             .groupBy { it.category?.trim()?.takeUnless { c -> c.isEmpty() } ?: "Altri canali" }
             .map { (category, chans) -> category to chans.sortedBy { it.name.lowercase() } }
             // La lista arriva GIÀ filtrata dal repository (canali che nominano le
-            // squadre + canali evento DAZN): qui si scartano solo le categorie
-            // "straniere" (es. 🇩🇪 DAZN GERMANIA). L'ordine dei gruppi è quello di
-            // arrivo — prima i canali della partita, poi i feed di squadra — quindi
-            // NON si riordina per nome.
+            // squadre + canali evento DAZN): qui si tiene solo ciò che passa
+            // [isAllowedCategory], cioè categorie che contengono "dazn" e non
+            // nominano paesi esteri / Champions / Prime. Il gruppo "Altri canali"
+            // (categoria vuota) non può superare il filtro: resta come rete di
+            // sicurezza per il raggruppamento, non come voce di menu.
+            // L'ordine dei gruppi è quello di arrivo — prima i canali della partita,
+            // poi i feed di squadra — quindi NON si riordina per nome.
             .filter { (category, _) -> isAllowedCategory(category) }
     }
 
