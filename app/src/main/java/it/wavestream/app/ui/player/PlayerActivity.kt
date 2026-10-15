@@ -33,6 +33,7 @@ import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.database.entity.ContentType
 import it.wavestream.app.data.database.entity.WatchProgress
 import it.wavestream.app.player.PlayNextManager
+import it.wavestream.app.player.SleepTimerController
 import it.wavestream.app.player.SubtitleManager
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.util.TitleCleaner
@@ -67,6 +68,7 @@ class PlayerActivity : ComponentActivity() {
     @Inject lateinit var watchProgressDao: WatchProgressDao
     @Inject lateinit var playNextManager: PlayNextManager
     @Inject lateinit var subtitleManager: SubtitleManager
+    @Inject lateinit var sleepTimerController: SleepTimerController
     @Inject lateinit var userPreferences: it.wavestream.app.data.preferences.UserPreferences
     @Inject lateinit var movieDao: it.wavestream.app.data.database.dao.MovieDao
     @Inject lateinit var seriesDao: it.wavestream.app.data.database.dao.SeriesDao
@@ -193,6 +195,11 @@ class PlayerActivity : ComponentActivity() {
     private var hiddenSeekRepeatRunnable: Runnable? = null
     private var hiddenSeekRepeatSeconds = 0
     private var hiddenSeekAccumulatedSeconds = 0
+
+    // Callback stabile del timer "dormire": registrato sul singleton a ogni onCreate
+    // e sganciato in onDestroy (confronto per identità, così una nuova Activity non
+    // viene scalzata dalla vecchia in fase di chiusura).
+    private val sleepTimerExpireCallback: () -> Unit = { onSleepTimerExpired() }
     
     // Countdown overlay "Prossimo episodio" (uniforme: 20s)
     private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 20
@@ -451,6 +458,10 @@ class PlayerActivity : ComponentActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Timer "dormire": la nuova istanza del player prende in carico la scadenza,
+        // mantenendo attivo il conto alla rovescia impostato sull'episodio precedente.
+        sleepTimerController.bindOnExpire(sleepTimerExpireCallback)
         
         // Get intent data
         contentId = intent.getLongExtra("content_id", 0)
@@ -638,6 +649,9 @@ class PlayerActivity : ComponentActivity() {
                 val hiddenSeekSeconds by remember { _hiddenSeekSeconds }
                 
                 val controlsVisible by remember { _controlsVisible }
+                // Timer "dormire" condiviso: sopravvive al cambio di episodio (prec./succ.)
+                // invece di ripartire da zero a ogni ricomposizione del player.
+                val sleepTimerState by sleepTimerController.state.collectAsState()
                 
                 TvPlayerScreen(
                     player = player,
@@ -710,13 +724,9 @@ class PlayerActivity : ComponentActivity() {
                         resetAutoPlayCounter()
                         player.play()
                     },
-                    onSleepTimerExpired = {
-                        // Timer "dormire" scaduto: pausa immediata + uscita dal player,
-                        // così la riproduzione non continua a vuoto.
-                        resetAutoPlayCounter()
-                        if (::player.isInitialized) player.pause()
-                        finish()
-                    }
+                    sleepTimerMinutes = sleepTimerState.minutes,
+                    sleepRemainingSeconds = sleepTimerState.remainingSeconds,
+                    onSleepTimerSelect = { minutes -> sleepTimerController.setTimer(minutes) }
                 )
             }
         }
@@ -2692,6 +2702,20 @@ class PlayerActivity : ComponentActivity() {
         creditsAudioMonitor.setIntroReference(null)
         creditsAudioMonitor.reset()
         if (::player.isInitialized) player.release()
+
+        // L'Activity muore: il timer (se attivo) resta nel singleton per il prossimo
+        // episodio, ma non deve più richiamare questa istanza.
+        sleepTimerController.unbindOnExpire(sleepTimerExpireCallback)
+    }
+
+    /**
+     * Timer "dormire" scaduto: pausa immediata + uscita dal player, così la
+     * riproduzione non continua a vuoto se ci si addormenta.
+     */
+    private fun onSleepTimerExpired() {
+        resetAutoPlayCounter()
+        if (::player.isInitialized) player.pause()
+        if (!isFinishing) finish()
     }
     
     /**
