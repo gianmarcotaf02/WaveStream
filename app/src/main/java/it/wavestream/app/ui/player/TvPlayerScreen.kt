@@ -141,8 +141,11 @@ fun TvPlayerScreen(
     onStillWatchingContinue: () -> Unit = {},
     /** Metadati per l'overlay "in pausa" stile Netflix (solo VOD). */
     pauseInfo: PlayerPauseInfo? = null,
-    /** Timer "dormire" (mezzaluna) scaduto: il player va in pausa ed esce. */
-    onSleepTimerExpired: () -> Unit = {},
+    /** Timer "dormire" (mezzaluna): minuti in corso (0 = spento) e secondi residui. */
+    sleepTimerMinutes: Int = 0,
+    sleepRemainingSeconds: Long = 0L,
+    /** Scelta di una nuova durata dal menu (0 = disattiva). */
+    onSleepTimerSelect: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val centerFocusRequester = remember { FocusRequester() }
@@ -193,24 +196,10 @@ fun TvPlayerScreen(
     // Cos\u00ec, finch\u00e9 l'utente naviga i controlli, la barra NON scompare.
     var lastKeyInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
-    // Timer "dormire" (mezzaluna): minuti impostati (0 = disattivo) e secondi residui.
-    var sleepTimerMinutes by remember { mutableIntStateOf(0) }
-    var sleepRemainingSeconds by remember { mutableLongStateOf(0L) }
+    // Timer "dormire" (mezzaluna): lo stato (minuti + secondi residui) arriva
+    // dall'esterno (SleepTimerController) così il conto alla rovescia non si azzera
+    // quando cambia episodio. Qui resta solo l'apertura del menu.
     var sleepMenuOpen by remember { mutableStateOf(false) }
-
-    // Conto alla rovescia: a 0 mette in pausa il player ed esce automaticamente,
-    // così il flusso non continua a vuoto se ci si addormenta.
-    LaunchedEffect(sleepRemainingSeconds) {
-        if (sleepRemainingSeconds > 0L) {
-            delay(1000L)
-            sleepRemainingSeconds -= 1L
-            if (sleepRemainingSeconds <= 0L) {
-                sleepTimerMinutes = 0
-                onSleepTimerExpired()
-            }
-        }
-    }
-
     // Auto-hide controls dopo un periodo di INATTIVIT\u00c0 (nessun tasto premuto).
     // Non nasconde mentre si cerca, si naviga i controlli o \u00e8 aperto il menu del timer.
     // In riproduzione spariscono dopo 3s; in pausa restano 10s e poi si nascondono con
@@ -464,8 +453,7 @@ fun TvPlayerScreen(
             SleepTimerDialog(
                 currentMinutes = sleepTimerMinutes,
                 onSelect = { minutes ->
-                    sleepTimerMinutes = minutes
-                    sleepRemainingSeconds = minutes * 60L
+                    onSleepTimerSelect(minutes)
                     sleepMenuOpen = false
                 },
                 onDismiss = { sleepMenuOpen = false }
