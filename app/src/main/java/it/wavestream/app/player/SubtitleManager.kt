@@ -82,9 +82,9 @@ class SubtitleManager @Inject constructor(
         season: Int? = null,
         episode: Int? = null,
         languages: String = "it,en"
-    ): List<SubtitleTrack> {
+    ): RemoteSearchResult {
         if (!openSubtitlesRepo.isAuthenticated()) {
-            return emptyList()
+            return RemoteSearchResult.Error("Login OpenSubtitles richiesto")
         }
         
         val result = openSubtitlesRepo.searchSubtitles(
@@ -99,19 +99,22 @@ class SubtitleManager @Inject constructor(
         
         return when (result) {
             is OpenSubtitlesRepository.SearchResult.Success -> {
-                result.subtitles.map { sub ->
-                    SubtitleTrack(
-                        id = sub.id,
-                        name = buildSubtitleName(sub),
-                        language = sub.language,
-                        filePath = null,
-                        isLocal = false,
-                        isRemote = true,
-                        remoteFileId = sub.fileId
-                    )
-                }
+                RemoteSearchResult.Success(
+                    result.subtitles.map { sub ->
+                        SubtitleTrack(
+                            id = sub.id,
+                            name = buildSubtitleName(sub),
+                            language = sub.language,
+                            filePath = null,
+                            isLocal = false,
+                            isRemote = true,
+                            remoteFileId = sub.fileId
+                        )
+                    }
+                )
             }
-            is OpenSubtitlesRepository.SearchResult.Error -> emptyList()
+            is OpenSubtitlesRepository.SearchResult.Error ->
+                RemoteSearchResult.Error(result.message)
         }
     }
     
@@ -145,7 +148,23 @@ class SubtitleManager @Inject constructor(
      * Apply subtitle to ExoPlayer
      */
     fun applySubtitle(player: ExoPlayer, subtitlePath: String, mediaItem: MediaItem): MediaItem {
-        val subtitleUri = Uri.fromFile(File(subtitlePath))
+        val subtitleFile = File(subtitlePath)
+        if (!subtitleFile.exists() || subtitleFile.length() == 0L) {
+            // Un file vuoto o mancante rende invisibile il sottotitolo senza errori: meglio
+            // dirlo forte nel log che far indovinare.
+            android.util.Log.e(
+                "SubtitleManager",
+                "Sottotitolo mancante o vuoto: $subtitlePath " +
+                    "(exists=${subtitleFile.exists()}, size=${subtitleFile.length()})"
+            )
+        } else {
+            android.util.Log.d(
+                "SubtitleManager",
+                "applySubtitle: ${subtitleFile.name} (${subtitleFile.length()} byte)"
+            )
+        }
+
+        val subtitleUri = Uri.fromFile(subtitleFile)
         val mimeType = when {
             subtitlePath.endsWith(".srt") -> MimeTypes.APPLICATION_SUBRIP
             subtitlePath.endsWith(".vtt") -> MimeTypes.TEXT_VTT
@@ -163,8 +182,50 @@ class SubtitleManager @Inject constructor(
         val newMediaItem = mediaItem.buildUpon()
             .setSubtitleConfigurations(listOf(subtitleConfig))
             .build()
+
+        android.util.Log.d(
+            "SubtitleManager",
+            "MediaItem aggiornato: subtitleConfigs=" +
+                "${newMediaItem.localConfiguration?.subtitleConfigurations?.size} mime=$mimeType " +
+                "uri=${newMediaItem.localConfiguration?.uri}"
+        )
         
-        player.replaceMediaItem(player.currentMediaItemIndex, newMediaItem)
+        // ATTENZIONE: non usare `replaceMediaItem` qui. Verificato sul campo: dopo la chiamata
+        // non arriva alcun `onTracksChanged`, quindi il MediaSource non viene ricreato (l'URI è
+        // lo stesso) e la traccia del sottotitolo non nasce mai — il player resta senza tracce
+        // testuali e nulla compare a schermo.
+        //
+        // Si ri-imposta invece la playlist sostituendo solo questo item: la coda
+        // (Prossimo/Precedente) resta intatta, posizione e stato di riproduzione vengono
+        // ripristinati, e il MediaSource viene ricreato con la subtitleConfiguration.
+        val itemIndex = player.currentMediaItemIndex
+        val positionMs = player.currentPosition
+        val wasPlaying = player.playWhenReady
+
+        val items = (0 until player.mediaItemCount).map { index ->
+            if (index == itemIndex) newMediaItem else player.getMediaItemAt(index)
+        }
+        player.setMediaItems(items, itemIndex, positionMs)
+        player.prepare()
+        player.playWhenReady = wasPlaying
+
+        android.util.Log.d(
+            "SubtitleManager",
+            "Playlist aggiornata: item=$itemIndex/${items.size} pos=${positionMs}ms " +
+                "playWhenReady=$wasPlaying"
+        )
+
+        // Media3 non seleziona da sola una traccia testuale appena aggiunta quando la sua
+        // lingua non è tra quelle preferite: i file scaricati si chiamano
+        // "<titolo>_<fileId>.srt", quindi la traccia risulta language="und" e il
+        // sottotitolo resterebbe caricato ma invisibile. Forziamo la selezione.
+        player.trackSelectionParameters = player.trackSelectionParameters
+            .buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+            .setSelectUndeterminedTextLanguage(true)
+            .setPreferredTextLanguage(detectLanguageCode(subtitlePath))
+            .build()
+
         return newMediaItem
     }
     
@@ -190,10 +251,15 @@ class SubtitleManager @Inject constructor(
     private fun buildSubtitleName(sub: OpenSubtitlesRepository.SubtitleInfo): String {
         val parts = mutableListOf<String>()
         parts.add(sub.language)
+        // fps e nome della release sono le due informazioni che permettono di scegliere il
+        // sottotitolo allineato al video: release diverse hanno timing diversi, e con fps
+        // diversi (es. 23.976 vs 25) la deriva cresce col tempo.
+        sub.fps?.takeIf { it > 0.0 }?.let { parts.add(String.format("%.2f fps", it)) }
         if (sub.isHD) parts.add("HD")
         if (sub.isHearingImpaired) parts.add("CC")
         parts.add("⬇${formatDownloads(sub.downloadCount)}")
         if (sub.rating > 0) parts.add("★${String.format("%.1f", sub.rating)}")
+        sub.release?.takeIf { it.isNotBlank() }?.let { parts.add(it.take(60)) }
         return parts.joinToString(" • ")
     }
     
@@ -229,6 +295,16 @@ class SubtitleManager @Inject constructor(
         }
     }
     
+    /**
+     * Esito della ricerca remota. Distinguere Success vuoto da Error è essenziale:
+     * convertire l'errore in lista vuota faceva apparire "Nessun sottotitolo trovato"
+     * anche quando la chiamata falliva (es. HTTP 400 per una query non valida).
+     */
+    sealed class RemoteSearchResult {
+        data class Success(val tracks: List<SubtitleTrack>) : RemoteSearchResult()
+        data class Error(val message: String) : RemoteSearchResult()
+    }
+
     sealed class DownloadState {
         data class Success(val filePath: String) : DownloadState()
         data class Error(val message: String) : DownloadState()

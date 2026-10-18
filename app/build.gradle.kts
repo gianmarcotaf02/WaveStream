@@ -30,6 +30,15 @@ val openRouterApiKey: String = (
         ?: ""
 ).trim().replace("\\", "\\\\").replace("\"", "\\\"")
 
+// Chiave del consumer OpenSubtitles (file .env GITIGNORED, oppure variabile d'ambiente).
+// OpenSubtitles la esige su ogni endpoint: senza, risponde 403 "You cannot consume this
+// service" anche su /login, e l'errore finiva in UI come JSON grezzo.
+val openSubtitlesApiKey: String = (
+    envProperties.getProperty("OPENSUBTITLES_API_KEY")
+        ?: System.getenv("OPENSUBTITLES_API_KEY")
+        ?: ""
+).trim().replace("\\", "\\\\").replace("\"", "\\\"")
+
 android {
     namespace = "it.wavestream.app"
     compileSdk = 34
@@ -38,8 +47,8 @@ android {
         applicationId = "it.wavestream.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 40
-        versionName = "1.1.15"
+        versionCode = 41
+        versionName = "1.1.16"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -49,6 +58,9 @@ android {
 
         // Chiave OpenRouter preconfigurata da .env (vuota se il file non esiste).
         buildConfigField("String", "OPENROUTER_API_KEY", "\"$openRouterApiKey\"")
+
+        // Chiave del consumer OpenSubtitles da .env (vuota se il file non esiste).
+        buildConfigField("String", "OPENSUBTITLES_API_KEY", "\"$openSubtitlesApiKey\"")
     }
 
     signingConfigs {

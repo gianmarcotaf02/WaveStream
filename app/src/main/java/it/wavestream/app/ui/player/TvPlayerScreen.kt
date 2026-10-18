@@ -131,6 +131,8 @@ fun TvPlayerScreen(
     onMarkIntro: () -> Unit = {},
     showSkipIntro: Boolean = false,
     onSkipIntro: () -> Unit = {},
+    /** Secondi dopo cui il pulsante "Salta sigla" si preme da solo (0 = disattivato). */
+    skipIntroAutoSeconds: Int = 0,
     /** Segnale di corroborazione dal monitor audio (Fase 2). */
     audioCandidate: Boolean = false,
     cumulativeSeekSeconds: Int = 0,
@@ -485,6 +487,7 @@ fun TvPlayerScreen(
         if (showSkipIntro && !isMiniPlayer && !isLiveChannel) {
             SkipIntroOverlay(
                 onClick = onSkipIntro,
+                autoSkipSeconds = skipIntroAutoSeconds,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(32.dp)
@@ -2779,12 +2782,19 @@ private fun ModernLoadingIndicator() {
 /**
  * Pulsante "Salta sigla", mostrato durante la sigla quando esiste un marker INTRO completo.
  * Si prende il focus automaticamente così è immediato da premere col telecomando.
+ *
+ * Con [autoSkipSeconds] > 0 il pulsante si "auto preme": una barra accent lo riempie da
+ * sinistra a destra e, quando il riempimento arriva in fondo, parte [onClick]. Il riempimento
+ * è UNA sola animazione lineare su tutti i [autoSkipSeconds] (niente scatti da 1s) e il
+ * countdown resta leggibile nel testo. Un click manuale esce dal composable e cancella
+ * l'animazione: nessun doppio salto.
  */
 @Composable
 private fun SkipIntroOverlay(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    label: String = "Salta sigla"
+    label: String = "Salta sigla",
+    autoSkipSeconds: Int = 0
 ) {
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
@@ -2795,35 +2805,76 @@ private fun SkipIntroOverlay(
         runCatching { focusRequester.requestFocus() }
     }
 
+    // 0 -> 1 in autoSkipSeconds; a 1 il pulsante si preme da solo.
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(autoSkipSeconds) {
+        progress.snapTo(0f)
+        if (autoSkipSeconds <= 0) return@LaunchedEffect
+        progress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = autoSkipSeconds * 1000,
+                easing = LinearEasing
+            )
+        )
+        onClick()
+    }
+
+    val fillFraction = if (autoSkipSeconds > 0) progress.value else 0f
+
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.06f else 1f,
         animationSpec = AppAnimations.SpringGlass,
         label = "skipScale"
     )
 
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White.copy(alpha = if (isFocused) 1f else 0.92f),
-            contentColor = Color.Black
-        ),
-        border = if (isFocused) BorderStroke(2.dp, WaveStreamColors.Accent) else null,
-        shape = RoundedCornerShape(24.dp),
+    val shape = RoundedCornerShape(24.dp)
+    // Il testo parte nero sul pill bianco e diventa bianco man mano che il riempimento
+    // accent lo copre: resta leggibile per tutta l'animazione.
+    val contentColor = androidx.compose.ui.graphics.lerp(Color.Black, Color.White, fillFraction)
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
             .focusRequester(focusRequester)
-            .focusable(interactionSource = interactionSource)
+            .clip(shape)
+            .background(Color.White.copy(alpha = if (isFocused) 1f else 0.92f))
+            .drawBehind {
+                if (fillFraction > 0f) {
+                    drawRect(
+                        color = WaveStreamColors.Accent,
+                        size = Size(size.width * fillFraction, size.height)
+                    )
+                }
+            }
+            .border(
+                width = 2.dp,
+                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                shape = shape
+            )
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = onClick
+            )
+            .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
         Icon(
             imageVector = Icons.Default.SkipNext,
             contentDescription = null,
+            tint = contentColor,
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(label, fontWeight = FontWeight.SemiBold)
+        Text(
+            text = label,
+            color = contentColor,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 

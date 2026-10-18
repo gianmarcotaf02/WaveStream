@@ -697,12 +697,13 @@ class UserPreferences @Inject constructor(
         dataStore.edit { it[SKIP_INTRO_ENABLED] = enabled }
     }
     
+    // Default ON: senza voce in Impostazioni l'auto-skip deve funzionare appena installato.
     suspend fun getSkipIntroEnabled(): Boolean {
-        return dataStore.data.first()[SKIP_INTRO_ENABLED] ?: false
+        return dataStore.data.first()[SKIP_INTRO_ENABLED] ?: true
     }
     
     fun getSkipIntroEnabledFlow(): Flow<Boolean> {
-        return dataStore.data.map { it[SKIP_INTRO_ENABLED] ?: false }
+        return dataStore.data.map { it[SKIP_INTRO_ENABLED] ?: true }
     }
     
     // Live Layout Mode (Grid or Timeline)

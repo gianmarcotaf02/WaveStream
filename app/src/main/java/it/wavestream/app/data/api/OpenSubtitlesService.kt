@@ -30,15 +30,18 @@ interface OpenSubtitlesService {
     @GET("subtitles")
     suspend fun searchSubtitles(
         @Header("Authorization") token: String,
-        @Query("query") query: String? = null,
-        @Query("imdb_id") imdbId: String? = null,
-        @Query("tmdb_id") tmdbId: Int? = null,
-        @Query("languages") languages: String = "it,en", // Comma-separated
-        @Query("type") type: String? = null, // "movie" or "episode"
-        @Query("season_number") seasonNumber: Int? = null,
+        // Parametri dichiarati in ordine ALFABETICO: l'API applica una regola "canonical"
+        // che altrimenti risponde 301 (con URL riscritto) su ogni ricerca, bruciando un
+        // round-trip e, in certi casi, alterando i valori (es. la "•" di una query).
         @Query("episode_number") episodeNumber: Int? = null,
+        @Query("imdb_id") imdbId: String? = null,
+        @Query("languages") languages: String = "it,en", // Comma-separated
         @Query("order_by") orderBy: String = "download_count",
-        @Query("order_direction") orderDirection: String = "desc"
+        @Query("order_direction") orderDirection: String = "desc",
+        @Query(value = "query", encoded = true) query: String? = null,
+        @Query("season_number") seasonNumber: Int? = null,
+        @Query("tmdb_id") tmdbId: Int? = null,
+        @Query("type") type: String? = null // "movie" or "episode"
     ): Response<SubtitleSearchResponse>
     
     @GET("subtitles/{subtitle_id}")
@@ -49,7 +52,9 @@ interface OpenSubtitlesService {
     
     @POST("download")
     suspend fun downloadSubtitle(
-        @Header("Authorization") token: String,
+        // null = download anonimo (quota per IP della Api-Key): usato come ripiego quando
+        // il percorso autenticato non è disponibile. Retrofit omette l'header se è null.
+        @Header("Authorization") token: String?,
         @Body request: DownloadRequest
     ): Response<DownloadResponse>
     

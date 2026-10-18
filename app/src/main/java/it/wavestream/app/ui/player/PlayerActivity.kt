@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.Tracks
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
@@ -68,6 +69,13 @@ class PlayerActivity : ComponentActivity() {
     @Inject lateinit var watchProgressDao: WatchProgressDao
     @Inject lateinit var playNextManager: PlayNextManager
     @Inject lateinit var subtitleManager: SubtitleManager
+
+    /**
+     * true quando un sottotitolo è appena stato applicato al MediaItem e la sua traccia va
+     * selezionata: Media3 la carica ma non la attiva da sola (i file scaricati hanno lingua
+     * "und", nessuna lingua preferita corrisponde). Vedi selectPendingSubtitleTrack().
+     */
+    private var pendingSubtitleSelection = false
     @Inject lateinit var sleepTimerController: SleepTimerController
     @Inject lateinit var userPreferences: it.wavestream.app.data.preferences.UserPreferences
     @Inject lateinit var movieDao: it.wavestream.app.data.database.dao.MovieDao
@@ -108,6 +116,11 @@ class PlayerActivity : ComponentActivity() {
     private var seriesIntroReference: MediaSegment? = null
     private var introFingerprintActive = false
     private val _showSkipIntro = mutableStateOf(false)
+    // Auto-skip della sigla: ON/OFF dalla preferenza `skip_intro`, e "one-shot" per
+    // playback — dopo il primo salto automatico il pulsante torna solo manuale, così
+    // chi si riporta indietro non si vede saltare la sigla che voleva rivedere.
+    private val _skipIntroAutoEnabled = mutableStateOf(true)
+    private var skipIntroAutoUsed = false
     // Fase 2: esito del monitor audio, passato al watchdog come corroborazione.
     private val _audioCandidate = mutableStateOf(false)
     // Generazione di sessione: si incrementa ad ogni salto indietro e fa ripartire/re-armare
@@ -201,14 +214,17 @@ class PlayerActivity : ComponentActivity() {
     // viene scalzata dalla vecchia in fase di chiusura).
     private val sleepTimerExpireCallback: () -> Unit = { onSleepTimerExpired() }
     
-    // Countdown overlay "Prossimo episodio" (uniforme: 20s)
-    private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 20
-    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 20
+    // Countdown overlay "Prossimo episodio" (uniforme: 15s)
+    private val DEFAULT_NEXT_COUNTDOWN_SECONDS = 15
+    private val CREDITS_NEXT_COUNTDOWN_SECONDS = 15
+
+    // "Salta sigla": dopo questo tempo il pulsante si preme da solo (riempimento accent).
+    private val SKIP_INTRO_AUTO_SECONDS = 5
 
     // Finestra finale entro cui la card si arma anche senza un marker affidabile
     // (fallback: ultimi secondi dell'episodio). Combacia col countdown della card, cosi`
     // anello e numero restano coerenti.
-    private val CREDITS_AUTOPLAY_TAIL_MS = 20_000L
+    private val CREDITS_AUTOPLAY_TAIL_MS = 15_000L
 
     private val progressHandler = Handler(Looper.getMainLooper())
     private val nextEpisodeHandler = Handler(Looper.getMainLooper())
@@ -602,6 +618,7 @@ class PlayerActivity : ComponentActivity() {
             _creditsDebugEnabled.value = userPreferences.getCreditsDebugEnabled()
             _creditsAudioEnabled.value = userPreferences.getCreditsAudioEnabled()
             _introDbEnabled.value = userPreferences.getIntroDbEnabled()
+            _skipIntroAutoEnabled.value = userPreferences.getSkipIntroEnabled()
             creditsAudioMonitor.enabled = _creditsAudioEnabled.value
             
             // Check if next episode exists
@@ -702,6 +719,9 @@ class PlayerActivity : ComponentActivity() {
                     onMarkIntro = { markIntroNow() },
                     showSkipIntro = _showSkipIntro.value,
                     onSkipIntro = { skipIntro() },
+                    skipIntroAutoSeconds = if (_skipIntroAutoEnabled.value && !skipIntroAutoUsed) {
+                        SKIP_INTRO_AUTO_SECONDS
+                    } else 0,
                     audioCandidate = _audioCandidate.value,
                     isLiveChannel = contentType == ContentType.CHANNEL,
                     isAtLiveEdge = _isAtLiveEdge.value,
@@ -898,6 +918,18 @@ class PlayerActivity : ComponentActivity() {
                         runCatching { streamProviderDao.updateDetectedHeight(sourceProviderId, height) }
                     }
                 }
+            }
+
+            override fun onTracksChanged(tracks: Tracks) {
+                // L'elenco audio non e' definitivo al primo STATE_READY: su manifest HLS e
+                // flussi live le tracce arrivano (o cambiano) dopo. Senza questo refresh
+                // il pulsante "audio" restava nascosto perche' la lista era quella del
+                // primo ready, spesso con una sola traccia.
+                updateAudioTracks()
+
+                // La traccia testuale compare qui dopo replaceMediaItem: è il momento in cui
+                // possiamo forzarne la selezione.
+                selectPendingSubtitleTrack()
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -2005,6 +2037,8 @@ class PlayerActivity : ComponentActivity() {
 
     private fun skipIntro() {
         val end = introEndMs ?: return
+        // Un salto automatico "consuma" l'auto-skip di questo playback.
+        skipIntroAutoUsed = true
         resetAutoPlayCounter()
         if (::player.isInitialized) {
             android.util.Log.i("CreditsDiag", "skipIntro to=$end")
@@ -2385,11 +2419,20 @@ class PlayerActivity : ComponentActivity() {
                 
                 val imdbId = when (contentType) {
                     ContentType.MOVIE -> movieDao.getMovieById(contentId)?.imdbId
-                    ContentType.SERIES, ContentType.EPISODE -> {
-                        val sId = seriesId ?: contentId
-                        seriesDao.getSeriesById(sId)?.imdbId
-                    }
+                    ContentType.SERIES, ContentType.EPISODE -> seriesDao.getSeriesById(seriesId ?: contentId)?.imdbId
                     else -> null
+                }
+
+                // La query NON puo' essere il `title` del player: per gli episodi vale
+                // "Nome serie • Titolo episodio" e il carattere "•" rompe la
+                // canonicalizzazione dell'API (301 -> query con %95 -> HTTP 400), che
+                // l'app mascherava come "Nessun sottotitolo trovato". Si usa il titolo
+                // della serie preso dal DB (fallback: tutto prima della "•").
+                val searchQuery = when (contentType) {
+                    ContentType.SERIES, ContentType.EPISODE ->
+                        seriesDao.getSeriesById(seriesId ?: contentId)?.title
+                            ?: title.substringBefore("•").trim()
+                    else -> title
                 }
                 
                 // Use user's preferred subtitle language
@@ -2401,8 +2444,8 @@ class PlayerActivity : ComponentActivity() {
                 
                 android.util.Log.d("PlayerActivity", "Searching subtitles: title=$title, imdbId=$imdbId, lang=$subtitleLanguage, season=$season, episode=$episode")
                 
-                val subtitles = subtitleManager.searchRemoteSubtitles(
-                    query = title,
+                val searchResult = subtitleManager.searchRemoteSubtitles(
+                    query = searchQuery,
                     imdbId = imdbId,
                     type = if (contentType == ContentType.MOVIE) "movie" else "episode",
                     season = season,
@@ -2410,15 +2453,28 @@ class PlayerActivity : ComponentActivity() {
                     languages = subtitleLanguage
                 )
                 
-                if (subtitles.isEmpty()) {
-                    android.widget.Toast.makeText(
-                        this@PlayerActivity,
-                        "Nessun sottotitolo trovato",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    // Show subtitle selection dialog
-                    showSubtitleSelectionDialog(subtitles)
+                when (searchResult) {
+                    is SubtitleManager.RemoteSearchResult.Success -> {
+                        if (searchResult.tracks.isEmpty()) {
+                            android.widget.Toast.makeText(
+                                this@PlayerActivity,
+                                "Nessun sottotitolo trovato",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            showSubtitleSelectionDialog(searchResult.tracks)
+                        }
+                    }
+                    is SubtitleManager.RemoteSearchResult.Error -> {
+                        // Prima l'errore diventava una lista vuota e in UI appariva
+                        // "Nessun sottotitolo trovato": qualunque problema di ricerca
+                        // era invisibile. Ora il motivo reale finisce nel toast.
+                        android.widget.Toast.makeText(
+                            this@PlayerActivity,
+                            "Ricerca sottotitoli: ${searchResult.message}",
+                            android.widget.Toast.LENGTH_LONG
+                        ).show()
+                    }
                 }
             } catch (e: Exception) {
                 android.util.Log.e("PlayerActivity", "Error searching subtitles: ${e.message}", e)
@@ -2431,9 +2487,53 @@ class PlayerActivity : ComponentActivity() {
         }
     }
     
+    /**
+     * Seleziona la traccia testuale del sottotitolo appena applicato.
+     *
+     * Media3 aggiunge la traccia al MediaItem ma non la attiva: la selezione automatica di
+     * DefaultTrackSelector lavora sulle lingue preferite, e i file scaricati hanno lingua
+     * "und" (il nome è "<titolo>_<fileId>.srt"). Con un override esplicito la selezione è
+     * deterministica, indipendente dalle preferenze e dal momento in cui la traccia compare
+     * (dopo replaceMediaItem arriva in modo asincrono, da qui anche la chiamata da
+     * onTracksChanged).
+     */
+    private fun selectPendingSubtitleTrack() {
+        if (!pendingSubtitleSelection) return
+
+        val groups = player.currentTracks.groups
+        val textGroup = groups.firstOrNull {
+            it.type == androidx.media3.common.C.TRACK_TYPE_TEXT
+        } ?: return // non ancora caricata: ci riprova onTracksChanged
+
+        if (textGroup.isTrackSelected(0)) {
+            pendingSubtitleSelection = false
+            android.util.Log.d("PlayerActivity", "Traccia sottotitoli già selezionata dal player")
+            return
+        }
+
+        val selector = player.trackSelector as? androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+        if (selector == null) {
+            android.util.Log.w("PlayerActivity", "TrackSelector non è DefaultTrackSelector: selezione sottotitoli non forzata")
+            return
+        }
+
+        selector.setParameters(
+            selector.buildUponParameters().setOverrideForType(
+                androidx.media3.common.TrackSelectionOverride(textGroup.mediaTrackGroup, 0)
+            )
+        )
+        pendingSubtitleSelection = false
+        android.util.Log.d(
+            "PlayerActivity",
+            "Traccia sottotitoli selezionata a mano (lang=${textGroup.getTrackFormat(0).language}, " +
+                "mime=${textGroup.getTrackFormat(0).sampleMimeType})"
+        )
+    }
+
     private fun showSubtitleSelectionDialog(subtitles: List<SubtitleManager.SubtitleTrack>) {
         val items = subtitles.map { sub ->
-            "${sub.language} - ${sub.name}"
+            // solo il nome: contiene già lingua, fps, HD/CC, download, rating e release
+            sub.name
         }.toTypedArray()
         
         android.app.AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
@@ -2458,6 +2558,9 @@ class PlayerActivity : ComponentActivity() {
                     val currentMediaItem = player.currentMediaItem
                     if (currentMediaItem != null) {
                         subtitleManager.applySubtitle(player, subtitlePath, currentMediaItem)
+                        // La selezione della traccia va forzata: vedi selectPendingSubtitleTrack().
+                        pendingSubtitleSelection = true
+                        selectPendingSubtitleTrack()
                         android.widget.Toast.makeText(
                             this@PlayerActivity,
                             "Sottotitoli applicati: ${track.language}",
@@ -2771,6 +2874,11 @@ class PlayerActivity : ComponentActivity() {
         }
         
         _audioTracks.value = tracks
+        android.util.Log.d(
+            "PlayerActivity",
+            "updateAudioTracks: ${tracks.size} traccia/e audio -> " +
+                tracks.joinToString { "${it.label}(group=${it.groupIndex},sel=${it.isSelected})" }
+        )
     }
     
     /**
