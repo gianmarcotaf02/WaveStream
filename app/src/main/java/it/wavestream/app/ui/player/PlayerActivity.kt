@@ -116,11 +116,12 @@ class PlayerActivity : ComponentActivity() {
     private var seriesIntroReference: MediaSegment? = null
     private var introFingerprintActive = false
     private val _showSkipIntro = mutableStateOf(false)
-    // Auto-skip della sigla: ON/OFF dalla preferenza `skip_intro`, e "one-shot" per
-    // playback — dopo il primo salto automatico il pulsante torna solo manuale, così
-    // chi si riporta indietro non si vede saltare la sigla che voleva rivedere.
+    // Auto-skip della sigla: ON/OFF dalla preferenza `skip_intro`, con re-arm per episodio.
+    // Il flag è legato a `introEndMs` (l'identità del marker in riproduzione): così torna
+    // attivo su ogni nuovo episodio ma resta "consumato" se ti riporti indietro a rivedere
+    // la stessa sigla.
     private val _skipIntroAutoEnabled = mutableStateOf(true)
-    private var skipIntroAutoUsed = false
+    private var skipIntroAutoDoneForEnd: Long? = null
     // Fase 2: esito del monitor audio, passato al watchdog come corroborazione.
     private val _audioCandidate = mutableStateOf(false)
     // Generazione di sessione: si incrementa ad ogni salto indietro e fa ripartire/re-armare
@@ -231,6 +232,9 @@ class PlayerActivity : ComponentActivity() {
     private val bufferingHandler = Handler(Looper.getMainLooper())
     private var autoSaveCounter = 0
     private var nextEpisodeCountdown = DEFAULT_NEXT_COUNTDOWN_SECONDS
+    // Scadenza assoluta del countdown dell'overlay (SystemClock.uptimeMillis): numero,
+    // anello e salto leggono tutti questa, così non possono sfasarsi.
+    private var nextEpisodeEndsAtMs = 0L
     private var nextEpisodeTriggered = false  // Prevent double trigger
     private var nextEpisodeLookupInFlight = false // Evita lookup concorrenti ripetute
     private var nextEpisodeUnavailable = false    // Nessun episodio successivo: stop ai retry
@@ -719,7 +723,7 @@ class PlayerActivity : ComponentActivity() {
                     onMarkIntro = { markIntroNow() },
                     showSkipIntro = _showSkipIntro.value,
                     onSkipIntro = { skipIntro() },
-                    skipIntroAutoSeconds = if (_skipIntroAutoEnabled.value && !skipIntroAutoUsed) {
+                    skipIntroAutoSeconds = if (_skipIntroAutoEnabled.value && skipIntroAutoDoneForEnd != introEndMs) {
                         SKIP_INTRO_AUTO_SECONDS
                     } else 0,
                     audioCandidate = _audioCandidate.value,
@@ -1672,6 +1676,8 @@ class PlayerActivity : ComponentActivity() {
         seriesCreditsReference = null
         introStartMs = null
         introEndMs = null
+        // Nuovo episodio/contenuto: l'auto-skip della sigla torna armato.
+        skipIntroAutoDoneForEnd = null
         seriesIntroReference = null
         introFingerprintActive = false
         creditsAudioMonitor.setIntroReference(null)
@@ -2037,8 +2043,8 @@ class PlayerActivity : ComponentActivity() {
 
     private fun skipIntro() {
         val end = introEndMs ?: return
-        // Un salto automatico "consuma" l'auto-skip di questo playback.
-        skipIntroAutoUsed = true
+        // Il marker in riproduzione è già stato auto-saltato: non riparte da solo.
+        skipIntroAutoDoneForEnd = end
         resetAutoPlayCounter()
         if (::player.isInitialized) {
             android.util.Log.i("CreditsDiag", "skipIntro to=$end")
@@ -2197,28 +2203,36 @@ class PlayerActivity : ComponentActivity() {
         countdownSeconds: Int = DEFAULT_NEXT_COUNTDOWN_SECONDS
     ) {
         nextEpisodeCountdown = countdownSeconds
+        nextEpisodeEndsAtMs = android.os.SystemClock.uptimeMillis() + countdownSeconds * 1000L
         _nextEpisode.value = NextEpisodeInfo(
             title = next.title,
             subtitle = next.subtitle,
             countdown = nextEpisodeCountdown,
             totalCountdown = countdownSeconds,
-            autoPlay = _autoPlayNextEnabled.value
+            autoPlay = _autoPlayNextEnabled.value,
+            endsAtUptimeMs = nextEpisodeEndsAtMs
         )
         
-        // Countdown
+        // Tick a 200ms sulla scadenza, non decremento di 1 ogni 1000ms: un `postDelayed(1000)`
+        // accumula ritardo sotto carico (R8/decoder/TV lente) e il numero restava indietro
+        // rispetto allo scorrere reale del tempo. Ora il numero è sempre `ceil(rimasti/1000)`.
         nextEpisodeHandler.post(object : Runnable {
             override fun run() {
-                nextEpisodeCountdown--
-                if (nextEpisodeCountdown > 0) {
+                val remainingMs = nextEpisodeEndsAtMs - android.os.SystemClock.uptimeMillis()
+                nextEpisodeCountdown = kotlin.math.ceil(remainingMs.toDouble() / 1000.0)
+                    .toInt().coerceAtLeast(0)
+                if (remainingMs > 0L) {
                     _nextEpisode.value = NextEpisodeInfo(
                         title = next.title,
                         subtitle = next.subtitle,
                         countdown = nextEpisodeCountdown,
                         totalCountdown = countdownSeconds,
-                        autoPlay = _autoPlayNextEnabled.value
+                        autoPlay = _autoPlayNextEnabled.value,
+                        endsAtUptimeMs = nextEpisodeEndsAtMs
                     )
-                    nextEpisodeHandler.postDelayed(this, 1000)
+                    nextEpisodeHandler.postDelayed(this, 200)
                 } else {
+                    nextEpisodeCountdown = 0
                     if (_autoPlayNextEnabled.value) {
                          playNextEpisode(isAutoPlay = true)
                     }
@@ -2229,6 +2243,7 @@ class PlayerActivity : ComponentActivity() {
     
     private fun hideNextEpisodeOverlay() {
         _nextEpisode.value = null
+        nextEpisodeEndsAtMs = 0L
         nextEpisodeHandler.removeCallbacksAndMessages(null)
         nextEpisodeTriggered = false
         creditsDetected = false

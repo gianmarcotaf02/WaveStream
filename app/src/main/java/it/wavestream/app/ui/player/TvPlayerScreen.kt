@@ -502,6 +502,7 @@ fun TvPlayerScreen(
                 countdown = next.countdown,
                 totalCountdown = next.totalCountdown,
                 autoPlay = next.autoPlay,
+                endsAtUptimeMs = next.endsAtUptimeMs,
                 onPlayNext = onPlayNext,
                 onCancel = onCancelNext,
                 modifier = Modifier
@@ -2784,10 +2785,8 @@ private fun ModernLoadingIndicator() {
  * Si prende il focus automaticamente così è immediato da premere col telecomando.
  *
  * Con [autoSkipSeconds] > 0 il pulsante si "auto preme": una barra accent lo riempie da
- * sinistra a destra e, quando il riempimento arriva in fondo, parte [onClick]. Il riempimento
- * è UNA sola animazione lineare su tutti i [autoSkipSeconds] (niente scatti da 1s) e il
- * countdown resta leggibile nel testo. Un click manuale esce dal composable e cancella
- * l'animazione: nessun doppio salto.
+ * sinistra a destra e, quando il riempimento arriva in fondo, parte [onClick]. Un click
+ * manuale esce dal composable e cancella il timer: nessun doppio salto.
  */
 @Composable
 private fun SkipIntroOverlay(
@@ -2805,22 +2804,27 @@ private fun SkipIntroOverlay(
         runCatching { focusRequester.requestFocus() }
     }
 
-    // 0 -> 1 in autoSkipSeconds; a 1 il pulsante si preme da solo.
-    val progress = remember { Animatable(0f) }
+    // Tempo misurato SULL'OROLOGIO, non con una animazione Compose: `tween` viene
+    // moltiplicato per la scala animazioni di sistema (`ANIMATOR_DURATION_SCALE`), e su
+    // molte TV/box vale 0.5x — la barra si riempiva in metà tempo e il click partiva
+    // prima dei secondi dichiarati. Qui il progresso è (adesso - inizio) / durata, quindi
+    // la barra e il click seguono il tempo reale qualunque sia la scala.
+    val totalMs = autoSkipSeconds * 1000L
+    var elapsedMs by remember(autoSkipSeconds) { mutableLongStateOf(0L) }
     LaunchedEffect(autoSkipSeconds) {
-        progress.snapTo(0f)
+        elapsedMs = 0L
         if (autoSkipSeconds <= 0) return@LaunchedEffect
-        progress.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(
-                durationMillis = autoSkipSeconds * 1000,
-                easing = LinearEasing
-            )
-        )
+        val startNanos = android.os.SystemClock.elapsedRealtimeNanos()
+        while (true) {
+            val e = (android.os.SystemClock.elapsedRealtimeNanos() - startNanos) / 1_000_000L
+            elapsedMs = e.coerceAtMost(totalMs)
+            if (e >= totalMs) break
+            withFrameNanos { } // ridisegna al frame, ma il tempo lo detta l'orologio
+        }
         onClick()
     }
 
-    val fillFraction = if (autoSkipSeconds > 0) progress.value else 0f
+    val fillFraction = if (totalMs > 0) (elapsedMs.toFloat() / totalMs).coerceIn(0f, 1f) else 0f
 
     val scale by animateFloatAsState(
         targetValue = if (isFocused) 1.06f else 1f,
@@ -2888,6 +2892,8 @@ private fun ModernNextEpisodeOverlay(
     countdown: Int,
     totalCountdown: Int = 10,
     autoPlay: Boolean,
+    /** Scadenza (uptime ms) del countdown: anello e numero leggono questa, non un tween. */
+    endsAtUptimeMs: Long = 0L,
     onPlayNext: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
@@ -2905,23 +2911,28 @@ private fun ModernNextEpisodeOverlay(
         label = "border"
     )
 
-    // Timer fluido: UNA sola animazione 0 -> 1 per tutta la durata, invece di
-    // riavviare un tween da 1s ad ogni tick. La barra non "scatta" più ogni secondo.
-    val progress = remember { Animatable(0f) }
-    LaunchedEffect(title, totalCountdown, autoPlay) {
-        if (autoPlay && totalCountdown > 0) {
-            progress.snapTo(0f)
-            progress.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = totalCountdown * 1000,
-                    easing = LinearEasing
-                )
-            )
-        } else {
-            progress.snapTo(0f)
+    // Anello + numero dalla STESSA fonte (la scadenza assoluta), misurata sull'orologio.
+    // Prima l'anello era un `tween` di `totalCountdown` secondi: Compose moltiplica quella
+    // durata per la scala animazioni di sistema (su molte TV 0.5x), quindi la barra si
+    // riempiva in metà tempo mentre il numero scendeva a 1s reali — e il salto avveniva
+    // alla fine dei secondi, con la barra già piena. Ora non c'è più nessuna animazione
+    // coinvolta nel timing: barra, numero e salto leggono tutti `endsAtUptimeMs`.
+    val totalMs = (totalCountdown * 1000).toLong()
+    var nowMs by remember(endsAtUptimeMs) {
+        mutableLongStateOf(android.os.SystemClock.uptimeMillis())
+    }
+    LaunchedEffect(title, endsAtUptimeMs, autoPlay) {
+        if (!autoPlay || endsAtUptimeMs <= 0L) return@LaunchedEffect
+        while (true) {
+            nowMs = android.os.SystemClock.uptimeMillis()
+            if (nowMs >= endsAtUptimeMs) break
+            withFrameNanos { }
         }
     }
+
+    val progressFraction = if (autoPlay && totalMs > 0L && endsAtUptimeMs > 0L) {
+        ((endsAtUptimeMs - nowMs).toFloat() / totalMs).let { (1f - it).coerceIn(0f, 1f) }
+    } else 0f
 
     // Autofocus sul pulsante principale quando compare l'overlay.
     // Retry robusto: il primo frame potrebbe non avere ancora il nodo agganciato.
@@ -2933,10 +2944,13 @@ private fun ModernNextEpisodeOverlay(
         }
     }
 
-    // Il numero segue il countdown reale del player, mentre l'anello `progress` è UNA sola
-    // animazione lineare su `totalCountdown` secondi: cresce in modo continuo (mai a scatti)
-    // e resta sempre coerente col numero e con la durata dichiarata della card.
-    val secondsLeft = countdown.coerceAtLeast(0)
+    // Il numero è lo stesso calcolo dell'anello (secondi rimasti alla scadenza), quindi
+    // non può più sfasarsi rispetto alla barra.
+    val secondsLeft = if (autoPlay && endsAtUptimeMs > 0L) {
+        kotlin.math.ceil((endsAtUptimeMs - nowMs).toDouble() / 1000.0).toInt().coerceAtLeast(0)
+    } else {
+        countdown.coerceAtLeast(0)
+    }
 
     GlassSurface(
         shape = RoundedCornerShape(16.dp),
@@ -2960,7 +2974,7 @@ private fun ModernNextEpisodeOverlay(
                 ) {
                     if (autoPlay && totalCountdown > 0) {
                         CircularProgressIndicator(
-                            progress = { progress.value },
+                            progress = { progressFraction },
                             modifier = Modifier.fillMaxSize(),
                             color = WaveStreamColors.Accent,
                             trackColor = Color.White.copy(alpha = 0.2f),
@@ -3057,7 +3071,9 @@ data class NextEpisodeInfo(
     val subtitle: String? = null,
     val countdown: Int,
     val totalCountdown: Int = 10,
-    val autoPlay: Boolean = true
+    val autoPlay: Boolean = true,
+    /** Scadenza assoluta del countdown (`SystemClock.uptimeMillis`), 0 = non attiva. */
+    val endsAtUptimeMs: Long = 0L
 )
 
 /**
