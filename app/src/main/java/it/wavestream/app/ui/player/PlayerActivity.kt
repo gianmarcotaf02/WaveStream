@@ -122,6 +122,9 @@ class PlayerActivity : ComponentActivity() {
     // la stessa sigla.
     private val _skipIntroAutoEnabled = mutableStateOf(true)
     private var skipIntroAutoDoneForEnd: Long? = null
+    // Sigla ignorata con la "x": il pulsante non ricompare per QUESTO marker (si azzera al
+    // cambio episodio in onPlaybackContentChanged).
+    private var skipIntroDismissedForEnd: Long? = null
     // Fase 2: esito del monitor audio, passato al watchdog come corroborazione.
     private val _audioCandidate = mutableStateOf(false)
     // Generazione di sessione: si incrementa ad ogni salto indietro e fa ripartire/re-armare
@@ -723,6 +726,7 @@ class PlayerActivity : ComponentActivity() {
                     onMarkIntro = { markIntroNow() },
                     showSkipIntro = _showSkipIntro.value,
                     onSkipIntro = { skipIntro() },
+                    onDismissIntro = { dismissSkipIntro() },
                     skipIntroAutoSeconds = if (_skipIntroAutoEnabled.value && skipIntroAutoDoneForEnd != introEndMs) {
                         SKIP_INTRO_AUTO_SECONDS
                     } else 0,
@@ -1482,7 +1486,8 @@ class PlayerActivity : ComponentActivity() {
                     val iEnd = introEndMs
                     if (iStart != null && iEnd != null && iEnd > iStart) {
                         val p = player.currentPosition
-                        _showSkipIntro.value = p >= iStart && p < iEnd - 1_500
+                        _showSkipIntro.value =
+                            p >= iStart && p < iEnd - 1_500 && skipIntroDismissedForEnd != iEnd
                     } else if (_showSkipIntro.value) {
                         _showSkipIntro.value = false
                     }
@@ -1678,6 +1683,7 @@ class PlayerActivity : ComponentActivity() {
         introEndMs = null
         // Nuovo episodio/contenuto: l'auto-skip della sigla torna armato.
         skipIntroAutoDoneForEnd = null
+        skipIntroDismissedForEnd = null
         seriesIntroReference = null
         introFingerprintActive = false
         creditsAudioMonitor.setIntroReference(null)
@@ -2054,6 +2060,17 @@ class PlayerActivity : ComponentActivity() {
     }
 
     /**
+     * La "x" accanto a "Salta sigla": chiude il pulsante senza saltare la sigla e non lo
+     * fa ricomparire finché si resta dentro questo marker (se invece cerchi indietro, il
+     * pulsante torna disponibile manualmente).
+     */
+    private fun dismissSkipIntro() {
+        android.util.Log.i("CreditsDiag", "skipIntro dismissed end=$introEndMs")
+        skipIntroDismissedForEnd = introEndMs
+        _showSkipIntro.value = false
+    }
+
+    /**
      * Salva un segmento marcato manualmente dall'utente alla posizione corrente.
      */
     private fun markSegmentNow(type: SegmentType) {
@@ -2161,11 +2178,39 @@ class PlayerActivity : ComponentActivity() {
             android.util.Log.i("CreditsDiag", "playbackEnded ignorato: cambio contenuto in corso")
             return
         }
-        // L'utente ha ignorato l'overlay: alla fine del file NON si passa all'episodio
-        // successivo, si chiude il player.
+        // L'utente ha ignorato l'overlay "Prossimo episodio": la card non ricompare e non
+        // si salta prima della fine, ma il player NON si chiude. A fine episodio si passa
+        // comunque al successivo; con l'autoplay disattivato si ripropone la scelta (player
+        // aperto). Prima qui c'era `finish()`: "Ignora" chiudeva il player a fine puntata e
+        // buttava via il resto della serie.
         if (creditsDismissed) {
-            android.util.Log.i("CreditsDiag", "playbackEnded after dismiss -> finish")
-            finish()
+            android.util.Log.i(
+                "CreditsDiag",
+                "playbackEnded after dismiss -> advance (autoPlay=${_autoPlayNextEnabled.value})"
+            )
+            lifecycleScope.launch {
+                val next = playNextManager.getNext(
+                    contentType = contentType,
+                    contentId = contentId,
+                    seriesId = seriesId,
+                    season = season,
+                    episode = episode,
+                    groupId = groupId
+                )
+                if (next == null) {
+                    android.util.Log.i("CreditsDiag", "playbackEnded after dismiss: no next -> finish")
+                    finish()
+                    return@launch
+                }
+                if (_autoPlayNextEnabled.value) {
+                    playNextEpisode(isAutoPlay = true)
+                } else {
+                    // Autoplay disattivo: nessuna partenza automatica, ma il player resta
+                    // aperto e la scelta "Guarda ora / Ignora" torna disponibile.
+                    nextEpisodeTriggered = true
+                    showNextEpisodeOverlay(next)
+                }
+            }
             return
         }
         if (nextEpisodeTriggered && _nextEpisode.value != null) {
@@ -2668,6 +2713,9 @@ class PlayerActivity : ComponentActivity() {
         // non avviare il seek a barra nascosta.
         if (!_controlsVisible.value && !_isMiniPlayer.value &&
             _nextEpisode.value == null &&
+            // Pulsante "Salta sigla" visibile: le frecce devono spostare il focus tra la
+            // pill e la "x" di annullamento, non avviare il seek a barra nascosta.
+            !_showSkipIntro.value &&
             (event.keyCode == KeyEvent.KEYCODE_DPAD_LEFT || event.keyCode == KeyEvent.KEYCODE_DPAD_RIGHT)
         ) {
             when (event.action) {
@@ -2749,6 +2797,11 @@ class PlayerActivity : ComponentActivity() {
             KeyEvent.KEYCODE_BACK -> {
                 if (_nextEpisode.value != null) {
                     cancelNextEpisodeOverlay()
+                    return true
+                }
+                // BACK con il pulsante "Salta sigla" a schermo: equivale alla "x".
+                if (_showSkipIntro.value) {
+                    dismissSkipIntro()
                     return true
                 }
                 if (_isMiniPlayer.value) {

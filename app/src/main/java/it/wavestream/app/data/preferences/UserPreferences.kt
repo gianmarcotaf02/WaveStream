@@ -97,6 +97,10 @@ class UserPreferences @Inject constructor(
         // Downloads
         private val DOWNLOAD_WIFI_ONLY = booleanPreferencesKey("download_wifi_only")
         private val MAX_CONCURRENT_DOWNLOADS = intPreferencesKey("max_concurrent_downloads")
+
+        // Banner "aggiornamento disponibile": versionCode per cui l'utente ha scelto
+        // "Non ora" (0 = nessuna scelta salvata).
+        private val UPDATE_BANNER_DISMISSED_VERSION = intPreferencesKey("update_banner_dismissed_version")
         
         // Profile Auto-Start
         private val AUTO_START_MODE = stringPreferencesKey("auto_start_mode") // "none", "default", "last"
@@ -704,6 +708,23 @@ class UserPreferences @Inject constructor(
     
     fun getSkipIntroEnabledFlow(): Flow<Boolean> {
         return dataStore.data.map { it[SKIP_INTRO_ENABLED] ?: true }
+    }
+
+    // ---------------------------------------------------------------------
+    // Banner "aggiornamento disponibile" all'avvio
+    // ---------------------------------------------------------------------
+
+    /**
+     * versionCode per cui l'utente ha scelto "Non ora" sul banner di aggiornamento.
+     * 0 = nessuna scelta salvata (banner visibile). Quando esce una versione nuova il
+     * versionCode cambia e il banner torna a comparire da solo.
+     */
+    suspend fun getUpdateBannerDismissedVersion(): Int {
+        return dataStore.data.first()[UPDATE_BANNER_DISMISSED_VERSION] ?: 0
+    }
+
+    suspend fun setUpdateBannerDismissedVersion(versionCode: Int) {
+        dataStore.edit { it[UPDATE_BANNER_DISMISSED_VERSION] = versionCode }
     }
     
     // Live Layout Mode (Grid or Timeline)

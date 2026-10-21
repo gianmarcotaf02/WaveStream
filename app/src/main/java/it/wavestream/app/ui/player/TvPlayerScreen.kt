@@ -131,6 +131,8 @@ fun TvPlayerScreen(
     onMarkIntro: () -> Unit = {},
     showSkipIntro: Boolean = false,
     onSkipIntro: () -> Unit = {},
+    /** Annulla il pulsante "Salta sigla" (x): lo chiude senza saltare la sigla. */
+    onDismissIntro: () -> Unit = {},
     /** Secondi dopo cui il pulsante "Salta sigla" si preme da solo (0 = disattivato). */
     skipIntroAutoSeconds: Int = 0,
     /** Segnale di corroborazione dal monitor audio (Fase 2). */
@@ -487,6 +489,7 @@ fun TvPlayerScreen(
         if (showSkipIntro && !isMiniPlayer && !isLiveChannel) {
             SkipIntroOverlay(
                 onClick = onSkipIntro,
+                onDismiss = onDismissIntro,
                 autoSkipSeconds = skipIntroAutoSeconds,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -2791,6 +2794,7 @@ private fun ModernLoadingIndicator() {
 @Composable
 private fun SkipIntroOverlay(
     onClick: () -> Unit,
+    onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     label: String = "Salta sigla",
     autoSkipSeconds: Int = 0
@@ -2798,6 +2802,11 @@ private fun SkipIntroOverlay(
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+    // La "x" accanto al pulsante: annulla l'auto-skip e chiude il pulsante per questa
+    // sigla, senza saltarla. Ha un interactionSource proprio perché è un secondo
+    // focusable (D-pad destra dalla pill, sinistra per tornare).
+    val dismissInteraction = remember { MutableInteractionSource() }
+    val dismissFocused by dismissInteraction.collectIsFocusedAsState()
 
     LaunchedEffect(Unit) {
         delay(100)
@@ -2811,10 +2820,11 @@ private fun SkipIntroOverlay(
     // la barra e il click seguono il tempo reale qualunque sia la scala.
     val totalMs = autoSkipSeconds * 1000L
     var elapsedMs by remember(autoSkipSeconds) { mutableLongStateOf(0L) }
-    LaunchedEffect(autoSkipSeconds) {
-        elapsedMs = 0L
-        if (autoSkipSeconds <= 0) return@LaunchedEffect
-        val startNanos = android.os.SystemClock.elapsedRealtimeNanos()
+    // Il countdown si METTE IN PAUSA mentre il focus è sulla "x": chi sta per annullare
+    // non deve vedersi saltare la sigla sotto le dita. Riprende da dove era.
+    LaunchedEffect(autoSkipSeconds, dismissFocused) {
+        if (autoSkipSeconds <= 0 || dismissFocused) return@LaunchedEffect
+        val startNanos = android.os.SystemClock.elapsedRealtimeNanos() - elapsedMs * 1_000_000L
         while (true) {
             val e = (android.os.SystemClock.elapsedRealtimeNanos() - startNanos) / 1_000_000L
             elapsedMs = e.coerceAtMost(totalMs)
@@ -2831,6 +2841,11 @@ private fun SkipIntroOverlay(
         animationSpec = AppAnimations.SpringGlass,
         label = "skipScale"
     )
+    val dismissScale by animateFloatAsState(
+        targetValue = if (dismissFocused) 1.12f else 1f,
+        animationSpec = AppAnimations.SpringGlass,
+        label = "skipDismissScale"
+    )
 
     val shape = RoundedCornerShape(24.dp)
     // Il testo parte nero sul pill bianco e diventa bianco man mano che il riempimento
@@ -2839,46 +2854,82 @@ private fun SkipIntroOverlay(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .focusRequester(focusRequester)
-            .clip(shape)
-            .background(Color.White.copy(alpha = if (isFocused) 1f else 0.92f))
-            .drawBehind {
-                if (fillFraction > 0f) {
-                    drawRect(
-                        color = WaveStreamColors.Accent,
-                        size = Size(size.width * fillFraction, size.height)
-                    )
-                }
-            }
-            .border(
-                width = 2.dp,
-                color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
-                shape = shape
-            )
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-            .padding(horizontal = 24.dp, vertical = 12.dp)
     ) {
-        Icon(
-            imageVector = Icons.Default.SkipNext,
-            contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = label,
-            color = contentColor,
-            fontWeight = FontWeight.SemiBold
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                }
+                .focusRequester(focusRequester)
+                .clip(shape)
+                .background(Color.White.copy(alpha = if (isFocused) 1f else 0.92f))
+                .drawBehind {
+                    if (fillFraction > 0f) {
+                        drawRect(
+                            color = WaveStreamColors.Accent,
+                            size = Size(size.width * fillFraction, size.height)
+                        )
+                    }
+                }
+                .border(
+                    width = 2.dp,
+                    color = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
+                    shape = shape
+                )
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
+                )
+                .padding(horizontal = 24.dp, vertical = 12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.SkipNext,
+                contentDescription = null,
+                tint = contentColor,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = label,
+                color = contentColor,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        // "x" di annullamento: piccola, floating, accanto al pulsante.
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .graphicsLayer {
+                    scaleX = dismissScale
+                    scaleY = dismissScale
+                }
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = if (dismissFocused) 1f else 0.85f))
+                .border(
+                    width = 2.dp,
+                    color = if (dismissFocused) WaveStreamColors.Accent else Color.Transparent,
+                    shape = CircleShape
+                )
+                .clickable(
+                    interactionSource = dismissInteraction,
+                    indication = null,
+                    onClick = onDismiss
+                )
+                .padding(10.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Close,
+                contentDescription = "Ignora sigla",
+                tint = Color.Black,
+                modifier = Modifier.size(16.dp)
+            )
+        }
     }
 }
 

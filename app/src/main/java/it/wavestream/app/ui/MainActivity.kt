@@ -236,6 +236,7 @@ class MainActivity : FragmentActivity() {
     }
     
     @Inject lateinit var userPreferences: UserPreferences
+    @Inject lateinit var appUpdateManager: it.wavestream.app.update.AppUpdateManager
     @Inject lateinit var trailerManager: it.wavestream.app.util.TrailerManager
     @Inject lateinit var movieDao: MovieDao
     @Inject lateinit var movieSourceResolver: MovieSourceResolver
@@ -394,6 +395,23 @@ private fun MainActivityScreen(
     var heroListPicker by remember { mutableStateOf<HeroItem?>(null) }
     // Fase C0 — tendina categorie ancorata ai tab Film/Serie (null = chiusa)
     var navDropdown by remember { mutableStateOf<NavDropdownState?>(null) }
+
+    // ---- Banner "aggiornamento disponibile" ----
+    // Un solo controllo per avvio, non bloccante: se la rete o Firebase non rispondono
+    // il banner semplicemente non compare. `null` = nascosto.
+    var updateBanner by remember {
+        mutableStateOf<it.wavestream.app.update.UpdateInfo?>(null)
+    }
+    LaunchedEffect(Unit) {
+        val result = runCatching { activity.appUpdateManager.checkForUpdate() }.getOrNull()
+        val info = (result as? it.wavestream.app.update.UpdateCheckResult.UpdateAvailable)?.info
+            ?: return@LaunchedEffect
+        // "Non ora" salvato per questa versione: niente banner finché non ne esce una nuova.
+        val dismissedFor = runCatching {
+            activity.userPreferences.getUpdateBannerDismissedVersion()
+        }.getOrDefault(0)
+        if (info.forceUpdate || info.versionCode > dismissedFor) updateBanner = info
+    }
     
     // Handle back press to exit grid mode (See All view) - restore previous scroll position
     androidx.activity.compose.BackHandler(enabled = homeState.isGridMode) {
@@ -924,6 +942,48 @@ private fun MainActivityScreen(
                     startActivityWithTransition(Intent(context, target))
                 }
             )
+        }
+
+        // Banner "aggiornamento disponibile": ultimo figlio della Box radice, quindi sopra
+        // il contenuto (hero, rail, top bar) senza spostare nulla del layout.
+        updateBanner?.let { info ->
+            androidx.compose.animation.AnimatedVisibility(
+                visible = true,
+                enter = androidx.compose.animation.slideInVertically(initialOffsetY = { -it }) +
+                    androidx.compose.animation.fadeIn(),
+                exit = androidx.compose.animation.slideOutVertically(targetOffsetY = { -it }) +
+                    androidx.compose.animation.fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 72.dp, start = 24.dp, end = 24.dp)
+            ) {
+                it.wavestream.app.ui.components.UpdateAvailableBanner(
+                    versionName = info.versionName,
+                    canDismiss = !info.forceUpdate,
+                    onUpdateNow = {
+                        // Sezione "Aggiornamenti" delle Impostazioni, aperta direttamente.
+                        updateBanner = null
+                        startActivityWithTransition(
+                            Intent(context, it.wavestream.app.ui.settings.SettingsActivity::class.java)
+                                .putExtra(
+                                    it.wavestream.app.ui.settings.SettingsActivity.EXTRA_SECTION,
+                                    "updates"
+                                )
+                        )
+                    },
+                    onNotNow = {
+                        // "Non ora": non riproporlo per QUESTA versione (persistito).
+                        updateBanner = null
+                        coroutineScope.launch {
+                            activity.userPreferences.setUpdateBannerDismissedVersion(info.versionCode)
+                        }
+                    },
+                    onRemindLater = {
+                        // "Ricordamelo al prossimo avvio": sparisce solo da questa sessione.
+                        updateBanner = null
+                    }
+                )
+            }
         }
     }
 }

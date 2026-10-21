@@ -132,7 +132,19 @@ private fun epgStatusText(lastUpdate: Long): String {
 
 @AndroidEntryPoint
 class SettingsActivity : ComponentActivity() {
-    
+
+    companion object {
+        /** Extra per aprire direttamente una sezione (es. "updates" dal banner aggiornamento). */
+        const val EXTRA_SECTION = "extra_section"
+
+        /** Sezioni apribili dall'esterno: evita id sbagliati nell'URL dell'Intent. */
+        private val SETTINGS_SECTION_IDS = setOf(
+            "profile", "account", "playlist", "preferences", "player", "subtitles",
+            "movieending", "assistant", "epg", "appearance", "storage", "vpn",
+            "updates", "about"
+        )
+    }
+
     @Inject lateinit var userPreferences: UserPreferences
     @Inject lateinit var profileDao: ProfileDao
     @Inject lateinit var playlistDao: PlaylistDao
@@ -155,9 +167,17 @@ class SettingsActivity : ComponentActivity() {
     
     @Composable
     private fun SettingsScreenContent() {
-        var selectedMenuId by remember { mutableStateOf<String?>(null) }
+        val screenContext = androidx.compose.ui.platform.LocalContext.current
+        // Sezione aperta direttamente (es. banner aggiornamento → "updates"): letta
+        // dall'Intent una sola volta, prima di inizializzare lo stato.
+        val initialSection = remember {
+            (screenContext as? android.app.Activity)
+                ?.intent?.getStringExtra(EXTRA_SECTION)
+                ?.takeIf { it in SETTINGS_SECTION_IDS }
+        }
+        var selectedMenuId by remember { mutableStateOf<String?>(initialSection) }
         // Ultima sezione aperta: al ritorno all'hub il focus torna sulla sua tile.
-        var lastOpenedId by remember { mutableStateOf<String?>(null) }
+        var lastOpenedId by remember { mutableStateOf<String?>(initialSection) }
         
         // Focus requester for content area - to focus on first interactive element when section changes
         val contentFocusRequester = remember { FocusRequester() }
