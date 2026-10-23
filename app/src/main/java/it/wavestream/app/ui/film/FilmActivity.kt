@@ -36,29 +36,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.sqlite.db.SimpleSQLiteQuery
 import coil.compose.AsyncImage
+import it.wavestream.app.ui.util.requestFocusWhenReady
 import dagger.hilt.android.AndroidEntryPoint
 import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.dao.CategoryWithCount
 import it.wavestream.app.data.database.dao.MovieDao
-import it.wavestream.app.data.database.dao.WatchProgressDao
 import it.wavestream.app.data.database.entity.ContentType
-import it.wavestream.app.data.database.entity.ContinueWatchingItem
 import it.wavestream.app.data.database.entity.Movie
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.components.ContentQueryBuilder
 import it.wavestream.app.ui.components.ContentSortFilterBar
-import it.wavestream.app.ui.components.ContinueWatchingCarousel
 import it.wavestream.app.ui.components.SortFilterState
 import it.wavestream.app.ui.details.DetailsActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
@@ -80,7 +78,6 @@ class FilmActivity : ComponentActivity() {
     }
 
     @Inject lateinit var movieDao: MovieDao
-    @Inject lateinit var watchProgressDao: WatchProgressDao
     @Inject lateinit var contentCache: ContentCache
     @Inject lateinit var userPreferences: UserPreferences
     
@@ -107,7 +104,6 @@ class FilmActivity : ComponentActivity() {
         var hasMoreMovies by remember { mutableStateOf(false) }
         var totalMoviesCount by remember { mutableIntStateOf(0) }
         var showingAllMovies by remember { mutableStateOf(initialCategory == null) }
-        var continueWatchingItems by remember { mutableStateOf<List<ContinueWatchingItem>>(emptyList()) }
         var sortFilter by remember { mutableStateOf(SortFilterState()) }
         var reloadToken by remember { mutableIntStateOf(0) }
         // Debounce dei cambi filtri: evita un reload ad ogni click sullo stepper
@@ -162,50 +158,12 @@ class FilmActivity : ComponentActivity() {
             }
         }
 
-        // "Continua a guardare": sempre allineato all'ultimo film visto, profilo corrente.
-        suspend fun loadContinueWatchingItems() {
-            val profileId = userPreferences.getCurrentProfileId() ?: 1L
-            val progressList = watchProgressDao.getContinueWatchingMovies(profileId)
-            if (progressList.isEmpty()) {
-                continueWatchingItems = emptyList()
-                return
-            }
-            val ids = progressList.map { it.contentId }
-            val moviesById = movieDao.getMoviesByIds(ids).associateBy { it.id }
-            continueWatchingItems = progressList.mapNotNull { progress ->
-                val movie = moviesById[progress.contentId] ?: return@mapNotNull null
-                val remaining = ((progress.duration - progress.position) / 60000).toInt()
-                ContinueWatchingItem(
-                    watchProgressId = progress.id,
-                    contentType = ContentType.MOVIE,
-                    contentId = progress.contentId,
-                    title = movie.tmdbTitle ?: movie.name,
-                    posterUrl = movie.posterUrl,
-                    backdropUrl = movie.backdropUrl,
-                    position = progress.position,
-                    duration = progress.duration,
-                    progressPercent = progress.progressPercent,
-                    remainingMinutes = remaining.coerceAtLeast(1),
-                    lastWatchedAt = progress.lastWatchedAt
-                )
-            }
-        }
-
-        // Ricarica il carosello ad ogni ritorno sull'Activity (es. dal player).
-        val lifecycleOwner = LocalLifecycleOwner.current
-        DisposableEffect(lifecycleOwner) {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    lifecycleScope.launch { loadContinueWatchingItems() }
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-        }
+        // La riga "Continua a guardare" è stata RIMOSSA da questa schermata: vive solo nella
+        // Home, dove ha senso. Qui occupava ~270dp permanenti sopra la griglia e riduceva lo
+        // spazio dei poster. Non reintrodurla: se serve ripartire da un contenuto, c'è la Home.
 
         // Initial load
         LaunchedEffect(Unit) {
-            loadContinueWatchingItems()
 
             val cats = movieDao.getCategoriesWithCount()
             categories = cats
@@ -258,7 +216,6 @@ class FilmActivity : ComponentActivity() {
             sortFilter = sortFilter,
             availableCategories = categories.map { it.name },
             showCategoryFilter = showingAllMovies,
-            continueWatchingItems = continueWatchingItems,
             onSortFilterChange = { newState ->
                 if (newState != sortFilter) {
                     sortFilter = newState
@@ -279,16 +236,6 @@ class FilmActivity : ComponentActivity() {
             },
             onLoadMore = { loadMoreMovies() },
             onMovieClick = { openMovieDetails(it) },
-            onContinueWatchingClick = { item ->
-                val intent = Intent(this@FilmActivity, DetailsActivity::class.java).apply {
-                    putExtra("content_id", item.contentId)
-                    putExtra("content_type", "MOVIE")
-                    putExtra("title", item.title)
-                    putExtra("poster_url", item.posterUrl)
-                    putExtra("backdrop_url", item.backdropUrl)
-                }
-                it.wavestream.app.ui.theme.ActivityTransitions.start(this, intent)
-            },
             onBackClick = { finish() },
             gridState = gridState
         )
@@ -322,13 +269,11 @@ fun FilmScreen(
     sortFilter: SortFilterState = SortFilterState(),
     availableCategories: List<String> = emptyList(),
     showCategoryFilter: Boolean = false,
-    continueWatchingItems: List<ContinueWatchingItem> = emptyList(),
     onSortFilterChange: (SortFilterState) -> Unit = {},
     onCategorySelect: (String) -> Unit,
     onViewAllClick: () -> Unit,
     onMovieClick: (Movie) -> Unit,
     onLoadMore: () -> Unit = {},
-    onContinueWatchingClick: (ContinueWatchingItem) -> Unit = {},
     onBackClick: () -> Unit,
     gridState: androidx.tv.foundation.lazy.grid.TvLazyGridState =
         androidx.tv.foundation.lazy.grid.rememberTvLazyGridState()
@@ -417,33 +362,32 @@ fun FilmScreen(
                             )
                         }
                     } else {
-                    Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                    // Continue Watching Carousel (if items exist)
-                    if (continueWatchingItems.isNotEmpty()) {
-                        ContinueWatchingCarousel(
-                            title = "▶ Continua a guardare",
-                            items = continueWatchingItems,
-                            onItemClick = onContinueWatchingClick,
-                            modifier = Modifier.padding(bottom = 24.dp)
-                        )
+                    Box(modifier = Modifier.fillMaxSize()) {
+                    // Focus iniziale sulla PRIMA card quando si entra nella schermata: senza
+                    // questo il telecomando non ha un elemento attivo e il primo tasto D-pad
+                    // non fa nulla (o salta a un punto arbitrario). Il requester è agganciato
+                    // solo alla card con index == 0 e il focus viene richiesto dopo che la
+                    // griglia ha composto i suoi item (vedi requestFocusWhenReady).
+                    val firstCardFocus = remember { FocusRequester() }
+                    LaunchedEffect(movies.size) {
+                        if (movies.isNotEmpty()) firstCardFocus.requestFocusWhenReady()
                     }
-                    
-                    // Movie grid using TV Compose for proper D-pad navigation
                     val cascadeSeen = remember { mutableSetOf<String>() }
+                    // Movie grid using TV Compose for proper D-pad navigation
                     TvLazyVerticalGrid(
                         columns = TvGridCells.Adaptive(minSize = 150.dp),
                         state = gridState,
                         contentPadding = PaddingValues(top = 8.dp, bottom = 64.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalArrangement = Arrangement.spacedBy(24.dp),
-                        modifier = Modifier.weight(1f).fillMaxWidth()
+                        modifier = Modifier.fillMaxSize()
                     ) {
                         tvGridItemsIndexed(movies, key = { _, it -> it.id }) { index, movie ->
                             Box(modifier = Modifier.cascadeIn(cascadeSeen, "MOVIE_${movie.id}", index)) {
                                 MovieGridCard(
                                     movie = movie,
-                                    onClick = { onMovieClick(movie) }
+                                    onClick = { onMovieClick(movie) },
+                                    focusRequester = if (index == 0) firstCardFocus else null
                                 )
                             }
                         }
@@ -482,8 +426,7 @@ fun FilmScreen(
                             }
                         }
                     }
-                    }
-                    }
+                    // chiude il Box contenitore (griglia + overlay di caricamento)
                     if (isLoading) {
                         Box(
                             modifier = Modifier
@@ -494,11 +437,12 @@ fun FilmScreen(
                             CircularProgressIndicator(color = WaveStreamColors.Accent)
                         }
                     }
-                    }
+                    }   // chiude il Box contenitore (griglia + overlay di caricamento)
                 }
             }
         }
     }
+}
 
 /**
  * Movie card for grid
@@ -506,7 +450,8 @@ fun FilmScreen(
 @Composable
 private fun MovieGridCard(
     movie: Movie,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    focusRequester: FocusRequester? = null
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -520,13 +465,14 @@ private fun MovieGridCard(
         targetValue = if (isFocused) WaveStreamColors.Accent else Color.Transparent,
         label = "movieBorder"
     )
-    
+
     Column(
         modifier = Modifier
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
             }
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
             .fillMaxWidth()
             .focusable(interactionSource = interactionSource)
             .clickable(

@@ -62,6 +62,7 @@ import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
 import it.wavestream.app.ui.theme.WaveStreamTheme
+import it.wavestream.app.ui.util.requestFocusWhenReady
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -208,16 +209,13 @@ private fun AllCategoriesScreen(
         isLoading = false
     }
 
-    // Dopo il caricamento porta il focus sulla prima card (attende un paio di
-    // frame per essere sicuri che la griglia sia composta/focusable).
+    // Focus iniziale sulla prima card. Prima si usava un `delay(100)` che sperava nella
+    // composizione della griglia: su TV box lenti a volte non bastava e il focus non
+    // arrivava. `requestFocusWhenReady` ritenta sui frame successivi, quindi è affidabile
+    // su qualsiasi hardware e non lancia se il nodo non è ancora agganciato.
     LaunchedEffect(categories, isLoading) {
         if (!isLoading && categories.isNotEmpty()) {
-            kotlinx.coroutines.delay(100)
-            try {
-                firstCategoryFocusRequester.requestFocus()
-            } catch (_: Exception) {
-                // Requester non ancora collegato: nessun problema.
-            }
+            firstCategoryFocusRequester.requestFocusWhenReady()
         }
     }
     

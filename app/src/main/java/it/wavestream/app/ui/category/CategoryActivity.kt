@@ -22,6 +22,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -60,6 +62,7 @@ import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.WaveStreamTheme
 import it.wavestream.app.ui.tv.TvContentCard
+import it.wavestream.app.ui.util.requestFocusWhenReady
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -517,6 +520,13 @@ private fun CategoryScreen(
         } else if (viewMode == "grid" || !isLiveCategory) {
             // Grid view - use smaller cells for Live channels
             val gridMinSize = if (isLiveCategory) 100.dp else 150.dp
+            // Focus iniziale sul PRIMO elemento della griglia all'ingresso nella categoria:
+            // senza questo il telecomando parte senza elemento attivo e il primo tasto D-pad
+            // non fa nulla. Il requester è agganciato solo alla card index == 0.
+            val firstCardFocus = remember { FocusRequester() }
+            androidx.compose.runtime.LaunchedEffect(displayItems.size) {
+                if (displayItems.isNotEmpty()) firstCardFocus.requestFocusWhenReady()
+            }
             val cascadeSeen = remember { mutableSetOf<String>() }
             TvLazyVerticalGrid(
                 columns = TvGridCells.Adaptive(minSize = gridMinSize),
@@ -530,7 +540,12 @@ private fun CategoryScreen(
                     TvContentCard(
                         item = item,
                         onClick = { onItemClick(item) },
-                        modifier = Modifier.cascadeIn(cascadeSeen, "${item.contentType}_${item.id}", index),
+                        modifier = Modifier
+                            .cascadeIn(cascadeSeen, "${item.contentType}_${item.id}", index)
+                            .then(
+                                if (index == 0) Modifier.focusRequester(firstCardFocus)
+                                else Modifier
+                            ),
                         fillWidth = !isLiveCategory
                     )
                 }
