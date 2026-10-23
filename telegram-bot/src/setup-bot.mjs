@@ -107,10 +107,14 @@ async function main() {
 
 const invokedDirectly = process.argv[1] && process.argv[1].replace(/\\/g, '/').endsWith('/setup-bot.mjs')
 if (invokedDirectly) {
+  // process.exit() dopo fetch fa crashare Node ≥ 22 su Windows (assertion libuv
+  // `UV_HANDLE_CLOSING`): usare `exitCode` e lasciare che Node chiuda gli handle.
   main()
-    .then((code) => process.exit(code ?? 0))
+    .then((code) => {
+      process.exitCode = code ?? 0
+    })
     .catch((err) => {
       console.error('❌ Errore:', err?.description ?? err?.message ?? err)
-      process.exit(1)
+      process.exitCode = 1
     })
 }

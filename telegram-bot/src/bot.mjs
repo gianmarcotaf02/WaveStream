@@ -613,7 +613,10 @@ async function main() {
     bot.stop()
     store.flush()
     logger.close()
-    setTimeout(() => process.exit(0), 300)
+    // `exitCode` + chiusura naturale: process.exit() dopo fetch crasha su Node ≥ 22/Windows
+    setTimeout(() => {
+      process.exitCode = 0
+    }, 300)
   }
   process.on('SIGINT', () => shutdown('SIGINT'))
   process.on('SIGTERM', () => shutdown('SIGTERM'))

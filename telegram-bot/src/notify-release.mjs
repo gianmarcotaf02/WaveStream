@@ -173,11 +173,19 @@ async function main() {
 
 const invokedDirectly = process.argv[1] && process.argv[1].replace(/\\/g, '/').endsWith('/notify-release.mjs')
 if (invokedDirectly) {
+  // ⚠️ NON usare process.exit() qui. Node ≥ 22 su Windows va in crash con
+  // `Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), src\win\async.c` se il
+  // processo termina con un handle di fetch ancora in chiusura: l'exit code diventava
+  // 0xC0000409 (-1073740791) e la notifica risultava FALLITA anche se era stata
+  // inviata, con `state.json` già aggiornato. Assegnare `exitCode` lascia che Node
+  // chiuda gli handle in modo pulito e l'exit code resta quello vero (0/1/2).
   main()
-    .then((code) => process.exit(code ?? 0))
+    .then((code) => {
+      process.exitCode = code ?? 0
+    })
     .catch((err) => {
       console.error('❌ Errore:', err?.description ?? err?.message ?? err)
-      process.exit(1)
+      process.exitCode = 1
     })
 }
 
