@@ -304,6 +304,12 @@ class WaveStreamBot {
     this.#logger.info(`[bot] /start da ${user.id} (@${user.username ?? '—'}) — ${isNew ? 'nuovo iscritto' : 'già iscritto'}`)
     await this.#tg.sendMessage(chatId, buildWelcomeText(user, { botName: this.#cfg.botName, isNew }))
 
+    // L'ultima release arriva SOLO al nuovo iscritto, come secondo messaggio: il primo
+    // spiega come funziona il bot, il secondo gli dà subito qualcosa da installare.
+    // A chi è già iscritto e rifà /start (o dopo un /stop) non la rimandiamo: sarebbe
+    // lo stesso messaggio già in chat. Per rivederla c'è /latest.
+    if (!isNew) return
+
     const release = await this.#latestRelease().catch(() => null)
     if (release) {
       await this.#tg.sendMessage(chatId, buildReleaseText(release, { variant: 'info', botName: this.#cfg.botName }), {

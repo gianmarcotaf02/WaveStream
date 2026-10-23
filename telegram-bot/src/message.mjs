@@ -117,10 +117,22 @@ export function buildReleaseKeyboard(release, { allowUnsubscribe = true, botName
 export function buildWelcomeText(user, { botName = 'WaveStream', isNew = true } = {}) {
   const name = escapeHtml(user?.first_name ?? 'ciao')
   const heading = isNew ? `👋 <b>Ciao ${name}, benvenuto in ${escapeHtml(botName)}!</b>` : `👋 <b>Ciao ${name}!</b>`
+  // Il testo base è una costante: contiene un apostrofo ("l'APK") che dentro un template
+  // literal annidato romperebbe la sintassi, quindi vive fuori dalla ternaria.
+  const intro =
+    "Da adesso ricevi qui un messaggio <b>ogni volta che esce una nuova versione</b> dell'app: " +
+    'novità, fix e miglioramenti già scritti in italiano, con il pulsante per scaricare subito ' +
+    "l'APK aggiornato."
+  const introNew =
+    intro +
+    "\n\nQui sotto trovi <b>l'ultima versione disponibile</b>, così puoi installarla " +
+    'senza aspettare il prossimo aggiornamento.'
   return [
     heading,
     '',
-    `Da adesso ricevi qui un messaggio <b>ogni volta che esce una nuova versione</b> dell'app: novità, fix e miglioramenti già scritti in italiano, con il pulsante per scaricare subito l'APK aggiornato.`,
+    // Al nuovo iscritto anticipiamo il secondo messaggio con l'ultima release: senza
+    // questa riga la card successiva sembrerebbe arrivata per caso.
+    isNew ? introNew : intro,
     '',
     '📺 App: <b>WaveStream per Android TV</b>',
     '🔔 Stato: <b>notifiche attive</b>',
