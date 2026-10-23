@@ -15,6 +15,10 @@ class FilterBlockedContentUseCase @Inject constructor() {
     fun isBlocked(name: String, category: String?): Boolean {
         val nameLower = name.lowercase().trim()
         val catLower = category?.lowercase()?.trim() ?: ""
+        // Stringa originale (case preservato): serve per distinguere un tag di paese
+        // scritto MAIUSCOLO ("IL - Canale") dall'articolo italiano ("Il ...").
+        val nameOriginal = name.trim()
+        val catOriginal = category?.trim() ?: ""
 
         // 1. Blocca contenuti XXX/adulti (nome o categoria)
         val adultKeywords = listOf("xxx", "18+", "adult", "porno", "erotic", "porn")
@@ -29,7 +33,25 @@ class FilterBlockedContentUseCase @Inject constructor() {
             "cn", "tw", "hk", "il", "eg", "ma", "dz", "tn", "sa", "ae",
             "qa", "kw", "ir", "iq", "af", "ex-yu", "ex yu"
         )
+        // Codici ISO che sono ANCHE parole italiane comunissime: "IL" (articolo),
+        // "IN"/"AL"/"SE"/"NO"/"MA" (preposizioni/congiunzioni), "ES" (ex), ...
+        // Per questi un semplice spazio NON è un tag di paese: altrimenti sparivano
+        // dalla ricerca 1.500+ film italiani che iniziano con "Il " (es. "Il silenzio
+        // degli innocenti"), "In ", "Al ", "Se ", "No "... e 269 serie.
+        val ambiguousCodes = setOf(
+            "il", "in", "al", "se", "no", "ma", "es", "at", "be", "ca",
+            "id", "my", "ir", "ar", "gr", "pl", "ro", "hr", "rs", "sk",
+            "hu", "fi", "af", "eg", "ae", "qa", "kw", "tn", "dz", "sa"
+        )
         for (code in blockedCountryCodes) {
+            if (code in ambiguousCodes) {
+                // Serve un delimitatore vero da tag IPTV, non lo spazio: "IL: X",
+                // "IL - X", "IL|X", "(IL)" restano bloccati, "Il padrino" no.
+                val up = code.uppercase()
+                val prefixes = listOf("${up}-", "${up}:", "${up}|", "${up}_", "($up)", "[$up]")
+                if (prefixes.any { nameOriginal.startsWith(it) || catOriginal.startsWith(it) }) return true
+                continue
+            }
             if (nameLower.startsWith("$code ") ||
                 nameLower.startsWith("$code-") ||
                 nameLower.startsWith("$code:") ||
@@ -76,8 +98,10 @@ class FilterBlockedContentUseCase @Inject constructor() {
         val catUpper = category?.uppercase()?.trim() ?: ""
         if (upperCodes.any { nameUpper.startsWith(it) || catUpper.startsWith(it) || nameUpper.contains("| $it") || catUpper.contains("| $it") }) return true
 
-        // 5. Pattern "| XX" o "| XX |" nel nome
-        val pipePattern = Regex("\\|\\s*(${blockedCountryCodes.joinToString("|")})\\s*(\\||$)")
+        // 5. Pattern "| XX" o "| XX |" nel nome (solo codici NON ambigui: "... | Il"
+        // non è un tag di Israele)
+        val pipeCodes = blockedCountryCodes.filterNot { it in ambiguousCodes }
+        val pipePattern = Regex("\\|\\s*(${pipeCodes.joinToString("|")})\\s*(\\||$)")
         if (pipePattern.containsMatchIn(nameLower) || pipePattern.containsMatchIn(catLower)) return true
 
         return false

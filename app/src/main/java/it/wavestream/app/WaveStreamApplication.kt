@@ -6,7 +6,6 @@ import android.os.StrictMode
 import dagger.hilt.android.HiltAndroidApp
 import it.wavestream.app.data.cache.ContentCache
 import it.wavestream.app.data.database.DatabaseCheckpointManager
-import it.wavestream.app.data.database.dao.FtsSearchDao
 import it.wavestream.app.data.repository.FtsSearchRepository
 import it.wavestream.app.data.preferences.UserPreferences
 import it.wavestream.app.ui.theme.AccentColor
@@ -34,9 +33,6 @@ class WaveStreamApplication : Application() {
 
     @Inject
     lateinit var contentCache: ContentCache
-
-    @Inject
-    lateinit var ftsSearchDao: FtsSearchDao
 
     @Inject
     lateinit var ftsSearchRepository: FtsSearchRepository
@@ -107,63 +103,13 @@ class WaveStreamApplication : Application() {
         // TV power-off, not only onTrimMemory/onLowMemory callbacks
         checkpointManager.startPeriodicCheckpoint()
 
-        // FASE 4 — Backfill FTS5. Gira UNA VOLTA SOLA (vedi rebuildFtsIndexIfNeeded):
-        // prima rifaceva l'indice completo a ogni avvio, e su cataloghi grandi era
-        // la causa principale della lentezza della ricerca.
+        // FASE 4 — Backfill FTS5. Gira UNA VOLTA SOLA (vedi rebuildIfNeeded):
+        // l'indice viene riallineato solo se ci sono righe fuori posto, quindi
+        // l'avvio non ripaga mai un rebuild completo quando tutto è a posto.
         applicationScope.launch {
             try {
-                if (ftsSearchRepository.isFts5Available()) rebuildFtsIndexIfNeeded()
+                ftsSearchRepository.rebuildIfNeeded()
             } catch (_: Exception) { }
-        }
-    }
-
-    /**
-     * Backfill dell'indice FTS5 — eseguito SOLO se l'indice è disallineato.
-     *
-     * Prima [rebuildFtsIndex] veniva chiamato a ogni cold start: DELETE + INSERT
-     * completi su canali, film e serie. Su cataloghi grandi (decine di migliaia di
-     * righe) significa ri-indicizzare tutto il catalogo mentre l'utente sta già
-     * cercando: la ricerca risultava lenta e l'avvio peggiorava. Serviva invece solo
-     * come backfill una tantum dopo la migration 25→26 e dopo un import massivo di
-     * playlist.
-     *
-     * Ora si confrontano solo i conteggi: se l'indice è allineato alle sorgenti non
-     * si tocca nulla. È robusto sia se i trigger di sincronizzazione esistono, sia se
-     * l'indice è rimasto indietro.
-     */
-    private fun rebuildFtsIndexIfNeeded() {
-        val misaligned = listOf(
-            "fts_channel" to "channels",
-            "fts_movie" to "movies",
-            "fts_series" to "series"
-        ).any { (fts, source) -> countRows(fts) != countRows(source) }
-
-        if (misaligned) rebuildFtsIndex()
-    }
-
-    /** Conteggio rapido di una tabella (background thread: chiamato da applicationScope). */
-    private fun countRows(table: String): Int = runCatching {
-        ftsSearchDao.reindexAll(
-            androidx.sqlite.db.SimpleSQLiteQuery("SELECT count(*) FROM $table")
-        )
-    }.getOrDefault(0)
-
-    /**
-     * Ripopola l'indice FTS5 dalle tabelle sorgente.
-     * DELETE + INSERT completo: l'UPSERT (ON CONFLICT DO UPDATE) non è disponibile
-     * su SQLite < 3.24 (minSdk 26 → Android 8, SQLite 3.18). Eseguirsi in background.
-     */
-    private fun rebuildFtsIndex() {
-        val statements = listOf(
-            "DELETE FROM fts_channel",
-            "INSERT INTO fts_channel(rowid, name, category, logoUrl) SELECT id, name, COALESCE(category,''), COALESCE(logoUrl,'') FROM channels",
-            "DELETE FROM fts_movie",
-            "INSERT INTO fts_movie(rowid, name, category, logoUrl) SELECT id, name, COALESCE(category,''), COALESCE(logoUrl,'') FROM movies",
-            "DELETE FROM fts_series",
-            "INSERT INTO fts_series(rowid, name, category, logoUrl) SELECT id, name, COALESCE(category,''), COALESCE(logoUrl,'') FROM series"
-        )
-        statements.forEach { sql ->
-            ftsSearchDao.reindexAll(androidx.sqlite.db.SimpleSQLiteQuery(sql))
         }
     }
 

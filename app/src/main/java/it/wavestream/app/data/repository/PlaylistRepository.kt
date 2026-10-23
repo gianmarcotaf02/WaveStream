@@ -43,7 +43,8 @@ class PlaylistRepository @Inject constructor(
     private val contentCache: ContentCache,
     private val tmdbService: TMDBService,
     private val movieUnificationService: MovieUnificationService,
-    private val watchProgressDao: WatchProgressDao
+    private val watchProgressDao: WatchProgressDao,
+    private val ftsSearchRepository: FtsSearchRepository
 ) {
     companion object {
         private const val TAG = "PlaylistRepo"
@@ -215,6 +216,12 @@ class PlaylistRepository @Inject constructor(
         // Content may have changed (M3U re-inserts with new ids, Xtream removes gone items):
         // the home session cache would keep showing stale ids for up to 10 days.
         contentCache.clearHomeSessionData()
+
+        // Riallinea l'indice di ricerca dopo il refresh: gli INSERT OR REPLACE e le
+        // cancellazioni massively possono lasciare qualche riga fuori dall'indice
+        // FTS (film visibile in categoria ma introvabile nella ricerca).
+        runCatching { ftsSearchRepository.rebuildIfNeeded() }
+            .onFailure { Log.w(TAG, "FTS realignment after refresh failed", it) }
     }
 
     /**
