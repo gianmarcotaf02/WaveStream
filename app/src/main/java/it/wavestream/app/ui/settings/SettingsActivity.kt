@@ -68,6 +68,8 @@ import it.wavestream.app.data.repository.PlaylistRepository
 import it.wavestream.app.ui.loading.LoadingActivity
 import it.wavestream.app.ui.MainActivity
 import it.wavestream.app.ui.theme.WaveStreamColors
+import it.wavestream.app.ui.components.GlassDropdownMenuItem
+import it.wavestream.app.ui.components.GlassDropdownMenu
 import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.AppAnimations
@@ -3224,18 +3226,12 @@ private fun SettingsDropdown(
                     )
                 }
             }
-            // Passo 3 — anche il menu che si apre è in vetro: contenitore translucido
-            // + bordo gradiente, e voci custom con alone di focus (MenuItemColors di
-            // Material3 non espone uno stato focus, quindi la voce selezionata col D-pad
-            // non era evidenziata).
-            DropdownMenu(
+            // Il menu che si apre usa lo stesso vetro delle righe: contenitore
+            // translucido + bordo gradiente, e voci con alone di focus (i MenuItemColors
+            // di Material3 non espongono uno stato focus).
+            GlassDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
-                shape = RoundedCornerShape(14.dp),
-                containerColor = WaveStreamColors.SurfaceDark.copy(alpha = 0.94f),
-                tonalElevation = 0.dp,
-                shadowElevation = 12.dp,
-                border = BorderStroke(1.dp, GlassTokens.StrokeGradient)
+                onDismissRequest = { expanded = false }
             ) {
                 options.forEach { (key, display) ->
                     GlassDropdownMenuItem(
@@ -3248,61 +3244,6 @@ private fun SettingsDropdown(
                     )
                 }
             }
-        }
-    }
-}
-
-/**
- * Voce di un menu a tendina in stile vetro, con alone di focus visibile.
- * Stessa ricetta delle righe ([SettingsDropdown]): fill animato + testo che si accende.
- */
-@Composable
-private fun GlassDropdownMenuItem(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-
-    val background by animateColorAsState(
-        targetValue = when {
-            isFocused -> Color.White.copy(alpha = 0.16f)
-            isSelected -> WaveStreamColors.Accent.copy(alpha = 0.18f)
-            else -> Color.Transparent
-        },
-        animationSpec = AppAnimations.SpringCardFocusColor,
-        label = "menuItemBg"
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(background)
-            .focusable(interactionSource = interactionSource)
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            )
-            .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (isFocused || isSelected) WaveStreamColors.TextPrimary else WaveStreamColors.TextSecondary,
-            fontWeight = if (isFocused || isSelected) FontWeight.SemiBold else FontWeight.Normal
-        )
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = WaveStreamColors.Accent,
-                modifier = Modifier.size(18.dp)
-            )
         }
     }
 }

@@ -944,46 +944,36 @@ private fun MainActivityScreen(
             )
         }
 
-        // Banner "aggiornamento disponibile": ultimo figlio della Box radice, quindi sopra
-        // il contenuto (hero, rail, top bar) senza spostare nulla del layout.
+        // Finestra popup "aggiornamento disponibile": non più un banner incollato sopra
+        // l'hero, ma un Dialog centrato a schermo grande con il changelog della release.
         updateBanner?.let { info ->
-            androidx.compose.animation.AnimatedVisibility(
-                visible = true,
-                enter = androidx.compose.animation.slideInVertically(initialOffsetY = { -it }) +
-                    androidx.compose.animation.fadeIn(),
-                exit = androidx.compose.animation.slideOutVertically(targetOffsetY = { -it }) +
-                    androidx.compose.animation.fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .padding(top = 72.dp, start = 24.dp, end = 24.dp)
-            ) {
-                it.wavestream.app.ui.components.UpdateAvailableBanner(
-                    versionName = info.versionName,
-                    canDismiss = !info.forceUpdate,
-                    onUpdateNow = {
-                        // Sezione "Aggiornamenti" delle Impostazioni, aperta direttamente.
-                        updateBanner = null
-                        startActivityWithTransition(
-                            Intent(context, it.wavestream.app.ui.settings.SettingsActivity::class.java)
-                                .putExtra(
-                                    it.wavestream.app.ui.settings.SettingsActivity.EXTRA_SECTION,
-                                    "updates"
-                                )
-                        )
-                    },
-                    onNotNow = {
-                        // "Non ora": non riproporlo per QUESTA versione (persistito).
-                        updateBanner = null
-                        coroutineScope.launch {
-                            activity.userPreferences.setUpdateBannerDismissedVersion(info.versionCode)
-                        }
-                    },
-                    onRemindLater = {
-                        // "Ricordamelo al prossimo avvio": sparisce solo da questa sessione.
-                        updateBanner = null
+            it.wavestream.app.ui.components.UpdateAvailableDialog(
+                versionName = info.versionName,
+                changelog = info.changelog,
+                forceUpdate = info.forceUpdate,
+                onUpdateNow = {
+                    // Sezione "Aggiornamenti" delle Impostazioni, aperta direttamente.
+                    updateBanner = null
+                    startActivityWithTransition(
+                        Intent(context, it.wavestream.app.ui.settings.SettingsActivity::class.java)
+                            .putExtra(
+                                it.wavestream.app.ui.settings.SettingsActivity.EXTRA_SECTION,
+                                "updates"
+                            )
+                    )
+                },
+                onNotNow = {
+                    // "Non ora": non riproporlo per QUESTA versione (persistito).
+                    updateBanner = null
+                    coroutineScope.launch {
+                        activity.userPreferences.setUpdateBannerDismissedVersion(info.versionCode)
                     }
-                )
-            }
+                },
+                onRemindLater = {
+                    // "Ricordamelo al prossimo avvio": sparisce solo da questa sessione.
+                    updateBanner = null
+                }
+            )
         }
     }
 }

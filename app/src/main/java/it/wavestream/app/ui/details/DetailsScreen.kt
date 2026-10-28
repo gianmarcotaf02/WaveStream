@@ -65,6 +65,8 @@ import it.wavestream.app.ui.theme.GlassSurface
 import it.wavestream.app.ui.components.EditListButton
 import it.wavestream.app.ui.components.AgeRatingBadge
 import it.wavestream.app.ui.components.GlassMenuRow
+import it.wavestream.app.ui.components.GlassDropdownMenu
+import it.wavestream.app.ui.components.GlassDropdownMenuItem
 import it.wavestream.app.ui.theme.GlassTokens
 import it.wavestream.app.ui.theme.WaveStreamColors
 import it.wavestream.app.ui.theme.AppAnimations
@@ -2671,30 +2673,22 @@ private fun EpisodesSectionHeader(
                     )
                 }
 
-                DropdownMenu(
+                // Menu del selettore in stile vetro (stesso componente di Impostazioni):
+                // il DropdownMenu Material3 di default disegnava un pannello opaco con un
+                // rettangolo di stato squadrato sulla voce focalizzata, fuori palette.
+                GlassDropdownMenu(
                     expanded = dropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false },
-                    // Tema esplicito: senza tonalElevation la superficie M3 prende una
-                    // tinta bluastra fuori palette; qui si allinea al vetro scuro dell'app.
-                    shape = RoundedCornerShape(14.dp),
-                    containerColor = WaveStreamColors.BackgroundSecondary,
-                    tonalElevation = 0.dp,
-                    shadowElevation = 8.dp,
-                    border = BorderStroke(1.dp, WaveStreamColors.SurfaceBorderStrong)
+                    onDismissRequest = { dropdownExpanded = false }
                 ) {
                     seasons.forEach { season ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(R.string.season_number, season),
-                                    color = if (season == selectedSeason) WaveStreamColors.Accent else WaveStreamColors.TextPrimary,
-                                    fontWeight = if (season == selectedSeason) FontWeight.Bold else FontWeight.Normal
-                                )
-                            },
+                        GlassDropdownMenuItem(
+                            text = stringResource(R.string.season_number, season),
+                            isSelected = season == selectedSeason,
                             onClick = {
                                 onSeasonSelected(season)
                                 dropdownExpanded = false
-                            }
+                            },
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }

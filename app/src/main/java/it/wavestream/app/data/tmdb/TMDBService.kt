@@ -1864,13 +1864,164 @@ class TMDBService @Inject constructor(
         val tmdbId = series.tmdbId ?: return@withContext
 
         try {
-            val existingSeasons = episodeDao.getSeasonNumbers(series.id)
-            for (season in existingSeasons) {
+            val localsBySeason = episodeDao.getEpisodesBySeriesList(series.id)
+                .groupBy { it.seasonNumber }
+            if (localsBySeason.isEmpty()) return@withContext
+
+            // I provider IPTV dividono spesso una serie in "parti" che TMDB organizza
+            // diversamente (es. Lupin: provider 4 stagioni da 5/5/7/8 episodi, TMDB 3 da
+            // 10/7/8). In quel caso la stagione locale N NON è la stagione TMDB N: la
+            // stagione locale 4 non esiste su TMDB (404) e le 2 e 3 prenderebbero i
+            // titoli/trame di episodi sbagliati. Quando la divisione non coincide si
+            // allinea per POSIZIONE (episodio assoluto nella serie) invece che per numero.
+            val positional = buildPositionalEpisodeMapping(series, tmdbId, localsBySeason)
+            if (positional != null) {
+                applyPositionalMapping(tmdbId, positional)
+                return@withContext
+            }
+
+            for (season in localsBySeason.keys.sorted()) {
                 fetchAndUpdateSeasonEpisodes(series, tmdbId, season)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error enriching episodes for series: ${series.name}", e)
         }
+    }
+
+    /** Stagione TMDB con il suo numero di episodi (dal dettaglio serie). */
+    private data class TmdbSeasonInfo(val number: Int, val episodeCount: Int)
+
+    /**
+     * Episodi TMDB di una stagione, indicizzati per numero di episodio.
+     * `null` se la stagione non esiste su TMDB o la chiamata fallisce.
+     */
+    private fun fetchSeasonEpisodes(tmdbId: Int, seasonNumber: Int): Map<Int, JSONObject>? {
+        return try {
+            val url = "$BASE_URL/tv/$tmdbId/season/$seasonNumber?api_key=$API_KEY&language=$LANGUAGE"
+            val array = JSONObject(fetchUrl(url)).optJSONArray("episodes") ?: return null
+            val episodes = LinkedHashMap<Int, JSONObject>()
+            for (i in 0 until array.length()) {
+                val ep = array.optJSONObject(i) ?: continue
+                val number = ep.optInt("episode_number", 0)
+                if (number > 0) episodes[number] = ep
+            }
+            episodes.ifEmpty { null }
+        } catch (e: Exception) {
+            Log.w(TAG, "Stagione $seasonNumber non disponibile su TMDB per tv/$tmdbId: ${e.message}")
+            null
+        }
+    }
+
+    /** Elenco delle stagioni TMDB (numero + episodi) dal dettaglio serie. */
+    private fun fetchTmdbSeasonList(tmdbId: Int): List<TmdbSeasonInfo>? {
+        return try {
+            val url = "$BASE_URL/tv/$tmdbId?api_key=$API_KEY&language=$LANGUAGE"
+            val array = JSONObject(fetchUrl(url)).optJSONArray("seasons") ?: return null
+            val seasons = ArrayList<TmdbSeasonInfo>(array.length())
+            for (i in 0 until array.length()) {
+                val season = array.optJSONObject(i) ?: continue
+                val number = season.optInt("season_number", -1)
+                val count = season.optInt("episode_count", 0)
+                // La stagione 0 (speciali) non partecipa all'allineamento posizionale.
+                if (number > 0 && count > 0) seasons.add(TmdbSeasonInfo(number, count))
+            }
+            seasons.sortedBy { it.number }.ifEmpty { null }
+        } catch (e: Exception) {
+            Log.w(TAG, "Elenco stagioni TMDB non disponibile per tv/$tmdbId: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * Mappa gli episodi locali sulla coppia (stagione TMDB, episodio TMDB) allineata per
+     * posizione assoluta nella serie.
+     *
+     * Restituisce `null` quando la divisione in stagioni coincide con quella locale: in
+     * quel caso resta valido il mapping diretto per numero di stagione (nessuna chiamata
+     * extra a TMDB). L'allineamento posizionale viene applicato solo se il numero totale
+     * di episodi combacia: è l'unico caso in cui è affidabile (stesso contenuto diviso
+     * diversamente), mentre su una serie in corso o incompleta i due totali divergono e
+     * si preferisce il comportamento precedente.
+     */
+    private fun buildPositionalEpisodeMapping(
+        series: Series,
+        tmdbId: Int,
+        localsBySeason: Map<Int, List<Episode>>
+    ): List<Pair<Episode, Pair<Int, Int>>>? {
+        val localSeasons = localsBySeason.keys.filter { it > 0 }.sorted()
+        if (localSeasons.isEmpty()) return null
+
+        val localOrdered = localSeasons.flatMap { season ->
+            localsBySeason.getValue(season).sortedBy { it.episodeNumber }
+        }
+        val localTotal = localOrdered.size
+
+        val tmdbSeasonCount = series.tmdbNumberOfSeasons
+        val tmdbTotalStored = series.tmdbNumberOfEpisodes
+        val numbersAligned = tmdbSeasonCount != null && localSeasons == (1..tmdbSeasonCount).toList()
+
+        // Caso normale: stessa numerazione e stesso numero di episodi, nessun bisogno
+        // di chiedere il dettaglio serie a TMDB.
+        if (numbersAligned && tmdbTotalStored == localTotal) return null
+
+        val tmdbSeasons = fetchTmdbSeasonList(tmdbId) ?: return null
+        if (tmdbSeasons.sumOf { it.episodeCount } != localTotal) return null
+
+        val localSplit = localSeasons.map { TmdbSeasonInfo(it, localsBySeason.getValue(it).size) }
+        if (tmdbSeasons == localSplit) return null
+
+        val tmdbOrdered = tmdbSeasons.flatMap { info -> (1..info.episodeCount).map { info.number to it } }
+        if (tmdbOrdered.size != localOrdered.size) return null
+
+        Log.d(
+            TAG,
+            "Allineamento posizionale per '${series.name}': locale=$localSplit, tmdb=$tmdbSeasons"
+        )
+        return localOrdered.zip(tmdbOrdered)
+    }
+
+    /** Applica un mapping posizionale già calcolato, una sola chiamata per stagione TMDB. */
+    private suspend fun applyPositionalMapping(
+        tmdbId: Int,
+        mapping: List<Pair<Episode, Pair<Int, Int>>>
+    ) {
+        val seasonCache = HashMap<Int, Map<Int, JSONObject>?>()
+        for ((localEp, target) in mapping) {
+            val tmdbSeason = target.first
+            if (!seasonCache.containsKey(tmdbSeason)) {
+                seasonCache[tmdbSeason] = fetchSeasonEpisodes(tmdbId, tmdbSeason)
+            }
+            val tmdbEpisodes = seasonCache[tmdbSeason] ?: continue
+            val tmdbEp = tmdbEpisodes[target.second] ?: continue
+            val newId = tmdbEp.optInt("id", 0).takeIf { it > 0 }
+            // Già allineato (id TMDB corretto e trama presente): niente scritture inutili.
+            if (localEp.tmdbEpisodeId != null && localEp.tmdbEpisodeId == newId &&
+                !localEp.tmdbOverview.isNullOrBlank()
+            ) {
+                continue
+            }
+            episodeDao.update(localEp.withTmdbEpisode(tmdbEp))
+        }
+    }
+
+    /** Copia l'episodio locale con i campi TMDB della riga JSON (quelli mancanti restano). */
+    private fun Episode.withTmdbEpisode(tmdbEp: JSONObject): Episode {
+        val tmdbName = tmdbEp.optString("name", "").takeIf { it.isNotBlank() }
+        val tmdbOverview = tmdbEp.optString("overview", "").takeIf { it.isNotBlank() }
+        val tmdbStillPath = tmdbEp.optString("still_path", "").takeIf { it.isNotBlank() }
+        val tmdbAirDate = tmdbEp.optString("air_date", "").takeIf { it.isNotBlank() }
+        val tmdbVoteAverage = tmdbEp.optDouble("vote_average", 0.0).toFloat().takeIf { it > 0f }
+        val tmdbRuntime = tmdbEp.optInt("runtime", 0).takeIf { it > 0 }
+        val tmdbEpisodeId = tmdbEp.optInt("id", 0).takeIf { it > 0 }
+        return copy(
+            tmdbEpisodeId = tmdbEpisodeId,
+            tmdbName = tmdbName ?: this.tmdbName,
+            tmdbOverview = tmdbOverview ?: this.tmdbOverview,
+            tmdbStillPath = tmdbStillPath ?: this.tmdbStillPath,
+            tmdbAirDate = tmdbAirDate ?: this.tmdbAirDate,
+            tmdbVoteAverage = tmdbVoteAverage ?: this.tmdbVoteAverage,
+            tmdbRuntime = tmdbRuntime ?: this.tmdbRuntime
+        )
     }
 
     private suspend fun fetchAndUpdateSeasonEpisodes(series: Series, tmdbId: Int, seasonNumber: Int) {
@@ -1881,35 +2032,10 @@ class TMDBService @Inject constructor(
             return
         }
 
-        val seasonUrl = "$BASE_URL/tv/$tmdbId/season/$seasonNumber?api_key=$API_KEY&language=$LANGUAGE"
-        val seasonResponse = fetchUrl(seasonUrl)
-        val seasonJson = JSONObject(seasonResponse)
-        val episodesArray = seasonJson.optJSONArray("episodes") ?: return
-
-        for (i in 0 until episodesArray.length()) {
-            val tmdbEp = episodesArray.getJSONObject(i)
-            val epNumber = tmdbEp.optInt("episode_number", 0)
-            if (epNumber <= 0) continue
-
-            val localEp = episodeDao.getEpisode(series.id, seasonNumber, epNumber) ?: continue
-
-            val tmdbName = tmdbEp.optString("name", "").takeIf { it.isNotBlank() }
-            val tmdbOverview = tmdbEp.optString("overview", "").takeIf { it.isNotBlank() }
-            val tmdbStillPath = tmdbEp.optString("still_path", "").takeIf { it.isNotBlank() }
-            val tmdbAirDate = tmdbEp.optString("air_date", "").takeIf { it.isNotBlank() }
-            val tmdbVoteAverage = tmdbEp.optDouble("vote_average", 0.0).toFloat().takeIf { it > 0f }
-            val tmdbRuntime = tmdbEp.optInt("runtime", 0).takeIf { it > 0 }
-            val tmdbEpisodeId = tmdbEp.optInt("id", 0).takeIf { it > 0 }
-
-            episodeDao.update(localEp.copy(
-                tmdbEpisodeId = tmdbEpisodeId,
-                tmdbName = tmdbName ?: localEp.tmdbName,
-                tmdbOverview = tmdbOverview ?: localEp.tmdbOverview,
-                tmdbStillPath = tmdbStillPath ?: localEp.tmdbStillPath,
-                tmdbAirDate = tmdbAirDate ?: localEp.tmdbAirDate,
-                tmdbVoteAverage = tmdbVoteAverage ?: localEp.tmdbVoteAverage,
-                tmdbRuntime = tmdbRuntime ?: localEp.tmdbRuntime
-            ))
+        val tmdbEpisodes = fetchSeasonEpisodes(tmdbId, seasonNumber) ?: return
+        for (localEp in localEpisodes) {
+            val tmdbEp = tmdbEpisodes[localEp.episodeNumber] ?: continue
+            episodeDao.update(localEp.withTmdbEpisode(tmdbEp))
         }
     }
 
