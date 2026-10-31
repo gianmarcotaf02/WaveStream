@@ -155,12 +155,40 @@ async function main() {
     return ok ? 0 : 1
   }
 
+  // CLAIM PRIMA DELL'INVIO: il bot in polling (o un secondo invio manuale) legge
+  // lo stato subito dopo il fetch della release e la trova già annunciata, così
+  // non parte un secondo messaggio. Prima lo stato veniva scritto DOPO il
+  // broadcast: nella finestra di 2-4 s il bot avviava il suo annuncio e gli
+  // iscritti ricevevano due notifiche identiche (successo con la 1.1.21).
+  const previousAnnounced = {
+    tag: state.lastAnnouncedTag ?? null,
+    at: state.lastAnnouncedAt ?? null
+  }
+  if (release) {
+    store.setState({
+      lastAnnouncedTag: release.tag,
+      lastAnnouncedAt: new Date().toISOString(),
+      lastSeenTag: release.tag
+    })
+    store.flush()
+  }
+
   const summary = await broadcastToSubscribers(tg, store, cfg, { release, text, keyboardFor, logger })
   if (release) await sendReleaseToChannel(tg, cfg, release, { logger })
 
-  if (release) {
-    store.setState({ lastAnnouncedTag: release.tag, lastAnnouncedAt: new Date().toISOString(), lastSeenTag: release.tag })
+  // Nessun destinatario raggiunto: il claim viene annullato, così la release può
+  // essere annunciata davvero alla prossima esecuzione (o dal bot).
+  if (release && summary.total > 0 && summary.sent === 0) {
+    store.setState({
+      lastAnnouncedTag: previousAnnounced.tag,
+      lastAnnouncedAt: previousAnnounced.at,
+      lastSeenTag: release.tag
+    })
+    store.flush()
+    logger.warn('[notify] nessun invio riuscito: claim annullato, la release risulta ancora da annunciare')
+    return 1
   }
+
   store.flush()
 
   if (options.values['--json']) {

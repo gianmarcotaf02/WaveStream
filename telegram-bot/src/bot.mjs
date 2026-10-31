@@ -514,6 +514,17 @@ class WaveStreamBot {
       return { release, announced: false, reason: 'già annunciata' }
     }
 
+    // Rilettura IMMEDIATA prima di inviare: `notify-release.mjs` (pipeline di
+    // release) scrive il claim su `lastAnnouncedTag` prima del broadcast. Tra il
+    // fetch della release e questo punto passano 1-3 s: senza questo controllo
+    // entrambi i processi annunciavano la stessa versione (doppia notifica,
+    // successo con la 1.1.21).
+    const claimed = this.#store.getState()
+    if (!force && claimed.lastAnnouncedTag === release.tag) {
+      logger.info(`[bot] ${release.tag} annunciata da un altro processo nel frattempo: nessun invio`)
+      return { release, announced: false, reason: 'claim concorrente' }
+    }
+
     const summary = await this.#runBroadcast({ release, updateBaseline: true, context: 'auto' })
     return { release, announced: true, summary }
   }
