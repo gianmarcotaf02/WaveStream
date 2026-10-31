@@ -693,11 +693,13 @@ private fun MainActivityScreen(
     Box(modifier = Modifier.fillMaxSize()) {
 
         if (ambientHeroActive && ambientHero != null) {
+            // La lista completa (non il singolo match): durante il Crossfade il
+            // backdrop di ogni slide deve risolvere LA PROPRIA partita, altrimenti
+            // la slide partita in uscita non trova il match e finisce sul ramo
+            // "poster" (stemma croppato a tutto schermo).
             HeroAmbientBackdrop(
                 hero = ambientHero,
-                serieAMatch = homeState.serieAMatches.firstOrNull {
-                    it.id == ambientHero.serieAMatchId
-                }
+                serieAMatches = homeState.serieAMatches
             )
         }
 
@@ -871,8 +873,9 @@ private fun MainActivityScreen(
                 match = picker.match,
                 channels = picker.channels,
                 isLoading = picker.isLoading,
-                tabellinoState = homeState.serieATabellino,
+                isSearching = picker.isSearching,
                 epg = picker.epg,
+                tabellinoState = homeState.serieATabellino,
                 onDismiss = { homeViewModel.dismissSerieAChannelPicker() },
                 onChannelClick = { channel ->
                     // Niente dismiss: il dialog resta aperto sotto il player,
@@ -993,7 +996,7 @@ private fun MainActivityScreen(
 @Composable
 private fun HeroAmbientBackdrop(
     hero: HeroItem,
-    serieAMatch: SerieAMatchEntity?
+    serieAMatches: List<SerieAMatchEntity>
 ) {
     // Ken Burns "idle": zoom + drift lentissimi sull'immagine di sfondo (solo
     // graphicsLayer, nessun costo di layout). Disattivato con motion ridotto.
@@ -1023,22 +1026,47 @@ private fun HeroAmbientBackdrop(
         animationSpec = tween(it.wavestream.app.ui.theme.AppAnimations.HeroCrossfadeMs),
         label = "heroAmbientBackdrop"
     ) { current ->
+        val isMatchHero = current.contentType == "SERIEA_MATCH"
+        // La partita si risolve PER LA SLIDE CORRENTE del Crossfade: usando il
+        // match dell'hero "nuovo" la slide partita in uscita non trovava la sua
+        // partita e cadeva sul poster (stemma di casa croppato a tutto schermo).
+        val match = if (isMatchHero) {
+            serieAMatches.firstOrNull { it.id == current.serieAMatchId }
+        } else {
+            null
+        }
+        // Ken Burns solo su un vero backdrop wide. Su uno stemma/locandina (poster
+        // croppato) o sul backdrop partita (Canvas con i due stemmi) lo zoom si
+        // vede come "il logo si gonfia": effetto da evitare.
+        val animateKenBurns = !reducedMotion && !isMatchHero && current.backdropUrl != null
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    scaleX = kbScale
-                    scaleY = kbScale
-                    translationX = kbDriftX
+                    if (animateKenBurns) {
+                        scaleX = kbScale
+                        scaleY = kbScale
+                        translationX = kbDriftX
+                    }
                 }
         ) {
-            if (current.contentType == "SERIEA_MATCH" && serieAMatch != null) {
-                SerieAMatchHeroBackdrop(
-                    match = serieAMatch,
+            when {
+                match != null -> SerieAMatchHeroBackdrop(
+                    match = match,
                     modifier = Modifier.fillMaxSize()
                 )
-            } else {
-                AsyncImage(
+                // Partita non (ancora) disponibile: fondo neutro, MAI lo stemma
+                // croppato a tutto schermo.
+                isMatchHero -> Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(Color(0xFF0B1020), Color(0xFF05070D))
+                            )
+                        )
+                )
+                else -> AsyncImage(
                     model = current.backdropUrl ?: current.posterUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,

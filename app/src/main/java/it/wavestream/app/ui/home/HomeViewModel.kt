@@ -75,13 +75,6 @@ class HomeViewModel @Inject constructor(
         /** DEBUG: mostra l'hero partita sempre (partita più vicina, anche fuori finestra). */
         private const val FORCE_SERIEA_HERO_DEBUG = false
 
-        /** Oltre questa età la cache squadra→canali del picker Serie A viene
-         *  ricostruita con una scansione completa della playlist. TTL corto (2 min):
-         *  la lista canali deve riflettere la playlist attuale già alla prima
-         *  apertura dopo un aggiornamento, senza aspettare ore. Il valore serve solo
-         *  a non ri-scansionare se l'utente apre/chiude il picker più volte di fila. */
-        private const val SERIE_A_CHANNEL_CACHE_TTL_MS = 2 * 60 * 1000L
-
         /**
          * Righe che restano anche se contengono contenuti "visti":
          *  - "Visti di recente" → è per definizione la lista dei contenuti visti;
@@ -233,6 +226,9 @@ class HomeViewModel @Inject constructor(
     private var serieAUpcoming: List<SerieAMatchEntity> = emptyList()
     private var serieAPollingJob: Job? = null
 
+    /** Job della ricognizione canali in corso per il picker Serie A. */
+    private var serieAChannelPickerJob: Job? = null
+
     /**
      * Sync del calendario + osservazione dei match vicino alla finestra hero.
      * Un ticker ogni 30s rivaluta la finestra (kickoff - 30 min → + 2h) così
@@ -360,57 +356,88 @@ class HomeViewModel @Inject constructor(
             .firstOrNull { it.id == matchId }
             ?: _uiState.value.serieAMatch
             ?: return
+        // Una sola ricognizione per volta: senza questo, la scansione lenta della
+        // partita aperta prima può sovrascrivere la lista di quella appena aperta.
+        serieAChannelPickerJob?.cancel()
         _uiState.update {
             it.copy(
-                serieAChannelPicker = SerieAChannelPickerState(match, emptyList(), isLoading = true),
+                serieAChannelPicker = SerieAChannelPickerState(
+                    match = match,
+                    channels = emptyList(),
+                    isLoading = true,
+                    isSearching = true
+                ),
                 serieATabellino = SerieATabellinoState(loading = true)
             )
         }
-        viewModelScope.launch {
-            // 1. Canali salvati (istantanei, mapping persistente per squadra)
+        serieAChannelPickerJob = viewModelScope.launch {
+            // 1. Mapping salvato + canali evento DAZN 1: lettura dal DB, immediata.
             val saved = runCatching { serieAMatchRepository.getSavedChannelsForMatch(match) }
-                .getOrDefault(emptyList())
-            if (saved.isNotEmpty()) {
+                .onFailure { Log.e("SerieA", "getSavedChannelsForMatch failed", it) }
+                .getOrNull()
+            val savedChannels = saved?.channels ?: emptyList()
+            // La cache contiene SOLO i 4 canali evento DAZN 1? Allora non si mostra
+            // nulla: meglio "Ricerca canali in corso…" di una lista di fallback che
+            // sembra il risultato finale (era il "trova solo i canali DAZN KALI").
+            val hasTeamChannels = (saved?.teamChannels ?: 0) > 0
+
+            // 2. Ricerca aggiornata SOLO per le squadre la cui cache non è
+            //    utilizzabile (mai cercata, playlist cambiata, TTL scaduto): una
+            //    squadra già in cache non viene ricercata, quindi le partite
+            //    successive non richiedono nessuna scansione. Parte subito, in
+            //    parallelo all'EPG (prima l'EPG del mapping veniva atteso e la
+            //    ricerca vera partiva solo dopo).
+            val scan = if (saved?.needsScan == true) async { scanChannelsForMatch(match) } else null
+
+            if (hasTeamChannels && savedChannels.isNotEmpty()) {
+                // Lista parziale ma reale: si mostra, marcata come provvisoria se la
+                // ricerca aggiornata è ancora in corso.
                 _uiState.update { s ->
-                    s.copy(serieAChannelPicker = s.serieAChannelPicker?.copy(
-                        channels = saved,
-                        isLoading = false
-                    ))
+                    s.copy(
+                        serieAChannelPicker = s.serieAChannelPicker?.copy(
+                            channels = savedChannels,
+                            isLoading = false,
+                            isSearching = scan != null
+                        )
+                    )
                 }
-                // EPG (programma in onda) per i canali mostrati subito.
-                loadSerieAEpgFor(saved)
+                loadSerieAEpgFor(savedChannels)
             }
-            // 2. Ricerca aggiornata (auto-aggiorna il mapping salvato: nuovi canali
-            //    col nome squadra entrano, quelli spariti con la playlist escono).
-            //    La scansione completa dell'intera playlist (decine di migliaia di
-            //    canali + regex per alias) si esegue a ogni apertura del picker
-            //    (TTL 2 min): così i canali aggiunti con un aggiornamento della
-            //    playlist compaiono subito. I canali salvati restano visibili nel
-            //    frattempo — la lista salvata viene mostrata prima, quella fresca
-            //    la sostituisce quando arriva.
-            val cacheAge = runCatching { serieAMatchRepository.savedChannelsAge(match) }
-                .getOrDefault(Long.MAX_VALUE)
-            val needsFullScan = cacheAge > SERIE_A_CHANNEL_CACHE_TTL_MS
-            val fresh = if (needsFullScan) {
-                runCatching { serieAMatchRepository.findChannelsForMatch(match) }
-                    .getOrDefault(emptyList())
-            } else {
-                emptyList()
+
+            if (scan == null) {
+                // Niente ricerca in corso: chiude lo stato di caricamento (la lista,
+                // se il mapping aveva canali reali, è già stata pubblicata sopra).
+                _uiState.update { s ->
+                    s.copy(
+                        serieAChannelPicker = s.serieAChannelPicker?.copy(
+                            isLoading = false,
+                            isSearching = false
+                        )
+                    )
+                }
+                return@launch
             }
-            var epgChannels: List<it.wavestream.app.data.database.entity.Channel> = emptyList()
+
+            val fresh = scan.await()
+            val freshChannels = fresh?.channels ?: emptyList()
+            var found: List<it.wavestream.app.data.database.entity.Channel> = emptyList()
             _uiState.update { s ->
                 val current = s.serieAChannelPicker ?: return@update s
-                val updated = when {
-                    fresh.isNotEmpty() -> fresh
-                    saved.isNotEmpty() -> saved   // fallback: niente aggiornamento, tieni i salvati
-                    else -> current.channels
-                }
-                epgChannels = updated
-                s.copy(serieAChannelPicker = current.copy(channels = updated, isLoading = false))
+                // Lista aggiornata se la ricerca ha prodotto qualcosa; altrimenti
+                // restano i canali salvati (mai una lista vuota al posto di una
+                // parziale).
+                val updated = if (freshChannels.isNotEmpty()) freshChannels else current.channels
+                found = updated
+                s.copy(
+                    serieAChannelPicker = current.copy(
+                        channels = updated,
+                        isLoading = false,
+                        isSearching = false
+                    )
+                )
             }
-            // Se la lista è cambiata con la ricerca aggiornata, ricarica l'EPG.
-            if (epgChannels.isNotEmpty() && (fresh.isNotEmpty())) {
-                loadSerieAEpgFor(epgChannels)
+            if (found.isNotEmpty() && found !== savedChannels) {
+                loadSerieAEpgFor(found)
             }
         }
         // Tabellino in parallelo (gol, cartellini, sostituzioni, formazioni)
@@ -425,6 +452,21 @@ class HomeViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    /** Ricerca canali con un secondo tentativo: un errore (DB occupato durante un
+     *  refresh playlist, memoria) non deve lasciare il picker fermo sulla lista
+     *  parziale. */
+    private suspend fun scanChannelsForMatch(
+        match: it.wavestream.app.data.database.entity.SerieAMatchEntity
+    ): it.wavestream.app.data.repository.SerieAMatchRepository.SavedMatchChannels? {
+        val first = runCatching { serieAMatchRepository.refreshChannelsForMatch(match) }
+        first.getOrNull()?.let { return it }
+        Log.e("SerieA", "refreshChannelsForMatch failed, retry once", first.exceptionOrNull())
+        delay(400L)
+        return runCatching { serieAMatchRepository.refreshChannelsForMatch(match) }
+            .onFailure { Log.e("SerieA", "refreshChannelsForMatch failed twice", it) }
+            .getOrNull()
     }
 
     fun dismissSerieAChannelPicker() {

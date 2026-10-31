@@ -82,32 +82,55 @@ object SerieATeamAliases {
      */
     fun channelMatchesTeam(channelName: String, aliases: List<String>): Boolean {
         if (channelName.isBlank()) return false
+        return normalize(channelName).matchesAliases(channelName, aliases)
+    }
+
+    /**
+     * Come [channelMatchesTeam] ma su DUE gruppi di alias insieme (casa e ospite),
+     * normalizzando il nome **una sola volta**.
+     *
+     * La scansione della playlist chiama questa funzione per ogni canale (decine
+     * di migliaia): con due chiamate separate a [channelMatchesTeam] il nome
+     * veniva normalizzato due volte per canale, raddoppiando il costo della
+     * ricerca dei canali della partita.
+     *
+     * @return `first` = matcha [aliasesA], `second` = matcha [aliasesB].
+     */
+    fun channelMatchesTeams(
+        channelName: String,
+        aliasesA: List<String>,
+        aliasesB: List<String>
+    ): Pair<Boolean, Boolean> {
+        if (channelName.isBlank()) return false to false
         val name = normalize(channelName)
-        return aliases.any { alias ->
+        return name.matchesAliases(channelName, aliasesA) to
+            name.matchesAliases(channelName, aliasesB)
+    }
+
+    private fun String.matchesAliases(rawName: String, aliases: List<String>): Boolean =
+        aliases.any { alias ->
             when {
                 alias.isBlank() -> false
-                alias.all { it in 'A'..'Z' } -> containsCode(channelName, alias)
-                else -> name.containsWord(alias)
+                alias.all { it in 'A'..'Z' } -> containsCode(rawName, alias)
+                else -> containsWord(alias)
             }
         }
-    }
 
     /**
      * Lowercase, accents stripped. Non alphanumeric chars (spaces, dashes,
      * underscores, dots) act as word separators.
+     *
+     * La regex dei segni diacritici è compilata una volta sola: prima veniva
+     * ricreata a ogni chiamata, cioè per ogni canale della playlist.
      */
-    fun normalize(text: String): String {
-        val deaccented = Normalizer.normalize(text.lowercase(), Normalizer.Form.NFD)
-            .replace(Regex("\\p{Mn}+"), "")
-        return deaccented
-    }
+    private val combiningMarks = Regex("\\p{Mn}+")
 
-    /**
-     * Whole-word containment using lookarounds on [a-z0-9], so that
-     * "inter-milan", "inter_milan", "inter milan" and "interhd"... —
-     * the last one does NOT match ("hd" glued to the word is handled by
-     * the right lookahead). E.g. "interhd" does not match "inter".
-     */
+    fun normalize(text: String): String =
+        combiningMarks.replace(
+            Normalizer.normalize(text.lowercase(), Normalizer.Form.NFD),
+            ""
+        )
+
     /**
      * Cache delle regex per alias: la compilazione è costosa e viene ripetuta
      * per OGNI canale della playlist (decine di migliaia) — senza cache la ricerca
@@ -116,14 +139,17 @@ object SerieATeamAliases {
      */
     private val regexCache = java.util.concurrent.ConcurrentHashMap<String, Regex>()
 
+    /**
+     * Whole-word containment using lookarounds on [a-z0-9], so that
+     * "inter-milan", "inter_milan", "inter milan" match and "interhd" does not.
+     */
     private fun wordRegex(word: String): Regex =
         regexCache.getOrPut(word) {
             Regex("(?<![a-z0-9])${Regex.escape(word)}(?![a-z0-9])")
         }
 
-    private fun String.containsWord(word: String): Boolean {
-        return wordRegex(word).containsMatchIn(this)
-    }
+    private fun String.containsWord(word: String): Boolean =
+        wordRegex(word).containsMatchIn(this)
 
     /** Sigla (tutto maiuscolo) come parola intera, sul nome NON normalizzato. */
     private fun containsCode(rawName: String, code: String): Boolean {

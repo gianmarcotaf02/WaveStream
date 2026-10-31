@@ -103,6 +103,28 @@ interface ChannelDao {
         ORDER BY MIN(id)
     """)
     suspend fun getCategoriesWithCount(): List<CategoryWithCount>
+
+    /** Impronta del catalogo canali: usata per invalidare la cache
+     *  "squadra → canali" quando la playlist cambia (canali aggiunti/rimossi,
+     *  nascosti/mostrati, nomi di lunghezza diversa). Una query aggregata sola,
+     *  con MAX(id) sulla primary key: costo trascurabile anche con decine di
+     *  migliaia di canali. */
+    @Query(
+        "SELECT COUNT(*) AS count, COALESCE(MAX(id), 0) AS maxId, " +
+            "COALESCE(SUM(LENGTH(name)), 0) AS namesLength " +
+            "FROM channels WHERE isHidden = 0"
+    )
+    suspend fun fingerprint(): ChannelsFingerprint
+}
+
+/** Vedi [ChannelDao.fingerprint]. */
+data class ChannelsFingerprint(
+    val count: Int,
+    val maxId: Long,
+    val namesLength: Long
+) {
+    /** Forma compatta salvata in `serie_a_team_scan.playlistFingerprint`. */
+    fun token(): String = "$count|$maxId|$namesLength"
 }
 
 

@@ -72,6 +72,8 @@ data class SerieAChannelPickerState(
     val match: SerieAMatchEntity,
     val channels: List<Channel>,
     val isLoading: Boolean = false,
+    /** Ricerca della playlist ancora in corso: la lista mostrata è provvisoria. */
+    val isSearching: Boolean = false,
     // EPG del canale (programma in onda), best-effort: se assente non si mostra nulla.
     val epg: Map<Long, EpgProgram?> = emptyMap()
 )
@@ -133,6 +135,7 @@ fun SerieAChannelPickerDialog(
     match: SerieAMatchEntity,
     channels: List<Channel>,
     isLoading: Boolean,
+    isSearching: Boolean = false,
     tabellinoState: SerieATabellinoState,
     epg: Map<Long, EpgProgram?> = emptyMap(),
     onDismiss: () -> Unit,
@@ -247,6 +250,7 @@ fun SerieAChannelPickerDialog(
                     match = match,
                     channels = channels,
                     isLoading = isLoading,
+                    isSearching = isSearching,
                     epg = epg,
                     onChannelClick = onChannelClick
                 )
@@ -271,6 +275,7 @@ private fun ChannelsTab(
     match: SerieAMatchEntity,
     channels: List<Channel>,
     isLoading: Boolean,
+    isSearching: Boolean,
     epg: Map<Long, EpgProgram?>,
     onChannelClick: (Channel) -> Unit
 ) {
@@ -295,6 +300,11 @@ private fun ChannelsTab(
                 Text("Ricerca canali in corso…", color = WaveStreamColors.TextSecondary)
             }
         }
+        grouped.isEmpty() && isSearching -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Ricerca canali in corso…", color = WaveStreamColors.TextSecondary)
+            }
+        }
         grouped.isEmpty() -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
@@ -304,11 +314,25 @@ private fun ChannelsTab(
                 )
             }
         }
-        else -> {
+        else -> Column(Modifier.fillMaxSize()) {
+            // La lista qui sotto è provvisoria (spesso solo i canali evento DAZN 1,
+            // sempre presenti): senza questo avviso sembrava il risultato finale e
+            // l'utente usciva dal picker prima che arrivassero gli altri canali.
+            if (isSearching) {
+                Text(
+                    text = "Ricerca canali aggiornata in corso…",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = WaveStreamColors.TextSecondary,
+                    letterSpacing = 1.sp
+                )
+                Spacer(Modifier.height(8.dp))
+            }
             val firstFocusRequester = remember { FocusRequester() }
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
             ) {
                 grouped.forEach { (category, chans) ->
                     item(key = "header_$category") {

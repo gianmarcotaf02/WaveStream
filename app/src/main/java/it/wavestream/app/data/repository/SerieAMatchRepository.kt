@@ -8,10 +8,12 @@ import it.wavestream.app.data.api.EspnStatusType
 import it.wavestream.app.data.api.FootballMatchDto
 import it.wavestream.app.data.database.dao.ChannelDao
 import it.wavestream.app.data.database.dao.SerieAMatchDao
+import it.wavestream.app.data.database.dao.SerieATeamScanDao
 import it.wavestream.app.data.database.dao.SerieATeamChannelDao
 import it.wavestream.app.data.database.entity.Channel
 import it.wavestream.app.data.database.entity.SerieAMatchEntity
 import it.wavestream.app.data.database.entity.SerieATeamChannelEntity
+import it.wavestream.app.data.database.entity.SerieATeamScanEntity
 import it.wavestream.app.data.parser.SerieATeamAliases
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -33,9 +35,10 @@ import javax.inject.Singleton
  * - `observeHeroMatches()` exposes every match inside its hero window
  *   (kickoff - 30 min → kickoff + 2h), one hero per match — simultaneous
  *   matches produce multiple heroes.
- * - `findChannelsForMatch()` filters playlist channels whose name contains
- *   an alias of BOTH teams (home AND away): solo i canali che nominano
- *   entrambe le squadre trasmettono la partita.
+ * - `getSavedChannelsForMatch()` / `refreshChannelsForMatch()` risolvono i canali
+ *   della partita da una cache **per squadra** persistente (`serie_a_team_channels`
+ *   + `serie_a_team_scan`): la ricerca per alias si esegue una volta per squadra e
+ *   resta valida per le partite successive, finché la playlist non cambia.
  */
 @Singleton
 class SerieAMatchRepository @Inject constructor(
@@ -43,6 +46,7 @@ class SerieAMatchRepository @Inject constructor(
     private val espnSoccerService: it.wavestream.app.data.api.EspnSoccerService,
     private val serieAMatchDao: SerieAMatchDao,
     private val serieATeamChannelDao: SerieATeamChannelDao,
+    private val serieATeamScanDao: SerieATeamScanDao,
     private val channelDao: ChannelDao
 ) {
 
@@ -323,113 +327,173 @@ class SerieAMatchRepository @Inject constructor(
     }
 
     /**
-     * Playlist channels (all playlists) whose name contains an alias of BOTH
-     * teams of [match] (casa E ospite), deduplicated by stream URL, sorted by
-     * name.
+     * Canali da proporre per una partita: cache persistente "squadra → canali"
+     * più i canali evento DAZN 1 (sempre presenti).
      *
-     * Nota: un canale tipo "Inter TV" contiene una sola squadra e NON trasmette
-     * la partita, quindi va escluso. Fanno eccezione i canali evento DAZN 1, che
-     * per nome non contengono le squadre ma sono il canale che manda il match:
-     * vengono aggiunti sempre.
+     * [teamChannels] distingue il caso "ho solo il fallback DAZN 1" (0) dal caso
+     * "ho i canali della partita" (>0).
+     * [teamsToScan] conta le squadre la cui ricerca va (ri)fatta: cache assente,
+     * playlist cambiata o TTL di sicurezza scaduto.
      */
+    data class SavedMatchChannels(
+        val channels: List<Channel>,
+        /** Canali arrivati dalla cache squadra→canale (esclusi gli eventi DAZN 1). */
+        val teamChannels: Int,
+        /** Squadre da (ri)cercare: 0 = cache completamente utilizzabile. */
+        val teamsToScan: Int
+    ) {
+        val needsScan: Boolean get() = teamsToScan > 0
+    }
+
+    /** Squadra da cercare nella playlist (TLA + nome breve per gli alias). */
+    private data class TeamKey(val tla: String, val shortName: String)
+
     /**
-     * Playlist channels (all playlists) da proporre per [match].
-     *
-     * Tre livelli di confidenza, nell'ordine in cui vengono restituiti (la UI
-     * raggruppa per categoria conservando l'ordine):
-     *  1. canali che nominano **entrambe** le squadre (match inequivocabile);
-     *  2. canali che nominano **una sola** squadra: molti provider espongono la
-     *     partita come due feed per squadra ("Genoa FHD" / "Fiorentina FHD",
-     *     "DAZN SERIE A 10 FHD GENOA" / "… 11 … FIORENTINA");
-     *  3. canali evento DAZN 1 (non contengono il nome delle squadre).
-     *
-     * Nota: filtrare per l'intersezione casa ∩ ospite — come si faceva prima —
-     * svuotava la lista per tutte le playlist che usano i feed per squadra.
+     * Canali già in cache per la partita (lettura istantanea dal DB) e numero di
+     * squadre che andrebbero ricercate. Non esegue mai la scansione della
+     * playlist: la UI mostra subito questi e decide se/come aggiornare.
      */
-    suspend fun findChannelsForMatch(match: SerieAMatchEntity): List<Channel> = withContext(Dispatchers.IO) {
-        val homeAliases = SerieATeamAliases.teamAliases(match.homeTla, match.homeShortName)
-        val awayAliases = SerieATeamAliases.teamAliases(match.awayTla, match.awayShortName)
+    suspend fun getSavedChannelsForMatch(match: SerieAMatchEntity): SavedMatchChannels =
+        resolveChannels(match, allowScan = false)
+
+    /**
+     * Riallinea la cache delle squadre da ricercare (una sola passata sulla
+     * playlist) e restituisce i canali aggiornati.
+     *
+     * Una squadra già cercata NON viene ricercata di nuovo: la cache resta
+     * valida finché la playlist non cambia (impronta diversa), non si apre una
+     * partita dopo [SERIE_A_TEAM_SCAN_TTL_MS] o il refresh esplicito della
+     * playlist non svuota lo stato di ricognizione.
+     */
+    suspend fun refreshChannelsForMatch(match: SerieAMatchEntity): SavedMatchChannels =
+        resolveChannels(match, allowScan = true).copy(teamsToScan = 0)
+
+    private suspend fun resolveChannels(
+        match: SerieAMatchEntity,
+        allowScan: Boolean
+    ): SavedMatchChannels = withContext(Dispatchers.IO) {
         // Canali evento DAZN 1 (DAZN HERMES/KALI): non contengono il nome della
-        // squadra nel nome, quindi il matching per alias non li trova. Vanno
-        // aggiunti per forza, altrimenti la partita risulta "senza canali".
-        val daznEvent = channelDao.getDaznEventChannels()
-        if (homeAliases.isEmpty() || awayAliases.isEmpty()) {
-            return@withContext daznEvent
-                .distinctBy { it.streamUrl }
-                .sortedBy { it.name.lowercase() }
-        }
-
-        val allChannels = channelDao.getAllChannelsList()
-        // Scansione per squadra (aggiorna anche il mapping persistente squadra→canale).
-        val matchedHome = matchChannelsForTeam(allChannels, match.homeTla, match.homeShortName)
-        val matchedAway = matchChannelsForTeam(allChannels, match.awayTla, match.awayShortName)
-
-        val homeUrls = matchedHome.map { it.streamUrl }.toSet()
-        val awayUrls = matchedAway.map { it.streamUrl }.toSet()
-        val bothTeamUrls = homeUrls intersect awayUrls
-
-        val bothTeams = (matchedHome + matchedAway)
-            .filter { it.streamUrl in bothTeamUrls }
-            .distinctBy { it.streamUrl }
-            .sortedBy { it.name.lowercase() }
-        val oneTeam = (matchedHome + matchedAway)
-            .filter { it.streamUrl !in bothTeamUrls }
-            .distinctBy { it.streamUrl }
-            .sortedBy { it.name.lowercase() }
-
-        return@withContext (bothTeams + oneTeam + daznEvent)
-            .distinctBy { it.streamUrl }
-    }
-
-    /**
-     * Età (ms) della cache squadra→canali per il match. Long.MAX_VALUE se non
-     * esiste alcun salvataggio. Serve a decidere se rifare la scansione completa
-     * della playlist: se la cache è fresca la si salta, così le partite
-     * successive della stessa squadra si aprono istantaneamente.
-     */
-    suspend fun savedChannelsAge(match: SerieAMatchEntity): Long = withContext(Dispatchers.IO) {
-        val tlas = listOf(match.homeTla, match.awayTla).filter { it.isNotBlank() }
-        if (tlas.isEmpty()) return@withContext Long.MAX_VALUE
-        val last = serieATeamChannelDao.lastSavedAt(tlas) ?: return@withContext Long.MAX_VALUE
-        System.currentTimeMillis() - last
-    }
-
-    /**
-     * Canali salvati localmente per le due squadre (lettura istantanea dal DB),
-     * con lo stesso ordine di priorità di [findChannelsForMatch]: prima i canali
-     * che nominano entrambe le squadre, poi i feed di una sola squadra, infine i
-     * canali evento DAZN 1 (sempre aggiunti).
-     */
-    suspend fun getSavedChannelsForMatch(match: SerieAMatchEntity): List<Channel> = withContext(Dispatchers.IO) {
-        // I canali evento DAZN 1 non sono mappati a una squadra (il nome non la
-        // contiene): vengono sempre aggiunti per le partite di Serie A.
-        val daznEvent = channelDao.getDaznEventChannels()
+        // squadra, quindi il matching per alias non li trova mai. Vanno proposti
+        // sempre, altrimenti una partita senza feed per squadra risulterebbe
+        // "senza canali".
+        val daznEvent = channelDao.getDaznEventChannels().filter { !it.isExcludedCategory() }
+        val daznEventIds = daznEvent.map { it.id }.toSet()
         val homeTla = match.homeTla
         val awayTla = match.awayTla
-        if (homeTla.isBlank() || awayTla.isBlank()) {
-            return@withContext daznEvent
-                .filter { !it.isExcludedCategory() }
-                .distinctBy { it.streamUrl }
-                .sortedBy { it.name.lowercase() }
+        val teams = buildList {
+            if (homeTla.isNotBlank()) add(TeamKey(homeTla, match.homeShortName))
+            if (awayTla.isNotBlank()) add(TeamKey(awayTla, match.awayShortName))
         }
-        val links = serieATeamChannelDao.getByTeams(listOf(homeTla, awayTla))
+
+        val links = if (teams.isEmpty()) emptyList() else
+            serieATeamChannelDao.getByTeams(teams.map { it.tla })
         val homeUrls = links.filter { it.teamTla == homeTla }.map { it.channelStreamUrl }.toSet()
         val awayUrls = links.filter { it.teamTla == awayTla }.map { it.channelStreamUrl }.toSet()
         val bothTeamUrls = homeUrls intersect awayUrls
         // UNIONE (non intersezione): i feed di una sola squadra sono spesso l'unico
         // modo in cui il provider espone la partita.
-        val allUrls = homeUrls + awayUrls
-        // Query mirata per streamUrl: NON si carica l'intera playlist (decine di
-        // migliaia di canali) solo per filtrare i pochi salvati. È il collo di
-        // bottiglia che rende lenta l'apertura del picker canali.
-        val saved = if (allUrls.isEmpty()) emptyList()
-            else channelDao.getChannelsByStreamUrls(allUrls.toList())
-                .filter { !it.isExcludedCategory() }
+        val allUrls = (homeUrls + awayUrls).toList()
+        val saved = getChannelsByUrlsChunked(allUrls).filter { !it.isExcludedCategory() }
+        val resolvedUrls = saved.map { it.streamUrl }.toSet()
+
+        val pending = pendingTeams(
+            teams = teams,
+            urlsByTeam = mapOf(homeTla to homeUrls, awayTla to awayUrls),
+            resolvedUrls = resolvedUrls
+        )
+
+        if (allowScan && pending.isNotEmpty()) {
+            scanTeams(pending)
+            // Rilegge la cache appena aggiornata: una sola ricorsione, così la
+            // lista restituita è quella effettiva e non un'unione a mano.
+            return@withContext resolveChannels(match, allowScan = false)
+        }
+
         val (bothTeams, oneTeam) = saved.partition { it.streamUrl in bothTeamUrls }
-        return@withContext (bothTeams.sortedBy { it.name.lowercase() } +
+        val channels = (bothTeams.sortedBy { it.name.lowercase() } +
             oneTeam.sortedBy { it.name.lowercase() } +
             daznEvent)
             .distinctBy { it.streamUrl }
+        SavedMatchChannels(
+            channels = channels,
+            teamChannels = channels.count { it.id !in daznEventIds },
+            teamsToScan = pending.size
+        )
+    }
+
+    /**
+     * Squadre la cui ricerca va (ri)fatta:
+     *  - mai cercata (nessuna riga in `serie_a_team_scan`);
+     *  - playlist cambiata (impronta diversa da quella salvata);
+     *  - TTL di sicurezza scaduto;
+     *  - cache che dichiara canali trovati ma nessuno di quegli URL esiste più
+     *    (canali sostituiti da un nuovo server/credenziali).
+     */
+    private suspend fun pendingTeams(
+        teams: List<TeamKey>,
+        urlsByTeam: Map<String, Set<String>>,
+        resolvedUrls: Set<String>
+    ): List<TeamKey> {
+        if (teams.isEmpty()) return emptyList()
+        val fingerprint = channelDao.fingerprint().token()
+        val known = serieATeamScanDao.getByTeams(teams.map { it.tla })
+            .associateBy { it.teamTla }
+        val now = System.currentTimeMillis()
+        return teams.filter { team ->
+            val row = known[team.tla]
+            when {
+                row == null -> true
+                row.playlistFingerprint != fingerprint -> true
+                now - row.scannedAt > SERIE_A_TEAM_SCAN_TTL_MS -> true
+                row.channelsCount > 0 &&
+                    urlsByTeam[team.tla].orEmpty().none { it in resolvedUrls } -> true
+                else -> false
+            }
+        }
+    }
+
+    /**
+     * Ricerca per alias delle sole squadre [teams] indicate, con UNA sola lettura
+     * della playlist (decine di migliaia di canali) e UNA sola normalizzazione
+     * del nome per canale. Salva il mapping squadra→canali e lo stato della
+     * ricognizione, così le partite successive delle stesse squadre non devono
+     * ricercare nulla.
+     */
+    private suspend fun scanTeams(teams: List<TeamKey>) {
+        val fingerprint = channelDao.fingerprint().token()
+        val allChannels = channelDao.getAllChannelsList()
+        val now = System.currentTimeMillis()
+        val scanRows = ArrayList<SerieATeamScanEntity>(teams.size)
+        teams.forEach { team ->
+            val aliases = SerieATeamAliases.teamAliases(team.tla, team.shortName)
+            val matched = if (aliases.isEmpty()) emptyList() else
+                allChannels
+                    .filter {
+                        !it.isExcludedCategory() &&
+                            SerieATeamAliases.channelMatchesTeam(it.name, aliases)
+                    }
+                    .distinctBy { it.streamUrl }
+            persistTeamMapping(team.tla, team.shortName, matched)
+            scanRows += SerieATeamScanEntity(
+                teamTla = team.tla,
+                scannedAt = now,
+                channelsCount = matched.size,
+                playlistFingerprint = fingerprint
+            )
+        }
+        serieATeamScanDao.upsertAll(scanRows)
+        Log.d(
+            "SerieA",
+            "scanTeams: ${scanRows.joinToString { "${it.teamTla}=${it.channelsCount}" }} (fp=$fingerprint)"
+        )
+    }
+
+    /** Lookup per URL a blocchi: SQLite ha un limite di variabili per query e una
+     *  squadra può avere decine di feed — senza blocchi la query falliva (errore
+     *  inghiottito dal chiamante) e il picker restava senza canali. */
+    private suspend fun getChannelsByUrlsChunked(urls: List<String>): List<Channel> {
+        if (urls.isEmpty()) return emptyList()
+        return urls.chunked(500).flatMap { chunk -> channelDao.getChannelsByStreamUrls(chunk) }
     }
 
     /** Categorie escluse dalla ricerca canali dei match (campionati minori con
@@ -441,36 +505,36 @@ class SerieAMatchRepository @Inject constructor(
         return EXCLUDED_CATEGORY_KEYWORDS.any { cat.contains(it) }
     }
 
-    /** Matching per una squadra + aggiornamento del mapping persistente. */
-    private suspend fun matchChannelsForTeam(
-        allChannels: List<Channel>,
+    /**
+     * Aggiorna il mapping persistente squadra→canali: upsert dei correnti e
+     * rimozione di quelli spariti con l'aggiornamento della playlist.
+     *
+     * La rimozione avviene anche quando [matched] è vuoto (squadra senza più
+     * canali), altrimenti la cache continuerebbe a proporre canali cancellati.
+     */
+    private suspend fun persistTeamMapping(
         teamTla: String,
-        teamShortName: String
-    ): List<Channel> {
-        if (teamTla.isBlank()) return emptyList()
-        val aliases = SerieATeamAliases.teamAliases(teamTla, teamShortName)
-        if (aliases.isEmpty()) return emptyList()
-
-        val matched = allChannels
-            .filter { !it.isExcludedCategory() && SerieATeamAliases.channelMatchesTeam(it.name, aliases) }
-            .distinctBy { it.streamUrl }
-
-        // Aggiorna il mapping persistente: upsert dei correnti, rimozione dei
-        // canali spariti con l'aggiornamento playlist
-        if (matched.isNotEmpty()) {
-            serieATeamChannelDao.upsertAll(
-                matched.map {
-                    SerieATeamChannelEntity(
-                        teamTla = teamTla,
-                        channelStreamUrl = it.streamUrl,
-                        teamShortName = teamShortName,
-                        channelName = it.name
-                    )
-                }
-            )
-            serieATeamChannelDao.deleteStaleForTeam(teamTla, matched.map { it.streamUrl })
+        teamShortName: String,
+        matched: List<Channel>
+    ) {
+        if (teamTla.isBlank()) return
+        val byUrl = matched.distinctBy { it.streamUrl }
+        if (byUrl.isEmpty()) {
+            // Squadra senza più canali: la cache non deve continuare a proporli.
+            serieATeamChannelDao.clearTeam(teamTla)
+            return
         }
-        return matched
+        serieATeamChannelDao.upsertAll(
+            byUrl.map {
+                SerieATeamChannelEntity(
+                    teamTla = teamTla,
+                    channelStreamUrl = it.streamUrl,
+                    teamShortName = teamShortName,
+                    channelName = it.name
+                )
+            }
+        )
+        serieATeamChannelDao.deleteStaleForTeam(teamTla, byUrl.map { it.streamUrl })
     }
 
     // ========== Helpers ==========
@@ -503,6 +567,10 @@ class SerieAMatchRepository @Inject constructor(
         private val ESPN_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.BASIC_ISO_DATE
         private const val DAY_MILLIS = 24L * 60 * 60 * 1000
         private const val DEFAULT_SYNC_INTERVAL_MILLIS = 4L * 60 * 60 * 1000 // 4 hours
+
+        /** TTL di sicurezza della ricognizione per squadra: passati questi giorni la
+         *  cache si riallinea anche se l'impronta della playlist non è cambiata. */
+        private const val SERIE_A_TEAM_SCAN_TTL_MS = 30L * 24 * 60 * 60 * 1000
     }
 }
 

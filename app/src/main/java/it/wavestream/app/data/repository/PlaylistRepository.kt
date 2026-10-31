@@ -44,7 +44,8 @@ class PlaylistRepository @Inject constructor(
     private val tmdbService: TMDBService,
     private val movieUnificationService: MovieUnificationService,
     private val watchProgressDao: WatchProgressDao,
-    private val ftsSearchRepository: FtsSearchRepository
+    private val ftsSearchRepository: FtsSearchRepository,
+    private val serieATeamScanDao: SerieATeamScanDao
 ) {
     companion object {
         private const val TAG = "PlaylistRepo"
@@ -204,6 +205,13 @@ class PlaylistRepository @Inject constructor(
         }
 
         playlistDao.updateLastUpdated(playlistId, System.currentTimeMillis())
+
+        // Playlist riscaricata: la cache "squadra → canali" del match center va
+        // invalidata, così la prossima apertura di una partita riallinea i canali
+        // ai nomi/categorie attuali (una sola ricerca per squadra, poi di nuovo
+        // stabile).
+        runCatching { serieATeamScanDao.clearAll() }
+            .onFailure { Log.w(TAG, "Serie A team-scan cache clear failed", it) }
 
         // Dopo il refresh del catalogo: aggiorna (merge) gli episodi delle serie che
         // l'utente sta seguendo. Così un episodio appena uscito compare subito dopo
@@ -368,8 +376,11 @@ class PlaylistRepository @Inject constructor(
         
         // Playlist gone: drop the cached home rows referencing its content.
         contentCache.clearHomeSessionData()
+        // ...e la cache "squadra → canali" del match center (i canali non esistono più).
+        runCatching { serieATeamScanDao.clearAll() }
+            .onFailure { Log.w(TAG, "Serie A team-scan cache clear failed", it) }
     }
-    
+
     /**
      * Carica (o aggiorna) gli episodi di una serie dal provider Xtream.
      *

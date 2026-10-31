@@ -643,6 +643,36 @@ object DatabaseModule {
         }
     }
 
+    /**
+     * Migration from version 37 to 38 (cache "squadra → canali" permanente):
+     * - new table `serie_a_team_scan` con lo stato dell'ultima ricognizione per
+     *   squadra (timestamp, canali trovati, impronta della playlist).
+     *
+     * `playlistFingerprint` viene inizializzata a stringa vuota: la prima apertura
+     * di una partita per ogni squadra rifà UNA volta la ricerca e poi la cache
+     * resta valida finché la playlist non cambia (o scade il TTL di sicurezza).
+     */
+    private val MIGRATION_37_38 = object : Migration(37, 38) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `serie_a_team_scan` (" +
+                    "`teamTla` TEXT NOT NULL, " +
+                    "`scannedAt` INTEGER NOT NULL, " +
+                    "`channelsCount` INTEGER NOT NULL, " +
+                    "`playlistFingerprint` TEXT NOT NULL, " +
+                    "PRIMARY KEY(`teamTla`))"
+            )
+            // Le squadre già in cache partono da "ricognizione fatta" (senza
+            // impronta): non si perde nulla e la prima apertura riallinea.
+            db.execSQL(
+                "INSERT OR REPLACE INTO `serie_a_team_scan` " +
+                    "(`teamTla`, `scannedAt`, `channelsCount`, `playlistFingerprint`) " +
+                    "SELECT `teamTla`, MAX(`savedAt`), COUNT(*), '' " +
+                    "FROM `serie_a_team_channels` GROUP BY `teamTla`"
+            )
+        }
+    }
+
     @Provides
     @Singleton
     fun provideAppDatabase(
@@ -653,7 +683,7 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37)
+            .addMigrations(MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26, MIGRATION_26_27, MIGRATION_27_28, MIGRATION_28_29, MIGRATION_29_30, MIGRATION_30_31, MIGRATION_31_32, MIGRATION_32_33, MIGRATION_33_34, MIGRATION_34_35, MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -720,6 +750,9 @@ object DatabaseModule {
 
     @Provides
     fun provideSerieATeamChannelDao(db: AppDatabase): SerieATeamChannelDao = db.serieATeamChannelDao()
+
+    @Provides
+    fun provideSerieATeamScanDao(db: AppDatabase): SerieATeamScanDao = db.serieATeamScanDao()
 
     @Provides
     fun provideMediaSegmentDao(db: AppDatabase): it.wavestream.app.data.database.dao.MediaSegmentDao =
