@@ -202,6 +202,16 @@ class LoadingActivity : ComponentActivity() {
                 var refreshedAny = false
                 
                 onStateUpdate(LoadingState(status = getString(R.string.loading), detail = "Inizializzazione...", progress = 5, showProgress = true))
+
+                // Riparazione idempotente degli streamUrl dei film: chi ha cambiato
+                // server con una versione precedente ha gli URL VOD ancora sul
+                // vecchio host (403) mentre serie e live funzionano. Qui si
+                // riallineano al server attuale, senza cancellare nulla.
+                runCatching { playlistRepository.repairStaleMovieStreamUrls() }
+                    .onSuccess { fixed ->
+                        if (fixed > 0) Log.d("LoadingActivity", "StreamUrl film riallineati per $fixed playlist")
+                    }
+                    .onFailure { Log.w("LoadingActivity", "Riparazione streamUrl film fallita: ${it.message}") }
                 
                 playlists.forEachIndexed { index, playlist ->
                     val timeSinceUpdate = now - playlist.lastUpdated

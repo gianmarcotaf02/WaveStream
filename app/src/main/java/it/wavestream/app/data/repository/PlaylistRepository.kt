@@ -36,6 +36,7 @@ class PlaylistRepository @Inject constructor(
     private val movieDao: MovieDao,
     private val seriesDao: SeriesDao,
     private val episodeDao: EpisodeDao,
+    private val streamProviderDao: StreamProviderDao,
     private val categoryDao: CategoryDao,
     private val m3uParser: M3UParser,
     private val xtreamParser: XtreamParser,
@@ -314,10 +315,79 @@ class PlaylistRepository @Inject constructor(
                 )
             }
 
+            // Stessa cosa per i FILM e per le loro sorgenti. Il player riproduce
+            // la StreamProvider, non il Movie: aggiornare solo `movies.streamUrl`
+            // non basta. Il refresh qui sotto (refreshPlaylist → upsert dei VOD dal
+            // provider) NON riscrive l'URL dei film già presenti, che restano
+            // quindi puntati al vecchio host: serie e live — riscritte sopra e
+            // riscaricate — continuano a funzionare, i film no.
+            movieDao.refreshStreamUrlsForPlaylist(
+                updated.id,
+                normalized.url,
+                normalized.username ?: "",
+                normalized.password ?: ""
+            )
+            streamProviderDao.refreshMovieStreamUrlsForPlaylist(
+                updated.id,
+                normalized.url,
+                normalized.username ?: "",
+                normalized.password ?: ""
+            )
+
             refreshPlaylist(normalized.id)
         }
 
         connectionChanged
+    }
+
+    /**
+     * Riallinea gli streamUrl dei film al server attuale della playlist.
+     *
+     * Perché non basta [updatePlaylistAndResync]: chi ha già cambiato server con
+     * una versione precedente dell'app ha `movies.streamUrl` (e
+     * `stream_providers.streamUrl`) ancora sul vecchio host, e da quel momento
+     * `connectionChanged` è false → il ramo di riscrittura non entra più.
+     * Senza questo, quei film restano in errore (403/404) a ogni avvio mentre
+     * serie e live — riscritte da altri percorsi — funzionano.
+     *
+     * Idempotente ed economica: una COUNT per playlist, e le due UPDATE solo se
+     * c'è davvero qualcosa di disallineato.
+     *
+     * @return numero di playlist riparate (0 = tutto già a posto).
+     */
+    suspend fun repairStaleMovieStreamUrls(): Int = withContext(Dispatchers.IO) {
+        val xtreamPlaylists = playlistDao.getEnabledPlaylistsList().filter { it.type == "xtream" }
+        var repaired = 0
+        for (playlist in xtreamPlaylists) {
+            val baseUrl = normalizeXtreamBaseUrl(playlist.url)
+            if (baseUrl.isBlank()) continue
+            // Pattern LIKE: serve il wildcard finale, altrimenti confronterebbe
+            // solo l'uguaglianza esatta e segnalerebbe tutto come da riparare.
+            val pattern = "$baseUrl/%"
+            val staleMovies = runCatching {
+                movieDao.countStreamUrlsNotStartingWith(playlist.id, pattern)
+            }.getOrDefault(0)
+            val staleProviders = runCatching {
+                streamProviderDao.countMovieStreamUrlsNotStartingWith(playlist.id, pattern)
+            }.getOrDefault(0)
+            if (staleMovies == 0 && staleProviders == 0) continue
+
+            movieDao.refreshStreamUrlsForPlaylist(
+                playlist.id,
+                baseUrl,
+                playlist.username ?: "",
+                playlist.password ?: ""
+            )
+            streamProviderDao.refreshMovieStreamUrlsForPlaylist(
+                playlist.id,
+                baseUrl,
+                playlist.username ?: "",
+                playlist.password ?: ""
+            )
+            Log.d(TAG, "StreamUrl film riallineati su $baseUrl (film=$staleMovies, sorgenti=$staleProviders)")
+            repaired++
+        }
+        repaired
     }
 
     /**

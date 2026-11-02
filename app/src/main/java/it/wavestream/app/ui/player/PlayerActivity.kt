@@ -2252,6 +2252,7 @@ class PlayerActivity : ComponentActivity() {
         _nextEpisode.value = NextEpisodeInfo(
             title = next.title,
             subtitle = next.subtitle,
+            imageUrl = next.imageUrl,
             countdown = nextEpisodeCountdown,
             totalCountdown = countdownSeconds,
             autoPlay = _autoPlayNextEnabled.value,
@@ -2271,6 +2272,7 @@ class PlayerActivity : ComponentActivity() {
                         title = next.title,
                         subtitle = next.subtitle,
                         countdown = nextEpisodeCountdown,
+                        imageUrl = next.imageUrl,
                         totalCountdown = countdownSeconds,
                         autoPlay = _autoPlayNextEnabled.value,
                         endsAtUptimeMs = nextEpisodeEndsAtMs

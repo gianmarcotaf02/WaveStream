@@ -77,6 +77,31 @@ interface StreamProviderDao {
     @Query("UPDATE stream_providers SET detectedHeight = :height, detectedAt = :timestamp WHERE id = :id")
     suspend fun updateDetectedHeight(id: Long, height: Int, timestamp: Long = System.currentTimeMillis())
 
+    /**
+     * Riscrive lo streamUrl delle sorgenti VOD (film) puntandole al nuovo server.
+     *
+     * Il player riproduce la [StreamProvider], non il [it.wavestream.app.data.database.entity.Movie]:
+     * aggiornare solo `movies.streamUrl` non basta. Senza questa riscrittura,
+     * dopo un cambio di dominio le sorgenti restano sul vecchio host e i film
+     * vanno in errore mentre serie e live (che non usano questa tabella) no.
+     */
+    @Query(
+        "UPDATE stream_providers SET streamUrl = :baseUrl || '/movie/' || :username || '/' || :password || '/' || xtreamStreamId || '.' || COALESCE(containerExtension, 'mp4') " +
+            "WHERE playlistId = :playlistId AND xtreamStreamId IS NOT NULL"
+    )
+    suspend fun refreshMovieStreamUrlsForPlaylist(playlistId: Long, baseUrl: String, username: String, password: String)
+
+
+    /**
+     * Vedi [StreamProviderDao.refreshMovieStreamUrlsForPlaylist]: conteggio per
+     * il self-heal all'avvio. @param pattern prefisso del server con `%` finale.
+     */
+    @Query(
+        "SELECT COUNT(*) FROM stream_providers WHERE playlistId = :playlistId AND xtreamStreamId IS NOT NULL " +
+            "AND streamUrl NOT LIKE :pattern"
+    )
+    suspend fun countMovieStreamUrlsNotStartingWith(playlistId: Long, pattern: String): Int
+
     @Query("UPDATE stream_providers SET movieId = :toMovieId WHERE movieId = :fromMovieId")
     suspend fun reassignToMovie(fromMovieId: Long, toMovieId: Long): Int
 

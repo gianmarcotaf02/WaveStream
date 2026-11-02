@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -502,6 +503,7 @@ fun TvPlayerScreen(
             ModernNextEpisodeOverlay(
                 title = next.title,
                 subtitle = next.subtitle,
+                imageUrl = next.imageUrl,
                 countdown = next.countdown,
                 totalCountdown = next.totalCountdown,
                 autoPlay = next.autoPlay,
@@ -2940,6 +2942,8 @@ private fun SkipIntroOverlay(
 private fun ModernNextEpisodeOverlay(
     title: String,
     subtitle: String?,
+    /** Copertina del prossimo episodio: riempita dal bordo del countdown. */
+    imageUrl: String? = null,
     countdown: Int,
     totalCountdown: Int = 10,
     autoPlay: Boolean,
@@ -3005,7 +3009,9 @@ private fun ModernNextEpisodeOverlay(
 
     GlassSurface(
         shape = RoundedCornerShape(16.dp),
-        fill = GlassTokens.SurfaceFillStrong,
+        // Pannello più scuro del vetro standard (18% bianco): sopra il video
+        // l'overlay deve staccare, non schiarirsi.
+        fill = GlassTokens.SurfaceFillDarker,
         stroke = SolidColor(borderColor),
         strokeWidth = 2.dp,
         modifier = modifier.width(360.dp)
@@ -3018,34 +3024,15 @@ private fun ModernNextEpisodeOverlay(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Countdown circle (anello fluido)
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(56.dp)
-                ) {
-                    if (autoPlay && totalCountdown > 0) {
-                        CircularProgressIndicator(
-                            progress = { progressFraction },
-                            modifier = Modifier.fillMaxSize(),
-                            color = WaveStreamColors.Accent,
-                            trackColor = Color.White.copy(alpha = 0.2f),
-                            strokeWidth = 3.dp
-                        )
-                        Text(
-                            text = "$secondsLeft",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.PlayArrow,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-                }
+                // Copertina del prossimo episodio: il countdown non è più un
+                // cerchio ma il bordo della copertina che si riempie.
+                NextEpisodeCoverWithBorder(
+                    imageUrl = imageUrl,
+                    progress = progressFraction,
+                    active = autoPlay && totalCountdown > 0,
+                    secondsLeft = secondsLeft,
+                    modifier = Modifier.size(width = 96.dp, height = 54.dp)
+                )
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -3115,11 +3102,130 @@ private fun ModernNextEpisodeOverlay(
 }
 
 /**
+ * Copertina del prossimo episodio con il countdown disegnato **come bordo che si
+ * riempie**: stessa fonte di verità dell'overlay (`progress`), quindi bordo e
+ * numero restano allineati.
+ *
+ * Sostituisce il vecchio cerchio timer: la copertina dà un colpo d'occhio
+ * immediato su cosa sta per partire, il bordo mantiene la lettura del tempo.
+ *
+ * @param imageUrl copertina (thumbnail provider o still TMDb); se null si
+ *        mostra un segnaposto con l'icona play.
+ * @param progress frazione 0..1 del bordo da riempire (in senso orario).
+ * @param active false = nessun riempimento (autoplay disattivato): solo traccia.
+ * @param secondsLeft secondi rimasti, mostrati come badge sulla copertina.
+ */
+@Composable
+private fun NextEpisodeCoverWithBorder(
+    imageUrl: String?,
+    progress: Float,
+    active: Boolean,
+    secondsLeft: Int,
+    modifier: Modifier = Modifier
+) {
+    val coverShape = RoundedCornerShape(8.dp)
+    val strokeWidth = 3.dp
+    val trackColor = Color.White.copy(alpha = 0.22f)
+
+    Box(modifier) {
+        // Copertina: inset di strokeWidth, così il bordo resta FUORI dall'immagine
+        // e non ne mangia i pixel laterali.
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .padding(strokeWidth)
+                .clip(coverShape)
+                .background(Color(0xFF101820))
+        ) {
+            if (!imageUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = imageUrl,
+                    contentDescription = null,
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier.matchParentSize()
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.75f),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(26.dp)
+                )
+            }
+
+            // Secondi rimasti: badge discreto sull'angolo della copertina.
+            if (active) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(4.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(Color.Black.copy(alpha = 0.62f))
+                        .padding(horizontal = 6.dp, vertical = 1.dp)
+                ) {
+                    Text(
+                        text = "$secondsLeft",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        // Bordo: traccia neutra sempre presente + segmento accent che avanza.
+        //
+        // Il perimetro è costruito A MANO partendo dall'angolo in alto a
+        // sinistra e proseguendo in senso ORARIO: così il riempimento è
+        // cronologico (0% = nulla, 50% = metà giro, 100% = giro completo).
+        // Con `addRoundRect` il punto di partenza del path dipende
+        // dall'implementazione di Skia e il fill partiva da un punto
+        // arbitrario del perimetro.
+        Canvas(modifier = Modifier.matchParentSize()) {
+            val strokePx = strokeWidth.toPx()
+            val inset = strokePx / 2f
+            val radius = 8.dp.toPx()
+            val left = inset
+            val top = inset
+            val right = size.width - inset
+            val bottom = size.height - inset
+
+            fun perimeter(): Path = Path().apply {
+                moveTo(left + radius, top)
+                lineTo(right - radius, top)
+                quadraticBezierTo(right, top, right, top + radius)
+                lineTo(right, bottom - radius)
+                quadraticBezierTo(right, bottom, right - radius, bottom)
+                lineTo(left + radius, bottom)
+                quadraticBezierTo(left, bottom, left, bottom - radius)
+                lineTo(left, top + radius)
+                quadraticBezierTo(left, top, left + radius, top)
+                close()
+            }
+
+            drawPath(perimeter(), color = trackColor, style = Stroke(width = strokePx))
+
+            if (active && progress > 0f) {
+                val outline = perimeter()
+                val measure = PathMeasure().apply { setPath(outline, false) }
+                val filled = Path()
+                measure.getSegment(0f, measure.length * progress.coerceIn(0f, 1f), filled, true)
+                drawPath(filled, color = WaveStreamColors.Accent, style = Stroke(width = strokePx))
+            }
+        }
+    }
+}
+
+/**
  * Data class for next episode info
  */
 data class NextEpisodeInfo(
     val title: String,
     val subtitle: String? = null,
+    /** Copertina del prossimo episodio (thumbnail provider o still TMDb). */
+    val imageUrl: String? = null,
     val countdown: Int,
     val totalCountdown: Int = 10,
     val autoPlay: Boolean = true,

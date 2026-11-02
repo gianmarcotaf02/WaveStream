@@ -107,6 +107,35 @@ interface MovieDao {
     // Update only popularity score (for efficient refresh without overwriting enriched data)
     @Query("UPDATE movies SET tmdbPopularity = :popularity WHERE id = :id")
     suspend fun updatePopularityScore(id: Long, popularity: Float)
+
+    // Riscrive lo streamUrl dei film già in DB puntandoli al nuovo server,
+    // SENZA cancellarli: preserva gli id e quindi progressi, preferiti e
+    // download quando URL/credenziali della playlist cambiano.
+    //
+    // È la controparte per i film di EpisodeDao.refreshStreamUrlsForSeries.
+    // Senza questa, dopo un cambio di dominio i film restano puntati al
+    // vecchio host (403 / "impossibile riprodurre") mentre serie e live —
+    // riscritte da altri percorsi — continuano a funzionare.
+    @Query(
+        "UPDATE movies SET streamUrl = :baseUrl || '/movie/' || :username || '/' || :password || '/' || xtreamStreamId || '.' || COALESCE(containerExtension, 'mp4') " +
+            "WHERE playlistId = :playlistId AND xtreamStreamId IS NOT NULL"
+    )
+    suspend fun refreshStreamUrlsForPlaylist(playlistId: Long, baseUrl: String, username: String, password: String)
+    /**
+     * Quanti film (VOD Xtream) di questa playlist hanno lo streamUrl che NON
+     * punta al server attuale. Serve al riallineamento automatico all'avvio:
+     * costa una COUNT, mentre le UPDATE costano ~56k righe.
+     *
+     * @param pattern prefisso del server **con** il wildcard finale
+     *        (es. "http://host:port/"), non solo l'host: un LIKE senza `%`
+     *        matcherebbe solo l'uguaglianza esatta e segnalerebbe tutto come
+     *        da riparare a ogni avvio.
+     */
+    @Query(
+        "SELECT COUNT(*) FROM movies WHERE playlistId = :playlistId AND xtreamStreamId IS NOT NULL " +
+            "AND streamUrl NOT LIKE :pattern"
+    )
+    suspend fun countStreamUrlsNotStartingWith(playlistId: Long, pattern: String): Int
     
     @Query("SELECT * FROM movies WHERE isHidden = 0 ORDER BY COALESCE(tmdbPopularity, 0) DESC, RANDOM() LIMIT :limit")
     fun getPopularMoviesFlow(limit: Int): Flow<List<Movie>>

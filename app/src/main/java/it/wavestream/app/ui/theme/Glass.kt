@@ -45,6 +45,14 @@ object GlassTokens {
     val SurfaceFillDark = Color(0x40101418)      // scrim overlay (video)
 
     /**
+     * Vetro SCURO più marcato: per pannelli che stanno sopra il video (es.
+     * overlay "prossimo episodio") e devono staccare dallo sfondo invece di
+     * schiarirsi. ~55% di blu-notte: più scuro di [SurfaceFillStrong], senza
+     * diventare opaco come [SurfaceFillOpaque].
+     */
+    val SurfaceFillDarker = Color(0x8C0A1219)
+
+    /**
      * Fill quasi pieno per overlay che devono restare leggibili sopra il
      * contenuto (menu a tendina, dialog). Vetro scuro al ~92%: mantiene un filo
      * di trasparenza ma garantisce contrasto su hero/immagini luminose.

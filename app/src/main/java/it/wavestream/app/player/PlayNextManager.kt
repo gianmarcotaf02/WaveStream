@@ -27,6 +27,8 @@ class PlayNextManager @Inject constructor(
         val streamUrl: String,
         val title: String,
         val subtitle: String? = null, // e.g., "Stagione 1 Episodio 2"
+        /** Copertina mostrata nell'overlay "prossimo episodio" (bordo = countdown). */
+        val imageUrl: String? = null,
         val season: Int? = null,
         val episode: Int? = null,
         val fromGroup: Boolean = false,
@@ -63,6 +65,7 @@ class PlayNextManager @Inject constructor(
                 streamUrl = nextInSeason.streamUrl,
                 title = episodeDisplayTitle(nextInSeason, seriesName),
                 subtitle = "Stagione $currentSeason Episodio ${currentEpisode + 1}",
+                imageUrl = nextInSeason.posterUrl,
                 season = currentSeason,
                 episode = currentEpisode + 1
             )
@@ -78,6 +81,7 @@ class PlayNextManager @Inject constructor(
                 title = episodeDisplayTitle(firstOfNextSeason, seriesName),
                 subtitle = "Stagione ${currentSeason + 1} Episodio 1",
                 season = currentSeason + 1,
+                imageUrl = firstOfNextSeason.posterUrl,
                 episode = 1
             )
         }
