@@ -2250,7 +2250,7 @@ class PlayerActivity : ComponentActivity() {
         nextEpisodeCountdown = countdownSeconds
         nextEpisodeEndsAtMs = android.os.SystemClock.uptimeMillis() + countdownSeconds * 1000L
         _nextEpisode.value = NextEpisodeInfo(
-            title = next.title,
+            title = next.episodeTitle ?: next.title,
             subtitle = next.subtitle,
             imageUrl = next.imageUrl,
             countdown = nextEpisodeCountdown,
@@ -2269,7 +2269,7 @@ class PlayerActivity : ComponentActivity() {
                     .toInt().coerceAtLeast(0)
                 if (remainingMs > 0L) {
                     _nextEpisode.value = NextEpisodeInfo(
-                        title = next.title,
+                        title = next.episodeTitle ?: next.title,
                         subtitle = next.subtitle,
                         countdown = nextEpisodeCountdown,
                         imageUrl = next.imageUrl,
